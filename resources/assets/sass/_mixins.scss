@@ -1,0 +1,25 @@
+@mixin desctop {
+    @media screen and (min-width: #{$lgWidth}) {
+        @content;
+    }
+}
+@mixin mobile {
+    @media screen and (max-width: #{($lgWidth - 1)}) {
+        @content;
+    }
+}
+@mixin mdMobile {
+    @media screen and (max-width: #{($mdWidth - 1)}) {
+        @content;
+    }
+}
+@mixin smMobile {
+    @media screen and (max-width: #{($smWidth - 1)}) {
+        @content;
+    }
+}
+@mixin xsMobile {
+    @media screen and (max-width: #{($xsWidth - 1)}) {
+        @content;
+    }
+}

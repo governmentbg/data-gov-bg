@@ -1,0 +1,241 @@
+$footerHeight: 50px;
+
+body {
+    cursor: default;
+    font-family: 'Roboto', sans-serif;
+    min-width: 318px;
+
+    #app {
+        min-height: 100%;
+        margin-bottom: -$footerHeight; 
+        
+        .navbar {
+            .navbar-header {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+                
+                > div {
+                    font-size: 0;
+                    padding-left: 0;
+                    padding-right: 0;
+                    
+                    &.nav-logos {
+                        display: inline-block;
+                        margin-top: 7px;
+                        margin-bottom: 7px;
+                        text-align: center;
+    
+                        > a {
+                            display: table-cell;
+                            padding: 5px;
+    
+                            @include desctop() {
+                                padding-right: 10px;
+    
+                                &:last-child {
+                                    padding-right: 0;
+                                }
+                            }
+                        }
+    
+                        @include smMobile() {
+                            display: table;
+                            width: 100%;
+    
+                            > a {
+                                width: 20%;
+                            }
+                        }
+                    }
+        
+                    &.nav-controls {
+                        padding-top: 15px;
+                        display: table;
+    
+                        > span {
+                            padding-right: 3px;
+                            padding-left: 3px;
+                            display: table-cell;
+                            vertical-align: middle;
+    
+                            &.social-icons {
+                                width: 98px;
+    
+                                a {
+                                    font-size: 14px;
+                                    text-decoration: none;
+                                    display: inline-flex;
+                                    padding: 2px;
+                                    color: $black;
+        
+                                    &:not(:last-child) {
+                                        padding-right: 3px;
+                                    }
+        
+                                    span {
+                                        display: inline-block;
+                                        border: 1px solid $black;
+                                        border-radius: 13px;
+                                        padding-top: 5px;
+                                        padding-bottom: 5px;
+                                    }
+        
+                                    &.fb {
+                                        span {
+                                            padding-left: 8px;
+                                            padding-right: 8px;
+                                        }
+                                        
+                                    }
+        
+                                    &.tw {
+                                        span {
+                                            padding-left: 5.5px;
+                                            padding-right: 5.5px;
+                                        }
+        
+                                    }
+        
+                                    &.gp {
+                                        span {
+                                            padding-left: 3px;
+                                            padding-right: 3px;
+                                        }
+                                    }
+                                }
+                            }
+    
+                            &.trans-link {
+                                width: 1px;
+                                padding-right: 18px;
+    
+                                @include xsMobile() {
+                                    padding-right: 8px;
+                                }
+    
+                                a {
+                                    font-size: 14px;
+                                    color: $black;
+                                }
+                            }
+    
+                            &.search-input {
+                                padding-right: 20px;
+    
+                                @include xsMobile() {
+                                    padding-right: 10px;
+                                }
+    
+                                input {
+                                    height: 26px;
+                                    padding-top: 2px;
+                                    padding-bottom: 2px;
+                                    padding-left: 15px;
+                                    padding-right: 15px;
+                                    font-size: 13px;
+                                    border: 1px solid $black;
+                                    border-radius: 30px;
+                                    display: inline-block;
+                                    vertical-align: top;
+                                    &:focus, &:hover {
+                                        border: 1px solid $black;
+                                    }
+                                    @include smMobile() {
+                                        width: 100%;
+                                    }
+                                }
+                            }
+                        }
+    
+                        @include smMobile() {
+                            width: 100%;
+                            padding-top: 0;
+                            padding-bottom: 10px;
+                        }
+                    }
+        
+                    @include xsMobile() {
+                        &.nav-logos {
+                            a {
+                                padding-right: 2.5px;
+                                padding-left: 2.5px;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            .navbar-nav {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin: 0;
+                font-size: 0;
+                li {
+                    a {
+                        background-color: white !important;
+                        font-size: 14px;
+                        padding-top: 5px;
+                        padding-bottom: 5px;
+                        margin-top: 2px;
+                        margin-bottom: 5px;
+                    }
+
+                    &:hover, &.active {
+                        a {
+                            margin-top: 0;
+                            margin-bottom: 0;
+                        }
+                        
+                        &:before, &:after {
+                            content: '';
+                            display: block;
+                            width: 40px;
+                            background: $purple;
+                            margin: 0 auto;
+                        }
+
+                        &:before {
+                            height: 2px;
+                        }
+
+                        &:after {
+                            height: 5px;
+                        }
+                    }
+
+                    &.active {
+                        font-weight: bold;
+                    }
+                }
+            }
+
+            .underline {
+                background-color: $purple;
+                padding: 15px;
+            }
+        }
+
+        &:after {
+            content: "";
+            display: block;
+            height: $footerHeight; 
+        }
+    }
+
+    .footer {
+        padding: 0 15px;
+        height: $footerHeight;
+        text-align: center;
+        display: table;
+        width: 100%;
+
+        .copiright {
+            display: table-cell;
+            vertical-align: middle;
+            justify-content: center;
+        }
+    }
+}

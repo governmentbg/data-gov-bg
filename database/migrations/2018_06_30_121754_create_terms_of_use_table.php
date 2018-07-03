@@ -20,7 +20,7 @@ class CreateTermsOfUseTable extends Migration
             $table->integer('descript_tg_id')->unsigned();
             $table->foreign('descript_tg_id')->references('id')->on('translations');
             $table->boolean('active');
-            $table->boolean('is-default');
+            $table->boolean('is_default');
             $table->unsignedTinyInteger('ordering');
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();

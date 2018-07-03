@@ -17,20 +17,21 @@ class CheckApiKey
      */
     public function handle($request, Closure $next)
     {
-        $key = $request->has('apiKey') ? $request->apiKey : $request->json('apiKey');
+        $user = User::select('id')->where('api_key', $request->get('api_key'))->first();
 
-        if (!\App\User::where('api_key', $key)->get()->count()) {
-            $response = new JsonResponse([
-                'status' => 'error',
-                'error' => [
-                    'errorCode'    => 403,
-                    'errorMessage' => 'Access denied',
-                ],
-            ], 403);
-
-            return $response;
+        if (
+            !empty($user)
+            && \Auth::loginUsingId($user->id, true)
+        ) {
+            return $next($request);
         }
 
-        return $next($request);
+        return new JsonResponse([
+            'success'   => false,
+            'error'     => [
+                'type'    => 'General',
+                'message' => 'Access denied',
+            ],
+        ], 403);
     }
 }

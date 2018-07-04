@@ -10,10 +10,17 @@ class RightController extends ApiController
 {
     public function listRights(Request $request)
     {
-        if ($rights = RoleRight::all('id', 'module_name as name')) {
+        if ($rights = RoleRight::getRights()) {
+            foreach ($rights as $id => $right) {
+                $result[] = [
+                    'id' => $id,
+                    'name' => $right,
+                ];
+            }
+
             return new JsonResponse([
                 'success'   => true,
-                'rights'    => $rights,
+                'rights'    => $result,
             ], 200);
         } else {
             return new JsonResponse([

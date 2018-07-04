@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('email');
             $table->string('firstname', 100);
             $table->string('lastname', 100);
-            $table->text('add_info');
+            $table->text('add_info')->nullable();
             $table->boolean('is_admin');
             $table->boolean('active');
             $table->boolean('approved');
@@ -37,27 +37,16 @@ class CreateUsersTable extends Migration
             $table->softDeletes();
         });
 
-        $preventUsernameQuery = "
-            SET @countNotDeleted = (
-                SELECT COUNT(*) FROM users AS u 
-                WHERE u.username = NEW.username AND u.deleted_by IS NULL
-            );
-
-            IF (@countNotDeleted > 0) THEN
-                SIGNAL SQLSTATE '45000' SET message_text = 'Undeleted matching username username exists!';
-            END IF;
-        ";
-
         DB::unprepared("
             CREATE TRIGGER check_username_insert BEFORE INSERT ON users
             FOR EACH ROW
             BEGIN
-                ". $preventUsernameQuery ."
+                ". $this->preventUsernameQuery() ."
             END;
             CREATE TRIGGER check_username_update BEFORE UPDATE ON users
             FOR EACH ROW
             BEGIN
-                ". $preventUsernameQuery ."
+                ". $this->preventUsernameQuery(true) ."
             END;
         ");
     }
@@ -73,5 +62,21 @@ class CreateUsersTable extends Migration
 
         DB::unprepared("DROP TRIGGER IF EXISTS check_username_insert");
         DB::unprepared("DROP TRIGGER IF EXISTS check_username_update");
+    }
+
+    private function preventUsernameQuery($update = false)
+    {
+        $updateCondition = $update ? 'AND OLD.username != NEW.username' : '';
+
+        return "
+            SET @countNotDeleted = (
+                SELECT COUNT(*) FROM users AS u
+                WHERE u.username = NEW.username AND u.deleted_by IS NULL
+            );
+
+            IF (@countNotDeleted > 0 ". $updateCondition .") THEN
+                SIGNAL SQLSTATE '45000' SET message_text = 'Undeleted matching username username exists!';
+            END IF;
+        ";
     }
 }

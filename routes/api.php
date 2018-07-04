@@ -20,8 +20,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::middleware([/*'auth',*/ 'auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/addRole', 'Api\RoleController@addRole');
     Route::post('roles/editRole/{id}', 'Api\RoleController@editRole');
-    Route::get('roles/deleteRole/{id}', 'Api\RoleController@deleteRole');
+    Route::post('roles/deleteRole/{id}', 'Api\RoleController@deleteRole');
     Route::post('roles/listRoles', 'Api\RoleController@listRoles');
-    Route::get('roles/getRoleRights/{id}', 'Api\RoleController@getRoleRights');
+    Route::post('roles/getRoleRights/{id}', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights/{id}', 'Api\RoleController@modifyRoleRights');
+    Route::post('rights/listRights', 'Api\RightController@listRights');
  });

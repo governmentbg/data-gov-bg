@@ -12,5 +12,6 @@ use App\RoleRight;
 
 class ApiController extends Controller
 {
-   
+    const ERROR_GENERAL = 'General';
+    const ERROR_ACCESS = 'Access denied';
 }

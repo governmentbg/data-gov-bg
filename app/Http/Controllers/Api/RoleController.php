@@ -24,7 +24,7 @@ class RoleController extends ApiController
                 'success'   => false,
                 'status'    => 500,
                 'error'     => [
-                    'type'     => 'General',
+                    'type'     => parent::ERROR_GENERAL,
                     'message'  => 'Add role failure'
                 ],
             ], 500);
@@ -61,7 +61,7 @@ class RoleController extends ApiController
                 'success'   => false,
                 'status'    => 500,
                 'error'     => [
-                    'type'     => 'General',
+                    'type'     => parent::ERROR_GENERAL,
                     'message'  => 'Edit role failure'
                 ],
             ], 500);
@@ -87,7 +87,7 @@ class RoleController extends ApiController
                 'success'   => false,
                 'status'    => 500,
                 'error'     => [
-                    'type'     => 'General',
+                    'type'     => parent::ERROR_GENERAL,
                     'message'  => 'Delete role failure'
                 ],
             ], 500);
@@ -140,7 +140,7 @@ class RoleController extends ApiController
                 'success'    => false,
                 'status'     => 500,
                 'error'      => [
-                    'type'     => 'General',
+                    'type'     => parent::ERROR_GENERAL,
                     'message'  => 'Get role rights failure',
                 ],
             ], 500);
@@ -163,7 +163,7 @@ class RoleController extends ApiController
             'success'    => false,
             'status'     => 500,
             'error'      => [
-                'type'     => 'General',
+                'type'     => parent::ERROR_GENERAL,
                 'message'  => 'No role found.',
             ],
         ], 404);

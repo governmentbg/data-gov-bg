@@ -18,7 +18,7 @@ class CreateUserSettingsTable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->integer('locale_id')->unsigned();
             $table->foreign('locale_id')->references('id')->on('locale');
-            $table->unsignedTinyInteger('newsletter_digest');
+            $table->unsignedTinyInteger('newsletter_digest')->default(0);
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

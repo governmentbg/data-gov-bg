@@ -20,12 +20,12 @@ class CreateOrganisationsTable extends Migration
             $table->foreign('name_tg_id')->references('id')->on('translations');
             $table->integer('descript_tg_id')->unsigned();
             $table->foreign('descript_tg_id')->references('id')->on('translations');
-            $table->string('logo_file_name');
-            $table->string('logo_mime_type');
-            $table->binary('logo_data');
-            $table->integer('activity_info_tg_id')->unsigned();
+            $table->string('logo_file_name')->nullable();
+            $table->string('logo_mime_type')->nullable();
+            $table->binary('logo_data')->nullable();
+            $table->integer('activity_info_tg_id')->unsigned()->nullable();
             $table->foreign('activity_info_tg_id')->references('id')->on('translations');
-            $table->integer('contacts_tg_id')->unsigned();
+            $table->integer('contacts_tg_id')->unsigned()->nullable();
             $table->foreign('contacts_tg_id')->references('id')->on('translations');
             $table->integer('parent_org_id')->unsigned()->nullable();
             $table->foreign('parent_org_id')->references('id')->on('organisations');

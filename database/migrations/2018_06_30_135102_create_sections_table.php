@@ -20,10 +20,10 @@ class CreateSectionsTable extends Migration
             $table->integer('parent_id')->unsigned()->nullable();
             $table->foreign('parent_id')->references('id')->on('sections');
             $table->boolean('active');
-            $table->unsignedTinyInteger('ordering');
-            $table->boolean('read_only');
-            $table->string('forum_link');
-            $table->unsignedTinyInteger('theme');
+            $table->tinyInteger('ordering')->default(1);
+            $table->boolean('read_only')->default(0);
+            $table->string('forum_link')->nullable();
+            $table->tinyInteger('theme')->default(1);
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

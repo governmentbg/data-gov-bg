@@ -4,12 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RoleRight extends Model
+class Section extends Model
 {
     protected $guarded = ['id'];
 
-    public function role()
+    public function page()
     {
-        return $this->belongsTo('App\Role');
+        return $this->hasMany('App\Page');
     }
 }

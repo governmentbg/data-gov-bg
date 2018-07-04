@@ -4,12 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RoleRight extends Model
+class Translation extends Model
 {
     protected $guarded = ['id'];
 
-    public function role()
+    public function locale()
     {
-        return $this->belongsTo('App\Role');
+        $this->belongsTo('App\Locale');
     }
 }

@@ -27,7 +27,13 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public static function getUserByKey($key) {
-       return User::where('api_key', $key)->first();
+    public function userSetting()
+    {
+        return $this->hasOne('App\UserSetting');
+    }
+
+    public function newsletterDigestLog()
+    {
+        return $this->hasMany('App\NewsletterDigestLog');
     }
 }

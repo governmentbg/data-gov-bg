@@ -12,4 +12,9 @@ class Role extends Model
     {
         return $this->hasMany('App\RoleRight');
     }
+
+    public function userToOrg()
+    {
+        return $this->hasMany('App\UserToOrgRole');
+    }
 }

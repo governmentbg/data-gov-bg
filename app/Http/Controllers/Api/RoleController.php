@@ -9,11 +9,8 @@ use App\User;
 use App\Role;
 use App\RoleRight;
 
-class RolesController extends ApiController
+class RoleController extends ApiController
 {
-    // ROLES - initial roles CRUD and lists 
-
-    // Route::post('roles/addRole', 'ApiTemplateController@addRole');
     public function addRole(Request $request)
     {
         $validator = \Validator::make($request->all(),[
@@ -34,9 +31,9 @@ class RolesController extends ApiController
         } else {
             $data = $request->all();
             unset($data['api_key']);
-            
+
             $data['created_by'] = \Auth::user()->id;
-    
+
             if ($newRole = Role::create($data)) {
                 $response = new JsonResponse([
                     'success' => true,
@@ -44,11 +41,10 @@ class RolesController extends ApiController
                 ], 200);
             }
         }
-        
+
         return $response;
     }
 
-    // Route::post('roles/editRole/{id}', 'ApiTemplateController@editRole');
     public function editRole(Request $request, $id)
     {
         $validator = \Validator::make($request->all(), [
@@ -84,7 +80,6 @@ class RolesController extends ApiController
         return $response;
     }
 
-    // Route::get('roles/deleteRole/{id}', 'ApiTemplateController@deleteRole');
     public function deleteRole(Request $request, $id)
     {
         if (empty($id) || !Role::where('id', $id)->get()->count()) {
@@ -107,7 +102,6 @@ class RolesController extends ApiController
         return $response;
     }
 
-    // Route::post('roles/listRoles', 'ApiTemplateController@listRoles');
     public function listRoles(Request $request)
     {
         $validator = \Validator::make($request->all(), [
@@ -129,7 +123,7 @@ class RolesController extends ApiController
             } else {
                 $roles = Role::all();
             }
-    
+
             $response = new JsonResponse([
                 'success'   => true,
                 'data'      => $roles,
@@ -139,7 +133,6 @@ class RolesController extends ApiController
         return $response;
     }
 
-    // Route::get('roles/getRoleRights/{id}', 'ApiTemplateController@getRoleRights');
     public function getRoleRights(Request $request, $id)
     {
         if (empty($id) || !Role::where('id', $id)->get()->count()) {
@@ -160,11 +153,10 @@ class RolesController extends ApiController
                 'data'      => $rights,
             ], 200);
         }
-        
+
         return $response;
     }
 
-    // Route::post('roles/modifyRoleRights/{id}', 'ApiTemplateController@modifyRoleRights');
     public function modifyRoleRights(Request $request, $id)
     {
         $errorResponse = new JsonResponse([
@@ -218,8 +210,7 @@ class RolesController extends ApiController
                 }
             }
         }
-        
+
         return $response;
     }
-    // ROLES END
 }

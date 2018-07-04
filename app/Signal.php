@@ -4,12 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RoleRight extends Model
+class Signal extends Model
 {
     protected $guarded = ['id'];
 
-    public function role()
+    public function resource()
     {
-        return $this->belongsTo('App\Role');
+        $this->belongsTo('App\Resource');
     }
 }

@@ -17,7 +17,7 @@ class CreateActionHistoryTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->timestamp('occurence');       
+            $table->timestamp('occurence');
             $table->string('module_name');
             $table->unsignedTinyInteger('action');
             $table->string('action_object');

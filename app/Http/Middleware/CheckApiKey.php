@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\ApiController;
 use App\User;
 
 class CheckApiKey
@@ -15,7 +17,7 @@ class CheckApiKey
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         $user = User::select('id')->where('api_key', $request->get('api_key'))->first();
 
@@ -23,15 +25,11 @@ class CheckApiKey
             !empty($user)
             && \Auth::loginUsingId($user->id, true)
         ) {
+            $request->offsetUnset('api_key');
+
             return $next($request);
         }
 
-        return new JsonResponse([
-            'success'   => false,
-            'error'     => [
-                'type'    => 'General',
-                'message' => 'Access denied',
-            ],
-        ], 403);
+        return ApiController::errorResponse('Access denied', 403);
     }
 }

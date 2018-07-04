@@ -2,11 +2,13 @@
 
 namespace App;
 
+use App\Http\Controllers\Traits\RecordSignature;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
+    use RecordSignature;
     use Notifiable;
 
     /**

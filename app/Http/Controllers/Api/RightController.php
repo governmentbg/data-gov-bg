@@ -20,19 +20,9 @@ class RightController extends ApiController
                 ];
             }
 
-            return new JsonResponse([
-                'success'   => true,
-                'rights'    => $result,
-            ], 200);
+            return $this->successResponse($result);
         } else {
-            return new JsonResponse([
-                'success'   => false,
-                'status'    => 500,
-                'error'     => [
-                    'type'      => parent::ERROR_GENERAL,
-                    'message'   => "Get rights data failure"
-                ],
-            ], 200);
+            return $this->errorResponse('Get rights data failure');
         }
     }
 }

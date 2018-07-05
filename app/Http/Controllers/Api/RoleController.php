@@ -20,11 +20,14 @@ class RoleController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            if ($newRole = Role::create($post)) {
-                $response = new JsonResponse([
-                    'success'   => true,
-                    'id'        => $newRole->id,
-                ], 200);
+            try {
+                $newRole = Role::create($post);
+
+                if ($newRole) {
+                    return $this->successResponse(['id' => $newRole->id], true);
+                }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                return $this->errorResponse($ex->getMessage());
             }
         }
 
@@ -45,8 +48,12 @@ class RoleController extends ApiController
             !$validator->fails()
             && Role::where('id', $post['id'])->get()->count()
         ) {
-            if (Role::where('id', $post['id'])->update($post)) {
-                return $this->successResponse();
+            try {
+                if (Role::where('id', $post['id'])->update($post)) {
+                    return $this->successResponse();
+                }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                return $this->errorResponse($ex->getMessage());
             }
         }
 
@@ -76,10 +83,14 @@ class RoleController extends ApiController
             return $this->errorResponse('Get role data failure');
         }
 
-        if ($request->has('active')) {
-            $roles = Role::where('active', $request->active)->get();
-        } else {
-            $roles = Role::all();
+        try {
+            if ($request->has('active')) {
+                $roles = Role::where('active', $request->active)->get();
+            } else {
+                $roles = Role::all();
+            }
+        } catch (\Illuminate\Database\QueryException $ex) {
+            return $this->errorResponse($ex->getMessage());
         }
 
         return $this->successResponse($roles);
@@ -93,9 +104,13 @@ class RoleController extends ApiController
             !empty($id)
             && Role::find($id)->get()->count()
         ) {
-            $role = Role::where('id', $id)->first();
+            try {
+                $role = Role::where('id', $id)->first();
 
-            return $this->successResponse($role->rights);
+                return $this->successResponse($role->rights);
+            } catch (\Illuminate\Database\QueryException $ex) {
+                return $this->errorResponse($ex->getMessage());
+            }
         }
 
         return $this->errorResponse('Get role rights failure');
@@ -124,23 +139,31 @@ class RoleController extends ApiController
             $rights = $role->rights;
             $names = $request->input('data.*.module_name');
 
-            foreach ($rights as $right) {
-                if (!in_array($right->module_name, $names)) {
-                    RoleRight::find($right->id)->delete();
+            try {
+                foreach ($rights as $right) {
+                    if (!in_array($right->module_name, $names)) {
+                        RoleRight::find($right->id)->delete();
+                    }
                 }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                return $this->errorResponse($ex->getMessage());
             }
 
-            foreach ($post['data'] as $module) {
-                $newRight = RoleRight::updateOrCreate(
-                    ['role_id' => $id, 'module_name' => $module['module_name']],
-                    $module
-                );
+            try {
+                foreach ($post['data'] as $module) {
+                    $newRight = RoleRight::updateOrCreate(
+                        ['role_id' => $id, 'module_name' => $module['module_name']],
+                        $module
+                    );
 
-                $response = $newRight ? $this->successResponse() : $this->errorResponse('No role found');
+                    $response = $newRight ? $this->successResponse() : $this->errorResponse('No role found');
 
-                if (empty($newRight)) {
-                    break;
+                    if (empty($newRight)) {
+                        break;
+                    }
                 }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                return $this->errorResponse($ex->getMessage());
             }
         }
 

@@ -20,4 +20,5 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/listRoles', 'Api\RoleController@listRoles');
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
+    Route::post('rights/listRights', 'Api\RightController@listRights');
 });

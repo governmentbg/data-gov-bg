@@ -20,12 +20,16 @@ class ApiController extends Controller
         ], $code);
     }
 
-    public static function successResponse($data = [])
+    public static function successResponse($data = [], $dataMerge = false)
     {
         $response = ['success' => true];
 
         if (!empty($data)) {
-            $response['data'] = $data;
+            if ($dataMerge) {
+                $response = array_merge($response, $data);
+            } else {
+                $response['data'] = $data;
+            }
         }
 
         return new JsonResponse($response, 200);

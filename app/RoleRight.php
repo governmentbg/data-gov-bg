@@ -9,10 +9,11 @@ class RoleRight extends Model
 {
     use RecordSignature;
 
-    protected $guarded = ['id'];
     const RIGHT_VIEW = 1;
     const RIGHT_EDIT = 2;
     const RIGHT_ALL = 3;
+
+    protected $guarded = ['id'];
 
     public static function getRights()
     {

@@ -3,10 +3,21 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Contracts\TranslatableInterface;
+use App\Translator\Translatable;
 
-class Organisation extends Model
+class Organisation extends Model implements TranslatableInterface
 {
+    use Translatable;
+
     protected $guarded = ['id'];
+
+    protected static $translatable = [
+        'name'          => 'label',
+        'descript'      => 'text',
+        'activity_info' => 'text',
+        'contacts'      => 'label',
+    ];
 
     public function userToOrgRole()
     {

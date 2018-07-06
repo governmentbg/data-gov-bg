@@ -34,6 +34,11 @@ class User extends Authenticatable
         return $this->hasOne('App\UserSetting');
     }
 
+    public function userToOrgRole()
+    {
+        return $this->hasOne('App\UserToOrgRole');
+    }
+
     public function newsletterDigestLog()
     {
         return $this->hasMany('App\NewsletterDigestLog');

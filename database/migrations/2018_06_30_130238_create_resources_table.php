@@ -28,10 +28,10 @@ class CreateResourcesTable extends Migration
             $table->string('authentication');
             $table->binary('post_data');
             $table->text('http_headers');
-            $table->integer('name_tg_id')->unsigned();
-            $table->foreign('name_tg_id')->references('id')->on('translations');
-            $table->integer('desctipt_tg_id')->unsigned();
-            $table->foreign('desctipt_tg_id')->references('id')->on('translations');
+            $table->integer('name')->unsigned();
+            $table->foreign('name')->references('id')->on('translations');
+            $table->integer('desctipt')->unsigned();
+            $table->foreign('desctipt')->references('id')->on('translations');
             $table->text('schema_descript');
             $table->string('schema_url');
             $table->boolean('is_reported');

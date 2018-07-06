@@ -18,10 +18,10 @@ class CreateDataSetsTable extends Migration
             $table->integer('org_id')->unsigned()->nullable();
             $table->foreign('org_id')->references('id')->on('organisations');
             $table->string('uri')->unique();
-            $table->integer('name_tg_id')->unsigned();
-            $table->foreign('name_tg_id')->references('id')->on('translations');
-            $table->integer('descript_tg_id')->unsigned();
-            $table->foreign('descript_tg_id')->references('id')->on('translations');
+            $table->integer('name')->unsigned();
+            $table->foreign('name')->references('id')->on('translations');
+            $table->integer('descript')->unsigned();
+            $table->foreign('descript')->references('id')->on('translations');
             $table->integer('category_id')->unsigned()->nullable();
             $table->foreign('category_id')->references('id')->on('categories');
             $table->integer('terms_of_use_id')->unsigned()->nullable();
@@ -32,8 +32,8 @@ class CreateDataSetsTable extends Migration
             $table->string('author_email');
             $table->string('support_name');
             $table->string('support_email');
-            $table->integer('sla_t_id')->unsigned();
-            $table->foreign('sla_t_id')->references('id')->on('translations');
+            $table->integer('sla')->unsigned();
+            $table->foreign('sla')->references('id')->on('translations');
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

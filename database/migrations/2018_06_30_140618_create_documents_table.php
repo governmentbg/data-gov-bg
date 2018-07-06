@@ -15,10 +15,10 @@ class CreateDocumentsTable extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('name_tg_id')->unsigned();
-            $table->foreign('name_tg_id')->references('id')->on('translations');
-            $table->integer('descript_tg_id')->unsigned();
-            $table->foreign('descript_tg_id')->references('id')->on('translations');
+            $table->integer('name')->unsigned();
+            $table->foreign('name')->references('id')->on('translations');
+            $table->integer('descript')->unsigned();
+            $table->foreign('descript')->references('id')->on('translations');
             $table->string('file_name');
             $table->string('mime_type');
             $table->timestamps();

@@ -19,6 +19,7 @@ class CheckApiKey
      */
     public function handle(Request $request, Closure $next)
     {
+        
         $user = User::select('id')->where('api_key', $request->get('api_key'))->first();
 
         if (

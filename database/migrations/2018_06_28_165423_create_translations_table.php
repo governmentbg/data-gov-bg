@@ -15,8 +15,8 @@ class CreateTranslationsTable extends Migration
     {
         Schema::create('translations', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('locale_id')->unsigned();
-            $table->foreign('locale_id')->references('id')->on('locale');
+            $table->char('locale', 5);
+            $table->foreign('locale')->references('locale')->on('locale');
             $table->integer('group_id');
             $table->text('text');
             $table->string('label', 100);
@@ -25,7 +25,7 @@ class CreateTranslationsTable extends Migration
             $table->foreign('updated_by')->references('id')->on('users');
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
-            $table->unique(['locale_id', 'group_id']);
+            $table->unique(['locale', 'group_id']);
         });
     }
 

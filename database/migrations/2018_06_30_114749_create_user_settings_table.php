@@ -16,8 +16,8 @@ class CreateUserSettingsTable extends Migration
         Schema::create('user_settings', function (Blueprint $table) {
             $table->integer('user_id')->unsigned()->primary();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('locale_id')->unsigned();
-            $table->foreign('locale_id')->references('id')->on('locale');
+            $table->char('locale', 5);
+            $table->foreign('locale')->references('locale')->on('locale');
             $table->unsignedTinyInteger('newsletter_digest')->default(0);
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();

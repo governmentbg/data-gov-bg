@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+ 
 Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/addRole', 'Api\RoleController@addRole');
     Route::post('roles/editRole', 'Api\RoleController@editRole');
@@ -21,4 +21,6 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
+    Route::post('actions/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
 });
+ 

@@ -53,8 +53,7 @@ class ActionsHistoryController extends ApiController
                 'message' => 'List action history failure',
             ],
         ];
-
-        try {
+ 
             $actionList = '';
             $actionList = ActionsHistory::all();
             if (is_null($criteria)) {
@@ -128,13 +127,7 @@ class ActionsHistoryController extends ApiController
             }
 
             $actionList = $actionList->all();
-            // dd($actionList);
-        } catch (QueryException $e) {
-            return response()->json($responseErrorArr, 500);
-        } catch (PDOException $e) {
-            return response()->json($responseErrorArr, 500);
-        }
-
+             
         if (!empty($actionList)) {
             $users = User::all();
             foreach ($actionList as $action) {

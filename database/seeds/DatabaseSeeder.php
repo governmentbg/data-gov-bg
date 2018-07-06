@@ -11,7 +11,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-       // Action::truncate();
-        // $this->call('ActionHistoryTableSeeder');
+      // $this->call(UsersTableSeeder::class);
     }
 }

@@ -8,6 +8,12 @@ use App\RoleRight;
 
 class RightController extends ApiController
 {
+    /**
+     * API function for listing all types of rights
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status and list of rights successfull
+     */
     public function listRights(Request $request)
     {
         $rights = RoleRight::getRights();

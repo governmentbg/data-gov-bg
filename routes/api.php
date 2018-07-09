@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 
 
 
-Route::middleware([/*'auth',*/ 'auth.api', /*'throttle:60,1'*/])->group(function () {
+Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/listUsers', 'Api\UserController@getUserData');
 
     Route::post('roles/addRole', 'Api\RoleController@addRole');

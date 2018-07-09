@@ -26,9 +26,19 @@ php artisan migrate
 php artisan queue:restart
 
 # Install new node modules
-npm install
+ldconfig -p | grep libpng 2>&1 || {
+    sudo apt-get install libpng12-dev -y
 
-# Build assets when using Laravel Mix
-npm run production
+    if [ -d node_modules ]
+    then
+        sudo rm -rf node_modules
+
+        echo 'Folder node_modules deleted.'
+    fi
+
+    echo 'Dependencies installed.'
+}
+
+npm install
 
 echo 'Deploy finished.'

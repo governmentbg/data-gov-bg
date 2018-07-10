@@ -16,7 +16,7 @@ class CreateSectionsTable extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('name')->unsigned();
-            $table->foreign('name')->references('id')->on('translations');
+            $table->foreign('name')->references('id')->on('translations')->onDelete('cascade');
             $table->integer('parent_id')->unsigned()->nullable();
             $table->foreign('parent_id')->references('id')->on('sections');
             $table->boolean('active');

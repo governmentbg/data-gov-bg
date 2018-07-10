@@ -25,20 +25,4 @@ php artisan migrate
 # Restart workers
 php artisan queue:restart
 
-# Install new node modules
-ldconfig -p | grep libpng 2>&1 || {
-    sudo apt-get install libpng12-dev -y
-
-    if [ -d node_modules ]
-    then
-        sudo rm -rf node_modules
-
-        echo 'Folder node_modules deleted.'
-    fi
-
-    echo 'Dependencies installed.'
-}
-
-npm install
-
 echo 'Deploy finished.'

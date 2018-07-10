@@ -16,11 +16,13 @@ fi
 # Cache boost configuration and routes
 php artisan cache:clear
 php artisan config:clear
-php artisan config:cache
 php artisan route:cache
 
 # Sync database changes
 php artisan migrate
+
+# Cache boost configuration and routes
+php artisan config:cache
 
 # Restart workers
 php artisan queue:restart

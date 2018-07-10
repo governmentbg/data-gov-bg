@@ -29,9 +29,9 @@ class CreateResourcesTable extends Migration
             $table->binary('post_data');
             $table->text('http_headers');
             $table->integer('name')->unsigned();
-            $table->foreign('name')->references('id')->on('translations');
-            $table->integer('desctipt')->unsigned();
-            $table->foreign('desctipt')->references('id')->on('translations');
+            $table->foreign('name')->references('id')->on('translations')->onDelete('cascade');
+            $table->integer('descript')->unsigned();
+            $table->foreign('descript')->references('id')->on('translations')->onDelete('cascade');
             $table->text('schema_descript');
             $table->string('schema_url');
             $table->boolean('is_reported');
@@ -40,6 +40,9 @@ class CreateResourcesTable extends Migration
             $table->foreign('updated_by')->references('id')->on('users');
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
+            $table->integer('deleted_by')->unsigned()->nullable();
+            $table->foreign('deleted_by')->references('id')->on('users');
+            $table->softDeletes();
         });
     }
 

@@ -2,13 +2,21 @@
 
 namespace App;
 
+use App\Translator\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\TranslatableInterface;
-use App\Translator\Translatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Http\Controllers\Traits\RecordSignature;
 
 class Organisation extends Model implements TranslatableInterface
 {
     use Translatable;
+    use SoftDeletes;
+    use RecordSignature;
+
+    const TYPE_CIVILIAN = 1;
+    const TYPE_COUNTRY = 2;
+    const TYPE_GROUP = 3;
 
     protected $guarded = ['id'];
 
@@ -18,6 +26,15 @@ class Organisation extends Model implements TranslatableInterface
         'activity_info' => 'text',
         'contacts'      => 'label',
     ];
+
+    public static function getTypes()
+    {
+        return [
+            self::TYPE_CIVILIAN => 'Temp',
+            self::TYPE_COUNTRY  => 'Temp2',
+            self::TYPE_GROUP    => 'Temp3',
+        ];
+    }
 
     public function userToOrgRole()
     {

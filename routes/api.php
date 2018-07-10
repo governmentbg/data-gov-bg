@@ -24,6 +24,10 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
+    Route::post('pages/addPage', 'Api\PageController@addPage');
+    Route::post('pages/editPage', 'Api\PageController@editPage');
+    Route::get('pages/deletePage', 'Api\PageController@deletePage');
+    Route::post('pages/listPages', 'Api\PageController@listPages');
 });
 
 Route::post('/register', 'Api\UserController@register');

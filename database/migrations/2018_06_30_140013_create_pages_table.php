@@ -19,7 +19,7 @@ class CreatePagesTable extends Migration
             $table->foreign('section_id')->references('id')->on('sections');
             $table->integer('title')->unsigned();
             $table->foreign('title')->references('id')->on('translations')->onDelete('cascade');
-            $table->integer('abstract')->unsigned();
+            $table->integer('abstract')->unsigned()->nullable();
             $table->foreign('abstract')->references('id')->on('translations')->onDelete('cascade');
             $table->integer('body')->unsigned()->nullable();
             $table->foreign('body')->references('id')->on('translations')->onDelete('cascade');

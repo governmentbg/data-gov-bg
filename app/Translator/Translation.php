@@ -10,7 +10,7 @@ class Translation extends Model {
     use RecordSignature;
 
     protected $table = 'translations';
-    protected $fillable = ['group_id', 'locale_id', 'text', 'label'];
+    protected $fillable = ['group_id', 'locale', 'text', 'label'];
     public $timestamps = false;
 
     public function delete() {
@@ -23,7 +23,7 @@ class Translation extends Model {
 	    	if(!Translation::where('group_id', $this->group_id)->exists()) {
 	    		Translation::create([
 	    			'group_id'	=> $this->group_id,
-	    			'locale_id'	=> 'xx',
+	    			'locale'	=> 'xx',
 	    			'text'		=> '',
                     'label'     => '',
 	    		]);

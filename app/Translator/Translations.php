@@ -62,11 +62,11 @@ class Translations  {
 	public function get($locale){
 		if (!array_key_exists($locale, $this->translations)){
 			$translation = Translation::where('group_id',$this->group_id)
-							->where('locale_id',$locale)->first();
+							->where('locale',$locale)->first();
 			$this->translations[$locale] = $translation ?: new Translation([
 				'group_id' => $this->group_id,
 				$this->type => null,
-				'locale_id' => $locale
+				'locale' => $locale
 			]);
 		}
 
@@ -108,7 +108,7 @@ class Translations  {
 			$this->translations[$locale]=Translation::create([
 				'group_id'	=> $this->group_id,
 				$this->type		=> $value,
-				'locale_id'	=> $locale,
+				'locale'	=> $locale,
 			]);
 		}
 		if($locale !=='xx' && $dummy = $this->get('xx')){

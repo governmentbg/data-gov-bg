@@ -136,9 +136,8 @@ class ActionsHistoryController extends ApiController
         if (isset($request['records_per_page']) || isset($request['page_number'])) {
             $actionList = $actionList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
-
-        $actionList = $actionList->all();
-
+        
+        $total_records = $actionList->count();
         if (!empty($actionList)) {
             $users = User::all();
             foreach ($actionList as $action) {
@@ -152,6 +151,6 @@ class ActionsHistoryController extends ApiController
                 ];
             }
         }
-        return $this->successResponse($result);
+        return $this->successResponse([$result, 'total_records' => $total_records], true);
     }
 }

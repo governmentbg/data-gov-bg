@@ -2,10 +2,9 @@
 
 namespace Tests\Unit\Api;
 
-use Tests\TestCase;
 use App\Role;
+use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class RoleTest extends TestCase
@@ -13,11 +12,6 @@ class RoleTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
     public function testAddRole()
     {
         $response = $this->post(url('api/roles/addRole'), [
@@ -67,7 +61,7 @@ class RoleTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    public function testListeRole()
+    public function testListRole()
     {
         $response = $this->post(url('api/roles/listRoles'), [
             'api_key'   => $this->getApiKey(),

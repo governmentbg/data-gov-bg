@@ -127,9 +127,9 @@ trait Translatable {
      * @param  string                 $key
      * @param  string|array           $value
      */
-    protected function translatable_set($key, $value){
-
-        $this->translatable_handled=false;
+    protected function translatable_set($key, $value)
+    {
+        $this->translatable_handled = false;
 
         if(self::isTranslatable($key)){
 
@@ -384,14 +384,14 @@ trait Translatable {
     {
         return new \App\Collections\TranslatableCollection($models);
     }
-    
+
     /**
      * Concatenate all translations and their transliterations for given key.
      * @param string $key
      * @return string
      */
     public function concatTranslations($key)
-    {  
+    {
         $localesAll = config('laravellocalization.supportedLocales');
         $translations = collect();
         foreach($localesAll as $k => $locale){

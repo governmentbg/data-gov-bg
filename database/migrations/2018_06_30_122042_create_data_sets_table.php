@@ -19,9 +19,7 @@ class CreateDataSetsTable extends Migration
             $table->foreign('org_id')->references('id')->on('organisations');
             $table->string('uri')->unique();
             $table->integer('name')->unsigned();
-            $table->foreign('name')->references('id')->on('translations')->onDelete('cascade');
             $table->integer('descript')->unsigned()->nullable();
-            $table->foreign('descript')->references('id')->on('translations')->onDelete('cascade');
             $table->integer('category_id')->unsigned()->nullable();
             $table->foreign('category_id')->references('id')->on('categories');
             $table->integer('terms_of_use_id')->unsigned()->nullable();
@@ -33,7 +31,6 @@ class CreateDataSetsTable extends Migration
             $table->string('support_name')->nullable();
             $table->string('support_email')->nullable();
             $table->integer('sla')->unsigned()->nullable();
-            $table->foreign('sla')->references('id')->on('translations')->onDelete('cascade');
             $table->unsignedTinyInteger('status');
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();

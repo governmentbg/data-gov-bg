@@ -24,6 +24,12 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
+
+    Route::post('locales/addLocale', 'Api\LocaleController@addLocale');
+    Route::post('locales/editLocale', 'Api\LocaleController@editLocale');
+    Route::get('locales/deleteLocale', 'Api\LocaleController@deleteLocale');
+    Route::post('locales/listLocale', 'Api\LocaleController@listLocale');
+    Route::get('locales/getLocaleDetails', 'Api\LocaleController@getLocaleDetails');
 });
 
 Route::post('/register', 'Api\UserController@register');

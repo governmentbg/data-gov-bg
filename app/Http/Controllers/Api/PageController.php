@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use \App\Page;
 use \App\User;
 use \Validator;
+
 //needs to be revised. When BG is supplied still returns EN translations!!! row 280
 class PageController extends ApiController
 {
@@ -117,52 +118,55 @@ class PageController extends ApiController
         }
 
         $pageToEdit = Page::find($editData['page_id']);
+      
+        if ($pageToEdit) {
+            $locale = $editData['data']['locale'];
 
-        $locale = $editData['data']['locale'];
+            if (isset($editData['data']['title'])) {
+                $pageToEdit->title = [$locale => $editData['data']['title']];
+            }
+            if (isset($editData['data']['section_id'])) {
+                $pageToEdit->section_id = $editData['data']['section_id'];
+            }
 
-        if (isset($editData['data']['title'])) {
-            $pageToEdit->title = [$locale => $editData['data']['title']];
-        }
-        if (isset($editData['data']['section_id'])) {
-            $pageToEdit->section_id = $editData['data']['section_id'];
-        }
+            if (isset($editData['data']['abstract'])) {
+                $pageToEdit->abstract = [$locale => $editData['data']['abstract']];
+            }
 
-        if (isset($editData['data']['abstract'])) {
-            $pageToEdit->abstract = [$locale => $editData['data']['abstract']];
-        }
+            if (isset($editData['data']['body'])) {
+                $pageToEdit->body = [$locale => $editData['data']['body']];
+            }
 
-        if (isset($editData['data']['body'])) {
-            $pageToEdit->body = [$locale => $editData['data']['body']];
-        }
+            if (isset($editData['data']['head_title'])) {
+                $pageToEdit->head_title = [$locale => $editData['data']['head_title']];
+            }
 
-        if (isset($editData['data']['head_title'])) {
-            $pageToEdit->head_title = [$locale => $editData['data']['head_title']];
-        }
+            if (isset($editData['data']['meta_desctript'])) {
+                $pageToEdit->meta_desctript = [$locale => $editData['data']['meta_desctript']];
+            }
 
-        if (isset($editData['data']['meta_desctript'])) {
-            $pageToEdit->meta_desctript = [$locale => $editData['data']['meta_desctript']];
-        }
+            if (isset($editData['data']['meta_key_words'])) {
+                $pageToEdit->meta_key_words = [$locale => $editData['data']['meta_key_words']];
+            }
 
-        if (isset($editData['data']['meta_key_words'])) {
-            $pageToEdit->meta_key_words = [$locale => $editData['data']['meta_key_words']];
-        }
+            if (isset($editData['data']['forum_link'])) {
+                $pageToEdit->forum_link = $editData['data']['forum_link'];
+            }
 
-        if (isset($editData['data']['forum_link'])) {
-            $pageToEdit->forum_link = $editData['data']['forum_link'];
-        }
+            if (isset($editData['data']['active'])) {
+                $pageToEdit->active = $editData['data']['active'];
+            }
 
-        if (isset($editData['data']['active'])) {
-            $pageToEdit->active = $editData['data']['active'];
-        }
+            $pageToEdit->updated_by = \Auth::user()->id;
 
-        $pageToEdit->updated_by = \Auth::user()->id;
-
-        try {
-            $pageToEdit->save();
-        } catch (QueryException $e) {
+            try {
+                $pageToEdit->save();
+            } catch (QueryException $e) {
+                return $this->errorResponse('Page edit failure');
+            }
+        } else {
             return $this->errorResponse('Page edit failure');
         }
-
         return $this->successResponse();
     }
 
@@ -179,9 +183,13 @@ class PageController extends ApiController
         }
 
         $pageToBeDeleted = Page::find($deleteData['page_id']);
-        try {
-            $pageToBeDeleted->delete();
-        } catch (QueryException $e) {
+        if ($pageToBeDeleted) {
+            try {
+                $pageToBeDeleted->delete();
+            } catch (QueryException $e) {
+                return $this->errorResponse('Delete page failure');
+            }
+        } else {
             return $this->errorResponse('Delete page failure');
         }
         return $this->successResponse();
@@ -279,7 +287,7 @@ class PageController extends ApiController
 
         if (!empty($pageList)) {
             $total_records = $pageList->count();
-           
+
             foreach ($pageList as $singlePage) {
                 $result[] = [
                     'id' => $singlePage->id,
@@ -299,9 +307,9 @@ class PageController extends ApiController
                     'updated_by' => $singlePage->updated_by,
                 ];
             }
-           
+
         }
         return $this->successResponse([$result, 'total_records' => $total_records], true);
-      
+
     }
 }

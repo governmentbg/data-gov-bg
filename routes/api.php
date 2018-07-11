@@ -24,6 +24,11 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
+    Route::post('section/addSection', 'Api\SectionController@addSection');
+    Route::post('section/editSection', 'Api\SectionController@editSection');
+    Route::post('section/deleteSection', 'Api\SectionController@deleteSection');
+    Route::post('section/listSections', 'Api\SectionController@listSections');
+    Route::post('section/listSubsections', 'Api\SectionController@listSubsections');
 });
 
 Route::post('/register', 'Api\UserController@register');

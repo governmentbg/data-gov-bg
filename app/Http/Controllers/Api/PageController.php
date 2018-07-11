@@ -186,7 +186,12 @@ class PageController extends ApiController
         }
         return $this->successResponse();
     }
-
+    /**
+     * Lists pages based on request input
+     *
+     * @param Request $request
+     * @return json response
+     */
     public function listPages(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -273,7 +278,8 @@ class PageController extends ApiController
         }
 
         if (!empty($pageList)) {
-
+            $total_records = $pageList->count();
+           
             foreach ($pageList as $singlePage) {
                 $result[] = [
                     'id' => $singlePage->id,
@@ -293,8 +299,9 @@ class PageController extends ApiController
                     'updated_by' => $singlePage->updated_by,
                 ];
             }
+           
         }
-
-        return $this->successResponse($result);
+        return $this->successResponse([$result, 'total_records' => $total_records], true);
+      
     }
 }

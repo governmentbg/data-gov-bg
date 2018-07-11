@@ -203,7 +203,7 @@ class UserController extends ApiController
             : \App::getLocale();
 
         $userSettings->user_id = $user->id;
-        $userSettings->locale_id = $userLocale;
+        $userSettings->locale = $userLocale;
 
         if(
             isset($data['user_settings']['newsletter_digest'])

@@ -20,11 +20,13 @@ class SetLocale
      */
     public function handle($request, Closure $next)
     {
-        $locale = !empty($request->get('locale')) && !empty(DB::table('locale')->where('locale', $request->get('locale'))->value('locale'))
+        $locale = !empty($request->get('locale'))
+            && !empty(DB::table('locale')->where('locale', $request->get('locale'))->value('locale'))
             ? $request->get('locale')
             : config('app.locale');
 
         $request->offsetUnset('locale');
+
         \LaravelLocalization::setLocale($locale);
 
         return $next($request);

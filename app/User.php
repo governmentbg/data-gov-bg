@@ -2,9 +2,9 @@
 
 namespace App;
 
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Http\Controllers\Traits\RecordSignature;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -65,5 +65,10 @@ class User extends Authenticatable
     public function newsletterDigestLog()
     {
         return $this->hasMany('App\NewsletterDigestLog');
+    }
+
+    public function follow()
+    {
+        return $this->hasMany('App\UserFollow');
     }
 }

@@ -13,8 +13,19 @@ use Illuminate\Http\Request;
 |
 */
 
+
+
+
 Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
-    Route::post('/listUsers', 'Api\UserController@getUserData');
+    Route::post('/listUsers', 'Api\UserController@listUsers');
+    Route::post('/searchUsers', 'Api\UserController@searchUsers');
+    Route::post('/getUserRoles', 'Api\UserController@getUserRoles');
+    Route::post('/getUserSettings', 'Api\UserController@getUserSettings');
+    Route::post('/addUser', 'Api\UserController@addUser');
+    Route::post('/editUser', 'Api\UserController@editUser');
+    Route::post('/deleteUser', 'Api\UserController@deleteUser');
+    Route::post('/generateAPIKey', 'Api\UserController@generateAPIKey');
+    Route::post('/inviteUser', 'Api\UserController@inviteUser');
 
     Route::post('roles/addRole', 'Api\RoleController@addRole');
     Route::post('roles/editRole', 'Api\RoleController@editRole');

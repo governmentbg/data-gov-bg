@@ -18,4 +18,9 @@ abstract class TestCase extends BaseTestCase
     {
         return User::where('username', 'system')->first()->api_key;
     }
+
+    protected function getUserId()
+    {
+        return User::where('username', 'system')->first()->id;
+    }
 }

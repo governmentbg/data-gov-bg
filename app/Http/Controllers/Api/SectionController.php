@@ -20,7 +20,7 @@ class SectionController extends ApiController
      */
     public function addSection(Request $request)
     {
-        $data = $request->json('data');
+        $data = $request->data;
         $validator = \Validator::make($data, [
             'name'      => 'required',
             'locale'    => 'required|max:5',
@@ -82,7 +82,7 @@ class SectionController extends ApiController
             return $this->errorResponse('Edit section failure');
         }
 
-        $data = $request->json('data');
+        $data = $request->data;
         $locale = Locale::where('locale', $data['locale'])->value('locale');
 
         // if request locale not found set default
@@ -105,6 +105,8 @@ class SectionController extends ApiController
             //return $this->errorResponse($ex->getMessage());
             return $this->errorResponse('Edit section failure');
         }
+
+        return $this->successResponse();
     }
 
     /**

@@ -118,7 +118,7 @@ class PageController extends ApiController
         }
 
         $pageToEdit = Page::find($editData['page_id']);
-      
+
         if ($pageToEdit) {
             $locale = $editData['data']['locale'];
 
@@ -220,45 +220,30 @@ class PageController extends ApiController
         }
 
         $result = [];
-        $criteria['order'] = null;
-        $criteria = is_array($request->json('criteria')) ? $request->json('criteria') : null;
-        $filters = [
-            'page_id',
-            'locale',
-            'active',
-            'section_id',
-            'order',
-        ];
+        $criteria = $request->json('criteria');
 
-        if (is_array($criteria)) {
-            foreach ($criteria as $key => $value) {
-                if (!in_array($key, $filters)) {
-                    unset($criteria[$key]);
-                }
-            }
-        }
-
-        $orderFilters = [
-            'type',
-            'field',
-        ];
-
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
-                foreach ($criteria['order'] as $key => $value) {
-                    if (!in_array($key, $orderFilters)) {
-                        unset($criteria['order'][$key]);
-                    }
-                }
-            }
-        }
         if (isset($criteria['locale'])) {
             $locale = \LaravelLocalization::setLocale($criteria['locale']);
         } else {
             $locale = config('app.locale');
         }
         $pageList = '';
-        $pageList = Page::all();
+        $pageList = Page::select(
+            'id',
+            'section_id',
+            'title',
+            'abstract',
+            'body',
+            'head_title',
+            'meta_desctript',
+            'meta_key_words',
+            'forum_link',
+            'active',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by');
+             
         if (is_null($criteria)) {
             $pageList = $pageList;
         }
@@ -277,13 +262,19 @@ class PageController extends ApiController
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
             if ($criteria['order']['type'] == 'desc') {
-                $pageList = $pageList->sortByDesc($criteria['order']['field']);
+                $pageList = $pageList->orderBy($criteria['order']['field'], 'desc');
+            }
+        } else {
+            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
+                $pageList = $pageList->orderBy($criteria['order']['field'], 'asc');
             }
         }
 
         if (isset($request['records_per_page']) || isset($request['page_number'])) {
             $pageList = $pageList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
+
+        $pageList = $pageList->get();
 
         if (!empty($pageList)) {
             $total_records = $pageList->count();
@@ -309,7 +300,10 @@ class PageController extends ApiController
             }
 
         }
-        return $this->successResponse([$result, 'total_records' => $total_records], true);
+        return $this->successResponse([
+            'total_records' => $total_records,
+            'pages' => $result
+        ], true);
 
     }
 }

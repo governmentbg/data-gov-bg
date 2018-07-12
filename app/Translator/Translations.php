@@ -5,29 +5,29 @@ namespace App\Translator;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Controllers\Traits\RecordSignature;
 
-class Translations  {
-
+class Translations
+{
     use RecordSignature;
 
-	public $group_id;
-	public $translations = [];
+    public $group_id;
+    public $translations = [];
 
-	public function __construct(
+    public function __construct(
         $group_id = null,
         Collection $data = null,
         $type
-    )
-    {
-		$this->group_id = $group_id ?: self::nextGroupId();
+    ) {
+        $this->group_id = $group_id ?: self::nextGroupId();
         $this->type = $type;
 
-        if(!empty($data))
+        if (!empty($data)) {
             $this->add_collection($data);
-	}
+        }
+    }
 
     public function toArray()
     {
-        $data = array_map(function($item) {
+        $data = array_map(function ($item) {
             return $item->{$this->type};
         }, $this->translations);
 
@@ -36,9 +36,8 @@ class Translations  {
 
     public function add_collection(Collection $data)
     {
-        if(!empty($data)) {
-            foreach($data as $translation)
-            {
+        if (!empty($data)) {
+            foreach ($data as $translation) {
                 $this->translations[$translation->locale] = $translation;
             }
         }
@@ -49,9 +48,10 @@ class Translations  {
      * @method nextGroupId
      * @return integer
      */
-	public static function nextGroupId(){
-		return Translation::max('group_id') + 1;
-	}
+    public static function nextGroupId()
+    {
+        return Translation::max('group_id') + 1;
+    }
 
     /**
      * Gets the translation in the corresponding locale
@@ -59,19 +59,20 @@ class Translations  {
      * @param  string $locale
      * @return string|boolean|null
      */
-	public function get($locale){
-		if (!array_key_exists($locale, $this->translations)){
-			$translation = Translation::where('group_id',$this->group_id)
-							->where('locale',$locale)->first();
-			$this->translations[$locale] = $translation ?: new Translation([
-				'group_id' => $this->group_id,
-				$this->type => null,
-				'locale' => $locale
-			]);
-		}
+    public function get($locale)
+    {
+        if (!array_key_exists($locale, $this->translations)) {
+            $translation = Translation::where('group_id', $this->group_id)
+                        ->where('locale', $locale)->first();
+            $this->translations[$locale] = $translation ?: new Translation([
+                'group_id'  => $this->group_id,
+                $this->type => null,
+                'locale'    => $locale
+            ]);
+        }
 
-		return $this->translations[$locale];
-	}
+        return $this->translations[$locale];
+    }
 
 
     /**
@@ -80,11 +81,12 @@ class Translations  {
      * @param  string  $locale
      * @return boolean
      */
-	public function has($locale){
+    public function has($locale)
+    {
         // $result = $this->get($locale) && $this->get($locale)->{$this->type};
         $result = $this->get($locale);
         return boolval($result);
-	}
+    }
 
     /**
      * Creates or updates translations
@@ -92,29 +94,30 @@ class Translations  {
      * @param  string|array $locale
      * @param  string $value
      */
-	public function set($locale, $value=null){
+    public function set($locale, $value=null)
+    {
         // Array format passed.
-		if(is_array($locale)) {
-			foreach ($locale as $loc => $value) {
-				$this->set($loc, $value);
-			}
-			return;
-		}
-		// Update an existing translation
-		if ($this->has($locale)) {
-			$this->get($locale)->{$this->type} = $value;
-			$this->get($locale)->save();
-		} else { // Create new translation
-			$this->translations[$locale]=Translation::create([
-				'group_id'	=> $this->group_id,
-				$this->type		=> $value,
-				'locale'	=> $locale,
+        if (is_array($locale)) {
+            foreach ($locale as $loc => $value) {
+                $this->set($loc, $value);
+            }
+            return;
+        }
+        // Update an existing translation
+        if ($this->has($locale)) {
+            $this->get($locale)->{$this->type} = $value;
+            $this->get($locale)->save();
+        } else { // Create new translation
+            $this->translations[$locale]=Translation::create([
+                'group_id'  => $this->group_id,
+                $this->type => $value,
+                'locale'    => $locale,
             ]);
-		}
-		if($locale !=='xx' && $dummy = $this->get('xx')){
-			$dummy->delete();
-		}
-	}
+        }
+        if ($locale !=='xx' && $dummy = $this->get('xx')) {
+            $dummy->delete();
+        }
+    }
 
     /**
      * Add translation to the current collection
@@ -122,10 +125,11 @@ class Translations  {
      * @param  Translation $translation
      * @return void
      */
-	public function attach(Translation $translation){
-		$translation->group_id = $this->group_id;
-		$this->translations[$translation->locale] = $translation;
-	}
+    public function attach(Translation $translation)
+    {
+        $translation->group_id = $this->group_id;
+        $this->translations[$translation->locale] = $translation;
+    }
 
     /**
      * Get the translation value in main or fallback locale
@@ -134,14 +138,17 @@ class Translations  {
      * @param  [type] $fallback [description]
      * @return [type]           [description]
      */
-	public function in($locale, $fallback = null){
-		if($this->has($locale) && $this->get($locale)->{$this->type} != null)
-			return $this->get($locale)->{$this->type};
+    public function in($locale, $fallback = null)
+    {
+        if ($this->has($locale) && $this->get($locale)->{$this->type} != null) {
+            return $this->get($locale)->{$this->type};
+        }
 
-		if($fallback)
-			return $this->in($fallback);
+        if ($fallback) {
+            return $this->in($fallback);
+        }
 
-		// throw new Exceptions\TranslationNotFound($this->group_id);
-		return '';
-	}
+        // throw new Exceptions\TranslationNotFound($this->group_id);
+        return '';
+    }
 }

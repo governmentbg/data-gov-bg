@@ -26,6 +26,19 @@ class CreateUserFollowsTable extends Migration
             $table->boolean('news');
             $table->unique(['user_id', 'org_id', 'data_set_id', 'category_id', 'news']);
         });
+
+        DB::unprepared("
+            CREATE TRIGGER check_user_follows_insert BEFORE INSERT ON user_follows
+            FOR EACH ROW
+            BEGIN
+                ". $this->preventUserFollowsQuery() ."
+            END;
+            CREATE TRIGGER check_user_follows_update BEFORE UPDATE ON user_follows
+            FOR EACH ROW
+            BEGIN
+                ". $this->preventUserFollowsQuery() ."
+            END;
+        ");
     }
 
     /**
@@ -36,5 +49,30 @@ class CreateUserFollowsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('user_follows');
+
+        DB::unprepared("DROP TRIGGER IF EXISTS check_user_follows_insert");
+        DB::unprepared("DROP TRIGGER IF EXISTS check_user_follows_update");
+    }
+
+    private function preventUserFollowsQuery()
+    {
+        return "
+            IF (
+                NEW.news = 1
+                AND (
+                    NEW.category_id IS NOT NULL
+                    OR NEW.data_set_id IS NOT NULL
+                    OR NEW.org_id IS NOT NULL
+                )
+                OR NEW.news = 0
+                AND (
+                    NEW.category_id IS NULL
+                    AND NEW.data_set_id IS NULL
+                    AND NEW.org_id IS NULL
+                )
+            ) THEN
+                SIGNAL SQLSTATE '45000' SET message_text = 'Custom trigger check failed!';
+            END IF;
+        ";
     }
 }

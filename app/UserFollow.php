@@ -5,7 +5,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserFollow extends Model
 {
-    protected $table = 'user_to_org_role';
     protected $guarded = ['id'];
 
     public function user()

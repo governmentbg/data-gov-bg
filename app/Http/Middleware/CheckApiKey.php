@@ -19,7 +19,10 @@ class CheckApiKey
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = User::select('id')->where('api_key', $request->get('api_key'))->first();
+        $user = User::select('id')->where([
+            'api_key'   => $request->get('api_key'),
+            'active'    => 1,
+        ])->first();
 
         if (
             !empty($user)

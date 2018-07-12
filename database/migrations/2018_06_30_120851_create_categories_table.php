@@ -15,8 +15,7 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('name_tg_id')->unsigned();
-            $table->foreign('name_tg_id')->references('id')->on('translations');
+            $table->integer('name')->unsigned();
             $table->string('icon_file_name');
             $table->string('icon_mime_type');
             $table->binary('icon_data');

@@ -18,27 +18,28 @@ class CreateDataSetsTable extends Migration
             $table->integer('org_id')->unsigned()->nullable();
             $table->foreign('org_id')->references('id')->on('organisations');
             $table->string('uri')->unique();
-            $table->integer('name_tg_id')->unsigned();
-            $table->foreign('name_tg_id')->references('id')->on('translations');
-            $table->integer('descript_tg_id')->unsigned();
-            $table->foreign('descript_tg_id')->references('id')->on('translations');
+            $table->integer('name')->unsigned();
+            $table->integer('descript')->unsigned()->nullable();
             $table->integer('category_id')->unsigned()->nullable();
             $table->foreign('category_id')->references('id')->on('categories');
             $table->integer('terms_of_use_id')->unsigned()->nullable();
             $table->foreign('terms_of_use_id')->references('id')->on('terms_of_use');
             $table->unsignedTinyInteger('visibility');
             $table->string('version', 15);
-            $table->string('author_name');
-            $table->string('author_email');
-            $table->string('support_name');
-            $table->string('support_email');
-            $table->integer('sla_t_id')->unsigned();
-            $table->foreign('sla_t_id')->references('id')->on('translations');
+            $table->string('author_name')->nullable();
+            $table->string('author_email')->nullable();
+            $table->string('support_name')->nullable();
+            $table->string('support_email')->nullable();
+            $table->integer('sla')->unsigned()->nullable();
+            $table->unsignedTinyInteger('status');
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
+            $table->integer('deleted_by')->unsigned()->nullable();
+            $table->foreign('deleted_by')->references('id')->on('users');
+            $table->softDeletes();
         });
     }
 

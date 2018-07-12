@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:60,1',
             'bindings',
+            'locale.api',
         ],
     ];
 
@@ -58,5 +59,6 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'auth.api' => \App\Http\Middleware\CheckApiKey::class,
+        'locale.api' => \App\Http\Middleware\SetLocale::class,
     ];
 }

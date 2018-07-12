@@ -17,10 +17,8 @@ class CreateOrgCustomSettingsTable extends Migration
             $table->increments('id');
             $table->integer('org_id')->unsigned();
             $table->foreign('org_id')->references('id')->on('organisations');
-            $table->integer('key_tg_id')->unsigned();
-            $table->foreign('key_tg_id')->references('id')->on('translations');
-            $table->integer('value_tg_id')->unsigned();
-            $table->foreign('value_tg_id')->references('id')->on('translations');
+            $table->integer('key')->unsigned();
+            $table->integer('value')->unsigned();
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

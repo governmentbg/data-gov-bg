@@ -10,6 +10,12 @@ use App\RoleRight;
 
 class RoleController extends ApiController
 {
+    /**
+     * API function for adding a new role
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status and id if successfull
+     */
     public function addRole(Request $request)
     {
         $post = $request->all();
@@ -34,6 +40,12 @@ class RoleController extends ApiController
         return $this->errorResponse('Add role failure');
     }
 
+    /**
+     * API function for editing a role
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status
+     */
     public function editRole(Request $request)
     {
         $post = $request->all();
@@ -60,6 +72,12 @@ class RoleController extends ApiController
         return $this->errorResponse('Edit role failure');
     }
 
+    /**
+     * API function for deleting a role
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status
+     */
     public function deleteRole(Request $request)
     {
         $id = $request->get('id');
@@ -75,6 +93,12 @@ class RoleController extends ApiController
         return $this->successResponse();
     }
 
+    /**
+     * API function for listing all roles
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status and list of found roles if successfull
+     */
     public function listRoles(Request $request)
     {
         $validator = \Validator::make($request->all(), ['active' => 'boolean']);
@@ -96,6 +120,12 @@ class RoleController extends ApiController
         return $this->successResponse($roles);
     }
 
+    /**
+     * API function for listing all rights for a given role
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status and list of roles's rights if successfull
+     */
     public function getRoleRights(Request $request)
     {
         $id = $request->get('id');
@@ -116,6 +146,12 @@ class RoleController extends ApiController
         return $this->errorResponse('Get role rights failure');
     }
 
+    /**
+     * API function for changing a role's rights
+     *
+     * @param Request $request - POST request
+     * @return json $response - response with status
+     */
     public function modifyRoleRights(Request $request)
     {
         $post = $request->all();

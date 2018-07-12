@@ -28,10 +28,8 @@ class CreateResourcesTable extends Migration
             $table->string('authentication');
             $table->binary('post_data');
             $table->text('http_headers');
-            $table->integer('name_tg_id')->unsigned();
-            $table->foreign('name_tg_id')->references('id')->on('translations');
-            $table->integer('desctipt_tg_id')->unsigned();
-            $table->foreign('desctipt_tg_id')->references('id')->on('translations');
+            $table->integer('name')->unsigned();
+            $table->integer('descript')->unsigned();
             $table->text('schema_descript');
             $table->string('schema_url');
             $table->boolean('is_reported');
@@ -40,6 +38,9 @@ class CreateResourcesTable extends Migration
             $table->foreign('updated_by')->references('id')->on('users');
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
+            $table->integer('deleted_by')->unsigned()->nullable();
+            $table->foreign('deleted_by')->references('id')->on('users');
+            $table->softDeletes();
         });
     }
 

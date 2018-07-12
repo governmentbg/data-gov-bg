@@ -7,6 +7,7 @@ class UserToOrgRole extends Model
 {
     protected $table = 'user_to_org_role';
     protected $guarded = [];
+    public $timestamps = false;
 
     public function user()
     {

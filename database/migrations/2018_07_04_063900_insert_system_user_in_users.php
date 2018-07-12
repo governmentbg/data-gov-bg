@@ -53,6 +53,8 @@ class InsertSystemUserInUsers extends Migration
      */
     public function down()
     {
-        // DB::table('users')->where('username', 'system')->delete();
+        try {
+            DB::table('users')->where('username', 'system')->delete();
+        } catch (\Illuminate\Database\QueryException $ex) {}
     }
 }

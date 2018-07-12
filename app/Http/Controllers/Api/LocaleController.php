@@ -20,7 +20,7 @@ class LocaleController extends ApiController
     {
         $localeData = $request->all();
         $validator = Validator::make($localeData, [
-            'data' => 'required|array',
+            'data'        => 'required|array',
             'data.locale' => 'required|string',
             'data.active' => 'required|integer',
         ]);
@@ -53,8 +53,8 @@ class LocaleController extends ApiController
 
         $locale = \LaravelLocalization::getCurrentLocale();
         $validator = Validator::make($localeEditData, [
-            'data' => 'required|array',
-            'locale' => 'string|required',
+            'data'        => 'required|array',
+            'locale'      => 'string|required',
             'data.active' => 'required|integer',
         ]);
 
@@ -113,7 +113,7 @@ class LocaleController extends ApiController
     {
         $localeListData = $request->all();
         $validator = Validator::make($localeListData, [
-            'criteria' => 'array',
+            'criteria'        => 'array',
             'criteria.active' => 'integer',
         ]);
 
@@ -122,20 +122,16 @@ class LocaleController extends ApiController
         }
 
         $result = [];
-        $criteria = is_array($request->json('criteria')) ? $request->json('criteria') : null;
-        $filters = [
+        $criteria = $request->json('criteria');
+
+        $listLocale = Locale::select(
+            'locale',
             'active',
-        ];
-
-        if (is_array($criteria)) {
-            foreach ($criteria as $key => $value) {
-                if (!in_array($key, $filters)) {
-                    unset($criteria[$key]);
-                }
-            }
-        }
-
-        $listLocale = Locale::all();
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by'
+        );
 
         if (is_null($criteria)) {
             $listLocale = $listLocale;
@@ -145,12 +141,13 @@ class LocaleController extends ApiController
             $listLocale = $listLocale->where('active', $criteria['active']);
         }
 
+        $listLocale = $listLocale->get();
+
         if (!empty($listLocale)) {
             foreach ($listLocale as $singleLocale) {
-
                 $result[] = [
-                    'locale' => $singleLocale->locale,
-                    'active' => $singleLocale->active,
+                    'locale'     => $singleLocale->locale,
+                    'active'     => $singleLocale->active,
                     'created_at' => date($singleLocale->created_at),
                     'updated_at' => date($singleLocale->updated_at),
                     'created_by' => $singleLocale->created_by,
@@ -158,9 +155,9 @@ class LocaleController extends ApiController
                 ];
             }
         }
-        return $this->successResponse($result);
+        return $this->successResponse(['locale' => $result], true);
     }
-    
+
     /**
      * Gets the details for a given locale
      *
@@ -180,15 +177,15 @@ class LocaleController extends ApiController
         if (!empty($localeDetails)) {
             foreach ($localeDetails as $singleLocale) {
                 $result[] = [
-                    'locale' => $singleLocale->locale,
-                    'active' => $singleLocale->active,
+                    'locale'     => $singleLocale->locale,
+                    'active'     => $singleLocale->active,
                     'created_at' => date($singleLocale->created_at),
                     'updated_at' => date($singleLocale->updated_at),
                     'created_by' => $singleLocale->created_by,
                     'updated_by' => $singleLocale->updated_by,
                 ];
             }
-            return $this->successResponse($result);
+            return $this->successResponse(['locale' => $result], true);
         }
     }
 }

@@ -12,11 +12,8 @@ class Translations
     public $group_id;
     public $translations = [];
 
-    public function __construct(
-        $group_id = null,
-        Collection $data = null,
-        $type
-    ) {
+    public function __construct($group_id = null, Collection $data = null, $type)
+    {
         $this->group_id = $group_id ?: self::nextGroupId();
         $this->type = $type;
 
@@ -62,8 +59,7 @@ class Translations
     public function get($locale)
     {
         if (!array_key_exists($locale, $this->translations)) {
-            $translation = Translation::where('group_id', $this->group_id)
-                        ->where('locale', $locale)->first();
+            $translation = Translation::where('group_id',$this->group_id)->where('locale', $locale)->first();
             $this->translations[$locale] = $translation ?: new Translation([
                 'group_id'  => $this->group_id,
                 $this->type => null,
@@ -74,7 +70,6 @@ class Translations
         return $this->translations[$locale];
     }
 
-
     /**
      * Check if translation exists in the corresponding locale
      * @method has
@@ -83,8 +78,8 @@ class Translations
      */
     public function has($locale)
     {
-        // $result = $this->get($locale) && $this->get($locale)->{$this->type};
         $result = $this->get($locale);
+
         return boolval($result);
     }
 
@@ -94,27 +89,30 @@ class Translations
      * @param  string|array $locale
      * @param  string $value
      */
-    public function set($locale, $value=null)
+    public function set($locale, $value = null)
     {
-        // Array format passed.
         if (is_array($locale)) {
             foreach ($locale as $loc => $value) {
                 $this->set($loc, $value);
             }
+
             return;
         }
-        // Update an existing translation
+
         if ($this->has($locale)) {
             $this->get($locale)->{$this->type} = $value;
             $this->get($locale)->save();
-        } else { // Create new translation
-            $this->translations[$locale]=Translation::create([
+        } else {
+            $this->translations[$locale] = Translation::create([
                 'group_id'  => $this->group_id,
                 $this->type => $value,
                 'locale'    => $locale,
             ]);
         }
-        if ($locale !=='xx' && $dummy = $this->get('xx')) {
+
+        $dummy = $this->get('xx');
+
+        if ($locale !== 'xx' && $dummy) {
             $dummy->delete();
         }
     }

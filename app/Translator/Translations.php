@@ -61,9 +61,9 @@ class Translations
         if (!array_key_exists($locale, $this->translations)) {
             $translation = Translation::where('group_id',$this->group_id)->where('locale', $locale)->first();
             $this->translations[$locale] = $translation ?: new Translation([
-                'group_id' => $this->group_id,
+                'group_id'  => $this->group_id,
                 $this->type => null,
-                'locale' => $locale
+                'locale'    => $locale
             ]);
         }
 

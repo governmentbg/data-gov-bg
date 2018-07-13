@@ -68,6 +68,8 @@ class DataSetController extends ApiController
                     if (!empty($tags)) {
                         if (!$this->checkAndCreateTags($tags, $post['data']['category_id'])) {
                             DB::rollback();
+
+                            return $this->errorResponse('Add DataSet Failure');
                         }
                     }
 
@@ -75,9 +77,11 @@ class DataSetController extends ApiController
                     return $this->successResponse(['uri' => $newDataSet->uri], true);
                 } else {
                     DB::rollback();
+
                     return $this->errorResponse('Add DataSet Failure');
                 }
             } catch (QueryException $ex) {
+
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -129,17 +133,21 @@ class DataSetController extends ApiController
                 if (!empty($tags)) {
                     if (!$this->checkAndCreateTags($tags, $post['data']['category_id'])) {
                         DB::rollback();
+
+                        return $this->errorResponse('Edit dataset failure');
                     }
                 }
 
                 try {
                     if ($dataSet->update($post['data'])) {
                         DB::commit();
+
                         return $this->successResponse();
                     } else {
                         DB::rollback();
                     }
                 } catch (QueryException $ex) {
+
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -163,9 +171,11 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             try {
                 if (DataSet::where('uri', $post['dataset_uri'])->delete()) {
+
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
+
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -279,6 +289,7 @@ class DataSetController extends ApiController
                         'datasets'      => $data,
                     ], true);
                 } catch (QueryException $ex) {
+
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -303,8 +314,6 @@ class DataSetController extends ApiController
      */
     public function searchDataSet(Request $request)
     {
-        // Ask how keywords work
-        // Ask how to implement locale translations
         $post = $request->all();
         $criteria = isset($post['criteria']) ? $post['criteria'] : false;
 
@@ -367,6 +376,7 @@ class DataSetController extends ApiController
                         'total_records' => $data->count()
                     ], true);
                 } catch (QueryException $ex) {
+
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -417,6 +427,7 @@ class DataSetController extends ApiController
 
                 return $this->successResponse($data);
             } catch (QueryException $e) {
+
                 return $this->errorResponse($e->getMessage());
             }
         }
@@ -442,16 +453,17 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             $dataSet = DataSet::where('uri', $post['dataset_uri'])->count();
+
             if ($dataSet) {
                 try {
                     if (DataSetGroup::create($post)) {
+
                         return $this->successResponse();
                     }
                 } catch (QueryException $e) {
+
                     return $this->errorResponse($ex->getMessage());
                 }
-            } else {
-                return errorResponse('Add dataset group failure');
             }
         }
 
@@ -476,16 +488,17 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             $dataSet = DataSet::where('uri', $post['dataset_uri'])->count();
+
             if ($dataSet) {
                 try {
                     if (DataSetGroup::where($post)->delete()) {
+
                         return $this->successResponse();
                     }
                 } catch (QueryException $e) {
+
                     return $this->errorResponse($ex->getMessage());
                 }
-            } else {
-                return errorResponse('Add dataset group failure');
             }
         }
 
@@ -515,6 +528,7 @@ class DataSetController extends ApiController
 
             return true;
         } catch (QueryException $e) {
+
             return false;
         }
     }

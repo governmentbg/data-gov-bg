@@ -27,6 +27,12 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/generateAPIKey', 'Api\UserController@generateAPIKey');
     Route::post('/inviteUser', 'Api\UserController@inviteUser');
 
+    Route::post('/addOrganisation', 'Api\OrganisationController@addOrganisation');
+    Route::post('/editOrganisation', 'Api\OrganisationController@editOrganisation');
+    Route::post('/listOrganisations', 'Api\OrganisationController@listOrganisations');
+    Route::post('/searchOrganisations', 'Api\OrganisationController@searchOrganisations');
+    Route::post('/deleteOrganisation', 'Api\OrganisationController@deleteOrganisation');
+
     Route::post('roles/addRole', 'Api\RoleController@addRole');
     Route::post('roles/editRole', 'Api\RoleController@editRole');
     Route::post('roles/deleteRole', 'Api\RoleController@deleteRole');

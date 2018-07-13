@@ -485,7 +485,7 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-                    error_log('e: '. print_r($ex->getMessage(), true));
+
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -513,7 +513,6 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             $dataSet = DataSet::where('uri', $post['data_set_uri'])->first();
 
-            error_log('here');
             if ($dataSet) {
                 try {
                     if (DataSetGroup::where([

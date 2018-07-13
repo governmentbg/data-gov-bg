@@ -169,7 +169,12 @@ class PageController extends ApiController
         }
         return $this->successResponse();
     }
-
+/**
+ * Deletes a page based on id
+ *
+ * @param Request $request
+ * @return json response
+ */
     public function deletePage(Request $request)
     {
         $deleteData = $request->all();
@@ -243,7 +248,7 @@ class PageController extends ApiController
             'updated_at',
             'created_by',
             'updated_by');
-             
+
         if (is_null($criteria)) {
             $pageList = $pageList;
         }
@@ -302,7 +307,7 @@ class PageController extends ApiController
         }
         return $this->successResponse([
             'total_records' => $total_records,
-            'pages' => $result
+            'pages' => $result,
         ], true);
 
     }

@@ -203,6 +203,28 @@ class SignalsController extends ApiController
             $signalList = $signalList->where('id', $criteria['signal_id']);
         }
 
+        $orderColumns = [
+            'id',
+            'resource_id',
+            'descript',
+            'firstname',
+            'lastname',
+            'email',
+            'status',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by'
+        ];
+
+        if (isset($criteria['order'])) {
+            if (is_array($criteria['order'])) {
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    unset($criteria['order']['field']);
+                }
+            }
+        }
+
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
             if ($criteria['order']['type'] == 'desc') {
                 $signalList = $signalList->orderBy($criteria['order']['field'], 'desc');

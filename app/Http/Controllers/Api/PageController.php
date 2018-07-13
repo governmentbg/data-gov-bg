@@ -248,6 +248,27 @@ class PageController extends ApiController
             'updated_at',
             'created_by',
             'updated_by');
+            
+        $orderColumns = [
+            'id',
+            'name',
+            'descript',
+            'file_name',
+            'mime_type',
+            'data',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ];
+
+        if (isset($criteria['order'])) {
+            if (is_array($criteria['order'])) {
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    unset($criteria['order']['field']);
+                }
+            }
+        }
 
         if (is_null($criteria)) {
             $pageList = $pageList;

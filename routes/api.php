@@ -43,13 +43,16 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('listSubsections', 'Api\SectionController@listSubsections');
 
     Route::post('listThemes', 'Api\ThemeController@listThemes');
+
     Route::post('/addDataSet', 'Api\DataSetController@addDataSet');
     Route::post('/editDataSet', 'Api\DataSetController@editDataSet');
     Route::post('/deleteDataSet', 'Api\DataSetController@deleteDataSet');
-    Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
-    Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');
     Route::post('/getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
-    Route::post('/addDataSetGroup', 'Api\DataSetController@addDataSetGroup');
+    Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
+    Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
 });
 
 Route::post('/register', 'Api\UserController@register');
+
+Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
+Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');

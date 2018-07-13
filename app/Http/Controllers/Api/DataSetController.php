@@ -14,10 +14,6 @@ use Illuminate\Database\QueryException;
 
 class DataSetController extends ApiController
 {
-    // apt-get install php7.0-sqlite for TNT search
-    // SQLite PHP Extension - for TNT
-    // mbstring PHP Extension - for TNT
-
     /**
      * API function for adding Data Set
      *
@@ -30,7 +26,8 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'org_id'                => 'integer',
-            'data.locale'           => 'string',
+            'data'                  => 'required',
+            'data.locale'           => 'required|string|max:5',
             'data.name'             => 'required|string',
             'data.descript'         => 'string',
             'data.tags.*'           => 'string',
@@ -45,7 +42,7 @@ class DataSetController extends ApiController
             'data.sla'              => 'string',
         ]);
 
-        if(!$validator->fails()) {
+        if(!$validator->fails() && !empty($post['data'])) {
             DB::beginTransaction();
 
             $post['data']['uri'] = Uuid::generate(4)->string;
@@ -81,7 +78,7 @@ class DataSetController extends ApiController
                     return $this->errorResponse('Add DataSet Failure');
                 }
             } catch (QueryException $ex) {
-
+                dd($ex->getMessage());
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -101,7 +98,7 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'dataset_uri'           => 'required|string',
-            'data.locale'           => 'string',
+            'data.locale'           => 'required|string|max:5',
             'data.name'             => 'string',
             'data.descript'         => 'string',
             'data.category_id'      => 'required|integer',
@@ -193,11 +190,15 @@ class DataSetController extends ApiController
     public function listDataSets(Request $request)
     {
         $post = $request->all();
-        $criteria = isset($post['criteria']) ? $post['criteria'] : false;
+        $criteria = !empty($post['criteria']) ? $post['criteria'] : false;
+        $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : 15;
+        $page = !empty($post['page_number']) ? $post['page_number'] : 1;
+        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
 
         if ($criteria) {
             $validator = \Validator::make($post, [
-                'criteria.locale'            => 'string',
+                'criteria.locale'            => 'string|max:5',
                 'criteria.org_id'            => 'integer',
                 'criteria.group_id'          => 'integer',
                 'criteria.category_id'       => 'integer',
@@ -213,13 +214,7 @@ class DataSetController extends ApiController
 
             if (!$validator->fails()) {
                 $data = [];
-                $order = [];
                 $reported = [];
-
-                $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-                $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-                $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : 15;
-                $page = !empty($post['page_number']) ? $post['page_number'] : 1;
 
                 try {
                     $query = DataSet::where('status', DataSet::STATUS_DRAFT);
@@ -289,7 +284,7 @@ class DataSetController extends ApiController
                         'datasets'      => $data,
                     ], true);
                 } catch (QueryException $ex) {
-
+                    dd($ex->getMessage());
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -297,10 +292,35 @@ class DataSetController extends ApiController
             return $this->errorResponse('Criteria error');
         }
 
-        $dataSets = DataSet::withCount('userFollow as followers_count')
-            ->with('resource')
-            ->orderBy($order['field'], $order['type'])
-            ->paginate($pagination, ['*'], 'page', $page);
+        $query = DataSet::where('status', DataSet::STATUS_PUBLISHED);
+
+        if (!empty($order)) {
+            $query->orderBy($order['field'], $order['type']);
+        }
+
+        if (!empty($pagination)) {
+            $query->paginate($pagination, ['*'], 'page', $page);
+        }
+
+        $dataSets = $query->get();
+
+        foreach ($dataSets as $set) {
+            $set['name'] = $set->name;
+            $set['sla'] = $set->sla;
+            $set['descript'] = $set->descript;
+            $set['followers_count'] = $set->userFollow()->count();
+            $set['reported'] = 0;
+
+            $hasRes = $set->resource()->count();
+
+            if ($hasRes) {
+                foreach ($set->resource as $resourse) {
+                    if ($resourse->is_reported) {
+                        $set['reported'] = 1;
+                    }
+                }
+            }
+        }
 
         return $this->successResponse($dataSets);
     }
@@ -319,7 +339,7 @@ class DataSetController extends ApiController
 
         if (!empty($criteria)) {
             $validator = \Validator::make($post, [
-                'criteria.locale'       => 'string',
+                'criteria.locale'       => 'string|max:5',
                 'criteria.keywords'     => 'string',
                 'criteria.order.type'   => 'string',
                 'criteria.order.field'  => 'string',
@@ -448,26 +468,30 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'group_id'      => 'required|integer',
-            'dataset_uri'   => 'required|string',
+            'data_set_uri'  => 'required|string',
         ]);
 
         if (!$validator->fails()) {
-            $dataSet = DataSet::where('uri', $post['dataset_uri'])->count();
+            $dataSet = DataSet::where('uri', $post['data_set_uri'])->first();
 
             if ($dataSet) {
                 try {
-                    if (DataSetGroup::create($post)) {
+                    if (DataSetGroup::create([
+                            'data_set_id'   => $dataSet->id,
+                            'group_id'      => $post['group_id'],
+                        ])
+                    ) {
 
                         return $this->successResponse();
                     }
-                } catch (QueryException $e) {
+                } catch (QueryException $ex) {
 
                     return $this->errorResponse($ex->getMessage());
                 }
             }
         }
 
-        return errorResponse('Add dataset group failure');
+        return $this->errorResponse('Add dataset group failure');
     }
 
 
@@ -483,26 +507,30 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'group_id'      => 'required|integer',
-            'dataset_uri'   => 'required|string',
+            'data_set_uri'  => 'required|string',
         ]);
 
         if (!$validator->fails()) {
-            $dataSet = DataSet::where('uri', $post['dataset_uri'])->count();
+            $dataSet = DataSet::where('uri', $post['data_set_uri'])->first();
 
             if ($dataSet) {
                 try {
-                    if (DataSetGroup::where($post)->delete()) {
+                    if (DataSetGroup::where([
+                            'group_id'      => $post['group_id'],
+                            'data_set_id'   => $dataSet->id,
+                        ])->delete()
+                    ) {
 
                         return $this->successResponse();
                     }
-                } catch (QueryException $e) {
-
+                } catch (QueryException $ex) {
+                    dd($ex->getMessage());
                     return $this->errorResponse($ex->getMessage());
                 }
             }
         }
 
-        return errorResponse('Add dataset group failure');
+        return $this->errorResponse('Add dataset group failure');
     }
 
     public function checkAndCreateTags($tags, $parent)
@@ -514,9 +542,6 @@ class DataSetController extends ApiController
                 if (!$exists) {
                     $tag = [
                         'name'              => $tag,
-                        'icon_file_name'    => 'someFileName', // these parameters need discussion
-                        'icon_mime_type'    => 'someMimeType', // these parameters need discussion
-                        'icon_data'         => 'someData', // these parameters need discussion
                         'parent_id'         => $parent,
                         'active'            => 1,
                         'ordering'          => Category::ORDERING_ASC,
@@ -527,7 +552,7 @@ class DataSetController extends ApiController
             }
 
             return true;
-        } catch (QueryException $e) {
+        } catch (QueryException $ex) {
 
             return false;
         }

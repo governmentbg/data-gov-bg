@@ -36,6 +36,14 @@ class Organisation extends Model implements TranslatableInterface
         ];
     }
 
+    public static function getPublicTypes()
+    {
+        return [
+            self::TYPE_CIVILIAN => 'Temp',
+            self::TYPE_COUNTRY  => 'Temp2',
+        ];
+    }
+
     public function userToOrgRole()
     {
         return $this->hasMany('App\UserToOrgRole');

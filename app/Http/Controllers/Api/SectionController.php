@@ -13,7 +13,7 @@ class SectionController extends ApiController
 {
     /**
      * API function for creates new section
-     * Route::post('section/addSection', 'Api\SectionController@addSection');
+     * Route::post('addSection', 'Api\SectionController@addSection');
      *
      * @param Request $request - JSON containing api_key (string), data (object) containing new section data
      * @return JsonResponse - JSON containing: On success - Status 200, ID of new sections / On fail - Status 500 error message
@@ -61,7 +61,7 @@ class SectionController extends ApiController
 
     /**
      * API function for editing section records
-     * Route::post('section/editSection', 'Api\SectionController@editSection');
+     * Route::post('editSection', 'Api\SectionController@editSection');
      *
      * @param Request $request - JSON containing api_key (string), id of edited section, data (object) containing updated section data
      * @return JsonResponse - JSON containing: On success - Status 200 / On fail - Status 500 error message
@@ -111,7 +111,7 @@ class SectionController extends ApiController
 
     /**
      * API function for deleting section records
-     * Route::post('section/deleteSection', 'Api\SectionController@deleteSection');
+     * Route::post('deleteSection', 'Api\SectionController@deleteSection');
      *
      * @param Request $request - JSON containing api_key (string), id of section to be deleted
      * @return JsonResponse - JSON containing: On success - Status 200 / On fail - Status 500 error message
@@ -138,7 +138,7 @@ class SectionController extends ApiController
 
     /**
      * API function for listing multiple section records
-     * Route::post('section/listSections', 'Api\SectionController@listSections');
+     * Route::post('listSections', 'Api\SectionController@listSections');
      *
      * @param Request $request - JSON containing api_key (string), criteria (object) containing filtering criteria for section records
      * @return JsonResponse - JSON containing: On success - Status 200 list of sections / On fail - Status 500 error message
@@ -180,7 +180,7 @@ class SectionController extends ApiController
 
     /**
      * API function for listing multiple subsection records
-     * Route::post('section/listSubsections', 'Api\SectionController@listSubsections');
+     * Route::post('listSubsections', 'Api\SectionController@listSubsections');
      *
      * @param Request $request - JSON containing api_key (string), criteria (object) containing filtering criteria for section records
      * @return JsonResponse - JSON containing: On success - Status 200 list of subsections / On fail - Status 500 error message

@@ -150,9 +150,9 @@ class SignalsController extends ApiController
         }
         return $this->successResponse();
     }
-    
+
     /**
-     * Lists and filters signals based on input 
+     * Lists and filters signals based on input
      *
      * @param Request $request
      * @return json response
@@ -178,42 +178,23 @@ class SignalsController extends ApiController
         }
 
         $result = [];
-        $criteria['order'] = null;
-        $criteria = is_array($request->json('criteria')) ? $request->json('criteria') : null;
-        $filters = [
-            'signal_id',
-            'status',
-            'date_from',
-            'date_to',
-            'search',
-            'order',
-        ];
 
-        if (is_array($criteria)) {
-            foreach ($criteria as $key => $value) {
-                if (!in_array($key, $filters)) {
-                    unset($criteria[$key]);
-                }
-            }
-        }
-
-        $orderFilters = [
-            'type',
-            'field',
-        ];
-
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
-                foreach ($criteria['order'] as $key => $value) {
-                    if (!in_array($key, $orderFilters)) {
-                        unset($criteria['order'][$key]);
-                    }
-                }
-            }
-        }
+        $criteria = $request->json('criteria');
 
         $signalList = '';
-        $signalList = Signal::all();
+        $signalList = Signal::select(
+            'id',
+            'resource_id',
+            'descript',
+            'firstname',
+            'lastname',
+            'email',
+            'status',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by');
+
         if (is_null($criteria)) {
             $signalList = $signalList;
         }
@@ -224,9 +205,11 @@ class SignalsController extends ApiController
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
             if ($criteria['order']['type'] == 'desc') {
-                $signalList = $signalList->sortByDesc($criteria['order']['field']);
+                $signalList = $signalList->orderBy($criteria['order']['field'], 'desc');
             } else {
-                $signalList = $signalList->sortBy($criteria['order']['field']);
+                if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
+                    $signalList = $signalList->orderBy($criteria['order']['field'], 'asc');
+                }
             }
         }
 
@@ -236,12 +219,11 @@ class SignalsController extends ApiController
 
         if (isset($criteria['search'])) {
             $search = $criteria['search'];
-            $signalList = $signalList->filter(function ($signalList) use ($search) {
-                return strstr($signalList->firstname, $search) ||
-                strstr($signalList->lastname, $search) ||
-                strstr($signalList->email, $search) ||
-                strstr($signalList->descript, $search);
-            });
+
+            $signalList = $signalList->where('firstname', 'like', '%' . $search . '%')
+                ->orWhere('lastname', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('descript', 'like', '%' . $search . '%');
         }
 
         if (isset($criteria['date_from'])) {
@@ -249,12 +231,14 @@ class SignalsController extends ApiController
         }
 
         if (isset($criteria['date_to'])) {
-            $signalList = $signalList->where('created_at', '=<', $criteria['date_to']);
+            $signalList = $signalList->where('created_at', '<=', $criteria['date_to']);
         }
 
         if (isset($request['records_per_page']) || isset($request['page_number'])) {
             $signalList = $signalList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
+
+        $signalList = $signalList->get();
 
         if (!empty($signalList)) {
             $total_records = $signalList->count();
@@ -274,6 +258,9 @@ class SignalsController extends ApiController
                 ];
             }
         }
-        return $this->successResponse([$result, 'total_records' => $total_records], true);
+        return $this->successResponse([
+            'total_records' => $total_records,
+            'signals' => $result,
+        ], true);
     }
 }

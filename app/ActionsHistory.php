@@ -20,7 +20,7 @@ class ActionsHistory extends Model
 
     public $timestamps = false;
     protected $guarded = ['id'];
-    protected $table = 'action_history';
+    protected $table = 'actions_history';
 
     public static function getTypes()
     {

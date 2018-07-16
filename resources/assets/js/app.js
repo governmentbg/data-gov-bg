@@ -20,3 +20,10 @@ Vue.component('example-component', require('./components/ExampleComponent.vue'))
 const app = new Vue({
     el: '#app'
 });
+
+require('./bootstrap-tagsinput');
+require('./bootstrap-datepicker.min');
+require('./bootstrap-datepicker.bg');
+
+// Main js
+require('./custom');

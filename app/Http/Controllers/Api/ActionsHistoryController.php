@@ -44,20 +44,20 @@ class ActionsHistoryController extends ApiController
         $criteria = $request->json('criteria');
 
         $history = ActionsHistory::select(
-            'occurence',
+            'occurrence',
             'module_name',
             'action',
             'action_object',
             'action_msg',
             'user_id'
-        )->with('user:id,username')->orderBy('occurence', 'desc');
+        )->with('user:id,username')->orderBy('occurrence', 'desc');
 
         if (isset($criteria['period_from'])) {
-            $history->where('occurence', '>=', $criteria['period_from']);
+            $history->where('occurrence', '>=', $criteria['period_from']);
         }
 
         if (isset($criteria['period_to'])) {
-            $history->where('occurence', '<=', $criteria['period_to']);
+            $history->where('occurrence', '<=', $criteria['period_to']);
         }
 
         if (isset($criteria['username'])) {
@@ -135,7 +135,7 @@ class ActionsHistoryController extends ApiController
             foreach ($history as $key => $record) {
                 $results[] = [
                     'user'          => $record->user->username,
-                    'occurence'    => $record->occurence,
+                    'occurrence'    => $record->occurrence,
                     'module'        => $record->module_name,
                     'action'        => $record->action,
                     'action_object' => $record->action_object,

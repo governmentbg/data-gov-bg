@@ -7,96 +7,129 @@ body {
 
     #app {
         min-height: 100%;
-        margin-bottom: -$footerHeight; 
-        
+        margin-bottom: -$footerHeight;
+
         .navbar {
+            margin-bottom: 10px;
+
             .navbar-header {
                 width: 100%;
                 margin-left: 0;
                 margin-right: 0;
-                
+
                 > div {
                     font-size: 0;
                     padding-left: 0;
                     padding-right: 0;
-                    
+
                     &.nav-logos {
                         display: inline-block;
                         margin-top: 7px;
                         margin-bottom: 7px;
                         text-align: center;
-    
+
                         > a {
                             display: table-cell;
-                            padding: 5px;
-    
+                            width: 33%;
+                            /*padding: 5px;*/
+
                             @include desctop() {
                                 padding-right: 10px;
-    
+
                                 &:last-child {
                                     padding-right: 0;
                                 }
                             }
+
+                            &:first-of-type img {
+                                width: 45px;
+                                height: 50px;
+                            }
                         }
-    
+
                         @include smMobile() {
                             display: table;
-                            width: 100%;
-    
+                            /*width: 100%;*/
+
                             > a {
                                 width: 20%;
                             }
                         }
                     }
-        
+
+                    .svgIcons {
+                        padding: 10px;
+
+                        > svg {
+                            width: 45px;
+                            height: 23px;
+                            margin-top: 10px;
+
+                            &.puzzle {
+                                max-width: 23px;
+                            }
+
+                            &:hover {
+                                transition: 0.4s ease-in;
+                            }
+                        }
+                    }
+
                     &.nav-controls {
                         padding-top: 15px;
                         display: table;
-    
+
                         > span {
                             padding-right: 3px;
                             padding-left: 3px;
                             display: table-cell;
                             vertical-align: middle;
-    
+
                             &.social-icons {
                                 width: 98px;
-    
+
                                 a {
                                     font-size: 14px;
                                     text-decoration: none;
                                     display: inline-flex;
                                     padding: 2px;
                                     color: $black;
-        
+
                                     &:not(:last-child) {
                                         padding-right: 3px;
                                     }
-        
+
                                     span {
                                         display: inline-block;
                                         border: 1px solid $black;
                                         border-radius: 13px;
                                         padding-top: 5px;
                                         padding-bottom: 5px;
+
+                                        &:hover {
+                                            transition: 0.5s ease-in;
+                                            background-color: grey;
+                                            color: white;
+                                            border-color: transparent;
+                                        }
                                     }
-        
+
                                     &.fb {
                                         span {
                                             padding-left: 8px;
                                             padding-right: 8px;
                                         }
-                                        
+
                                     }
-        
+
                                     &.tw {
                                         span {
                                             padding-left: 5.5px;
                                             padding-right: 5.5px;
                                         }
-        
+
                                     }
-        
+
                                     &.gp {
                                         span {
                                             padding-left: 3px;
@@ -105,29 +138,58 @@ body {
                                     }
                                 }
                             }
-    
+
                             &.trans-link {
                                 width: 1px;
                                 padding-right: 18px;
-    
-                                @include xsMobile() {
+
+                                @include mdMobile() {
                                     padding-right: 8px;
                                 }
-    
+
                                 a {
                                     font-size: 14px;
                                     color: $black;
+
+                                    &:hover {
+                                        font-weight: 800;
+                                    }
                                 }
                             }
-    
+
+                            &.login-link {
+                                width: auto;
+                                padding-right: 30px;
+                                padding-top: 5px;
+
+                                @include xsMobile() {
+                                    padding-right: 8px;
+                                }
+
+                                a {
+                                    font-size: 14px;
+                                    color: $black;
+
+                                    &:hover {
+                                        font-weight: 800;
+                                    }
+                                }
+                            }
+
                             &.search-input {
                                 padding-right: 20px;
-    
-                                @include xsMobile() {
+                                width: 1px;
+
+                                @include smMobile() {
+                                    width: auto;
+                                }
+
+                                @include mdMobile() {
                                     padding-right: 10px;
                                 }
-    
+
                                 input {
+                                    min-width: 150px;
                                     height: 26px;
                                     padding-top: 2px;
                                     padding-bottom: 2px;
@@ -138,23 +200,45 @@ body {
                                     border-radius: 30px;
                                     display: inline-block;
                                     vertical-align: top;
+
                                     &:focus, &:hover {
                                         border: 1px solid $black;
                                     }
+
                                     @include smMobile() {
                                         width: 100%;
+                                        min-width: 75px;
+                                    }
+                                }
+                            }
+
+                            &.user-icon {
+                                @include smMobile() {
+                                    width: 1px;
+                                }
+
+                                a {
+                                    display: inline-block;
+
+                                    img {
+                                        width: 26px;
+                                        margin-right: 13px;
+
+                                        @include mdMobile() {
+                                            margin-right: 5px;
+                                        }
                                     }
                                 }
                             }
                         }
-    
+
                         @include smMobile() {
                             width: 100%;
                             padding-top: 0;
                             padding-bottom: 10px;
                         }
                     }
-        
+
                     @include xsMobile() {
                         &.nav-logos {
                             a {
@@ -164,8 +248,14 @@ body {
                         }
                     }
                 }
+
+                @include smMobile {
+                    .navbar-header {
+                        width: 25% !important;
+                    }
+                }
             }
-            
+
             .navbar-nav {
                 width: 100%;
                 display: flex;
@@ -173,14 +263,16 @@ body {
                 justify-content: center;
                 margin: 0;
                 font-size: 0;
+                margin-top: 20px;
                 li {
                     a {
-                        background-color: white !important;
+                        color: #000;
+                        background-color: transparent !important;
                         font-size: 14px;
                         padding-top: 5px;
                         padding-bottom: 5px;
-                        margin-top: 2px;
-                        margin-bottom: 5px;
+                        margin-top: 4px;
+                        margin-bottom: 8px;
                     }
 
                     &:hover, &.active {
@@ -188,32 +280,36 @@ body {
                             margin-top: 0;
                             margin-bottom: 0;
                         }
-                        
+
                         &:before, &:after {
                             content: '';
                             display: block;
                             width: 40px;
-                            background: $purple;
                             margin: 0 auto;
                         }
 
                         &:before {
-                            height: 2px;
+                            height: 4px;
                         }
 
                         &:after {
-                            height: 5px;
+                            height: 8px;
                         }
                     }
 
                     &.active {
-                        font-weight: bold;
+                        /*font-weight: bold;*/
+                    }
+
+                    @include smMobile() {
+                        display: inline !important;
+                        width: 100%;
+                        text-align: center;
                     }
                 }
             }
 
             .underline {
-                background-color: $purple;
                 padding: 15px;
             }
         }
@@ -221,7 +317,93 @@ body {
         &:after {
             content: "";
             display: block;
-            height: $footerHeight; 
+            height: $footerHeight;
+        }
+
+        @include smMobile() {
+            .navbar-default .navbar-toggle {
+                float: none;
+                border-color: transparent;
+
+                > .icon-bar {
+                    background-color: #707070;
+                    width: 55px;
+                    padding: 4px;
+                    height: 8px;
+                    border-radius: 10px;
+                }
+            }
+
+            #myNavbar {
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.91);
+                position: absolute;
+
+                .nav.navbar-nav {
+                    width: 50%;
+                    margin: 0 auto;
+                    padding: 10px 0px 50px;
+
+                    >li {
+                        border-bottom: 1px solid white;
+                        text-align: left;
+
+                        > a {
+                            color: white;
+                            padding: 0;
+                            margin-bottom: 5px;
+                        }
+
+                        &:hover, &.active {
+                            a {
+                                font-weight: 800;
+                                margin-top: 4px;
+                                margin-bottom: 5px;
+                            }
+
+                            &:before, &:after {
+                                display: none;
+                            }
+                        }
+
+                        &.icons {
+                            margin-top: 10px;
+                            > a {
+                                width: 25%;
+                                display: inline-block;
+                                padding: 10px;
+                                text-align: center;
+                            }
+                        }
+
+                        &:last-of-type, &:nth-last-of-type(2), &:nth-last-of-type(3) {
+                            border-color: transparent;
+                        }
+                    }
+
+                    .rounded-input.input-long {
+                        margin-top: 15px;
+                        border: none;
+                        color: white;
+                        background-color: #555555;
+                    }
+
+                    @include xsMobile() {
+                        width: 90%;
+                    }
+                }
+
+                .close-btn {
+                    width: 70%;
+                    margin: 0 auto;
+                    padding-top: 10px;
+
+                    .js-close-navbar {
+                        cursor: pointer;
+                        width: 15px;
+                    }
+                }
+            }
         }
     }
 
@@ -236,6 +418,45 @@ body {
             display: table-cell;
             vertical-align: middle;
             justify-content: center;
+        }
+    }
+
+    .footer-mobile {
+        height: 70px;
+        .svgIcons > svg {
+            fill: white;
+            width: 60px;
+            height: 30px;
+            margin: 20px 12px 0px;
+
+            &.puzzle {
+                max-width: 30px;
+            }
+
+            &:hover {
+                fill: black;
+            }
+        }
+
+        @include smMobile() {
+            .copiright {
+                color: white;
+                padding: 28px 0;
+
+                a {
+                    color: white;
+
+                    &:hover {
+                        color: black;
+                    }
+                }
+            }
+        }
+
+        @include xsMobile() {
+            .copiright {
+                padding: 28px 0;
+            }
         }
     }
 }

@@ -50,6 +50,12 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
+    
+    Route::post('addDocument', 'Api\DocumentController@addDocument');
+    Route::post('editDocument', 'Api\DocumentController@editDocument');
+    Route::get('deleteDocument', 'Api\DocumentController@deleteDocument');
+    Route::post('listDocuments', 'Api\DocumentController@listDocuments');
+    Route::post('searchDocuments', 'Api\DocumentController@searchDocuments');
 });
 
 Route::post('/register', 'Api\UserController@register');

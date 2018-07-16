@@ -32,7 +32,7 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
-    Route::post('actions/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+    Route::post('listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
 });
 
 Route::post('/register', 'Api\UserController@register');

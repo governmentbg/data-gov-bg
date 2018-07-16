@@ -251,15 +251,19 @@ class PageController extends ApiController
             
         $orderColumns = [
             'id',
-            'name',
-            'descript',
-            'file_name',
-            'mime_type',
-            'data',
+            'section_id',
+            'title',
+            'abstract',
+            'body',
+            'head_title',
+            'meta_desctript',
+            'meta_key_words',
+            'forum_link',
+            'active',
             'created_at',
             'updated_at',
             'created_by',
-            'updated_by',
+            'updated_by'
         ];
 
         if (isset($criteria['order'])) {

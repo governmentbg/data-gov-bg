@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
+use Illuminate\Support\Facades\Log;
 use App\Section;
 use App\Locale;
 
@@ -29,7 +29,6 @@ class SectionController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            // TODO add graylog log
             return $this->errorResponse('Add section failure');
         }
 
@@ -51,8 +50,7 @@ class SectionController extends ApiController
         try {
             $newSection->save();
         } catch (QueryException $ex) {
-            // TODO add graylog log
-            //return $this->errorResponse($ex->getMessage());
+            Log::error($ex->getMessage());
             return $this->errorResponse('Add section failure');
         }
 
@@ -78,7 +76,6 @@ class SectionController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            // TODO add graylog log
             return $this->errorResponse('Edit section failure');
         }
 
@@ -101,8 +98,7 @@ class SectionController extends ApiController
 
             $section->save();
         } catch (QueryException $ex) {
-            // TODO add graylog log
-            //return $this->errorResponse($ex->getMessage());
+            Log::error($ex->getMessage());
             return $this->errorResponse('Edit section failure');
         }
 
@@ -124,14 +120,12 @@ class SectionController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            // TODO add graylog log
             return $this->errorResponse('Delete section failure');
         }
 
         if (Section::find($post['id'])->delete()) {
             return $this->successResponse();
         } else {
-            // TODO add graylog log
             return $this->errorResponse('Delete section failure');
         }
     }
@@ -150,12 +144,11 @@ class SectionController extends ApiController
 
         if (!empty($post)) {
             $validator = \Validator::make($request->all(), [
-                'active'    => 'boolean',
-                'locale'    => 'max:5',
+                'criteria.active'    => 'boolean',
+                'criteria.locale'    => 'max:5',
             ]);
 
             if ($validator->fails()) {
-                // TODO add graylog log
                 return $this->errorResponse('List sections failure');
             }
 
@@ -166,13 +159,11 @@ class SectionController extends ApiController
             if ($request->filled('criteria.active')) {
                 $criteria['active'] = $request->input('criteria.active');
             }
-
-            $sections = $sectionModel->listSections($criteria);
         } else {
             $criteria['locale'] = config('app.locale');
-            $sections = $sectionModel->listSections($criteria);
         }
 
+        $sections = $sectionModel->listSections($criteria);
         $response = $this->prepareSections($sections);
 
         return $this->successResponse($response);
@@ -197,7 +188,6 @@ class SectionController extends ApiController
             ]);
 
             if ($validator->fails()) {
-                // TODO add graylog log
                 return $this->errorResponse('List sections failure');
             }
 
@@ -209,8 +199,8 @@ class SectionController extends ApiController
                 $criteria['active'] = $request->input('criteria.active');
             }
 
-            if ($request->filled('criteria.sectionid')) {
-                $criteria['parent_id'] = $request->input('criteria.sectionid');
+            if ($request->filled('criteria.section_id')) {
+                $criteria['parent_id'] = $request->input('criteria.section_id');
             }
 
             $sections = $sectionModel->listSubsections($criteria);
@@ -246,8 +236,8 @@ class SectionController extends ApiController
                 'forum_link'    => $section->forum_link,
                 'theme'         => $section->theme,
                 'created_at'    => $section->created_at,
-                'updated_at,'   => $section->updated_at,
-                'created_by,'   => $section->created_by,
+                'updated_at'   => $section->updated_at,
+                'created_by'   => $section->created_by,
                 'updated_by'    => $section->updated_by,
             ];
         }

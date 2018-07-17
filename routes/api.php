@@ -36,13 +36,13 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
 
     Route::post('rights/listRights', 'Api\RightController@listRights');
 
-    Route::post('addSection', 'Api\SectionController@addSection');
-    Route::post('editSection', 'Api\SectionController@editSection');
-    Route::post('deleteSection', 'Api\SectionController@deleteSection');
-    Route::post('listSections', 'Api\SectionController@listSections');
-    Route::post('listSubsections', 'Api\SectionController@listSubsections');
+    Route::post('/addSection', 'Api\SectionController@addSection');
+    Route::post('/editSection', 'Api\SectionController@editSection');
+    Route::post('/deleteSection', 'Api\SectionController@deleteSection');
+    Route::post('/listSections', 'Api\SectionController@listSections');
+    Route::post('/listSubsections', 'Api\SectionController@listSubsections');
 
-    Route::post('listThemes', 'Api\ThemeController@listThemes');
+    Route::post('/listThemes', 'Api\ThemeController@listThemes');
 
     Route::post('/addDataSet', 'Api\DataSetController@addDataSet');
     Route::post('/editDataSet', 'Api\DataSetController@editDataSet');

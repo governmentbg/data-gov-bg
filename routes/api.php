@@ -50,6 +50,13 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
+
+    Route::post('addNews', 'Api\NewsController@addNews');
+    Route::post('editNews', 'Api\NewsController@editNews');
+    Route::get('deleteNews', 'Api\NewsController@deleteNews');
+    Route::post('listNews', 'Api\NewsController@listNews');
+    Route::post('searchNews', 'Api\NewsController@searchNews');
+    Route::get('getNewsDetails', 'Api\NewsController@getNewsDetails');
 });
 
 Route::post('/register', 'Api\UserController@register');

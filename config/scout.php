@@ -99,9 +99,9 @@ return [
 
     'tntsearch' => [
         'storage'       => storage_path(), //place where the index files will be stored
-        'fuzziness'     => env('TNTSEARCH_FUZZINESS', false),
+        'fuzziness'     => env('TNTSEARCH_FUZZINESS', true),
         'fuzzy'         => [
-            'prefix_length'     => 2,
+            'prefix_length'     => 4,
             'max_expansions'    => 50,
             'distance'          => 2,
         ],

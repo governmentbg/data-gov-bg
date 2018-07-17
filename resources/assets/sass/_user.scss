@@ -1,0 +1,147 @@
+.theme-user {
+    .sidebar-submenu.open {
+        display: block;
+    }
+
+    .my-profile {
+        color: $black;
+        font-size: 28px;
+    }
+
+    .tag.label {
+        font-weight: normal;
+        font-size: 100%;
+        border-radius: 9px;
+    }
+
+    .open-select {
+        overflow-y: auto;
+
+        >
+        option {
+            &:hover,
+            &:active,
+            &:focus,
+            &:checked {
+                box-shadow: inset 20px 20px #a1ecf491;
+            }
+        }
+    }
+
+    .fileinput-new.thumbnai {
+        width: 180px;
+        height: 100px;
+        padding: 0px;
+        margin-bottom: -10px;
+        display: inline-block;
+    }
+
+    .inline-block {
+        display: inline-block;
+    }
+
+    span > label {
+        font-weight: normal;
+        margin-bottom: 0;
+    }
+    #org-img {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+    }
+
+    a.btn {
+        color: white;
+        &:active, &:focus, &:hover {
+            color: white;
+        }
+    }
+
+    .term-use {
+        overflow: hidden;
+    }
+
+    @include smMobile() {
+        .my-profile {
+            margin-left: 0 !important;
+        }
+
+        .sidenav .sidebar-submenu.open {
+            padding: 10px 30px !important;
+            width: 45%;
+        }
+
+        .sidebar-submenu {
+            li {
+                a,
+                a:hover,
+                a:active,
+                a:focus {
+                    &:after {
+                        width: 70px;
+                        left: 70px;
+                    }
+                }
+            }
+        }
+
+        .add-terms {
+            margin-top: 10px;
+        }
+
+    }
+
+    @include xsMobile() {
+        .filter-type li a {
+                font-size: 12px;
+        }
+
+        .sidenav .sidebar-submenu.open {
+            padding: 10px 30px !important;
+            width: 60% !important;
+        }
+
+        .sidebar-submenu {
+            li {
+                a,
+                a:hover,
+                a:active,
+                a:focus {
+                    &:after {
+                        width: 70px;
+                        left: 70px;
+                    }
+                }
+            }
+        }
+
+        .open-select {
+            padding: 4px;
+        }
+
+        .reg-btns {
+            a, button {
+                font-size: 13px;
+            }
+
+            .add-org {
+                padding: 5px 8px;
+                margin-left: 5px;
+            }
+        }
+
+        img.img-responsive {
+            width: 100%;
+        }
+
+        button {
+            font-size: 13px;
+            padding: 5px 12px;
+        }
+    }
+}
+
+.frame {
+    margin: 20px;
+    border-radius: 10px;
+}

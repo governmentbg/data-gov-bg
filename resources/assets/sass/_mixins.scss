@@ -23,3 +23,264 @@
         @content;
     }
 }
+
+@mixin theme($name, $primary) {
+    $primary: $primary;
+    $lighten-primary: rgba($primary, .2);
+    $darker-primary: darken($primary, 10%);
+    $secondary: white;
+
+    .#{$name} {
+        .navbar {
+            .navbar-header {
+                .svgIcons {
+                    &:hover, &:active, &:focus {
+                        > svg {
+                            fill: $primary;
+                        }
+                    }
+                }
+            }
+
+            .navbar-nav {
+                li {
+                    &:hover,
+                    &.active {
+                        &:before,
+                        &:after {
+                            background: $primary;
+                        }
+                    }
+                }
+            }
+
+            .underline {
+                background-color: $primary;
+            }
+        }
+
+        & .container {
+            a {
+                &:hover, &:focus, &:active {
+                    color: $primary;
+                }
+            }
+
+            .btn-sidebar {
+                background-color: transparentize($primary, 0.1) !important;
+
+                i.fa {
+                    color: white;
+                }
+            }
+
+            .sidenav {
+                color: $primary;
+
+                li {
+                    a,
+                    a:hover,
+                    a:focus,
+                    a:active {
+                        color: $primary;
+                    }
+                }
+
+                & li.js-show-submenu:after {
+                    border: 1px solid $primary;
+                }
+
+                .sidebar-submenu {
+                    background-color: $primary;
+                    color: $secondary;
+
+                    a,
+                    a:hover,
+                    a:active,
+                    a:focus {
+                        color: $secondary;
+
+                        &:after {
+                            border-bottom: 1px solid $secondary;
+                        }
+                    }
+                }
+
+                @include smMobile() {
+                    background-color: transparentize($primary, 0.1);
+                    color: $secondary;
+                    height: max-content;
+
+                    .sidebar-submenu {
+                        background-color: transparent;
+                    }
+                }
+            }
+
+            .badge {
+                background-color: $primary;
+
+                &:hover {
+                    background-color: $darker-primary;
+                }
+
+                a,
+                a:hover{
+                    color: $secondary;
+                }
+            }
+
+            .rounded-input {
+                border: 1px solid $primary;
+            }
+
+            .filter-content {
+                a {
+                    color: $primary;
+                }
+
+                .filter-type, .sort-by {
+                    li {
+                        a {
+                            &:hover,
+                            &:active,
+                            &:focus,
+                            &.active {
+                                color: $primary;
+                            }
+                        }
+                    }
+
+                    &.right-border {
+                        li {
+                            a {
+                                border-right: 1px solid $primary;
+                            }
+                        }
+                    }
+                }
+
+                .rounded-input {
+                    border-color: $primary;
+                }
+            }
+
+            .articles {
+                .article {
+                    .art-heading-bar div, h2, h3 {
+                        .social:hover {
+                            i {
+                                color: $secondary;
+                                background-color: $primary;
+                                border-color: transparent !important;
+                            }
+                        }
+                    }
+
+                    .tags:after {
+                        border: 1px solid $primary;
+                    }
+
+                    .info-box {
+                        background-color: $lighten-primary;
+                    }
+                    .comments {
+                        .comment-box {
+                            border: 1px solid $primary;
+                        }
+                    }
+
+                    .coment-avatar{
+                        border: 1px solid $primary;
+                    }
+                }
+            }
+
+            .article-underline:after {
+                border: 1px solid $primary;
+            }
+
+            .btn {
+                background-color: $primary;
+                border-color: $primary;
+
+                &.btn:hover,
+                .btn:active,
+                .btn:focus {
+                    transition: 0.5s ease-in;
+                    background-color: $darker-primary;
+                    border-color: $darker-primary;
+                }
+            }
+
+            .tag.label {
+                background-color: $primary;
+            }
+
+            .up-down-angle {
+                color: $primary;
+            }
+        }
+
+        .frame {
+            border: 1px solid $primary;
+        }
+
+        .btn-custom {
+            color: $secondary;
+            background-color: $primary;
+            border-color: $primary;
+
+            &:hover, &:active, &:focus {
+                background-color: $darker-primary;
+                border-color: $darker-primary;
+                color: $secondary;
+            }
+        }
+
+        .input-border-r-12, .bootstrap-tagsinput {
+            border: 1px solid $primary
+        }
+
+        @include smMobile() {
+             #myNavbar {
+                .nav.navbar-nav {
+                    >li:not(.icons) {
+                        &:hover, &.active {
+                            boreder-color: $primary;
+                            a {
+                                font-weight: 500;
+                                color: opacify($primary, .5) !important;
+                            }
+                        }
+                    }
+
+                    li.icons>a:hover {
+                        color: opacify($primary, .5) !important;
+                    }
+                }
+            }
+
+            .footer-mobile {
+                background-color: $primary;
+            }
+        }
+    }
+}
+
+$themes: (
+    theme-index: #c02e54,
+    theme-data: #4e57aa,
+    theme-data-attention: #d32a31,
+    theme-organisation: #76ad3f,
+    theme-request: #e8d429,
+    theme-visualisations: #e98911,
+    theme-news: #0a7b5d,
+    theme-documents: #145c99,
+    theme-contact: #791292,
+    theme-user: #108f9e,
+) !default;
+
+@each $theme, $primary in $themes {
+    @include theme($theme, $primary);
+}

@@ -1,10 +1,14 @@
 <?php
+
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Http\Controllers\Traits\RecordSignature;
 
 class Locale extends Model
 {
+    use RecordSignature;
+
     protected $table = 'locale';
     protected $guarded = ['id'];
 

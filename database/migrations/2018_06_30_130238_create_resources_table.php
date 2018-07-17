@@ -29,9 +29,7 @@ class CreateResourcesTable extends Migration
             $table->binary('post_data');
             $table->text('http_headers');
             $table->integer('name')->unsigned();
-            $table->foreign('name')->references('id')->on('translations')->onDelete('cascade');
             $table->integer('descript')->unsigned();
-            $table->foreign('descript')->references('id')->on('translations')->onDelete('cascade');
             $table->text('schema_descript');
             $table->string('schema_url');
             $table->boolean('is_reported');

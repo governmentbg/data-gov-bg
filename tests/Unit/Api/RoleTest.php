@@ -12,6 +12,7 @@ class RoleTest extends TestCase
 {
     use DatabaseTransactions;
     use WithFaker;
+
     /**
      * A basic test example.
      *
@@ -131,6 +132,4 @@ class RoleTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
     }
-
-
 }

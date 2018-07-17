@@ -2,6 +2,7 @@
 /public/hot
 /public/storage
 /storage/*.key
+/storage/*.index
 /vendor
 /.idea
 /.vagrant
@@ -11,3 +12,7 @@ npm-debug.log
 yarn-error.log
 .env
 .editorconfig
+/nbproject
+/_ide_helper.php
+.php_cs
+/.php_cs.cache

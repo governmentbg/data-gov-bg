@@ -17,5 +17,26 @@
 // Base
 @import "base";
 
+// Tags styles
+@import "tags-input/bootstrap-tagsinput";
+
 // Common
 @import "main";
+
+// Articles for data and organisations
+@import "articles";
+
+// Home page
+@import "home";
+
+// Data pages
+@import "data";
+
+// User pages
+@import "user";
+
+// Organisation pages
+@import "organisation";
+
+// Request page
+@import "request";

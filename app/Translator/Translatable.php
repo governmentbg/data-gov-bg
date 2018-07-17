@@ -49,6 +49,7 @@ trait Translatable
     {
         $this->locale = $locale;
         $this->fallback_locale = $fallback_locale;
+
         return $this;
     }
 
@@ -225,10 +226,11 @@ trait Translatable
     {
         $translations = [];
 
-        /** select the translatable fields from $attributes create
-        translations from them and then unset them from the $attributes array.
-        The rest of the $attributes fields are used to create the main model
-        */
+        /**
+         * select the translatable fields from $attributes create
+         * translations from them and then unset them from the $attributes array.
+         * The rest of the $attributes fields are used to create the main model
+         */
         foreach ($attributes as $key => $value) {
             if (self::isTranslatable($key)) {
                 $translations[$key] = $value;
@@ -241,8 +243,8 @@ trait Translatable
 
         // Replace empty with Dummy translations
         foreach (self::$translatable as $key => $type) {
-            if (!isset($translations[$key]) || $translations[$key]==[]) {
-                $value = ($type=='bool') ? null : '';
+            if (!isset($translations[$key]) || $translations[$key] == []) {
+                $value = $type == 'bool' ? null : '';
                 $translations[$key] = [
                     'xx' => $value, // Dummy
                 ];
@@ -271,9 +273,10 @@ trait Translatable
     {
         $translations = [];
 
-        /** select the translatable fields from $attributes, create
-        translations from them and then unset them from the $attributes array.
-        The rest of the $attributes fields are used to create the main model
+        /**
+         * select the translatable fields from $attributes, create
+         * translations from them and then unset them from the $attributes array.
+         * The rest of the $attributes fields are used to create the main modelhe $attributes fields are used to create the main model
         */
         foreach ($attributes as $key => $value) {
             if (self::isTranslatable($key)) {
@@ -403,7 +406,9 @@ trait Translatable
             $translations->push($translation);
             $translations->push($transliteration);
         }
+
         $uniqueTranslations = $translations->unique();
+
         return $uniqueTranslations->implode(' ');
     }
 }

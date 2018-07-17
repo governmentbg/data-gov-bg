@@ -4,6 +4,7 @@
 
 html, body {
     height: 100%;
+    color: #000;
 }
 
 input:focus,
@@ -13,17 +14,21 @@ button:focus {
     outline: none;
 }
 
+.js-show-on-load {
+    visibility: hidden;
+}
+
 .p-l-none {
-    padding-left: 0px !important; 
+    padding-left: 0px !important;
 }
 
 .p-r-none {
-    padding-right: 0px !important; 
+    padding-right: 0px !important;
 }
 
 .p-l-r-none {
     padding-left: 0px !important;
-    padding-right: 0px !important; 
+    padding-right: 0px !important;
 }
 
 .p-xxs {

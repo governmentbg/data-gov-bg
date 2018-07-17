@@ -6,8 +6,6 @@ use App\DataSet;
 use App\Category;
 use App\DataSetGroup;
 use Illuminate\Http\Request;
-use TeamTNT\TNTSearch\TNTSearch;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;

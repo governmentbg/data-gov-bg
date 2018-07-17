@@ -35,11 +35,11 @@ class DatabaseTest extends TestCase
      */
     public function testStructureAndModels()
     {
-        // $this->users();
-        // $this->passwordResets();
-        // $this->roles();
-        // $this->roleRights();
-        // $this->newsletterDigestLog();
+        $this->users();
+        $this->passwordResets();
+        $this->roles();
+        $this->roleRights();
+        $this->newsletterDigestLog();
         $this->locale();
         $this->translations();
         $this->organisations();

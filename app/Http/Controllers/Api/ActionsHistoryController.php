@@ -124,9 +124,7 @@ class ActionsHistoryController extends ApiController
         $recordsPerPage = $request->json('records_per_page');
         $count = $history->count();
 
-        if (isset($recordsPerPage)) {
-            $history = $history->forPage($request->json('page_number'), $recordsPerPage);
-        }
+        $history->forPage($request->json('page_number'), $this->getRecordsPerPage($recordsPerPage));
 
         $results = [];
         $history = $history->get();

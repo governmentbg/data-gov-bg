@@ -9,6 +9,7 @@ use App\RoleRight;
 use Tests\TestCase;
 use App\Translation;
 use App\Organisation;
+use App\ActionsHistory;
 use App\NewsletterDigestLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
@@ -27,6 +28,7 @@ class DatabaseTest extends TestCase
     const NEWSLETTER_DIGEST_LOG_RECORDS = 10;
     const TRANSLATION_RECORDS = 10;
     const ORGANISATION_RECORDS = 10;
+    const ACTIONS_HISTORY_RECORDS = 10;
 
     /**
      * Tests all tables structures and models
@@ -43,6 +45,7 @@ class DatabaseTest extends TestCase
         $this->locale();
         $this->translations();
         $this->organisations();
+        $this->actionsHistory();
     }
 
     /**
@@ -383,7 +386,6 @@ class DatabaseTest extends TestCase
             $this->assertNotNull($record);
 
             if (!empty($record->id)) {
-                $this->log($record->id);
                 $this->assertDatabaseHas('organisations', ['id' => $record->id]);
             }
         }
@@ -413,6 +415,49 @@ class DatabaseTest extends TestCase
             }
 
             $this->assertSoftDeleted('organisations', ['id' => $record->id]);
+        }
+    }
+
+    /**
+     * Tests actions_history table structure and models
+     *
+     * @return void
+     */
+    private function actionsHistory()
+    {
+        $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
+        $types = array_keys(ActionsHistory::getTypes());
+        $modules = ActionsHistory::MODULE_NAMES;
+
+        // Test creation
+        foreach (range(1, self::ACTIONS_HISTORY_RECORDS) as $i) {
+            $user = $this->faker->randomElement($users)['id'];
+            $type = $this->faker->randomElement($types);
+            $module = $this->faker->randomElement($modules);
+            $record = null;
+
+            $dbData = [
+                'user_id'       => $user,
+                'occurrence'     => $this->faker->dateTime(),
+                'module_name'   => $module,
+                'action'        => $type,
+                'action_object' => $this->faker->sentence(),
+                'action_msg'    => $this->faker->sentence(),
+                'ip_address'    => $this->faker->ipv4(),
+                'user_agent'    => $this->faker->sentence(),
+            ];
+
+            try {
+                $record = ActionsHistory::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+
+            $this->assertNotNull($record);
+
+            if (!empty($record->id)) {
+                $this->assertDatabaseHas('actions_history', ['id' => $record->id]);
+            }
         }
     }
 }

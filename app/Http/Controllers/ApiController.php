@@ -12,19 +12,6 @@ class ApiController extends Controller
     const DEFAULT_RECORDS_PER_PAGE = 50;
     const MAX_RECORDS_PER_PAGE = 100;
 
-    public function getRecordsPerPage(&$number)
-    {
-        if (empty($number)) {
-            return self::DEFAULT_RECORDS_PER_PAGE;
-        }
-
-        if ($number > self::MAX_RECORDS_PER_PAGE) {
-            return self::DEFAULT_RECORDS_PER_PAGE;
-        }
-
-        return $number;
-    }
-
     protected static $format;
 
     /**
@@ -43,6 +30,19 @@ class ApiController extends Controller
         if (is_null(self::$format) || $validator->fails()) {
             self::$format = 'json';
         }
+    }
+
+    public function getRecordsPerPage(&$number)
+    {
+        if (empty($number)) {
+            return self::DEFAULT_RECORDS_PER_PAGE;
+        }
+
+        if ($number > self::MAX_RECORDS_PER_PAGE) {
+            return self::DEFAULT_RECORDS_PER_PAGE;
+        }
+
+        return $number;
     }
 
     public static function errorResponse($message = null, $code = 500, $type = self::ERROR_GENERAL)

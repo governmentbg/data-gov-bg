@@ -7,9 +7,10 @@ use App\User;
 use App\Locale;
 use App\RoleRight;
 use Tests\TestCase;
-use App\Translation;
+use App\Translator\Translation;
 use App\Organisation;
 use App\NewsletterDigestLog;
+use App\DataRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -27,6 +28,7 @@ class DatabaseTest extends TestCase
     const NEWSLETTER_DIGEST_LOG_RECORDS = 10;
     const TRANSLATION_RECORDS = 10;
     const ORGANISATION_RECORDS = 10;
+    const DATA_REQUESTS_RECORDS = 10;
 
     /**
      * Tests all tables structures and models
@@ -43,6 +45,7 @@ class DatabaseTest extends TestCase
         $this->locale();
         $this->translations();
         $this->organisations();
+        $this->data_requests();
     }
 
     /**
@@ -413,6 +416,39 @@ class DatabaseTest extends TestCase
             }
 
             $this->assertSoftDeleted('organisations', ['id' => $record->id]);
+        }
+    }
+
+     /**
+     * Tests DataRequest table structure and models
+     *
+     * @return void
+     */
+    private function data_requests()
+    {
+        // Test creation
+        $orgs = Organisation::orderBy('created_at', 'desc')->limit(self::DATA_REQUESTS_RECORDS)->get()->toArray();
+        foreach (range(1, self::DATA_REQUESTS_RECORDS) as $i) {
+            $org = $this->faker->randomElement($orgs)['id'];
+            $record = null;
+            $dbData = [
+                'org_id'=> $org,
+                'descript' => $this->faker->sentence(3),
+                'published_url' => $this->faker->url,
+                'contact_name' => $this->faker->name,
+                'email' => $this->faker->email,
+                'notes' => $this->faker->sentence(4),
+                'status' => $this->faker->boolean()   
+            ];
+
+            try {
+                $record = DataRequest::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+
+            $this->assertNotNull($record);
+            $this->assertDatabaseHas('data_requests', ['id' => $record->id]);
         }
     }
 }

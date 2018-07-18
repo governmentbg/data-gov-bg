@@ -4,8 +4,8 @@ namespace App\Translator;
 
 use App\Repositories\TranslationsRepository;
 
-trait Translatable {
-
+trait Translatable
+{
     protected $repo;
 
     protected $locale = null;
@@ -17,7 +17,8 @@ trait Translatable {
      * @method translation_locale
      * @return string
      */
-    protected function translation_locale(){
+    protected function translation_locale()
+    {
         return $this->locale ?: \LaravelLocalization::getCurrentLocale();
     }
 
@@ -32,7 +33,8 @@ trait Translatable {
      * @method translation_fallback
      * @return string
      */
-    protected function translation_fallback(){
+    protected function translation_fallback()
+    {
         return $this->fallback_locale ?: config('app.fallback_locale');
     }
 
@@ -43,9 +45,11 @@ trait Translatable {
      * @param  string    $fallback_locale
      * @return EloquentModel              Current instance
      */
-    public function translate($locale, $fallback_locale = null){
+    public function translate($locale, $fallback_locale = null)
+    {
         $this->locale = $locale;
         $this->fallback_locale = $fallback_locale;
+
         return $this;
     }
 
@@ -61,8 +65,7 @@ trait Translatable {
     {
         $values = [];
 
-        foreach(array_keys(static::$translatable) as $key)
-        {
+        foreach (array_keys(static::$translatable) as $key) {
             $values[$this->attributes[$key]] = $key;
         }
 
@@ -73,10 +76,10 @@ trait Translatable {
     {
         $values = [];
 
-        foreach(static::$translatable as $key => $type)
-        {
-            if(isset($this->attributes[$key]))
+        foreach (static::$translatable as $key => $type) {
+            if (isset($this->attributes[$key])) {
                 $values[$this->attributes[$key]] = $type;
+            }
         }
 
         return $values;
@@ -98,8 +101,7 @@ trait Translatable {
     {
         $this->translatable_handled = false;
 
-        if(self::isTranslatable($key)) {
-
+        if (self::isTranslatable($key)) {
             $this->translatable_handled = true;
 
             // Get the translations for the corresponding key
@@ -131,11 +133,10 @@ trait Translatable {
     {
         $this->translatable_handled = false;
 
-        if(self::isTranslatable($key)){
-
+        if (self::isTranslatable($key)) {
             $translations = $this->translations($key);
 
-            if (is_array($value)){
+            if (is_array($value)) {
                 $translations->set($value);
             } else {
                 $translations->set($this->translation_locale(), $value);
@@ -157,7 +158,8 @@ trait Translatable {
      * @param  string         $key the key of the $translatable array
      * @return boolean
      */
-    public static function isTranslatable($key){
+    public static function isTranslatable($key)
+    {
         return isset(
             static::$translatable)
             && in_array($key, array_keys(static::$translatable)
@@ -170,13 +172,16 @@ trait Translatable {
      * @param  string           $key the key of the $translatable array
      * @return integer|null
      */
-    public function getTranslationId($key){
-        if(!self::isTranslatable($key))
+    public function getTranslationId($key)
+    {
+        if (!self::isTranslatable($key)) {
             throw new Exceptions\KeyNotTranslatable($key);
-        if(array_key_exists($key, $this->attributes))
+        }
+        if (array_key_exists($key, $this->attributes)) {
             return $this->attributes[$key];
-        else
+        } else {
             return null;
+        }
     }
 
     /**
@@ -199,7 +204,7 @@ trait Translatable {
     public function translations($key)
     {
         $group_id = $this->getTranslationId($key);
-        if(! $this->repo->has($group_id)){
+        if (! $this->repo->has($group_id)) {
             $translations = $this->repo
                 ->add($this->getTranslationsType($key), $group_id)
                 ->getLast();
@@ -221,12 +226,13 @@ trait Translatable {
     {
         $translations = [];
 
-        /** select the translatable fields from $attributes create
-        translations from them and then unset them from the $attributes array.
-        The rest of the $attributes fields are used to create the main model
-        */
+        /**
+         * select the translatable fields from $attributes create
+         * translations from them and then unset them from the $attributes array.
+         * The rest of the $attributes fields are used to create the main model
+         */
         foreach ($attributes as $key => $value) {
-            if(self::isTranslatable($key)) {
+            if (self::isTranslatable($key)) {
                 $translations[$key] = $value;
                 unset($attributes[$key]);
             }
@@ -236,9 +242,9 @@ trait Translatable {
         $model = new static($attributes);
 
         // Replace empty with Dummy translations
-        foreach (self::$translatable as $key => $type){
-            if(!isset($translations[$key]) || $translations[$key]==[]){
-                $value = ($type=='bool') ? null : '';
+        foreach (self::$translatable as $key => $type) {
+            if (!isset($translations[$key]) || $translations[$key] == []) {
+                $value = $type == 'bool' ? null : '';
                 $translations[$key] = [
                     'xx' => $value, // Dummy
                 ];
@@ -267,12 +273,13 @@ trait Translatable {
     {
         $translations = [];
 
-        /** select the translatable fields from $attributes, create
-        translations from them and then unset them from the $attributes array.
-        The rest of the $attributes fields are used to create the main model
+        /**
+         * select the translatable fields from $attributes, create
+         * translations from them and then unset them from the $attributes array.
+         * The rest of the $attributes fields are used to create the main modelhe $attributes fields are used to create the main model
         */
         foreach ($attributes as $key => $value) {
-            if(self::isTranslatable($key)) {
+            if (self::isTranslatable($key)) {
                 $translations[$key] = $value;
                 unset($attributes[$key]);
             }
@@ -295,8 +302,9 @@ trait Translatable {
     {
         // Handle Translatable keys
         $this->translatable_set($key, $value);
-        if ($this->translatable_handled)
+        if ($this->translatable_handled) {
             return;
+        }
 
         // Handle not translatable fields
         parent::__set($key, $value);
@@ -306,8 +314,9 @@ trait Translatable {
     {
         $result = $this->translatable_get($key);
 
-        if($this->translatable_handled)
+        if ($this->translatable_handled) {
             return $result;
+        }
 
         // Handle not translatable fields
         return parent::__get($key);
@@ -324,27 +333,25 @@ trait Translatable {
         $attributes = parent::attributesToArray();
 
         foreach ($attributes as $key => $value) {
-            if(self::isTranslatable($key)) {
-                if($all)
+            if (self::isTranslatable($key)) {
+                if ($all) {
                     $attributes[$key] = $this->translations($key)->toArray();
-                else
+                } else {
                     $attributes[$key] = $this->translatable_get($key)?:null;
-
+                }
             }
         }
 
         return $attributes;
-
     }
 
-    public function toTranslatedArray($all = FALSE)
+    public function toTranslatedArray($all = false)
     {
         return array_merge($this->translatedAttributesToArray($all), $this->relationsToArray());
     }
 
     public function toTranslatedJson($options = 0)
     {
-
         $json = json_encode($this->jsonSerializeWithTranslations(), $options);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
@@ -352,8 +359,6 @@ trait Translatable {
         }
 
         return $json;
-
-
     }
 
     public function jsonSerializeWithTranslations()
@@ -394,15 +399,16 @@ trait Translatable {
     {
         $localesAll = config('laravellocalization.supportedLocales');
         $translations = collect();
-        foreach($localesAll as $k => $locale){
+        foreach ($localesAll as $k => $locale) {
             $this->translate($k);
             $translation = $this->translatable_get($key);
             $transliteration = preg_replace('/[^a-z]/i', '', iconv("UTF-8", "US-ASCII//TRANSLIT//IGNORE", $translation));
             $translations->push($translation);
             $translations->push($transliteration);
         }
+
         $uniqueTranslations = $translations->unique();
+
         return $uniqueTranslations->implode(' ');
     }
-
 }

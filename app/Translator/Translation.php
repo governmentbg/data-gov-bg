@@ -5,15 +5,16 @@ namespace App\Translator;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Traits\RecordSignature;
 
-class Translation extends Model {
-
+class Translation extends Model
+{
     use RecordSignature;
 
     protected $table = 'translations';
     protected $fillable = ['group_id', 'locale', 'text', 'label'];
     public $timestamps = false;
 
-    public function delete() {
+    public function delete()
+    {
         parent::delete();
 
         // Leave atleast one dummy translation for using this group_id
@@ -26,7 +27,7 @@ class Translation extends Model {
                     'locale'    => 'xx',
                     'text'      => '',
                     'label'     => '',
-                ]);
+                    ]);
             }
         }
     }

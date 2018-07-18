@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
+use Illuminate\Support\Facades\Log;
 use App\Role;
 use App\RoleRight;
 
@@ -32,8 +33,8 @@ class RoleController extends ApiController
                 if ($newRole) {
                     return $this->successResponse(['id' => $newRole->id], true);
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
@@ -64,8 +65,8 @@ class RoleController extends ApiController
                 if (Role::where('id', $post['id'])->update($post)) {
                     return $this->successResponse();
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
@@ -113,7 +114,7 @@ class RoleController extends ApiController
             } else {
                 $roles = Role::all();
             }
-        } catch (\Illuminate\Database\QueryException $ex) {
+        } catch (QueryException $ex) {
             return $this->errorResponse($ex->getMessage());
         }
 
@@ -138,8 +139,8 @@ class RoleController extends ApiController
                 $role = Role::where('id', $id)->first();
 
                 return $this->successResponse($role->rights);
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
@@ -181,8 +182,9 @@ class RoleController extends ApiController
                         RoleRight::find($right->id)->delete();
                     }
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+                return $this->errorResponse();
             }
 
             try {
@@ -198,7 +200,8 @@ class RoleController extends ApiController
                         break;
                     }
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
                 return $this->errorResponse($ex->getMessage());
             }
         }

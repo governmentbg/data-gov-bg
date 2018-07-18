@@ -3,11 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Locale;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiController;
-use App;
 
 class SetLocale
 {
@@ -18,29 +16,23 @@ class SetLocale
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        if (!empty($request->get('data.locale'))) {
-            $locale = empty(DB::table('locale')->where('locale', $request->get('data.locale'))->value('locale'))
-                ? $request->get('data.locale')
-                : null;
+        if (isset($request->locale)) {
+            $locale = $request->locale;
+        } else if (isset($request->data['locale'])) {
+            $locale = $request->data['locale'];
+        } else if (isset($request->criteria['locale'])) {
+            $locale = $request->criteria['locale'];
         }
 
-        if (!empty($request->get('criteria.locale'))) {
-            $locale = empty(DB::table('locale')->where('locale', $request->get('criteria.locale'))->value('locale'))
-                ? $request->get('criteria.locale')
-                : null;
+        if (isset($locale)) {
+            if (Locale::where('locale', $locale)->count()) {
+                \LaravelLocalization::setLocale($locale);
+            } else {
+                return ApiController::errorResponse('Language `'. $locale .'` does not exist in database');
+            }
         }
-
-        if (!empty($request->get('locale'))) {
-            $locale = empty(DB::table('locale')->where('locale', $request->get('locale'))->value('locale'))
-                ? $request->get('locale')
-                : null;
-        }
-
-        $request->offsetUnset('locale');
-
-        \LaravelLocalization::setLocale(empty($locale) ? config('app.locale') : $locale);
 
         return $next($request);
     }

@@ -56,9 +56,22 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
+
+    Route::post('/addResourceMetadata', 'Api\ResourceController@addResourceMetadata');
+    Route::post('/addResourceData', 'Api\ResourceController@addResourceData');
+    Route::post('/editResourceMetadata', 'Api\ResourceController@editResourceMetadata');
+    Route::post('/updateResourceData', 'Api\ResourceController@updateResourceData');
+    Route::post('/deleteResource', 'Api\ResourceController@deleteResource');
 });
 
 Route::post('/register', 'Api\UserController@register');
 
 Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
 Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');
+
+Route::post('/listResources', 'Api\ResourceController@listResources');
+Route::post('/getResourceMetadata', 'Api\ResourceController@getResourceMetadata');
+Route::post('/getResourceSchema', 'Api\ResourceController@getResourceSchema');
+Route::post('/getResourceData', 'Api\ResourceController@getResourceData');
+Route::post('/getResourceView', 'Api\ResourceController@getResourceView');
+Route::post('/searchResourceData', 'Api\ResourceController@searchResourceData');

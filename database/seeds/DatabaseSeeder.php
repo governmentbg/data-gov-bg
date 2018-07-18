@@ -20,5 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(OrganisationSeeder::class);
         $this->call(TermsOfUseSeeder::class);
         $this->call(CategorySeeder::class);
+        $this->call(DataSetSeeder::class);
+        $this->call(ResourceSeeder::class);
     }
 }

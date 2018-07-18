@@ -9,7 +9,6 @@ use App\Contracts\TranslatableInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Http\Controllers\Traits\RecordSignature;
 
-
 class DataSet extends Model implements TranslatableInterface
 {
     use Searchable;
@@ -30,6 +29,22 @@ class DataSet extends Model implements TranslatableInterface
         'descript'  => 'text',
         'sla'       => 'text',
     ];
+
+    public static function getStatus()
+    {
+        return [
+            self::STATUS_DRAFT      => 'Draft',
+            self::STATUS_PUBLISHED  => 'Published',
+        ];
+    }
+
+    public static function getVisibility()
+    {
+        return [
+            self::VISIBILITY_PUBLIC     => 'Public',
+            self::VISIBILITY_PRIVATE    => 'Private',
+        ];
+    }
 
 
     public function toSearchableArray()

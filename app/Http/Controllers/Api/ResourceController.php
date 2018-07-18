@@ -1,14 +1,13 @@
 <?php
 namespace App\Http\Controllers\Api;
 
-Use Uuid;
 use App\DataSet;
-use App\Category;
+use App\Http\Controllers\ApiController;
 use App\Resource;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\ApiController;
-use Illuminate\Database\QueryException;
+use Uuid;
 
 class ResourceController extends ApiController
 {
@@ -25,18 +24,18 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'dataset_uri'           => 'required|string',
-            'data.name'             => 'required|string',
-            'data.descript'         => 'required|string',
-            'data.locale'           => 'required|string',
-            'data.version'          => 'required|string',
-            'data.schema_descript'  => 'required|string',
-            'data.schema_url'       => 'required|string',
-            'data.resource_type'    => 'required|integer',
-            'data.resource_url'     => 'string',
-            'data.http_rq_type'     => 'integer',
-            'data.authentication'   => 'string',
-            'data.http_headers'     => 'string',
+            'dataset_uri' => 'required|string',
+            'data.name' => 'required|string',
+            'data.descript' => 'required|string',
+            'data.locale' => 'required|string',
+            'data.version' => 'required|string',
+            'data.schema_descript' => 'required|string',
+            'data.schema_url' => 'required|string',
+            'data.resource_type' => 'required|integer',
+            'data.resource_url' => 'string',
+            'data.http_rq_type' => 'integer',
+            'data.authentication' => 'string',
+            'data.http_headers' => 'string',
         ]);
 
         if (!$validator->fails()) {
@@ -77,8 +76,8 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-            'data'          => 'required|string',
+            'resource_uri' => 'required|string',
+            'data' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -109,18 +108,18 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'          => 'required|string',
-            'data.name'             => 'string',
-            'data.decript'          => 'string',
-            'data.locale'           => 'string',
-            'data.version'          => 'string',
-            'data.schema_descript'  => 'string',
-            'data.schema_url'       => 'string',
-            'data.type'             => 'required|integer',
-            'data.resource_url'     => 'string',
-            'data.http_rq_type'     => 'integer',
-            'data.authentication'   => 'string',
-            'data.http_headers'     => 'string',
+            'resource_uri' => 'required|string',
+            'data.name' => 'string',
+            'data.decript' => 'string',
+            'data.locale' => 'string',
+            'data.version' => 'string',
+            'data.schema_descript' => 'string',
+            'data.schema_url' => 'string',
+            'data.type' => 'required|integer',
+            'data.resource_url' => 'string',
+            'data.http_rq_type' => 'integer',
+            'data.authentication' => 'string',
+            'data.http_headers' => 'string',
         ]);
 
         $updates = $post['data'];
@@ -193,8 +192,8 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-            'data'          => 'required|string',
+            'resource_uri' => 'required|string',
+            'data' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -226,7 +225,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
+            'resource_uri' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -255,14 +254,14 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.locale'       => 'string',
+            'criteria.locale' => 'string',
             'criteria.resource_uri' => 'string',
-            'criteria.dataset_uri'  => 'string',
-            'criteria.reported'     => 'boolean',
-            'criteria.order.type'   => 'string',
-            'criteria.order.field'  => 'string',
-            'records_per_page'      => 'integer',
-            'page_number'           => 'integer',
+            'criteria.dataset_uri' => 'string',
+            'criteria.reported' => 'boolean',
+            'criteria.order.type' => 'string',
+            'criteria.order.field' => 'string',
+            'records_per_page' => 'integer',
+            'page_number' => 'integer',
         ]);
 
         if (!$validator->fails()) {
@@ -326,8 +325,8 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-            'locale'        => 'string|max:5',
+            'resource_uri' => 'required|string',
+            'locale' => 'string|max:5',
         ]);
 
         if (!$validator->fails()) {
@@ -335,25 +334,25 @@ class ResourceController extends ApiController
 
             if ($resource) {
                 $data = [
-                    'uri'                   => $resource->uri,
-                    'dataset_uri'           => $resource->dataSet->uri,
-                    'name'                  => $resource->name,
-                    'description'           => $resource->descript,
+                    'uri' => $resource->uri,
+                    'dataset_uri' => $resource->dataSet->uri,
+                    'name' => $resource->name,
+                    'description' => $resource->descript,
                     // 'locale'                => $this->getLocale(),
-                    'version'               => $resource->version,
-                    'schema_description'    => $resource->schema_descript,
-                    'schema_url'            => $resource->schema_url,
-                    'type'                  => $resource->resource_type,
-                    'resource_url'          => $resource->resource_url,
-                    'http_rq_type'          => $resource->http_rq_type,
-                    'authentication'        => $resource->authentication,
-                    'http_headers'          => $resource->http_headers,
-                    'file_format'           => $resource->file_format,
-                    'reported'              => $resource->is_reported,
-                    'created_at'            => $resource->created_at,
-                    'created_by'            => $resource->created_by,
-                    'updated_at'            => $resource->updated_at,
-                    'updated_by'            => $resource->updated_by,
+                    'version' => $resource->version,
+                    'schema_description' => $resource->schema_descript,
+                    'schema_url' => $resource->schema_url,
+                    'type' => $resource->resource_type,
+                    'resource_url' => $resource->resource_url,
+                    'http_rq_type' => $resource->http_rq_type,
+                    'authentication' => $resource->authentication,
+                    'http_headers' => $resource->http_headers,
+                    'file_format' => $resource->file_format,
+                    'reported' => $resource->is_reported,
+                    'created_at' => $resource->created_at,
+                    'created_by' => $resource->created_by,
+                    'updated_at' => $resource->updated_at,
+                    'updated_by' => $resource->updated_by,
                 ];
 
                 return $this->successResponse(['resource' => $data]);
@@ -374,7 +373,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
+            'resource_uri' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -399,7 +398,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
+            'resource_uri' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -422,7 +421,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
+            'resource_uri' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -441,11 +440,11 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.keywords'     => 'string',
-            'criteria.order.type'   => 'string',
-            'criteria.order.field'  => 'string',
-            'records_per_page'      => 'integer',
-            'page_number'           => 'integer',
+            'criteria.keywords' => 'string',
+            'criteria.order.type' => 'string',
+            'criteria.order.field' => 'string',
+            'records_per_page' => 'integer',
+            'page_number' => 'integer',
         ]);
 
         if (!$validator->fails()) {
@@ -475,7 +474,7 @@ class ResourceController extends ApiController
 
                 foreach ($results as $resource) {
                     $data[] = [
-                        'data'  => $resource->post_data,
+                        'data' => $resource->post_data,
                     ];
                 }
 
@@ -487,5 +486,38 @@ class ResourceController extends ApiController
         }
 
         return $this->errorResponse('Search resource data failure');
+    }
+
+    /**
+     * Lists the count of the datasets per format
+     *
+     * @param Request $request
+     * @return json response
+     */
+    public function listDataFormats(Request $request)
+    {
+        $dataSets = Resource::select('file_format', DB::raw('count(*) as total'))
+            ->groupBy('file_format')->pluck('total', 'file_format')
+            ->all();
+        $formats = Resource::getFormats();
+        $formatLabel = '';
+        if (!empty($dataSets)) {
+
+            foreach ($dataSets as $key => $value) {
+                foreach ($formats as $id => $format) {
+                    if ($id == $key) {
+                        $formatLabel = $format;
+                    }
+                }
+                $result[] = [
+                    'format' => $formatLabel,
+                    'datasets_count' => $value,
+                ];
+
+            }
+
+            return $this->successResponse(['data_formats' => $result], true);
+
+        }
     }
 }

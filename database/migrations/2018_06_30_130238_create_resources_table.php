@@ -17,8 +17,8 @@ class CreateResourcesTable extends Migration
             $table->increments('id');
             $table->integer('data_set_id')->unsigned();
             $table->foreign('data_set_id')->references('id')->on('data_sets');
-            $table->string('uri')->unique();
-            $table->string('version', 15)->unique();
+            $table->string('uri');
+            $table->string('version', 15);
             $table->unsignedTinyInteger('resource_type');
             $table->unsignedTinyInteger('file_format');
             $table->integer('es_id')->unsigned()->nullable();
@@ -41,6 +41,7 @@ class CreateResourcesTable extends Migration
             $table->integer('deleted_by')->unsigned()->nullable();
             $table->foreign('deleted_by')->references('id')->on('users');
             $table->softDeletes();
+            $table->unique(['uri', 'version']);
         });
     }
 

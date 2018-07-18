@@ -24,8 +24,8 @@ class OrganisationSeeder extends Seeder
         // Test creation
         foreach (range(1, self::ORGANISATION_RECORDS) as $i) {
             $type = $this->faker->randomElement($types);
-            $parentId = empty($parentId) && empty($record) || $type == Organisation::TYPE_GROUP ? null : $record->id;
             $locale = $this->faker->randomElement($locales)['locale'];
+            $parentId = empty($parentId) && empty($record) || $type == Organisation::TYPE_GROUP ? null : $record->id;
 
             $dbData = [
                 'type'              => $type,

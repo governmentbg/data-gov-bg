@@ -2,9 +2,9 @@
 
 namespace App;
 
-use App\Http\Controllers\Traits\RecordSignature;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Http\Controllers\Traits\RecordSignature;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable

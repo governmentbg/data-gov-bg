@@ -34,6 +34,7 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/rights/listRights', 'Api\RightController@listRights');
 
     Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+    Route::post('/listModules', 'Api\ActionsHistoryController@listModules');
 
     Route::post('/addSection', 'Api\SectionController@addSection');
     Route::post('/editSection', 'Api\SectionController@editSection');

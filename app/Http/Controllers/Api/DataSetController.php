@@ -23,27 +23,31 @@ class DataSetController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'                => 'integer',
-            'data'                  => 'required',
-            'data.locale'           => 'required|string|max:5',
-            'data.name'             => 'required|string',
-            'data.descript'         => 'string',
-            'data.tags.*'           => 'string',
-            'data.category_id'      => 'required|integer',
-            'data.terms_of_use_id'  => 'integer',
-            'data.visibility'       => 'integer',
-            'data.version'          => 'string',
-            'data.author_name'      => 'string',
-            'data.author_email'     => 'email',
-            'data.support_name'     => 'string',
-            'data.support_email'    => 'email',
-            'data.sla'              => 'string',
+            'org_id'                        => 'integer',
+            'data'                          => 'required',
+            'data.locale'                   => 'required|string|max:5',
+            'data.name'                     => 'required|string',
+            'data.uri'                      => 'string',
+            'data.descript'                 => 'string',
+            'data.tags.*'                   => 'string',
+            'data.category_id'              => 'required|integer',
+            'data.terms_of_use_id'          => 'integer',
+            'data.visibility'               => 'integer',
+            'data.version'                  => 'string',
+            'data.author_name'              => 'string',
+            'data.author_email'             => 'email',
+            'data.support_name'             => 'string',
+            'data.support_email'            => 'email',
+            'data.sla'                      => 'string',
         ]);
 
         if(!$validator->fails() && !empty($post['data'])) {
             DB::beginTransaction();
 
-            $post['data']['uri'] = Uuid::generate(4)->string;
+            if (empty($post['data']['uri'])) {
+                $post['data']['uri'] = Uuid::generate(4)->string;
+            }
+
             $post['data']['status'] = DataSet::STATUS_DRAFT;
             unset($post['data']['locale']);
 
@@ -76,7 +80,6 @@ class DataSetController extends ApiController
                     return $this->errorResponse('Add DataSet Failure');
                 }
             } catch (QueryException $ex) {
-                dd($ex->getMessage());
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -142,7 +145,6 @@ class DataSetController extends ApiController
                         DB::rollback();
                     }
                 } catch (QueryException $ex) {
-
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -170,7 +172,6 @@ class DataSetController extends ApiController
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
-
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -282,7 +283,6 @@ class DataSetController extends ApiController
                         'datasets'      => $data,
                     ], true);
                 } catch (QueryException $ex) {
-                    dd($ex->getMessage());
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -394,7 +394,6 @@ class DataSetController extends ApiController
                         'total_records' => $data->count()
                     ], true);
                 } catch (QueryException $ex) {
-
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -445,7 +444,6 @@ class DataSetController extends ApiController
 
                 return $this->successResponse($data);
             } catch (QueryException $e) {
-
                 return $this->errorResponse($e->getMessage());
             }
         }
@@ -483,7 +481,6 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -522,7 +519,6 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-                    dd($ex->getMessage());
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -551,7 +547,6 @@ class DataSetController extends ApiController
 
             return true;
         } catch (QueryException $ex) {
-
             return false;
         }
     }

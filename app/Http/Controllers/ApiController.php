@@ -9,6 +9,21 @@ use Illuminate\Http\JsonResponse;
 class ApiController extends Controller
 {
     const ERROR_GENERAL = 'General';
+    const DEFAULT_RECORDS_PER_PAGE = 50;
+    const MAX_RECORDS_PER_PAGE = 100;
+
+    public function getRecordsPerPage(&$number)
+    {
+        if (empty($number)) {
+            return self::DEFAULT_RECORDS_PER_PAGE;
+        }
+
+        if ($number > self::MAX_RECORDS_PER_PAGE) {
+            return self::DEFAULT_RECORDS_PER_PAGE;
+        }
+
+        return $number;
+    }
 
     protected static $format;
 

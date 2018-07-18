@@ -156,9 +156,7 @@ class PageController extends ApiController
             if (isset($editData['data']['active'])) {
                 $pageToEdit->active = $editData['data']['active'];
             }
-
-            $pageToEdit->updated_by = \Auth::user()->id;
-
+ 
             try {
                 $pageToEdit->save();
             } catch (QueryException $e) {
@@ -209,8 +207,8 @@ class PageController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'criteria' => 'array',
+            'locale' => 'string',
             'criteria.page_id' => 'integer',
-            'criteria.locale' => 'string',
             'criteria.active' => 'integer',
             'criteria.section_id ' => 'integer',
             'criteria.order' => 'array',
@@ -312,14 +310,14 @@ class PageController extends ApiController
             foreach ($pageList as $singlePage) {
                 $result[] = [
                     'id' => $singlePage->id,
-                    'locale' => $locale, //needs to be revised. When BG is supplied still returns EN translations!!!
+                    'locale' => $locale, //Displays EN translations when BG is supplied
                     'section_id' => $singlePage->section_id,
-                    'title' => [$locale => $singlePage->title],
-                    'abstract' => [$locale => $singlePage->abstract],
-                    'body' => [$locale => $singlePage->body],
-                    'head_title' => [$locale => $singlePage->head_title],
-                    'meta_description' => [$locale => $singlePage->meta_description],
-                    'meta_keywords' => [$locale => $singlePage->meta_keywords],
+                    'title' =>  $singlePage->title,
+                    'abstract' => $singlePage->abstract,
+                    'body' =>  $singlePage->body,
+                    'head_title' => $singlePage->head_title,
+                    'meta_description' => $singlePage->meta_desctript,
+                    'meta_keywords' => $singlePage->meta_key_words,
                     'forum_link' => $singlePage->forum_link,
                     'active' => $singlePage->active,
                     'created_at' => date($singlePage->created_at),

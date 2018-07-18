@@ -10,7 +10,7 @@ class PageTest extends TestCase
     public function testList()
     {
         $response = $this->post(
-            url('api/pages/listPages'),
+            url('api/listPages'),
             ['api_key' => $this->getApiKey()]
         );
 

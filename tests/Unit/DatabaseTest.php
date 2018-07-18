@@ -7,9 +7,11 @@ use App\User;
 use App\Locale;
 use App\RoleRight;
 use Tests\TestCase;
-use App\Translation;
+use App\Translator\Translation;
 use App\Organisation;
 use App\NewsletterDigestLog;
+use App\Page;
+use App\Section;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -27,6 +29,8 @@ class DatabaseTest extends TestCase
     const NEWSLETTER_DIGEST_LOG_RECORDS = 10;
     const TRANSLATION_RECORDS = 10;
     const ORGANISATION_RECORDS = 10;
+    const PAGES_RECORDS = 10;
+    const SECTIONS_RECORDS = 10;
 
     /**
      * Tests all tables structures and models
@@ -43,6 +47,8 @@ class DatabaseTest extends TestCase
         $this->locale();
         $this->translations();
         $this->organisations();
+        $this->pages();
+        $this->sections();
     }
 
     /**
@@ -413,6 +419,68 @@ class DatabaseTest extends TestCase
             }
 
             $this->assertSoftDeleted('organisations', ['id' => $record->id]);
+        }
+    }
+
+    private function pages()
+    {
+        // Test creation
+        $locales = Locale::where('active', 1)->limit(self::PAGES_RECORDS)->get()->toArray();
+        $sections = Section::limit(self::PAGES_RECORDS)->get()->toArray();
+        foreach (range(1, self::PAGES_RECORDS) as $i) {
+            $record = null; 
+            $locale = $this->faker->randomElement($locales)['locale'];
+            $section = $this->faker->randomElement($sections)['id'];
+            $dbData = [
+                'section_id' => $section,
+                'title' => $this->faker->randomDigit(),
+                'abstract' =>$this->faker->randomDigit(),
+                'body' => $this->faker->randomDigit(),
+                'head_title' => $this->faker->randomDigit(),
+                'meta_desctript' => $this->faker->randomDigit(),
+                'meta_key_words' => $this->faker->randomDigit(),
+                'forum_link' => $this->faker->word,
+                'active' => $this->faker->boolean, 
+                'valid_from' => $this->faker->date,
+                'valid_to' => $this->faker->date,
+            ];
+
+            try {
+                $record = Page::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+            
+            $this->assertNotNull($record);
+            $this->assertDatabaseHas('pages', ['id' => $record->id]);
+        }
+    }
+
+    private function sections()
+    {
+        // Test creation
+        $locales = Locale::where('active', 1)->limit(self::SECTIONS_RECORDS)->get()->toArray(); 
+        foreach (range(1, self::SECTIONS_RECORDS) as $i) {
+            $record = null; 
+            $locale = $this->faker->randomElement($locales)['locale']; 
+            $dbData = [
+                'name'      => [$locale=>$this->faker->word],
+                'parent_id'    => 1,
+                'active'    => $this->faker->boolean(),
+                'ordering'    => $this->faker->boolean(),
+                'read_only'    => $this->faker->boolean(),
+                'forum_link'    => $this->faker->url(),
+                'theme'    => $this->faker->randomDigit(),
+            ];
+
+            try {
+                $record = Section::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+            
+            $this->assertNotNull($record);
+            $this->assertDatabaseHas('sections', ['id' => $record->id]);
         }
     }
 }

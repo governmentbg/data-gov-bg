@@ -32,7 +32,12 @@ class ApiController extends Controller
         }
     }
 
-    public function getRecordsPerPage(&$number)
+    /**
+     * Get records per page
+     *
+     * @return integer
+     */
+    public function getRecordsPerPage($number)
     {
         if (empty($number)) {
             return self::DEFAULT_RECORDS_PER_PAGE;
@@ -45,6 +50,11 @@ class ApiController extends Controller
         return $number;
     }
 
+    /**
+     * Return error response
+     *
+     * @return json/xml - response data
+     */
     public static function errorResponse($message = null, $code = 500, $type = self::ERROR_GENERAL)
     {
         $resposeData = [
@@ -72,6 +82,11 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * Return success response
+     *
+     * @return json/xml - response data
+     */
     public static function successResponse($data = [], $dataMerge = false)
     {
         $response = ['success' => true];
@@ -92,10 +107,9 @@ class ApiController extends Controller
                 // function call to convert array to xml
                 self::arrayToXml($response, $xmlData);
 
-                return response($xmlData->asXML(), 200)
-                    ->header('Content-Type', 'text/xml');
+                return response($xmlData->asXML(), 200)->header('Content-Type', 'text/xml');
             case 'json':
-            default :
+            default:
                 return new JsonResponse($response, 200);
         }
     }
@@ -104,47 +118,21 @@ class ApiController extends Controller
      * convert array to xml
      *
      * @param type $data
-     * @param type $xml_data
+     * @param type $xmlData
      */
-    public static function arrayToXml($data, &$xml_data) {
-        foreach( $data as $key => $value ) {
-            if( is_numeric($key) ){
-                $key = 'item'.$key; //dealing with <0/>..<n/> issues
+    public static function arrayToXml($data, &$xmlData) {
+        foreach ($data as $key => $value) {
+            if (is_numeric($key)) {
+                $key = 'item'. $key; //dealing with <0/>..<n/> issues
             }
 
-            if( is_array($value) ) {
-                $subnode = $xml_data->addChild($key);
-                self::arrayToXml($value, $subnode);
+            if(is_array($value)) {
+                $subNode = $xmlData->addChild($key);
+
+                self::arrayToXml($value, $subNode);
             } else {
-                $xml_data->addChild("$key",htmlspecialchars("$value"));
-            }
-         }
-    }
-
-    /**
-     * Get image data from URL
-     *
-     * @param string $url
-     * @return array $result - array with image name, mime type, binary data
-     */
-    public function getImgDataFromUrl($url)
-    {
-        $result = [
-            'name' => null,
-            'mime' => null,
-            'data' => null,
-        ];
-
-        if ($url) {
-            if ($img = base64_encode(file_get_contents($url))) {
-                $urlPieces = explode('/', $url);
-                $result['name'] = !empty($urlPieces) ? $urlPieces[count($urlPieces) - 1] : null;
-                $imgInfo = getimagesizefromstring(base64_decode($img));
-                $result['mime'] = !empty($imgInfo['mime']) ? $imgInfo['mime'] : null;
-                $result['data'] = base64_decode($img);
+                $xmlData->addChild($key, htmlspecialchars($value));
             }
         }
-
-        return $result;
     }
 }

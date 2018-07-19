@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
+Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
     Route::post('/listUsers', 'Api\UserController@listUsers');
     Route::post('/searchUsers', 'Api\UserController@searchUsers');
     Route::post('/getUserRoles', 'Api\UserController@getUserRoles');
@@ -37,9 +37,9 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
 
-    Route::post('/rights/listRights', 'Api\RightController@listRights');
-
     Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+
+    Route::post('/listRights', 'Api\RightController@listRights');
 
     Route::post('/addSection', 'Api\SectionController@addSection');
     Route::post('/editSection', 'Api\SectionController@editSection');

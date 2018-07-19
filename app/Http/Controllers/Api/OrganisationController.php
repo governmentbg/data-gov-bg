@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Locale;
 use App\Organisation;
-use App\OrgCustomSetting;
+use App\CustomSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
+use Intervention\Image\Exception\NotReadableException;
 
 class OrganisationController extends ApiController
 {
@@ -20,302 +23,280 @@ class OrganisationController extends ApiController
      */
     public function addOrganisation(Request $request)
     {
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'data.name'   => 'required',
-                'data.locale' => 'required',
-                'data.type'   => 'required',
-            ]
-        );
+        $data = $request->get('data');
+        $validator = \Validator::make($data, [
+            'locale' => 'required|string',
+            'name'   => 'required|string',
+            'type'   => 'required|integer',
+        ]);
 
-        if ($validator->fails()) {
+        if (
+            !$validator->fails()
+            && in_array($data['type'], array_keys(Organisation::getPublicTypes()))
+            && (
+                isset($data['logo'])
+                || (
+                    isset($data['logo_filename'])
+                    && isset($data['logo_mimetype'])
+                    && isset($data['logo_data'])
+                )
+            )
+        ) {
+            $organisation = new Organisation;
+            $locale = \LaravelLocalization::getCurrentLocale();
 
-            return ApiController::errorResponse('Add organisation failure');
-        }
+            $organisation->type = $data['type'];
+            $organisation->name = [$locale => $data['name']];
+            $organisation->descript = !empty($data['description']) ? [$locale => $data['description']] : null;
 
-        if (!in_array($request->data['type'], array_flip(Organisation::getPublicTypes()))) {
+            if (!empty($data['logo'])) {
+                try {
+                    $img = \Image::make($data['logo']);
+                } catch (NotReadableException $ex) {}
 
-            return ApiController::errorResponse('Add organisation failure');
-        }
-
-        $orgLocale = !empty(Locale::where('locale', $request->data['locale'])->value('locale'))
-            ? $request->data['locale']
-            : config('app.locale');
-
-        $organisation = new Organisation;
-
-        $UrlLogoData = $this->getImgDataFromUrl(isset($request->data['logo']) ? $request->data['logo'] : null);
-
-        $organisation->type = $request->data['type'];
-        $organisation->name = [$orgLocale => $request->data['name']];
-        $organisation->descript = !empty($request->data['description'])
-            ? [$orgLocale => $request->data['description']]
-            : [$orgLocale => null];
-        $organisation->logo_file_name = !empty($request->data['logo_filename'])
-            ? $request->data['logo_filename']
-            : $UrlLogoData['name'];
-        $organisation->logo_mime_type = !empty($request->data['logo_mimetype'])
-            ? $request->data['logo_mimetype']
-            : $UrlLogoData['mime'];
-        $organisation->logo_data = !empty($request->data['logo_data'])
-            ? $request->data['logo_data']
-            : $UrlLogoData['data'];
-        $organisation->activity_info = !empty($request->data['activity_info'])
-            ? [$orgLocale => $request->data['activity_info']]
-            : [$orgLocale => null];
-        $organisation->contacts = !empty($request->data['contacts'])
-            ? [$orgLocale => $request->data['contacts']]
-            : [$orgLocale => null];
-        $organisation->parent_org_id = !empty($request->data['parent_org_id'])
-            ? $request->data['parent_org_id']
-            : null;
-        $organisation->active = isset($request->data['active'])
-            ? $request->data['active']
-            : 1;
-        $organisation->approved = isset($request->data['approved']) && $request->data['type'] == Organisation::TYPE_CIVILIAN
-            ? $request->data['approved']
-            : 0;
-        $organisation->created_by = \Auth::id();
-
-        try {
-            $organisation->save();
-        } catch (QueryException $e) {
-
-            return ApiController::errorResponse('Add organisation failure');
-        }
-
-        if (!empty($request->data['custom_fields']) && is_array($request->data['custom_fields'])) {
-            $data = [];
-            foreach ($request->data['custom_fields'] as $custom) {
-                if (empty($custom['label']) || empty($custom['value'])) {
-
-                    return ApiController::errorResponse('Add organisation failure');
-                } else {
-                    $customSettings = new OrgCustomSetting;
-
-                    $customSettings->key = [$orgLocale => $custom['label']];
-                    $customSettings->value = [$orgLocale => $custom['value']];
-                    $customSettings->org_id = $organisation->id;
-                    $customSettings->created_by = \Auth::id();
-
-                    try {
-                        $customSettings->save();
-                    } catch (QueryException $e) {
-
-                        return ApiController::errorResponse('Add organisation failure');
-                    }
+                if (!empty($img)) {
+                    $img->resize(300, 200);
+                    $organisation->logo_file_name = basename($data['logo']);
+                    $organisation->logo_mime_type = $img->mime();
+                    $organisation->logo_data = $img->encode('data-url');
                 }
+            } else {
+                $organisation->logo_file_name = $data['logo_filename'];
+                $organisation->logo_mime_type = $data['logo_mimetype'];
+                $organisation->logo_data = $data['logo_data'];
             }
-        }
 
-        return $this->successResponse(['org_id' => $organisation->id], true);
-    }
+            $organisation->activity_info = !empty($data['activity_info']) ? [$locale => $data['activity_info']] : null;
+            $organisation->contacts = !empty($data['contacts']) ? [$locale => $data['contacts']] : null;
+            $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
+            $organisation->active = isset($data['active']) ? $data['active'] : 1;
+            $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
+                ? $data['approved']
+                : 0;
 
-    public function editOrganisation(Request $request)
-    {
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'data'  => 'required',
-                'org_id'=> 'required',
-            ]
-        );
-
-        if ($validator->fails()) {
-
-            return ApiController::errorResponse('Edit organisation failure');
-        }
-
-        if (empty($organisation = Organisation::find($request->org_id))) {
-
-            return ApiController::errorResponse('Edit organisation failure');
-        }
-
-        $newOrgData = [];
-        $orgLocale = !empty($request->data['locale']) && !empty(Locale::where('locale', $request->data['locale'])->value('locale'))
-            ? $request->data['locale']
-            : config('app.locale');
-
-        if (!empty($request->data['name'])) {
-            $newOrgData['name'] = [$orgLocale => $request->data['name']];
-        }
-
-        if (!empty($request->data['description'])) {
-            $newOrgData['descript'] = [$orgLocale => $request->data['description']];
-        }
-
-        if (!empty($request->data['type'])) {
-            if (!in_array($request->data['type'], array_flip(Organisation::getPublicTypes()))) {
-
-                return ApiController::errorResponse('Edit organisation failure');
-            }
-            $newOrgData['type'] = $request->data['type'];
-        }
-
-        if (!empty($request->data['logo'])) {
-            $UrlLogoData = $this->getImgDataFromUrl($request->data['logo']);
-            $newOrgData['logo_file_name'] = $UrlLogoData['name'];
-            $newOrgData['logo_mime_type'] = $UrlLogoData['mime'];
-            $newOrgData['logo_data'] = $UrlLogoData['data'];
-        }
-
-        if (!empty($request->data['logo_filename'])) {
-            $newOrgData['logo_file_name'] = $request->data['logo_filename'];
-        }
-
-        if (!empty($request->data['logo_mimetype'])) {
-            $newOrgData['logo_mime_type'] = $request->data['logo_mimetype'];
-        }
-
-        if (!empty($request->data['logo_data'])) {
-            $newOrgData['logo_data'] = $request->data['logo_data'];
-        }
-
-        if (!empty($request->data['activity_info'])) {
-            $newOrgData['activity_info'] = [$orgLocale => $request->data['activity_info']];
-        }
-
-        if (!empty($request->data['contacts'])) {
-            $newOrgData['contacts'] = [$orgLocale => $request->data['contacts']];
-        }
-
-        if (!empty($request->data['parent_org_id'])) {
-            $newOrgData['parent_org_id'] = $request->data['parent_org_id'];
-        }
-
-        if (isset($request->data['active'])) {
-            $newOrgData['active'] = $request->data['active'];
-        }
-
-        if (isset($request->data['approved'])) {
-            $newOrgData['approved'] = $request->data['approved'];
-        }
-
-        $newOrgSettingsData = [];
-
-        if (!empty($request->data['custom_fields']) && is_array($request->data['custom_fields'])) {
-            foreach ($request->data['custom_fields'] as $custom) {
-                if (empty($custom['label']) || empty($custom['value'])) {
-
-                    return ApiController::errorResponse('Edit organisation failure');
-                } else {
-                    $newOrgSettingsData[] = [
-                        'key'        => [$orgLocale => $custom['label']],
-                        'value'      => [$orgLocale => $custom['value']],
-                        'org_id'     => $request->org_id,
-                    ];
-                }
-            }
-        }
-
-        if (empty($newOrgData) && empty($newOrgSettingsData)) {
-
-            return ApiController::errorResponse('Edit organisation failure');
-        }
-
-        if (!empty($newOrgData)) {
-            $newOrgData['updated_by'] = \Auth::id();
-            foreach($newOrgData as $prop => $val) {
-                $organisation->$prop = $val;
-            }
+            DB::beginTransaction();
 
             try {
                 $organisation->save();
-            } catch (QueryException $e) {
 
-                return ApiController::errorResponse('Edit organisation failure');
+                if (!empty($data['custom_fields']) && is_array($data['custom_fields'])) { // TODO (waiting for details)
+                    $data = [];
+
+                    foreach ($data['custom_fields'] as $custom) {
+                        if (empty($custom['label']) || empty($custom['value'])) {
+                            return ApiController::errorResponse('Add organisation failure');
+                        } else {
+                            $customSettings = new CustomSetting;
+
+                            $customSettings->key = [$locale => $custom['label']];
+                            $customSettings->value = [$locale => $custom['value']];
+                            $customSettings->org_id = $organisation->id;
+
+                            $customSettings->save();
+                        }
+                    }
+                }
+
+                DB::commit();
+
+                return $this->successResponse(['org_id' => $organisation->id], true);
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
             }
         }
 
-        foreach($newOrgSettingsData as $setting) {
-            $customSettings = new OrgCustomSetting;
-
-            $customSettings->key = $setting['key'];
-            $customSettings->value = $setting['value'];
-            $customSettings->org_id = $setting['org_id'];
-            $customSettings->created_by = \Auth::id();
-
-            if (
-                !empty($settingsToEdit = OrgCustomSetting::where(
-                        [
-                            'org_id' => $customSettings->org_id,
-                            'key'    => $customSettings->key
-                        ]
-                    )->first() // to do this query with search library
-                )
-            ) {
-                $settingsToEdit->value = $setting['value'];
-                $settingsToEdit->updated_by = \Auth::id();
-
-                try {
-                    $settingsToEdit->save();
-                } catch (QueryException $e) {
-
-                    return ApiController::errorResponse('Edit organisation failure');
-                }
-            } else {
-                try {
-                    $customSettings->save();
-                } catch (QueryException $e) {
-
-                    return ApiController::errorResponse('Edit organisation failure');
-                }
-            }
-        }
-
-        return $this->successResponse();
+        return ApiController::errorResponse('Add organisation failure');
     }
 
+    /**
+     * Edit organisation record
+     *
+     * @param object $request - POST request
+     * @return json $response - response with status and success flag or error
+     */
+    public function editOrganisation(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'data'  => 'required',
+            'org_id'=> 'required|integer',
+        ]);
+
+        if (
+            !$validator->fails()
+            && !empty($organisation = Organisation::find($request->org_id))
+            && (
+                empty($request->data['type'])
+                || in_array($request->data['type'], array_flip(Organisation::getPublicTypes()))
+            )
+        ) {
+            $locale = \LaravelLocalization::getCurrentLocale();
+            $orgData = [];
+            $data = $request->data;
+
+            if (!empty($data['name'])) {
+                $orgData['name'] = [$locale => $data['name']];
+            }
+
+            if (!empty($data['description'])) {
+                $orgData['descript'] = [$locale => $data['description']];
+            }
+
+            if (!empty($data['type'])) {
+                $orgData['type'] = $data['type'];
+            }
+
+            if (!empty($data['logo'])) {
+                try {
+                    $img = \Image::make($data['logo']);
+                } catch (NotReadableException $ex) {}
+
+                if (!empty($img)) {
+                    $img->resize(300, 200);
+                    $orgData['logo_file_name'] = basename($data['logo']);
+                    $orgData['logo_mime_type'] = $img->mime();
+                    $orgData['logo_data'] = $img->encode('data-url');
+                }
+            }
+
+            if (!empty($data['logo_filename'])) {
+                $orgData['logo_file_name'] = $data['logo_filename'];
+            }
+
+            if (!empty($data['logo_mimetype'])) {
+                $orgData['logo_mime_type'] = $data['logo_mimetype'];
+            }
+
+            if (!empty($data['logo_data'])) {
+                $orgData['logo_data'] = $data['logo_data'];
+            }
+
+            if (!empty($data['activity_info'])) {
+                $orgData['activity_info'] = [$locale => $data['activity_info']];
+            }
+
+            if (!empty($data['contacts'])) {
+                $orgData['contacts'] = [$locale => $data['contacts']];
+            }
+
+            if (!empty($data['parent_org_id'])) {
+                $orgData['parent_org_id'] = $data['parent_org_id'];
+            }
+
+            if (isset($data['active'])) {
+                $orgData['active'] = $data['active'];
+            }
+
+            if (isset($data['approved'])) {
+                $orgData['approved'] = $data['approved'];
+            }
+
+            $newOrgSettingsData = [];
+
+            if (!empty($data['custom_fields']) && is_array($data['custom_fields'])) { // TODO (waiting for details)
+                foreach ($data['custom_fields'] as $custom) {
+                    if (empty($custom['label']) || empty($custom['value'])) {
+                        return ApiController::errorResponse('Edit organisation failure');
+                    } else {
+                        $newOrgSettingsData[] = [
+                            'key'        => [$locale => $custom['label']],
+                            'value'      => [$locale => $custom['value']],
+                            'org_id'     => $request->org_id,
+                        ];
+                    }
+                }
+            }
+
+            DB::beginTransaction();
+
+            try {
+                if (!empty($orgData)) {
+                    foreach($orgData as $prop => $val) {
+                        $organisation->$prop = $val;
+                    }
+
+                    $organisation->save();
+                }
+
+                if (!empty($newOrgSettingsData)) {
+                    foreach ($newOrgSettingsData as $setting) {
+                        $customSettings = new CustomSetting;
+
+                        $customSettings->key = $setting['key'];
+                        $customSettings->value = $setting['value'];
+                        $customSettings->org_id = $setting['org_id'];
+
+                        if (
+                            !empty($settingsToEdit = CustomSetting::search([
+                                'org_id' => $customSettings->org_id,
+                                'key'    => $customSettings->key
+                            ])->first()) // to do this query with search library
+                        ) {
+                            $settingsToEdit->value = $setting['value'];
+
+                            $settingsToEdit->save();
+                        } else {
+                            $customSettings->save();
+                        }
+                    }
+                }
+
+                DB::commit();
+
+                return $this->successResponse();
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return ApiController::errorResponse('Edit organisation failure');
+    }
+
+
+    /**
+     * Delete organisation record
+     *
+     * @param object $request - POST request
+     * @return json $response - response with status and success flag or error
+     */
     public function deleteOrganisation(Request $request)
     {
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'org_id' => 'required',
-            ]
-        );
+        $validator = \Validator::make($request->all(), [
+            'org_id' => 'required',
+        ]);
 
-        if ($validator->fails()) {
+        if (
+            !$validator->fails()
+            && !empty($organisation = Organisation::find($request->org_id))
+        ) {
+            try {
+                $organisation->delete();
+                $organisation->deleted_by = \Auth::id();
+                $organisation->save();
 
-            return ApiController::errorResponse('Delete organisation failure');
+                return $this->successResponse();
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        if (empty($organisation = Organisation::find($request->org_id))) {
-            return ApiController::errorResponse('Delete organisation failure');
-        }
-
-        try {
-            $organisation->delete();
-        } catch (QueryException $e) {
-
-            return ApiController::errorResponse('Delete organisation failure');
-        }
-
-        try {
-            $organisation->deleted_by = \Auth::id();
-            $organisation->save();
-        } catch (QueryException $e) {
-
-            return ApiController::errorResponse('Delete organisation failure');
-        }
-
-        return $this->successResponse();
+        return ApiController::errorResponse('Delete organisation failure');
     }
 
+    /**
+     * List organisation records
+     *
+     * @param object $request - POST request
+     * @return json $response - response with results or empty array
+     */
     public function listOrganisations(Request $request)
     {
-        $result = [];
+        $results = [];
         $criteria = [];
-        $orderType = !empty($request->criteria['order']['type']) ? $request->criteria['order']['type'] : null;
-        $orderField = !empty($request->criteria['order']['field']) ? $request->criteria['order']['field'] : null;
-        $pagination = is_numeric($request->records_per_page)
-            ? $request->records_per_page
-            : null;
-        $page = is_numeric($request->page_number)
-            ? $request->page_number
-            : null;
-
+        $count = 0;
 
         if (isset($request->criteria['active'])) {
             $criteria['active'] = $request->criteria['active'];
@@ -326,7 +307,7 @@ class OrganisationController extends ApiController
         }
 
         if (isset($request->criteria['org_id'])) {
-            $criteria['parrent_org_id'] = $request->criteria['org_id'];
+            $criteria['parent_org_id'] = $request->criteria['org_id'];
         }
 
         try {
@@ -336,108 +317,108 @@ class OrganisationController extends ApiController
                 $query->where($criteria);
             }
 
-            if ($pagination) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
+            $count = $query->count();
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
-            if ($orderType && $orderField) {
-                $query->orderBy($orderField, $orderType);
-            }
+            $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+            $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
-            $organisations = $query->get(); // to do // with search library
-        } catch (QueryException $e) {
+            $query->orderBy($field, $type);
 
-            return ApiController::errorResponse('Get organisations list failure');
-        }
-
-        if (!empty($organisations)) {
-            foreach ($organisations as $org) {
-                $result[] = [
-                    'name'           => $org->name,
-                    'description'    => $org->description,
-                    'locale'         => $org->locale,
-                    'type'           => $org->type,
-                    'logo'           => $org->logo,
-                    'activity_info'  => $org->activity_info,
-                    'contacts'       => $org->contacts,
-                    'parrent_org_id' => $org->parent_org_id,
-                    'approved'       => $org->approved,
-                    'active'         => $org->active,
-                    'custom_fields'  => '',
-                    'created_at'     => $org->created,
-                    'updated_at'     => $org->updated_at,
-                    'created_by'     => $org->created_by,
-                    'updated_by'     => $org->updated_by,
-                ];
-            }
-        }
-
-        return $this->successResponse(['organisations'=> $result, 'total_records' => count($organisations)], true);
-    }
-
-    public function  searchOrganisations(Request $request)
-    {
-        $result = [];
-        $order = !empty($request->criteria['order']['type']) && !empty($request->criteria['order']['field']);
-        $search = !empty($request->criteria['keywords'])
-            ? $request->criteria['keywords']
-            : null;
-        $pagination = is_numeric($request->records_per_page)
-            ? $request->records_per_page
-            : null;
-        $page = is_numeric($request->page_number)
-            ? $request->page_number
-            : null;
-
-        try {
-            $query = Organisation::select();
-
-            if (!is_null($search)) {
-                $query->where(function ($qr) use ($search) {
-                    $qr->where('name', 'like', '%'. $search .'%')
-                        ->orWhere('descript', 'like', '%'. $search .'%')
-                        ->orWhere('activity_info', 'like', '%'. $search .'%')
-                        ->orWhere('contacts', 'like', '%'. $search .'%');
-                }); // to do // search library
-            }
-
-            if ($pagination) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
-
-            if ($order) {
-                $query->orderBy($request->criteria['order']['field'], $request->criteria['order']['type']);
-            }
-
-            $organisations = $query->get();
-
-        } catch (QueryException $e) {
-
-            return ApiController::errorResponse('Search organisations failure');
-        }
-
-        if (!empty($organisations)) {
-            foreach ($organisations as $org) {
-                $result[] = [
-                    'id'            => $org->id,
-                    'username'      => $org->username,
-                    'email'         => $org->email,
-                    'firstname'     => $org->firstname,
-                    'lastname'      => $org->lastname,
-                    'add_info'      => $org->add_info,
-                    'is_admin'      => $org->is_admin,
-                    'active'        => $org->active,
+            foreach ($query->get() as $org) {
+                $results[] = [
+                    'name'          => $org->name,
+                    'description'   => $org->description,
+                    'locale'        => $org->locale,
+                    'type'          => $org->type,
+                    'logo'          => $org->logo,
+                    'activity_info' => $org->activity_info,
+                    'contacts'      => $org->contacts,
+                    'parent_org_id' => $org->parent_org_id,
                     'approved'      => $org->approved,
-                    'api_key'       => $org->api_key,
-                    'hash_id'       => $org->hash_id,
-                    'created_at'    => $org->created,
-                    'updated_at'    => $org->updated_at,
+                    'active'        => $org->active,
+                    'custom_fields' => '', // TODO get custom fields
+                    'created_at'    => isset($org->created_at) ? $org->created_at->toDateTimeString() : null,
+                    'updated_at'    => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
                     'created_by'    => $org->created_by,
                     'updated_by'    => $org->updated_by,
                 ];
             }
+
+            return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
+        } catch (QueryException $ex) {
+            Log::error($ex->getMessage());
         }
 
-        return $this->successResponse(['organisations'=> $result, 'total_records' => count($organisations)], true);
+        return ApiController::errorResponse('List organisation failure');
+    }
+
+    /**
+     * Search organisation records
+     *
+     * @param object $request - POST request
+     * @return json $response - response with results or empty array
+     */
+    public function searchOrganisations(Request $request)
+    {
+        $result = [];
+        $count = 0;
+        $validator = \Validator::make($request->all(), [
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.keywords'     => 'required|string',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $criteria = $request->criteria;
+
+                $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
+                $query = Organisation::whereIn('id', $ids);
+
+                $count = $query->count();
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
+
+                $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+                $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $query->orderBy($field, $type);
+
+                foreach ($query->get() as $org) {
+                    $results[] = [
+                        'name'          => $org->name,
+                        'description'   => $org->description,
+                        'locale'        => $org->locale,
+                        'type'          => $org->type,
+                        'logo'          => $org->logo,
+                        'activity_info' => $org->activity_info,
+                        'contacts'      => $org->contacts,
+                        'parent_org_id' => $org->parent_org_id,
+                        'approved'      => $org->approved,
+                        'active'        => $org->active,
+                        'custom_fields' => '', // TODO get custom fields
+                        'created_at'    => isset($org->created_at) ? $org->created_at->toDateTimeString() : null,
+                        'updated_at'    => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
+                        'created_by'    => $org->created_by,
+                        'updated_by'    => $org->updated_by,
+                    ];
+                }
+
+                return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return ApiController::errorResponse('Search organisation failure');
     }
 }

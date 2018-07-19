@@ -14,6 +14,7 @@ class DataSetTest extends TestCase
 {
     use WithFaker;
     use DatabaseTransactions;
+
     /**
      * Test DataSet creation
      *
@@ -202,12 +203,12 @@ class DataSetTest extends TestCase
         // test missing api_key
         $this->post(
             url('api/searchDataSet'),
-                [
-                    'api_key'   => null,
-                    'criteria'  => [
-                        'locale'    => 'en',
-                    ],
-                ]
+            [
+                'api_key'   => null,
+                'criteria'  => [
+                    'locale'    => 'en',
+                ],
+            ]
         )
            ->assertStatus(200)
            ->assertJson(['success' => true]);
@@ -215,9 +216,7 @@ class DataSetTest extends TestCase
         // test empty criteria
         $this->post(
             url('api/searchDataSet'),
-                [
-                    'criteria'   => [],
-                ]
+            ['criteria' => []]
         )
              ->assertStatus(500)
              ->assertJson(['success' => false]);
@@ -225,12 +224,12 @@ class DataSetTest extends TestCase
         // test successfull search
         $this->post(
             url('api/searchDataSet'),
-                [
-                    'criteria'   => [
-                        'loclae'    => 'en',
-                        'keywords'  => $this->faker->word(),
-                    ],
-                ]
+            [
+                'criteria'   => [
+                    'locale'    => 'en',
+                    'keywords'  => $this->faker->word(),
+                ],
+            ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);

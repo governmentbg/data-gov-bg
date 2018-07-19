@@ -354,19 +354,15 @@ class DataSetController extends ApiController
                 $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
 
                 try {
-                    $query = DataSet::where('visibility', 1);
+                    $ids = DataSet::search($search)->get()->pluck('id');
+                    $query = DataSet::whereIn('id', $ids);
 
-                    if ($order) {
-                        $query->orderBy($order['field'], $order['type']);
-                    }
+                    $count = $query->count();
 
-                    if ($pagination && $page) {
-                        $query->paginate($pagination, ['*'], 'page', $page);
-                    }
-
-                    if ($search) {
-                        $query = DataSet::search($search)->constrain($query);
-                    }
+                    $query->forPage(
+                        $request->offsetGet('page_number'),
+                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                    );
 
                     $data = $query->get();
 
@@ -390,7 +386,7 @@ class DataSetController extends ApiController
 
                     return $this->successResponse([
                         'datasets'      => $data,
-                        'total_records' => $data->count()
+                        'total_records' => $count,
                     ], true);
                 } catch (QueryException $ex) {
                     return $this->errorResponse($ex->getMessage());

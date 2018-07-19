@@ -31,6 +31,7 @@ class OrganisationSeeder extends Seeder
                 'type'              => $type,
                 'name'              => [$locale => $this->faker->name],
                 'descript'          => [$locale => $this->faker->text(intval(8000))],
+                'uri'               => $this->faker->uuid(),
                 'logo_file_name'    => $i != 1 ? $this->faker->imageUrl() : null,
                 'logo_mime_type'    => $i != 1 ? $this->faker->mimeType() : null,
                 'logo_data'         => $i != 1 ? $this->faker->text(intval(8000)) : null,

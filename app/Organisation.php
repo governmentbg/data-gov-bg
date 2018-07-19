@@ -20,6 +20,9 @@ class Organisation extends Model implements TranslatableInterface
     const TYPE_COUNTRY = 2;
     const TYPE_GROUP = 3;
 
+    const ACTIVE_FALSE = 0;
+    const APPROVED_FALSE = 0;
+
     protected $guarded = ['id'];
 
     protected static $translatable = [
@@ -64,17 +67,17 @@ class Organisation extends Model implements TranslatableInterface
 
     public function userFollow()
     {
-        return $this->hasMany('App\UserFollow');
+        return $this->hasMany('App\UserFollow', 'org_id');
     }
 
-    public function orgCustomSetting()
+    public function customSetting()
     {
-        return $this->hasOne('App\OrgCustomSetting');
+        return $this->hasMany('App\CustomSetting', 'org_id');
     }
 
     public function dataSet()
     {
-        return $this->hasMany('App\DataSet');
+        return $this->hasMany('App\DataSet', 'org_id');
     }
 
     public function dataSetGroup()

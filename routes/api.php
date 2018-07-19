@@ -26,9 +26,11 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
 
     Route::post('/addOrganisation', 'Api\OrganisationController@addOrganisation');
     Route::post('/editOrganisation', 'Api\OrganisationController@editOrganisation');
-    Route::post('/listOrganisations', 'Api\OrganisationController@listOrganisations');
-    Route::post('/searchOrganisations', 'Api\OrganisationController@searchOrganisations');
     Route::post('/deleteOrganisation', 'Api\OrganisationController@deleteOrganisation');
+
+    Route::post('/addGroup', 'Api\OrganisationController@addGroup');
+    Route::post('/editGroup', 'Api\OrganisationController@editGroup');
+    Route::post('/deleteGroup', 'Api\OrganisationController@deleteGroup');
 
     Route::post('/addRole', 'Api\RoleController@addRole');
     Route::post('/editRole', 'Api\RoleController@editRole');
@@ -86,3 +88,11 @@ Route::post('/listMainCategories', 'Api\CategoryController@listMainCategories');
 Route::post('/getMainCategoryDetails', 'Api\CategoryController@getMainCategoryDetails');
 Route::post('/listTags', 'Api\CategoryController@listTags');
 Route::post('/getTagDetails', 'Api\CategoryController@getTagDetails');
+
+Route::post('/listOrganisations', 'Api\OrganisationController@listOrganisations');
+Route::post('/searchOrganisations', 'Api\OrganisationController@searchOrganisations');
+Route::post('/getOrganisationDetails', 'Api\OrganisationController@getOrganisationDetails');
+
+Route::post('/listGroups', 'Api\OrganisationController@listGroups');
+Route::post('/searchGroups', 'Api\OrganisationController@searchGroups');
+Route::post('/getGroupDetails', 'Api\OrganisationController@getGroupDetails');

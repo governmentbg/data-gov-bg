@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
+    const CATEGORY_COUNT = 5;
     /**
      * Run the database seeds.
      *
@@ -15,15 +16,15 @@ class CategorySeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach (range(1,3) as $index) {
+        foreach (range(1, self::CATEGORY_COUNT) as $index) {
             Category::create([
                 'name'              => $faker->name,
                 'icon_file_name'    => $faker->name,
                 'icon_mime_type'    => $faker->mimeType,
                 'icon_data'         => $faker->name,
-                'active'            => 1,
-                'ordering'          => 1,
-	        ]);
-	    }
+                'active'            => true,
+                'ordering'          => Category::ORDERING_ASC,
+            ]);
+        }
     }
 }

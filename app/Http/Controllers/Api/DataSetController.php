@@ -23,27 +23,31 @@ class DataSetController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'                => 'integer',
-            'data'                  => 'required',
-            'data.locale'           => 'required|string|max:5',
-            'data.name'             => 'required|string',
-            'data.descript'         => 'string',
-            'data.tags.*'           => 'string',
-            'data.category_id'      => 'required|integer',
-            'data.terms_of_use_id'  => 'integer',
-            'data.visibility'       => 'integer',
-            'data.version'          => 'string',
-            'data.author_name'      => 'string',
-            'data.author_email'     => 'email',
-            'data.support_name'     => 'string',
-            'data.support_email'    => 'email',
-            'data.sla'              => 'string',
+            'org_id'                        => 'nullable|integer',
+            'data'                          => 'nullable|required',
+            'data.locale'                   => 'required|string|max:5',
+            'data.name'                     => 'required|string',
+            'data.uri'                      => 'nullable|string',
+            'data.descript'                 => 'nullable|string',
+            'data.tags.*'                   => 'nullable|string',
+            'data.category_id'              => 'required|integer',
+            'data.terms_of_use_id'          => 'nullable|integer',
+            'data.visibility'               => 'nullable|integer',
+            'data.version'                  => 'nullable|string',
+            'data.author_name'              => 'nullable|string',
+            'data.author_email'             => 'nullable|email',
+            'data.support_name'             => 'nullable|string',
+            'data.support_email'            => 'nullable|email',
+            'data.sla'                      => 'nullable|string',
         ]);
 
         if(!$validator->fails() && !empty($post['data'])) {
             DB::beginTransaction();
 
-            $post['data']['uri'] = Uuid::generate(4)->string;
+            if (empty($post['data']['uri'])) {
+                $post['data']['uri'] = Uuid::generate(4)->string;
+            }
+
             $post['data']['status'] = DataSet::STATUS_DRAFT;
             unset($post['data']['locale']);
 
@@ -76,7 +80,6 @@ class DataSetController extends ApiController
                     return $this->errorResponse('Add DataSet Failure');
                 }
             } catch (QueryException $ex) {
-                dd($ex->getMessage());
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -97,20 +100,20 @@ class DataSetController extends ApiController
         $validator = \Validator::make($post, [
             'dataset_uri'           => 'required|string',
             'data.locale'           => 'required|string|max:5',
-            'data.name'             => 'string',
-            'data.descript'         => 'string',
-            'data.category_id'      => 'required|integer',
-            'data.uri'              => 'string',
-            'data.tags.*'           => 'string',
-            'data.terms_of_use_id'  => 'integer',
-            'data.visibility'       => 'integer',
-            'data.version'          => 'string',
-            'data.author_name'      => 'string',
-            'data.author_email'     => 'email',
-            'data.support_name'     => 'string',
-            'data.support_email'    => 'email',
-            'data.sla'              => 'string',
-            'data.status'           => 'integer',
+            'data.name'             => 'nullable|string',
+            'data.descript'         => 'nullable|string',
+            'data.category_id'      => 'nullable|required|integer',
+            'data.uri'              => 'nullable|string',
+            'data.tags.*'           => 'nullable|string',
+            'data.terms_of_use_id'  => 'nullable|integer',
+            'data.visibility'       => 'nullable|integer',
+            'data.version'          => 'nullable|string',
+            'data.author_name'      => 'nullable|string',
+            'data.author_email'     => 'nullable|email',
+            'data.support_name'     => 'nullable|string',
+            'data.support_email'    => 'nullable|email',
+            'data.sla'              => 'nullable|string',
+            'data.status'           => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
@@ -142,7 +145,6 @@ class DataSetController extends ApiController
                         DB::rollback();
                     }
                 } catch (QueryException $ex) {
-
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -166,11 +168,9 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             try {
                 if (DataSet::where('uri', $post['dataset_uri'])->delete()) {
-
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
-
                 return $this->errorResponse($ex->getMessage());
             }
         }
@@ -196,18 +196,18 @@ class DataSetController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
-                'criteria.locale'            => 'string|max:5',
-                'criteria.org_id'            => 'integer',
-                'criteria.group_id'          => 'integer',
-                'criteria.category_id'       => 'integer',
-                'criteria.tag_id'            => 'integer',
-                'criteria.format'            => 'string',
-                'criteria.terms_of_use_id'   => 'integer',
-                'criteria.reported'          => 'integer',
-                'criteria.order.type'        => 'string',
-                'criteria.order.field'       => 'string',
-                'records_per_page'           => 'integer',
-                'page_number'                => 'integer',
+                'criteria.locale'            => 'nullable|string|max:5',
+                'criteria.org_id'            => 'nullable|integer',
+                'criteria.group_id'          => 'nullable|integer',
+                'criteria.category_id'       => 'nullable|integer',
+                'criteria.tag_id'            => 'nullable|integer',
+                'criteria.format'            => 'nullable|string',
+                'criteria.terms_of_use_id'   => 'nullable|integer',
+                'criteria.reported'          => 'nullable|integer',
+                'criteria.order.type'        => 'nullable|string',
+                'criteria.order.field'       => 'nullable|string',
+                'records_per_page'           => 'nullable|integer',
+                'page_number'                => 'nullable|integer',
             ]);
 
             if (!$validator->fails()) {
@@ -282,7 +282,6 @@ class DataSetController extends ApiController
                         'datasets'      => $data,
                     ], true);
                 } catch (QueryException $ex) {
-                    dd($ex->getMessage());
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -337,12 +336,12 @@ class DataSetController extends ApiController
 
         if (!empty($criteria)) {
             $validator = \Validator::make($post, [
-                'criteria.locale'       => 'string|max:5',
-                'criteria.keywords'     => 'string',
-                'criteria.order.type'   => 'string',
-                'criteria.order.field'  => 'string',
-                'records_per_page'      => 'integer',
-                'page_number'           => 'integer',
+                'criteria.locale'       => 'nullable|string|max:5',
+                'criteria.keywords'     => 'required|string',
+                'criteria.order.type'   => 'nullable|string',
+                'criteria.order.field'  => 'nullable|string',
+                'records_per_page'      => 'nullable|integer',
+                'page_number'           => 'nullable|integer',
             ]);
 
             if (!$validator->fails()) {
@@ -366,10 +365,10 @@ class DataSetController extends ApiController
                     }
 
                     if ($search) {
-                        $data = DataSet::search($search)->constrain($query)->get();
-                    } else {
-                        $data = $query->get();
+                        $query = DataSet::search($search)->constrain($query);
                     }
+
+                    $data = $query->get();
 
                     foreach ($data as $set) {
                         $set['name'] = $set->name;
@@ -394,7 +393,6 @@ class DataSetController extends ApiController
                         'total_records' => $data->count()
                     ], true);
                 } catch (QueryException $ex) {
-
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -416,7 +414,7 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'dataset_uri'   => 'required|string',
-            'locale'        => 'string',
+            'locale'        => 'nullable|string',
         ]);
 
         if (!$validator->fails()) {
@@ -445,7 +443,6 @@ class DataSetController extends ApiController
 
                 return $this->successResponse($data);
             } catch (QueryException $e) {
-
                 return $this->errorResponse($e->getMessage());
             }
         }
@@ -483,7 +480,6 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -522,7 +518,6 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-                    dd($ex->getMessage());
                     return $this->errorResponse($ex->getMessage());
                 }
             }
@@ -551,7 +546,6 @@ class DataSetController extends ApiController
 
             return true;
         } catch (QueryException $ex) {
-
             return false;
         }
     }

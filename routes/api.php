@@ -58,6 +58,11 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
 
+    Route::post('/addTermsOfUse', 'Api\TermsOfUseController@addTermsOfUse');
+    Route::post('/editTermsOfUse', 'Api\TermsOfUseController@editTermsOfUse');
+    Route::post('/deleteTermsOfUse', 'Api\TermsOfUseController@deleteTermsOfUse');
+    Route::post('/listTermsOfUse', 'Api\TermsOfUseController@listTermsOfUse');
+
     Route::post('/addResourceMetadata', 'Api\ResourceController@addResourceMetadata');
     Route::post('/addResourceData', 'Api\ResourceController@addResourceData');
     Route::post('/editResourceMetadata', 'Api\ResourceController@editResourceMetadata');
@@ -96,3 +101,4 @@ Route::post('/getOrganisationDetails', 'Api\OrganisationController@getOrganisati
 Route::post('/listGroups', 'Api\OrganisationController@listGroups');
 Route::post('/searchGroups', 'Api\OrganisationController@searchGroups');
 Route::post('/getGroupDetails', 'Api\OrganisationController@getGroupDetails');
+Route::post('/getTermsOfUseDetails', 'Api\TermsOfUseController@getTermsOfUseDetails');

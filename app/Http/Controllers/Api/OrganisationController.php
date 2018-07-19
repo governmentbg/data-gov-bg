@@ -19,7 +19,7 @@ class OrganisationController extends ApiController
      * Add new organisation record
      *
      * @param object $request - POST request
-     * @return json $response - response with status and org id if successfull
+     * @return json $response - response with status and org id if successful
      */
     public function addOrganisation(Request $request)
     {
@@ -97,24 +97,6 @@ class OrganisationController extends ApiController
                         return $this->errorResponse('Add Organisation Failure.');
                     }
                 }
-//                if (isset($data['custom_fields']) && is_array($data['custom_fields'])) { // TODO (waiting for details)
-//
-//                    foreach ($data['custom_fields'] as $custom) {
-//                        if (empty($custom['label']) || empty($custom['value'])) {
-//                            return ApiController::errorResponse('Label and value for custom fields are required.');
-//                        } else {
-//                            $customSettings = new CustomSetting;
-//
-//                            $customSettings->key = [$locale => $custom['label']];
-//                            $customSettings->value = [$locale => $custom['value']];
-//                            $customSettings->org_id = $organisation->id;
-//                            $customSettings->created_by = \Auth::user()->id;
-//
-//
-//                            $customSettings->save();
-//                        }
-//                    }
-//                }
 
                 DB::commit();
 
@@ -220,25 +202,12 @@ class OrganisationController extends ApiController
             }
 
             $newOrgSettingsData = [];
-//            if (!empty($data['custom_fields']) && is_array($data['custom_fields'])) { // TODO (waiting for details)
-//                foreach ($data['custom_fields'] as $custom) {
-//                    if (empty($custom['label']) || empty($custom['value'])) {
-//                        return ApiController::errorResponse('Edit organisation failure');
-//                    } else {
-//                        $newOrgSettingsData[] = [
-//                            'key'        => [$locale => $custom['label']],
-//                            'value'      => [$locale => $custom['value']],
-//                            'org_id'     => $request->org_id,
-//                        ];
-//                    }
-//                }
-//            }
 
             DB::beginTransaction();
 
             try {
                 if (!empty($orgData)) {
-                    foreach($orgData as $prop => $val) {
+                    foreach ($orgData as $prop => $val) {
                         $organisation->$prop = $val;
                     }
 
@@ -252,28 +221,6 @@ class OrganisationController extends ApiController
                         return $this->errorResponse('Add organisation failure.');
                     }
                 }
-//                if (!empty($newOrgSettingsData)) {
-//                    foreach ($newOrgSettingsData as $setting) {
-//                        $customSettings = new CustomSetting;
-//
-//                        $customSettings->key = $setting['key'];
-//                        $customSettings->value = $setting['value'];
-//                        $customSettings->org_id = $setting['org_id'];
-//
-//                        if (
-//                            !empty($settingsToEdit = CustomSetting::search([
-//                                'org_id' => $customSettings->org_id,
-//                                'key'    => $customSettings->key
-//                            ])->first()) // to do this query with search library
-//                        ) {
-//                            $settingsToEdit->value = $setting['value'];
-//
-//                            $settingsToEdit->save();
-//                        } else {
-//                            $customSettings->save();
-//                        }
-//                    }
-//                }
 
                 DB::commit();
 
@@ -479,7 +426,7 @@ class OrganisationController extends ApiController
      * Get organisation details
      *
      * @param Request $request - POST request
-     * @return json $response - response with status and organisation info if successfull
+     * @return json $response - response with status and organisation info if successful
      */
     public function getOrganisationDetails(Request $request)
     {
@@ -536,8 +483,9 @@ class OrganisationController extends ApiController
         return $this->errorResponse('Get Organisation Details Failure');
     }
 
-    /************************   MANAGE GROUPS   ************************/
 
+
+    /************************   MANAGE GROUPS   ************************/
     /**
      * Add new Group
      *

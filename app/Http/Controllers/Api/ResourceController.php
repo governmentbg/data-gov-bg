@@ -339,7 +339,7 @@ class ResourceController extends ApiController
                     'dataset_uri'           => $resource->dataSet->uri,
                     'name'                  => $resource->name,
                     'description'           => $resource->descript,
-                    // 'locale'                => $this->getLocale(),
+                    'locale'                => \LaravelLocalization::getCurrentLocale(),
                     'version'               => $resource->version,
                     'schema_description'    => $resource->schema_descript,
                     'schema_url'            => $resource->schema_url,
@@ -441,7 +441,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.keywords'     => 'string',
+            'criteria.keywords'     => 'required|string',
             'criteria.order.type'   => 'string',
             'criteria.order.field'  => 'string',
             'records_per_page'      => 'integer',
@@ -457,29 +457,23 @@ class ResourceController extends ApiController
             $search = !empty($post['criteria']['keywords']) ? $post['criteria']['keywords'] : false;
 
             try {
-                $query = Resource::where('is_reported', 0);
+                $ids = Resource::search($search)->get()->pluck('id');
+                $query = Resource::whereIn('id', $ids);
 
-                if ($order) {
-                    $query->orderBy($order['field'], $order['type']);
-                }
+                $count = $query->count();
 
-                if ($pagination && $page) {
-                    $query->paginate($pagination, ['*'], 'page', $page);
-                }
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
 
-                if ($search) {
-                    $results = Resource::search($search)->constrain($query)->get();
-                } else {
-                    $results = $query->get();
-                }
+                $results = $query->get();
 
                 foreach ($results as $resource) {
-                    $data[] = [
-                        'data'  => $resource->post_data,
-                    ];
+                    $data[] = $resource->post_data;
                 }
 
-                return $this->successResponse($data);
+                return $this->successResponse(['data' => $data], true);
             } catch (QueryException $ex) {
                 return $this->errorResponse($ex->getMessage());
             }

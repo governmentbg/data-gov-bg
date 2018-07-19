@@ -68,6 +68,13 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
     Route::post('/editResourceMetadata', 'Api\ResourceController@editResourceMetadata');
     Route::post('/updateResourceData', 'Api\ResourceController@updateResourceData');
     Route::post('/deleteResource', 'Api\ResourceController@deleteResource');
+
+    Route::post('/addMainCategory', 'Api\CategoryController@addMainCategory');
+    Route::post('/editMainCategory', 'Api\CategoryController@editMainCategory');
+    Route::post('/deleteMainCategory', 'Api\CategoryController@deleteMainCategory');
+    Route::post('/addTag', 'Api\CategoryController@addTag');
+    Route::post('/editTag', 'Api\CategoryController@editTag');
+    Route::post('/deleteTag', 'Api\CategoryController@deleteTag');
 });
 
 Route::post('/register', 'Api\UserController@register');
@@ -81,3 +88,8 @@ Route::post('/getResourceSchema', 'Api\ResourceController@getResourceSchema');
 Route::post('/getResourceData', 'Api\ResourceController@getResourceData');
 Route::post('/getResourceView', 'Api\ResourceController@getResourceView');
 Route::post('/searchResourceData', 'Api\ResourceController@searchResourceData');
+
+Route::post('/listMainCategories', 'Api\CategoryController@listMainCategories');
+Route::post('/getMainCategoryDetails', 'Api\CategoryController@getMainCategoryDetails');
+Route::post('/listTags', 'Api\CategoryController@listTags');
+Route::post('/getTagDetails', 'Api\CategoryController@getTagDetails');

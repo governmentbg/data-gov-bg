@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 class ApiController extends Controller
 {
     const ERROR_GENERAL = 'General';
+    const DEFAULT_RECORDS_PER_PAGE = 50;
+    const MAX_RECORDS_PER_PAGE = 100;
 
     protected static $format;
 
@@ -30,6 +32,29 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * Get records per page
+     *
+     * @return integer
+     */
+    public function getRecordsPerPage($number)
+    {
+        if (empty($number)) {
+            return self::DEFAULT_RECORDS_PER_PAGE;
+        }
+
+        if ($number > self::MAX_RECORDS_PER_PAGE) {
+            return self::DEFAULT_RECORDS_PER_PAGE;
+        }
+
+        return $number;
+    }
+
+    /**
+     * Return error response
+     *
+     * @return json/xml - response data
+     */
     public static function errorResponse($message = null, $code = 500, $type = self::ERROR_GENERAL)
     {
         $resposeData = [
@@ -57,6 +82,11 @@ class ApiController extends Controller
         }
     }
 
+    /**
+     * Return success response
+     *
+     * @return json/xml - response data
+     */
     public static function successResponse($data = [], $dataMerge = false)
     {
         $response = ['success' => true];
@@ -77,10 +107,9 @@ class ApiController extends Controller
                 // function call to convert array to xml
                 self::arrayToXml($response, $xmlData);
 
-                return response($xmlData->asXML(), 200)
-                    ->header('Content-Type', 'text/xml');
+                return response($xmlData->asXML(), 200)->header('Content-Type', 'text/xml');
             case 'json':
-            default :
+            default:
                 return new JsonResponse($response, 200);
         }
     }
@@ -89,20 +118,21 @@ class ApiController extends Controller
      * convert array to xml
      *
      * @param type $data
-     * @param type $xml_data
+     * @param type $xmlData
      */
-    public static function arrayToXml($data, &$xml_data) {
-        foreach( $data as $key => $value ) {
-            if( is_numeric($key) ){
-                $key = 'item'.$key; //dealing with <0/>..<n/> issues
+    public static function arrayToXml($data, &$xmlData) {
+        foreach ($data as $key => $value) {
+            if (is_numeric($key)) {
+                $key = 'item'. $key; //dealing with <0/>..<n/> issues
             }
 
-            if( is_array($value) ) {
-                $subnode = $xml_data->addChild($key);
-                self::arrayToXml($value, $subnode);
+            if(is_array($value)) {
+                $subNode = $xmlData->addChild($key);
+
+                self::arrayToXml($value, $subNode);
             } else {
-                $xml_data->addChild("$key",htmlspecialchars("$value"));
+                $xmlData->addChild($key, htmlspecialchars($value));
             }
-         }
+        }
     }
 }

@@ -13,10 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-
-
-
-Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
+Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
     Route::post('/listUsers', 'Api\UserController@listUsers');
     Route::post('/searchUsers', 'Api\UserController@searchUsers');
     Route::post('/getUserRoles', 'Api\UserController@getUserRoles');
@@ -27,6 +24,12 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/generateAPIKey', 'Api\UserController@generateAPIKey');
     Route::post('/inviteUser', 'Api\UserController@inviteUser');
 
+    Route::post('/addOrganisation', 'Api\OrganisationController@addOrganisation');
+    Route::post('/editOrganisation', 'Api\OrganisationController@editOrganisation');
+    Route::post('/listOrganisations', 'Api\OrganisationController@listOrganisations');
+    Route::post('/searchOrganisations', 'Api\OrganisationController@searchOrganisations');
+    Route::post('/deleteOrganisation', 'Api\OrganisationController@deleteOrganisation');
+
     Route::post('/addRole', 'Api\RoleController@addRole');
     Route::post('/editRole', 'Api\RoleController@editRole');
     Route::post('/deleteRole', 'Api\RoleController@deleteRole');
@@ -34,7 +37,9 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
 
-    Route::post('rights/listRights', 'Api\RightController@listRights');
+    Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+
+    Route::post('/listRights', 'Api\RightController@listRights');
 
     Route::post('/addSection', 'Api\SectionController@addSection');
     Route::post('/editSection', 'Api\SectionController@editSection');
@@ -51,15 +56,28 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function () {
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
 
-    Route::post('addNews', 'Api\NewsController@addNews');
-    Route::post('editNews', 'Api\NewsController@editNews');
-    Route::get('deleteNews', 'Api\NewsController@deleteNews');
-    Route::post('listNews', 'Api\NewsController@listNews');
-    Route::post('searchNews', 'Api\NewsController@searchNews');
-    Route::get('getNewsDetails', 'Api\NewsController@getNewsDetails');
+    Route::post('/addNews', 'Api\NewsController@addNews');
+    Route::post('/editNews', 'Api\NewsController@editNews');
+    Route::post('/deleteNews', 'Api\NewsController@deleteNews');
+    Route::post('/listNews', 'Api\NewsController@listNews');
+    Route::post('/searchNews', 'Api\NewsController@searchNews');
+    Route::post('/getNewsDetails', 'Api\NewsController@getNewsDetails');
+
+    Route::post('/addResourceMetadata', 'Api\ResourceController@addResourceMetadata');
+    Route::post('/addResourceData', 'Api\ResourceController@addResourceData');
+    Route::post('/editResourceMetadata', 'Api\ResourceController@editResourceMetadata');
+    Route::post('/updateResourceData', 'Api\ResourceController@updateResourceData');
+    Route::post('/deleteResource', 'Api\ResourceController@deleteResource');
 });
 
 Route::post('/register', 'Api\UserController@register');
 
 Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
 Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');
+
+Route::post('/listResources', 'Api\ResourceController@listResources');
+Route::post('/getResourceMetadata', 'Api\ResourceController@getResourceMetadata');
+Route::post('/getResourceSchema', 'Api\ResourceController@getResourceSchema');
+Route::post('/getResourceData', 'Api\ResourceController@getResourceData');
+Route::post('/getResourceView', 'Api\ResourceController@getResourceView');
+Route::post('/searchResourceData', 'Api\ResourceController@searchResourceData');

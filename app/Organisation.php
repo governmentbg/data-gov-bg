@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Laravel\Scout\Searchable;
 use App\Translator\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\TranslatableInterface;
@@ -13,6 +14,7 @@ class Organisation extends Model implements TranslatableInterface
     use Translatable;
     use SoftDeletes;
     use RecordSignature;
+    use Searchable;
 
     const TYPE_CIVILIAN = 1;
     const TYPE_COUNTRY = 2;
@@ -33,6 +35,25 @@ class Organisation extends Model implements TranslatableInterface
             self::TYPE_CIVILIAN => 'Temp',
             self::TYPE_COUNTRY  => 'Temp2',
             self::TYPE_GROUP    => 'Temp3',
+        ];
+    }
+
+    public static function getPublicTypes()
+    {
+        return [
+            self::TYPE_CIVILIAN => 'Temp',
+            self::TYPE_COUNTRY  => 'Temp2',
+        ];
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id'            => $this->id,
+            'name'          => $this->concatTranslations('name'),
+            'descript'      => $this->concatTranslations('descript'),
+            'activity_info' => $this->concatTranslations('activity_info'),
+            'contacts'      => $this->concatTranslations('contacts'),
         ];
     }
 

@@ -747,7 +747,6 @@ class UserController extends ApiController
                     ]
                 )->fails()
             ) {
-
                 return ApiController::errorResponse('User registration failure');
             }
         }
@@ -775,12 +774,10 @@ class UserController extends ApiController
         try {
             $registered = $user->save();
         } catch (QueryException $e) {
-
             return ApiController::errorResponse('User registration failure');
         }
 
         if (!$registered) {
-
             return ApiController::errorResponse('User registration failure');
         }
 
@@ -792,7 +789,6 @@ class UserController extends ApiController
         }
 
         if (isset($data['role_id']) || isset($data['org_id'])) {
-
             $validator = \Validator::make(
                 $request->all(),
                 [
@@ -822,7 +818,8 @@ class UserController extends ApiController
 
         $userSettings = new UserSetting;
 
-        $userLocale = !empty($data['user_settings']['locale']) && !empty(Locale::where('locale', $data['user_settings']['locale'])->value('locale'))
+        $userLocale = !empty($data['user_settings']['locale'])
+            && !empty(Locale::where('locale', $data['user_settings']['locale'])->value('locale'))
             ? $data['user_settings']['locale']
             : config('app.locale');
 
@@ -845,7 +842,6 @@ class UserController extends ApiController
         }
 
         if (!empty($data['org_data'])) {
-
             $organisation = new Organisation;
 
             $orgLocale = !empty($data['org_data']['locale']) && !empty(Locale::where('locale', $data['org_data']['locale'])->value('locale'))

@@ -2,11 +2,22 @@
 
 namespace App;
 
+use App\Translator\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use App\Contracts\TranslatableInterface;
+use App\Http\Controllers\Traits\RecordSignature;
 
-class OrgCustomSetting extends Model
+class OrgCustomSetting extends Model implements TranslatableInterface
 {
+    use Translatable;
+    use RecordSignature;
+
     protected $guarded = ['id'];
+
+    protected static $translatable = [
+        'key'   => 'label',
+        'value' => 'text',
+    ];
 
     public function organisation()
     {

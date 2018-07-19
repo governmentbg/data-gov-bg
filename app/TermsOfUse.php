@@ -2,11 +2,12 @@
 
 namespace App;
 
-use App\Translator\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use App\Contracts\TranslatableInterface;
+use App\Translator\Translatable;
 use App\Http\Controllers\Traits\RecordSignature;
 
-class TermsOfUse extends Model
+class TermsOfUse extends Model implements TranslatableInterface
 {
     use RecordSignature;
     use Translatable;

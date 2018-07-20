@@ -1,52 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog"  aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="frame">
-                <div class="p-w-md">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <h2>Заявка за добавяне на лиценз</h2>
-                </div>
-                <div class="modal-body">
-                    <form class="m-t-lg">
-                        <div class="form-group row">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">Име:</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="fname" placeholder="Иван">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="lname" class="col-sm-3 col-xs-12 col-form-label">Фамилия:</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="lname" placeholder="Иванов">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="email" class="col-sm-3 col-xs-12 col-form-label">E-mail:</label>
-                            <div class="col-sm-9">
-                                <input type="email" class="input-border-r-12 form-control" id="email" placeholder="ivanov@abv.bg">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="description" class="col-sm-3 col-xs-12 col-form-label">Описание:</label>
-                            <div class="col-sm-9">
-                                <textarea class="input-border-r-12 form-control" id="description" placeholder="Описание"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-sm-12 text-right">
-                                <button type="submit" class="m-l-md btn btn-custom">Изпрати</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="container">
     <div class="row">
         <div class="col-xs-12 p-sm">
@@ -77,28 +31,40 @@
                     <p class='req-fields'>Всички полета маркирани с * са задължителни.</p>
                     <p class='req-fields has-error'>Всички полета маркирани с * са задължителни.</p>
                     <form>
-                        <div class="form-group row required has-error">
+                        <div class="form-group row required">
                             <label for="title" class="col-sm-3 col-xs-12 col-form-label">Заглавие:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="title" placeholder="Заглавие">
+                                <input type="email" class="input-border-r-12 form-control" id="title" value="Lorem ipsum BG">
+                            </div>
+                        </div>
+                        <div class="form-group row required has-error">
+                            <label for="titleTR" class="col-sm-3 col-xs-12 col-form-label">Title:</label>
+                            <div class="col-sm-9">
+                                <input type="email" class="input-border-r-12 form-control" id="titleTR" value="Lorem ipsum EN">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">Уникален идентификатор:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="identifier" placeholder="Уникален идентификатор">
+                                <input type="text" class="input-border-r-12 form-control" id="identifier" value="256266233">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="description" class="col-sm-3 col-xs-12 col-form-label">Описание:</label>
                             <div class="col-sm-9">
-                                <textarea type="text" class="input-border-r-12 form-control" id="description" placeholder="Описание"></textarea>
+                                <textarea type="text" class="input-border-r-12 form-control" id="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut.</textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="descriptionTR" class="col-sm-3 col-xs-12 col-form-label">Description:</label>
+                            <div class="col-sm-9">
+                                <textarea type="text" class="input-border-r-12 form-control" id="descriptionTR">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut.</textarea>
                             </div>
                         </div>
                         <div class="form-group row required">
                             <label for="theme" class="col-sm-3 col-xs-12 col-form-label">Основна тема:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="theme" placeholder="Основна тема">
+                                <input type="text" class="input-border-r-12 form-control" id="theme" value="Основна тема">
                             </div>
                         </div>
                         <div class="form-group row tagsBG">
@@ -165,25 +131,29 @@
                         <div class="form-group row">
                             <label for="source" class="col-sm-3 col-xs-12 col-form-label">Източник:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="source" placeholder="Източник">
+                                <input type="text" class="input-border-r-12 form-control" id="source" value="Източник">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="version" class="col-sm-3 col-xs-12 col-form-label">Версия:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="version" placeholder="Версия">
+                                <input type="text" class="input-border-r-12 form-control" id="version" value="1.0">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="author" class="col-sm-3 col-xs-12 col-form-label">Автор:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="author" placeholder="Автор">
+                                <input type="text" class="input-border-r-12 form-control" id="author" value="Иван Иванов">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">e-mail на автора:</label>
+                            <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">
+                                e-mail на автора:
+                                <span class="info-icon"><i class="fa fa-info"></i></span>
+                            </label>
+
                             <div class="col-sm-9">
-                                <input type="email" class="input-border-r-12 form-control" id="author-email" placeholder="e-mail на автора">
+                                <input type="email" class="input-border-r-12 form-control" id="author-email" value="ivanov@abv.bg">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -220,9 +190,12 @@
                             @endfor
                         </div>
                         <div class="form-group row">
-                            <div class="col-xs-12 text-right mng-btns">
-                                <button type="button" class="btn btn-primary">изглед</button>
-                                <button type="button" class="btn btn-primary">запази</button>
+                            <div class="col-sm-12 pull right text-right">
+                                <div class="row">
+                                    <button type="button" class="btn btn-primary">добавяне на ресурс</button>
+                                    <button type="button" class="btn btn-primary">изглед</button>
+                                    <button type="button" class="btn btn-primary">публикуване</button>
+                                </div>
                             </div>
                         </div>
                     </form>

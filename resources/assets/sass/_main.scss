@@ -14,7 +14,7 @@ a:active {
     background-color: #fff;
 }
 
-.sidenav {
+.sidenav, .sidenav-open {
     height: 100%;
     display: inline-block;
 
@@ -73,7 +73,7 @@ a:active {
         display: none !important;
     }
 
-    .sidebar-submenu {
+    .sidebar-submenu, {
         display: none;
         padding: 10px 40px;
         border-radius: 11px;
@@ -133,10 +133,30 @@ a:active {
     }
 
     @include smMobile() {
-        display: none;
-        position: absolute;
-        z-index: 30;
-        top: 170px;
+        .sidenav {
+            display: none;
+            position: absolute;
+            z-index: 30;
+            top: 170px;
+        }
+    }
+}
+
+ul > li {
+    list-style: none;
+}
+
+.info-icon {
+    position: absolute;
+    right: -6px;
+    border-radius: 18px;
+    padding: 0px 9px;
+    margin-top: 5px;
+
+    @include smMobile() {
+        margin-top: 0px;
+        right: auto;
+        margin-left: 10px;
     }
 }
 
@@ -256,7 +276,7 @@ textarea {
         top:50px;
     }
 
-    .sidenav {
+    .sidenav,.sidenav-open {
         top:60px;
     }
 }

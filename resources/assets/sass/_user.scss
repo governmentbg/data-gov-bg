@@ -1,8 +1,31 @@
 .theme-user {
+    .sidenav {
+        background-color: transparent !important;
+    }
     .sidebar-submenu.open {
         display: block;
+
+        li {
+            > a {
+                &:after {
+                    display: none;
+                }
+
+                &.active, &:hover, &:focus, &:active {
+                    &:after {
+                        left: 39%;
+                        display:block;
+                    }
+                }
+            }
+        }
     }
 
+    .filter-type {
+        li a {
+            clear: both;
+        }
+    }
     .my-profile {
         color: $black;
         font-size: 28px;
@@ -61,25 +84,99 @@
         overflow: hidden;
     }
 
+    .new-data {
+        padding: 8px 28px;
+    }
+
+    .info-bar {
+        li {
+            list-style: none;
+            padding: 10px 0;
+        }
+    }
+
+    .history {
+        .version-heading {
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .version {
+            font-size: 17px;
+        }
+
+        span > svg {
+            height: 20px;
+            width: 20px;
+        }
+
+        .signaled {
+            span {
+                color: #d32a31;
+            }
+            a {
+                &:hover, &:focus, &:active {
+                    svg {
+                        fill: #d32a31;
+                    }
+                }
+            }
+        }
+    }
+
+    .filter-content {
+        .badge > a {
+            color: white !important;
+        }
+    }
+
+    .org-logo {
+        img {
+            width: 228px;
+            height: 128px;
+        }
+    }
+
+    .control-btns span{
+        padding: 15px 25px;
+    }
+
+    .exclamation-sign {
+        margin-top: -20px;
+
+        img {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .type {
+        span.selected:after {
+            content: url('/img/checked.jpg');
+            margin-left: 25px;
+        }
+    }
+
     @include smMobile() {
         .my-profile {
             margin-left: 0 !important;
         }
 
-        .sidenav .sidebar-submenu.open {
-            padding: 10px 30px !important;
-            width: 45%;
-        }
+        .sidenav {
+            .sidebar-submenu.open {
+                padding: 10px 30px !important;
+                width: 45%;
+                display: block;
 
-        .sidebar-submenu {
-            li {
-                a,
-                a:hover,
-                a:active,
-                a:focus {
-                    &:after {
-                        width: 70px;
-                        left: 70px;
+                li {
+                    a,
+                    a:hover,
+                    a:active,
+                    a:focus {
+                        &:after {
+                            width: 100px;
+                            left: 80px;
+                        }
                     }
                 }
             }
@@ -88,28 +185,25 @@
         .add-terms {
             margin-top: 10px;
         }
-
     }
 
     @include xsMobile() {
         .filter-type li a {
-                font-size: 12px;
+            font-size: 12px;
         }
 
         .sidenav .sidebar-submenu.open {
             padding: 10px 30px !important;
-            width: 60% !important;
-        }
+            width: 100% !important;
 
-        .sidebar-submenu {
             li {
                 a,
                 a:hover,
                 a:active,
                 a:focus {
                     &:after {
-                        width: 70px;
-                        left: 70px;
+                        width: 100px;
+                        left: 80px;
                     }
                 }
             }

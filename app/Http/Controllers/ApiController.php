@@ -56,11 +56,12 @@ class ApiController extends Controller
      *
      * @return json/xml - response data
      */
-    public static function errorResponse($message = null, $code = 500, $type = self::ERROR_GENERAL)
+    public static function errorResponse($message = null, $errors = [], $code = 500, $type = self::ERROR_GENERAL)
     {
         $resposeData = [
             'success'   => false,
             'status'    => $code,
+            'errors'    => $errors,
             'error'     => [
                 'type'      => $type,
                 'message'   => $message,

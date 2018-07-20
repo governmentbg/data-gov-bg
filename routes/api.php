@@ -63,6 +63,11 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
     Route::post('/deleteTermsOfUse', 'Api\TermsOfUseController@deleteTermsOfUse');
     Route::post('/listTermsOfUse', 'Api\TermsOfUseController@listTermsOfUse');
 
+    Route::post('/sendTermsOfUseRequest', 'Api\TermsOfUseRequestController@sendTermsOfUseRequest');
+    Route::post('/editTermsOfUseRequest', 'Api\TermsOfUseRequestController@editTermsOfUseRequest');
+    Route::post('/deleteTermsOfUseRequest', 'Api\TermsOfUseRequestController@deleteTermsOfUseRequest');
+    Route::post('/listTermsOfUseRequests', 'Api\TermsOfUseRequestController@listTermsOfUseRequests');
+
     Route::post('/addNews', 'Api\NewsController@addNews');
     Route::post('/editNews', 'Api\NewsController@editNews');
     Route::post('/deleteNews', 'Api\NewsController@deleteNews');

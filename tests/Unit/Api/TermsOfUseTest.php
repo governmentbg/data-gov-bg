@@ -93,7 +93,7 @@ class TermsOfUseTest extends TestCase
             url('api/editTermsOfUse'),
             [
                 'api_key'   => $this->getApiKey(),
-                'terms_id'        => $section->id,
+                'terms_id'  => $section->id,
                 'data'      => [],
             ]
         )
@@ -149,7 +149,7 @@ class TermsOfUseTest extends TestCase
             url('api/deleteTermsOfUse'),
             [
                 'api_key'   => $this->getApiKey(),
-                'terms_id'        => $section->id,
+                'terms_id'  => $section->id,
             ]
         )
             ->assertStatus(200)

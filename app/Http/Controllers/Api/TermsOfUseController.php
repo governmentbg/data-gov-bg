@@ -28,7 +28,7 @@ class TermsOfUseController extends ApiController
             'locale'        => 'required|string|max:5',
             'active'        => 'required|boolean',
             'is_default'    => 'boolean',
-            'ordering'      => 'numeric',
+            'ordering'      => 'integer',
         ]);
 
         if ($validator->fails()) {
@@ -43,7 +43,6 @@ class TermsOfUseController extends ApiController
         if (!isset($data['ordering'])) {
             $data['ordering'] = 1;
         }
-
 
         //prepare model data
         $newTerms = new TermsOfUse;
@@ -67,7 +66,7 @@ class TermsOfUseController extends ApiController
      * API function for editing terms of use
      * Route::post('/editTermsOfUse', 'Api\TermsOfUseController@editTermsOfUse');
      *
-     * @param Request $request - JSON containing api_key (string), id of edited section, data (object) containing updated terms of use data
+     * @param Request $request - JSON containing api_key (string), id of terms of use record to be edited, data (object) containing updated terms of use data
      * @return JsonResponse - JSON containing: On success - Status 200 / On fail - Status 500 error message
      */
     public function editTermsOfUse(Request $request)

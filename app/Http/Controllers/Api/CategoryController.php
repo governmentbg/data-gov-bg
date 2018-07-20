@@ -166,7 +166,7 @@ class CategoryController extends ApiController
             $pagination = $this->getRecordsPerPage($post['records_per_page']);
             $page = !empty($post['page_number']) ? $post['page_number'] : 1;
 
-            $query = Category::select('*');
+            $query = Category::select();
 
             if (isset($criteria['active'])) {
                 $query->where('active', $criteria['active']);

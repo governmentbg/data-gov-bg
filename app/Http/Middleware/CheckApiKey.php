@@ -33,6 +33,6 @@ class CheckApiKey
             return $next($request);
         }
 
-        return ApiController::errorResponse('Access denied', 403);
+        return ApiController::errorResponse('Access denied', [], 403);
     }
 }

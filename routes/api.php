@@ -59,8 +59,6 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
     Route::post('/addNews', 'Api\NewsController@addNews');
     Route::post('/editNews', 'Api\NewsController@editNews');
     Route::post('/deleteNews', 'Api\NewsController@deleteNews');
-    Route::post('/listNews', 'Api\NewsController@listNews');
-    Route::post('/searchNews', 'Api\NewsController@searchNews');
     Route::post('/getNewsDetails', 'Api\NewsController@getNewsDetails');
 
     Route::post('/addResourceMetadata', 'Api\ResourceController@addResourceMetadata');
@@ -78,6 +76,9 @@ Route::middleware(['auth.api', /*'throttle:60,1'*/])->group(function() {
 });
 
 Route::post('/register', 'Api\UserController@register');
+
+Route::post('/searchNews', 'Api\NewsController@searchNews');
+Route::post('/listNews', 'Api\NewsController@listNews');
 
 Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
 Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');

@@ -23,5 +23,13 @@ class DatabaseSeeder extends Seeder
         $this->call(CategorySeeder::class);
         $this->call(DataSetSeeder::class);
         $this->call(ResourceSeeder::class);
+        $this->call(TermsOfUseRequestTableSeeder::class);
+        $this->call(UserFollowTableSeeder::class);
+        $this->call(UserSettingTableSeeder::class);
+        $this->call(UserToOrgRoleTableSeeder::class);
+        $this->call(DataSetSubCategoriesTableSeeder::class);
+        $this->call(DataSetGroupTableSeeder::class);
+        $this->call(ElasticDataSetTableSeeder::class);
+        $this->call(CustomSettingTableSeeder::class);
     }
 }

@@ -53,6 +53,19 @@
                                 <textarea type="text" class="input-border-r-12 form-control" id="description" placeholder=""></textarea>
                             </div>
                         </div>
+                        <div class="form-group row required">
+                            <label for="newsLetter" class="col-sm-3 col-xs-12 col-form-label">Роля:</label>
+                            <div class="col-sm-3 col-xs-6 p-r-none">
+                                <!-- size=" count($options" -->
+                                <select class="input-border-r-12 form-control open-select" size="5">
+                                    <option value="idRole">роля</option>
+                                    <option value="idRole">роля</option>
+                                    <option value="idRole">роля</option>
+                                    <option value="idRole">роля</option>
+                                    <option value="idRole">роля</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group row">
                             <label for="newsLetter" class="col-sm-3 col-xs-12 col-form-label">Получаване на бюлетин:</label>
                             <div class="col-sm-3 col-xs-6 p-r-none">
@@ -66,7 +79,6 @@
                                 </select>
                             </div>
                             <div class="col-sm-6 col-xs-6 text-right p-l-none reg-btns">
-                                <a href="{{ url('/user/orgRegistration') }}" type="button" class="btn btn-primary m-b-sm add-org">добави организация</a>
                                 <button type="submit" class="m-l-md btn btn-primary m-b-sm">готово</button>
                             </div>
                         </div>

@@ -18,10 +18,10 @@ class TermsOfUseRequest extends Model
 
     public function toSearchableArray()
     {
-        $array['descript'] = $this->descript;
-        $array['id'] = $this->id;
-
-        return $array;
+        return [
+            'descript'  => $this->descript,
+            'id'        => $this->id,
+        ];
     }
 
     public function searchableAs()

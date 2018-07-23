@@ -5,333 +5,477 @@ Use Uuid;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use App\ElasticDataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
+use Elasticsearch\Common\Exceptions\RuntimeException;
 
 class ResourceController extends ApiController
 {
     /**
-     * API function for adding resource to data set
+     * Add resource record
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - required
+     * @param string dataset_uri - required
+     * @param array data - required
+     * @param string data[name] - required
+     * @param string data[description] - optional
+     * @param string data[locale] - required
+     * @param string data[version] - optional
+     * @param string data[schema_description] - required if no schema_url|optional
+     * @param string data[schema_url] - required if no schema_description|optional
+     * @param int data[type] - required (1 -> File, 2 -> Hiperlink, 3 -> API)
+     * @param string data[resource_url] - required if type is Hyperlink or API|optional
+     * @param string data[http_rq_type] - required if type is API|optional (post, get)
+     * @param string data[authentication] - required if type is API|optional
+     * @param string data[http_headers] - required if type is API|optional
+     * @param array data[custom_fields] - optional
+     * @param string data[custom_fields][label] - optional
+     * @param string data[custom_fields][value] - optional
+     *
+     * @return json with success or error
      */
     public function addResourceMetadata(Request $request)
     {
-        // Ask about file_format
-
         $post = $request->all();
+        $requestTypes = Resource::getRequestTypes();
+
+        if (isset($post['data']['http_rq_type'])) {
+            $post['data']['http_rq_type'] = strtoupper($post['data']['http_rq_type']);
+        }
 
         $validator = \Validator::make($post, [
-            'dataset_uri'           => 'required|string',
-            'data.name'             => 'required|string',
-            'data.descript'         => 'required|string',
-            'data.locale'           => 'required|string',
-            'data.version'          => 'required|string',
-            'data.schema_descript'  => 'required|string',
-            'data.schema_url'       => 'required|string',
-            'data.resource_type'    => 'required|integer',
-            'data.resource_url'     => 'string',
-            'data.http_rq_type'     => 'integer',
-            'data.authentication'   => 'string',
-            'data.http_headers'     => 'string',
+            'dataset_uri'               => 'required|string|exists:data_sets,uri,deleted_at,NULL',
+            'data'                      => 'required|array',
+            'data.name'                 => 'required|string',
+            'data.description'          => 'nullable|string',
+            'data.locale'               => 'required|string|max:5',
+            'data.version'              => 'nullable|string',
+            'data.schema_description'   => 'nullable|string|required_without:data.schema_url',
+            'data.schema_url'           => 'nullable|url|required_without:data.schema_description',
+            'data.type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
+            'data.resource_url'         => 'nullable|url|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+            'data.http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+            'data.authentication'       => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
+            'data.http_headers'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
+            'data.post_data'            => 'nullable|string',
+            'data.custom_fields'        => 'nullable|array',
+            'data.custom_fields.label'  => 'nullable|string',
+            'data.custom_fields.value'  => 'nullable|string',
         ]);
 
+        $validator->sometimes('data.post_data', 'required', function($post) use ($requestTypes) {
+            if (
+                isset($post['data']['type']) 
+                && $post['data']['type'] == Resource::TYPE_API
+                && isset($post['data']['http_rq_type'])
+                && $post['data']['http_rq_type'] == $requestTypes[Resource::HTTP_POST]
+            ) {
+                return true;
+            }
+            
+            return false;
+        });
+
         if (!$validator->fails()) {
-            $dataSet = DataSet::where('uri', $post['dataset_uri'])->first();
+            $dbData = [
+                'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
+                'name'              => $post['data']['name'],
+                'descript'          => isset($post['data']['description']) ? $post['data']['description'] : null,
+                'uri'               => Uuid::generate(4)->string,
+                'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
+                'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
+                'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
+                'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
+                'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
+                'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
+                'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
+                'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
+                'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
+            ];
 
-            if ($dataSet) {
-                $post['data']['data_set_id'] = $dataSet->id;
-                $post['data']['is_reported'] = false;
-                $post['data']['uri'] = Uuid::generate(4)->string;
-                // Ask about these not null fields in the table
-                $post['data']['file_format'] = 1;
-                $post['data']['post_data'] = 'some post data';
+            try {
+                $resource = Resource::create($dbData);
 
-                unset($post['data']['locale']);
-
-                try {
-                    $newResource = Resource::create($post['data']);
-
-                    return $this->successResponse(['uri' => $newResource->uri]);
-                } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
-                }
+                return $this->successResponse(['uri' => $resource->uri]);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Add resource metadata failure');
+        return $this->errorResponse('Add resource metadata failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for adding data to resource
+     * Add data to elastic search
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param int resource_uri - required
+     * @param array data - required
+     *
+     * @return json with success or error
      */
     public function addResourceData(Request $request)
     {
-        // Ask what does the `data` object contain, from the request parameters
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-            'data'          => 'required|string',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'data'          => 'required|array',
         ]);
 
         if (!$validator->fails()) {
-            $resource = Resource::where('uri', $post['resource_uri']);
+            DB::beginTransaction();
 
-            if ($resource) {
-                try {
-                    $resource->update(['post_data' => $post['data']]);
+            try {
+                $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $id = $resource->id;
+                $index = $resource->dataSet->id;
+                
+                $elasticDataSet = ElasticDataSet::create([
+                    'index'         => $index,
+                    'index_type'    => ElasticDataSet::ELASTIC_TYPE,
+                    'doc'           => $id,
+                ]);
+                
+                $resource->es_id = $elasticDataSet->id;
+                $resource->save();
 
-                    return $this->successResponse();
-                } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
-                }
+                $insert = \Elasticsearch::index([
+                    'body'  => $post['data'],
+                    'index' => $index,
+                    'type'  => ElasticDataSet::ELASTIC_TYPE,
+                    'id'    => $id,
+                ]);
+
+                DB::commit();
+
+                return $this->successResponse();
+            } catch (RuntimeException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Add resource data failure');
+        return $this->errorResponse('Add resource data failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for editing metadata of a resource
+     * Edit resource record
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param string resource_uri - required
+     * @param array data - required
+     * @param string data[resource_uri] - optional
+     * @param string data[name] - optional
+     * @param string data[description] - optional
+     * @param string data[locale] - optional
+     * @param string data[version] - optional
+     * @param string data[schema_description] - optional
+     * @param string data[schema_url] - optional
+     * @param int data[type] - optional (1 -> File, 2 -> Hiperlink, 3 -> API)
+     * @param string data[resource_url] - optional if type is Hyperlink or API
+     * @param string data[http_rq_type] - optional if type is API (post, get)
+     * @param string data[authentication] - optional if type is API
+     * @param string data[http_headers] - optional if type is API
+     * @param array data[custom_fields] - optional
+     * @param string data[custom_fields][label] - optional
+     * @param string data[custom_fields][value] - optional
+     *
+     * @return json with success or error
      */
     public function editResourceMetadata(Request $request)
     {
         $post = $request->all();
+        $requestTypes = Resource::getRequestTypes();
+        
+        if (isset($post['data']['http_rq_type'])) {
+            $post['data']['http_rq_type'] = strtoupper($post['data']['http_rq_type']);
+        }
 
         $validator = \Validator::make($post, [
-            'resource_uri'          => 'required|string',
-            'data.name'             => 'string',
-            'data.decript'          => 'string',
-            'data.locale'           => 'string',
-            'data.version'          => 'string',
-            'data.schema_descript'  => 'string',
-            'data.schema_url'       => 'string',
-            'data.type'             => 'required|integer',
-            'data.resource_url'     => 'string',
-            'data.http_rq_type'     => 'integer',
-            'data.authentication'   => 'string',
-            'data.http_headers'     => 'string',
+            'resource_uri'              => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'data'                      => 'required|array',
+            'data.resource_uri'         => 'nullable|string|unique:resources,uri',
+            'data.name'                 => 'nullable|string',
+            'data.description'          => 'nullable|string',
+            'data.locale'               => 'nullable|string|required_with:data.name,data.description|max:5',
+            'data.version'              => 'nullable|string',
+            'data.schema_description'   => 'nullable|string',
+            'data.schema_url'           => 'nullable|url',
+            'data.type'                 => 'nullable|int|in:'. implode(',', array_keys(Resource::getTypes())),
+            'data.resource_url'         => 'nullable|url|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+            'data.http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+            'data.authentication'       => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
+            'data.http_headers'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
+            'data.post_data'            => 'nullable|string',
+            'data.custom_fields'        => 'nullable|array',
+            'data.custom_fields.label'  => 'nullable|string',
+            'data.custom_fields.value'  => 'nullable|string',
         ]);
-
-        $updates = $post['data'];
-
+        
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
 
-            if ($resource) {
-                if (!empty($updates['name'])) {
-                    $resource->name = $updates['name'];
-                }
+            if (isset($post['data']['resource_uri'])) {
+                $resource->uri = $post['data']['resource_uri'];
+            }
 
-                if (!empty($updates['descript'])) {
-                    $resource->descript = $updates['descript'];
-                }
+            if (isset($post['data']['name'])) {
+                $resource->name = $post['data']['name'];
+            }
 
-                if (!empty($updates['version'])) {
-                    $resource->version = $updates['version'];
-                }
+            if (isset($post['data']['description'])) {
+                $resource->descript = $post['data']['description'];
+            }
 
-                if (!empty($updates['schema_descript'])) {
-                    $resource->schema_descript = $updates['schema_descript'];
-                }
+            if (isset($post['data']['version'])) {
+                $resource->version = $post['data']['version'];
+            }
 
-                if (!empty($updates['schema_url'])) {
-                    $resource->schema_url = $updates['schema_url'];
-                }
+            if (isset($post['data']['type'])) {
+                $resource->resource_type = $post['data']['type'];
+            }
 
-                if (!empty($updates['type'])) {
-                    $resource->resource_type = $updates['type'];
-                }
+            if (isset($post['data']['resource_url'])) {
+                $resource->resource_url = $post['data']['resource_url'];
+            }
 
-                if (!empty($updates['resource_url'])) {
-                    $resource->resource_url = $updates['resource_url'];
-                }
+            if (isset($post['data']['http_rq_type'])) {
+                $resource->http_rq_type = array_flip($requestTypes)[$post['data']['http_rq_type']];
+            }
 
-                if (!empty($updates['http_rq_type'])) {
-                    $resource->http_rq_type = $updates['http_rq_type'];
-                }
+            if (isset($post['data']['authentication'])) {
+                $resource->authentication = $post['data']['authentication'];
+            }
 
-                if (!empty($updates['authentication'])) {
-                    $resource->authentication = $updates['authentication'];
-                }
+            if (isset($post['data']['post_data'])) {
+                $resource->post_data = $post['data']['post_data'];
+            }
 
-                if (!empty($updates['http_headers'])) {
-                    $resource->http_headers = $updates['http_headers'];
-                }
+            if (isset($post['data']['http_headers'])) {
+                $resource->http_headers = $post['data']['http_headers'];
+            }
 
-                try {
-                    $resource->save();
+            if (isset($post['data']['schema_description'])) {
+                $resource->schema_descript = $post['data']['schema_description'];
+            }
 
-                    return $this->successResponse();
-                } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
-                }
+            if (isset($post['data']['schema_url'])) {
+                $resource->schema_url = $post['data']['schema_url'];
+            }
+
+            try {
+                $resource->save();
+
+                return $this->successResponse();
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Edit resource metadata failure');
+        return $this->errorResponse('Edit resource metadata failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for updating data of a resource
+     * Update elastic search data
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - required
+     * @param int resource_uri - required
+     * @param array data - required
+     *
+     * @return json with success or error
      */
     public function updateResourceData(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-            'data'          => 'required|string',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'data'          => 'required|array',
         ]);
 
         if (!$validator->fails()) {
-            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            try {
+                $resource = Resource::where('uri', $post['resource_uri'])->first();
 
-            if ($resource) {
-                try {
-                    $resource->post_data = $post['data'];
-                    $resource->save();
+                $id = $resource->id;
+                $index = $resource->dataSet->id;
 
-                    return $this->successResponse();
-                } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
-                }
+                $insert = \Elasticsearch::index([
+                    'body'  => $post['data'],
+                    'index' => $index,
+                    'type'  => ElasticDataSet::ELASTIC_TYPE,
+                    'id'    => $id,
+                ]);
+
+                return $this->successResponse();
+            } catch (RuntimeException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Update resource data failure');
+        return $this->errorResponse('Update resource data failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for deleting a resource
+     * Delete resource metadata record
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - required
+     * @param int resource_uri - required
+     * @param array data - required
+     *
+     * @return json with success or error
      */
     public function deleteResource(Request $request)
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-        ]);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
 
         if (!$validator->fails()) {
             try {
-                if (Resource::where('uri', $post['resource_uri'])->delete()) {
+                $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $resource->deleted_by = \Auth::id();
+                $resource->save();
+                $resource->delete();
 
-                    return $this->successResponse();
-                }
+                return $this->successResponse();
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Delete resource failure');
+        return $this->errorResponse('Delete resource failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for listing resources
+     * List resource records
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - optional
+     * @param array criteria - required
+     * @param string criteria[locale] - optional
+     * @param string criteria[dataset_uri] - optional
+     * @param string criteria[reported] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param int criteria[records_per_page] - optional
+     * @param int criteria[page_number] - optional
+     *
+     * @return json with success or error
      */
     public function listResources(Request $request)
     {
-        // Ask why dataset_uri is integer
+        $count = 0;
+        $results = [];
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.locale'       => 'string',
-            'criteria.resource_uri' => 'string',
-            'criteria.dataset_uri'  => 'string',
-            'criteria.reported'     => 'boolean',
-            'criteria.order.type'   => 'string',
-            'criteria.order.field'  => 'string',
-            'records_per_page'      => 'integer',
-            'page_number'           => 'integer',
+            'criteria'              => 'required|array',
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.resource_uri' => 'nullable|string|exists:resources,uri,deleted_at,NULL',
+            'criteria.dataset_uri'  => 'nullable|string|exists:data_sets,uri,deleted_at,NULL',
+            'criteria.reported'     => 'nullable|boolean',
+            'criteria.order'        => 'nullable|array',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
-
+        
         if (!$validator->fails()) {
-            $order = [];
-            $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'asc';
-            $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'id';
-            $pagination = $this->getRecordsPerPage($post['records_per_page']);
-            $page = !empty($post['page_number']) ? $post['page_number'] : 1;
+            $query = Resource::with('DataSet');
 
-            try {
-                $query = Resource::where('resource_type', 2);
-
-                if (!empty($post['criteria'])) {
-                    if (!empty($post['criteria']['dataset_uri'])) {
-                        $dataSet = DataSet::where('uri', $post['criteria']['dataset_uri'])->first();
-
-                        if ($dataSet) {
-                            $query->where('data_set_id', $dataSet->id);
-                        } else {
-
-                            return $this->errorResponse('List resources failure');
-                        }
-                    }
-
-                    if (!empty($post['criteria']['resource_uri'])) {
-                        $query->where('uri', $post['criteria']['resource_uri']);
-                    }
-
-                    if (!empty($post['criteria']['reported'])) {
-                        $query->where('is_reported', $post['criteria']['reported']);
-                    }
-                }
-
-                if ($order) {
-                    $query->orderBy($order['field'], $order['type']);
-                }
-
-                if ($pagination && $page) {
-                    $query->paginate($pagination, ['*'], 'page', $page);
-                }
-
-                $resourceData = $query->get();
-
-                return $this->successResponse(['resources' => $resourceData]);
-            } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            if (!empty($post['criteria']['dataset_uri'])) {
+                $query->whereHas('DataSet', function($q) use ($post) {
+                    $q->where('uri', $post['criteria']['dataset_uri']);
+                });
             }
-        }
 
-        return $this->errorResponse('List resources failure');
+            if (!empty($post['criteria']['resource_uri'])) {
+                $query->where('uri', $post['criteria']['resource_uri']);
+            }
+
+            if (!empty($post['criteria']['reported'])) {
+                $query->where('is_reported', $post['criteria']['reported']);
+            }
+            
+            $count = $query->count();
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
+
+            $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+            $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+            $query->orderBy($field, $type);
+
+            $locale = \LaravelLocalization::getCurrentLocale();
+            $fileFormats = Resource::getFormats();
+            $rqTypes = Resource::getRequestTypes();
+            $types = Resource::getTypes();
+
+            foreach ($query->get() as $result) {
+                $results[] = [
+                    'uri'                   => $result->uri,
+                    'dataset_uri'           => $result->dataSet->uri,
+                    'name'                  => $result->name,
+                    'description'           => $result->descript,
+                    'locale'                => $locale,
+                    'version'               => $result->version,
+                    'schema_description'    => $result->schema_descript,
+                    'schema_url'            => $result->schema_url,
+                    'type'                  => $types[$result->type],
+                    'resource_url'          => $result->resource_url,
+                    'http_rq_type'          => $rqTypes[$result->http_rq_type],
+                    'authentication'        => $result->authentication,
+                    'custom_fields'         => [], // TODO
+                    'file_format'           => $fileFormats[$result->file_format],
+                    'reported'              => $result->is_reported,
+                    'created_at'            => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
+                    'updated_at'            => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
+                    'created_by'            => $result->created_by,
+                    'updated_by'            => $result->updated_by,
+                ];
+            } 
+        }
+        
+        return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
     }
 
     /**
-     * API function for getting the metadata of a given resource
+     * Get resource metadata
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - optional
+     * @param string resource_uri - required 
+     * @param string locale - optional
+     *
+     * @return json with success or error
      */
     public function getResourceMetadata(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-            'locale'        => 'string|max:5',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'locale'        => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
-            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $resource = Resource::with('DataSet')->where('uri', $post['resource_uri'])->first();
+            $fileFormats = Resource::getFormats();
+            $rqTypes = Resource::getRequestTypes();
+            $types = Resource::getTypes();
 
             if ($resource) {
                 $data = [
@@ -343,97 +487,109 @@ class ResourceController extends ApiController
                     'version'               => $resource->version,
                     'schema_description'    => $resource->schema_descript,
                     'schema_url'            => $resource->schema_url,
-                    'type'                  => $resource->resource_type,
+                    'type'                  => $types[$resource->resource_type],
                     'resource_url'          => $resource->resource_url,
-                    'http_rq_type'          => $resource->http_rq_type,
+                    'http_rq_type'          => $rqTypes[$resource->http_rq_type],
                     'authentication'        => $resource->authentication,
                     'http_headers'          => $resource->http_headers,
-                    'file_format'           => $resource->file_format,
+                    'file_format'           => $fileFormats[$resource->file_format],
                     'reported'              => $resource->is_reported,
-                    'created_at'            => $resource->created_at,
+                    'created_at'            => isset($resource->created_at) ? $resource->created_at->toDateTimeString() : null,
                     'created_by'            => $resource->created_by,
-                    'updated_at'            => $resource->updated_at,
+                    'updated_at'            => isset($resource->updated_at) ? $resource->updated_at->toDateTimeString() : null,
                     'updated_by'            => $resource->updated_by,
                 ];
 
-                return $this->successResponse(['resource' => $data]);
+                return $this->successResponse(['resource' => $data], true);
             }
         }
 
-        return $this->errorResponse('Get resource metadata failure');
+        return $this->errorResponse('Get resource metadata failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for getting the description schema of a given resource
+     * Get description schema of a given resource
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - optional
+     * @param string resource_uri - required 
+     *
+     * @return json with success or error
      */
     public function getResourceSchema(Request $request)
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-        ]);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
 
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
 
             if ($resource) {
-                return $this->successResponse(['schema_definition' => $resource->schema_descript]);
+                $definition = isset($resource->schema_descript) ? $resource->schema_descript : $resource->schema_url;
+                
+                return $this->successResponse(['schema_definition' => $definition], true);
             }
         }
 
-        return $this->errorResponse('Get resource schema failure');
+        return $this->errorResponse('Get resource schema failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for getting the resource view
+     * Get a view of a given resource
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - optional
+     * @param string resource_uri - required 
+     *
+     * @return json with success or error
      */
     public function getResourceView(Request $request)
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-        ]);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
 
         if (!$validator->fails()) {
-            // PENDING we need clarification TO DO
-            return $this->successResponse();
+            // TODO tool
+            return $this->successResponse(['view' => 'html'], true);
         }
 
-        return $this->errorResponse('Get resource view failure');
+        return $this->errorResponse('Get resource view failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for retrieving data form a resource
+     * Get elastic search data of a given resource
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and uri of resource if successfull
+     * @param string api_key - optional
+     * @param string resource_uri - required 
+     *
+     * @return json with success or error
      */
     public function getResourceData(Request $request)
     {
-        // TO DO ELASTIC DATA TRANSFERS
         $post = $request->all();
 
-        $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string',
-        ]);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
 
         if (!$validator->fails()) {
-            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            try {
+                $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $elasticData = $resource->elasticDataSet;
+                
+                if (!empty($elasticData)) {
+                    $data = \Elasticsearch::get([
+                        'index' => $elasticData->index,
+                        'type'  => $elasticData->index_type,
+                        'id'    => $elasticData->doc,
+                    ]);
+                }
 
-            if ($resource) {
-                return $this->successResponse($resource->post_data);
+                return $this->successResponse(!empty($data['_source']) ? $data['_source'] : null);
+            } catch (RuntimeException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Get resource data failure');
+        return $this->errorResponse('Get resource data failure', $validator->errors()->messages());
     }
 
     public function searchResourceData(Request $request)
@@ -442,42 +598,49 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria.keywords'     => 'required|string',
-            'criteria.order.type'   => 'string',
-            'criteria.order.field'  => 'string',
-            'records_per_page'      => 'integer',
-            'page_number'           => 'integer',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
-
+        //     "size": 20,
+        //     "from": 100,
+        //     "sort": [
+        //       {
+        //         "_id": {
+        //           "order": "desc"
+        //         }
+        //       }
+        //     ]
+        //   }
         if (!$validator->fails()) {
             $order = [];
-            $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'asc';
-            $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'id';
-            $pagination = $this->getRecordsPerPage($post['records_per_page']);
+            $orderType = isset($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'desc';
+            $orderField = isset($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'created_at';
+            $recordsPerPage = $this->getRecordsPerPage($request->offsetGet('records_per_page'));
             $page = !empty($post['page_number']) ? $post['page_number'] : 1;
             $search = !empty($post['criteria']['keywords']) ? $post['criteria']['keywords'] : false;
 
             try {
-                $ids = Resource::search($search)->get()->pluck('id');
-                $query = Resource::whereIn('id', $ids);
+                $criteria = [
+                    // 'index' => '*',
+                    // 'type'  => '*',
+                    'body'  => '{
+                        "query" : {
+                            "multi_match" : {
+                                "query": "a",
+                                "fields": "*" 
+                            }
+                        }
+                    }',
+                ];
 
-                $count = $query->count();
-
-                $query->forPage(
-                    $request->offsetGet('page_number'),
-                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                );
-
-                $results = $query->get();
-
-                foreach ($results as $resource) {
-                    $data[] = $resource->post_data;
-                }
-
+                $data = \Elasticsearch::search($criteria);
+                error_log(print_r($data, true));
                 return $this->successResponse(['data' => $data], true);
             } catch (QueryException $ex) {
                 return $this->errorResponse($ex->getMessage());
             }
-
         }
 
         return $this->errorResponse('Search resource data failure');

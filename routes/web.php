@@ -84,12 +84,40 @@ Route::get('/user/datasetView', function () {
     return view('user/datasetView', ['class' => 'user']);
 });
 
+Route::get('/user/resourceView', function () {
+    return view('user/resourceView', ['class' => 'user']);
+});
+
+Route::get('/user/organisations', function () {
+    return view('user/organisations', ['class' => 'user']);
+});
+
+Route::get('/user/groups', function () {
+    return view('user/groups', ['class' => 'user']);
+});
+
+Route::get('/user/groupView', function () {
+    return view('user/groupView', ['class' => 'user']);
+});
+
+Route::get('/user/groupMembers', function () {
+    return view('user/groupMembers', ['class' => 'user']);
+});
+
+Route::get('/user/orgView', function () {
+    return view('user/orgView', ['class' => 'user']);
+});
+
+Route::get('/user/orgMembers', function () {
+    return view('user/orgMembers', ['class' => 'user']);
+});
+
 Route::get('/user/create', function () {
     return view('user/create', ['class' => 'user']);
 });
 
-Route::get('/user/translate', function () {
-    return view('user/translate', ['class' => 'user']);
+Route::get('/user/edit', function () {
+    return view('user/edit', ['class' => 'user']);
 });
 
 Route::get('/user/settings', function () {
@@ -102,6 +130,10 @@ Route::get('/user/registration', function () {
 
 Route::get('/user/orgRegistration', function () {
     return view('user/orgRegistration', ['class' => 'user']);
+});
+
+Route::get('/user/groupRegistration', function () {
+    return view('user/groupRegistration', ['class' => 'user']);
 });
 
 Route::get('/request', function () {

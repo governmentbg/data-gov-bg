@@ -7,10 +7,10 @@ use App\User;
 use App\Locale;
 use App\RoleRight;
 use Tests\TestCase;
-use App\Translation;
 use App\Organisation;
 use App\ActionsHistory;
 use App\NewsletterDigestLog;
+use App\Translator\Translation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -360,6 +360,7 @@ class DatabaseTest extends TestCase
 
             $dbData = [
                 'type'              => $type,
+                'uri'               => $this->faker->uuid(),
                 'name'              => [$locale => $this->faker->name],
                 'descript'          => [$locale => $this->faker->text(intval(8000))],
                 'logo_file_name'    => $i != 1 ? $this->faker->imageUrl() : null,

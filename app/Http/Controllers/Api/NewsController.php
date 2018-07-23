@@ -275,12 +275,12 @@ class NewsController extends ApiController
      * @param integer criteria[active] - optional
      * @param integer criteria[active] - optional
      * @param array criteria[order] - optional
-     * @param string order['type'] - optional
-     * @param string order['field] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      *
-     * @return json with status and list of news or error on failure
+     * @return json list of news or error on failure
      */
     public function listNews(Request $request)
     {
@@ -289,7 +289,7 @@ class NewsController extends ApiController
         $validator = Validator::make($newsListData, [
             'locale'                => 'nullable|string',
             'criteria'              => 'nullable|array',
-            'citeria.active'        => 'nullable|integer',
+            'criteria.active'       => 'nullable|integer',
             'criteria.valid'        => 'nullable|integer',
             'criteria.date_from'    => 'nullable|date',
             'criteria.date_to'      => 'nullable|date',

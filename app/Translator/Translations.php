@@ -89,17 +89,29 @@ class Translations
      * @param  string|array $locale
      * @param  string $value
      */
-    public function set($locale, $value = null)
+    public function set($locale, $value = null, $isUpdate = false, $first = false)
     {
         if (is_array($locale)) {
             foreach ($locale as $loc => $value) {
-                $this->set($loc, $value);
+                $this->set($loc, $value, $isUpdate);
             }
 
             return;
         }
 
         if ($this->has($locale)) {
+            if ($first) {
+                if ($isUpdate) {
+                    $locale = $this->trans($value, $this->group_id);
+                } else {
+                    $locale = $this->trans($value);
+                }
+
+                $this->set($locale, null, $isUpdate);
+
+                return;
+            }
+
             $this->get($locale)->{$this->type} = $value;
             $this->get($locale)->save();
         } else {
@@ -148,5 +160,34 @@ class Translations
 
         // throw new Exceptions\TranslationNotFound($this->group_id);
         return '';
+    }
+
+     /**
+     *
+     * @param type $value
+     * @return type
+     */
+    public function trans($value, $groupId = 0)
+    {
+        $defaultLocale = \LaravelLocalization::getDefaultLocale();
+        $locale = \LaravelLocalization::getCurrentLocale();
+        $array = [$locale => $value];
+
+        if ($groupId) {
+            $hasDefaultTrans = DB::table('translations')
+                ->where('locale', $defaultLocale)
+                ->where('group_id', $groupId)
+                ->count();
+
+            if ($hasDefaultTrans) {
+                return $array;
+            }
+        }
+
+        if ($locale == $defaultLocale) {
+            return $array;
+        }
+
+        return array_merge([$defaultLocale => $value], $array);
     }
 }

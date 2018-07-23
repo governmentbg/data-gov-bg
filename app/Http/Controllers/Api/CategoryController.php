@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 
@@ -12,8 +13,17 @@ class CategoryController extends ApiController
     /**
      * API function for adding main Category
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and id of Data Set if successfull
+     * @param string api_key - required
+     * @param string name - required
+     * @param string locale - required
+     * @param string icon - optional
+     * @param string icon_filename - optional
+     * @param string icon_mimetype - optional
+     * @param string icon_data - optional
+     * @param integer active - optional
+     * @param integer ordering - optional
+     *
+     * @return json response with id of Data Set or error
      */
     public function addMainCategory(Request $request)
     {
@@ -22,12 +32,12 @@ class CategoryController extends ApiController
         $validator = \Validator::make($post['data'], [
             'name'              => 'required|string',
             'locale'            => 'required|string|max:5',
-            'icon'              => 'string',
-            'icon_filename'     => 'string',
-            'icon_mimetype'     => 'string',
-            'icon_data'         => 'string',
-            'active'            => 'integer',
-            'ordering'          => 'integer',
+            'icon'              => 'nullable|string',
+            'icon_filename'     => 'nullable|string',
+            'icon_mimetype'     => 'nullable|string',
+            'icon_data'         => 'nullable|string',
+            'active'            => 'nullable|integer',
+            'ordering'          => 'nullable|integer',
         ]);
 
         // add library for image manipulation
@@ -58,13 +68,30 @@ class CategoryController extends ApiController
                     return $this->successResponse(['category_id' => $category->id], true);
                 }
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Add main category failure');
+        return $this->errorResponse('Add main category failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for editing main Category
+     *
+     * @param string api_key - required
+     * @param integer category_id - required
+     * @param array data - required
+     * @param string data[name] - required
+     * @param string data[locale] - required
+     * @param string data[icon] - optional
+     * @param string data[icon_filename] - optional
+     * @param string data[icon_mimetype] - optional
+     * @param string data[icon_data] - optional
+     * @param integer data[active] - optional
+     * @param integer data[ordering] - optional
+     *
+     * @return json with succes true or errors on failure
+     */
     public function editMainCategory(Request $request)
     {
         $post = $request->all();
@@ -73,12 +100,12 @@ class CategoryController extends ApiController
             'category_id'           => 'required|integer',
             'data.name'             => 'required|string',
             'data.locale'           => 'required|string|max:5',
-            'data.icon'             => 'string',
-            'data.icon_filename'    => 'string',
-            'data.icon_mimetype'    => 'string',
-            'data.icon_data'        => 'string',
-            'data.active'           => 'integer',
-            'data.ordering'         => 'integer',
+            'data.icon'             => 'nullable|string',
+            'data.icon_filename'    => 'nullable|string',
+            'data.icon_mimetype'    => 'nullable|string',
+            'data.icon_data'        => 'nullable|string',
+            'data.active'           => 'nullable|integer',
+            'data.ordering'         => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
@@ -113,17 +140,22 @@ class CategoryController extends ApiController
 
                     return $this->successResponse();
                 } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    Log::error($ex->getMessage());
                 }
-
-            } else {
-                return $this->errorResponse('Edit main category failure');
             }
         }
 
-        return $this->errorResponse('Edit main category failure');
+        return $this->errorResponse('Edit main category failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for deleting a main Category
+     *
+     * @param string api_key - required
+     * @param integer category_id - required
+     *
+     * @return json with succes true or errors on failure
+     */
     public function deleteMainCategory(Request $request)
     {
         $post = $request->all();
@@ -138,24 +170,38 @@ class CategoryController extends ApiController
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Delete main category failure');
+        return $this->errorResponse('Delete main category failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for lsiting main categories by criteria
+     *
+     * @param array criteria - optional
+     * @param string criteria[locale] - optional
+     * @param string criteria[active] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json with list of categories or error
+     */
     public function listMainCategories(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.locale'        => 'string|max:5',
-            'criteria.active'        => 'integer',
-            'criteria.order.type'    => 'string',
-            'criteria.order.field'   => 'string',
-            'records_per_page'      => 'integer',
-            'page_number'           => 'integer',
+            'criteria.locale'        => 'nullable|string|max:5',
+            'criteria.active'        => 'nullable|integer',
+            'criteria.order.type'    => 'nullable|string',
+            'criteria.order.field'   => 'nullable|string',
+            'records_per_page'       => 'nullable|integer',
+            'page_number'            => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
@@ -190,20 +236,28 @@ class CategoryController extends ApiController
 
                 return $this->successResponse($categoryData);
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('List main categories failure');
+        return $this->errorResponse('List main categories failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for viewig main category details
+     *
+     * @param integer category_id - required
+     * @param string locale - optional
+     *
+     * @return json with details or error
+     */
     public function getMainCategoryDetails(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
             'category_id'   => 'required|integer',
-            'locale'        => 'string|max:5',
+            'locale'        => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
@@ -217,9 +271,20 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get main category details failure');
+        return $this->errorResponse('Get main category details failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for adding a tag
+     *
+     * @param string api_key - required
+     * @param string category_id - required
+     * @param string name - required
+     * @param string locale - required
+     * @param integer active - optional
+     *
+     * @return json with tag_id or error
+     */
     public function addTag(Request $request)
     {
         $post = $request->data;
@@ -228,7 +293,7 @@ class CategoryController extends ApiController
             'name'          => 'required|string',
             'category_id'   => 'required|integer',
             'locale'        => 'required|string|max:5',
-            'active'        => 'integer',
+            'active'        => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
@@ -247,23 +312,36 @@ class CategoryController extends ApiController
                     return $this->successResponse(['tag_id' => $tag->id], true);
                 }
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Add tag failure');
+        return $this->errorResponse('Add tag failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for editing an existing tag
+     *
+     * @param string api_key - required
+     * @param integer tag_id - required
+     * @param array data - required
+     * @param string data[locale] - required if data[name] is present
+     * @param string data[name] - optional
+     * @param string data[category_id] - optional
+     * @param integer data[active] - optional
+     *
+     * @return json with success or error
+     */
     public function editTag(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
             'tag_id'            => 'required|integer',
-            'data.name'         => 'string',
-            'data.locale'       => 'string',
-            'data.category_id'  => 'integer',
-            'data.active'       => 'integer'
+            'data.name'         => 'nullable|string',
+            'data.locale'       => 'nullable|string',
+            'data.category_id'  => 'nullable|integer',
+            'data.active'       => 'nullable|integer'
         ]);
 
         if (!$validator->fails()) {
@@ -291,14 +369,22 @@ class CategoryController extends ApiController
 
                     return $this->successResponse();
                 } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    Log::error($ex->getMessage());
                 }
             }
         }
 
-        return $this->errorResponse('Edit tag failure');
+        return $this->errorResponse('Edit tag failure', $validator->errors()->messages());
     }
 
+     /**
+     * API function for deleting an existing tag
+     *
+     * @param string api_key - required
+     * @param integer tag_id - required
+     *
+     * @return json with success or error
+     */
     public function deleteTag(Request $request)
     {
         $post = $request->all();
@@ -311,25 +397,40 @@ class CategoryController extends ApiController
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Delete tag failure');
+        return $this->errorResponse('Delete tag failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for lsiting tags by criteria
+     *
+     * @param array criteria - optional
+     * @param string criteria[locale] - optional
+     * @param string criteria[active] - optional
+     * @param integer criteria[category_id] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json with list of tags or error
+     */
     public function listTags(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'records_per_page'      => 'integer',
-            'page_number'           => 'integer',
-            'criteria.locale'       => 'string|max:5',
-            'criteria.category_id'  => 'integer',
-            'criteria.active'       => 'integer',
-            'criteria.order.type'   => 'string',
-            'criteria.order.field'  => 'string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.category_id'  => 'nullable|integer',
+            'criteria.active'       => 'nullable|integer',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
         ]);
 
         if (!$validator->fails()) {
@@ -382,20 +483,28 @@ class CategoryController extends ApiController
                     'total_records' => $count,
                 ], true);
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('List tags failure');
+        return $this->errorResponse('List tags failure', $validator->errors()->messages());
     }
 
+    /**
+     * API function for viewig tag details
+     *
+     * @param integer tag_id - required
+     * @param string locale - optional
+     *
+     * @return json with details or error
+     */
     public function getTagDetails(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
             'tag_id' => 'required|integer',
-            "locale" => 'string|max:5',
+            "locale" => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
@@ -416,6 +525,6 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get tag details failure');
+        return $this->errorResponse('Get tag details failure', $validator->errors()->messages());
     }
 }

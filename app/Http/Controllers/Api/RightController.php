@@ -11,8 +11,9 @@ class RightController extends ApiController
     /**
      * API function for listing all types of rights
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and list of rights successfull
+     * @param string api_key required
+     *
+     * @return json wit list of rights or error
      */
     public function listRights(Request $request)
     {
@@ -26,7 +27,7 @@ class RightController extends ApiController
                 ];
             }
 
-            return $this->successResponse($result);
+            return $this->successResponse(['rights' => $result], true);
         } else {
             return $this->errorResponse('Get rights data failure');
         }

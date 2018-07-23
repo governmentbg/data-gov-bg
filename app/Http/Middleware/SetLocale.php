@@ -24,6 +24,10 @@ class SetLocale
             $locale = $request->data['locale'];
         } else if (isset($request->criteria['locale'])) {
             $locale = $request->criteria['locale'];
+        } else if (isset($request->org_data['locale'])) {
+            $locale = $request->org_data['locale'];
+        } else if (isset($request->user_settings['locale'])) {
+            $locale = $request->user_settings['locale'];
         }
 
         if (isset($locale)) {

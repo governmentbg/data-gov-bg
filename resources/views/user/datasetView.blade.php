@@ -15,9 +15,17 @@
                                 <div class="col-sm-12 p-l-none">
                                     <div>
                                         <ul class="nav filter-type right-border">
-                                            <li><a class="p-l-none" href="{{ url('/user') }}">нюзфийд</a></li>
-                                            <li><a class="active" href="{{ url('/user/datasets') }}">моите данни</a></li>
-                                            <li><a href="{{ url('/user/create') }}">нов набор</a></li>
+                                            <li><a class="p-l-none" href="{{ url('/user') }}">известия</a></li>
+                                            <li>
+                                                <!-- if there is resource with signal -->
+                                                <div class="col-xs-12 text-center exclamation-sign">
+                                                    <img src="{{ asset('img/reported.svg') }}">
+                                                </div>
+                                                <!-- end-->
+                                                <a class="active" href="{{ url('/user/datasets') }}">моите данни</a>
+                                            </li>
+                                            <li><a href="{{ url('/user/groups') }}">групи</a></li>
+                                            <li><a href="{{ url('/user/organisations') }}">организации</a></li>
                                             <li><a href="{{ url('/user/settings') }}">настройки</a></li>
                                         </ul>
                                     </div>
@@ -29,87 +37,80 @@
                 <div class="col-xs-12 m-t-lg">
                     <div class="articles">
                         <div class="article m-b-md">
-                            <div>
-                                <div class="col-sm-7 col-xs-12">
-                                    <ul class="p-l-none">
-                                        <li>Отгиворник подръжка:</li>
-                                        <li>Версия:</li>
-                                        <li>Последен ъпдейт:</li>
-                                        <li>Създаден:</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-sm-12 art-heading-bar">
-                                <div class="socialPadding">
-                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
-                                </div>
-                                <div class="sendMail p-w-sm">
-                                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
-                                </div>
-                            </div>
-
                             <div class="col-sm-12">
+                                <div>Дата на добавяне: {{ date('d.m.Y') }}</div>
                                 <h2>Lorem ipsum dolor sit amet</h2>
                                 <p>
                                     Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi. Ut euismod nibh at ante dapibus, sit amet pharetra lectus blandit. Aliquam eget orci tellus. Aliquam quis dignissim lectus, non dictum purus. Pellentesque scelerisque quis enim at varius. Duis a ex faucibus urna volutpat varius ac quis mauris. Sed porttitor cursus metus, molestie ullamcorper dolor auctor sed. Praesent dictum posuere tellus, vitae eleifend dui ornare et. Donec eu ornare eros. Cras eget velit et ex viverra facilisis eget nec lacus.
                                 </p>
-                                <div class="col-sm-12 p-l-none">
-                                    <div class="tags pull-left">
-                                        <span class="badge badge-pill">ТАГ</span>
-                                        <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                                        <span class="badge badge-pill">ТАГ</span>
+
+                                <div class="col-sm-12 pull-left m-t-md p-l-none">
+                                    <div class="pull-left history">
+                                        @for($i = 1; $i <= 3; $i++ )
+                                            <div>
+                                                <a href="{{ url('/user/resourceView') }}">
+                                                    <span>
+                                                        <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><path d="M26.72,29.9H3.33V0H26.72ZM4.62,28.61H25.43V1.29H4.62Z"/><path d="M11.09,6.18V9.12H8.14V6.18h2.95m1.29-1.3H6.85v5.53h5.53V4.88Z"/><path d="M11.09,13.48v2.94H8.14V13.48h2.95m1.29-1.29H6.85v5.52h5.53V12.19Z"/><path d="M11.09,20.78v2.94H8.14V20.78h2.95m1.29-1.29H6.85V25h5.53V19.49Z"/><rect x="14.34" y="21.38" width="7.57" height="1.74"/><rect x="14.34" y="14.08" width="7.57" height="1.74"/><rect x="14.34" y="6.78" width="7.57" height="1.74"/></svg>
+                                                    </span>
+                                                    <span class="version-heading">Ресурс</span>
+                                                    <span class="version">&nbsp;&#8211;&nbsp;име</span>
+                                                </a>
+                                            </div>
+                                        @endfor
+                                        <!-- if resource has signals add class signaled-->
+                                        <div class="signaled">
+                                            <a href="{{ url('/user/resourceView') }}">
+                                                <span>
+                                                    <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><path d="M26.72,29.9H3.33V0H26.72ZM4.62,28.61H25.43V1.29H4.62Z"/><path d="M11.09,6.18V9.12H8.14V6.18h2.95m1.29-1.3H6.85v5.53h5.53V4.88Z"/><path d="M11.09,13.48v2.94H8.14V13.48h2.95m1.29-1.29H6.85v5.52h5.53V12.19Z"/><path d="M11.09,20.78v2.94H8.14V20.78h2.95m1.29-1.29H6.85V25h5.53V19.49Z"/><rect x="14.34" y="21.38" width="7.57" height="1.74"/><rect x="14.34" y="14.08" width="7.57" height="1.74"/><rect x="14.34" y="6.78" width="7.57" height="1.74"/></svg>
+                                                </span>
+                                                <span class="version-heading">Ресурс</span>
+                                                <span class="version">&nbsp;&#8211;&nbsp;име</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="info-bar col-sm-7 col-xs-12 p-l-none">
+                                    <ul class="p-l-none">
+                                        <li>Отговорник подръжка:</li>
+                                        <li>Създаден:</li>
+                                    </ul>
+                                </div>
+                                <!-- IF there are old versions of this article -->
+                                <div class="col-xs-12 pull-left m-t-md p-l-none">
+                                    <div class="pull-left history">
+                                        <div class="m-b-sm">
+                                            <a href="#">
+                                                <span class="version">Версия 1</span>
+                                            </a>
+                                        </div>
+                                        <div>
+                                            <a href="#">
+                                                <span class="version">Версия 2</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- chart goes here -->
-                                <div class="col-sm-12 pull-left m-t-md">
-                                    <img class="img-responsive" src="{{ asset('img/test-img/bar-chart.jpg') }}">
-                                </div>
-                                <div class="col-sm-12 pull-left m-t-md">
-                                    <div class="pull-right">
-                                        <div class="badge-info m-r-md pull-left">
-                                            <span class="badge badge-pill js-toggle-info-box">превод</span>
-                                            <div class="info-box">
-                                                <a href="{{ url('/user/translate') }}"><p>БГ</p></a>
-                                                <a href="{{ url('/user/translate') }}"><p>EN</p></a>
-                                                <a href="{{ url('/user/translate') }}"><p>SP</p></a>
-                                                <p>...</p>
-                                            </div>
-                                        </div>
-                                        <div class="badge-info m-r-md">
-                                            <span class="badge badge-pill js-toggle-info-box"><a href="#">изтриване</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- IF there are old versions of this article -->
-                                <div class="col-xs-12 pull-left m-t-md">
-                                    <div class="pull-left history">
-                                        <div>
-                                            <a href="#">
-                                                <span class="version-heading">Заглавие</span>
-                                                <span class="version">&nbsp;&#8211;&nbsp;версия 3</span>
-                                            </a>
-                                        </div>
-                                        <div>
-                                            <a href="#">
-                                                <span class="version-heading">Заглавие</span>
-                                                <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- IF there are commnets (in design there is no comments?!-->
+                                <!-- signals -->
                                 <div class="col-sm-12 pull-left m-t-md p-l-none">
-                                    <div class="comments p-lg">
-                                        @for ($i=0; $i<3; $i++)
-                                            <div class="comment-box p-lg m-b-lg">
-                                                <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>
-                                                <p class="comment-author p-b-xs">Име на профила</p>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                                            </div>
-                                        @endfor
+                                    <div class="comments signal p-lg">
+                                        <div class="comment-box p-lg m-b-lg">
+                                            <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>
+                                            <p class="comment-author p-b-xs">Име на профила</p>
+                                            <p class="p-b-xs">Съдържание на сигнала</p>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-t-lg p-l-none">
+                                    <div class="pull-left">
+                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/edit') }}">редактиране</a></span>
+                                        <span class="badge badge-pill m-b-sm">
+                                            <a
+                                                href="#"
+                                                onclick="return confirm('Изтриване на данните?');"
+                                                >изтриване</a>
+                                        </span>
                                     </div>
                                 </div>
                             </div>

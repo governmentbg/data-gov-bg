@@ -137,31 +137,4 @@ class ApiController extends Controller
             }
         }
     }
-
-    /**
-     *
-     * @param type $locale
-     * @param type $value
-     * @return type
-     */
-    public function trans($locale, $value, $groupId = 0)
-    {
-        $defaultLocale = \LaravelLocalization::getDefaultLocale();
-
-        if ($groupId) {
-            $haveDefautTrans = DB::table('translations')
-                    ->where('locale', $defaultLocale)
-                    ->where('group_id', $groupId)
-                    ->count();
-            if ($haveDefautTrans) {
-                return [$locale => $value];
-            }
-        }
-
-        if ($locale == $defaultLocale) {
-            return $value;
-        }
-
-        return [$defaultLocale => $value, $locale => $value];
-    }
 }

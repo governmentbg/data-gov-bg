@@ -129,7 +129,7 @@ trait Translatable
      * @param  string                 $key
      * @param  string|array           $value
      */
-    protected function translatable_set($key, $value)
+    protected function translatable_set($key, $value, $isUpdate = false)
     {
         $this->translatable_handled = false;
 
@@ -137,9 +137,9 @@ trait Translatable
             $translations = $this->translations($key);
 
             if (is_array($value)) {
-                $translations->set($value);
+                $translations->set($value, null, $isUpdate, true);
             } else {
-                $translations->set($this->translation_locale(), $value);
+                $translations->set($this->translation_locale(), $value, $isUpdate, true);
             }
 
             // Make sure model key (e.g "name") matches the translation "group_id"
@@ -290,7 +290,7 @@ trait Translatable
 
         // Update translations
         foreach ($translations as $key => $value) {
-            $this->translatable_set($key, $value);
+            $this->translatable_set($key, $value, true);
         }
 
         $this->save();

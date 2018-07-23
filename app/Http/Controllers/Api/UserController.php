@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\ApiController;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Database\QueryException;
-use PDOException;
 use App\User;
-use App\UserSetting;
 use App\Locale;
+use PDOException;
+use App\RoleRight;
+use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
-use App\RoleRight;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 Use \DB;
 Use Uuid;
 
@@ -21,261 +22,242 @@ class UserController extends ApiController
     /**
      * List user records by given criteria
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and users if successfull
+     * @param string api_key - required
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     * @param array criteria - optional
+     * @param integer criteria[active] - optional
+     * @param integer criteria[is_admin] - optional
+     * @param integer criteria[org_id] - optional
+     * @param integer criteria[role_id] - optional
+     * @param integer criteria[id] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     *
+     * @return json response with list of users or error
      */
     public function listUsers(Request $request)
     {
         $result = [];
-        $criteria = is_array($request->criteria)
-            ? $request->criteria
-            : null;
-        $userFilters = ['active', 'approved', 'is_admin', 'id'];
-        $userToOrgRoleFilters = [];
-        $orderType = !empty($criteria['order']['type']) ? $criteria['order']['type'] : null;
-        $orderField = !empty($criteria['order']['field']) ? $criteria['order']['field'] : null;
-        $pagination = is_numeric($request->records_per_page)
-            ? $request->records_per_page
-            : null;
-        $page = is_numeric($request->page_number)
-            ? $request->page_number
-            : null;
+        $criteria = $request->offsetGet('criteria');
 
-        if (!empty($criteria['org_id'])) {
-            $userToOrgRoleFilters['org_id'] = $criteria['org_id'];
-        }
+        $validator = \Validator::make($request->all(), [
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+            'criteria'              => 'nullable|array',
+            'criteria.active'       => 'nullable|boolean',
+            'criteria.approved'     => 'nullable|boolean',
+            'criteria.is_admin'     => 'nullable|integer',
+            'criteria.role_id'      => 'nullable|integer',
+            'criteria.org_id'       => 'nullable|integer',
+            'criteria.id'           => 'nullable|interger',
+            'criteria.order'        => 'nullable|array',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+        ]);
 
-        if (!empty($criteria['role_id'])) {
-            $userToOrgRoleFilters['role_id'] = $criteria['role_id'];
-        }
-
-        if (is_array($criteria)) {
-            foreach ($criteria as $key => $value) {
-                if (!in_array($key, $userFilters)) {
-                    unset($criteria[$key]);
-                }
-            }
-        }
-
-        try {
+        if (!$validator->fails()) {
             $query = User::select();
 
-            if (!is_null($criteria)) {
-                $query->where($criteria);
+            if (isset($criteria['active'])) {
+                $query->where('active', $criteria['active']);
             }
 
-            if (!empty($userToOrgRoleFilters)) {
-                $query->whereHas('userToOrgRole', function($q) use($userToOrgRoleFilters)
-                    {
-                        $q->where($userToOrgRoleFilters);
-                    });
+            if (isset($criteria['approved'])) {
+                $query->where('approved', $criteria['approved']);
             }
 
-            if ($pagination) {
-                $query->paginate($pagination, ['*'], 'page', $page);
+            if (!empty($criteria['is_admin'])) {
+                $query->where('is_admin', $criteria['is_admin']);
             }
 
-            if ($orderType && $orderField) {
-                $query->orderBy($orderField, $orderType);
+            if (!empty($criteria['role_id'])) {
+                $query->whereHas('userToOrgRole', function($q) use($criteria) {
+                    $q->where('role_id', $criteria['role_id']);
+                });
             }
 
-            $users = $query->get();
-        } catch (QueryException $e) {
+            if (!empty($criteria['org_id'])) {
+                $query->whereHas('userToOrgRole', function($q) use($criteria) {
+                    $q->where('org_id', $criteria['org_id']);
+                });
+            }
 
-            return ApiController::errorResponse('Get user list failure');
+            if (!empty($criteria['id'])) {
+                $query->where('id', $criteria['id']);
+            }
+
+            $count = $query->count();
+
+            if (isset($criteria['order']['field']) && isset($criteria['order']['type'])) {
+                $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
+            }
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
+
+            try {
+                $users = $query->get();
+
+                return $this->successResponse(['users'=> $users, 'total_records' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        if (!empty($users)) {
-            foreach ($users as $user) {
-                $result[] = [
-                    'id'            => $user->id,
-                    'username'      => $user->username,
-                    'email'         => $user->email,
-                    'firstname'     => $user->firstname,
-                    'lastname'      => $user->lastname,
-                    'add_info'      => $user->add_info,
-                    'is_admin'      => $user->is_admin,
-                    'active'        => $user->active,
-                    'approved'      => $user->approved,
-                    'api_key'       => $user->api_key,
-                    'hash_id'       => $user->hash_id,
-                    'created_at'    => $user->created,
-                    'updated_at'    => $user->updated_at,
-                    'created_by'    => $user->created_by,
-                    'updated_by'    => $user->updated_by,
-                ];
-            }
-        }
-
-        return $this->successResponse(['users'=> $result, 'total_records' => count($users)], true);
+        return $this->errorResponse('Get users list failure', $validator->errors()->messages());
     }
 
     /**
      * Search in user records by given keywords
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and users if successfull
+     * @param string api_key - required
+     * @param array criteria - required
+     * @param string criteria[keywords] - required
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json response with fount users or error
      */
     public function searchUsers(Request $request)
     {
-        $result = [];
-        $criteria = is_array($request->criteria)
-            ? $request->criteria
-            : null;
-        $order = !empty($criteria['order']['type']) && !empty($criteria['order']['field']);
-        $search = !empty($criteria['keywords'])
-            ? $criteria['keywords']
-            : null;
-        $pagination = is_numeric($request->records_per_page)
-            ? $request->records_per_page
-            : null;
-        $page = is_numeric($request->page_number)
-            ? $request->page_number
-            : null;
+        $validator = \Validator::make($request->all(), [
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+            'criteria'              => 'required|array',
+            'criteria.keywords'     => 'required|string',
+            'criteria.order'        => 'nullable|array',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+        ]);
 
-        try {
-            $query = User::select();
+        $search = $request->all();
 
-            if (!is_null($search)) {
-                $query->where(function ($qr) use ($search) {
-                    $qr->where('firstname', 'like', '%'. $search .'%')
-                        ->orWhere('lastname', 'like', '%'. $search .'%')
-                        ->orWhere('username', 'like', '%'. $search .'%')
-                        ->orWhere('email', 'like', '%'. $search .'%');
-                });
-            }
+        if (!$validator->fails()) {
+            $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
+            $query = User::whereIn('id', $ids);
 
-            if ($pagination) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
+            $count = $query->count();
 
-            if ($order) {
-                $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
-            }
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
-            $users = $query->get();
+            try {
+                $data = $query->get();
 
-        } catch (QueryException $e) {
-
-            return ApiController::errorResponse('Search users failure');
-        }
-
-        if (!empty($users)) {
-            foreach ($users as $user) {
-                $result[] = [
-                    'id'            => $user->id,
-                    'username'      => $user->username,
-                    'email'         => $user->email,
-                    'firstname'     => $user->firstname,
-                    'lastname'      => $user->lastname,
-                    'add_info'      => $user->add_info,
-                    'is_admin'      => $user->is_admin,
-                    'active'        => $user->active,
-                    'approved'      => $user->approved,
-                    'api_key'       => $user->api_key,
-                    'hash_id'       => $user->hash_id,
-                    'created_at'    => $user->created,
-                    'updated_at'    => $user->updated_at,
-                    'created_by'    => $user->created_by,
-                    'updated_by'    => $user->updated_by,
-                ];
+                return $this->successResponse(['users' => $data, 'total_records' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->successResponse(['users'=> $result, 'total_records' => count($users)], true);
+        return $this->errorResponse('Search users failure', $validator->errors()->messages());
     }
 
     /**
      * Get user roles and organisations by given user id
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and user if successfull
+     * @param string api_key - required
+     * @param integer id - required
+     *
+     * @return json response with roles or error
      */
     public function getUserRoles(Request $request)
     {
-        $result = [];
+        $post = $request->all();
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'id' => 'required',
-            ]
-        );
+        $validator = \Validator::make($post, ['id' => 'required|integer']);
 
-        if ($validator->fails()) {
+        if (!$validator->fails()) {
+            $user = User::find($post['id']);
 
-            return ApiController::errorResponse('Get user roles failure');
-        }
+            if ($user) {
+                $result = [];
 
-        $roles = \App\UserToOrgRole::where('user_id', $request->id)->get();
-
-        if (!empty($roles)) {
-            foreach ($roles as $role) {
-                $result['roles'][] = [
-                    'org_id'  => $role['org_id'],
-                    'role_id' => $role['role_id'],
-                ];
+                foreach($user->userToOrgRole as $role) {
+                    $result[] = [
+                        'org_id' => $role->org_id,
+                        'role_id' => $role->role_id,
+                    ];
+                }
+                return $this->successResponse(['roles' => $result]);
             }
         }
 
-        return $this->successResponse(['user' => $result], true);
+        return $this->errorResponse('Get user roles failure', $validator->errors->messages());
     }
 
     /**
      * Get user settings by given user id
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and user if successfull
+     * @param string api_key - required
+     * @param integer id - required
+     *
+     * @return json response with settings or error
      */
     public function getUserSettings(Request $request)
     {
         $result = [];
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'id' => 'required',
-            ]
-        );
+        $validator = \Validator::make($request->all(), ['id' => 'required|integer']);
 
-        if ($validator->fails()) {
+        if (!$validator->fails()) {
+            $user = User::with('userSetting', 'follow')->find($request->id);
 
-            return ApiController::errorResponse('Get user settings failure');
-        }
+            if (!empty($user)) {
+                $result['settings'] = [
+                    'locale'            => !empty($user['userSetting']) ? $user['userSetting']['locale'] : null,
+                    'newsletter_digest' => !empty($user['userSetting']) ? $user['userSetting']['newsletter_digest'] : null,
+                    'created_at'        => $user['created_at'],
+                    'updated_at'        => $user['updated_at'],
+                    'created_by'        => $user['created_by'],
+                    'updated_by'        => $user['updated_by'],
+                ];
 
-        $user = User::with('userSetting', 'follow')->find($request->id);
+                $result['follows'] = [];
 
-        if (!empty($user)) {
-            $result['settings'] = [
-                'locale'            => !empty($user['userSetting']) ? $user['userSetting']['locale'] : null,
-                'newsletter_digest' => !empty($user['userSetting']) ? $user['userSetting']['newsletter_digest'] : null,
-                'created_at'        => $user['created_at'],
-                'updated_at'        => $user['updated_at'],
-                'created_by'        => $user['created_by'],
-                'updated_by'        => $user['updated_by'],
-            ];
-
-            $result['follows'] = [];
-
-            if (!empty($user['follow'])) {
-                foreach ($user['follow'] as $follow) {
-                    $result['follows'][] = [
-                        'news'        => $follow['news'],
-                        'org_id'      => $follow['org_id'],
-                        'dataset_id'  => $follow['dataset_id'],
-                        'category_id' => $follow['category_id'],
-                    ];
+                if (!empty($user['follow'])) {
+                    foreach ($user['follow'] as $follow) {
+                        $result['follows'][] = [
+                            'news'        => $follow['news'],
+                            'org_id'      => $follow['org_id'],
+                            'dataset_id'  => $follow['dataset_id'],
+                            'category_id' => $follow['category_id'],
+                        ];
+                    }
                 }
             }
+
+            return $this->successResponse(['user' => $result], true);
         }
 
-        return $this->successResponse(['user' => $result], true);
+        return $this->errorResponse('Get user settings failure', $validator->errors()->messages());
     }
 
     /**
      * Add new user record
      *
-     * @param object $request - POST request
+     * @param string api_key - required
+     * @param array data - required
+     * @param string data[firstname] - required
+     * @param string data[lastname] - required
+     * @param string data[email] - required
+     * @param string data[add_info] - optional
+     * @param string data[username] - optional
+     * @param string data[password] - required
+     * @param string data[password_confirm] - required
+     * @param integer data[role_id] - optional
+     * @param array data[user_settings] - optional
+     * @param string data[user_settings][locale] - optional
+     * @param integer data[user_settings][newsletter_digest] - optional
+     *
      * @return json $response - response with status and api key if successfull
      */
     public function addUser(Request $request)
@@ -285,17 +267,16 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'data.firstname'         => 'required',
-                'data.lastname'          => 'required',
+                'data.firstname'         => 'required|string',
+                'data.lastname'          => 'required|string',
                 'data.email'             => 'required|email',
-                'data.password'          => 'required',
-                'data.password_confirm'  => 'required|same:data.password',
+                'data.password'          => 'required|string',
+                'data.password_confirm'  => 'required|string|same:data.password',
             ]
         );
 
         if ($validator->fails()) {
-
-            return ApiController::errorResponse('Add user failure');
+            return $this->errorResponse('Add user failure', $validator->errors()->messages());
         }
 
         $apiKey = Uuid::generate(4)->string;
@@ -321,8 +302,9 @@ class UserController extends ApiController
         try {
             $user->save();
         } catch (QueryException $e) {
+            Log::error($e->getMessage());
 
-            return ApiController::errorResponse('Add user failure');
+            return $this->errorResponse('Add user failure');
         }
 
         if (isset($data['role_id']) || isset($data['org_id'])) {
@@ -336,8 +318,7 @@ class UserController extends ApiController
             );
 
             if ($validator->fails()) {
-
-                return ApiController::errorResponse('Add user failure');
+                return $this->errorResponse('Add user failure', $validator->errors()->messages());
             }
 
             $userToOrgRole = new UserToOrgRole;
@@ -349,17 +330,14 @@ class UserController extends ApiController
             try {
                 $userToOrgRole->save();
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Add user failure');
+                return $this->errorResponse('Add user failure');
             }
         }
 
         if (!empty($data['user_settings']['locale']) || isset($data['user_settings']['newsletter_digest'])) {
             $userSettings = new UserSetting;
-
-            $userLocale = !empty($data['user_settings']['locale']) && !empty(Locale::where('locale', $data['user_settings']['locale'])->value('locale'))
-                ? $data['user_settings']['locale']
-                : config('app.locale');
 
             $userSettings->user_id = $user->id;
             $userSettings->locale = $userLocale;
@@ -375,8 +353,9 @@ class UserController extends ApiController
             try {
                 $userSettings->save();
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Add user failure');
+                return $this->errorResponse('Add user failure');
             }
         }
 
@@ -388,7 +367,22 @@ class UserController extends ApiController
     /**
      * Edit existing user record
      *
-     * @param object $request - POST request
+     * @param string api_key - required
+     * @param integer id - required
+     * @param array data - required
+     * @param string data[firstname] - required
+     * @param string data[lastname] - required
+     * @param string data[email] - required
+     * @param string data[add_info] - optional
+     * @param string data[username] - optional
+     * @param string data[password] - required
+     * @param string data[password_confirm] - required
+     * @param integer data[role_id] - optional
+     * @param integer data[is_admin] - optional
+     * @param array data[user_settings] - optional
+     * @param string data[user_settings][locale] - optional
+     * @param integer data[user_settings][newsletter_digest] - optional
+     *
      * @return json $response - response with status and api key if successfull
      */
     public function editUser(Request $request)
@@ -399,18 +393,24 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'data' => 'required',
-                'id'   => 'required',
+                'id'                    => 'required|integer',
+                'data'                  => 'required|array',
+                'data.firstname'        => 'nullable|string',
+                'data.lastname'         => 'nullable|string',
+                'data.email'            => 'nullable|email',
+                'data.password'         => 'nullable|string',
+                'data.is_admin'         => 'nullable|integer',
+                'data.password_confirm' => 'nullable|string|same:data.password',
             ]
         );
 
         if ($validator->fails()) {
 
-            return ApiController::errorResponse('Edit user failure');
+            return $this->errorResponse('Edit user failure', $validator->errors()->messages());
         }
 
         if (empty($user = User::find($request->id))) {
-            return ApiController::errorResponse('Edit user failure');
+            return $this->errorResponse('Edit user failure');
         }
 
         $newUserData = [];
@@ -445,7 +445,7 @@ class UserController extends ApiController
 
             if ($validator->fails()) {
 
-                return ApiController::errorResponse('Edit user failure');
+                return $this->errorResponse('Edit user failure', $validator->errors()->messages());
             }
 
             $newUserData['password'] = bcrypt($data['password']);
@@ -477,7 +477,7 @@ class UserController extends ApiController
 
             if ($validator->fails()) {
 
-                return ApiController::errorResponse('Edit user failure');
+                return $this->errorResponse('Edit user failure');
             }
 
             $orgAndRoles['role_id'] = (int) $data['role_id'];
@@ -495,7 +495,7 @@ class UserController extends ApiController
         }
 
         if (empty($newUserData) && empty($newSettings) && empty($orgAndRoles)) {
-            return ApiController::errorResponse('Edit user failure');
+            return $this->errorResponse('Edit user failure');
         }
 
         if (!empty($newUserData)) {
@@ -504,8 +504,9 @@ class UserController extends ApiController
             try {
                 User::where('id', $request->id)->update($newUserData);
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Edit user failure');
+                return $this->errorResponse('Edit user failure');
             }
         }
 
@@ -513,8 +514,9 @@ class UserController extends ApiController
             try {
                 UserToOrgRole::where('user_id', $request->id)->update($orgAndRoles);
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Edit user failure');
+                return $this->errorResponse('Edit user failure');
             }
         }
 
@@ -522,8 +524,9 @@ class UserController extends ApiController
             try {
                 UserSetting::where('user_id', $request->id)->update($newSettings);
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Edit user failure');
+                return $this->errorResponse('Edit user failure');
             }
         }
 
@@ -533,7 +536,9 @@ class UserController extends ApiController
     /**
      * Delete existing user record
      *
-     * @param object $request - POST request
+     * @param string api_key - required
+     * @param integer id - required
+     *
      * @return json $response - response with status
      */
     public function deleteUser(Request $request)
@@ -549,26 +554,27 @@ class UserController extends ApiController
 
         if ($validator->fails()) {
 
-            return ApiController::errorResponse('Delete user failure');
+            return $this->errorResponse('Delete user failure', $validator->errors()->messages());
         }
 
         if (empty($user = User::find($request->id))) {
-            return ApiController::errorResponse('Delete user failure');
+            return $this->errorResponse('Delete user failure');
         }
 
         try {
             $user->delete();
         } catch (QueryException $e) {
 
-            return ApiController::errorResponse('Delete user failure');
+            return $this->errorResponse('Delete user failure');
         }
 
         try {
             $user->deleted_by = \Auth::id();
             $user->save();
         } catch (QueryException $e) {
+            Log::error($e->getMessage());
 
-            return ApiController::errorResponse('Delete user failure');
+            return $this->errorResponse('Delete user failure');
         }
 
         return $this->successResponse();
@@ -577,25 +583,21 @@ class UserController extends ApiController
     /**
      * Generate new api key for existing user
      *
-     * @param object $request - POST request
+     * @param string api_key - required
+     * @param integer id - required
+     *
      * @return json $response - response with status
      */
     public function generateAPIKey(Request $request)
     {
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'id' => 'required',
-            ]
-        );
+        $validator = \Validator::make($request->all(), ['id' => 'required|integer']);
 
         if ($validator->fails()) {
-
-            return ApiController::errorResponse('Generate API key failure');
+            return $this->errorResponse('Generate API key failure', $validator->errors()->messages());
         }
 
         if (empty($user = User::find($request->id))) {
-            return ApiController::errorResponse('Generate API key failure');
+            return $this->errorResponse('Generate API key failure');
         }
 
         try {
@@ -603,8 +605,9 @@ class UserController extends ApiController
             $user->updated_by = \Auth::id();
             $user->save();
         } catch (QueryException $e) {
+            Log::error($e->getMessage());
 
-            return ApiController::errorResponse('Generate API key failure');
+            return $this->errorResponse('Generate API key failure');
         }
 
         return $this->successResponse();
@@ -613,7 +616,15 @@ class UserController extends ApiController
     /**
      * Invite user to register
      *
-     * @param object $request - POST request
+     * @param string api_key - required
+     * @param array data - required
+     * @param string data[email] - required
+     * @param integer data[is_admin] - optional
+     * @param integer data[approved] - optional
+     * @param integer data[role_id] - optional
+     * @param integer data[org_id] - optional
+     *
+     *
      * @return json $response - response with status
      */
     public function inviteUser(Request $request)
@@ -621,12 +632,18 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'data.email' => 'required|email',
+                'id'            => 'required|integer',
+                'data'          => 'required|array',
+                'data.email'    => 'required|email',
+                'data.is_admin' => 'nullable|integer',
+                'data.approved' => 'nullable|integer',
+                'data.role_id'  => 'nullable|integer',
+                'data.org_id'   => 'nullable|integer',
             ]
         );
 
         if ($validator->fails()) {
-            return ApiController::errorResponse('Invite user failure');
+            return $this->errorResponse('Invite user failure', $validator->errors()->messages());
         }
 
         $reqOrgId = isset($request->data['org_id']) ? $request->data['org_id']: null;
@@ -665,8 +682,9 @@ class UserController extends ApiController
             try {
                 $user->save();
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Invite user failure');
+                return $this->errorResponse('Invite user failure');
             }
 
             if (isset($request->data['role_id']) || isset($request->data['org_id'])) {
@@ -681,7 +699,7 @@ class UserController extends ApiController
 
                 if ($validator->fails()) {
 
-                    return ApiController::errorResponse('Invite user failure');
+                    return $this->errorResponse('Invite user failure');
                 }
 
                 $userToOrgRole = new UserToOrgRole;
@@ -693,16 +711,18 @@ class UserController extends ApiController
                 try {
                     $userToOrgRole->save();
                 } catch (QueryException $e) {
+                    Log::error($e->getMessage());
 
-                    return ApiController::errorResponse('Invite user failure');
+                    return $this->errorResponse('Invite user failure');
                 }
             }
         } else {
             try {
                 $user->save();
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('Invite user failure');
+                return $this->errorResponse('Invite user failure');
             }
         }
 
@@ -714,8 +734,31 @@ class UserController extends ApiController
     /**
      * Register new user
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and api key if successfull
+     * @param array data - required
+     * @param string data[firstname] - required
+     * @param string data[lastname] - required
+     * @param string data[email] - required
+     * @param string data[add_info] - optional
+     * @param string data[username] - optional
+     * @param string data[password] - required
+     * @param string data[password_confirm] - required
+     * @param integer data[role_id] - optional
+     * @param array data[user_settings] - optional
+     * @param string data[user_settings][locale] - optional
+     * @param integer data[user_settings][newsletter_digest] - optional
+     * @param array data[org_data] - optional
+     * @param integer data[org_data][parent_org_id] - optional
+     * @param string data[org_data][locale] - required
+     * @param string data[org_data][name] - required
+     * @param integer data[org_data][type] - required
+     * @param string data[org_data][description] - required
+     * @param string data[org_data][logo_file_name] - optional
+     * @param string data[org_data][logo_mime_type] - optional
+     * @param string data[org_data][logo_data] - optional
+     * @param string data[org_data][activity_info] - optional
+     * @param string data[org_data][contacts] - optional
+     *
+     * @return json response with api key or error
      */
     public function register(Request $request)
     {
@@ -724,31 +767,16 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'data.firstname'         => 'required',
-                'data.lastname'          => 'required',
+                'data.firstname'         => 'required|string',
+                'data.lastname'          => 'required|string',
                 'data.email'             => 'required|email',
-                'data.password'          => 'required',
-                'data.password_confirm'  => 'required|same:data.password',
+                'data.password'          => 'required|string',
+                'data.password_confirm'  => 'required|string|same:data.password',
             ]
         );
 
         if ($validator->fails()) {
-            return ApiController::errorResponse('User registration failure');
-        }
-
-        if (!empty($data['orgdata'])) {
-            if (
-                \Validator::make(
-                    $request->all(),
-                    [
-                        'data.orgdata.name'          => 'required',
-                        'data.orgdata.type'          => 'required',
-                        'data.orgdata.description'   => 'required',
-                    ]
-                )->fails()
-            ) {
-                return ApiController::errorResponse('User registration failure');
-            }
+            return $this->errorResponse('User registration failure', $validator->errors()->messages());
         }
 
         $apiKey = Uuid::generate(4)->string;
@@ -774,32 +802,32 @@ class UserController extends ApiController
         try {
             $registered = $user->save();
         } catch (QueryException $e) {
-            return ApiController::errorResponse('User registration failure');
+            return $this->errorResponse('User registration failure');
         }
 
         if (!$registered) {
-            return ApiController::errorResponse('User registration failure');
+            return $this->errorResponse('User registration failure');
         }
 
         try {
             User::where('id', $user->id)->update(['created_by' => $user->id]);
         } catch (QueryException $e) {
+            Log::error($e->getMessage());
 
-            return ApiController::errorResponse('User registration failure');
+            return $this->errorResponse('User registration failure');
         }
 
         if (isset($data['role_id']) || isset($data['org_id'])) {
             $validator = \Validator::make(
                 $request->all(),
                 [
-                    'data.role_id' => 'required',
-                    'data.org_id'  => 'required',
+                    'data.role_id' => 'required|integer',
+                    'data.org_id'  => 'required|integer',
                 ]
             );
 
             if ($validator->fails()) {
-
-                return ApiController::errorResponse('Edit user failure');
+                return $this->errorResponse('Edit user failure', $validator->errors()->messages());
             }
 
             $userToOrgRole = new UserToOrgRole;
@@ -811,8 +839,9 @@ class UserController extends ApiController
             try {
                 $userToOrgRole->save();
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('User registration failure');
+                return $this->errorResponse('User registration failure');
             }
         }
 
@@ -837,16 +866,13 @@ class UserController extends ApiController
         try {
             $userSettings->save();
         } catch (QueryException $e) {
+            Log::error($e->getMessage());
 
-            return ApiController::errorResponse('User registration failure');
+            return $this->errorResponse('User registration failure');
         }
 
         if (!empty($data['org_data'])) {
             $organisation = new Organisation;
-
-            $orgLocale = !empty($data['org_data']['locale']) && !empty(Locale::where('locale', $data['org_data']['locale'])->value('locale'))
-                ? $data['org_data']['locale']
-                : config('app.locale');
 
             $organisation->type = $data['org_data']['type'];
             $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
@@ -864,16 +890,17 @@ class UserController extends ApiController
             $organisation->active = 0;
             $organisation->approved = 0;
             $organisation->created_by = $user->id;
-            $organisation->name = [$orgLocale => $data['org_data']['name']];
-            $organisation->descript = [$orgLocale => $data['org_data']['description']];
-            $organisation->activity_info = [$orgLocale => $data['org_data']['activity_info']];
-            $organisation->contacts = [$orgLocale => $data['org_data']['contacts']];
+            $organisation->name =  $data['org_data']['name'];
+            $organisation->descript = $data['org_data']['description'];
+            $organisation->activity_info = $data['org_data']['activity_info'];
+            $organisation->contacts = $data['org_data']['contacts'];
 
             try {
                 $organisation->save();
             } catch (QueryException $e) {
+                Log::error($e->getMessage());
 
-                return ApiController::errorResponse('User registration failure');
+                return $this->errorResponse('User registration failure');
             }
         }
 

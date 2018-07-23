@@ -18,16 +18,48 @@ class OrganisationController extends ApiController
     /**
      * Add new organisation record
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and org id if successful
+     * @param string api_key - required
+     * @param array data -required
+     * @param string data[name] - required
+     * @param string data[locale] - required
+     * @param integer data[type] - optional
+     * @param string data[description] - optional
+     * @param string data[uri] - optional
+     * @param string data[logo] - optional
+     * @param string data[logo_filename] - optional
+     * @param string data[logo_mimetype] - optional
+     * @param string data[logo_data] - optional
+     * @param string data[activity_info] - optional
+     * @param string data[contacts] - optional
+     * @param integer data[parent_org_id] - optional
+     * @param integer data[active] - optional
+     * @param integer data[approved] - optional
+     * @param array data[custom_fields] - optional
+     * @param string data[custom_fields][label] - optional
+     * @param string data[custom_fields][value] - optional
+     *
+     * @return json with organisation id or error
      */
     public function addOrganisation(Request $request)
     {
         $data = $request->get('data');
         $validator = \Validator::make($data, [
-            'locale' => 'required|string',
-            'name'   => 'required|string',
-            'type'   => 'required|integer',
+            'locale'                => 'required|string',
+            'name'                  => 'required|string',
+            'type'                  => 'required|integer',
+            'description'           => 'nullable|string',
+            'uri'                   => 'nullable|string',
+            'logo'                  => 'nullable|string',
+            'logo_filename'         => 'nullable|string',
+            'logo_mimetype'         => 'nullable|string',
+            'logo_data'             => 'nullable|string',
+            'activity_info'         => 'nullable|string',
+            'contacts'              => 'nullable|string',
+            'parent_org_id'         => 'nullable|integer',
+            'active'                => 'nullable|integer',
+            'approved'              => 'nullable|integer',
+            'custom_fields.*.label' => 'nullable|string',
+            'custom_fields.*.value' => 'nullable|string',
         ]);
 
         if (
@@ -46,9 +78,9 @@ class OrganisationController extends ApiController
             $locale = \LaravelLocalization::getCurrentLocale();
 
             $organisation->type = $data['type'];
-            $organisation->name = [$locale => $data['name']];
+            $organisation->name = $data['name'];
             $organisation->descript = !empty($data['description'])
-                    ? [$locale => $data['description']]
+                    ? $data['description']
                     : null;
 
             $organisation->uri = !empty($request->data['uri'])
@@ -108,20 +140,56 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Add organisation failure');
+        return ApiController::errorResponse('Add organisation failure', $validator->errors()->messages());
     }
 
     /**
      * Edit organisation record
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and success flag or error
+     * @param string api_key - required
+     * @param integer org_id - required
+     * @param array data -required
+     * @param string data[name] - required
+     * @param string data[locale] - required
+     * @param integer data[type] - required
+     * @param string data[description] - optional
+     * @param string data[uri] - optional
+     * @param string data[logo] - optional
+     * @param string data[logo_filename] - optional
+     * @param string data[logo_mimetype] - optional
+     * @param string data[logo_data] - optional
+     * @param string data[activity_info] - optional
+     * @param string data[contacts] - optional
+     * @param integer data[parent_org_id] - optional
+     * @param integer data[active] - optional
+     * @param integer data[approved] - optional
+     * @param array data[custom_fields] - optional
+     * @param string data[custom_fields][label] - optional
+     * @param string data[custom_fields][value] - optional
+     *
+     * @return json with success or error
      */
     public function editOrganisation(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'data'  => 'required',
-            'org_id'=> 'required|integer',
+            'data'                          => 'required',
+            'org_id'                        => 'required|integer',
+            'data.locale'                   => 'required|string',
+            'data.name'                     => 'required|string',
+            'data.type'                     => 'required|integer',
+            'data.description'              => 'nullable|string',
+            'data.uri'                      => 'nullable|string',
+            'data.logo'                     => 'nullable|string',
+            'data.logo_filename'            => 'nullable|string',
+            'data.logo_mimetype'            => 'nullable|string',
+            'data.logo_data'                => 'nullable|string',
+            'data.activity_info'            => 'nullable|string',
+            'data.contacts'                 => 'nullable|string',
+            'data.parent_org_id'            => 'nullable|integer',
+            'data.active'                   => 'nullable|integer',
+            'data.approved'                 => 'nullable|integer',
+            'data.custom_fields.*.label'    => 'nullable|string',
+            'data.custom_fields.*.value'    => 'nullable|string',
         ]);
 
         if (
@@ -137,11 +205,11 @@ class OrganisationController extends ApiController
             $data = $request->data;
 
             if (!empty($data['name'])) {
-                $orgData['name'] = [$locale => $data['name']];
+                $orgData['name'] = $data['name'];
             }
 
             if (!empty($data['description'])) {
-                $orgData['descript'] = [$locale => $data['description']];
+                $orgData['descript'] = $data['description'];
             }
 
             if (!empty($data['uri'])) {
@@ -232,15 +300,17 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Edit organisation failure');
+        return ApiController::errorResponse('Edit organisation failure', $validator->errors()->messages());
     }
 
 
     /**
      * Delete organisation record
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and success flag or error
+     * @param string api_key - required
+     * @param integer org_id - required
+     *
+     * @return json with success or error
      */
     public function deleteOrganisation(Request $request)
     {
@@ -263,14 +333,23 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Delete organisation failure');
+        return ApiController::errorResponse('Delete organisation failure', $validator->errors()->messages());
     }
 
     /**
-     * List organisation records
+     * List organisations by criteria
      *
-     * @param object $request - POST request
-     * @return json $response - response with results or empty array
+     * @param array criteria -optional
+     * @param string criteria[locale] - optional
+     * @param integer criteria[org_id] - optional
+     * @param integer criteria[active] - optional
+     * @param integer criteria[approved] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json lsit with organisations or error
      */
     public function listOrganisations(Request $request)
     {
@@ -278,79 +357,99 @@ class OrganisationController extends ApiController
         $criteria = [];
         $count = 0;
 
-        if (isset($request->criteria['active'])) {
-            $criteria['active'] = $request->criteria['active'];
-        }
+        $validator = \Validator::make($request->all(), [
+            'criteria.locale'       => 'nullable|string',
+            'criteria.active'       => 'nullable|integer',
+            'criteria.approved'     => 'nullable|integer',
+            'criteria.org_id'       => 'nullable|integer',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+        ]);
 
-        if (isset($request->criteria['approved'])) {
-            $criteria['approved'] = $request->criteria['approved'];
-        }
-
-        if (isset($request->criteria['org_id'])) {
-            $criteria['parent_org_id'] = $request->criteria['org_id'];
-        }
-
-        try {
-            $query = Organisation::select();
-
-            if (!empty($criteria)) {
-                $query->where($criteria);
+        if (!$validator->fails()) {
+            if (isset($request->criteria['active'])) {
+                $criteria['active'] = $request->criteria['active'];
             }
 
-            $count = $query->count();
-            $query->forPage(
-                $request->offsetGet('page_number'),
-                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-            );
+            if (isset($request->criteria['approved'])) {
+                $criteria['approved'] = $request->criteria['approved'];
+            }
 
-            $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
-            $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+            if (isset($request->criteria['org_id'])) {
+                $criteria['parent_org_id'] = $request->criteria['org_id'];
+            }
 
-            $query->orderBy($field, $type);
+            try {
+                $query = Organisation::select();
 
-            foreach ($query->get() as $org) {
-                foreach ($org->customSetting()->get() as $setting) {
-                    $customFields[] = [
-                        'key'    =>$setting->key,
-                        'value'  =>$setting->value
+                if (!empty($criteria)) {
+                    $query->where($criteria);
+                }
+
+                $count = $query->count();
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
+
+                $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+                $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $query->orderBy($field, $type);
+
+                foreach ($query->get() as $org) {
+                    foreach ($org->customSetting()->get() as $setting) {
+                        $customFields[] = [
+                            'key'    =>$setting->key,
+                            'value'  =>$setting->value
+                        ];
+                    }
+
+                    $results[] = [
+                        'name'            => $org->name,
+                        'description'     => $org->descript,
+                        'locale'          => $org->locale,
+                        'uri'             => $org->uri,
+                        'type'            => $org->type,
+                        'logo'            => $org->logo,
+                        'activity_info'   => $org->activity_info,
+                        'contacts'        => $org->contacts,
+                        'parent_org_id'   => $org->parent_org_id,
+                        'approved'        => $org->approved,
+                        'active'          => $org->active,
+                        'custom_fields'   => $customFields,
+                        'datasets_count'  => $org->dataSet()->count(),
+                        'followers_count' => $org->userFollow()->count(),
+                        'created_at'      => $org->created_at->toDateTimeString(),
+                        'updated_at'      => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
+                        'created_by'      => $org->created_by,
+                        'updated_by'      => $org->updated_by,
                     ];
                 }
 
-                $results[] = [
-                    'name'            => $org->name,
-                    'description'     => $org->descript,
-                    'locale'          => $org->locale,
-                    'uri'             => $org->uri,
-                    'type'            => $org->type,
-                    'logo'            => $org->logo,
-                    'activity_info'   => $org->activity_info,
-                    'contacts'        => $org->contacts,
-                    'parent_org_id'   => $org->parent_org_id,
-                    'approved'        => $org->approved,
-                    'active'          => $org->active,
-                    'custom_fields'   => $customFields,
-                    'datasets_count'  => $org->dataSet()->count(),
-                    'followers_count' => $org->userFollow()->count(),
-                    'created_at'      => isset($org->created_at) ? $org->created_at->toDateTimeString() : null,
-                    'updated_at'      => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
-                    'created_by'      => $org->created_by,
-                    'updated_by'      => $org->updated_by,
-                ];
+                return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
-
-            return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
-        } catch (QueryException $ex) {
-            Log::error($ex->getMessage());
         }
 
-        return ApiController::errorResponse('List organisation failure');
+        return ApiController::errorResponse('List organisation failure', $validator->errors()->messages());
     }
 
     /**
-     * Search organisation records
+     * Search organisations by criteria
      *
-     * @param object $request - POST request
-     * @return json $response - response with results or empty array
+     * @param array criteria - required
+     * @param string criteria[locale] - optional
+     * @param integer criteria[keywords] - required
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json with found organisations or error
      */
     public function searchOrganisations(Request $request)
     {
@@ -419,22 +518,24 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Search organisation failure');
+        return ApiController::errorResponse('Search organisation failure', $validator->errors()->messages());
     }
 
     /**
      * Get organisation details
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and organisation info if successful
+     * @param string locale - required
+     * @param integer org_id - required
+     *
+     * @return json with organisatin deetails or error
      */
     public function getOrganisationDetails(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'   => 'required|int',
-            'locale'   => 'string',
+            'org_id'   => 'required|integer',
+            'locale'   => 'nullable|string',
         ]);
 
         $locale = \LaravelLocalization::getCurrentLocale();
@@ -476,11 +577,11 @@ class OrganisationController extends ApiController
                     return $this->successResponse($result);
                 }
             } catch (QueryException $e) {
-                return $this->errorResponse($e->getMessage());
+                Log::error($e->getMessage());
             }
         }
 
-        return $this->errorResponse('Get Organisation Details Failure');
+        return $this->errorResponse('Get Organisation Details Failure', $validator->errors()->messages());
     }
 
 
@@ -489,37 +590,48 @@ class OrganisationController extends ApiController
     /**
      * Add new Group
      *
-     * @param object $request - POST request
-     * @return json $response - response with status and group id if successful
+     * @param string api_key - required
+     * @param array data - required
+     * @param string data[locale] - required
+     * @param string data[name] - required
+     * @param string data[description] - optional
+     * @param string data[uri] - optional
+     * @param string data[logo] - optional
+     * @param string data[logo_filename] - optional
+     * @param string data[logo_mimetype] - optional
+     * @param string data[logo_data] - optional
+     * @param string data[activity_info] - optional
+     * @param integer data[active] - optional
+     * @param array custom_fields - optional
+     * @param string data[custom_fields][label] - optional
+     * @param string data[custom_fields][value] - optional
+     *
+     * @return json response with group id or error
      */
     public function addGroup(Request $request)
     {
-        $post = $request->get('data');
-
-        if (!isset($post)) {
-             return ApiController::errorResponse('No data provided.');
-        }
+        $post = $request->offsetGet('data');
 
         $validator = \Validator::make($post, [
-            'name'    => 'required',
-            'locale'  => 'required|string|max:5'
+            'locale'                => 'required|string',
+            'name'                  => 'required|string',
+            'description'           => 'nullable|string',
+            'uri'                   => 'nullable|string',
+            'logo'                  => 'nullable|string',
+            'logo_filename'         => 'required_with:logo_mimetype,logo_data|string',
+            'logo_mimetype'         => 'required_with:llogo_filename,logo_data|string',
+            'logo_data'             => 'required_with:llogo_filename,logo_mimetype|string',
+            'activity_info'         => 'nullable|string',
+            'active'                => 'nullable|integer',
+            'custom_fields.*.label' => 'nullable|string',
+            'custom_fields.*.value' => 'nullable|string',
         ]);
 
-
-        if (!isset($post['name']) || $post['name'] == '') {
-            return ApiController::errorResponse('Group name is required.');
-        }
-
-        if (!isset($post['locale']) || $post['locale'] == '') {
-            return ApiController::errorResponse('Locale is required.');
-        }
-
-        if (!$validator->fails() && !empty($post)) {
-            $locale = $post['locale'];
+        if (!$validator->fails()) {
             $newGroup = new Organisation;
 
-            $newGroup->name = [$locale => $post['name']];
-            $newGroup->descript = !empty($post['description']) ? [$locale => $post['description']] : null;
+            $newGroup->name =$post['name'];
+            $newGroup->descript = !empty($post['description']) ? $post['description'] : null;
             $newGroup->uri = !empty($post['uri'])
                 ? $post['uri']
                 : $this->generateOrgUri($post['name']);
@@ -533,7 +645,9 @@ class OrganisationController extends ApiController
             if (!empty($post['logo'])) {
                 try {
                     $img = \Image::make($post['logo']);
-                } catch (NotReadableException $ex) {}
+                } catch (NotReadableException $ex) {
+                    Log::error($ex->getMessage());
+                }
 
                 if (!empty($img)) {
                     $img->resize(300, 200);
@@ -542,9 +656,9 @@ class OrganisationController extends ApiController
                     $newGroup->logo_data = $img->encode('data-url');
                 }
             } else {
-                $newGroup->logo_file_name = $post['logo_filename'];
-                $newGroup->logo_mime_type = $post['logo_mimetype'];
-                $newGroup->logo_data = $post['logo_data'];
+                $newGroup->logo_file_name = isset($post['logo_filename']) ? $post['logo_filename'] : null;
+                $newGroup->logo_mime_type = isset($post['logo_mimetype']) ? $post['logo_mimetype'] : null;
+                $newGroup->logo_data = isset($post['logo_data']) ? $post['logo_data'] : null;
             }
 
             if (!empty($post['custom_fields'])) {
@@ -567,24 +681,36 @@ class OrganisationController extends ApiController
                     DB::commit();
 
                     return $this->successResponse(['id' => $newGroup->id], true);
-                } else {
-                    DB::rollback();
-
-                    return $this->errorResponse('Add Group Failure.');
                 }
             } catch (QueryException $ex) {
-                dd($ex->getMessage());
-
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
+
+        return $this->errorResponse('Add Group Failure.', $validator->errors()->messages());
     }
 
     /**
      * Edit Group
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer group_id - required
+     * @param array data - required
+     * @param string data[locale] - required if name or description is present
+     * @param string data[name] - optional
+     * @param string data[description] - optional
+     * @param string data[uri] - optional
+     * @param string data[logo] - optional
+     * @param string data[logo_filename] - optional
+     * @param string data[logo_mimetype] - optional
+     * @param string data[logo_data] - optional
+     * @param string data[activity_info] - optional
+     * @param integer data[active] - optional
+     * @param array custom_fields - optional
+     * @param string data[custom_fields][label] - optional
+     * @param string data[custom_fields][value] - optional
+     *
+     * @return json with success or error
      */
     public function editGroup(Request $request)
     {
@@ -592,114 +718,115 @@ class OrganisationController extends ApiController
 
         $id = $request->group_id;
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'data'          => 'required',
-                'group_id'      => 'required',
-                'data.locale'   => 'required_with:data.name, data.descript',
-            ]
-        );
+        $validator = \Validator::make($request->all(),[
+            'group_id'              => 'required',
+            'data'                  => 'required|array',
+            'data.name'             => 'nullable|string',
+            'data.description'      => 'nullable|string',
+            'data.locale'           => 'required_with:data.name,data.description',
+            'uri'                   => 'nullable|string',
+            'logo'                  => 'nullable|string',
+            'logo_filename'         => 'nullable|string',
+            'logo_mimetype'         => 'nullable|string',
+            'logo_data'             => 'nullable|string',
+            'custom_fields.*.label' => 'nullable|string',
+            'custom_fields.*.value' => 'nullable|string',
+        ]);
 
-        if ($validator->fails()) {
-            if (!isset($id) || $id == '') {
-                return ApiController::errorResponse('Id is required.');
+        if (!$validator->fails()) {
+
+            if (empty($group = Organisation::find($id))) {
+                return $this->errorResponse('No Group Found.');
             }
 
-            if (isset($data['name']) && $data['name'] != '' && (!isset($data['locale']) || $data['locale'] == '')) {
-                return ApiController::errorResponse('Group name requiures locale.');
-            }
-        }
+            $newGroupData = [];
 
-        if (empty($group = Organisation::find($id))) {
-            return ApiController::errorResponse('No Group Found.');
-        }
-
-        $newGroupData = [];
-
-        if (!empty($data['name'])) {
-            $newGroupData['name'] = $data['name'];
-        }
-
-        if (!empty($data['description'])) {
-            $newGroupData['descript'] = $data['description'];
-        }
-
-        if (!empty($data['uri'])) {
-            $newGroupData['uri'] = $data['uri'];
-        }
-
-        if (!empty($data['logo'])) {
-            try {
-                $img = \Image::make($data['logo']);
-            } catch (NotReadableException $ex) {}
-
-            if (!empty($img)) {
-                $img->resize(300, 200);
-                $newGroupData['logo_file_name'] = basename($data['logo']);
-                $newGroupData['logo_mime_type'] = $img->mime();
-                $newGroupData['logo_data'] = $img->encode('data-url');
-            }
-        }
-
-        if (!empty($data['logo_filename'])) {
-            $newGroupData['logo_filename'] = $data['logo_filename'];
-        }
-
-        if (!empty($data['logo_mimetype'])) {
-            $newGroupData['logo_mimetype'] = $data['logo_mimetype'];
-        }
-
-        if (!empty($data['logo_data'])) {
-            $newGroupData['logo_data'] = $data['logo_data'];
-        }
-
-        if (!empty($data['custom_fields'])) {
-            $customFields = $data['custom_fields'];
-        }
-
-        if (!empty($newGroupData)) {
-            $newGroupData['updated_by'] = \Auth::id();
-
-            foreach ($newGroupData as $prop => $val) {
-                $group->$prop = $val;
+            if (!empty($data['name'])) {
+                $newGroupData['name'] = $data['name'];
             }
 
-            DB::beginTransaction();
+            if (!empty($data['description'])) {
+                $newGroupData['descript'] = $data['description'];
+            }
 
-            try {
-                $group->save();
+            if (!empty($data['uri'])) {
+                $newGroupData['uri'] = $data['uri'];
+            }
 
-                if (!empty($customFields)) {
-                    if (!$this->checkAndCreateCustomSettings($customFields, $group->id)) {
-                        DB::rollback();
+            if (!empty($data['logo'])) {
+                try {
+                    $img = \Image::make($data['logo']);
+                } catch (NotReadableException $ex) {}
 
-                        return $this->errorResponse('Add Group Failure.');
-                    }
+                if (!empty($img)) {
+                    $img->resize(300, 200);
+                    $newGroupData['logo_file_name'] = basename($data['logo']);
+                    $newGroupData['logo_mime_type'] = $img->mime();
+                    $newGroupData['logo_data'] = $img->encode('data-url');
                 }
-                DB::commit();
+            }
 
-                return $this->successResponse();
-            } catch (QueryException $e) {
-                DB::rollback();
+            if (!empty($data['logo_filename'])) {
+                $newGroupData['logo_filename'] = $data['logo_filename'];
+            }
 
-                return ApiController::errorResponse('Edit Group Failure');
+            if (!empty($data['logo_mimetype'])) {
+                $newGroupData['logo_mimetype'] = $data['logo_mimetype'];
+            }
+
+            if (!empty($data['logo_data'])) {
+                $newGroupData['logo_data'] = $data['logo_data'];
+            }
+
+            if (!empty($data['custom_fields'])) {
+                $customFields = $data['custom_fields'];
+            }
+
+            if (!empty($newGroupData)) {
+                $newGroupData['updated_by'] = \Auth::id();
+
+                foreach ($newGroupData as $prop => $val) {
+                    $group->$prop = $val;
+                }
+
+                DB::beginTransaction();
+
+                try {
+                    $group->save();
+
+                    if (!empty($customFields)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $group->id)) {
+                            DB::rollback();
+
+                            return $this->errorResponse('Add Group Failure.');
+                        }
+                    }
+                    DB::commit();
+
+                    return $this->successResponse();
+                } catch (QueryException $e) {
+                    Log::errror($e->getMessages());
+
+                    DB::rollback();
+                }
             }
         }
 
-        return $this->successResponse();
+        return $this->errorResponse('Edit Group Failure', $validator->errors()->messages());
     }
 
     /**
      * Delete existing group record
      *
-     * @param object $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer group_id - required
+     *
+     * @return json with success or error
      */
     public function deleteGroup(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'group_id' => 'required',
+            'group_id' => 'required|integer',
         ]);
 
         $group = Organisation::find($request->group_id);
@@ -720,21 +847,27 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Delete organisation failure');
+        return ApiController::errorResponse('Delete organisation failure', $validator->errors()->messages());
     }
 
     /**
-     * List all groups
+     * List all listGroups
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and list of Data Sets from selected criteria
+     * @param integer criteria - optional
+     * @param integer criteria[dataset_id] - optional
+     * @param string criteria[locale] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json with list of groups
      */
     public function listGroups(Request $request)
     {
         $post = $request->all();
         $criteria = !empty($post['criteria']) ? $post['criteria'] : false;
-        $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : 15;
-        $page = !empty($post['page_number']) ? $post['page_number'] : 1;
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
         $locale = !empty($post['criteria']['locale'])
@@ -747,12 +880,12 @@ class OrganisationController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
-                'criteria.locale'       => 'string|max:5',
-                'criteria.dataset_id'   => 'integer',
-                'criteria.order.type'   => 'string',
-                'criteria.order.field'  => 'string',
-                'records_per_page'      => 'integer',
-                'page_number'           => 'integer',
+                'criteria.locale'       => 'nullable|string|max:5',
+                'criteria.dataset_id'   => 'nullable|integer',
+                'criteria.order.type'   => 'nullable|string',
+                'criteria.order.field'  => 'nullable|string',
+                'records_per_page'      => 'nullable|integer',
+                'page_number'           => 'nullable|integer',
             ]);
 
             if (!$validator->fails()) {
@@ -770,9 +903,10 @@ class OrganisationController extends ApiController
 
         $count = $query->count();
 
-        if (!empty($pagination) && !empty($page)) {
-            $query->paginate($pagination, ['*'], 'page', $page);
-        }
+        $query->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
 
         $groups = $query->get();
 
@@ -806,15 +940,17 @@ class OrganisationController extends ApiController
 
             return $this->successResponse(['groups'=> $result, 'total_records' => $count], true);
         } else {
-            return ApiController::errorResponse('No Groups Found.');
+            return ApiController::errorResponse('No Groups Found.', $validator->errors()->messages());
         }
     }
 
     /**
      * Get group details
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and group info if successful
+     * @param integer group_id - required
+     * @param string locale - optional
+     *
+     * @return json with success or error
      */
     public function getGroupDetails(Request $request)
     {
@@ -822,7 +958,7 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'group_id'   => 'required|int',
-            'locale'     => 'string',
+            'locale'     => 'nullable|string',
         ]);
 
         $locale = \LaravelLocalization::getCurrentLocale();
@@ -856,13 +992,21 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get Group Details Failure');
+        return $this->errorResponse('Get Group Details Failure', $validator->errors()->messages());
     }
 
     /**
      * Search group records
      *
-     * @param object $request - POST request
+     * @param array criteria - required
+     * @param integer criteria[keywords] - required
+     * @param string criteria[locale] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
      * @return json $response - response with results or empty array
      */
     public function searchGroups(Request $request)
@@ -942,7 +1086,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Search groups failure');
+        return ApiController::errorResponse('Search groups failure', $validator->errors()->messages());
     }
 
 
@@ -1003,6 +1147,8 @@ class OrganisationController extends ApiController
                 }
             }
         } catch (QueryException $ex) {
+            Log::error($ex->getMessage());
+
             return false;
         }
     }

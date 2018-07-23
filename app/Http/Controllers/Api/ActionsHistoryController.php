@@ -14,8 +14,22 @@ class ActionsHistoryController extends ApiController
     /**
      * Lists actions based on request input
      *
-     * @param Request $request
-     * @return json response
+     * @param array criteria - optional
+     * @param date criteria[period_from] - optional
+     * @param date criteria[period_to] - optional
+     * @param string criteria[username] - optional
+     * @param integer criteria[user_id] - optional
+     * @param string criteria[module] - optional
+     * @param integer criteria[action] - optional
+     * @param integer criteria[category_id] - optional
+     * @param integer criteria[tag_id] - optional
+     * @param integer criteria[org_id] - optional
+     * @param integer criteria[group_id] - optional
+     * @param string criteria[dataset_uri] - optional
+     * @param string criteria[ip_adress] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     * @return json response with history list or error message
      */
     public function listActionHistory(Request $request)
     {
@@ -38,7 +52,7 @@ class ActionsHistoryController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List action history failure');
+            return $this->errorResponse('List action history failure', $validator->errors()->messages());
         }
 
         $criteria = $request->json('criteria');

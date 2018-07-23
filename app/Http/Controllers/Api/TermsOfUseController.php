@@ -47,8 +47,8 @@ class TermsOfUseController extends ApiController
 
         //prepare model data
         $newTerms = new TermsOfUse;
-        $newTerms->name = $this->trans(app()->getLocale(), $data['name']);
-        $newTerms->descript = $this->trans(app()->getLocale(), $data['description']);
+        $newTerms->name = $data['name'];
+        $newTerms->descript = $data['description'];
         unset($data['locale'], $data['name'], $data['description']);
         $newTerms->fill($data);
 
@@ -90,8 +90,8 @@ class TermsOfUseController extends ApiController
 
         $data = $request->data;
         $terms = TermsOfUse::find($post['terms_id']);
-        $terms->name = $this->trans(app()->getLocale(), $data['name'], $terms['name']);
-        $terms->descript = $this->trans(app()->getLocale(), $data['description'], $terms['descript']);
+        $terms->name = $data['name'];
+        $terms->descript = $data['description'];
         unset($data['locale'], $data['name'], $data['description']);
         $terms->fill($data);
 

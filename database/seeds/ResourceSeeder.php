@@ -21,9 +21,13 @@ class ResourceSeeder extends Seeder
         $files = array_keys(Resource::getFormats());
         $httpTypes = array_keys(Resource::getRequestTypes());
         $dataSets = DataSet::orderBy('created_at', 'desc')->limit(self::RESOURCE_COUNT)->get()->toArray();
+        $locales = Locale::where('active', 1)->limit(self::ORGANISATION_RECORDS)->get()->toArray();
 
         foreach ($dataSets as $set) {
             foreach (range(1, self::RESOURCE_COUNT) as $index) {
+                $locale = $this->faker->randomElement($locales)['locale'];
+                    \LaravelLocalization::setLocale($locale);
+
                 $type = $this->faker->randomElement($types);
                 $fileType = $this->faker->randomElement($files);
                 $httpType = $this->faker->randomElement($httpTypes);
@@ -39,12 +43,8 @@ class ResourceSeeder extends Seeder
                     'authentication'    => $this->faker->name(),
                     'post_data'         => $this->faker->name(),
                     'http_headers'      => $this->faker->text(),
-                    'name'              => [
-                        'en' => $this->faker->name(),
-                    ],
-                    'descript'          => [
-                        'en' => $this->faker->text(),
-                    ],
+                    'name'              => $this->faker->name(),
+                    'descript'          => $this->faker->text(),
                     'schema_descript'   => $this->faker->text(),
                     'schema_url'        => $this->faker->name(),
                     'is_reported'       => $this->faker->boolean(),

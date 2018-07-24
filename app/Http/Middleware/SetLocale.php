@@ -18,16 +18,20 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        if (isset($request->locale)) {
-            $locale = $request->locale;
-        } else if (isset($request->data['locale'])) {
-            $locale = $request->data['locale'];
-        } else if (isset($request->criteria['locale'])) {
-            $locale = $request->criteria['locale'];
-        } else if (isset($request->org_data['locale'])) {
-            $locale = $request->org_data['locale'];
-        } else if (isset($request->user_settings['locale'])) {
-            $locale = $request->user_settings['locale'];
+        $controller = explode('@', class_basename($request->route()->getAction()['controller']))[0];
+
+        if ($controller != 'LocaleController') {
+            if (isset($request->locale)) {
+                $locale = $request->locale;
+            } else if (isset($request->data['locale'])) {
+                $locale = $request->data['locale'];
+            } else if (isset($request->criteria['locale'])) {
+                $locale = $request->criteria['locale'];
+            } else if (isset($request->org_data['locale'])) {
+                $locale = $request->org_data['locale'];
+            } else if (isset($request->user_settings['locale'])) {
+                $locale = $request->user_settings['locale'];
+            }
         }
 
         if (isset($locale)) {

@@ -11,6 +11,8 @@ class Locale extends Model
 
     protected $table = 'locale';
     protected $guarded = ['id'];
+    protected $primaryKey = 'locale';
+    protected $keyType = 'string';
 
     public function userSettings()
     {

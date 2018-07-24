@@ -14,6 +14,10 @@ a:active {
     background-color: #fff;
 }
 
+.error {
+    color: $error-color;
+}
+
 .sidenav, .sidenav-open {
     height: 100%;
     display: inline-block;

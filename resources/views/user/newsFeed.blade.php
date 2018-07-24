@@ -6,17 +6,19 @@
         <div class="col-xs-12 m-t-md">
             <div class="row">
                 <div class="col-md-3 col-sm-4 col-xs-12 sidenav">
-                    <span class="my-profile m-b-lg m-l-sm">Моят профил</span>
-                    <ul class="nav">
-                        <li class="js-show-submenu m-t-lg">
-                            <ul class="sidebar-submenu open">
-                                <li><a class="active" href="#">Организации</a></li>
-                                <li><a href="#">Групи</a></li>
-                                <li><a href="#">Набори данни</a></li>
-                                <li><a href="#">Основна тема</a></li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <form type="POST">
+                        <span class="my-profile m-b-lg m-l-sm">Моят профил</span>
+                        <ul class="nav">
+                            <li class="js-show-submenu m-t-lg">
+                                <ul class="sidebar-submenu open">
+                                    <li><a class="active" href="#">Организации</a></li>
+                                    <li><a href="#">Групи</a></li>
+                                    <li><a href="#">Набор данни</a></li>
+                                    <li><a href="#">Основна тема</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </form>
                 </div>
                 <div class="col-md-9 col-sm-8 col-xs-12 p-sm">
                     <div class="filter-content">

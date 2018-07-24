@@ -11,23 +11,33 @@
                         <img class="responsive logo-login" src="{{ asset('img/opendata-logo-color.svg') }}">
                     </div>
                     <div class="col-xs-12">
-                        <form>
+                        <form class="form-horizontal" method="POST">
+                            {{ csrf_field() }}
+
                             <div class="form-group row">
                                 <label for="username" class="col-xs-12 col-form-label">Потребителско име:</label>
                                 <div class="col-xs-12">
-                                    <input type="text" class="input-border-r-12 form-control" id="username">
+                                    <input type="text" class="input-border-r-12 form-control" name="username">
+                                    @if (!empty($errors['username']))
+                                        <span class="error">{{ $errors['username'][0] }}</span>
+                                    @endif
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label for="password" class="col-xs-12 col-form-label">Парола:</label>
                                 <div class="col-xs-12">
-                                    <input type="password" class="input-border-r-12 form-control" id="password">
+                                    <input type="password" class="input-border-r-12 form-control" name="password">
+                                    @if (!empty($errors['password']))
+                                        <span class="error">{{ $errors['password'][0] }}</span>
+                                    @endif
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label for="password" class="col-xs-6 col-form-label">Запомни ме</label>
+                                <label for="remember_me" class="col-xs-6 col-form-label">Запомни ме</label>
                                 <div class="col-xs-6">
-                                    <input type="checkbox" class="pull-right input-border-r-12 form-control custom-checkbox">
+                                    <div class="js-check pull-right">
+                                        <input type="checkbox" name="remember_me" value="1">
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group row">

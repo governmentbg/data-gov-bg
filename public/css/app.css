@@ -11772,6 +11772,10 @@ a:active {
   background-color: #fff;
 }
 
+.error {
+  color: #C02E54;
+}
+
 .sidenav,
 .sidenav-open {
   height: 100%;

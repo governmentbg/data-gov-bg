@@ -5,6 +5,16 @@ $(function() {
     });
 });
 
+
+$(function() {
+    if ($('.js-check').length) {
+        $('.js-check').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+    }
+});
+
 // show hide submenu
 $(function() {
     $('.clicable').on('click', function(){
@@ -74,3 +84,4 @@ $('.js-close-navbar').on('click', function(){
         }
     }
 });
+

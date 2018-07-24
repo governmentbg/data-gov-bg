@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Elasticsearch\Common\Exceptions\RuntimeException;
+use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 
 class ResourceController extends ApiController
 {
@@ -69,14 +70,14 @@ class ResourceController extends ApiController
 
         $validator->sometimes('data.post_data', 'required', function($post) use ($requestTypes) {
             if (
-                isset($post['data']['type']) 
+                isset($post['data']['type'])
                 && $post['data']['type'] == Resource::TYPE_API
                 && isset($post['data']['http_rq_type'])
                 && $post['data']['http_rq_type'] == $requestTypes[Resource::HTTP_POST]
             ) {
                 return true;
             }
-            
+
             return false;
         });
 
@@ -133,14 +134,14 @@ class ResourceController extends ApiController
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $id = $resource->id;
-                $index = $resource->dataSet->id;
-                
+                $index = $resource->data_set_id;
+
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
                     'index_type'    => ElasticDataSet::ELASTIC_TYPE,
                     'doc'           => $id,
                 ]);
-                
+
                 $resource->es_id = $elasticDataSet->id;
                 $resource->save();
 
@@ -196,7 +197,7 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
         $requestTypes = Resource::getRequestTypes();
-        
+
         if (isset($post['data']['http_rq_type'])) {
             $post['data']['http_rq_type'] = strtoupper($post['data']['http_rq_type']);
         }
@@ -221,7 +222,7 @@ class ResourceController extends ApiController
             'data.custom_fields.label'  => 'nullable|string',
             'data.custom_fields.value'  => 'nullable|string',
         ]);
-        
+
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
 
@@ -309,9 +310,10 @@ class ResourceController extends ApiController
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
-
+                $postData = $post['data'];
+                error_log('asdasdas: '. print_r(array_merge(['_all' => json_encode($postData)], $postData), true));
                 $insert = \Elasticsearch::index([
-                    'body'  => $post['data'],
+                    'body'  => array_merge(['_all' => json_encode($postData)], $postData),
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id,
@@ -391,7 +393,7 @@ class ResourceController extends ApiController
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
-        
+
         if (!$validator->fails()) {
             $query = Resource::with('DataSet');
 
@@ -408,7 +410,7 @@ class ResourceController extends ApiController
             if (!empty($post['criteria']['reported'])) {
                 $query->where('is_reported', $post['criteria']['reported']);
             }
-            
+
             $count = $query->count();
             $query->forPage(
                 $request->offsetGet('page_number'),
@@ -447,9 +449,9 @@ class ResourceController extends ApiController
                     'created_by'            => $result->created_by,
                     'updated_by'            => $result->updated_by,
                 ];
-            } 
+            }
         }
-        
+
         return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
     }
 
@@ -457,7 +459,7 @@ class ResourceController extends ApiController
      * Get resource metadata
      *
      * @param string api_key - optional
-     * @param string resource_uri - required 
+     * @param string resource_uri - required
      * @param string locale - optional
      *
      * @return json with success or error
@@ -511,7 +513,7 @@ class ResourceController extends ApiController
      * Get description schema of a given resource
      *
      * @param string api_key - optional
-     * @param string resource_uri - required 
+     * @param string resource_uri - required
      *
      * @return json with success or error
      */
@@ -526,7 +528,7 @@ class ResourceController extends ApiController
 
             if ($resource) {
                 $definition = isset($resource->schema_descript) ? $resource->schema_descript : $resource->schema_url;
-                
+
                 return $this->successResponse(['schema_definition' => $definition], true);
             }
         }
@@ -538,7 +540,7 @@ class ResourceController extends ApiController
      * Get a view of a given resource
      *
      * @param string api_key - optional
-     * @param string resource_uri - required 
+     * @param string resource_uri - required
      *
      * @return json with success or error
      */
@@ -560,7 +562,7 @@ class ResourceController extends ApiController
      * Get elastic search data of a given resource
      *
      * @param string api_key - optional
-     * @param string resource_uri - required 
+     * @param string resource_uri - required
      *
      * @return json with success or error
      */
@@ -574,7 +576,7 @@ class ResourceController extends ApiController
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $elasticData = $resource->elasticDataSet;
-                
+
                 if (!empty($elasticData)) {
                     $data = \Elasticsearch::get([
                         'index' => $elasticData->index,
@@ -592,6 +594,19 @@ class ResourceController extends ApiController
         return $this->errorResponse('Get resource data failure', $validator->errors()->messages());
     }
 
+    /**
+     * Search elastic search data
+     *
+     * @param string api_key - optional
+     * @param string keywords - required
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param int records_per_page - optional
+     * @param int page_number - optional
+     *
+     * @return json with results or error
+     */
     public function searchResourceData(Request $request)
     {
         $post = $request->all();
@@ -603,46 +618,103 @@ class ResourceController extends ApiController
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
-        //     "size": 20,
-        //     "from": 100,
-        //     "sort": [
-        //       {
-        //         "_id": {
-        //           "order": "desc"
-        //         }
-        //       }
-        //     ]
-        //   }
+
         if (!$validator->fails()) {
-            $order = [];
-            $orderType = isset($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'desc';
-            $orderField = isset($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'created_at';
+            $pageNumber = !empty($post['page_number']) ? $post['page_number'] : 1;
             $recordsPerPage = $this->getRecordsPerPage($request->offsetGet('records_per_page'));
-            $page = !empty($post['page_number']) ? $post['page_number'] : 1;
-            $search = !empty($post['criteria']['keywords']) ? $post['criteria']['keywords'] : false;
+            $orderType = isset($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : null;
+            $orderField = isset($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : null;
+            $keywords = array_map(function($element) { return '*'. $element .'*'; }, explode(' ', $post['criteria']['keywords']));
+            $orderJson = isset($orderType) && isset($orderField)
+                ? '"sort": [
+                        {
+                            "'. $orderField .'": {
+                                "order": "'. $orderType .'"
+                            }
+                        }
+                    ],
+                '
+                : '';
 
             try {
-                $criteria = [
-                    // 'index' => '*',
-                    // 'type'  => '*',
+                $data = \Elasticsearch::search([
                     'body'  => '{
-                        "query" : {
-                            "multi_match" : {
-                                "query": "a",
-                                "fields": "*" 
+                        "size": '. $recordsPerPage .',
+                        "from": '. ($pageNumber * $recordsPerPage - $recordsPerPage + 1) .',
+                        '. $orderJson .'
+                        "query": {
+                            "query_string": {
+                                "query": "'. implode(' ', $keywords) .'"
                             }
                         }
                     }',
-                ];
+                ]);
 
-                $data = \Elasticsearch::search($criteria);
-                error_log(print_r($data, true));
-                return $this->successResponse(['data' => $data], true);
-            } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                if (!empty($data['hits'])) {
+                    $data = array_merge(['page_number' => $pageNumber], $data['hits']);
+                }
+
+                return $this->successResponse(['data' => isset($data['hits']) ? $data['hits'] : []], true);
+            } catch (BadRequest400Exception $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Search resource data failure');
+        return $this->errorResponse('Search resource data failure', $validator->errors()->messages());
+    }
+
+    public function getLinkedData(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'namespaces'        => 'required|string',
+            'query'             => 'required',
+            'order.type'        => 'nullable|string',
+            'order.field'       => 'nullable|string',
+            'format'            => 'nullable|string',
+            'records_per_page'  => 'nullable|int',
+            'page_number'       => 'nullable|int',
+        ]);
+
+        if (!$validator->fails()) {
+            preg_match_all('!\d+!', $post['namespaces'], $namespaces);
+            $orderType = isset($post['order']['type']) ? $post['order']['type'] : null;
+            $orderField = isset($post['order']['field']) ? $post['order']['field'] : null;
+            $pageNumber = !empty($post['page_number']) ? $post['page_number'] : 1;
+            $recordsPerPage = $this->getRecordsPerPage($request->offsetGet('records_per_page'));
+            $orderJson = isset($orderType) && isset($orderField)
+                ? '"sort": [
+                        {
+                            "'. $orderField .'": {
+                                "order": "'. $orderType .'"
+                            }
+                        }
+                    ],
+                '
+                : '';
+
+            try {
+                $data = \Elasticsearch::search([
+                    'index' => isset($namespaces[0]) ? $namespaces[0] : null,
+                    'body'  => '{
+                        "size": '. $recordsPerPage .',
+                        "from": '. ($pageNumber * $recordsPerPage - $recordsPerPage + 1) .',
+                        '. $orderJson .'
+                        "query": '. json_encode($post['query']) .'
+                    }',
+                ]);
+
+                if (!empty($data['hits'])) {
+                    $data = array_merge(['page_number' => $pageNumber], $data['hits']);
+                }
+
+                return $this->successResponse(['data' => $data], true);
+            } catch (BadRequest400Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Linked data failure', $validator->errors()->messages());
     }
 }

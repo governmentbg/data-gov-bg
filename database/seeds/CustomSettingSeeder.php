@@ -8,7 +8,7 @@ use App\Resource;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class CustomSettingTableSeeder extends Seeder
+class CustomSettingSeeder extends Seeder
 {
     const CUSTOM_SETTING_RECORDS = 10;
 

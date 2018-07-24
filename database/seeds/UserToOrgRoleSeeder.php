@@ -8,7 +8,7 @@ use App\UserToOrgRole;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class UserToOrgRoleTableSeeder extends Seeder
+class UserToOrgRoleSeeder extends Seeder
 {
     const USER_TO_ORG_RECORDS = 10;
 

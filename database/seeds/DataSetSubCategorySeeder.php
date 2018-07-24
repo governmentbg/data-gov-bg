@@ -7,7 +7,7 @@ use App\DataSetSubCategory;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class DataSetSubCategoriesTableSeeder extends Seeder
+class DataSetSubCategorySeeder extends Seeder
 {
     const DATA_SET_SUB_CATEGORIES_RECORDS = 10;
 

@@ -4,7 +4,7 @@ use App\TermsOfUseRequest;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class TermsOfUseRequestTableSeeder extends Seeder
+class TermsOfUseRequestSeeder extends Seeder
 {
     const TERMS_OF_USE_REQUEST_RECORDS = 10;
 

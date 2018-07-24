@@ -7,7 +7,7 @@ use App\Organisation;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class DataSetGroupTableSeeder extends Seeder
+class DataSetGroupSeeder extends Seeder
 {
     const DATA_SET_GROUP_RECORDS = 10;
 

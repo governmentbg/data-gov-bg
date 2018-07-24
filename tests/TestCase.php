@@ -9,6 +9,9 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+    protected $apiKey;
+    protected $userId;
+
     protected function log($message)
     {
         echo PHP_EOL . PHP_EOL . print_r($message, true) . PHP_EOL;
@@ -16,11 +19,23 @@ abstract class TestCase extends BaseTestCase
 
     protected function getApiKey()
     {
-        return User::where('username', 'system')->first()->api_key;
+        if (isset($this->apiKey)) {
+            return $this->apiKey;
+        }
+
+        $this->apiKey = User::where('username', 'system')->first()->api_key;
+
+        return $this->apiKey;
     }
 
     protected function getUserId()
     {
-        return User::where('username', 'system')->first()->id;
+        if (isset($this->userId)) {
+            return $this->userId;
+        }
+
+        $this->userId = User::where('username', 'system')->first()->id;
+
+        return $this->userId;
     }
 }

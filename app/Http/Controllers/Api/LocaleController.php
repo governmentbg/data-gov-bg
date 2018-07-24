@@ -2,190 +2,200 @@
 
 namespace App\Http\Controllers\Api;
 
+use \Validator;
+use \App\Locale;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\Request;
-use \App\Locale;
-use \Validator;
 
 class LocaleController extends ApiController
 {
     /**
      * Adds a locale based on input data
      *
-     * @param Request $request
-     * @return json response
+     * @param string api_key - required
+     * @param array data - required
+     * @param string data[locale] - required
+     * @param bool data[active] - required
+     *
+     * @return json with success or error
      */
     public function addLocale(Request $request)
     {
-        $localeData = $request->all();
-        $validator = Validator::make($localeData, [
-            'data'        => 'required|array',
-            'data.locale' => 'required|string',
-            'data.active' => 'required|integer',
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
+            'data'          => 'required|array',
+            'data.locale'   => 'required|string|max:5|unique:locale,locale',
+            'data.active'   => 'required|bool',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Add locale failure');
+        if (!$validator->fails()) {
+            $locale = new Locale;
+
+            $locale->locale = $post['data']['locale'];
+            $locale->active = $post['data']['active'];
+
+            try {
+                $locale->save();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        $newLocale = new Locale;
-        $newLocale->locale = $localeData['data']['locale'];
-        $newLocale->active = $localeData['data']['active'];
-
-        try {
-            $newLocale->save();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Locale add failure');
-        }
-        return $this->successResponse();
+        return $this->errorResponse('Add locale failure', $validator->errors()->messages());
     }
 
     /**
-     * Edits a locale based on request data
+     * Edit locale based on request data
      *
-     * @param Request $request
-     * @return json response
+     * @param string api_key - required
+     * @param string locale - required
+     * @param array data - required
+     * @param bool data[active] - required
+     *
+     * @return json with success or error
      */
     public function editLocale(Request $request)
     {
-        $localeEditData = $request->all();
+        $post = $request->all();
 
-        $locale = \LaravelLocalization::getCurrentLocale();
-        $validator = Validator::make($localeEditData, [
-            'data'        => 'required|array',
-            'locale'      => 'string|required',
-            'data.active' => 'required|integer',
+        $validator = Validator::make($post, [
+            'locale'        => 'required|string|max:5|exists:locale,locale',
+            'data'          => 'required|array',
+            'data.active'   => 'required|bool',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Edit locale failure');
+        if (!$validator->fails()) {
+            $locale = Locale::find($post['locale']);
+
+            $locale->active = $post['data']['active'];
+
+            try {
+                $locale->save();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        $localeToEdit = Locale::find($locale);
-        $localeToEdit->locale = $locale;
-        $localeToEdit->active = $localeEditData['data']['active'];
-        try {
-            $localeToEdit->save();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Locale add failure');
-        }
-        return $this->successResponse();
+        return $this->errorResponse('Edit locale failure', $validator->errors()->messages());
     }
 
     /**
-     * Deletes a locale based on request data.
-     * Locale id is column locale values
-     * like 'en', 'es' etc.
+     * Delete a locale based on request data
      *
-     * @param Request $request
-     * @return json response
+     * @param string api_key - required
+     * @param string locale - required
+     *
+     * @return json with success or error
      */
     public function deleteLocale(Request $request)
     {
-        $localeDeleteData = $request->all();
-        $validator = Validator::make($localeDeleteData, [
-            'locale' => 'required|string',
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
+            'locale'    => 'required|string|max:5|exists:locale,locale',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Delete locale failure');
+        if (!$validator->fails()) {
+            $locale = Locale::find($post['locale']);
+
+            try {
+                $locale->delete();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                return $this->errorResponse('Locale add failure');
+            }
         }
 
-        $locale = \LaravelLocalization::getCurrentLocale();
-        $localeToDelete = Locale::find($locale);
-
-        try {
-            $localeToDelete->delete();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Locale add failure');
-        }
-        return $this->successResponse();
+        return $this->errorResponse('Delete locale failure', $validator->errors()->messages());
     }
 
     /**
      * Lists locales based on input criteria
      *
-     * @param Request $request
-     * @return json response
+     * @param string api_key - required
+     * @param array criteria - optional
+     * @param bool criteria[active] - optional
+     *
+     * @return json with success or error
      */
     public function listLocale(Request $request)
     {
-        $localeListData = $request->all();
-        $validator = Validator::make($localeListData, [
-            'criteria'        => 'array',
-            'criteria.active' => 'integer',
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
+            'criteria'        => 'nullable|array',
+            'criteria.active' => 'nullable|bool',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('List locale failure');
-        }
+        if (!$validator->fails()) {
+            $locales = new Locale;
+            $results = [];
 
-        $result = [];
-        $criteria = $request->json('criteria');
+            if (isset($criteria['active'])) {
+                $locales = $locales->where('active', $post['active']);
+            }
 
-        $listLocale = Locale::select(
-            'locale',
-            'active',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by'
-        );
+            $supportedLocales = \LaravelLocalization::getSupportedLocales();
 
-        if (is_null($criteria)) {
-            $listLocale = $listLocale;
-        }
+            foreach ($locales->get() as $locale) {
+                $name = isset($supportedLocales[$locale->locale]) ? $supportedLocales[$locale->locale]['native'] : null;
 
-        if (isset($criteria['active'])) {
-            $listLocale = $listLocale->where('active', $criteria['active']);
-        }
-
-        $listLocale = $listLocale->get();
-
-        if (!empty($listLocale)) {
-            foreach ($listLocale as $singleLocale) {
-                $result[] = [
-                    'locale'     => $singleLocale->locale,
-                    'active'     => $singleLocale->active,
-                    'created_at' => date($singleLocale->created_at),
-                    'updated_at' => date($singleLocale->updated_at),
-                    'created_by' => $singleLocale->created_by,
-                    'updated_by' => $singleLocale->updated_by,
+                $results[] = [
+                    'locale'        => $locale->locale,
+                    'name'          => $name,
+                    'active'        => $locale->active,
+                    'created_at'    => isset($locale->created_at) ? $locale->created_at->toDateTimeString() : null,
+                    'updated_at'    => isset($locale->updated_at) ? $locale->updated_at->toDateTimeString() : null,
+                    'created_by'    => $locale->created_by,
+                    'updated_by'    => $locale->updated_by,
                 ];
             }
+
+            return $this->successResponse(['locale_list' => $results], true);
         }
-        return $this->successResponse(['locale' => $result], true);
+
+        return $this->errorResponse('List locale failure', $validator->errors()->messages());
     }
 
     /**
-     * Gets the details for a given locale
+     * Delete a locale based on request data
      *
-     * @param Request $request
-     * @return json response
+     * @param string locale - required
+     *
+     * @return json with success or error
      */
     public function getLocaleDetails(Request $request)
     {
-        $localeDetailsData = $request->all();
-        $validator = Validator::make($localeDetailsData, [
-            'locale' => 'string',
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
+            'locale' => 'required|string|max:5|exists:locale,locale',
         ]);
 
-        $locale = \LaravelLocalization::getCurrentLocale();
-        $localeDetails = Locale::where('locale', $locale)->get();
+        if (!$validator->fails()) {
+            $supportedLocales = \LaravelLocalization::getSupportedLocales();
+            $locale = Locale::where('locale', $post['locale'])->first();
+            $name = isset($supportedLocales[$locale->locale]) ? $supportedLocales[$locale->locale]['native'] : null;
 
-        if (!empty($localeDetails)) {
-            foreach ($localeDetails as $singleLocale) {
-                $result[] = [
-                    'locale'     => $singleLocale->locale,
-                    'active'     => $singleLocale->active,
-                    'created_at' => date($singleLocale->created_at),
-                    'updated_at' => date($singleLocale->updated_at),
-                    'created_by' => $singleLocale->created_by,
-                    'updated_by' => $singleLocale->updated_by,
-                ];
-            }
-            return $this->successResponse(['locale' => $result], true);
+            return $this->successResponse(['locale' => [
+                'locale'        => $locale->locale,
+                'name'          => $name,
+                'active'        => $locale->active,
+                'created_at'    => isset($locale->created_at) ? $locale->created_at->toDateTimeString() : null,
+                'updated_at'    => isset($locale->updated_at) ? $locale->updated_at->toDateTimeString() : null,
+                'created_by'    => $locale->created_by,
+                'updated_by'    => $locale->updated_by,
+            ]], true);
         }
+
+        return $this->errorResponse('Get locale details failure', $validator->errors()->messages());
     }
 }

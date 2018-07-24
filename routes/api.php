@@ -61,11 +61,9 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/deleteTermsOfUse', 'Api\TermsOfUseController@deleteTermsOfUse');
     Route::post('/listTermsOfUse', 'Api\TermsOfUseController@listTermsOfUse');
 
-    Route::post('addLocale', 'Api\LocaleController@addLocale');
-    Route::post('editLocale', 'Api\LocaleController@editLocale');
-    Route::get('deleteLocale', 'Api\LocaleController@deleteLocale');
-    Route::post('listLocale', 'Api\LocaleController@listLocale');
-    Route::get('getLocaleDetails', 'Api\LocaleController@getLocaleDetails');
+    Route::post('/addLocale', 'Api\LocaleController@addLocale');
+    Route::post('/editLocale', 'Api\LocaleController@editLocale');
+    Route::post('/deleteLocale', 'Api\LocaleController@deleteLocale');
 
     Route::post('/sendTermsOfUseRequest', 'Api\TermsOfUseRequestController@sendTermsOfUseRequest');
     Route::post('/editTermsOfUseRequest', 'Api\TermsOfUseRequestController@editTermsOfUseRequest');
@@ -120,3 +118,6 @@ Route::post('/listGroups', 'Api\OrganisationController@listGroups');
 Route::post('/searchGroups', 'Api\OrganisationController@searchGroups');
 Route::post('/getGroupDetails', 'Api\OrganisationController@getGroupDetails');
 Route::post('/getTermsOfUseDetails', 'Api\TermsOfUseController@getTermsOfUseDetails');
+
+Route::post('/listLocale', 'Api\LocaleController@listLocale');
+Route::post('/getLocaleDetails', 'Api\LocaleController@getLocaleDetails');

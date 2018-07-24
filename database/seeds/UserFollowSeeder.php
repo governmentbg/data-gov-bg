@@ -8,7 +8,7 @@ use App\Category;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class UserFollowTableSeeder extends Seeder
+class UserFollowSeeder extends Seeder
 {
     const USER_FOLLOW_RECORDS = 10;
 

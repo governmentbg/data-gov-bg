@@ -83,8 +83,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addTag', 'Api\CategoryController@addTag');
     Route::post('/editTag', 'Api\CategoryController@editTag');
     Route::post('/deleteTag', 'Api\CategoryController@deleteTag');
-
-    Route::post('/getLinkedData', 'Api\LinkedDataController@getLinkedData');
 });
 
 Route::post('/register', 'Api\UserController@register');
@@ -101,6 +99,7 @@ Route::post('/getResourceSchema', 'Api\ResourceController@getResourceSchema');
 Route::post('/getResourceData', 'Api\ResourceController@getResourceData');
 Route::post('/getResourceView', 'Api\ResourceController@getResourceView');
 Route::post('/searchResourceData', 'Api\ResourceController@searchResourceData');
+Route::post('/getLinkedData', 'Api\ResourceController@getLinkedData');
 
 Route::post('/listMainCategories', 'Api\CategoryController@listMainCategories');
 Route::post('/getMainCategoryDetails', 'Api\CategoryController@getMainCategoryDetails');

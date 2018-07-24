@@ -362,7 +362,7 @@ class DataSetController extends ApiController
                     }
 
                     return $this->successResponse([
-                        'datasets'      => $data,
+                        'datasets'  => $data,
                     ], true);
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());

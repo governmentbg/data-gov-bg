@@ -26,7 +26,7 @@ class CheckApiKey
 
         if (
             !empty($user)
-            && \Auth::loginUsingId($user->id, true)
+            && \Auth::loginUsingId($user->id)
         ) {
             $request->offsetUnset('api_key');
 

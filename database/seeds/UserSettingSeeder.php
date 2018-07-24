@@ -8,7 +8,7 @@ use App\UserSetting;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class UserSettingTableSeeder extends Seeder
+class UserSettingSeeder extends Seeder
 {
     const USER_SETTING_RECORDS = 10;
 

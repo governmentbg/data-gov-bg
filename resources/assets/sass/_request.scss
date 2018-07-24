@@ -1,0 +1,21 @@
+.theme-request {
+    p.request-data {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    span {
+        &.required {
+            color: #FE0000;
+        }
+
+        &.info {
+            font-size: 14px;
+            font-style: italic;
+        }
+    }
+
+    .btn {
+        color: black;
+    }
+}

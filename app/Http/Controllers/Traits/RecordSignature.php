@@ -8,9 +8,9 @@ trait RecordSignature
 {
     protected static function bootRecordSignature()
     {
-        $userId = \Auth::check() ?
-            \Auth::user()->id :
-            User::select('id')->where('username', 'system')->first()->id;
+        $userId = \Auth::check() 
+            ? \Auth::user()->id 
+            : User::select('id')->where('username', 'system')->first()->id;
 
         static::updating(function ($model) use ($userId) {
             $model->updated_by = $userId;

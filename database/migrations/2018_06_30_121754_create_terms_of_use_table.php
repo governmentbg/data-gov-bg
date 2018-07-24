@@ -16,9 +16,7 @@ class CreateTermsOfUseTable extends Migration
         Schema::create('terms_of_use', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('name')->unsigned();
-            $table->foreign('name')->references('id')->on('translations')->onDelete('cascade');
             $table->integer('descript')->unsigned();
-            $table->foreign('descript')->references('id')->on('translations')->onDelete('cascade');
             $table->boolean('active');
             $table->boolean('is_default');
             $table->unsignedTinyInteger('ordering');

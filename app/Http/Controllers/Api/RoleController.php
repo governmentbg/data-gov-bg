@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
+use Illuminate\Support\Facades\Log;
 use App\Role;
 use App\RoleRight;
 
@@ -13,8 +14,12 @@ class RoleController extends ApiController
     /**
      * API function for adding a new role
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and id if successfull
+     * @param string api_key - required
+     * @param array data - required
+     * @param string data[name] - required
+     * @param boolean data[active] - required
+     *
+     * @return json with success and role id or error
      */
     public function addRole(Request $request)
     {
@@ -32,19 +37,24 @@ class RoleController extends ApiController
                 if ($newRole) {
                     return $this->successResponse(['id' => $newRole->id], true);
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Add role failure');
+        return $this->errorResponse('Add role failure', $validator->errors()->messages());
     }
 
     /**
      * API function for editing a role
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer id - required
+     * @param array data - required
+     * @param string data[name] - required
+     * @param boolean data[active] - required
+     *
+     * @return json with success or error
      */
     public function editRole(Request $request)
     {
@@ -64,92 +74,122 @@ class RoleController extends ApiController
                 if (Role::where('id', $post['id'])->update($post)) {
                     return $this->successResponse();
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Edit role failure');
+        return $this->errorResponse('Edit role failure', $validator->errors()->messages());
     }
 
     /**
      * API function for deleting a role
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer id - required
+     *
+     * @return json success or error
      */
     public function deleteRole(Request $request)
     {
-        $id = $request->get('id');
+        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
 
-        if (
-            empty($id)
-            || !Role::where('id', $id)->get()->count()
-            || !Role::find($id)->delete()
-        ) {
-            return $this->errorResponse('Delete role failure');
+        $id = $request->offsetGet('id');
+
+        if (!$validator->fails()) {
+            try {
+                if (DataSet::find($id)->delete()) {
+                    return $this->successResponse();
+                }
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        return $this->successResponse();
+        return $this->errorResponse('Delete role failure', $validator->errors()->messages());
     }
 
     /**
      * API function for listing all roles
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and list of found roles if successfull
+     * @param string api_key - required
+     * @param array criteria - optional
+     * @param boolean active - optional | 1 = active 0 = inactive
+     *
+     * @return json with list of roles or error
      */
     public function listRoles(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['active' => 'boolean']);
+        $post = $request->all();
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Get role data failure');
-        }
+        $validator = \Validator::make($post, ['criteria.active' => 'nullable|boolean']);
 
-        try {
-            if ($request->has('active')) {
-                $roles = Role::where('active', $request->active)->get();
-            } else {
-                $roles = Role::all();
+        if (!$validator->fails()) {
+            $query = Role::select();
+
+            if (isset($post['criteria']['active'])) {
+                $query->where('active', $post['criteria']['active']);
             }
-        } catch (\Illuminate\Database\QueryException $ex) {
-            return $this->errorResponse($ex->getMessage());
+
+            try {
+                $roles = $query->get();
+
+                return $this->successResponse(['roles' => $roles], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        return $this->successResponse($roles);
+        return $this->errorResponse('Get role data failure', $validator->errors()->messages());
     }
 
     /**
      * API function for listing all rights for a given role
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and list of roles's rights if successfull
+     * @param string api_key - required
+     * @param integer id - required
+     *
+     * @return json with list of role's rights or error
      */
     public function getRoleRights(Request $request)
     {
-        $id = $request->get('id');
+        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
 
-        if (
-            !empty($id)
-            && Role::find($id)->get()->count()
-        ) {
+        if (!$validator->fails()) {
+            $id = $request->get('id');
+
             try {
-                $role = Role::where('id', $id)->first();
+                $role = Role::find($id);
+                $rights = RoleRight::getRightsDescription();
 
-                return $this->successResponse($role->rights);
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                if ($role) {
+                    foreach ($role->rights as $right) {
+                        $right['right_id'] = $right->right;
+                        $right['right'] = $rights[$right->right];
+                    }
+
+                    return $this->successResponse(['rights' => $role->rights], true);
+                }
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Get role rights failure');
+        return $this->errorResponse('Get role rights failure', $validator->errors()->messages());
     }
 
     /**
      * API function for changing a role's rights
+    *
+     * @param string api_key - required
+     * @param integer id - required
+     * @param array data - required | array with rights
+     * @param array data[right] - required | array with right data
+     * @param string data[right][module_name] - required
+     * @param integer data[right][right_id] - required
+     * @param boolean data[right][limit_to_own_data] - required
+     * @param boolean data[right][api] - required
      *
-     * @param Request $request - POST request
      * @return json $response - response with status
      */
     public function modifyRoleRights(Request $request)
@@ -158,8 +198,8 @@ class RoleController extends ApiController
         $id = $request->get('id');
 
         $validator = \Validator::make($post, [
-            'data.*.module_name'       => 'required|max:255',
-            'data.*.right'             => 'required',
+            'data.*.module_name'       => 'required|string|max:255',
+            'data.*.right'             => 'required|integer',
             'data.*.limit_to_own_data' => 'required|boolean',
             'data.*.api'               => 'required|boolean',
         ]);
@@ -169,7 +209,7 @@ class RoleController extends ApiController
             || !Role::where('id', $id)->get()->count()
             || $validator->fails()
         ) {
-            $response = $this->errorResponse('No role found');
+            $response = $this->errorResponse('No role found', $validator->errors()->messages());
         } else {
             $role = Role::where('id', $id)->first();
             $rights = $role->rights;
@@ -181,8 +221,9 @@ class RoleController extends ApiController
                         RoleRight::find($right->id)->delete();
                     }
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+                return $this->errorResponse();
             }
 
             try {
@@ -198,8 +239,8 @@ class RoleController extends ApiController
                         break;
                     }
                 }
-            } catch (\Illuminate\Database\QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 

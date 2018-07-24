@@ -12,7 +12,6 @@
 */
 
 //Route::get('/', 'HomeController@index');
-//Route::get('/home', 'HomeController@index')->name('home');
 //
 //Auth::routes();
 
@@ -20,8 +19,17 @@ Route::get('/', function () {
     return view('home/index', ['class' => 'index']);
 });
 
-Route::get('/home/login', function () {
-    return view('home/login', ['class' => 'index']);
+Route::get('/logout', function() {
+    Auth::logout();
+
+    return view('home/index', ['class' => 'index']);
+});
+
+Route::get('/login', 'Auth\LoginController@login');
+Route::post('/login', 'Auth\LoginController@login');
+
+Route::get('/user/registration', function () {
+    return view('user/registration', ['class' => 'user']);
 });
 
 Route::get('/accessibility', function () {
@@ -72,9 +80,8 @@ Route::get('/organisation/chronology', function () {
     return view('organisation/chronology', ['class' => 'organisation']);
 });
 
-Route::get('/user', function () {
-    return view('user/newsFeed', ['class' => 'user']);
-});
+Route::get('/user', 'UserController@index');
+Route::post('/user', 'UserController@index');
 
 Route::get('/user/datasets', function () {
     return view('user/datasets', ['class' => 'user']);
@@ -122,10 +129,6 @@ Route::get('/user/edit', function () {
 
 Route::get('/user/settings', function () {
     return view('user/settings', ['class' => 'user']);
-});
-
-Route::get('/user/registration', function () {
-    return view('user/registration', ['class' => 'user']);
 });
 
 Route::get('/user/orgRegistration', function () {

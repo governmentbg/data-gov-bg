@@ -27,3 +27,6 @@ require('./bootstrap-datepicker.bg');
 
 // Main js
 require('./custom');
+
+// Checkboxes
+require('icheck');

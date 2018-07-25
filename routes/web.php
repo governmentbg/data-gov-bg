@@ -86,6 +86,7 @@ Route::post('/user', 'UserController@index');
 Route::get('/user/datasets', 'UserController@datasets');
 Route::get('/user/datasetView/{uri}', 'UserController@datasetView');
 Route::post('/user/deleteDataset', 'UserController@deleteDataset');
+Route::match(['get', 'post'], '/user/createDataset', 'UserController@createDataset');
 
 Route::get('/user/resourceView', function () {
     return view('user/resourceView', ['class' => 'user']);
@@ -105,10 +106,6 @@ Route::post('/user/organisation/delete', 'UserController@deleteOrg');
 
 Route::get('/user/organisations/search', 'UserController@searchOrg');
 
-Route::get('/user/datasets', function () {
-    return view('user/datasets', ['class' => 'user']);
-});
-
 Route::get('/user/groupView', function () {
     return view('user/groupView', ['class' => 'user']);
 });
@@ -123,10 +120,6 @@ Route::get('/user/orgView', function () {
 
 Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);
-});
-
-Route::get('/user/create', function () {
-    return view('user/create', ['class' => 'user']);
 });
 
 Route::get('/user/edit', function () {

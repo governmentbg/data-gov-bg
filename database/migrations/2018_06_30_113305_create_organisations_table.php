@@ -18,7 +18,7 @@ class CreateOrganisationsTable extends Migration
             $table->unsignedTinyInteger('type');
             $table->integer('name')->unsigned();
             $table->integer('descript')->unsigned();
-            $table->string('uri', 255)->unique();
+            $table->string('uri')->unique();
             $table->string('logo_file_name')->nullable();
             $table->string('logo_mime_type')->nullable();
             $table->binary('logo_data')->nullable();

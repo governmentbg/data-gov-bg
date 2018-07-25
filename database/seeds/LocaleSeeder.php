@@ -17,8 +17,8 @@ class LocaleSeeder extends Seeder
             $languages = [
                 'bg'    => true,
                 'en'    => true,
-                'xx'    => true,
                 'ru'    => false,
+                'xx'    => false,
             ];
 
             foreach ($languages as $language => $active) {

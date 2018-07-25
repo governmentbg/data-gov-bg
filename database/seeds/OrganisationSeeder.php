@@ -49,7 +49,7 @@ class OrganisationSeeder extends Seeder
                 ]);
             }
 
-            Organisation::create($dbData);
+            Organisation::create($dbData)->searchable();
         }
     }
 }

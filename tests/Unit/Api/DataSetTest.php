@@ -290,7 +290,7 @@ class DataSetTest extends TestCase
             'descript'      => $this->faker->text(),
             'active'        => $this->faker->numberBetween(0,1),
             'approved'      => $this->faker->numberBetween(0,1),
-        ]);
+        ])->searchable();
 
         // test mising api key
         $this->post(url('api/addDataSetToGroup'), ['api_key' => null])

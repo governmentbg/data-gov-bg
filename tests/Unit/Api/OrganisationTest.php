@@ -62,7 +62,7 @@ class OrganisationTest extends TestCase
             'logo_data'         => $this->faker->text(intval(8000)),
             'active'            => $this->faker->boolean(),
             'approved'          => $this->faker->boolean(),
-        ]);
+        ])->searchable();
 
         $this->post(url('api/editOrganisation'), ['api_key' => null])
             ->assertStatus(403)

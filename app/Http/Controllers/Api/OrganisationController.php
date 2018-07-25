@@ -121,7 +121,6 @@ class OrganisationController extends ApiController
             try {
                 $organisation->save();
 
-
                 if (!empty($customFields)) {
                     if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
                         DB::rollback();
@@ -584,14 +583,7 @@ class OrganisationController extends ApiController
                 $criteria = $request->criteria;
 
                 $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
-                $query = Organisation::with('UserToOrgRole');
-                $query = Organisation::whereIn('id', $ids);
-
-                $userId = \Auth::user()->id;
-
-                $query->whereHas('UserToOrgRole', function($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                });
+                $query = Organisation::with('UserToOrgRole')->whereIn('id', $ids);
 
                 $count = $query->count();
                 $query->forPage(

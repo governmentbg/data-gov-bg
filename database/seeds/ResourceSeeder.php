@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class ResourceSeeder extends Seeder
 {
-    const RESOURCE_RECORDS = 50;
+    const RESOURCE_RECORDS = 10;
 
     /**
      * Run the database seeds.
@@ -31,7 +31,7 @@ class ResourceSeeder extends Seeder
             $type = $this->faker->randomElement($types);
             $fileType = $this->faker->randomElement($files);
             $httpType = $this->faker->randomElement($httpTypes);
-            
+
             \LaravelLocalization::setLocale($locale);
 
             Resource::create([

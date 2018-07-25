@@ -11373,6 +11373,7 @@ __webpack_require__(45);
 
 // Checkboxes
 __webpack_require__(46);
+//require('./resources')
 
 /***/ }),
 /* 12 */
@@ -44457,12 +44458,6 @@ $(function () {
             checkboxClass: 'icheckbox_square-green',
             radioClass: 'iradio_square-green'
         });
-
-        if ($('.js-check').iCheck('update')[0].checked) {
-            $('.js-check').val(1);
-        } else {
-            $('.js-check').val(false);
-        }
     }
 });
 

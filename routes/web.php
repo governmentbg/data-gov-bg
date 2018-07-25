@@ -83,13 +83,9 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
-Route::get('/user/datasets', function () {
-    return view('user/datasets', ['class' => 'user']);
-});
-
-Route::get('/user/datasetView', function () {
-    return view('user/datasetView', ['class' => 'user']);
-});
+Route::get('/user/datasets', 'UserController@datasets');
+Route::get('/user/datasetView/{uri}', 'UserController@datasetView');
+Route::post('/user/deleteDataset', 'UserController@deleteDataset');
 
 Route::get('/user/resourceView', function () {
     return view('user/resourceView', ['class' => 'user']);

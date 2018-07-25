@@ -16,7 +16,7 @@ class DataSetSeeder extends Seeder
     public function run()
     {
         $this->faker = Faker::create();
-        
+
         $statuses = array_keys(DataSet::getStatus());
         $visibilities = array_keys(DataSet::getVisibility());
 
@@ -27,6 +27,11 @@ class DataSetSeeder extends Seeder
             DataSet::create([
                 'uri'           => $this->faker->uuid(),
                 'name'          => $this->faker->word(),
+                'descript'      => $this->faker->text(),
+                'author_name'   => $this->faker->name(),
+                'author_email'  => $this->faker->email(),
+                'support_name'  => $this->faker->name(),
+                'support_email' => $this->faker->email(),
                 'visibility'    => $visibility,
                 'version'       => 1,
                 'status'        => $status,

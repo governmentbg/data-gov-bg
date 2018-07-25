@@ -38,10 +38,10 @@
                     <div class="articles">
                         <div class="article m-b-md">
                             <div class="col-sm-12">
-                                <div>Дата на добавяне: {{ date('d.m.Y') }}</div>
-                                <h2>Lorem ipsum dolor sit amet</h2>
+                                <div>Дата на добавяне: {{ $dataset->created_at }}</div>
+                                <h2>{{ $dataset->name }}</h2>
                                 <p>
-                                    Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi. Ut euismod nibh at ante dapibus, sit amet pharetra lectus blandit. Aliquam eget orci tellus. Aliquam quis dignissim lectus, non dictum purus. Pellentesque scelerisque quis enim at varius. Duis a ex faucibus urna volutpat varius ac quis mauris. Sed porttitor cursus metus, molestie ullamcorper dolor auctor sed. Praesent dictum posuere tellus, vitae eleifend dui ornare et. Donec eu ornare eros. Cras eget velit et ex viverra facilisis eget nec lacus.
+                                    {{ $dataset->descript }}
                                 </p>
 
                                 <div class="col-sm-12 pull-left m-t-md p-l-none">
@@ -105,12 +105,20 @@
                                 <div class="col-sm-12 m-t-lg p-l-none">
                                     <div class="pull-left">
                                         <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/edit') }}">редактиране</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на данните?');"
-                                                >изтриване</a>
-                                        </span>
+
+                                        <form method="POST" action="{{ url('/user/deleteDataset') }}">
+                                            {{ csrf_field() }}
+                                            <div class="col-xs-6 text-right">
+                                                <button
+                                                    class="badge badge-pill m-b-sm"
+                                                    type="submit"
+                                                    name="delete"
+                                                    onclick="return confirm('Изтриване на данните?');"
+                                                >премахване</button>
+                                            </div>
+                                            <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
+                                        </form>
+
                                     </div>
                                 </div>
                             </div>

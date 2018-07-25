@@ -236,9 +236,12 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                if (DataSet::where('uri', $post['dataset_uri'])->delete()) {
-                    return $this->successResponse();
-                }
+                $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
+                $dataset->deleted_by = \Auth::id();
+                $dataset->save();
+                $dataset->delete();
+
+                return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -280,6 +283,7 @@ class DataSetController extends ApiController
         if ($criteria) {
             $validator = \Validator::make($post, [
                 'criteria.locale'            => 'nullable|string|max:5',
+                'criteria.creator'           => 'nullable|integer',
                 'criteria.org_id'            => 'nullable|integer',
                 'criteria.group_id'          => 'nullable|integer',
                 'criteria.category_id'       => 'nullable|integer',
@@ -298,7 +302,13 @@ class DataSetController extends ApiController
                 $reported = [];
 
                 try {
-                    $query = DataSet::where('status', DataSet::STATUS_DRAFT);
+                    $query = DataSet::select();
+
+                    if (!empty($criteria['created_by'])) {
+                        $query->where('created_by', $criteria['created_by']);
+                    } else {
+                        $query->where('status', DataSet::STATUS_PUBLISHED);
+                    }
 
                     if (!empty($criteria['org_id'])) {
                         $query->where('org_id', $criteria['org_id']);

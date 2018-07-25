@@ -19,20 +19,22 @@ class CheckApiKey
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = User::select('id')->where([
-            'api_key'   => $request->offsetGet('api_key'),
-            'active'    => 1,
-        ])->first();
+        if (!\Auth::check()) {
+            $user = User::select('id')->where([
+                'api_key'   => $request->offsetGet('api_key'),
+                'active'    => 1,
+            ])->first();
 
-        if (
-            !empty($user)
-            && \Auth::loginUsingId($user->id)
-        ) {
-            $request->offsetUnset('api_key');
+            if (
+                !empty($user)
+                && \Auth::loginUsingId($user->id)
+            ) {
+                $request->offsetUnset('api_key');
 
-            return $next($request);
+                return $next($request);
+            }
+
+            return ApiController::errorResponse('Access denied', [], 403);
         }
-
-        return ApiController::errorResponse('Access denied', [], 403);
     }
 }

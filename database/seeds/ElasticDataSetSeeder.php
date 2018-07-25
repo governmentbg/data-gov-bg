@@ -44,12 +44,12 @@ class ElasticDataSetSeeder extends Seeder
                 'hash_id'   => $this->faker->md5(),
             ];
 
-            $insert = \Elasticsearch::index([
-                'body'  => $data,
-                'index' => $index,
-                'type'  => ElasticDataSet::ELASTIC_TYPE,
-                'id'    => $id,
-            ]);
+//            $insert = \Elasticsearch::index([
+//                'body'  => $data,
+//                'index' => $index,
+//                'type'  => ElasticDataSet::ELASTIC_TYPE,
+//                'id'    => $id,
+//            ]);
         }
     }
 }

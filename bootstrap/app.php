@@ -45,6 +45,8 @@ $app->configureMonologUsing(function ($monolog) use($app){
     $logLevel = \Monolog\Logger::toMonologLevel(config('app.log_level'));
 
     if (App::environment(['devel', 'test'])){
+//    if (App::environment(['local', 'demo'])){
+
         //graylog handler
         $fluentd = new \App\Extensions\Monolog\Handler\FluentdHandler($logLevel);
         $fluentd->pushProcessor(function ($record) {

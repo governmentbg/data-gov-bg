@@ -368,13 +368,16 @@ trait Translatable
 
     public static function bootTranslatable()
     {
+        $traits = class_uses(self::class);
         // When model is deleted, Delete the corresponding translations as well
-        self::deleting(function ($model) {
-            Translation::whereIn(
-                'group_id',
-                array_keys($model->get_translatable_values())
-            )->delete();
-        });
+        if (!isset($traits['Illuminate\\Database\\Eloquent\\SoftDeletes'])) {
+            self::deleting(function ($model) {
+                Translation::whereIn(
+                    'group_id',
+                    array_keys($model->get_translatable_values())
+                )->delete();
+            });
+        }
     }
 
     /**

@@ -40,7 +40,7 @@ class LoginController extends Controller
     }
 
     public function login(Request $request) {
-        $errors = [];
+        $error = [];
         $class = 'index';
         $loginData = $request->all();
 
@@ -62,13 +62,13 @@ class LoginController extends Controller
 
                     return redirect('/');
                 } else {
-                    $errors['password'][0] = 'Wrong password given.';
+                    $error['password'][0] = 'Wrong password given.';
                 }
             } else {
-                $errors = $validator->errors()->messages();
+                $error = $validator->errors()->messages();
             }
         }
 
-        return view('home/login', compact('errors', 'class'));
+        return view('home/login', compact('error', 'class'));
     }
 }

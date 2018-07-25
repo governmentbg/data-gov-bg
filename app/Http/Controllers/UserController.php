@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
+use App\UserSetting;
+use App\Organisation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 
@@ -74,10 +80,111 @@ class UserController extends Controller {
     public function settigns() {
     }
 
-    public function registration() {
+    public function registration(Request $request) {
+        $class = 'user';
+        $message = 'Пратено е съобщение за потвърждение, на посоченият от вас адрес';
+        $params = [];
+        $error = [];
+
+        $digestFreq = UserSetting::getDigestFreq();
+
+        if ($request->isMethod('post')) {
+            $params = $request->all();
+            error_log('params: '. print_r($params, true));
+
+            $req = Request::create('/register', 'POST', ['data' => $params]);
+            $api = new ApiUser($req);
+            $result = $api->register($req)->getData();
+
+            if ($result->success) {
+                $user = User::where('api_key', $result->api_key)->first();
+
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                ];
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($params) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($params['email'], $params['firstname'])->subject('Your account has been created!');
+                });
+
+                if (count(Mail::failures()) > 0) {
+                    $error['mail'] = 'Failed to send mail';
+                } else {
+                    if ($request->has('add_org')) {
+                        $key = $user->username;
+
+                        return redirect()->route(
+                            'orgRegistration', compact('key', 'message')
+                        );
+                    }
+                    $class = 'index';
+
+                    return view('home/login', compact('message', 'class'));
+                }
+            } else {
+                $error = $result->errors;
+            }
+
+            error_log('error: '. print_r($error, true));
+        }
+
+        return view('user/registration', compact('class', 'error', 'digestFreq'));
     }
 
-    public function orgRegistration() {
+    public function orgRegistration(Request $request) {
+        $class = 'user';
+        $params = [];
+        $error = [];
+        $username = $request->offsetGet('key');
+        $orgTypes = Organisation::getPublicTypes();
+
+        if (!empty($username)) {
+            if ($request->isMethod('post')) {
+                $user = User::where('username', $username)->first();
+                $params = $request->all();
+                $apiKey = $user->api_key;
+
+                if (!empty($params['logo'])) {
+                    try {
+                        $img = \Image::make($params['logo']);
+                    } catch (NotReadableException $ex) {
+                        Log::error($ex->getMessage());
+                    }
+
+                    if (!empty($img)) {
+                        $img->resize(300, 200);
+                        $params['logo_filename'] = $params['logo']->getClientOriginalName();
+                        $params['logo_mimetype'] = $img->mime();
+                        $params['logo_data'] = $img->encode('data-url');
+
+                        unset($params['logo']);
+                    }
+                }
+
+                $params['locale'] = \LaravelLocalization::getCurrentLocale();
+
+                if (empty($params['type'])) {
+                    $params['type'] = Organisation::TYPE_CIVILIAN;
+                }
+
+                $req = Request::create('/addOrganisation', 'POST', ['api_key' => $apiKey,'data' => $params]);
+                $api = new ApiOrganisations($req);
+                $result = $api->addOrganisation($req)->getData();
+
+                if ($result->success) {
+                    $class = 'index';
+                    $message = 'Успешно създадена организация!';
+
+                    return view('home/login', compact('message', 'class'));
+                } else {
+                    $error = $result->errors;
+                }
+            }
+        }
+
+        return view('user/orgRegistration', compact('class', 'error', 'orgTypes'));
     }
 
     public function createLicense() {

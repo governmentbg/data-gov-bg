@@ -11776,6 +11776,10 @@ a:active {
   color: #C02E54;
 }
 
+.hidden {
+  display: none;
+}
+
 .sidenav,
 .sidenav-open {
   height: 100%;
@@ -12142,6 +12146,15 @@ textarea {
   .page-content {
     float: right;
   }
+}
+
+.radio-label {
+  cursor: pointer;
+}
+
+.radio-label div {
+  display: inline-block;
+  margin-left: 10px;
 }
 
 .container .filter-content .filter-type li,
@@ -12598,6 +12611,35 @@ textarea {
   padding: 30px 0px;
 }
 
+.confirm-error .logo-error {
+  width: 150px;
+  opacity: 0.4;
+  margin-top: 35px;
+  margin-bottom: 35px;
+}
+
+.confirm-error .wrap {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.confirm-error .wrap > span {
+  font-size: 22pt;
+  margin-bottom: 20px;
+}
+
+@media screen and (max-width: 991px) {
+  .confirm-error .wrap > span {
+    font-size: 16pt;
+  }
+}
+
+.confirm-error .wrap > button {
+  width: 80%;
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
 .theme-data .underline-thin,
 .theme-data-attention .underline-thin {
   background-color: #4F57AA;
@@ -12691,7 +12733,7 @@ textarea {
 
 .theme-user .fileinput-new.thumbnai {
   width: 180px;
-  height: 100px;
+  height: 105px;
   padding: 0px;
   margin-bottom: -10px;
   display: inline-block;
@@ -12980,6 +13022,18 @@ textarea {
 .frame {
   margin: 20px;
   border-radius: 10px;
+}
+
+.preview {
+  padding: 5px;
+  margin: 0 auto;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.cust-val {
+  padding-right: 0px !important;
 }
 
 .theme-organisation .sidebar-submenu .order {

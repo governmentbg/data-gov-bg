@@ -28,9 +28,13 @@ Route::get('/logout', function() {
 Route::get('/login', 'Auth\LoginController@login');
 Route::post('/login', 'Auth\LoginController@login');
 
-Route::get('/user/registration', function () {
-    return view('user/registration', ['class' => 'user']);
-});
+Route::get('/registration', 'UserController@registration');
+Route::post('/registration', 'UserController@registration');
+
+Route::get('/confirmation', 'HomeController@confirmation');
+
+Route::get('/orgRegistration', 'UserController@orgRegistration');
+Route::post('/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);

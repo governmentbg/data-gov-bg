@@ -18,6 +18,10 @@ a:active {
     color: $error-color;
 }
 
+.hidden {
+    display: none;
+}
+
 .sidenav, .sidenav-open {
     height: 100%;
     display: inline-block;
@@ -326,5 +330,14 @@ textarea {
 @include smMobile() {
     .page-content {
         float: right;
+    }
+}
+
+.radio-label {
+    cursor: pointer;
+
+    div {
+        display: inline-block;
+        margin-left: 10px;
     }
 }

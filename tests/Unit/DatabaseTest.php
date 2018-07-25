@@ -423,7 +423,7 @@ class DatabaseTest extends TestCase
             }
 
             try {
-                $record = Organisation::create($dbData);
+                $record = Organisation::create($dbData)->searchable();
             } catch (QueryException $ex) {
                 $this->log($ex->getMessage());
             }

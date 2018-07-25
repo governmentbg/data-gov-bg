@@ -11373,7 +11373,6 @@ __webpack_require__(45);
 
 // Checkboxes
 __webpack_require__(46);
-//require('./resources')
 
 /***/ }),
 /* 12 */

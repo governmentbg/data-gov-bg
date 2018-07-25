@@ -621,7 +621,7 @@ class OrganisationController extends ApiController
                         'locale'          => $org->locale,
                         'uri'             => $org->uri,
                         'type'            => $org->type,
-                        'logo'            => $org->logo,
+                        'logo'            => $org->logo_data,
                         'activity_info'   => $org->activity_info,
                         'contacts'        => $org->contacts,
                         'parent_org_id'   => $org->parent_org_id,

@@ -189,10 +189,9 @@
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 1;
         }
-        .logo-cont {
-            height: 220px;
-            img {
-                max-height: 220px !important;
+        .logo {
+            &img {
+                height: 200px;
             }
         }
         .show-more {

@@ -99,6 +99,16 @@ Route::get('/user/groups', function () {
     return view('user/groups', ['class' => 'user']);
 });
 
+Route::get('/user/organisations', 'UserController@organisations');
+
+Route::post('/user/organisation/delete', 'UserController@deleteOrg');
+
+Route::get('/user/organisations/search', 'UserController@searchOrg');
+
+Route::get('/user/datasets', function () {
+    return view('user/datasets', ['class' => 'user']);
+});
+
 Route::get('/user/groupView', function () {
     return view('user/groupView', ['class' => 'user']);
 });

@@ -62,7 +62,7 @@ class Organisation extends Model implements TranslatableInterface
 
     public function userToOrgRole()
     {
-        return $this->hasMany('App\UserToOrgRole');
+        return $this->hasMany('App\UserToOrgRole', 'org_id');
     }
 
     public function userFollow()

@@ -358,7 +358,7 @@ class OrganisationController extends ApiController
         $count = 0;
 
         $validator = \Validator::make($request->all(), [
-            'criteria.locale'       => 'nullable|string',
+            'criteria.locale'       => 'nullable|string|max:5',
             'criteria.active'       => 'nullable|integer',
             'criteria.approved'     => 'nullable|integer',
             'criteria.org_id'       => 'nullable|integer',
@@ -382,7 +382,7 @@ class OrganisationController extends ApiController
             }
 
             try {
-                $query = Organisation::select();
+                $query = Organisation::with('CustomSettings');
 
                 if (!empty($criteria)) {
                     $query->where($criteria);
@@ -400,6 +400,8 @@ class OrganisationController extends ApiController
                 $query->orderBy($field, $type);
 
                 foreach ($query->get() as $org) {
+                    $customFields = [];
+
                     foreach ($org->customSetting()->get() as $setting) {
                         $customFields[] = [
                             'key'    =>$setting->key,
@@ -408,6 +410,119 @@ class OrganisationController extends ApiController
                     }
 
                     $results[] = [
+                        'name'            => $org->name,
+                        'description'     => $org->descript,
+                        'locale'          => $org->locale,
+                        'uri'             => $org->uri,
+                        'type'            => $org->type,
+                        'logo'            => $org->logo,
+                        'activity_info'   => $org->activity_info,
+                        'contacts'        => $org->contacts,
+                        'parent_org_id'   => $org->parent_org_id,
+                        'approved'        => $org->approved,
+                        'active'          => $org->active,
+                        'custom_fields'   => $customFields,
+                        'datasets_count'  => $org->dataSet()->count(),
+                        'followers_count' => $org->userFollow()->count(),
+                        'created_at'      => $org->created_at->toDateTimeString(),
+                        'updated_at'      => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
+                        'created_by'      => $org->created_by,
+                        'updated_by'      => $org->updated_by,
+                    ];
+                }
+
+                return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return ApiController::errorResponse('List organisation failure', $validator->errors()->messages());
+    }
+
+    /**
+     * List organisations by criteria
+     *
+     * @param array criteria -optional
+     * @param string criteria[locale] - optional
+     * @param integer criteria[user_id] - optional
+     * @param integer criteria[active] - optional
+     * @param integer criteria[approved] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json lsit with organisations or error
+     */
+    public function getOrganisations(Request $request)
+    {
+        $results = [];
+        $criteria = [];
+        $count = 0;
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.active'       => 'nullable|integer',
+            'criteria.approved'     => 'nullable|integer',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+        ]);
+
+        if (!$validator->fails()) {
+            if (isset($post->criteria['active'])) {
+                $criteria['active'] = $post->criteria['active'];
+            }
+
+            if (isset($post->criteria['active'])) {
+                $criteria['active'] = $post->criteria['active'];
+            }
+
+            if (isset($post->criteria['approved'])) {
+                $criteria['approved'] = $post->criteria['approved'];
+            }
+
+            try {
+                $query = Organisation::with('CustomSetting')->with('UserToOrgRole');
+
+                $userId = \Auth::user()->id;
+
+                $query->whereHas('UserToOrgRole', function($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+
+                if (!empty($criteria)) {
+                    $query->where($criteria);
+                }
+
+                $count = $query->count();
+
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
+
+                $field = empty($post->criteria['order']['field']) ? 'created_at' : $post->criteria['order']['field'];
+                $type = empty($post->criteria['order']['type']) ? 'desc' : $post->criteria['order']['type'];
+
+                $query->orderBy($field, $type);
+
+                $customFields = [];
+                foreach ($query->get() as $org) {
+                    $customFields = [];
+
+                    foreach ($org->customSetting()->get() as $setting) {
+                        $customFields[] = [
+                            'key'    =>$setting->key,
+                            'value'  =>$setting->value
+                        ];
+                    }
+
+                    $results[] = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $org->locale,
@@ -469,7 +584,14 @@ class OrganisationController extends ApiController
                 $criteria = $request->criteria;
 
                 $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
+                $query = Organisation::with('UserToOrgRole');
                 $query = Organisation::whereIn('id', $ids);
+
+                $userId = \Auth::user()->id;
+
+                $query->whereHas('UserToOrgRole', function($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
 
                 $count = $query->count();
                 $query->forPage(
@@ -483,14 +605,17 @@ class OrganisationController extends ApiController
                 $query->orderBy($field, $type);
 
                 foreach ($query->get() as $org) {
+                    $customFields = [];
+
                     foreach ($org->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 
                     $results[] = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $org->locale,

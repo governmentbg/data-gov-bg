@@ -12786,7 +12786,114 @@ textarea {
   margin-left: 25px;
 }
 
+.theme-user .user-orgs {
+  padding: 50px;
+}
+
+.theme-user .user-orgs .ch-del-btns {
+  margin-top: 10px;
+  margin-bottom: 35px;
+}
+
+.theme-user .user-orgs .ch-del-btns div div button {
+  border-radius: 10px;
+  padding: 7px;
+  background-color: #108f9e;
+  color: white;
+  border: none;
+}
+
+.theme-user .user-orgs .org-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 10;
+}
+
+.theme-user .user-orgs .org-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.theme-user .user-orgs .logo-cont {
+  height: 220px;
+}
+
+.theme-user .user-orgs .logo-cont img {
+  max-height: 220px !important;
+}
+
+.theme-user .user-orgs .show-more {
+  margin-top: 10px;
+}
+
+.theme-user .user-orgs .org-col {
+  margin-bottom: 30px;
+}
+
+.theme-user .user-orgs .pagination li.active span {
+  background-color: #108f9e;
+  border-color: #108f9e;
+  color: white;
+}
+
+.theme-user .user-orgs .pagination li span,
+.theme-user .user-orgs .pagination li a {
+  color: #108f9e;
+}
+
+@media screen and (max-width: 1199px) {
+  .theme-user .filter-content div div.create-org {
+    margin-top: 20px !important;
+  }
+
+  .theme-user .filter-content div div.create-org div {
+    text-align: left;
+  }
+
+  .theme-user .filter-content div div div {
+    margin-bottom: 10px;
+  }
+
+  .theme-user .filter-content div div div .my-profile {
+    font-size: 24px;
+  }
+
+  .theme-user .filter-content .search {
+    text-align: left;
+  }
+}
+
 @media screen and (max-width: 767px) {
+  .theme-user .filter-content div div.create-org {
+    margin-top: 20px !important;
+  }
+
+  .theme-user .filter-content div div.create-org div {
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .theme-user .filter-content div div div {
+    margin-bottom: 10px;
+  }
+
+  .theme-user .filter-content div div div .my-profile {
+    font-size: 24px;
+  }
+
+  .theme-user .filter-content .search {
+    text-align: left;
+  }
+
+  .theme-user .user-orgs {
+    padding: 0px;
+  }
+
   .theme-user .my-profile {
     margin-left: 0 !important;
   }
@@ -12850,6 +12957,28 @@ textarea {
     font-size: 13px;
     padding: 5px 12px;
   }
+}
+
+.theme-user .filter-content div div.create-org {
+  margin-top: 40px;
+}
+
+.theme-user .filter-content div div.create-org div span {
+  border-radius: 10px;
+  padding: 7px;
+  background-color: #108f9e;
+  color: white;
+}
+
+.theme-user .filter-content .search {
+  padding-top: 9px;
+}
+
+.theme-user .filter-content .search input {
+  border-radius: 15px;
+  border: 1px solid black;
+  font-size: 12px;
+  padding: 2px 5px;
 }
 
 .frame {

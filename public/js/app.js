@@ -11334,7 +11334,7 @@ module.exports = Cancel;
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(11);
-module.exports = __webpack_require__(47);
+module.exports = __webpack_require__(48);
 
 
 /***/ }),
@@ -11370,9 +11370,10 @@ __webpack_require__(44);
 
 // Main js
 __webpack_require__(45);
+__webpack_require__(46);
 
 // Checkboxes
-__webpack_require__(46);
+__webpack_require__(47);
 
 /***/ }),
 /* 12 */
@@ -44534,6 +44535,39 @@ $('.btn-sidebar').click(function (e) {
 /* 46 */
 /***/ (function(module, exports) {
 
+$(function () {
+    if ($('.js-logo').length) {
+        var $button = $('.js-logo');
+        var $input = $('.js-logo-input');
+        var $preview = $('.js-preview');
+
+        $button.on('click', function (e) {
+            $input.trigger('click');
+        });
+
+        $input.change(function () {
+            readURL(this);
+            $preview.removeClass('hidden');
+        });
+    }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $preview.attr('src', e.target.result);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+});
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports) {
+
 /*!
  * iCheck v1.0.2, http://git.io/arlzeA
  * ===================================
@@ -45046,7 +45080,7 @@ $('.btn-sidebar').click(function (e) {
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

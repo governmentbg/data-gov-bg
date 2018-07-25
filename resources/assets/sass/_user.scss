@@ -157,7 +157,118 @@
         }
     }
 
+    .user-orgs {
+        padding: 50px;
+        .ch-del-btns {
+            margin-top: 10px;
+            margin-bottom: 35px;
+            div {
+                div {
+                    button {
+                        border-radius: 10px;
+                        padding: 7px;
+                        background-color: #108f9e;
+                        color: white;
+                        border: none;
+                    }
+                }
+            }
+        }
+        .org-desc {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+             -webkit-box-orient: vertical;
+             -webkit-line-clamp: 10;
+            //max-height: 150px;
+        }
+        .org-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
+        .logo-cont {
+            height: 220px;
+            img {
+                max-height: 220px !important;
+            }
+        }
+        .show-more {
+            margin-top: 10px;
+        }
+        .org-col {
+            margin-bottom: 30px;
+        }
+        .pagination {
+            li {
+                &.active {
+                    span {
+                        background-color: #108f9e;
+                        border-color: #108f9e;
+                        color: white;
+                    }
+                }
+                span, a {
+                    color: #108f9e;
+                }
+            }
+        }
+    }
+
+    @include mobile() {
+        .filter-content {
+            div {
+                div {
+                    &.create-org {
+                        margin-top: 20px !important;
+                        div {
+                            text-align: left;
+                        }
+                    }
+                    div {
+                        margin-bottom: 10px;
+                        .my-profile {
+                            font-size: 24px;
+                        }
+                    }
+                }
+            }
+            .search {
+               text-align: left;
+            }
+        }
+    }
+
     @include smMobile() {
+        .filter-content {
+            div {
+                div {
+                    &.create-org {
+                        margin-top: 20px !important;
+                        div {
+                            text-align: left;
+                            font-size: 13px;
+                        }
+                    }
+                    div {
+                        margin-bottom: 10px;
+                        .my-profile {
+                            font-size: 24px;
+                        }
+                    }
+                }
+            }
+            .search {
+               text-align: left;
+            }
+        }
+
+        .user-orgs {
+            padding: 0px;
+        }
+
         .my-profile {
             margin-left: 0 !important;
         }
@@ -231,6 +342,33 @@
         button {
             font-size: 13px;
             padding: 5px 12px;
+        }
+    }
+
+    .filter-content {
+        div {
+            div {
+                &.create-org {
+                    margin-top: 40px;
+                    div {
+                        span {
+                            border-radius: 10px;
+                            padding: 7px;
+                            background-color: #108f9e;
+                            color: white;
+                        }
+                    }
+                }
+            }
+        }
+        .search {
+            input {
+                border-radius: 15px;
+                border: 1px solid black;
+                font-size: 12px;
+                padding: 2px 5px;
+            }
+            padding-top: 9px;
         }
     }
 }

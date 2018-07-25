@@ -47,9 +47,9 @@
             <div class="row">
                 @foreach ($organisations as $organisation)
                     <div class="col-md-4 col-sm-12 org-col">
-                        <div class="col-xs-12 org-logo">
+                        <div class="col-xs-12">
                             <a href="{{ url('/organisation/profile') }}">
-                                <div class="logo-cont"><img class="img-responsive" src="{{ asset('img/test-img/logo-org-3.jpg') }}"/></div>
+                                <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
                             </a>
                         </div>
                         <div class="col-xs-12">

@@ -12819,12 +12819,8 @@ textarea {
   -webkit-line-clamp: 1;
 }
 
-.theme-user .user-orgs .logo-cont {
-  height: 220px;
-}
-
-.theme-user .user-orgs .logo-cont img {
-  max-height: 220px !important;
+.theme-user .user-orgs .logoimg {
+  height: 200px;
 }
 
 .theme-user .user-orgs .show-more {

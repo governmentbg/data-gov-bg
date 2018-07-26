@@ -19,8 +19,8 @@ class TermsOfUseRequest extends Model
     public function toSearchableArray()
     {
         return [
-            'descript'  => $this->descript,
             'id'        => $this->id,
+            'descript'  => $this->descript,
         ];
     }
 

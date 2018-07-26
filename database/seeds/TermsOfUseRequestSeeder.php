@@ -24,7 +24,7 @@ class TermsOfUseRequestSeeder extends Seeder
                 'lastname'      => $this->faker->lastName(),
                 'email'         => $this->faker->email(),
                 'status'        => $this->faker->boolean()
-            ]);
+            ])->searchable();
         }
     }
 }

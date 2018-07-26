@@ -53,7 +53,7 @@
 
     .fileinput-new.thumbnai {
         width: 180px;
-        height: 100px;
+        height: 105px;
         padding: 0px;
         margin-bottom: -10px;
         display: inline-block;
@@ -376,3 +376,17 @@
     margin: 20px;
     border-radius: 10px;
 }
+
+.preview {
+    padding: 5px;
+    margin: 0 auto;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.cust-val {
+    padding-right: 0px !important;
+}
+
+

@@ -11,6 +11,11 @@
                         <img class="responsive logo-login" src="{{ asset('img/opendata-logo-color.svg') }}">
                     </div>
                     <div class="col-xs-12">
+                        @if (!empty($message))
+                            <div class="alert alert-success">
+                                {{ $message }}
+                            </div>
+                        @endif
                         <form class="form-horizontal" method="POST">
                             {{ csrf_field() }}
 
@@ -18,8 +23,8 @@
                                 <label for="username" class="col-xs-12 col-form-label">Потребителско име:</label>
                                 <div class="col-xs-12">
                                     <input type="text" class="input-border-r-12 form-control" name="username">
-                                    @if (!empty($errors['username']))
-                                        <span class="error">{{ $errors['username'][0] }}</span>
+                                    @if (!empty($error['username']))
+                                        <span class="error">{{ $error['username'][0] }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -27,8 +32,8 @@
                                 <label for="password" class="col-xs-12 col-form-label">Парола:</label>
                                 <div class="col-xs-12">
                                     <input type="password" class="input-border-r-12 form-control" name="password">
-                                    @if (!empty($errors['password']))
-                                        <span class="error">{{ $errors['password'][0] }}</span>
+                                    @if (!empty($error['password']))
+                                        <span class="error">{{ $error['password'][0] }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -53,7 +58,7 @@
                         </div>
                         <div class="form-group row text-center">
                             <div class="col-xs-12">
-                                <a href="{{ url('/user/registration') }}"><h3>нов профил</h3></a>
+                                <a href="{{ url('/registration') }}"><h3>нов профил</h3></a>
                             </div>
                         </div>
                     </div>

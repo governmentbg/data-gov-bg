@@ -37,21 +37,21 @@ class HomeController extends Controller {
             $user = User::where('hash_id', $request->offsetGet('hash'))->first();
 
             if ($user) {
-                $message = 'Поздравления! Профилът ви беше активиран.
-                    Вашите данни ще се публикуват като непотвъдени, докaто не ви одобри някой от нашите администратори';
+                $confirmed = 1;
                 $user->active = true;
 
                 try {
                     $user->save();
                     $class = 'index';
 
-                    return view('/home/login', compact('message', 'class'));
+                    return redirect()->guest(route('login', compact('confirmed')));
+
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
+            } else {
+                return view('confirmError', compact('class'));
             }
         }
-
-        return view('confirmError', compact('class'));
     }
 }

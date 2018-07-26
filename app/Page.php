@@ -21,25 +21,25 @@ class Page extends Model implements TranslatableInterface
     const DATE_TYPE_VALID = 'valid';
 
     protected static $translatable = [
-        'title' => 'label',
-        'abstract' => 'text',
-        'body' => 'text',
-        'head_title' => 'label',
-        'meta_desctript' => 'text',
-        'meta_key_words' => 'label',
+        'title'             => 'label',
+        'abstract'          => 'text',
+        'body'              => 'text',
+        'head_title'        => 'label',
+        'meta_desctript'    => 'text',
+        'meta_key_words'    => 'label',
     ];
 
     public function toSearchableArray()
     {
-        $array['title'] = $this->concatTranslations('title');
-        $array['abstract'] = $this->concatTranslations('abstract');
-        $array['body'] = $this->concatTranslations('body');
-        $array['head_title'] = $this->concatTranslations('head_title');
-        $array['meta_desctript'] = $this->concatTranslations('meta_desctript');
-        $array['meta_key_words'] = $this->concatTranslations('meta_key_words');
-        $array['id'] = $this->id;
-
-        return $array;
+        return [
+            'id'                => $this->id,
+            'title'             => $this->concatTranslations('title'),
+            'abstract'          => $this->concatTranslations('abstract'),
+            'body'              => $this->concatTranslations('body'),
+            'head_title'        => $this->concatTranslations('head_title'),
+            'meta_desctript'    => $this->concatTranslations('meta_desctript'),
+            'meta_key_words'    => $this->concatTranslations('meta_key_words'),
+        ];
     }
 
     public function section()

@@ -50,7 +50,7 @@ class ResourceSeeder extends Seeder
                 'schema_descript'   => $this->faker->text(),
                 'schema_url'        => $this->faker->name(),
                 'is_reported'       => $this->faker->boolean(),
-            ]);
+            ])->searchable();
         }
     }
 }

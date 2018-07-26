@@ -35,7 +35,7 @@ class DataSetSeeder extends Seeder
                 'visibility'    => $visibility,
                 'version'       => 1,
                 'status'        => $status,
-            ]);
+            ])->searchable();
         }
     }
 }

@@ -99,7 +99,7 @@ class ResourceController extends ApiController
             ];
 
             try {
-                $resource = Resource::create($dbData);
+                $resource = Resource::create($dbData)->searchable();
 
                 return $this->successResponse(['uri' => $resource->uri]);
             } catch (QueryException $ex) {

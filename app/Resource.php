@@ -69,9 +69,9 @@ class Resource extends Model implements TranslatableInterface
     public function toSearchableArray()
     {
         return [
+            'id'        => $this->id,
             'name'      => $this->concatTranslations('name'),
             'descript'  => $this->concatTranslations('descript'),
-            'id'        => $this->id,
         ];
     }
 

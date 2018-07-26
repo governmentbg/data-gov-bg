@@ -26,12 +26,13 @@ Route::get('/logout', function() {
 });
 
 Route::get('/login', 'Auth\LoginController@login');
-Route::post('/login', 'Auth\LoginController@login');
+Route::post('/login', 'Auth\LoginController@login')->name('login');
 
 Route::get('/registration', 'UserController@registration');
 Route::post('/registration', 'UserController@registration');
 
 Route::get('/confirmation', 'HomeController@confirmation');
+Route::post('/confirmation', 'HomeController@confirmation');
 
 Route::get('/orgRegistration', 'UserController@orgRegistration');
 Route::post('/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
@@ -87,10 +88,13 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
-Route::get('/user/datasets', 'UserController@datasets');
-Route::get('/user/datasetView/{uri}', 'UserController@datasetView');
-Route::post('/user/deleteDataset', 'UserController@deleteDataset');
-Route::match(['get', 'post'], '/user/createDataset', 'UserController@createDataset');
+Route::get('/user/datasets', function () {
+    return view('user/datasets', ['class' => 'user']);
+});
+
+Route::get('/user/datasetView', function () {
+    return view('user/datasetView', ['class' => 'user']);
+});
 
 Route::get('/user/resourceView', function () {
     return view('user/resourceView', ['class' => 'user']);
@@ -103,12 +107,6 @@ Route::get('/user/organisations', function () {
 Route::get('/user/groups', function () {
     return view('user/groups', ['class' => 'user']);
 });
-
-Route::get('/user/organisations', 'UserController@organisations');
-
-Route::post('/user/organisation/delete', 'UserController@deleteOrg');
-
-Route::get('/user/organisations/search', 'UserController@searchOrg');
 
 Route::get('/user/groupView', function () {
     return view('user/groupView', ['class' => 'user']);
@@ -124,6 +122,10 @@ Route::get('/user/orgView', function () {
 
 Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);
+});
+
+Route::get('/user/create', function () {
+    return view('user/create', ['class' => 'user']);
 });
 
 Route::get('/user/edit', function () {

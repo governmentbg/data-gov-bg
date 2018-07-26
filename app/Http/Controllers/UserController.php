@@ -121,13 +121,11 @@ class UserController extends Controller {
                     }
                     $class = 'index';
 
-                    return view('home/login', compact('message', 'class'));
+                    return view('/home/login', compact('message', 'class'));
                 }
             } else {
                 $error = $result->errors;
             }
-
-            error_log('error: '. print_r($error, true));
         }
 
         return view('user/registration', compact('class', 'error', 'digestFreq'));

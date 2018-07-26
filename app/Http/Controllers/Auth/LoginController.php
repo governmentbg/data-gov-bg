@@ -42,6 +42,8 @@ class LoginController extends Controller
     public function login(Request $request) {
         $error = [];
         $class = 'index';
+        $message = 'Поздравления! Профилът ви беше активиран.
+            Вашите данни ще се публикуват като непотвъдени, докaто не ви одобри някой от нашите администратори';
         $loginData = $request->all();
 
         if ($request->has('username')) {
@@ -69,6 +71,7 @@ class LoginController extends Controller
             }
         }
 
-        return view('home/login', compact('error', 'class'));
+
+        return view('home/login', compact('error', 'class', $request->offsetGet('confirmed') ? 'message' : ''));
     }
 }

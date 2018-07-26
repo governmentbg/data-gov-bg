@@ -764,16 +764,14 @@ class UserController extends ApiController
     {
         $data = $request->data;
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'data.firstname'         => 'required|string',
-                'data.lastname'          => 'required|string',
-                'data.email'             => 'required|email',
-                'data.password'          => 'required|string',
-                'data.password_confirm'  => 'required|string|same:data.password',
-            ]
-        );
+        $validator = \Validator::make($data, [
+            'firstname'         => 'required|string',
+            'lastname'          => 'required|string',
+            'username'          => 'required|string',
+            'email'             => 'required|email',
+            'password'          => 'required|string',
+            'password_confirm'  => 'required|string|same:password',
+        ]);
 
         if ($validator->fails()) {
             return $this->errorResponse('User registration failure', $validator->errors()->messages());

@@ -40,8 +40,10 @@ class LoginController extends Controller
     }
 
     public function login(Request $request) {
-        $errors = [];
+        $error = [];
         $class = 'index';
+        $message = 'Поздравления! Профилът ви беше активиран.
+            Вашите данни ще се публикуват като непотвъдени, докaто не ви одобри някой от нашите администратори';
         $loginData = $request->all();
 
         if ($request->has('username')) {
@@ -62,13 +64,14 @@ class LoginController extends Controller
 
                     return redirect('/');
                 } else {
-                    $errors['password'][0] = 'Wrong password given.';
+                    $error['password'][0] = 'Wrong password given.';
                 }
             } else {
-                $errors = $validator->errors()->messages();
+                $error = $validator->errors()->messages();
             }
         }
 
-        return view('home/login', compact('errors', 'class'));
+
+        return view('home/login', compact('error', 'class', $request->offsetGet('confirmed') ? 'message' : ''));
     }
 }

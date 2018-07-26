@@ -7,8 +7,8 @@ use App\Organisation;
 use App\CustomSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Intervention\Image\Exception\NotReadableException;
@@ -52,7 +52,7 @@ class OrganisationController extends ApiController
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'nullable|string',
             'logo_mimetype'         => 'nullable|string',
-            'logo_data'             => 'nullable|string',
+            'logo_data'             => 'nullable',
             'activity_info'         => 'nullable|string',
             'contacts'              => 'nullable|string',
             'parent_org_id'         => 'nullable|integer',
@@ -65,14 +65,6 @@ class OrganisationController extends ApiController
         if (
             !$validator->fails()
             && in_array($data['type'], array_keys(Organisation::getPublicTypes()))
-            && (
-                isset($data['logo'])
-                || (
-                    isset($data['logo_filename'])
-                    && isset($data['logo_mimetype'])
-                    && isset($data['logo_data'])
-                )
-            )
         ) {
             $organisation = new Organisation;
             $locale = \LaravelLocalization::getCurrentLocale();
@@ -98,13 +90,17 @@ class OrganisationController extends ApiController
                     $organisation->logo_mime_type = $img->mime();
                     $organisation->logo_data = $img->encode('data-url');
                 }
-            } else {
+            } elseif (
+                isset($data['logo_filename'])
+                && isset($data['logo_mimetype'])
+                && isset($data['logo_data'])
+            ) {
                 $organisation->logo_file_name = $data['logo_filename'];
                 $organisation->logo_mime_type = $data['logo_mimetype'];
                 $organisation->logo_data = $data['logo_data'];
             }
 
-            $organisation->activity_info = !empty($data['activity_info']) ? [$locale => $data['activity_info']] : null;
+            $organisation->activity_info = !empty($data['activity_info']) ? $data['activity_info'] : null;
             $organisation->contacts = !empty($data['contacts']) ? [$locale => $data['contacts']] : null;
             $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
             $organisation->active = isset($data['active']) ? $data['active'] : 1;

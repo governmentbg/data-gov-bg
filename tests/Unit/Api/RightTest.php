@@ -18,7 +18,7 @@ class RightTest extends TestCase
     public function testList()
     {
         $response = $this->post(
-            url('api/rights/listRights'),
+            url('api/listRights'),
             ['api_key' => $this->getApiKey()]
         );
 

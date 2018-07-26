@@ -66,8 +66,6 @@
                         @else
                             <span class="login-link">>
                                 <a href="{{ url('/login') }}">вход</a>
-                                <a style="font-weight: normal">&nbsp; &#47; &nbsp;</a>
-                                <a href="{{ url('/registration')}}">нов профил</a>
                             </span>
                         @endif
                     </div>
@@ -114,14 +112,15 @@
                         <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                             <a href="{{ url('/contact') }}">Контакти</a>
                         </li>
-                        <!-- if user is logged in (mobile view) -->
+                        @if (\Auth::check())
                             <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
                                 <a href="{{ url('/user') }}">Профил</a>
                             </li>
-                        <!-- else -->
-<!--                        <li class="hidden-lg hidden-md {{ Request::segment(2) == 'login' ? 'active' : '' }}">
-                            <a href="{{ url('/home/login') }}">Вход</a>
-                        </li>-->
+                        @else
+                            <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                                <a href="{{ url('/login') }}">Вход</a>
+                            </li>
+                        @endif
                         <li class="hidden-lg hidden-md hidden-sm">
                             <input type="text" placeholder="търсене..." class="form-control rounded-input input-long">
                         </li>

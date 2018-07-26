@@ -11,11 +11,14 @@
                         <img class="responsive logo-login" src="{{ asset('img/opendata-logo-color.svg') }}">
                     </div>
                     <div class="col-xs-12">
-                        @if (!empty($message))
-                            <div class="alert alert-success">
-                                {{ $message }}
-                            </div>
-                        @endif
+                        @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+                            @if(Session::has('alert-' . $msg))
+                                <p class="alert alert-{{ $msg }}">
+                                    {{ Session::get('alert-' . $msg) }}
+                                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                </p>
+                            @endif
+                        @endforeach
                         <form class="form-horizontal" method="POST">
                             {{ csrf_field() }}
 

@@ -80,7 +80,6 @@
                             <label for="newsLetter" class="col-sm-3 col-xs-12 col-form-label">Получаване на бюлетин:</label>
                             <div class="col-sm-3 col-xs-6 p-r-none">
                                 <select class="input-border-r-12 form-control open-select" name="user_settings[newsletter_digest]" size="5">
-                                    <option value="0" selected>Не желая</option>
                                     @foreach ($digestFreq as $id => $freq)
                                         <option value="{{ $id }}">{{ $freq }}</option>
                                     @endforeach

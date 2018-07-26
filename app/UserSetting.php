@@ -11,6 +11,7 @@ class UserSetting extends Model
 
     protected $guarded = [];
 
+    const DIGEST_FREQ_NONE = 0;
     const DIGEST_FREQ_ON_POST = 1;
     const DIGEST_FREQ_ONCE_DAY = 2;
     const DIGEST_FREQ_ONCE_WEEK = 3;
@@ -19,6 +20,7 @@ class UserSetting extends Model
     public static function getDigestFreq()
     {
         return [
+            self::DIGEST_FREQ_NONE          => 'Не желая',
             self::DIGEST_FREQ_ON_POST       => 'При публикуване',
             self::DIGEST_FREQ_ONCE_DAY      => 'Веднъж дневно',
             self::DIGEST_FREQ_ONCE_WEEK     => 'Веднъж седмично',

@@ -377,6 +377,36 @@
     border-radius: 10px;
 }
 
+.blue-highlight {
+    background-color: #EAF5F7;
+    width: 100%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+
+    .usr-delete {
+        display: inline-block;
+    }
+
+    .small-text {
+        font-size: 12pt;
+        padding-top: 10px;
+    }
+
+    .conf {
+        margin-top: 22px;
+    }
+
+    p {
+        font-size: 16pt;
+        line-height: 1.2;
+    }
+
+    a {
+        position: relative;
+        bottom: 15px;
+    }
+}
+
 .preview {
     padding: 5px;
     margin: 0 auto;

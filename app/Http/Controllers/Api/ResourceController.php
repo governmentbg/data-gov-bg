@@ -311,7 +311,7 @@ class ResourceController extends ApiController
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
                 $postData = $post['data'];
-                error_log('asdasdas: '. print_r(array_merge(['_all' => json_encode($postData)], $postData), true));
+
                 $insert = \Elasticsearch::index([
                     'body'  => array_merge(['_all' => json_encode($postData)], $postData),
                     'index' => $index,

@@ -25,4 +25,10 @@ $(function() {
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    if ($('#delete-confirm').length) {
+        $('#confirm').on('click', function(e) {
+            $('#delete-confirm').modal('toggle');
+        })
+    }
 });

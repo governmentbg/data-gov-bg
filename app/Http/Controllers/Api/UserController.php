@@ -12,6 +12,7 @@ use App\UserToOrgRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 Use \DB;
@@ -370,13 +371,13 @@ class UserController extends ApiController
      * @param string api_key - required
      * @param integer id - required
      * @param array data - required
-     * @param string data[firstname] - required
-     * @param string data[lastname] - required
-     * @param string data[email] - required
+     * @param string data[firstname] - optional
+     * @param string data[lastname] - optional
+     * @param string data[email] - optional
      * @param string data[add_info] - optional
      * @param string data[username] - optional
-     * @param string data[password] - required
-     * @param string data[password_confirm] - required
+     * @param string data[password] - optional
+     * @param string data[password_confirm] - optional
      * @param integer data[role_id] - optional
      * @param integer data[is_admin] - optional
      * @param array data[user_settings] - optional
@@ -398,6 +399,7 @@ class UserController extends ApiController
                 'data.firstname'        => 'nullable|string',
                 'data.lastname'         => 'nullable|string',
                 'data.email'            => 'nullable|email',
+                'data.add_info'         => 'nullable|string',
                 'data.password'         => 'nullable|string',
                 'data.is_admin'         => 'nullable|integer',
                 'data.password_confirm' => 'nullable|string|same:data.password',
@@ -423,8 +425,21 @@ class UserController extends ApiController
             $newUserData['lastname'] = $data['lastname'];
         }
 
-        if (!empty($data['email'])) {
-            $newUserData['email'] = $data['email'];
+        if (!empty($data['email']) && $data['email'] !== $user->email) {
+            $mailData = [
+                'user'  => $user->firstname,
+                'hash'  => $user->hash_id,
+                'mail'  => $data['email']
+            ];
+
+            Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {
+                $m->from('info@finite-soft.com', 'Open Data');
+                $m->to($data['email'], $data['firstname'])->subject('Смяна на екектронен адрес!');
+            });
+
+            if (count(Mail::failures()) > 0) {
+                return $this->errorResponse('Failed to send mail');
+            }
         }
 
         if (!empty($data['add_info'])) {
@@ -799,6 +814,21 @@ class UserController extends ApiController
 
         try {
             $registered = $user->save();
+
+
+            $mailData = [
+                'user'  => $user->firstname,
+                'hash'  => $user->hash_id,
+            ];
+
+            Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                $m->from('info@finite-soft.com', 'Open Data');
+                $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+            });
+
+            if (count(Mail::failures()) > 0) {
+                return $this->errorResponse('Failed to send mail');
+            }
         } catch (QueryException $e) {
             return $this->errorResponse('User registration failure');
         }

@@ -120,7 +120,7 @@ class LocaleController extends ApiController
     /**
      * Lists locales based on input criteria
      *
-     * @param string api_key - required
+     * @param string api_key - optional
      * @param array criteria - optional
      * @param bool criteria[active] - optional
      *
@@ -139,8 +139,8 @@ class LocaleController extends ApiController
             $locales = new Locale;
             $results = [];
 
-            if (isset($criteria['active'])) {
-                $locales = $locales->where('active', $post['active']);
+            if (isset($post['criteria']['active'])) {
+                $locales = $locales->where('active', $post['criteria']['active']);
             }
 
             $supportedLocales = \LaravelLocalization::getSupportedLocales();

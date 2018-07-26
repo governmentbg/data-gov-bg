@@ -31,11 +31,14 @@ Route::post('/login', 'Auth\LoginController@login')->name('login');
 Route::get('/registration', 'UserController@registration');
 Route::post('/registration', 'UserController@registration');
 
-Route::get('/confirmation', 'HomeController@confirmation');
-Route::post('/confirmation', 'HomeController@confirmation');
+Route::get('/confirmation', 'UserController@confirmation');
+Route::post('/confirmation', 'UserController@confirmation');
+Route::get('/mailConfirmation', 'UserController@mailConfirmation');
 
 Route::get('/orgRegistration', 'UserController@orgRegistration');
 Route::post('/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
+
+Route::match(['get', 'post'], '/user/settings', 'UserController@settings');
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
@@ -127,10 +130,6 @@ Route::get('/user/create', function () {
 
 Route::get('/user/edit', function () {
     return view('user/edit', ['class' => 'user']);
-});
-
-Route::get('/user/settings', function () {
-    return view('user/settings', ['class' => 'user']);
 });
 
 Route::get('/user/orgRegistration', function () {

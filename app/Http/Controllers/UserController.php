@@ -7,10 +7,13 @@ use App\UserSetting;
 use App\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 
@@ -77,12 +80,125 @@ class UserController extends Controller {
     public function translate() {
     }
 
-    public function settigns() {
+    public function settings(Request $request) {
+        $class = 'user';
+        $user = User::find(Auth::id());
+        $digestFreq = UserSetting::getDigestFreq();
+        $error = [];
+        $message = false;
+
+        $localeData = [
+            'criteria'  => [
+                'active'    => true,
+            ],
+        ];
+
+        $localePost = Request::create('/api/listLocale', 'POST', $localeData);
+        $locale = new ApiLocale($localePost);
+        $localeList = $locale->listLocale($localePost)->getData()->locale_list;
+
+        if ($user) {
+            if ($request->has('save')) {
+                $saveData = [
+                    'api_key'   => $user['api_key'],
+                    'id'        => $user['id'],
+                    'data'      => [
+                        'firstname'     => $request->offsetGet('firstname'),
+                        'lastname'      => $request->offsetGet('lastname'),
+                        'username'      => $request->offsetGet('username'),
+                        'email'         => $request->offsetGet('email'),
+                        'add_info'      => $request->offsetGet('add_info'),
+                        'user_settings' => [
+                            'newsletter_digest' => $request->offsetGet('newsletter'),
+                            'locale'            => $request->offsetGet('locale'),
+                        ],
+                    ],
+                ];
+
+                if ($request->offsetGet('email')) {
+                    $request->session()->flash('alert-warning', 'Електронната поща ще се промени, когато я потвърдите!');
+                }
+            }
+
+            if ($request->has('change_pass')) {
+                $oldPass = $request->offsetGet('old_password');
+
+                if (Hash::check($oldPass, $user['password'])) {
+                    $saveData = [
+                        'api_key'   => $user['api_key'],
+                        'id'        => $user['id'],
+                        'data'      => [
+                            'password'          => $request->offsetGet('password'),
+                            'password_confirm'  => $request->offsetGet('password_confirm'),
+                        ],
+                    ];
+                } else {
+                    $request->session()->flash('alert-danger', 'Грешна парола!');
+                }
+            }
+
+            if ($request->has('generate_key')) {
+                $data = [
+                    'api_key'   => $user['api_key'],
+                    'id'        => $user['id'],
+                ];
+
+                $newKey = Request::create('api/generateAPIKey', 'POST', $data);
+                $api = new ApiUser($newKey);
+                $result = $api->generateAPIKey($newKey)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', 'Успешно генериран АПИ ключ!');
+
+                    return back();
+                } else {
+                    $request->session()->flash('alert-danger', 'Възникна грешка при генериране на АПИ ключ!');
+                }
+            }
+
+            if ($request->has('delete')) {
+                $data = [
+                    'api_key'   => $user['api_key'],
+                    'id'        => $user['id'],
+                ];
+
+                $delUser = Request::create('api/deleteUser', 'POST', $data);
+                $api = new ApiUser($delUser);
+                $result = $api->deleteUser($delUser)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', 'Успешно изтрит потребител!');
+
+                    return redirect('/');
+                } else {
+                    $request->session()->flash('alert-danger', 'Възникна грешка при изтриване на потребител!');
+                }
+            }
+
+            if (!empty($saveData)) {
+                $editPost = Request::create('api/editUser', 'POST', $saveData);
+                $api = new ApiUser($editPost);
+                $result = $api->editUser($editPost)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+
+                    return back();
+                } else {
+                    $request->session()->flash('alert-danger', 'Промените не бяха запазени!');
+
+                    $error = $result->errors;
+                }
+            }
+
+            return view('user/settings', compact('class', 'user', 'digestFreq', 'localeList', 'error', 'message'));
+        }
+
+        return redirect('/');
     }
 
     public function registration(Request $request) {
         $class = 'user';
-        $message = 'Пратено е съобщение за потвърждение, на посоченият от вас адрес';
         $params = [];
         $error = [];
 
@@ -90,7 +206,6 @@ class UserController extends Controller {
 
         if ($request->isMethod('post')) {
             $params = $request->all();
-            error_log('params: '. print_r($params, true));
 
             $req = Request::create('/register', 'POST', ['data' => $params]);
             $api = new ApiUser($req);
@@ -99,30 +214,16 @@ class UserController extends Controller {
             if ($result->success) {
                 $user = User::where('api_key', $result->api_key)->first();
 
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
+                if ($request->has('add_org')) {
+                    $key = $user->username;
 
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($params) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($params['email'], $params['firstname'])->subject('Your account has been created!');
-                });
-
-                if (count(Mail::failures()) > 0) {
-                    $error['mail'] = 'Failed to send mail';
-                } else {
-                    if ($request->has('add_org')) {
-                        $key = $user->username;
-
-                        return redirect()->route(
-                            'orgRegistration', compact('key', 'message')
-                        );
-                    }
-                    $class = 'index';
-
-                    return view('/home/login', compact('message', 'class'));
+                    return redirect()->route(
+                        'orgRegistration', compact('key', 'message')
+                    );
                 }
+                $request->session()->flash('alert-success', 'Пратено е съобщение за потвърждение, на посоченият от вас адрес.');
+
+                return redirect('login');
             } else {
                 $error = $result->errors;
             }
@@ -172,10 +273,9 @@ class UserController extends Controller {
                 $result = $api->addOrganisation($req)->getData();
 
                 if ($result->success) {
-                    $class = 'index';
-                    $message = 'Успешно създадена организация!';
+                    $request->session()->flash('alert-success', 'Успешно създадена организация!');
 
-                    return view('home/login', compact('message', 'class'));
+                    return redirect('login');
                 } else {
                     $error = $result->errors;
                 }
@@ -264,5 +364,55 @@ class UserController extends Controller {
                 'search'        => $search
             ]
         );
+    }
+
+
+    public function confirmation(Request $request)
+    {
+        $class = 'user';
+
+        if ($request->has('hash')) {
+            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+
+            if ($user) {
+                $user->active = true;
+
+                try {
+                    $user->save();
+                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
+
+                    return redirect('login')->guest();
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            } else {
+                return view('confirmError', compact('class'));
+            }
+        }
+    }
+
+    public function mailConfirmation(Request $request)
+    {
+        Auth::logout();
+        $class = 'user';
+
+        if ($request->has('hash') && $request->has('mail')) {
+            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+
+            if ($user) {
+                $user->email = $request->offsetGet('mail');
+
+                try {
+                    $user->save();
+                    $request->session()->flash('alert-success', 'Успешно променихте електронната си поща');
+
+                    return redirect('login');
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            } else {
+                return view('confirmError', compact('class'));
+            }
+        }
     }
 }

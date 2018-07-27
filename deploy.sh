@@ -11,7 +11,7 @@ then
 fi
 
 # Install new composer packages
-/usr/local/bin/composer install --prefer-dist --no-interaction
+/usr/local/bin/composer install --no-interaction
 
 # Cache boost configuration and routes
 php artisan cache:clear

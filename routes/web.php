@@ -31,9 +31,8 @@ Route::post('/login', 'Auth\LoginController@login')->name('login');
 Route::get('/registration', 'UserController@registration');
 Route::post('/registration', 'UserController@registration');
 
-Route::get('/confirmation', 'UserController@confirmation');
-Route::post('/confirmation', 'UserController@confirmation');
-Route::get('/mailConfirmation', 'UserController@mailConfirmation');
+Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
+Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
 
 Route::get('/orgRegistration', 'UserController@orgRegistration');
 Route::post('/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');

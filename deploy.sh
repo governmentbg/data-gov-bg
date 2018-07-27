@@ -21,9 +21,6 @@ php artisan route:clear
 # Sync database changes
 php artisan migrate
 
-# Cache boost configuration and routes
-php artisan config:cache
-
 # Restart workers
 php artisan queue:restart
 

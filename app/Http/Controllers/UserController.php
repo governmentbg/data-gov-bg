@@ -411,7 +411,7 @@ class UserController extends Controller {
         $hash = $request->offsetGet('hash');
         $mail = $request->offsetGet('mail');
 
-        if ($hahs && $mail) {
+        if ($hash && $mail) {
             $user = User::where('hash_id', $request->offsetGet('hash'))->first();
 
             if ($user) {

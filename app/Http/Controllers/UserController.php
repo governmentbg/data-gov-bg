@@ -370,7 +370,7 @@ class UserController extends Controller {
     public function confirmation(Request $request)
     {
         $class = 'user';
-        $hash = offsetGet('hash');
+        $hash = $request->offsetGet('hash');
 
         if ($hash) {
             $user = User::where('hash_id', $request->offsetGet('hash'))->first();

@@ -382,7 +382,7 @@ class UserController extends Controller {
                     $user->save();
                     $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
 
-                    return redirect('login')->guest();
+                    return redirect('login');
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }

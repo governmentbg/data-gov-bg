@@ -815,7 +815,6 @@ class UserController extends ApiController
         try {
             $registered = $user->save();
 
-
             $mailData = [
                 'user'  => $user->firstname,
                 'hash'  => $user->hash_id,

@@ -370,8 +370,9 @@ class UserController extends Controller {
     public function confirmation(Request $request)
     {
         $class = 'user';
+        $hash = offsetGet('hash');
 
-        if ($request->has('hash')) {
+        if ($hash) {
             $user = User::where('hash_id', $request->offsetGet('hash'))->first();
 
             if ($user) {
@@ -385,18 +386,32 @@ class UserController extends Controller {
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
-            } else {
-                return view('confirmError', compact('class'));
+            }
+
+            if ($request->has('generate')) {
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                ];
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+                });
             }
         }
+
+        return view('confirmError', compact('class'));
     }
 
     public function mailConfirmation(Request $request)
     {
         Auth::logout();
         $class = 'user';
+        $hash = $request->offsetGet('hash');
+        $mail = $request->offsetGet('mail');
 
-        if ($request->has('hash') && $request->has('mail')) {
+        if ($hash && $mail) {
             $user = User::where('hash_id', $request->offsetGet('hash'))->first();
 
             if ($user) {
@@ -410,9 +425,22 @@ class UserController extends Controller {
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
-            } else {
-                return view('confirmError', compact('class'));
+            }
+
+            if ($request->has('generate')) {
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                    'mail'  => $mail
+                ];
+
+                Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($mailData['mail'], $mailData['user'])->subject('Смяна на екектронен адрес!');
+                });
             }
         }
+
+        return view('confirmError', compact('class'));
     }
 }

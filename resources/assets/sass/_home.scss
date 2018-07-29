@@ -1,0 +1,250 @@
+.home-stats {
+    @include mobile() {
+        padding: 0;
+    }
+
+    .basic-stats {
+        margin-bottom: 30px;
+
+        @include mobile() {
+            margin-bottom: 5px;
+        }
+
+        a {
+            display: inline-block;
+            width: 100%;
+            margin-top: 15px;
+            position: relative;
+            height: 85px;
+            border-radius: 10px;
+
+            img {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                height: 100%;
+            }
+
+            &.reg-users {
+                background: #13ca9a;
+            }
+
+            &.reg-orgs {
+                background: #e8e129;
+            }
+
+            &.updates {
+                background: #76ad3f;
+            }
+
+            &.data-sets {
+                background: #c02e54;
+            }
+
+            p {
+                color: #fff;
+                margin: 0;
+
+                &:first-child {
+                    padding: 5px 17px 3px 17px;
+                    font-size: 22px;
+                    font-weight: bold;
+                }
+
+                &:nth-child(3) {
+                    padding: 6px 17px 0 17px;
+                    font-size: 16px;
+                    position: absolute;
+                    z-index: 1;
+                    width: 100%;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+
+            hr {
+                text-align: left;
+                margin: 0 0 0 17px;
+                width: 100px;
+            }
+        }
+    }
+
+    .most-active {
+        margin-bottom: 30px;
+
+        a {
+            width: 100%;
+            display: inline-block;
+            margin-top: 15px;
+            position: relative;
+            font-size: 15px;
+            border: 1px solid #9E2B4F;
+            border-radius: 10px;
+            height: 185px;
+
+            p {
+                margin: 30px 30px 0 95px;
+                min-height: 50px;
+                line-height: 18px;
+            }
+
+            span {
+                color: $dark-gray;
+                margin: 30px 95px 0 50px;
+                display: inline-block;
+                font-weight: bold;
+                line-height: 20px;
+
+                @include mobile {
+                    margin: 30px 95px 0 30px;
+                }
+            }
+
+            img {
+                position: absolute;
+
+                &:first-child {
+                    height: 120px;
+                    top: -15px;
+                    left: -15px;
+
+                    @include smMobile {
+                        left: -10px;
+                    }
+                }
+
+                &:last-child {
+                    bottom: 25px;
+                    right: 25px;
+                }
+            }
+
+            hr {
+                border: 1px solid #9E2B4F;
+                margin: 5px 25px 0 95px;
+            }
+        }
+    }
+}
+
+.activity-chart {
+    @include smMobile() {
+        padding: 0;
+    }
+
+    img {
+        width: 100%;
+        height: 200px;
+        padding: 0 100px;
+        margin-bottom: 40px;
+
+        @include mobile() {
+            padding: 0;
+        }
+
+        @include smMobile() {
+            height: 150px;
+        }
+    }
+}
+
+.picks-box {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 680px;
+    margin: 0 auto;
+    font-size: 0;
+
+    a {
+        display: inline-block;
+        margin: 0 20px;
+
+        @include xsMobile() {
+            margin: 0 5px;
+        }
+
+        svg {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto;
+            display: block;
+
+            .cls-1, .cls-2 {
+                transition: 0.5s ease-in;
+                fill: #c02e54;
+            }
+
+            .cls-1 {
+                fill-rule: evenodd;
+            }
+
+            &:hover {
+                .cls-1, .cls-2 {
+                    transition: 0.2s ease-out;
+                    fill: #12c999;
+                }
+            }
+        }
+
+        p {
+            color: $dark-gray;
+            margin: 10px 0 15px 0;
+            font-size: 14px;
+            text-align: center;
+            width: 120px;
+        }
+    }
+}
+
+.login-btn {
+    background-color: #12c999 !important;
+    border-color: #12c999 !important;
+
+    &:hover, &:active, &:focus {
+        background-color: #0e9a75 !important;;
+        border-color: #0e9a75 !important;;
+    }
+}
+
+.custom-checkbox {
+    width: 25px;
+    height: 25px;
+}
+
+.logo-login {
+    width: 70%;
+    padding: 30px 0px;
+}
+
+.confirm-error {
+    .logo-error {
+        width: 150px;
+        opacity: 0.4;
+        margin-top: 35px;
+        margin-bottom: 35px;
+    }
+
+    .wrap {
+        max-width: 600px;
+        margin: 0 auto;
+
+        > span {
+            font-size: 22pt;
+            margin-bottom: 20px;
+
+            @include mdMobile {
+                font-size: 16pt;
+            }
+        }
+
+        > button {
+            width: 80%;
+            margin-top: 60px;
+            margin-bottom: 60px;
+        }
+    }
+}

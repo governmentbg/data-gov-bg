@@ -14,21 +14,22 @@ class Document extends Model implements TranslatableInterface
     use Translatable;
     use Searchable;
 
+    protected $guarded = ['id'];
+
     protected static $translatable = [
-        'name' => 'label',
-        'descript' => 'text'
+        'name'      => 'label',
+        'descript'  => 'text'
     ];
 
     public function toSearchableArray()
     {
-        $array['name'] = $this->concatTranslations('name');
-        $array['descript'] = $this->concatTranslations('descript'); 
-        $array['id'] = $this->id;
-        return $array;
+        return [
+            'name'      => $this->concatTranslations('name'),
+            'descript'  => $this->concatTranslations('descript'),
+            'id'        => $this->id,
+        ];
     }
 
     const DATE_TYPE_UPDATED = 'updated';
     const DATE_TYPE_CREATED = 'created';
-
-    protected $guarded = ['id']; 
 }

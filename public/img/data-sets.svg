@@ -1,0 +1,26 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 77">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #9e2b4f;
+      }
+
+      .cls-2 {
+        fill: #c02e54;
+      }
+    </style>
+  </defs>
+  <title>4-icon</title>
+  <rect class="cls-1" x="44.17" y="8.53" width="45.83" height="68.47" rx="12" ry="12"/>
+  <rect class="cls-1" y="8.53" width="45.83" height="68.47" rx="12" ry="12"/>
+  <rect class="cls-2" x="10.49" y="30.62" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="10.49" y="36.14" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="10.49" y="41.66" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="10.49" y="47.18" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="10.49" y="52.71" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="53.56" y="30.62" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="53.56" y="36.14" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="53.56" y="41.66" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="53.56" y="47.18" width="26.5" height="2.21" rx="1" ry="1"/>
+  <rect class="cls-2" x="53.56" y="52.71" width="26.5" height="2.21" rx="1" ry="1"/>
+</svg>

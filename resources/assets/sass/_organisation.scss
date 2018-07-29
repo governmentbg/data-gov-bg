@@ -1,0 +1,162 @@
+.theme-organisation {
+    .sidebar-submenu .order {
+        display: inline-block;
+        margin-left: -45px;
+        min-width: 270px;
+
+        > a {
+            display: inline-block;
+            font-size: 14px;
+            width: max-content;
+        }
+    }
+
+    .view-profile {
+        color: #5e5e5e;
+        font-weight: 600;
+    }
+
+    .list-orgs img {
+        height: 200px;
+    }
+
+    .chronology > .row{
+        .info-icon {
+            img {
+                max-height: 60px;
+            }
+
+            &:after {
+                content: '';
+                display: block;
+                border: 5px solid #76AE41;
+                border-radius: 40px;
+                bottom: -20px;
+                position: absolute;
+                left: 40px;
+            }
+
+            @include smMobile() {
+                img {
+                    margin-top: 20px;
+                    max-width: 40px;
+                }
+                &:after {
+                    left: 30px;
+                }
+            }
+
+            @include xsMobile() {
+                padding: 10px 0;
+
+                img {
+                    margin-top: 0;
+                }
+
+                &:after {
+                    left: 59%;
+                }
+            }
+        }
+
+        &:last-of-type {
+            .info-icon:after {
+                display: none;
+            }
+        }
+
+        @include smMobile() {
+            .logo-img > img{
+                margin: 15px 10px;
+            }
+        }
+
+        @include xsMobile() {
+            .logo-img > img{
+                display: none;
+            }
+        }
+    }
+
+    .org-logo {
+        text-align: center !important;
+    }
+
+    .info-box {
+        a {
+            display: inline-block;
+            width: 100%;
+            margin-top: 15px;
+            position: relative;
+            height: 85px;
+            border-radius: 10px;
+
+            img {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                height: 100%;
+            }
+
+            &.reg-users {
+                background: #13ca9a;
+            }
+
+            &.reg-orgs {
+                background: #e8e129;
+            }
+
+            &.updates {
+                background: #76ad3f;
+            }
+
+            &.followers {
+                background: #77ad3e;
+            }
+
+            &.data-sets {
+                background: #c02e54;
+            }
+
+            p {
+                color: #fff;
+                margin: 0;
+
+                &:first-child {
+                    padding: 5px 17px 3px 17px;
+                    font-size: 22px;
+                    font-weight: bold;
+                }
+
+                &:nth-child(3) {
+                    padding: 6px 17px 0 17px;
+                    font-size: 16px;
+                    position: absolute;
+                    z-index: 1;
+                    width: 100%;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+
+            hr {
+                margin: 0 0 0 17px;
+                width: 100px;
+                text-align: left;
+            }
+        }
+    }
+
+    @include smMobile {
+        img.img-responsive {
+            width: 100%;
+        }
+    }
+}
+
+    @include xsMobile {
+        .exclamation-sign img {
+            min-width: 30px;
+        }
+    }

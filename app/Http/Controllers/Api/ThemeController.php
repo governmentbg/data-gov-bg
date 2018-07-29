@@ -53,9 +53,9 @@ class ThemeController extends ApiController
 
     /**
      * API function for themes
-     * Route::post('listSections', 'Api\ThemesController@listSections');
      *
-     * @param Request $request - JSON containing api_key (string)
+     * @param string api_key - required
+     *
      * @return JsonResponse - JSON containing: On success - Status 200 list of themes / On fail - Status 500 error message
      */
     public function listThemes(Request $request)

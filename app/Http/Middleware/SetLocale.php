@@ -3,11 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Locale;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiController;
-use App;
 
 class SetLocale
 {
@@ -18,33 +16,31 @@ class SetLocale
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        if ($request->has('data.locale')) {
-            $locale = !empty(DB::table('locale')->where('locale',$request['data']['locale'])->value('locale'))
-                ? $request['data']['locale']
-                : null;
+        $controller = explode('@', class_basename($request->route()->getAction()['controller']))[0];
 
-            $request->offsetUnset('data.locale');
+        if ($controller != 'LocaleController') {
+            if (isset($request->locale)) {
+                $locale = $request->locale;
+            } else if (isset($request->data['locale'])) {
+                $locale = $request->data['locale'];
+            } else if (isset($request->criteria['locale'])) {
+                $locale = $request->criteria['locale'];
+            } else if (isset($request->org_data['locale'])) {
+                $locale = $request->org_data['locale'];
+            } else if (isset($request->user_settings['locale'])) {
+                $locale = $request->user_settings['locale'];
+            }
         }
 
-        if ($request->has('criteria.locale')) {
-            $locale = !empty(DB::table('locale')->where('locale', $request->get('criteria.locale'))->value('locale'))
-                ? $request->get('criteria.locale')
-                : null;
-
-            $request->offsetUnset('criteria.locale');
+        if (isset($locale)) {
+            if (Locale::where('locale', $locale)->count()) {
+                \LaravelLocalization::setLocale($locale);
+            } else {
+                return ApiController::errorResponse('Language `'. $locale .'` does not exist in database');
+            }
         }
-
-        if ($request->has('locale')) {
-            $locale = !empty(DB::table('locale')->where('locale', $request->get('locale'))->value('locale'))
-                ? $request->get('locale')
-                : null;
-
-            $request->offsetUnset('locale');
-        }
-
-        \LaravelLocalization::setLocale(empty($locale) ? config('app.locale') : $locale);
 
         return $next($request);
     }

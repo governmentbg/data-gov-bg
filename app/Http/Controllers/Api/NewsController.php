@@ -273,7 +273,6 @@ class NewsController extends ApiController
      * @param date criteria[date_to] - optional
      * @param string criteria[date_type] - optional
      * @param integer criteria[active] - optional
-     * @param integer criteria[active] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -369,7 +368,7 @@ class NewsController extends ApiController
                 }
             }
 
-            $total_records = $newsList->count();
+            $count = $newsList->count();
 
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
@@ -406,8 +405,8 @@ class NewsController extends ApiController
             }
 
             return $this->successResponse([
-                'total_records' => $total_records,
-                'news' => $result,
+                'total_records' => $count,
+                'news'          => $result,
             ], true);
         }
 

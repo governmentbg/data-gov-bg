@@ -457,6 +457,8 @@ class DataSetController extends ApiController
                     $ids = DataSet::search($search)->get()->pluck('id');
                     $query = DataSet::whereIn('id', $ids);
 
+                    $query->orderBy($order['field'], $order['type']);
+
                     $count = $query->count();
 
                     $query->forPage(
@@ -464,28 +466,28 @@ class DataSetController extends ApiController
                         $this->getRecordsPerPage($request->offsetGet('records_per_page'))
                     );
 
-                    $data = $query->get();
-
-                    foreach ($data as $set) {
-                        $set['name'] = $set->name;
-                        $set['sla'] = $set->sla;
-                        $set['descript'] = $set->descript;
-                        $set['followers_count'] = $set->userFollow()->count();
-                        $set['reported'] = 0;
+                    foreach ($query->get() as $set) {
+                        $result['name'] = $set->name;
+                        $result['sla'] = $set->sla;
+                        $result['descript'] = $set->descript;
+                        $result['followers_count'] = $set->userFollow()->count();
+                        $result['reported'] = 0;
 
                         $hasRes = $set->resource()->count();
 
                         if ($hasRes) {
                             foreach ($set->resource as $resourse) {
                                 if ($resourse->is_reported) {
-                                    $set['reported'] = 1;
+                                    $result['reported'] = 1;
                                 }
                             }
                         }
+
+                        $results[] = $result;
                     }
 
                     return $this->successResponse([
-                        'datasets'      => $data,
+                        'datasets'      => $results,
                         'total_records' => $count,
                     ], true);
                 } catch (QueryException $ex) {

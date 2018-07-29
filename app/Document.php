@@ -14,6 +14,9 @@ class Document extends Model implements TranslatableInterface
     use Translatable;
     use Searchable;
 
+    const DATE_TYPE_UPDATED = 'updated';
+    const DATE_TYPE_CREATED = 'created';
+
     protected $guarded = ['id'];
 
     protected static $translatable = [
@@ -29,7 +32,4 @@ class Document extends Model implements TranslatableInterface
             'id'        => $this->id,
         ];
     }
-
-    const DATE_TYPE_UPDATED = 'updated';
-    const DATE_TYPE_CREATED = 'created';
 }

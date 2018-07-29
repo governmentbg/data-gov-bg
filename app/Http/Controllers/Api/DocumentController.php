@@ -2,199 +2,212 @@
 
 namespace App\Http\Controllers\Api;
 
+use \Validator;
 use App\Document;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\Request;
-use \Validator;
 
 class DocumentController extends ApiController
 {
     /**
      * Add a document with provided data
      *
-     * @param Request $request
-     * @return json response
+     * @param array data - required
+     * @param string|array data[name] - required
+     * @param string|array data[description] - required
+     * @param string data[locale] - optional
+     * @param string data[filename] - required
+     * @param string data[mimetype] - required
+     * @param string data[data] - required
+     *
+     * @return json response with doc id or error message
      */
     public function addDocument(Request $request)
     {
-        $documentData = $request->all();
-        $validator = Validator::make($documentData, [
-            'data' => 'required|array',
-            'data.name' => 'required|string',
-            'data.description' => 'required|string',
-            'data.locale' => 'required|string',
-            'data.filename' => 'required|string',
-            'data.mimetype' => 'required|string',
-            'data.data' => 'required|string',
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
+            'data'              => 'required|array',
+            'data.name'         => 'required',
+            'data.description'  => 'required',
+            'data.locale'       => 'nullable|string|max:5',
+            'data.filename'     => 'required|string',
+            'data.mimetype'     => 'required|string',
+            'data.data'         => 'required|string',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Add document failure');
+        if (!$validator->fails()) {
+            try {
+                DB::beginTransaction();
+
+                $newDocument = new Document;
+                $newDocument->name = $this->trans($post['data']['locale'], $post['data']['name']);
+                $newDocument->descript = $this->trans($post['data']['locale'], $post['data']['description']);
+                $newDocument->file_name = $post['data']['filename'];
+                $newDocument->mime_type = $post['data']['mimetype'];
+                $newDocument->data = $post['data']['data'];
+                $newDocument->save();
+
+                DB::commit();
+
+                return $this->successResponse(['doc_id' => $newDocument->id]);
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
         }
 
-        $newDocument = new Document;
-        $newDocument->name = [$documentData['data']['locale'] => $documentData['data']['name']];
-        $newDocument->descript = [$documentData['data']['locale'] => $documentData['data']['description']];
-        $newDocument->file_name = $documentData['data']['filename'];
-        $newDocument->mime_type = $documentData['data']['mimetype'];
-        $newDocument->data = $documentData['data']['data'];
-
-        try {
-            $newDocument->save();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Add document failure');
-        }
-        return $this->successResponse(['doc_id :' . $newDocument->id]);
+        return $this->errorResponse('Add document failure', $validator->errors()->messages());
     }
 
     /**
      * Edit document with provided data
      *
-     * @param Request $request
-     * @return json response
+     * @param int doc_id - required
+     * @param array data - required
+     * @param string|array data[name] - optional
+     * @param string|array data[description] - optional
+     * @param string data[locale] - optional
+     * @param string data[filename] - optional
+     * @param string data[mimetype] - optional
+     * @param string data[data] - optional
+     *
+     * @return json response with success or error message
      */
     public function editDocument(Request $request)
     {
-        $documentEditData = $request->all();
+        $post = $request->all();
 
-        $validator = Validator::make($documentEditData, [
-            'doc_id' => 'required|integer',
-            'data' => 'required|array',
-            'data.name' => 'string',
-            'data.description' => 'string',
-            'data.locale' => 'string',
-            'data.filename' => 'string',
-            'data.mimetype' => 'string',
-            'data.data' => 'string',
+        $validator = Validator::make($post, [
+            'doc_id'            => 'required|integer|exists:documents,id',
+            'data'              => 'required|array',
+            'data.name'         => 'nullable',
+            'data.description'  => 'nullable',
+            'data.locale'       => 'nullable|string|max:5',
+            'data.filename'     => 'nullable|string',
+            'data.mimetype'     => 'nullable|string',
+            'data.data'         => 'nullable|string',
         ]);
 
-        if (isset($documentEditData['data']['name'])) {
-            $validator->sometimes('data.locale', 'required', function ($documentEditData) {
-                return $documentEditData['data']['name'] != '';
-            });
-        }
-        if (isset($documentEditData['data']['description'])) {
-            $validator->sometimes('data.locale', 'required', function ($documentEditData) {
-                return $documentEditData['data']['description'] != '';
-            });
+        if (!$validator->fails()) {
+            try {
+                $editDocument = Document::find($post['doc_id']);
+
+                DB::beginTransaction();
+
+                if (isset($post['data']['name'])) {
+                    $editDocument->name = $this->trans($post['data']['locale'], $post['data']['name'], true);
+                }
+
+                if (isset($post['data']['description'])) {
+                    $editDocument->descript = $this->trans($post['data']['locale'], $post['data']['description'], true);
+                }
+
+                if (isset($post['data']['filename'])) {
+                    $editDocument->file_name = $post['data']['filename'];
+                }
+
+                if (isset($post['data']['mimetype'])) {
+                    $editDocument->mime_type = $post['data']['mimetype'];
+                }
+
+                if (isset($post['data']['data'])) {
+                    $editDocument->data = $post['data']['data'];
+                }
+
+                $editDocument->save();
+
+                DB::commit();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
         }
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Edit document failure');
-        }
-
-        $editDocument = Document::find($documentEditData['doc_id']);
-
-        if (!$editDocument) {
-            return $this->errorResponse('Edit document failure');
-        }
-        if (isset($documentEditData['data']['name'])) {
-            $editDocument->name = [$documentEditData['data']['locale'] => $documentEditData['data']['name']];
-        }
-
-        if (isset($documentEditData['data']['description'])) {
-            $editDocument->descript = [$documentEditData['data']['locale'] => $documentEditData['data']['description']];
-        }
-
-        if (isset($documentEditData['data']['filename'])) {
-            $editDocument->file_name = $documentEditData['data']['filename'];
-        }
-
-        if (isset($documentEditData['data']['mimetype'])) {
-            $editDocument->mime_type = $documentEditData['data']['mimetype'];
-        }
-
-        if (isset($documentEditData['data']['data'])) {
-            $editDocument->data = $documentEditData['data']['data'];
-        }
-
-        try {
-            $editDocument->save();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Edit document failure');
-        }
-        return $this->successResponse();
-
+        return $this->errorResponse('Edit document failure', $validator->errors()->messages());
     }
 
     /**
      * Delete a document based on ID
      *
-     * @param Request $request
-     * @return json response
+     * @param int doc_id - required
+     *
+     * @return json response with success or error message
      */
     public function deleteDocument(Request $request)
     {
-        $documentDeleteData = $request->all();
+        $post = $request->all();
 
-        $validator = Validator::make($documentDeleteData, [
-            'doc_id' => 'required|integer',
+        $validator = Validator::make($post, [
+            'doc_id' => 'required|integer|exists:documents,id',
         ]);
 
-        if ($validator->fails()) {
+        if (!$validator->fails()) {
+            $deleteDocument = Document::find($post['doc_id']);
+
+            try {
+                $deleteDocument->delete();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($ex->getMessage());
+            }
             return $this->errorResponse('Delete document failure');
         }
-        $deleteDocument = Document::find($documentDeleteData['doc_id']);
 
-        if (!$deleteDocument) {
-            return $this->errorResponse('Delete document failure');
-        }
-
-        try {
-            $deleteDocument->delete();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Delete document failure');
-        }
-        return $this->successResponse();
-
+        return $this->errorResponse('Delete document failure', $validator->errors()->messages());
     }
 
     /**
      * List documents based on search criteria
      *
-     * @param Request $request
-     * @return json response
+     * @param array criteria - optional
+     * @param integer criteria[doc_id] - optional
+     * @param date criteria[date_from] - optional
+     * @param date criteria[date_to] - optional
+     * @param string criteria[locale] - optional
+     * @param string criteria[date_type] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json response with doc list or error message
      */
     public function listDocuments(Request $request)
     {
-        $documentListData = $request->all();
+        $post = $request->all();
 
-        $validator = Validator::make($documentListData, [
-            'criteria' => 'array',
-            'criteria.doc_id' => 'integer',
-            'criteria.date_from' => 'date',
-            'criteria.date_to' => 'date',
-            'criteria.locale' => 'string',
-            'criteria.date_type' => 'string',
-            'criteria.order' => 'array',
-            'criteria.order.type' => 'string',
-            'criteria.order.field' => 'string',
-            'records_per_page' => 'integer',
-            'page_number' => 'integer',
+        $validator = Validator::make($post, [
+            'criteria'              => 'nullable|array',
+            'criteria.doc_id'       => 'nullable|integer',
+            'criteria.date_from'    => 'nullable|date',
+            'criteria.date_to'      => 'nullable|date',
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.date_type'    => 'nullable|string',
+            'criteria.order'        => 'nullable|array',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List document failure');
+            return $this->errorResponse('List document failure', $validator->errors()->messages());
         }
 
         $result = [];
         $criteria = $request->json('criteria');
 
-        $documentList = Document::select(
-            'id',
-            'name',
-            'descript',
-            'file_name',
-            'mime_type',
-            'data',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by'
-        );
-
-        $orderColumns = [
+        $columns = [
             'id',
             'name',
             'descript',
@@ -207,26 +220,18 @@ class DocumentController extends ApiController
             'updated_by',
         ];
 
+        $query = Document::select($columns);
+
         if (isset($criteria['order'])) {
             if (is_array($criteria['order'])) {
-                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                if (!in_array($criteria['order']['field'], $columns)) {
                     unset($criteria['order']['field']);
                 }
             }
         }
 
-        if (isset($criteria['locale'])) {
-            $locale = \LaravelLocalization::setLocale($criteria['locale']);
-        } else {
-            $locale = config('app.locale');
-        }
-
-        if (is_null($criteria)) {
-            $documentList = $documentList;
-        }
-
         if (isset($criteria['doc_id'])) {
-            $documentList = $documentList->where('id', $criteria['doc_id']);
+            $query->where('id', $criteria['doc_id']);
         }
 
         $filterColumn = 'created_at';
@@ -238,133 +243,140 @@ class DocumentController extends ApiController
         }
 
         if (isset($criteria['date_from'])) {
-            $documentList = $documentList->where($filterColumn, '>=', $criteria['date_from']);
+            $query->where($filterColumn, '>=', $criteria['date_from']);
         }
 
         if (isset($criteria['date_to'])) {
-            $documentList = $documentList->where($filterColumn, '<=', $criteria['date_to']);
+            $query->where($filterColumn, '<=', $criteria['date_to']);
         }
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            if ($criteria['order']['type'] == 'desc') {
-                $documentList = $documentList->orderBy($criteria['order']['field'], 'desc');
-            }
-        } else {
-            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $documentList = $documentList->orderBy($criteria['order']['field'], 'asc');
-            }
+            $query->orderBy(
+                $criteria['order']['field'],
+                $criteria['order']['type'] == 'asc' ? 'asc' : 'desc'
+            );
         }
 
-        if (isset($request['records_per_page']) || isset($request['page_number'])) {
-            $documentList = $documentList->forPage($request['page_number'], $request['records_per_page']);
-        }
+        $count = $query->count();
+        $query->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
 
-        $documentList = $documentList->get();
+        $locale = \LaravelLocalization::getCurrentLocale();
+        $results = [];
 
-        if (!empty($documentList)) {
-            $total_records = $documentList->count();
-            foreach ($documentList as $singleDocument) {
-                $result[] = [
-                    'id' => $singleDocument->id,
-                    'locale' => $locale, //needs to be revised. When BG is supplied still returns EN translations!!!
-                    'name' => [$locale => $singleDocument->name],
-                    'description' => [$locale => $singleDocument->desript],
-                    'filename' => $singleDocument->file_name,
-                    'mimetype' => $singleDocument->mime_type,
-                    'data' => $singleDocument->data,
-                    'created_at' => date($singleDocument->created_at),
-                    'updated_at' => date($singleDocument->updated_at),
-                    'created_by' => $singleDocument->created_by,
-                    'updated_by' => $singleDocument->updated_by,
-                ];
-            }
+        foreach ($query->get() as $result) {
+            $results[] = [
+                'id'            => $result->id,
+                'locale'        => $locale,
+                'name'          => $result->name,
+                'description'   => $result->descript,
+                'filename'      => $result->file_name,
+                'mimetype'      => $result->mime_type,
+                'data'          => $result->data,
+                'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
+                'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
+                'created_by'    => $result->created_by,
+                'updated_by'    => $result->updated_by,
+            ];
         }
 
         return $this->successResponse([
-            'total_records' => $total_records,
-            'documents' => $result,
+            'total_records' => $count,
+            'documents'     => $results,
         ], true);
-
     }
 
     /**
-     * Get a list of documents based on criteria
+     * Search for a list of documents based on criteria
      *
-     * @param Request $request
-     * @return json response
-     * TODO does not display translations of NAME AND DESCRIPTION !!!
+     * @param array criteria - required
+     * @param integer criteria[search] - required
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json response with doc list or error message
      */
     public function searchDocuments(Request $request)
     {
         $post = $request->all();
-        $criteria = isset($post['criteria']) ? $post['criteria'] : false;
-        
-        if (!empty($criteria)) {
-            $validator = Validator::make($post, [
-                'criteria' => 'array',
-                'criteria.search' => 'string',
-                'criteria.order.type' => 'string',
-                'criteria.order.field' => 'string',
-                'records_per_page' => 'integer',
-                'page_number' => 'integer',
-            ]);
 
-            if (!$validator->fails()) {
-                $data = [];
-                $order = [];
-                $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-                $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-                $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
-                $page = !empty($post['page_number']) ? $post['page_number'] : null;
-                $search = !empty($criteria['search']) ? $criteria['search'] : null;
+        $validator = Validator::make($post, [
+            'criteria'              => 'required|array',
+            'criteria.search'       => 'required|string',
+            'criteria.order'        => 'nullable|array',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+        ]);
 
-                $orderColumns = [
-                    'id',
-                    'name',
-                    'descript',
-                    'file_name',
-                    'mime_type',
-                    'data',
-                    'created_at',
-                    'updated_at',
-                    'created_by',
-                    'updated_by',
-                ];
+        if (!$validator->fails()) {
+            $data = [];
+            $criteria = $post['criteria'];
+            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
+            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
 
-                if (isset($order['field'])) {
-                    if (!in_array($order['field'], $orderColumns)) {
-                        unset($order['field']);
-                    }
-                }
+            $orderColumns = [
+                'id',
+                'name',
+                'descript',
+                'file_name',
+                'mime_type',
+                'data',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
 
-                try {
-                    $query = Document::select('*');
-                    if (isset($order['field']) && isset($order['type'])) {
-                        $query = $query->orderBy($order['field'], $order['type']);
-                    }
-                    if ($pagination && $page) {
-                        $query = $query->forPage($pagination, $page);
-                    }
-                    if ($search) {
-                        $data = Document::search($search)->constrain($query)->get();
-                    } else {
-                        $data = $query->get();
-                    }
-                    //TODO does not display translations of NAME AND DESCRIPTION !!!
-                    foreach ($data as $set) {
-                        $set['name'] = $set->name;
-                        $set['descript'] = $set->descript;
-
-                    }
-                    return $this->successResponse([
-                        'documents' => $data,
-                        'total_records' => $data->count(),
-                    ], true);
-                } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+            if (isset($order['field'])) {
+                if (!in_array($order['field'], $orderColumns)) {
+                    unset($order['field']);
                 }
             }
+
+            $ids = Document::search($criteria['search'])->get()->pluck('id');
+            $query = Document::whereIn('id', $ids);
+
+            $count = $query->count();
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
+
+            $query->orderBy($order['field'], $order['type']);
+
+
+            $locale = \LaravelLocalization::getCurrentLocale();
+            $results = [];
+
+            foreach ($query->get() as $result) {
+                $results[] = [
+                    'id'            => $result->id,
+                    'locale'        => $locale,
+                    'name'          => $result->name,
+                    'description'   => $result->descript,
+                    'filename'      => $result->file_name,
+                    'mimetype'      => $result->mime_type,
+                    'data'          => $result->data,
+                    'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
+                    'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
+                    'created_by'    => $result->created_by,
+                    'updated_by'    => $result->updated_by,
+                ];
+            }
+
+            return $this->successResponse([
+                'documents'     => $results,
+                'total_records' => $count,
+            ], true);
         }
-        return $this->errorResponse('Search document failure');
+
+        return $this->errorResponse('Search document failure', $validator->errors()->messages());
     }
 }

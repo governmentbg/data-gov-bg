@@ -29,6 +29,7 @@ class ActionsHistoryController extends ApiController
      * @param string criteria[ip_adress] - optional
      * @param integer records_per_page - optional
      * @param integer page_number - optional
+     *
      * @return json response with history list or error message
      */
     public function listActionHistory(Request $request)

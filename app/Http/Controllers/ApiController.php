@@ -117,7 +117,7 @@ class ApiController extends Controller
     }
 
     /**
-     * convert array to xml
+     * Convert array to xml
      *
      * @param type $data
      * @param type $xmlData
@@ -136,5 +136,37 @@ class ApiController extends Controller
                 $xmlData->addChild($key, htmlspecialchars($value));
             }
         }
+    }
+
+    /**
+     * Get correct value to set in translatable fields
+     *
+     * @param string|null $locale
+     * @param string|array $data
+     */
+    protected function trans(&$locale, $data, $isUpdate = false) {
+        $defaultLocale = \LaravelLocalization::getDefaultLocale();
+
+        if (isset($locale)) {
+            $array = [$locale => $data];
+
+            if ($isUpdate || $locale == $defaultLocale) {
+                return $array;
+            }
+
+            return array_merge([$defaultLocale => $data], $array);
+        }
+
+        if (is_array($data)) {
+            $locales = array_keys($data);
+
+            if ($isUpdate || in_array($defaultLocale, $locales)) {
+                return $data;
+            }
+
+            return array_merge([$defaultLocale => $data[$locales[0]]], $data);
+        }
+
+        return [[]];
     }
 }

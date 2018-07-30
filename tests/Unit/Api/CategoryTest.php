@@ -19,7 +19,7 @@ class CategoryTest extends TestCase
      */
     public function testAddMainCategory()
     {
-        //  test missing api_key
+        // test missing api_key
         $this->post(url('api/addMainCategory'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);

@@ -184,16 +184,15 @@ class UserController extends ApiController
 
                 foreach($user->userToOrgRole as $role) {
                     $result[] = [
-                        'org_id'    => $role->org_id,
-                        'role_id'   => $role->role_id,
+                        'org_id' => $role->org_id,
+                        'role_id' => $role->role_id,
                     ];
                 }
-
                 return $this->successResponse(['roles' => $result]);
             }
         }
 
-        return $this->errorResponse('Get user roles failure', $validator->errors()->messages());
+        return $this->errorResponse('Get user roles failure', $validator->errors->messages());
     }
 
     /**

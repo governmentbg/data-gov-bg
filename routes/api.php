@@ -94,15 +94,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addTag', 'Api\CategoryController@addTag');
     Route::post('/editTag', 'Api\CategoryController@editTag');
     Route::post('/deleteTag', 'Api\CategoryController@deleteTag');
-
-    Route::post('/xml2json', 'Api\ConversionController@xml2json');
-    Route::post('/json2xml', 'Api\ConversionController@json2xml');
-    Route::post('/csv2json', 'Api\ConversionController@csv2json');
-    Route::post('/json2csv', 'Api\ConversionController@json2csv');
-    Route::post('/kml2json', 'Api\ConversionController@kml2json');
-    Route::post('/json2kml', 'Api\ConversionController@json2kml');
-    Route::post('/rdf2json', 'Api\ConversionController@rdf2json');
-    Route::post('/json2rdf', 'Api\ConversionController@json2rdf');
 });
 
 Route::post('/register', 'Api\UserController@register');

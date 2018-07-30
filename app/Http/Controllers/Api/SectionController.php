@@ -13,7 +13,7 @@ class SectionController extends ApiController
 {
     /**
      * API function for creates new section
-     *
+   *
      * @param string api_key - required
      * @param array data - required
      * @param string data[name] - required
@@ -37,13 +37,18 @@ class SectionController extends ApiController
             'active'        => 'required|boolean',
             'parent_id'     => 'nullable|integer|exists:sections,id',
             'ordering'      => 'nullable|integer',
-            'read_only'     => 'nullable|boolean',
+            'read_only'     => 'nullable|integer',
             'theme'         => 'nullable|integer',
             'forum_link'    => 'nullable|string',
         ]);
 
         if (!$validator->fails()) {
             $locale = Locale::where('locale', $data['locale'])->value('locale');
+
+            // if request locale not found set default
+            if (is_null($locale)) {
+                $data['locale'] = config('app.locale');
+            }
 
             //prepare section data
             $newSection = new Section;
@@ -92,7 +97,7 @@ class SectionController extends ApiController
             'data.active'       => 'required|boolean',
             'data.parent_id'    => 'nullable|integer|exists:sections,id',
             'data.ordering'     => 'nullable|integer',
-            'data.read_only'    => 'nullable|boolean',
+            'data.read_only'    => 'nullable|integer',
             'data.theme'        => 'nullable|integer',
             'data.forum_link'   => 'nullable|string',
         ]);

@@ -166,5 +166,3 @@ Route::get('/contact', function () {
 Route::get('/visualisation', function () {
     return view('visualisation/visualisation', ['class' => 'visualisations']);
 });
-
-Route::get('lang/{lang}', ['as'=>'lang.switch', 'uses'=>'LanguageController@switchLang']);

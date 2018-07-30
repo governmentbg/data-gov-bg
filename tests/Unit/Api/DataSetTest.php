@@ -28,33 +28,23 @@ class DataSetTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test empty data
-        $this->post(
-            url('api/addDataSet'),
-            [
-                'api_key'   => $this->getApiKey(),
-                'data'      => [],
-            ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/addDataSet'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => [],
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful DataSet create
-        $this->post(
-            url('api/addDataSet'),
-            [
-                'api_key'   => $this->getApiKey(),
-                'data'      => [
-                    'name'          => $this->faker->word(),
-                    'locale'        => 'en',
-                    'category_id'   => $this->faker->numberBetween(1,3),
-                    'visibility'    => $this->faker->numberBetween(1,2),
-                    'version'       => '0.test',
-                    'status'        => $this->faker->numberBetween(1,2),
-                ]
+        $this->post(url('api/addDataSet'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => [
+                'name'          => $this->faker->word(),
+                'locale'        => 'en',
+                'category_id'   => $this->faker->numberBetween(1, 3),
+                'visibility'    => $this->faker->numberBetween(1, 2),
+                'version'       => $this->faker->randomDigit(),
+                'status'        => $this->faker->numberBetween(1, 2),
             ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testEditDataSet()
@@ -64,7 +54,7 @@ class DataSetTest extends TestCase
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1,3),
             'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => '0.test',
+            'version'       => $this->faker->randomDigit(),
             'status'        => $this->faker->numberBetween(1,2),
         ]);
 
@@ -74,57 +64,42 @@ class DataSetTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test missing DataSet uri
-        $this->post(
-            url('api/editDataSet'),
-            [
-                'api_key'   => $this->getApiKey(),
-                'data'      => [
-                    'name'          => $this->faker->word(),
-                    'locale'        => 'en',
-                    'category_id'   => $this->faker->numberBetween(1,3),
-                    'visibility'    => $this->faker->numberBetween(1,2),
-                    'version'       => '0.test',
-                    'status'        => $this->faker->numberBetween(1,2),
-                ]
+        $this->post(url('api/editDataSet'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => [
+                'name'          => $this->faker->word(),
+                'locale'        => 'en',
+                'category_id'   => $this->faker->numberBetween(1,3),
+                'visibility'    => $this->faker->numberBetween(1,2),
+                'version'       => $this->faker->randomDigit(),
+                'status'        => $this->faker->numberBetween(1,2),
             ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test empty data
-        $this->post(
-            url('api/editDataSet'),
-            [
-                'api_key'       => $this->getApiKey(),
-                'dataset_uri'   => $dataSet->uri,
-                'data'          => [],
-            ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/editDataSet'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => $dataSet->uri,
+            'data'          => [],
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful edit
-        $this->post(
-            url('api/editDataSet'),
-            [
-                'api_key'       => $this->getApiKey(),
-                'dataset_uri'   => $dataSet->uri,
-                'data'          => [
-                    'name'          => $this->faker->word(),
-                    'locale'        => 'en',
-                    'category_id'   => $this->faker->numberBetween(1,3),
-                    'visibility'    => $this->faker->numberBetween(1,2),
-                    'version'       => '0.test',
-                    'status'        => $this->faker->numberBetween(1,2),
-                    'tags'          => [
-                        $this->faker->word(),
-                        $this->faker->word(),
-                    ],
-                ]
+        $this->post(url('api/editDataSet'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => $dataSet->uri,
+            'data'          => [
+                'name'          => $this->faker->word(),
+                'locale'        => 'en',
+                'category_id'   => $this->faker->numberBetween(1,3),
+                'visibility'    => $this->faker->numberBetween(1,2),
+                'version'       => $this->faker->randomDigit(),
+                'status'        => $this->faker->numberBetween(1,2),
+                'tags'          => [
+                    $this->faker->word(),
+                    $this->faker->word(),
+                ],
             ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testDeleteDataSet()
@@ -134,7 +109,7 @@ class DataSetTest extends TestCase
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1,3),
             'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => '0.test',
+            'version'       => $this->faker->randomDigit(),
             'status'        => $this->faker->numberBetween(1,2),
         ]);
 
@@ -144,95 +119,63 @@ class DataSetTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test wrong DataSet uri
-        $this->post(
-            url('api/deleteDataSet'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'dataset_uri'   => $this->faker->uuid(),
-                ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/deleteDataSet'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => $this->faker->uuid(),
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test DataSet deletion
-        $this->post(
-            url('api/deleteDataSet'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'dataset_uri'   => $dataSet->uri,
-                ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/deleteDataSet'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => $dataSet->uri,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testListDataSets()
     {
         // test missing api_key
-        $this->post(url('api/listDataSets'), ['api_key' => null])
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/listDataSets'), [
+            'api_key'    => $this->getApiKey(),
+            'criteria'   => [],
+        ])->assertStatus(200)->assertJson(['success' => true]);
 
         // test empty criteria
-        $this->post(
-           url('api/listDataSets'),
-               [
-                   'api_key'    => $this->getApiKey(),
-                   'criteria'   => [],
-               ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/listDataSets'), [
+            'api_key'    => $this->getApiKey(),
+            'criteria'   => [],
+        ])->assertStatus(200)->assertJson(['success' => true]);
 
         // test successful list
-        $this->post(
-            url('api/listDataSets'),
-                [
-                    'criteria'   => [
-                        'locale'    => 'en',
-                        'reported'  => $this->faker->numberBetween(0,1),
-                    ],
-                ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/listDataSets'), [
+            'criteria'   => [
+                'locale'    => 'en',
+                'reported'  => $this->faker->numberBetween(0, 1),
+            ],
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testSearchDataSets()
     {
         // test missing api_key
-        $this->post(
-            url('api/searchDataSet'),
-            [
-                'api_key'   => null,
-                'criteria'  => [
-                    'locale'    => 'en',
-                ],
-            ]
-        )
-           ->assertStatus(200)
-           ->assertJson(['success' => true]);
+        $this->post(url('api/searchDataSet'), [
+            'api_key'   => null,
+            'criteria'  => [
+                'locale'    => 'en',
+            ],
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test empty criteria
-        $this->post(
-            url('api/searchDataSet'),
-            ['criteria' => []]
-        )
+        $this->post(url('api/searchDataSet'), ['criteria' => []])
              ->assertStatus(500)
              ->assertJson(['success' => false]);
 
         // test successfull search
-        $this->post(
-            url('api/searchDataSet'),
-            [
-                'criteria'   => [
-                    'locale'    => 'en',
-                    'keywords'  => $this->faker->word(),
-                ],
-            ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/searchDataSet'), [
+            'criteria'   => [
+                'locale'    => 'en',
+                'keywords'  => $this->faker->word(),
+            ],
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testGetDataSetDetails()
@@ -242,7 +185,7 @@ class DataSetTest extends TestCase
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1,3),
             'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => '0.test',
+            'version'       => $this->faker->randomDigit(),
             'status'        => $this->faker->numberBetween(1,2),
         ]);
 
@@ -252,25 +195,15 @@ class DataSetTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test missing Data Set uri
-        $this->post(
-            url('api/getDataSetDetails'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'dataset_uri'   => null,
-                ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/getDataSetDetails'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => null,
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
-        $this->post(
-            url('api/getDataSetDetails'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'dataset_uri'   => $dataSet->uri,
-                ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/getDataSetDetails'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => $dataSet->uri,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testAddDataSetToGroup()
@@ -278,19 +211,20 @@ class DataSetTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => '0.test',
-            'status'        => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
+            'version'       => $this->faker->randomDigit(),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         $organisation = Organisation::create([
             'name'          => $this->faker->word(),
-            'type'          => $this->faker->numberBetween(1,3),
+            'uri'           => $this->faker->uuid(),
+            'type'          => $this->faker->numberBetween(1, 3),
             'descript'      => $this->faker->text(),
-            'active'        => $this->faker->numberBetween(0,1),
-            'approved'      => $this->faker->numberBetween(0,1),
-        ])->searchable();
+            'active'        => $this->faker->numberBetween(0, 1),
+            'approved'      => $this->faker->numberBetween(0, 1),
+        ]);
 
         // test mising api key
         $this->post(url('api/addDataSetToGroup'), ['api_key' => null])
@@ -298,40 +232,25 @@ class DataSetTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test missing group_id
-        $this->post(
-            url('api/addDataSetToGroup'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'data_set_uri'   => $dataSet->uri,
-                    'group_id'      => null,
-                ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/addDataSetToGroup'), [
+            'api_key'       => $this->getApiKey(),
+            'data_set_uri'   => $dataSet->uri,
+            'group_id'      => null,
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test missing dataset_uri
-        $this->post(
-            url('api/addDataSetToGroup'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'data_set_uri'   => null,
-                    'group_id'      => $organisation->id,
-                ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/addDataSetToGroup'), [
+            'api_key'       => $this->getApiKey(),
+            'data_set_uri'   => null,
+            'group_id'      => $organisation->id,
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful request
-        $this->post(
-            url('api/addDataSetToGroup'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'data_set_uri'  => $dataSet->uri,
-                    'group_id'      => $organisation->id,
-                ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/addDataSetToGroup'), [
+            'api_key'       => $this->getApiKey(),
+            'data_set_uri'  => $dataSet->uri,
+            'group_id'      => $organisation->id,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testRemoveDataSetFromGroup()
@@ -341,7 +260,7 @@ class DataSetTest extends TestCase
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1,3),
             'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => '0.test',
+            'version'       => $this->faker->randomDigit(),
             'status'        => $this->faker->numberBetween(1,2),
         ]);
 
@@ -356,39 +275,24 @@ class DataSetTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test missing group_id
-        $this->post(
-            url('api/removeDataSetFromGroup'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'data_set_uri'  => $dataSet->uri,
-                    'group_id'      => null,
-                ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/removeDataSetFromGroup'), [
+            'api_key'       => $this->getApiKey(),
+            'data_set_uri'  => $dataSet->uri,
+            'group_id'      => null,
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test missing dataset_uri
-        $this->post(
-            url('api/removeDataSetFromGroup'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'data_set_uri'  => null,
-                    'group_id'      => $dataSetGroup->group_id,
-                ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        $this->post(url('api/removeDataSetFromGroup'), [
+            'api_key'       => $this->getApiKey(),
+            'data_set_uri'  => null,
+            'group_id'      => $dataSetGroup->group_id,
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful request
-        $this->post(
-            url('api/removeDataSetFromGroup'),
-                [
-                    'api_key'       => $this->getApiKey(),
-                    'data_set_uri'  => $dataSet->uri,
-                    'group_id'      => $dataSetGroup->group_id,
-                ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $this->post(url('api/removeDataSetFromGroup'), [
+            'api_key'       => $this->getApiKey(),
+            'data_set_uri'  => $dataSet->uri,
+            'group_id'      => $dataSetGroup->group_id,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 }

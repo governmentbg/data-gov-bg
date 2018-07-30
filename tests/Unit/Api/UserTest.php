@@ -26,11 +26,11 @@ class UserTest extends TestCase
 
     public function testSearchUsers()
     {
-        $criteria = ['locale' => app()->getLocale()];
+        $criteria = ['locale' => app()->getLocale(), 'keywords' => 'search'];
 
         $this->post(url('api/searchUsers'), ['api_key' => $this->getApiKey()])
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
 
         $this->post(url('api/searchUsers'), ['api_key' => $this->getApiKey(), 'criteria' => $criteria])
             ->assertStatus(200)
@@ -217,6 +217,7 @@ class UserTest extends TestCase
             url('api/inviteUser'),
             [
                 'api_key' => $this->getApiKey(),
+                'id' => $this->getUserId(),
                 'data'    => [
                     'email' => $this->faker->safeEmail(),
                 ]

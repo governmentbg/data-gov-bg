@@ -10,7 +10,7 @@ class DocumentTest extends TestCase
     public function testList()
     {
         $response = $this->post(
-            url('api/documents/listDocuments'),
+            url('api/listDocuments'),
             ['api_key' => $this->getApiKey()]
         );
 

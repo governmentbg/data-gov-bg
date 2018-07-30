@@ -32,13 +32,13 @@ class SetLocale
             } else if (isset($request->user_settings['locale'])) {
                 $locale = $request->user_settings['locale'];
             }
-        }
 
-        if (isset($locale)) {
-            if (Locale::where('locale', $locale)->count()) {
-                \LaravelLocalization::setLocale($locale);
-            } else {
-                return ApiController::errorResponse('Language `'. $locale .'` does not exist in database');
+            if (isset($locale)) {
+                if (Locale::where('locale', $locale)->count()) {
+                    \LaravelLocalization::setLocale($locale);
+                } else {
+                    return ApiController::errorResponse('Language `'. $locale .'` does not exist in database');
+                }
             }
         }
 

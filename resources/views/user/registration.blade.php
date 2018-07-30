@@ -16,7 +16,12 @@
                         <div class="form-group row required">
                             <label for="fname" class="col-sm-3 col-xs-12 col-form-label">Име:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" name="firstname" placeholder="Иван">
+                                <input
+                                    type="text"
+                                    class="input-border-r-12 form-control"
+                                    name="firstname"
+                                    placeholder="Иван"
+                                >
                                 @if (!empty($error->firstname))
                                     <span class="error">{{ $error->firstname[0] }}</span>
                                 @endif
@@ -25,7 +30,12 @@
                         <div class="form-group row required">
                             <label for="lname" class="col-sm-3 col-xs-12 col-form-label">Фамилия:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" name="lastname" placeholder="Иванов">
+                                <input
+                                    type="text"
+                                    class="input-border-r-12 form-control"
+                                    name="lastname"
+                                    placeholder="Иванов"
+                                >
                                 @if (!empty($error->lastname))
                                     <span class="error">{{ $error->lastname[0] }}</span>
                                 @endif
@@ -34,7 +44,13 @@
                         <div class="form-group row required">
                             <label for="email" class="col-sm-3 col-xs-12 col-form-label">e-mail:</label>
                             <div class="col-sm-9">
-                                <input type="email" class="input-border-r-12 form-control" name="email" placeholder="ivanov@abv.bg">
+                                <input
+                                    type="email"
+                                    class="input-border-r-12 form-control"
+                                    name="email"
+                                    placeholder="ivanov@abv.bg"
+                                    value="{{ !empty($invMail) ? $invMail : ''}}"
+                                >
                                 @if (!empty($error->email))
                                     <span class="error">{{ $error->email[0] }}</span>
                                 @endif
@@ -43,7 +59,12 @@
                         <div class="form-group row required">
                             <label for="username" class="col-sm-3 col-xs-12 col-form-label">Потребителско име:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" name="username" placeholder="Иванов">
+                                <input
+                                    type="text"
+                                    class="input-border-r-12 form-control"
+                                    name="username"
+                                    placeholder="Иванов"
+                                >
                                 @if (!empty($error->username))
                                     <span class="error">{{ $error->username[0] }}</span>
                                 @endif
@@ -52,7 +73,11 @@
                         <div class="form-group row required">
                             <label for="password" class="col-sm-3 col-xs-12 col-form-label">Парола:</label>
                             <div class="col-sm-9">
-                                <input type="password" class="input-border-r-12 form-control" name="password">
+                                <input
+                                    type="password"
+                                    class="input-border-r-12 form-control"
+                                    name="password"
+                                >
                                 @if (!empty($error->password))
                                     <span class="error">{{ $error->password[0] }}</span>
                                 @endif
@@ -61,7 +86,11 @@
                         <div class="form-group row required">
                             <label for="password-confirm" class="col-sm-3 col-xs-12 col-form-label">Потвърждение на паролата:</label>
                             <div class="col-sm-9">
-                                <input type="password" class="input-border-r-12 form-control" name="password_confirm">
+                                <input
+                                    type="password"
+                                    class="input-border-r-12 form-control"
+                                    name="password_confirm"
+                                >
                                 @if (!empty($error->password_confirm))
                                     <span class="error">{{ $error->password_confirm[0] }}</span>
                                 @endif
@@ -70,7 +99,11 @@
                         <div class="form-group row">
                             <label for="description" class="col-sm-3 col-xs-12 col-form-label">Повече информация:</label>
                             <div class="col-sm-9">
-                                <textarea type="text" class="input-border-r-12 form-control" name="description" placeholder=""></textarea>
+                                <textarea
+                                    type="text"
+                                    class="input-border-r-12 form-control"
+                                    name="description"
+                                ></textarea>
                                 @if (!empty($error->description))
                                     <span class="error">{{ $error->description[0] }}</span>
                                 @endif
@@ -79,7 +112,11 @@
                         <div class="form-group row">
                             <label for="newsLetter" class="col-sm-3 col-xs-12 col-form-label">Получаване на бюлетин:</label>
                             <div class="col-sm-3 col-xs-6 p-r-none">
-                                <select class="input-border-r-12 form-control open-select" name="user_settings[newsletter_digest]" size="5">
+                                <select
+                                    class="input-border-r-12 form-control open-select"
+                                    name="user_settings[newsletter_digest]"
+                                    size="5"
+                                >
                                     @foreach ($digestFreq as $id => $freq)
                                         <option value="{{ $id }}">{{ $freq }}</option>
                                     @endforeach

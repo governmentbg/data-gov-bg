@@ -21,6 +21,7 @@
                                             <li><a href="{{ url('/user/groups') }}">групи</a></li>
                                             <li><a href="{{ url('/user/organisations') }}">организации</a></li>
                                             <li><a href="{{ url('/user/settings') }}">настройки</a></li>
+                                            <li><a href="{{ url('/user/invite') }}">покана</a></li>
                                         </ul>
                                     </div>
                                 </div>

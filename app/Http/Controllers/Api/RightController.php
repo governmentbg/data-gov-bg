@@ -28,8 +28,8 @@ class RightController extends ApiController
             }
 
             return $this->successResponse(['rights' => $result], true);
-        } else {
-            return $this->errorResponse('Get rights data failure');
         }
+
+        return $this->errorResponse('Get rights data failure');
     }
 }

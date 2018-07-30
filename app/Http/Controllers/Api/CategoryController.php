@@ -209,8 +209,6 @@ class CategoryController extends ApiController
             $order = [];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-            $pagination = $this->getRecordsPerPage($post['records_per_page']);
-            $page = !empty($post['page_number']) ? $post['page_number'] : 1;
 
             $query = Category::select();
 
@@ -222,19 +220,27 @@ class CategoryController extends ApiController
                 $query->orderBy($order['field'], $order['type']);
             }
 
-            if ($pagination && $page) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
+            $count = $query->count();
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
             try {
-                $categoryData = $query->get();
+                $results = $query->get();
 
-                foreach ($categoryData as $category) {
+                $locale = \LaravelLocalization::getCurrentLocale();
+
+                foreach ($results as $category) {
                     $category['name'] = $category->name;
-                    $category['locale'] = \LaravelLocalization::getCurrentLocale();
+                    $category['locale'] = $locale;
                 }
 
-                return $this->successResponse($categoryData);
+                return $this->successResponse([
+                    'total_records' => $count,
+                    'data'          => $results,
+                ], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -438,8 +444,6 @@ class CategoryController extends ApiController
             $order = [];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-            $pagination = $this->getRecordsPerPage($post['records_per_page']);
-            $page = !empty($post['page_number']) ? $post['page_number'] : 1;
 
             $query = Category::where('parent_id', '!=', null);
 
@@ -451,15 +455,16 @@ class CategoryController extends ApiController
                 $query->where('active', $criteria['active']);
             }
 
-            $count = $query->count();
-
             if ($order) {
                 $query->orderBy($order['field'], $order['type']);
             }
 
-            if ($pagination && $page) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
+            $count = $query->count();
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
             try {
                 $data = $query->get();

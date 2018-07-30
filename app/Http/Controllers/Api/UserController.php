@@ -184,15 +184,16 @@ class UserController extends ApiController
 
                 foreach($user->userToOrgRole as $role) {
                     $result[] = [
-                        'org_id' => $role->org_id,
-                        'role_id' => $role->role_id,
+                        'org_id'    => $role->org_id,
+                        'role_id'   => $role->role_id,
                     ];
                 }
+
                 return $this->successResponse(['roles' => $result]);
             }
         }
 
-        return $this->errorResponse('Get user roles failure', $validator->errors->messages());
+        return $this->errorResponse('Get user roles failure', $validator->errors()->messages());
     }
 
     /**
@@ -792,7 +793,7 @@ class UserController extends ApiController
      */
     public function register(Request $request)
     {
-        $data = $request->data;
+        $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
             'firstname'         => 'required|string',
@@ -932,7 +933,7 @@ class UserController extends ApiController
             $organisation->active = 0;
             $organisation->approved = 0;
             $organisation->created_by = $user->id;
-            $organisation->name =  $data['org_data']['name'];
+            $organisation->name = $data['org_data']['name'];
             $organisation->descript = $data['org_data']['description'];
             $organisation->activity_info = $data['org_data']['activity_info'];
             $organisation->contacts = $data['org_data']['contacts'];

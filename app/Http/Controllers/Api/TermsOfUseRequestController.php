@@ -36,30 +36,28 @@ class TermsOfUseRequestController extends ApiController
             'status'        => 'integer|min:1'
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Send terms of use request failure');
+        if (!$validator->fails()) {
+            // set default values to optional fields
+            if (!isset($data['status'])) {
+                $data['status'] = TermsOfUseRequest::STATUS_NEW;
+            }
+
+            //prepare model data
+            $newTerms = new TermsOfUseRequest;
+            $newTerms->descript = $data['description'];
+            unset($data['description']);
+            $newTerms->fill($data);
+
+            try {
+                $newTerms->save();
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+
+            return $this->successResponse(['id' => $newTerms->id], true);
         }
 
-        // set default values to optional fields
-        if (!isset($data['status'])) {
-            $data['status'] = TermsOfUseRequest::STATUS_NEW;
-        }
-
-        //prepare model data
-        $newTerms = new TermsOfUseRequest;
-        $newTerms->descript = $data['description'];
-        unset($data['description']);
-        $newTerms->fill($data);
-
-        try {
-            $newTerms->save();
-        } catch (QueryException $ex) {
-            Log::error($ex->getMessage());
-
-            return $this->errorResponse('Send terms of use request failure');
-        }
-
-        return $this->successResponse(['id' => $newTerms->id], true);
+        return $this->errorResponse('Send terms of use request failure', $validator->errors()->messages());
     }
 
     /**
@@ -80,9 +78,9 @@ class TermsOfUseRequestController extends ApiController
     public function editTermsOfUseRequest(Request $request)
     {
         $post = $request->all();
-        //validate request data
-        $validator = \validator::make($post, [
-            'request_id'        => 'required||numeric|exists:terms_of_use_requests,id',
+
+        $validator = \Validator::make($post, [
+            'request_id'        => 'required|numeric|exists:terms_of_use_requests,id',
             'data.description'  => 'required|string',
             'data.firstname'    => 'required|string|max:100',
             'data.lastname'     => 'required|string|max:100',
@@ -90,25 +88,23 @@ class TermsOfUseRequestController extends ApiController
             'data.status'       => 'integer|min:1'
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Edit terms of use request failure');
+        if (!$validator->fails()) {
+            $data = $post['data'];
+            $terms = TermsOfUseRequest::find($post['request_id']);
+            $terms->descript = $data['description'];
+            unset($data['description']);
+            $terms->fill($data);
+
+            try {
+                $terms->save();
+
+                return $this->successResponse();
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        $data = $request->offsetGet('data');
-        $terms = TermsOfUseRequest::find($post['request_id']);
-        $terms->descript = $data['description'];
-        unset($data['description']);
-        $terms->fill($data);
-
-        try {
-            $terms->save();
-        } catch (QueryException $ex) {
-            Log::error($ex->getMessage());
-
-            return $this->errorResponse('Edit terms of use request failure');
-        }
-
-        return $this->successResponse();
+        return $this->errorResponse('Edit terms of use request failure', $validator->errors()->messages());
     }
 
     /**

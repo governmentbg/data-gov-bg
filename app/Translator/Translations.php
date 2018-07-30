@@ -89,7 +89,7 @@ class Translations
      * @param  string|array $locale
      * @param  string $value
      */
-    public function set($locale, $value = null)
+    public function set($locale, $value = null, $isUpdate = false, $first = false)
     {
         if (is_array($locale)) {
             foreach ($locale as $loc => $value) {

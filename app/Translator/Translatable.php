@@ -129,7 +129,7 @@ trait Translatable
      * @param  string                 $key
      * @param  string|array           $value
      */
-    protected function translatable_set($key, $value)
+    protected function translatable_set($key, $value, $isUpdate = false)
     {
         $this->translatable_handled = false;
 
@@ -137,9 +137,9 @@ trait Translatable
             $translations = $this->translations($key);
 
             if (is_array($value)) {
-                $translations->set($value);
+                $translations->set($value, null, $isUpdate, true);
             } else {
-                $translations->set($this->translation_locale(), $value);
+                $translations->set($this->translation_locale(), $value, $isUpdate, true);
             }
 
             // Make sure model key (e.g "name") matches the translation "group_id"
@@ -290,7 +290,7 @@ trait Translatable
 
         // Update translations
         foreach ($translations as $key => $value) {
-            $this->translatable_set($key, $value);
+            $this->translatable_set($key, $value, true);
         }
 
         $this->save();
@@ -368,13 +368,16 @@ trait Translatable
 
     public static function bootTranslatable()
     {
+        $traits = class_uses(self::class);
         // When model is deleted, Delete the corresponding translations as well
-        self::deleting(function ($model) {
-            Translation::whereIn(
-                'group_id',
-                array_keys($model->get_translatable_values())
-            )->delete();
-        });
+        if (!isset($traits['Illuminate\\Database\\Eloquent\\SoftDeletes'])) {
+            self::deleting(function ($model) {
+                Translation::whereIn(
+                    'group_id',
+                    array_keys($model->get_translatable_values())
+                )->delete();
+            });
+        }
     }
 
     /**

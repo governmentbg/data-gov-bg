@@ -157,6 +157,12 @@
                     border-radius: 30px;
                 }
             }
+
+            .comments.signal {
+                .comment-box, .coment-avatar {
+                    border: 1px solid #d32a31 !important;
+                }
+            }
         }
     }
 

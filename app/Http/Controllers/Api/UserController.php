@@ -538,7 +538,7 @@ class UserController extends ApiController
 
         if (!empty($newSettings)) {
             try {
-                UserSetting::where('user_id', $request->id)->update($newSettings);
+                UserSetting::updateOrCreate(['user_id' => $request->id], $newSettings);
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
@@ -648,7 +648,6 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'id'            => 'required|integer',
                 'data'          => 'required|array',
                 'data.email'    => 'required|email',
                 'data.is_admin' => 'nullable|integer',
@@ -662,6 +661,7 @@ class UserController extends ApiController
             return $this->errorResponse('Invite user failure', $validator->errors()->messages());
         }
 
+        $password = Uuid::generate(4)->string;
         $reqOrgId = isset($request->data['org_id']) ? $request->data['org_id']: null;
 
         $loggedUser = User::with('userToOrgRole')->find(\Auth::id());
@@ -673,7 +673,7 @@ class UserController extends ApiController
         $user = new User;
 
         $user->username = $this->generateUsername($request->data['email']);
-        $user->password = bcrypt(Uuid::generate(4)->string);
+        $user->password = bcrypt($password);
         $user->email = $request->data['email'];
         $user->firstname = '';
         $user->lastname = '';
@@ -697,6 +697,21 @@ class UserController extends ApiController
 
             try {
                 $user->save();
+
+                $mailData = [
+                    'user'      => \Auth::user()->firstname .' '. \Auth::user()->lastname,
+                    'username'  => $user->username,
+                    'pass'      => $password,
+                ];
+
+                Mail::send('mail/generateMail', $mailData, function ($m) use ($user) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($user->email)->subject('Получихте покана за opendata.bg!');
+                });
+
+                if (count(Mail::failures()) > 0) {
+                    return $this->errorResponse('Failed to send mail');
+                }
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
@@ -808,7 +823,7 @@ class UserController extends ApiController
             : null;
         $user->is_admin = 0;
         $user->active = 0;
-        $user->approved = 0;
+        $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
         $user->api_key = $apiKey;
         $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
         $user->remember_token = null;

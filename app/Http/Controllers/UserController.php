@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
@@ -115,7 +116,7 @@ class UserController extends Controller {
                     ],
                 ];
 
-                if ($request->offsetGet('email')) {
+                if ($request->offsetGet('email') && $request->offsetGet('email') !== $user['email']) {
                     $request->session()->flash('alert-warning', 'Електронната поща ще се промени, когато я потвърдите!');
                 }
             }
@@ -201,13 +202,14 @@ class UserController extends Controller {
         $class = 'user';
         $params = [];
         $error = [];
+        $invMail = $request->offsetGet('mail');
 
         $digestFreq = UserSetting::getDigestFreq();
 
         if ($request->isMethod('post')) {
             $params = $request->all();
 
-            $req = Request::create('/register', 'POST', ['data' => $params]);
+            $req = Request::create('/register', 'POST', ['invite' => !empty($invMail), 'data' => $params]);
             $api = new ApiUser($req);
             $result = $api->register($req)->getData();
 
@@ -229,7 +231,7 @@ class UserController extends Controller {
             }
         }
 
-        return view('user/registration', compact('class', 'error', 'digestFreq'));
+        return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail'));
     }
 
     public function orgRegistration(Request $request) {
@@ -442,5 +444,93 @@ class UserController extends Controller {
         }
 
         return view('confirmError', compact('class'));
+    }
+
+    public function inviteUser(Request $request)
+    {
+        $class = 'user';
+        $invData = $request->all();
+
+        $roleReqData = [
+            'api_key'   => Auth::user()->api_key,
+            'criteria'  => [
+                'active'    => 1,
+            ],
+        ];
+
+        $roleReq = Request::create('/api/listRoles', 'POST', $roleReqData);
+        $roleApi = new ApiRole($roleReq);
+        $roleResult = $roleApi->listRoles($roleReq)->getData();
+
+        if ($roleResult->success) {
+            $roleList = $roleResult->roles;
+        } else {
+            $request->session()->flash('alert-danger', 'Не успяхме да се свържем с РОЛИ!');
+
+            return back();
+        }
+
+        if ($request->has('generate')) {
+            $invData['api_key'] = Auth::user()->api_key;
+
+            $invRequset = Request::create('/api/inviteUser', 'POST', ['data' => $invData]);
+            $api = new ApiUser($invRequset);
+            $result = $api->inviteUser($invRequset)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', 'Успешно изпращане на покана!');
+            } else {
+                foreach ($result->errors as $key => $msg) {
+                    $request->session()->flash('alert-danger', $msg[0]);
+                }
+            }
+        }
+
+        if ($request->has('send')) {
+            $mailData = [
+                'user'  => Auth::user()->firstname .' '. Auth::user()->lastname,
+                'mail'  => $invData['email'],
+            ];
+
+            Mail::send('mail/inviteMail', $mailData, function ($m) use ($invData) {
+                $m->from('info@finite-soft.com', 'Open Data');
+                $m->to($invData['email'])->subject('Получихте покана за opendata.bg!');
+            });
+
+            if (count(Mail::failures()) > 0) {
+                $request->session()->flash('alert-danger', 'Неуспешно изпращане на покана!');
+            } else {
+                $request->session()->flash('alert-success', 'Успешно изпратена покана!');
+            }
+        }
+
+        return view('/user/invite', compact('class', 'roleList'));
+    }
+
+    public function preGenerated(Request $request)
+    {
+        $data = $request->all();
+
+        $validator = \Validator::make($data, [
+            'username'  => 'required',
+            'pass'      => 'required',
+        ]);
+
+        if (!$validator->fails()) {
+            $cred = [
+                'username'  => $data['username'],
+                'password'  => $data['pass'],
+            ];
+
+            if (Auth::attempt($cred)) {
+                $request->session()->flash('alert-success', 'Моля попълнете вашите данни');
+
+                return redirect()->route('settings');
+            }
+        } else {
+            $request->session()->flash('alert-danger', 'Грешни параметри на заявка');
+
+            return redirect('/');
+        }
     }
 }

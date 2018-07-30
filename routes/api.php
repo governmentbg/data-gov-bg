@@ -69,7 +69,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('sendSignal', 'Api\SignalsController@sendSignal');
     Route::post('editSignal', 'Api\SignalsController@editSignal');
-    Route::get('deleteSignal', 'Api\SignalsController@deleteSignal');
+    Route::post('deleteSignal', 'Api\SignalsController@deleteSignal');
     Route::post('listSignals', 'Api\SignalsController@listSignals');
     Route::post('/addTermsOfUse', 'Api\TermsOfUseController@addTermsOfUse');
     Route::post('/editTermsOfUse', 'Api\TermsOfUseController@editTermsOfUse');

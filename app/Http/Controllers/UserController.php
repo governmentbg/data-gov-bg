@@ -409,6 +409,7 @@ class UserController extends Controller {
     public function mailConfirmation(Request $request)
     {
         Auth::logout();
+        \Session::flush();
         $class = 'user';
         $hash = $request->offsetGet('hash');
         $mail = $request->offsetGet('mail');

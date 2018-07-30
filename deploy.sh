@@ -11,18 +11,15 @@ then
 fi
 
 # Install new composer packages
-/usr/local/bin/composer install --prefer-dist --no-interaction
+/usr/local/bin/composer install --no-interaction
 
 # Cache boost configuration and routes
 php artisan cache:clear
 php artisan config:clear
-php artisan route:cache
+php artisan route:clear
 
 # Sync database changes
 php artisan migrate
-
-# Cache boost configuration and routes
-php artisan config:cache
 
 # Restart workers
 php artisan queue:restart

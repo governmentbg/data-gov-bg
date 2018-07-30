@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Http\Controllers\Traits\RecordSignature;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Traits\RecordSignature;
 

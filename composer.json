@@ -6,12 +6,19 @@
     "type": "project",
     "require": {
         "php": ">=7.0.0",
+        "cviebrock/laravel-elasticsearch": "^3.1",
         "doctrine/dbal": "^2.5",
         "elasticsearch/elasticsearch": "^6.0",
         "fideloper/proxy": "~3.3",
+        "fluent/logger": "^1.0",
+        "graylog2/gelf-php": "^1.5",
+        "intervention/image": "^2.4",
         "laravel/framework": "5.5.*",
+        "laravel/scout": "^4.0",
         "laravel/tinker": "~1.0",
         "mcamara/laravel-localization": "^1.3",
+        "teamtnt/laravel-scout-tntsearch-driver": "^3.0",
+        "teamtnt/tntsearch": "^1.3",
         "webpatser/laravel-uuid": "^3.0"
     },
     "require-dev": {

@@ -2,6 +2,9 @@
 // Body
 $body-bg: #f5f8fa;
 
+// Colors
+$error-color: #C02E54;
+
 // Borders
 $laravel-border-color: darken($body-bg, 10%);
 $list-group-border: $laravel-border-color;
@@ -45,4 +48,4 @@ $xsWidth: 480px;
 
 // Colors
 $black: #333333;
-$purple: #4f57aa;
+$dark-gray: #484848;

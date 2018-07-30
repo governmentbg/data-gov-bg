@@ -10,7 +10,7 @@ class ActionsHistoryTest extends TestCase
     public function testList()
     {
         $response = $this->post(
-            url('api/actions/listActionHistory'),
+            url('api/listActionHistory'),
             ['api_key' => $this->getApiKey()]
         );
 

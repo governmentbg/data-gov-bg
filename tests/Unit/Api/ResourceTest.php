@@ -24,10 +24,10 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         // test missing api_key
@@ -44,12 +44,13 @@ class ResourceTest extends TestCase
                     'name'              => $this->faker->word(),
                     'description'       => $this->faker->text(),
                     'locale'            => 'en',
-                    'version'           => $this->faker->numberBetween(1,999),
+                    'version'           => $this->faker->numberBetween(1, 999),
                     'schema_descript'   => $this->faker->word(),
                     'schema_url'        => $this->faker->url(),
-                    'resource_type'     => $this->faker->numberBetween(1,3),
+                    'resource_type'     => $this->faker->numberBetween(1, 3),
                     'resource_url'      => $this->faker->url(),
-                    'http_rq_type'      => $this->faker->numberBetween(1,2),
+                    'http_rq_type'      => $this->faker->randomElement(['post', 'get']),
+                    'post_data'         => $this->faker->text(),
                     'authentication'    => $this->faker->word(),
                     'http_headers'      => $this->faker->text(),
                 ]
@@ -65,15 +66,17 @@ class ResourceTest extends TestCase
                 'api_key'           => $this->getApiKey(),
                 'dataset_uri'       => $dataSet->uri,
                 'data'              => [
+                    'type'              => $this->faker->numberBetween(1, 3),
                     'name'              => $this->faker->word(),
                     'descript'          => $this->faker->text(),
                     'locale'            => 'en',
                     'version'           => $this->faker->word(),
                     'schema_descript'   => $this->faker->word(),
                     'schema_url'        => $this->faker->url(),
-                    'resource_type'     => $this->faker->numberBetween(1,3),
+                    'resource_type'     => $this->faker->numberBetween(1, 3),
                     'resource_url'      => $this->faker->url(),
-                    'http_rq_type'      => $this->faker->numberBetween(1,2),
+                    'post_data'         => $this->faker->text(),
+                    'http_rq_type'      => $this->faker->randomElement(['post', 'get']),
                     'authentication'    => $this->faker->word(),
                     'http_headers'      => $this->faker->text(),
                 ]
@@ -88,10 +91,10 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         $resource = Resource::create([
@@ -101,12 +104,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -147,7 +150,7 @@ class ResourceTest extends TestCase
             [
                 'api_key'           => $this->getApiKey(),
                 'resource_uri'      => $resource->uri,
-                'data'              => $this->faker->text(),
+                'data'              => ['test elastic' => 'data array'],
             ]
         )
             ->assertStatus(200)
@@ -159,10 +162,10 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         $resource = Resource::create([
@@ -172,12 +175,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -199,12 +202,12 @@ class ResourceTest extends TestCase
                     'descript'          => $this->faker->text(),
                     'version'           => $this->faker->word(),
                     'schema_descript'   => $this->faker->word(),
-                    'file_format'       => $this->faker->numberBetween(1,3),
+                    'file_format'       => $this->faker->numberBetween(1, 3),
                     'post_data'         => $this->faker->text(),
                     'schema_url'        => $this->faker->url(),
-                    'resource_type'     => $this->faker->numberBetween(1,3),
+                    'resource_type'     => $this->faker->numberBetween(1, 3),
                     'resource_url'      => $this->faker->url(),
-                    'http_rq_type'      => $this->faker->numberBetween(1,2),
+                    'http_rq_type'      => $this->faker->randomElement(['post', 'get']),
                     'authentication'    => $this->faker->word(),
                     'http_headers'      => $this->faker->text(),
                     'is_reported'       => false,
@@ -233,18 +236,19 @@ class ResourceTest extends TestCase
                 'api_key'           => $this->getApiKey(),
                 'resource_uri'      => $resource->uri,
                 'data'              => [
+                    'locale'            => 'en',
                     'name'              => $this->faker->word(),
                     'descript'          => $this->faker->text(),
                     'version'           => $this->faker->word(),
                     'schema_descript'   => $this->faker->word(),
                     'post_data'         => $this->faker->text(),
                     'schema_url'        => $this->faker->url(),
-                    'resource_type'     => $this->faker->numberBetween(1,3),
+                    'resource_type'     => $this->faker->numberBetween(1, 3),
                     'resource_url'      => $this->faker->url(),
-                    'http_rq_type'      => $this->faker->numberBetween(1,2),
+                    'http_rq_type'      => $this->faker->randomElement(['post', 'get']),
                     'authentication'    => $this->faker->word(),
                     'http_headers'      => $this->faker->text(),
-                    'type'              => $this->faker->numberBetween(1,3),
+                    'type'              => $this->faker->numberBetween(1, 3),
                 ],
             ]
         )
@@ -270,12 +274,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -316,7 +320,7 @@ class ResourceTest extends TestCase
             [
                 'api_key'           => $this->getApiKey(),
                 'resource_uri'      => $resource->uri,
-                'data'              => $this->faker->word(),
+                'data'              => ['test elastic' => 'data array 2'],
             ]
         )
             ->assertStatus(200)
@@ -328,10 +332,10 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         $resource = Resource::create([
@@ -341,12 +345,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -406,12 +410,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -420,9 +424,9 @@ class ResourceTest extends TestCase
         // test mising resource uri
         $this->post(
             url('api/getResourceMetadata'),
-                [
-                    'resource_uri' => null,
-                ]
+            [
+                'resource_uri' => null,
+            ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
@@ -430,9 +434,9 @@ class ResourceTest extends TestCase
         // test successful request
         $this->post(
             url('api/getResourceMetadata'),
-                [
-                    'resource_uri' => $resource->uri,
-                ]
+            [
+                'resource_uri' => $resource->uri,
+            ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
@@ -443,8 +447,8 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
             'status'        => $this->faker->numberBetween(1,2),
         ]);
@@ -456,12 +460,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -470,9 +474,9 @@ class ResourceTest extends TestCase
         // test mising resource uri
         $this->post(
             url('api/getResourceSchema'),
-                [
-                    'resource_uri' => null,
-                ]
+            [
+                'resource_uri' => null,
+            ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
@@ -481,9 +485,9 @@ class ResourceTest extends TestCase
         // test successful request
         $this->post(
             url('api/getResourceSchema'),
-                [
-                    'resource_uri' => $resource->uri,
-                ]
+            [
+                'resource_uri' => $resource->uri,
+            ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
@@ -507,12 +511,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -521,9 +525,9 @@ class ResourceTest extends TestCase
         // test mising resource uri
         $this->post(
             url('api/getResourceView'),
-                [
-                    'resource_uri' => null,
-                ]
+            [
+                'resource_uri' => null,
+            ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
@@ -531,9 +535,9 @@ class ResourceTest extends TestCase
         // test successful request
         $this->post(
             url('api/getResourceView'),
-                [
-                    'resource_uri' => $resource->uri,
-                ]
+            [
+                'resource_uri' => $resource->uri,
+            ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
@@ -544,10 +548,10 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         $resource = Resource::create([
@@ -557,12 +561,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -571,9 +575,9 @@ class ResourceTest extends TestCase
         // test mising resource uri
         $this->post(
             url('api/getResourceData'),
-                [
-                    'resource_uri' => null,
-                ]
+            [
+                'resource_uri' => null,
+            ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
@@ -581,9 +585,9 @@ class ResourceTest extends TestCase
         // test successful request
         $this->post(
             url('api/getResourceData'),
-                [
-                    'resource_uri' => $resource->uri,
-                ]
+            [
+                'resource_uri' => $resource->uri,
+            ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
@@ -594,10 +598,10 @@ class ResourceTest extends TestCase
         $dataSet = DataSet::create([
             'name'          => $this->faker->word(),
             'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
+            'category_id'   => $this->faker->numberBetween(1, 3),
+            'visibility'    => $this->faker->numberBetween(1, 2),
             'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
+            'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
         $resource = Resource::create([
@@ -607,12 +611,12 @@ class ResourceTest extends TestCase
             'descript'          => $this->faker->text(),
             'version'           => $this->faker->word(),
             'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1,3),
+            'file_format'       => $this->faker->numberBetween(1, 3),
             'post_data'         => $this->faker->text(),
             'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1,3),
+            'resource_type'     => $this->faker->numberBetween(1, 3),
             'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1,2),
+            'http_rq_type'      => $this->faker->numberBetween(1, 2),
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
@@ -621,21 +625,21 @@ class ResourceTest extends TestCase
         // test mising criteria
         $this->post(
             url('api/searchResourceData'),
-                [
-                    'criteria' => [],
-                ]
+            [
+                'criteria' => [],
+            ]
         )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
 
         // test mising with criteria
         $this->post(
             url('api/searchResourceData'),
-                [
-                    'criteria'  => [
-                        'keywords'  => "cool",
-                    ],
-                ]
+            [
+                'criteria'  => [
+                    'keywords'  => 'cool',
+                ],
+            ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);

@@ -30,7 +30,7 @@
                 </div>
                 <div class="col-xs-12">
                     <div class="articles m-t-lg">
-                        @foreach ( $datasets as $set)
+                        @foreach ($datasets as $set)
                             <div class="article m-b-lg">
                                 <div>Дата на добавяне: {{ $set->created_at }}</div>
                                 <div class="col-sm-12 p-l-none">

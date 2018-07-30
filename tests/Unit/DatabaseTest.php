@@ -76,19 +76,19 @@ class DatabaseTest extends TestCase
         $this->organisations();
         $this->actionsHistory();
         $this->category();
-        $this->dataset();
+        $this->dataSets();
         $this->resources();
-        $this->termsofuse();
+        $this->termsOfUse();
         $this->signals();
         $this->documents();
-        $this->termsofuserequests();
-        $this->userfollows();
-        $this->usersettings();
-        $this->usertoorg();
-        $this->datasetgroup();
-        $this->datasetsubcategories();
-        $this->elasticdatasets();
-        $this->customsettings();
+        $this->termsOfUseRequests();
+        $this->userFollows();
+        $this->userSettings();
+        $this->userToOrg();
+        $this->dataSetGroup();
+        $this->dataSetSubCategories();
+        $this->elasticDataSets();
+        $this->customSettings();
     }
 
     /**
@@ -231,14 +231,19 @@ class DatabaseTest extends TestCase
                     'api'               => $this->faker->boolean(),
                 ];
 
-                try {
-                    $record = RoleRight::create($dbData);
-                } catch (QueryException $ex) {
-                    $this->log($ex->getMessage());
-                }
+                if (!RoleRight::where([
+                    'role_id'       => $dbData['role_id'],
+                    'module_name'   => $dbData['module_name'],
+                ])->count()) {
+                    try {
+                        $record = RoleRight::create($dbData);
+                    } catch (QueryException $ex) {
+                        $this->log($ex->getMessage());
+                    }
 
-                $this->assertNotNull($record);
-                $this->assertDatabaseHas('role_rights', $dbData);
+                    $this->assertNotNull($record);
+                    $this->assertDatabaseHas('role_rights', $dbData);
+                }
             }
         }
 
@@ -271,17 +276,22 @@ class DatabaseTest extends TestCase
             $dbData = [
                 'user_id'   => $user['id'],
                 'type'      => $this->faker->randomElement($types),
-                'sent'      => $this->faker->dateTime(),
+                'sent'      => date('Y-m-d H:i:s'),
             ];
 
-            try {
-                $record = NewsletterDigestLog::create($dbData);
-            } catch (QueryException $ex) {
-                $this->log($ex->getMessage());
-            }
+            if (!NewsletterDigestLog::where([
+                'user_id'   => $dbData['user_id'],
+                'type'      => $dbData['type'],
+            ])->count()) {
+                try {
+                    $record = NewsletterDigestLog::create($dbData);
+                } catch (QueryException $ex) {
+                    $this->log($ex->getMessage());
+                }
 
-            $this->assertNotNull($record);
-            $this->assertDatabaseHas('newsletter_digest_log', $dbData);
+                $this->assertNotNull($record);
+                $this->assertDatabaseHas('newsletter_digest_log', $dbData);
+            }
         }
 
         if (!empty($dbData)) {
@@ -423,7 +433,7 @@ class DatabaseTest extends TestCase
             }
 
             try {
-                $record = Organisation::create($dbData)->searchable();
+                $record = Organisation::create($dbData);
             } catch (QueryException $ex) {
                 $this->log($ex->getMessage());
             }
@@ -544,7 +554,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function dataset()
+    private function dataSets()
     {
         $statuses = array_keys(DataSet::getStatus());
         $visibilities = array_keys(DataSet::getVisibility());
@@ -636,7 +646,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function termsofuse()
+    private function termsOfUse()
     {
         // Test creation
         foreach (range(1, self::TERMS_RECORDS) as $i) {
@@ -737,7 +747,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function termsofuserequests()
+    private function termsOfUseRequests()
     {
         // Test creation
         foreach (range(1, self::TERMS_OF_USE_REQUESTS_RECORDS) as $i) {
@@ -769,7 +779,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function userfollows()
+    private function userFollows()
     {
         $users = User::select('id')->limit(self::USER_FOLLOW_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::USER_FOLLOW_RECORDS)->get()->toArray();
@@ -810,7 +820,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function usersettings()
+    private function userSettings()
     {
         $users = User::select('id')->limit(self::USER_SETTING_RECORDS)->get()->toArray();
         $locales = Locale::where('active', 1)->limit(self::USER_SETTING_RECORDS)->get()->toArray();
@@ -829,16 +839,18 @@ class DatabaseTest extends TestCase
                 'newsletter_digest' => $newsLetter
             ];
 
-            try {
-                $record = UserSetting::create($dbData);
-            } catch (QueryException $ex) {
-                $this->log($ex->getMessage());
-            }
+            if (!UserSetting::where('user_id', $user)->count()) {
+                try {
+                    $record = UserSetting::create($dbData);
+                } catch (QueryException $ex) {
+                    $this->log($ex->getMessage());
+                }
 
-            $this->assertNotNull($record);
-
-            if (!empty($record->id)) {
-                $this->assertDatabaseHas('user_settings', ['id' => $record->id]);
+                $this->assertNotNull($record);
+    
+                if (!empty($record->id)) {
+                    $this->assertDatabaseHas('user_settings', ['id' => $record->id]);
+                }
             }
         }
     }
@@ -848,7 +860,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function usertoorg()
+    private function userToOrg()
     {
         $users = User::select('id')->limit(self::USER_TO_ORG_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::USER_TO_ORG_RECORDS)->get()->toArray();
@@ -887,7 +899,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function datasetgroup()
+    private function dataSetGroup()
     {
         $dataSets = DataSet::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
@@ -901,20 +913,22 @@ class DatabaseTest extends TestCase
 
             $record = null;
             $dbData = [
-                'data_set_id' => $dataSet,
-                'group_id'  => $organisation
+                'data_set_id'   => $dataSet,
+                'group_id'      => $organisation
             ];
 
-            try {
-                $record = DataSetGroup::create($dbData);
-            } catch (QueryException $ex) {
-                $this->log($ex->getMessage());
-            }
+            if (!DataSetGroup::where($dbData)->count()) {
+                try {
+                    $record = DataSetGroup::create($dbData);
+                } catch (QueryException $ex) {
+                    $this->log($ex->getMessage());
+                }
 
-            $this->assertNotNull($record);
+                $this->assertNotNull($record);
 
-            if (!empty($record->id)) {
-                $this->assertDatabaseHas('data_set_groups', ['id' => $record->data_set_id]);
+                if (!empty($record->id)) {
+                    $this->assertDatabaseHas('data_set_groups', ['id' => $record->data_set_id]);
+                }
             }
         }
     }
@@ -924,15 +938,13 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function datasetsubcategories()
+    private function dataSetSubCategories()
     {
         $dataSets = DataSet::select('id')->limit(self::DATA_SET_SUB_CATEGORIES_RECORDS)->get()->toArray();
         $categories = Category::select('id')->limit(self::DATA_SET_SUB_CATEGORIES_RECORDS)->get()->toArray();
 
-        $subCatFaker = Faker::create();//creating a new instance so the unique() works. Can be revised if solution is found.
-        // Test creation
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
-            $dataSet =  $subCatFaker->unique()->randomElement($dataSets)['id'];
+            $dataSet = $this->faker->randomElement($dataSets)['id'];
             $category = $this->faker->randomElement($categories)['id'];
 
             $record = null;
@@ -941,22 +953,23 @@ class DatabaseTest extends TestCase
                 'sub_cat_id'  => $category
             ];
 
-            try {
-                $record = DataSetSubCategory::create($dbData);
-            } catch (QueryException $ex) {
-                $this->log($ex->getMessage());
-            }
+            if (!DataSetSubCategory::where($dbData)->count()) {
+                try {
+                    $record = DataSetSubCategory::create($dbData);
+                } catch (QueryException $ex) {
+                    $this->log($ex->getMessage());
+                }
 
-            $this->assertNotNull($record);
+                $this->assertNotNull($record);
 
-            if (!empty($record->id)) {
-                $this->assertDatabaseHas('data_set_sub_category', ['id' => $record->data_set_id]);
+                if (!empty($record->id)) {
+                    $this->assertDatabaseHas('data_set_sub_category', ['id' => $record->data_set_id]);
+                }
             }
         }
     }
 
-
-    private function elasticdatasets()
+    private function elasticDataSets()
     {
         // Test creation
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
@@ -981,7 +994,7 @@ class DatabaseTest extends TestCase
         }
     }
 
-    private function customsettings()
+    private function customSettings()
     {
         $dataSets = DataSet::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
@@ -989,10 +1002,7 @@ class DatabaseTest extends TestCase
 
         // Test creation
         foreach (range(1, self::CUSTOM_SETTING_RECORDS) as $i) {
-
-          $organisation =  $this->faker->randomElement($organisations)['id'];
-
-
+            $organisation = $this->faker->randomElement($organisations)['id'];
             $record = null;
             $dbData = [
                 'org_id' => $organisation,

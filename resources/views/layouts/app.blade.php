@@ -8,6 +8,7 @@
     <title>{{ config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Roboto&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
+    <link rel="stylesheet" href="/css/custom.css">
     <link href="{{ asset('fonts/vendor/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -55,14 +56,18 @@
                         </button>
                     </div>
                     <div class="nav-controls col-lg-3 col-md-1 text-right hidden-xs hidden-sm">
-                        <!-- if user is logged in -->
-                        <span class="user-icon pull-right">
-                            <a href="{{ url('/user') }}" class="user-icon"><img src="{{ asset('img/user.svg') }}"></a>
-                        </span>
-                        <!-- else -->
-<!--                        <span class="login-link">>
-                            <a href="{{ url('home/login') }}">вход</a>
-                        </span>-->
+                        @if (\Auth::check())
+                            <span class="user-icon pull-right">
+                                <a href="{{ url('/user') }}" class="user-icon"><img src="{{ asset('img/user.svg') }}"></a>
+                            </span>
+                            <span class="login-link">>
+                                <a href="{{ url('/logout') }}"> изход</a>
+                            </span>
+                        @else
+                            <span class="login-link">>
+                                <a href="{{ url('/login') }}">вход</a>
+                            </span>
+                        @endif
                     </div>
                     <div class="nav-controls col-lg-4 col-md-5 col-sm-6 text-right hidden-xs">
                         <span class="search-input">
@@ -107,14 +112,15 @@
                         <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                             <a href="{{ url('/contact') }}">Контакти</a>
                         </li>
-                        <!-- if user is logged in (mobile view) -->
+                        @if (\Auth::check())
                             <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
                                 <a href="{{ url('/user') }}">Профил</a>
                             </li>
-                        <!-- else -->
-<!--                        <li class="hidden-lg hidden-md {{ Request::segment(2) == 'login' ? 'active' : '' }}">
-                            <a href="{{ url('/home/login') }}">Вход</a>
-                        </li>-->
+                        @else
+                            <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                                <a href="{{ url('/login') }}">Вход</a>
+                            </li>
+                        @endif
                         <li class="hidden-lg hidden-md hidden-sm">
                             <input type="text" placeholder="търсене..." class="form-control rounded-input input-long">
                         </li>

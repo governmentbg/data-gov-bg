@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
                 'approved'  => rand(0, 1),
                 'api_key'   => $this->faker->uuid(),
                 'hash_id'   => $this->faker->md5(),
-            ]);
+            ])->searchable();
         }
     }
 }

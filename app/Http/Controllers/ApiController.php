@@ -76,8 +76,7 @@ class ApiController extends Controller
                 // function call to convert array to xml
                 self::arrayToXml($resposeData, $xmlData);
 
-                return response($xmlData->asXML(), 500)
-                    ->header('Content-Type', 'text/xml');
+                return response($xmlData->asXML(), 500)->header('Content-Type', 'text/xml');
             case 'json':
             default :
                 return new JsonResponse($resposeData, $code);
@@ -128,7 +127,7 @@ class ApiController extends Controller
                 $key = 'item'. $key; //dealing with <0/>..<n/> issues
             }
 
-            if(is_array($value)) {
+            if (is_array($value)) {
                 $subNode = $xmlData->addChild($key);
 
                 self::arrayToXml($value, $subNode);

@@ -30,6 +30,10 @@ abstract class TestCase extends BaseTestCase
 
     protected function getUserId()
     {
+        if (isset($this->systemUser)) {
+            return $this->systemUser->id;
+        }
+
         if (isset($this->userId)) {
             return $this->userId;
         }
@@ -37,5 +41,16 @@ abstract class TestCase extends BaseTestCase
         $this->userId = User::where('username', 'system')->first()->id;
 
         return $this->userId;
+    }
+
+    protected function getSystemUser()
+    {
+        if (isset($this->systemUser)) {
+            return $this->systemUser;
+        }
+
+        $this->systemUser = User::where('username', 'system')->first();
+
+        return $this->systemUser;
     }
 }

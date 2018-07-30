@@ -329,9 +329,9 @@ class UserController extends Controller {
 
     public function searchOrg(Request $request)
     {
-        $search = $request->q;
+        $search = trim($request->q);
 
-        if (empty(trim($search))) {
+        if (empty($search)) {
             return redirect('/user/organisations');
         }
 

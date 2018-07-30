@@ -65,7 +65,9 @@
                             </span>
                         @else
                             <span class="login-link">>
-                                <a href="{{ url('/login') }}">вход</a>
+                                <a href="{{ url('/login') }}">{{ trans('custom.test') }}вход</a>
+                                <a style="font-weight: normal">&nbsp; &#47; &nbsp;</a>
+                                <a href="{{ url('/registration')}}">нов профил</a>
                             </span>
                         @endif
                     </div>
@@ -74,7 +76,9 @@
                             <input type="text" placeholder="търсене..">
                         </span>
                         <span class="trans-link">
-                            <a href="#">EN</a>
+                            <?php $lang = \LaravelLocalization::getCurrentLocale() == 'bg' ? 'en' : 'bg'; ?>
+                            {{ \LaravelLocalization::getCurrentLocale() }}
+                            <a href="{{ route('lang.switch', $lang) }}">{{ strtoupper($lang) }}</a>
                         </span>
                         <span class="social-icons">
                             <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
@@ -112,15 +116,14 @@
                         <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                             <a href="{{ url('/contact') }}">Контакти</a>
                         </li>
-                        @if (\Auth::check())
+                        <!-- if user is logged in (mobile view) -->
                             <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
                                 <a href="{{ url('/user') }}">Профил</a>
                             </li>
-                        @else
-                            <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
-                                <a href="{{ url('/login') }}">Вход</a>
-                            </li>
-                        @endif
+                        <!-- else -->
+<!--                        <li class="hidden-lg hidden-md {{ Request::segment(2) == 'login' ? 'active' : '' }}">
+                            <a href="{{ url('/home/login') }}">Вход</a>
+                        </li>-->
                         <li class="hidden-lg hidden-md hidden-sm">
                             <input type="text" placeholder="търсене..." class="form-control rounded-input input-long">
                         </li>

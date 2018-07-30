@@ -10,6 +10,7 @@ class UserSetting extends Model
     use RecordSignature;
 
     protected $guarded = [];
+    protected $primaryKey = 'user_id';
 
     const DIGEST_FREQ_NONE = 0;
     const DIGEST_FREQ_ON_POST = 1;

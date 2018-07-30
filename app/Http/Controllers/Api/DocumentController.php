@@ -127,7 +127,7 @@ class DocumentController extends ApiController
             } catch (QueryException $e) {
                 DB::rollback();
 
-                Log::error($ex->getMessage());
+                Log::error($e->getMessage());
             }
         }
 
@@ -156,7 +156,7 @@ class DocumentController extends ApiController
                 $deleteDocument->delete();
 
                 return $this->successResponse();
-            } catch (QueryException $e) {
+            } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
             return $this->errorResponse('Delete document failure');

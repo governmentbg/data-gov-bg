@@ -98,7 +98,7 @@ class RoleController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                if (Role::find($id)->delete()) {
+                if (DataSet::find($id)->delete()) {
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {

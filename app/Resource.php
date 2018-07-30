@@ -26,8 +26,8 @@ class Resource extends Model implements TranslatableInterface
     const FORMAT_JSON = 2;
     const FORMAT_KML = 3;
     const FORMAT_RDF = 4;
-    const FORMAT_XML = 5;
-    const FORMAT_WMS = 6;
+    const FORMAT_WMS = 5;
+    const FORMAT_XML = 6;
 
     const HTTP_POST = 1;
     const HTTP_GET = 2;

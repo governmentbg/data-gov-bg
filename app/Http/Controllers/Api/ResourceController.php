@@ -99,8 +99,7 @@ class ResourceController extends ApiController
             ];
 
             try {
-                $resource = Resource::create($dbData);
-                $resource->searchable();
+                $resource = Resource::create($dbData)->searchable();
 
                 return $this->successResponse(['uri' => $resource->uri]);
             } catch (QueryException $ex) {
@@ -146,7 +145,7 @@ class ResourceController extends ApiController
                 $resource->es_id = $elasticDataSet->id;
                 $resource->save();
 
-                \Elasticsearch::index([
+                $insert = \Elasticsearch::index([
                     'body'  => $post['data'],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
@@ -311,9 +310,10 @@ class ResourceController extends ApiController
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
+                $postData = $post['data'];
 
-                \Elasticsearch::index([
-                    'body'  => $post['data'],
+                $insert = \Elasticsearch::index([
+                    'body'  => array_merge(['_all' => json_encode($postData)], $postData),
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id,

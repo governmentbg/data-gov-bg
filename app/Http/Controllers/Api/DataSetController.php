@@ -453,6 +453,8 @@ class DataSetController extends ApiController
                     $this->getRecordsPerPage($request->offsetGet('records_per_page'))
                 );
 
+                $results = [];
+
                 foreach ($query->get() as $set) {
                     $result['name'] = $set->name;
                     $result['sla'] = $set->sla;
@@ -468,9 +470,9 @@ class DataSetController extends ApiController
                                 $result['reported'] = 1;
                             }
                         }
-
-                        $results[] = $result;
                     }
+
+                    $results[] = $result;
                 }
 
                 return $this->successResponse([

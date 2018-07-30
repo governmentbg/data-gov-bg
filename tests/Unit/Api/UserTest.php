@@ -71,7 +71,7 @@ class UserTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    public function testaddUser()
+    public function testAddUser()
     {
         $password = bcrypt(str_random(10));
 

@@ -8,6 +8,7 @@ class DataSetSubCategory extends Model
 {
     protected $guarded = [];
     protected $table = 'data_set_sub_categories';
+    public $timestamps = false;
 
     public function dataSet()
     {

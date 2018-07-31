@@ -15,7 +15,6 @@ class PageTest extends TestCase
 
     public function testAddPage()
     {
-
         //test missing api key
         $this->post(url('api/addPage'), ['api_key' => null])
             ->assertStatus(403)
@@ -70,11 +69,13 @@ class PageTest extends TestCase
             'valid_from'        => $this->faker->date,
             'valid_to'          => $this->faker->date
         ]);
+
         //test missing api key
         $this->post(url('api/editPage'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
-        //test missing news id
+
+        //test missing page id
         $this->post(
             url('api/editPage'),
             [
@@ -96,6 +97,7 @@ class PageTest extends TestCase
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
+
         //test missing data
         $this->post(
             url('api/editPage'),
@@ -107,6 +109,7 @@ class PageTest extends TestCase
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
+
         // test successful testEdit
         $this->post(
             url('api/editPage'),
@@ -126,7 +129,6 @@ class PageTest extends TestCase
 
     public function testDeletePage()
     {
-
         $page = Page::create([
             'title'             => $this->faker->word(),
             'body'              => $this->faker->word(),
@@ -138,6 +140,7 @@ class PageTest extends TestCase
             'valid_from'        => $this->faker->date,
             'valid_to'          => $this->faker->date
         ]);
+
         //test missing api key
         $this->post(url('api/deletePage'),
             [
@@ -147,6 +150,7 @@ class PageTest extends TestCase
         )
             ->assertStatus(403)
             ->assertJson(['success' => false]);
+
         //test missing page id
         $this->post(
             url('api/deletePage'),
@@ -157,6 +161,7 @@ class PageTest extends TestCase
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
+
         $count = Page::all()->count();
         //test successful delete
         $this->post(
@@ -168,6 +173,7 @@ class PageTest extends TestCase
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
+
         // check that a record is missing
         $this->assertTrue($count - 1 == Page::all()->count());
     }

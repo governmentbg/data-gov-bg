@@ -27,7 +27,7 @@ class Translation extends Model
                     'locale'    => 'xx',
                     'text'      => '',
                     'label'     => '',
-                    ]);
+                ]);
             }
         }
     }

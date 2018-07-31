@@ -46,18 +46,16 @@ class DataSet extends Model implements TranslatableInterface
         ];
     }
 
-
     public function toSearchableArray()
     {
-        $array['name'] = $this->concatTranslations('name');
-        $array['descript'] = $this->concatTranslations('descript');
-        $array['sla'] = $this->concatTranslations('sla');
-        $array['id'] = $this->id;
-
-        return $array;
+        return [
+            'id'        => $this->id,
+            'name'      => $this->concatTranslations('name'),
+            'descript'  => $this->concatTranslations('descript'),
+            'sla'       => $this->concatTranslations('sla'),
+        ];
     }
 
-    //check translation connection
     public function organisation()
     {
         return $this->belongsTo('App\Organisation');

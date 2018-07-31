@@ -44,8 +44,8 @@ class SectionTest extends TestCase
                     'active'        => $this->faker->boolean(),
                     'read_only'     => $this->faker->boolean(),
                     'forum_link'    => $this->faker->url(),
-                    'ordering'      => $this->faker->numberBetween(0,10),
-                    'theme'         => $this->faker->numberBetween(0,10),
+                    'ordering'      => $this->faker->numberBetween(0, 10),
+                    'theme'         => $this->faker->numberBetween(0, 10),
                 ]
             ]
         )
@@ -62,8 +62,8 @@ class SectionTest extends TestCase
             'active'        => $this->faker->boolean(),
             'read_only'     => $this->faker->boolean(),
             'forum_link'    => $this->faker->url(),
-            'ordering'      => $this->faker->numberBetween(0,10),
-            'theme'         => $this->faker->numberBetween(0,10),
+            'ordering'      => $this->faker->numberBetween(0, 10),
+            'theme'         => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
 
@@ -83,8 +83,8 @@ class SectionTest extends TestCase
                     'active'        => $this->faker->boolean(),
                     'read_only'     => $this->faker->boolean(),
                     'forum_link'    => $this->faker->url(),
-                    'ordering'      => $this->faker->numberBetween(0,10),
-                    'theme'         => $this->faker->numberBetween(0,10),
+                    'ordering'      => $this->faker->numberBetween(0, 10),
+                    'theme'         => $this->faker->numberBetween(0, 10),
                 ]
             ]
         )
@@ -115,8 +115,8 @@ class SectionTest extends TestCase
                     'active'        => $this->faker->boolean(),
                     'read_only'     => $this->faker->boolean(),
                     'forum_link'    => $this->faker->url(),
-                    'ordering'      => $this->faker->numberBetween(0,10),
-                    'theme'         => $this->faker->numberBetween(0,10),
+                    'ordering'      => $this->faker->numberBetween(0, 10),
+                    'theme'         => $this->faker->numberBetween(0, 10),
                 ]
             ]
         )
@@ -134,8 +134,8 @@ class SectionTest extends TestCase
             'active'        => $this->faker->boolean(),
             'read_only'     => $this->faker->boolean(),
             'forum_link'    => $this->faker->url(),
-            'ordering'      => $this->faker->numberBetween(0,10),
-            'theme'         => $this->faker->numberBetween(0,10),
+            'ordering'      => $this->faker->numberBetween(0, 10),
+            'theme'         => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
 
@@ -145,7 +145,7 @@ class SectionTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test missing record id
-        $this->post(url('api/deleteSection'), ['api_key'   => $this->getApiKey()])
+        $this->post(url('api/deleteSection'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
@@ -200,7 +200,7 @@ class SectionTest extends TestCase
     /**
      * Test for SectionController@listSubsections
      */
-    public function testListSeubsctions()
+    public function testListSubsections()
     {
         // test missing api_key
         $this->post(url('api/listSubsections'), ['api_key' => null])

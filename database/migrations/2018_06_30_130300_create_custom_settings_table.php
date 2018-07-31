@@ -16,9 +16,11 @@ class CreateCustomSettingsTable extends Migration
         Schema::create('custom_settings', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('org_id')->unsigned()->nullable();
+            $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
             $table->integer('data_set_id')->unsigned()->nullable();
+            $table->foreign('data_set_id')->references('id')->on('data_sets')->onDelete('cascade');
             $table->integer('resource_id')->unsigned()->nullable();
-            $table->foreign('org_id')->references('id')->on('organisations');
+            $table->foreign('resource_id')->references('id')->on('resources')->onDelete('cascade');
             $table->integer('key')->unsigned();
             $table->integer('value')->unsigned();
             $table->timestamps();

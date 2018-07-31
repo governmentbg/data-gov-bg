@@ -7,6 +7,7 @@ use App\Category;
 use App\DataSetGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 
@@ -15,30 +16,47 @@ class DataSetController extends ApiController
     /**
      * API function for adding Data Set
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and id of Data Set if successfull
+     * @param string api_key - required
+     * @param integer org_id - optional
+     * @param array data - required
+     * @param string data[locale] - required
+     * @param string data[name] - required
+     * @param string data[uri] - optional
+     * @param string data[description] - optional
+     * @param array data[tags] - optional
+     * @param integer data[category_id] - required
+     * @param integer data[terms_of_use_id] - optional
+     * @param integer data[visibility] - optional
+     * @param string data[version] - optional
+     * @param string data[author_name] - optional
+     * @param string data[author_email] - optional
+     * @param string data[support_name] - optional
+     * @param string data[support_email] - optional
+     * @param string data[sla] - optional
+     *
+     * @return json response with id of Data Set or error
      */
     public function addDataSet(Request $request)
     {
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'                        => 'integer',
-            'data'                          => 'required',
-            'data.locale'                   => 'required|string|max:5',
-            'data.name'                     => 'required|string',
-            'data.uri'                      => 'string',
-            'data.descript'                 => 'string',
-            'data.tags.*'                   => 'string',
-            'data.category_id'              => 'required|integer',
-            'data.terms_of_use_id'          => 'integer',
-            'data.visibility'               => 'integer',
-            'data.version'                  => 'string',
-            'data.author_name'              => 'string',
-            'data.author_email'             => 'email',
-            'data.support_name'             => 'string',
-            'data.support_email'            => 'email',
-            'data.sla'                      => 'string',
+            'org_id'                => 'nullable|integer',
+            'data'                  => 'required',
+            'data.locale'           => 'required|string|max:5',
+            'data.name'             => 'required|string',
+            'data.uri'              => 'nullable|string',
+            'data.description'      => 'nullable|string',
+            'data.tags.*'           => 'nullable|string',
+            'data.category_id'      => 'required|integer',
+            'data.terms_of_use_id'  => 'nullable|integer',
+            'data.visibility'       => 'nullable|integer',
+            'data.version'          => 'nullable',
+            'data.author_name'      => 'nullable|string',
+            'data.author_email'     => 'nullable|email',
+            'data.support_name'     => 'nullable|string',
+            'data.support_email'    => 'nullable|email',
+            'data.sla'              => 'nullable|string',
         ]);
 
         if(!$validator->fails() && !empty($post['data'])) {
@@ -49,7 +67,6 @@ class DataSetController extends ApiController
             }
 
             $post['data']['status'] = DataSet::STATUS_DRAFT;
-            unset($post['data']['locale']);
 
             if (!empty($post['data']['tags'])) {
                 $tags = $post['data']['tags'];
@@ -60,8 +77,25 @@ class DataSetController extends ApiController
                 $post['data']['org_id'] = $post['org_id'];
             }
 
+            $newDataSet = new DataSet;
+
+            $newDataSet->name = $post['data']['name'];
+
+            if (!empty($post['data']['sla'])) {
+                $newDataSet->sla = $post['data']['sla'];
+            }
+
+            if (!empty($post['data']['description'])) {
+                $newDataSet->descript = $post['data']['description'];
+            }
+
+            unset($post['data']['sla'], $post['data']['name'], $post['data']['description']);
+            unset($post['data']['locale']);
+
+            $newDataSet->fill($post['data']);
+
             try {
-                $newDataSet = DataSet::create($post['data']);
+                $newDataSet->save();
 
                 if ($newDataSet) {
                     if (!empty($tags)) {
@@ -73,25 +107,42 @@ class DataSetController extends ApiController
                     }
 
                     DB::commit();
+
                     return $this->successResponse(['uri' => $newDataSet->uri], true);
                 } else {
                     DB::rollback();
-
-                    return $this->errorResponse('Add DataSet Failure');
                 }
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Add DataSet Failure');
+        return $this->errorResponse('Add DataSet Failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for editing Data Sets
+     * API function for editing an existing Data Set
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param string dataset_uri - required
+     * @param array data - required
+     * @param string data[locale] - required
+     * @param string data[name] - required
+     * @param string data[uri] - optional
+     * @param string data[description] - optional
+     * @param array data[tags] - optional
+     * @param integer data[category_id] - required
+     * @param integer data[terms_of_use_id] - optional
+     * @param integer data[visibility] - optional
+     * @param string data[version] - optional
+     * @param string data[author_name] - optional
+     * @param string data[author_email] - optional
+     * @param string data[support_name] - optional
+     * @param string data[support_email] - optional
+     * @param string data[sla] - optional
+     * @param integer data[status] - optional
+     *
+     * @return json response with success or error
      */
     public function editDataSet(Request $request)
     {
@@ -100,20 +151,20 @@ class DataSetController extends ApiController
         $validator = \Validator::make($post, [
             'dataset_uri'           => 'required|string',
             'data.locale'           => 'required|string|max:5',
-            'data.name'             => 'string',
-            'data.descript'         => 'string',
+            'data.name'             => 'nullable|string',
+            'data.description'      => 'nullable|string',
             'data.category_id'      => 'required|integer',
-            'data.uri'              => 'string',
-            'data.tags.*'           => 'string',
-            'data.terms_of_use_id'  => 'integer',
-            'data.visibility'       => 'integer',
-            'data.version'          => 'string',
-            'data.author_name'      => 'string',
-            'data.author_email'     => 'email',
-            'data.support_name'     => 'string',
-            'data.support_email'    => 'email',
-            'data.sla'              => 'string',
-            'data.status'           => 'integer',
+            'data.uri'              => 'nullable|string',
+            'data.tags.*'           => 'nullable|string',
+            'data.terms_of_use_id'  => 'nullable|integer',
+            'data.visibility'       => 'nullable|integer',
+            'data.version'          => 'nullable',
+            'data.author_name'      => 'nullable|string',
+            'data.author_email'     => 'nullable|email',
+            'data.support_name'     => 'nullable|string',
+            'data.support_email'    => 'nullable|email',
+            'data.sla'              => 'nullable|string',
+            'data.status'           => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
@@ -128,6 +179,22 @@ class DataSetController extends ApiController
             if ($dataSet) {
                 DB::beginTransaction();
 
+                if (!empty($post['data']['name'])){
+                    $dataSet->name = $post['data']['name'];
+                }
+
+                if (!empty($post['data']['sla'])) {
+                    $dataSet->sla = $post['data']['sla'];
+                }
+
+                if (!empty($post['data']['description'])) {
+                    $dataSet->descript = $post['data']['description'];
+                }
+
+                unset($post['data']['sla'], $post['data']['name'], $post['data']['description']);
+
+                $dataSet->fill($post['data']);
+
                 if (!empty($tags)) {
                     if (!$this->checkAndCreateTags($tags, $post['data']['category_id'])) {
                         DB::rollback();
@@ -137,7 +204,7 @@ class DataSetController extends ApiController
                 }
 
                 try {
-                    if ($dataSet->update($post['data'])) {
+                    if ($dataSet->save()) {
                         DB::commit();
 
                         return $this->successResponse();
@@ -145,19 +212,21 @@ class DataSetController extends ApiController
                         DB::rollback();
                     }
                 } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    Log::error($ex->getMessage());
                 }
             }
         }
 
-        return $this->errorResponse('Edit dataset failure');
+        return $this->errorResponse('Edit dataset failure', $validator->errors()->messages());
     }
 
     /**
-     * API function for deleting a Data Set
+     * API function for eleting an existing Data Set
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer dataset_uri - required
+     *
+     * @return json response with success or error
      */
     public function deleteDataSet(Request $request)
     {
@@ -168,23 +237,36 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             try {
                 if (DataSet::where('uri', $post['dataset_uri'])->delete()) {
-
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
-                return $this->errorResponse($ex->getMessage());
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Delete dataset failure');
+        return $this->errorResponse('Delete dataset failure', $validator->errors()->messages());
     }
 
 
     /**
-     * API function for listing all Data Sets
+     * API function for listing Data Sets
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and list of Data Sets from selected criteria
+     * @param array criteria - optional
+     * @param string criteria[locale] - optional
+     * @param integer criteria[org_id] - optional
+     * @param integer criteria[group_id] - optional
+     * @param integer criteria[tag_id] - optional
+     * @param integer criteria[category_id] - optional
+     * @param integer criteria[terms_of_use_id] - optional
+     * @param string criteria[format] - optional
+     * @param integer criteria[reported] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json list with records or error
      */
     public function listDataSets(Request $request)
     {
@@ -197,18 +279,18 @@ class DataSetController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
-                'criteria.locale'            => 'string|max:5',
-                'criteria.org_id'            => 'integer',
-                'criteria.group_id'          => 'integer',
-                'criteria.category_id'       => 'integer',
-                'criteria.tag_id'            => 'integer',
-                'criteria.format'            => 'string',
-                'criteria.terms_of_use_id'   => 'integer',
-                'criteria.reported'          => 'integer',
-                'criteria.order.type'        => 'string',
-                'criteria.order.field'       => 'string',
-                'records_per_page'           => 'integer',
-                'page_number'                => 'integer',
+                'criteria.locale'            => 'nullable|string|max:5',
+                'criteria.org_id'            => 'nullable|integer',
+                'criteria.group_id'          => 'nullable|integer',
+                'criteria.category_id'       => 'nullable|integer',
+                'criteria.tag_id'            => 'nullable|integer',
+                'criteria.format'            => 'nullable|string',
+                'criteria.terms_of_use_id'   => 'nullable|integer',
+                'criteria.reported'          => 'nullable|integer',
+                'criteria.order.type'        => 'nullable|string',
+                'criteria.order.field'       => 'nullable|string',
+                'records_per_page'           => 'nullable|integer',
+                'page_number'                => 'nullable|integer',
             ]);
 
             if (!$validator->fails()) {
@@ -280,14 +362,14 @@ class DataSetController extends ApiController
                     }
 
                     return $this->successResponse([
-                        'datasets'      => $data,
+                        'datasets'  => $data,
                     ], true);
                 } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    Log::error($ex->getMessage());
                 }
             }
 
-            return $this->errorResponse('Criteria error');
+            return $this->errorResponse('Criteria error', $validator->errors()->messages());
         }
 
         $query = DataSet::where('status', DataSet::STATUS_PUBLISHED);
@@ -325,89 +407,94 @@ class DataSetController extends ApiController
 
 
     /**
-     * API function for searching for a Data Set from keyword
+     * API function for searching Data Sets by keywords
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and list of Data Sets if successfull
+     * @param array criteria - required
+     * @param string criteria[locale] - optional
+     * @param integer criteria[keywords] - required
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json list with found records or error
      */
     public function searchDataSet(Request $request)
     {
         $post = $request->all();
-        $criteria = isset($post['criteria']) ? $post['criteria'] : false;
 
-        if (!empty($criteria)) {
-            $validator = \Validator::make($post, [
-                'criteria.locale'       => 'string|max:5',
-                'criteria.keywords'     => 'string',
-                'criteria.order.type'   => 'string',
-                'criteria.order.field'  => 'string',
-                'records_per_page'      => 'integer',
-                'page_number'           => 'integer',
-            ]);
+        $validator = \Validator::make($post, [
+            'criteria'              => 'required|array',
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.keywords'     => 'required|string',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+        ]);
 
-            if (!$validator->fails()) {
-                $data = [];
-                $order = [];
-                $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-                $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-                $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
-                $page = !empty($post['page_number']) ? $post['page_number'] : null;
-                $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
+        if (!$validator->fails()) {
+            $data = [];
+            $criteria = $post['criteria'];
+            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
+            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
+            $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
+            $page = !empty($post['page_number']) ? $post['page_number'] : null;
+            $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
 
-                try {
-                    $query = DataSet::where('visibility', 1);
+            try {
+                $ids = DataSet::search($search)->get()->pluck('id');
+                $query = DataSet::whereIn('id', $ids);
 
-                    if ($order) {
-                        $query->orderBy($order['field'], $order['type']);
-                    }
+                $count = $query->count();
 
-                    if ($pagination && $page) {
-                        $query->paginate($pagination, ['*'], 'page', $page);
-                    }
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
 
-                    if ($search) {
-                        $data = DataSet::search($search)->constrain($query)->get();
-                    } else {
-                        $data = $query->get();
-                    }
+                $results = [];
 
-                    foreach ($data as $set) {
-                        $set['name'] = $set->name;
-                        $set['sla'] = $set->sla;
-                        $set['descript'] = $set->descript;
-                        $set['followers_count'] = $set->userFollow()->count();
-                        $set['reported'] = 0;
+                foreach ($query->get() as $set) {
+                    $result['name'] = $set->name;
+                    $result['sla'] = $set->sla;
+                    $result['descript'] = $set->descript;
+                    $result['followers_count'] = $set->userFollow()->count();
+                    $result['reported'] = 0;
 
-                        $hasRes = $set->resource()->count();
+                    $hasRes = $set->resource()->count();
 
-                        if ($hasRes) {
-                            foreach ($set->resource as $resourse) {
-                                if ($resourse->is_reported) {
-                                    $set['reported'] = 1;
-                                }
+                    if ($hasRes) {
+                        foreach ($set->resource as $resourse) {
+                            if ($resourse->is_reported) {
+                                $result['reported'] = 1;
                             }
                         }
                     }
 
-                    return $this->successResponse([
-                        'datasets'      => $data,
-                        'total_records' => $data->count()
-                    ], true);
-                } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    $results[] = $result;
                 }
+
+                return $this->successResponse([
+                    'datasets'      => $results,
+                    'total_records' => $count,
+                ], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Search dataset failure');
+        return $this->errorResponse('Search dataset failure', $validator->errors()->messages());
     }
 
-
     /**
-     * API function for getting the information for a Data Set
+     * API function for viewing iformation about existing Data Set
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status and Data Set info if successfull
+     * @param string api_key - optional
+     * @param integer dataset_uri - required
+     * @param string locale - optional
+     *
+     * @return json response with data or error
      */
     public function getDataSetDetails(Request $request)
     {
@@ -415,7 +502,7 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'dataset_uri'   => 'required|string',
-            'locale'        => 'string',
+            'locale'        => 'nullable|string',
         ]);
 
         if (!$validator->fails()) {
@@ -444,21 +531,24 @@ class DataSetController extends ApiController
 
                 return $this->successResponse($data);
             } catch (QueryException $e) {
-                return $this->errorResponse($e->getMessage());
+                Log::error($e->getMessage());
             }
         }
 
-        return $this->errorResponse('Get dataset details failure');
+        return $this->errorResponse('Get dataset details failure', $validator->errors()->messages());
     }
 
 
     /**
-     * API function for adding a Data Set to a group
+     * API function for adding Data Set to group
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer dataset_uri - required
+     * @param integer group_id - required
+     *
+     * @return json success or error
      */
-    public function addDataSetToGroup (Request $request)
+    public function addDataSetToGroup(Request $request)
     {
         $post = $request->all();
 
@@ -481,20 +571,23 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    Log::error($ex->getMessage());
                 }
             }
         }
 
-        return $this->errorResponse('Add dataset group failure');
+        return $this->errorResponse('Add dataset group failure', $validator->errors()->messages());
     }
 
 
     /**
-     * API function for removing Data Set from a group
+     * API function for adding Data Set to group
      *
-     * @param Request $request - POST request
-     * @return json $response - response with status
+     * @param string api_key - required
+     * @param integer data_set_uri - required
+     * @param integer group_id - required
+     *
+     * @return json success or error
      */
     public function removeDataSetFromGroup(Request $request)
     {
@@ -519,14 +612,22 @@ class DataSetController extends ApiController
                         return $this->successResponse();
                     }
                 } catch (QueryException $ex) {
-                    return $this->errorResponse($ex->getMessage());
+                    Log::error($ex->getMessage());
                 }
             }
         }
 
-        return $this->errorResponse('Add dataset group failure');
+        return $this->errorResponse('Add dataset group failure', $validator->errors()->messages());
     }
 
+    /**
+     * Function for adding tags to Data Set
+     *
+     * @param array $tags - required
+     * @param integer $parent - required
+     *
+     * @return result true or false
+     */
     public function checkAndCreateTags($tags, $parent)
     {
         try {
@@ -547,6 +648,8 @@ class DataSetController extends ApiController
 
             return true;
         } catch (QueryException $ex) {
+            Log::error($ex->getMessage());
+
             return false;
         }
     }

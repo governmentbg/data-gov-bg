@@ -117,6 +117,9 @@
                 }
             }
 
+            .sidebar-submenu.open {
+                background-color: $primary;
+            }
             .badge {
                 background-color: $primary;
 
@@ -220,10 +223,28 @@
             .up-down-angle {
                 color: $primary;
             }
+
+            .info-icon {
+                border: 1px solid $primary;
+
+                i.fa {
+                    color: $primary;
+                }
+            }
         }
 
         .frame {
             border: 1px solid $primary;
+        }
+
+        .history a {
+            &:hover, &:active, &:focus {
+                transition: 0.4s ease-in;
+                svg {
+                    transition: 0.4s ease-in;
+                    fill: $primary;
+                }
+            }
         }
 
         .btn-custom {

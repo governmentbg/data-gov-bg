@@ -39,39 +39,40 @@ class DataRequestController extends ApiController
             'data.status'           => 'nullable|integer',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Send request failure', $validator->errors()->messages());
+        if (!$validator->fails()) {
+
+            $dataRequest = new DataRequest;
+            $dataRequest->org_id = $requestData['data']['org_id'];
+            $dataRequest->descript = $requestData['data']['description'];
+            $dataRequest->email = $requestData['data']['email'];
+
+            if (isset($requestData['data']['published_url'])) {
+                $dataRequest->published_url = $requestData['data']['published_url'];
+            }
+
+            if (isset($requestData['data']['contact_name'])) {
+                $dataRequest->contact_name = $requestData['data']['contact_name'];
+            }
+
+            if (isset($requestData['data']['notes'])) {
+                $dataRequest->notes = $requestData['data']['notes'];
+            }
+
+            if (isset($requestData['data']['status'])) {
+                $dataRequest->status = $requestData['data']['status'];
+            } else {
+                $dataRequest->status = DataRequest::NEW_DATA_REQUEST;
+            }
+
+            try {
+                $dataRequest->save();
+                return $this->successResponse(['request_id' => $dataRequest->id], true);
+            } catch (QueryException $e) {
+                Log::error($ex->getMessage());
+            }
         }
 
-        $dataRequest = new DataRequest;
-        $dataRequest->org_id = $requestData['data']['org_id'];
-        $dataRequest->descript = $requestData['data']['description'];
-        $dataRequest->email = $requestData['data']['email'];
-
-        if (isset($requestData['data']['published_url'])) {
-            $dataRequest->published_url = $requestData['data']['published_url'];
-        }
-
-        if (isset($requestData['data']['contact_name'])) {
-            $dataRequest->contact_name = $requestData['data']['contact_name'];
-        }
-
-        if (isset($requestData['data']['notes'])) {
-            $dataRequest->notes = $requestData['data']['notes'];
-        }
-
-        if (isset($requestData['data']['status'])) {
-            $dataRequest->status = $requestData['data']['status'];
-        } else {
-            $dataRequest->status = DataRequest::NEW_DATA_REQUEST;
-        }
-
-        try {
-            $dataRequest->save();
-            return $this->successResponse(['request_id' => $dataRequest->id]);
-        } catch (QueryException $e) {
-            Log::error($ex->getMessage());
-        }
+        return $this->errorResponse('Send request failure', $validator->errors()->messages());
     }
 
      /**
@@ -175,7 +176,7 @@ class DataRequestController extends ApiController
     }
 
     /**
-     * Delete a data reuqest based on id
+     * List data requests based on criteria
      *
      * @param integer request_id - optional
      * @param array criteria - optional

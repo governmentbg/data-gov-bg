@@ -21,7 +21,7 @@ class CreatePagesTable extends Migration
             $table->integer('abstract')->unsigned()->nullable();
             $table->integer('body')->unsigned()->nullable();
             $table->integer('head_title')->unsigned()->nullable();
-            $table->integer('meta_desctript')->unsigned()->nullable();
+            $table->integer('meta_descript')->unsigned()->nullable();
             $table->integer('meta_key_words')->unsigned()->nullable();
             $table->string('forum_link')->nullable();
             $table->boolean('active');

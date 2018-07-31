@@ -5,329 +5,333 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-//use App\Translator\LaravelLocalization;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use \App\Page;
-use \App\User;
 use \Validator;
 
-//needs to be revised. When BG is supplied still returns EN translations!!! row 280
 class PageController extends ApiController
 {
     /**
-     * Adds a new page based on the provided data
+     * Add a new page
      *
-     * @param Request $request
-     * @return json response
+     * Requires a json $request
+     *
+     * @param array data - required
+     * @param string data[locale] - required
+     * @param integer data[section_id] - optional
+     * @param string data[title] - required
+     * @param string data[body] - optional
+     * @param string data[head_title] - optional
+     * @param string data[meta_description] - optional
+     * @param string data[forum_link] - optional
+     * @param integer data[active] - required
+     *
+     * @return json response with new page id on success and error on fail
      */
+
     public function addPage(Request $request)
     {
         $pageData = $request->all();
 
         $validator = Validator::make($pageData, [
-            'data' => 'required|array',
-            'data.locale' => 'required|string',
-            'data.section_id' => 'nullable|integer',
-            'data.title' => 'required|string',
-            'data.body' => 'nullable|string',
-            'data.head_title' => 'nullable|string',
-            'data.meta_description' => 'nullable|string',
-            'data.meta_keywords' => 'nullable|string',
-            'data.forum_link' => 'nullable|string',
-            'data.active' => 'required|integer',
+            'data'                     => 'required|array',
+            'locale'                   => 'required|string',
+            'data.section_id'          => 'nullable|integer',
+            'data.title'               => 'required|string',
+            'data.body'                => 'nullable|string',
+            'data.head_title'          => 'nullable|string',
+            'data.meta_description'    => 'nullable|string',
+            'data.meta_keywords'       => 'nullable|string',
+            'data.forum_link'          => 'nullable|string',
+            'data.active'              => 'required|integer',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Add page failure');
+        if (!$validator->fails()) {
+            try {
+                DB::beginTransaction();
+                $locale = $pageData['locale'];
+
+                $newPage = new Page;
+                $newPage->title = $this->trans($locale, $pageData['data']['title']);
+
+                if (isset($pageData['data']['section_id'])) {
+                    $newPage->section_id = $pageData['data']['section_id'];
+                }
+
+                if (isset($pageData['data']['body'])) {
+                    $newPage->body = $this->trans($locale, $pageData['data']['body']);
+                }
+
+                if (isset($pageData['data']['head_title'])) {
+                    $newPage->head_title = $this->trans($locale, $pageData['data']['head_title']);
+                }
+
+                if (isset($pageData['data']['meta_description'])) {
+                    $newPage->meta_descript = $this->trans($locale, $pageData['data']['meta_description']);
+                }
+
+                if (isset($pageData['data']['meta_keywords'])) {
+                    $newPage->meta_key_words = $this->trans($locale, $pageData['data']['meta_keywords']);
+                }
+
+                if (isset($pageData['data']['forum_link'])) {
+                    $newPage->forum_link = $pageData['data']['forum_link'];
+                }
+
+                $newPage->active = $pageData['data']['active'];
+
+                $newPage->save();
+                DB::commit();
+                return $this->successResponse(['page_id' => $newPage->id]);
+
+            } catch (QueryException $e) {
+                DB::rollback();
+                Log::error($e->getMessage());
+            }
         }
-
-        $locale = $pageData['data']['locale'];
-
-        $newPage = new Page;
-
-        $newPage->title = [$locale => $pageData['data']['title']];
-
-        if (isset($pageData['data']['section_id'])) {
-            $newPage->section_id = $pageData['data']['section_id'];
-        }
-
-        if (isset($pageData['data']['abstract'])) {
-            $newPage->abstract = [$locale => $pageData['data']['abstract']];
-        }
-
-        if (isset($pageData['data']['body'])) {
-            $newPage->body = [$locale => $pageData['data']['body']];
-        }
-
-        if (isset($pageData['data']['head_title'])) {
-            $newPage->head_title = [$locale => $pageData['data']['head_title']];
-        }
-
-        if (isset($pageData['data']['meta_desctript'])) {
-            $newPage->meta_desctript = [$locale => $pageData['data']['meta_desctript']];
-        }
-
-        if (isset($pageData['data']['meta_key_words'])) {
-            $newPage->meta_key_words = [$locale => $pageData['data']['meta_key_words']];
-        }
-
-        if (isset($pageData['data']['forum_link'])) {
-            $newPage->forum_link = $pageData['data']['forum_link'];
-        }
-
-        $newPage->active = $pageData['data']['active'];
-
-        try {
-            $newPage->save();
-        } catch (QueryException $e) {
-            return $this->errorResponse('Page add failure');
-        }
-
-        return $this->successResponse(['page_id :' . $newPage->id]);
+        return $this->errorResponse('Page add failure', $validator->errors()->messages());
     }
 
     /**
      * Edits a page based on the provided pageId and edit data
      *
-     * @param Request $request
-     * @return json response
+     * @param integer page_id - required
+     * @param array data - required
+     * @param string data[locale] - required
+     * @param integer data[section_id] - optional
+     * @param string data[title] - required
+     * @param string data[body] - optional
+     * @param string data[head_title] - optional
+     * @param string data[meta_description] - optional
+     * @param string data[forum_link] - optional
+     * @param integer data[active] - required
+     *
+     * @return json response with success or error
      */
     public function editPage(Request $request)
     {
         $editData = $request->all();
 
         if (sizeof($editData['data']) < 1) {
-            return $this->errorResponse('Edit failure');
+            return $this->errorResponse('Edit Page failure');
         }
 
         $validator = Validator::make($editData, [
-            'page_id' => 'required|integer',
-            'data' => 'required|array',
-            'data.locale' => 'required|string',
-            'data.section_id' => 'nullable|integer',
-            'data.title' => 'nullable|string',
-            'data.body' => 'nullable|string',
-            'data.head_title' => 'nullable|string',
-            'data.meta_description' => 'nullable|string',
-            'data.meta_keywords' => 'nullable|string',
-            'data.forum_link' => 'nullable|string',
-            'data.active' => 'required|integer',
+            'page_id'                  => 'required|integer|exists:pages,id',
+            'data'                     => 'required|array',
+            'locale'                   => 'nullable|string',
+            'data.section_id'          => 'nullable|integer',
+            'data.title'               => 'nullable|string',
+            'data.body'                => 'nullable|string',
+            'data.head_title'          => 'nullable|string',
+            'data.meta_description'    => 'nullable|string',
+            'data.meta_keywords'       => 'nullable|string',
+            'data.forum_link'          => 'nullable|string',
+            'data.active'              => 'required|integer',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Edit page failure');
-        }
+        if (!$validator->fails()) {
 
-        $pageToEdit = Page::find($editData['page_id']);
-
-        if ($pageToEdit) {
-            $locale = $editData['data']['locale'];
-
-            if (isset($editData['data']['title'])) {
-                $pageToEdit->title = [$locale => $editData['data']['title']];
-            }
-            if (isset($editData['data']['section_id'])) {
-                $pageToEdit->section_id = $editData['data']['section_id'];
-            }
-
-            if (isset($editData['data']['abstract'])) {
-                $pageToEdit->abstract = [$locale => $editData['data']['abstract']];
-            }
-
-            if (isset($editData['data']['body'])) {
-                $pageToEdit->body = [$locale => $editData['data']['body']];
-            }
-
-            if (isset($editData['data']['head_title'])) {
-                $pageToEdit->head_title = [$locale => $editData['data']['head_title']];
-            }
-
-            if (isset($editData['data']['meta_desctript'])) {
-                $pageToEdit->meta_desctript = [$locale => $editData['data']['meta_desctript']];
-            }
-
-            if (isset($editData['data']['meta_key_words'])) {
-                $pageToEdit->meta_key_words = [$locale => $editData['data']['meta_key_words']];
-            }
-
-            if (isset($editData['data']['forum_link'])) {
-                $pageToEdit->forum_link = $editData['data']['forum_link'];
-            }
-
-            if (isset($editData['data']['active'])) {
-                $pageToEdit->active = $editData['data']['active'];
-            }
- 
             try {
+                $pageToEdit = Page::find($editData['page_id']);
+
+                DB::beginTransaction();
+
+                $locale = $editData['locale'];
+
+                if (isset($editData['data']['title'])) {
+                    $pageToEdit->title = $this->trans($locale, $editData['data']['title']);
+                }
+
+                if (isset($editData['data']['section_id'])) {
+                    $pageToEdit->section_id = $editData['data']['section_id'];
+                }
+
+                if (isset($editData['data']['body'])) {
+                    $pageToEdit->body = $this->trans($locale, $editData['data']['body']);
+                }
+
+                if (isset($editData['data']['head_title'])) {
+                    $pageToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
+                }
+
+                if (isset($editData['data']['meta_description'])) {
+                    $pageToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
+                }
+
+                if (isset($editData['data']['meta_keywords'])) {
+                    $pageToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
+                }
+
+                if (isset($editData['data']['forum_link'])) {
+                    $pageToEdit->forum_link = $editData['data']['forum_link'];
+                }
+
+                if (isset($editData['data']['active'])) {
+                    $pageToEdit->active = $editData['data']['active'];
+                }
+
                 $pageToEdit->save();
+                DB::commit();
+                return $this->successResponse();
             } catch (QueryException $e) {
-                return $this->errorResponse('Page edit failure');
+                DB::rollback();
+                Log::error($e->getMessage());
+
             }
-        } else {
-            return $this->errorResponse('Page edit failure');
         }
-        return $this->successResponse();
+        return $this->errorResponse('Page edit failure', $validator->errors()->messages());
+
     }
-/**
- * Deletes a page based on id
- *
- * @param Request $request
- * @return json response
- */
+
+    /**
+     * Deletes a page based on id
+     *
+     * @param Request $request
+     *
+     * @param integer page_id - required
+     *
+     * @return json response with success or error
+     */
     public function deletePage(Request $request)
     {
         $deleteData = $request->all();
 
         $validator = Validator::make($deleteData, [
-            'page_id' => 'required|integer',
+            'page_id' => 'required|integer|exists:pages,id',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Delete page failure');
-        }
+        if (!$validator->fails()) {
 
-        $pageToBeDeleted = Page::find($deleteData['page_id']);
-        if ($pageToBeDeleted) {
             try {
+                $pageToBeDeleted = Page::find($deleteData['page_id']);
+
                 $pageToBeDeleted->delete();
+                return $this->successResponse();
             } catch (QueryException $e) {
-                return $this->errorResponse('Delete page failure');
+                Log::error($ex->getMessage());
             }
-        } else {
-            return $this->errorResponse('Delete page failure');
         }
-        return $this->successResponse();
+        return $this->errorResponse('Delete page failure', $validator->errors()->messages());
+
     }
     /**
      * Lists pages based on request input
      *
      * @param Request $request
-     * @return json response
+     *
+     * @param array criteria - optional
+     * @param string locale - optional
+     * @param integer criteria[page_id] - optional
+     * @param integer criteria[active] - optional
+     * @param integer criteria[section_id] - optional
+     * @param array criteria[order] - optional
+     * @param string criteria[order][type] - optional
+     * @param string criteria[order][field] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json response with success or list of pages
      */
     public function listPages(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'criteria' => 'array',
-            'locale' => 'string',
-            'criteria.page_id' => 'integer',
-            'criteria.active' => 'integer',
-            'criteria.section_id ' => 'integer',
-            'criteria.order' => 'array',
-            'criteria.order.type' => 'string',
-            'criteria.order.field' => 'string',
-            'records_per_page' => 'integer',
-            'page_number' => 'integer',
+            'criteria'                => 'nullable|array',
+            'locale'                  => 'nullable|string',
+            'criteria.page_id'        => 'nullable|integer',
+            'criteria.active'         => 'nullable|integer',
+            'criteria.section_id '    => 'nullable|integer',
+            'criteria.order'          => 'nullable|array',
+            'criteria.order.type'     => 'nullable|string',
+            'criteria.order.field'    => 'nullable|string',
+            'records_per_page'        => 'nullable|integer',
+            'page_number'             => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List pages failure');
+            return $this->errorResponse('List pages failure', $validator->errors()->messages());
         }
 
         $result = [];
         $criteria = $request->json('criteria');
 
-        if (isset($criteria['locale'])) {
-            $locale = \LaravelLocalization::setLocale($criteria['locale']);
-        } else {
-            $locale = config('app.locale');
-        }
+        $locale = \LaravelLocalization::getCurrentLocale();
+
         $pageList = '';
-        $pageList = Page::select(
+        $columns = [
             'id',
             'section_id',
             'title',
-            'abstract',
             'body',
             'head_title',
-            'meta_desctript',
+            'meta_descript',
             'meta_key_words',
             'forum_link',
             'active',
             'created_at',
             'updated_at',
             'created_by',
-            'updated_by');
-            
-        $orderColumns = [
-            'id',
-            'section_id',
-            'title',
-            'abstract',
-            'body',
-            'head_title',
-            'meta_desctript',
-            'meta_key_words',
-            'forum_link',
-            'active',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by'
+            'updated_by',
         ];
+
+        $pageList = Page::select($columns);
 
         if (isset($criteria['order'])) {
             if (is_array($criteria['order'])) {
-                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                if (!in_array($criteria['order']['field'], $columns)) {
                     unset($criteria['order']['field']);
                 }
             }
         }
 
-        if (is_null($criteria)) {
-            $pageList = $pageList;
-        }
-
         if (isset($criteria['page_id'])) {
-            $pageList = $pageList->where('id', $criteria['page_id']);
+            $pageList->where('id', $criteria['page_id']);
         }
 
         if (isset($criteria['active'])) {
-            $pageList = $pageList->where('active', $criteria['active']);
+            $pageList->where('active', $criteria['active']);
         }
 
         if (isset($criteria['section_id'])) {
-            $pageList = $pageList->where('section_id', $criteria['section_id']);
+            $pageList->where('section_id', $criteria['section_id']);
         }
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            if ($criteria['order']['type'] == 'desc') {
-                $pageList = $pageList->orderBy($criteria['order']['field'], 'desc');
-            }
-        } else {
-            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $pageList = $pageList->orderBy($criteria['order']['field'], 'asc');
-            }
+            $pageList->orderBy($criteria['order']['field'],
+                $criteria['order']['type'] == 'asc' ? 'asc' : 'desc');
         }
 
+        $total_records = $pageList->count();
+
         if (isset($request['records_per_page']) || isset($request['page_number'])) {
-            $pageList = $pageList->forPage($request->input('page_number'), $request->input('records_per_page'));
+            $pageList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
 
         $pageList = $pageList->get();
 
         if (!empty($pageList)) {
-            $total_records = $pageList->count();
 
             foreach ($pageList as $singlePage) {
                 $result[] = [
-                    'id' => $singlePage->id,
-                    'locale' => $locale, //Displays EN translations when BG is supplied
-                    'section_id' => $singlePage->section_id,
-                    'title' =>  $singlePage->title,
-                    'abstract' => $singlePage->abstract,
-                    'body' =>  $singlePage->body,
-                    'head_title' => $singlePage->head_title,
-                    'meta_description' => $singlePage->meta_desctript,
-                    'meta_keywords' => $singlePage->meta_key_words,
-                    'forum_link' => $singlePage->forum_link,
-                    'active' => $singlePage->active,
-                    'created_at' => date($singlePage->created_at),
-                    'updated_at' => date($singlePage->updated_at),
-                    'created_by' => $singlePage->created_by,
-                    'updated_by' => $singlePage->updated_by,
+                    'id'                  => $singlePage->id,
+                    'locale'              => $locale,
+                    'section_id'          => $singlePage->section_id,
+                    'title'               => $singlePage->title,
+                    'body'                => $singlePage->body,
+                    'head_title'          => $singlePage->head_title,
+                    'meta_description'    => $singlePage->meta_descript,
+                    'meta_keywords'       => $singlePage->meta_key_words,
+                    'forum_link'          => $singlePage->forum_link,
+                    'active'              => $singlePage->active,
+                    'created_at'          => date($singlePage->created_at),
+                    'updated_at'          => date($singlePage->updated_at),
+                    'created_by'          => $singlePage->created_by,
+                    'updated_by'          => $singlePage->updated_by,
                 ];
             }
-
         }
+
         return $this->successResponse([
             'total_records' => $total_records,
             'pages' => $result,

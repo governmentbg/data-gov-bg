@@ -21,21 +21,24 @@ class PageTableSeeder extends Seeder
 
         $locales = Locale::where('active', 1)->limit(self::PAGES_RECORDS)->get()->toArray();
         $sections = Section::limit(self::PAGES_RECORDS)->get()->toArray();
+
         foreach (range(1, self::PAGES_RECORDS) as $i) {
             $locale = $this->faker->randomElement($locales)['locale'];
+            \LaravelLocalization::setLocale($locale);
             $section = $this->faker->randomElement($sections)['id'];
+
             Page::create([
-                'section_id' => $section,
-                'title' => [$locale => $this->faker->randomDigit()],
-                'abstract' => [$locale => $this->faker->randomDigit()],
-                'body' => [$locale => $this->faker->randomDigit()],
-                'head_title' => [$locale => $this->faker->randomDigit()],
-                'meta_desctript' => [$locale => $this->faker->randomDigit()],
-                'meta_key_words' => [$locale => $this->faker->randomDigit()],
-                'forum_link' => $this->faker->word,
-                'active' => $this->faker->boolean,
-                'valid_from' => $this->faker->date,
-                'valid_to' => $this->faker->date
+                'section_id'      => $section,
+                'title'           => $this->faker->word(),
+                'abstract'        => $this->faker->word(),
+                'body'            => $this->faker->word(),
+                'head_title'      => $this->faker->word(),
+                'meta_descript'   => $this->faker->word(),
+                'meta_key_words'  => $this->faker->word(),
+                'forum_link'      => $this->faker->word,
+                'active'          => $this->faker->boolean,
+                'valid_from'      => $this->faker->date,
+                'valid_to'        => $this->faker->date
             ]);
         }
     }

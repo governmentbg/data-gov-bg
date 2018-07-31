@@ -24,13 +24,16 @@ class OrganisationSeeder extends Seeder
         // Test creation
         foreach (range(1, self::ORGANISATION_RECORDS) as $i) {
             $type = $this->faker->randomElement($types);
-            $parentId = empty($parentId) && empty($record) || $type == Organisation::TYPE_GROUP ? null : $record->id;
             $locale = $this->faker->randomElement($locales)['locale'];
+            \LaravelLocalization::setLocale($locale);
+
+            $parentId = empty($parentId) && empty($record) || $type == Organisation::TYPE_GROUP ? null : $record->id;
 
             $dbData = [
                 'type'              => $type,
-                'name'              => [$locale => $this->faker->name],
-                'descript'          => [$locale => $this->faker->text(intval(8000))],
+                'name'              => $this->faker->name,
+                'descript'          => $this->faker->text(intval(8000)),
+                'uri'               => $this->faker->uuid(),
                 'logo_file_name'    => $i != 1 ? $this->faker->imageUrl() : null,
                 'logo_mime_type'    => $i != 1 ? $this->faker->mimeType() : null,
                 'logo_data'         => $i != 1 ? $this->faker->text(intval(8000)) : null,
@@ -41,12 +44,12 @@ class OrganisationSeeder extends Seeder
 
             if ($i != 1) {
                 $dbData = array_merge($dbData, [
-                    'activity_info'     => [$locale => $this->faker->text(intval(8000))],
-                    'contacts'          => [$locale => $this->faker->text(intval(100))],
+                    'activity_info'     => $this->faker->text(intval(8000)),
+                    'contacts'          => $this->faker->text(intval(100)),
                 ]);
             }
 
-            Organisation::create($dbData);
+            Organisation::create($dbData)->searchable();
         }
     }
 }

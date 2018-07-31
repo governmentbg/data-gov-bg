@@ -1,8 +1,31 @@
 .theme-user {
+    .sidenav {
+        background-color: transparent !important;
+    }
     .sidebar-submenu.open {
         display: block;
+
+        li {
+            > a {
+                &:after {
+                    display: none;
+                }
+
+                &.active, &:hover, &:focus, &:active {
+                    &:after {
+                        left: 39%;
+                        display:block;
+                    }
+                }
+            }
+        }
     }
 
+    .filter-type {
+        li a {
+            clear: both;
+        }
+    }
     .my-profile {
         color: $black;
         font-size: 28px;
@@ -30,7 +53,7 @@
 
     .fileinput-new.thumbnai {
         width: 180px;
-        height: 100px;
+        height: 105px;
         padding: 0px;
         margin-bottom: -10px;
         display: inline-block;
@@ -61,25 +84,209 @@
         overflow: hidden;
     }
 
+    .new-data {
+        padding: 8px 28px;
+    }
+
+    .info-bar {
+        li {
+            list-style: none;
+            padding: 10px 0;
+        }
+    }
+
+    .history {
+        .version-heading {
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .version {
+            font-size: 17px;
+        }
+
+        span > svg {
+            height: 20px;
+            width: 20px;
+        }
+
+        .signaled {
+            span {
+                color: #d32a31;
+            }
+            a {
+                &:hover, &:focus, &:active {
+                    svg {
+                        fill: #d32a31;
+                    }
+                }
+            }
+        }
+    }
+
+    .filter-content {
+        .badge > a {
+            color: white !important;
+        }
+    }
+
+    .org-logo {
+        img {
+            width: 228px;
+            height: 128px;
+        }
+    }
+
+    .control-btns span{
+        padding: 15px 25px;
+    }
+
+    .exclamation-sign {
+        margin-top: -20px;
+
+        img {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .type {
+        span.selected:after {
+            content: url('/img/checked.jpg');
+            margin-left: 25px;
+        }
+    }
+
+    .user-orgs {
+        padding: 50px;
+        .ch-del-btns {
+            margin-top: 10px;
+            margin-bottom: 35px;
+            div {
+                div {
+                    button {
+                        border-radius: 10px;
+                        padding: 7px;
+                        background-color: #108f9e;
+                        color: white;
+                        border: none;
+                    }
+                }
+            }
+        }
+        .org-desc {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+             -webkit-box-orient: vertical;
+             -webkit-line-clamp: 10;
+            //max-height: 150px;
+        }
+        .org-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
+        .logo {
+            &img {
+                height: 200px;
+            }
+        }
+        .show-more {
+            margin-top: 10px;
+        }
+        .org-col {
+            margin-bottom: 30px;
+        }
+        .pagination {
+            li {
+                &.active {
+                    span {
+                        background-color: #108f9e;
+                        border-color: #108f9e;
+                        color: white;
+                    }
+                }
+                span, a {
+                    color: #108f9e;
+                }
+            }
+        }
+    }
+
+    @include mobile() {
+        .filter-content {
+            div {
+                div {
+                    &.create-org {
+                        margin-top: 20px !important;
+                        div {
+                            text-align: left;
+                        }
+                    }
+                    div {
+                        margin-bottom: 10px;
+                        .my-profile {
+                            font-size: 24px;
+                        }
+                    }
+                }
+            }
+            .search {
+               text-align: left;
+            }
+        }
+    }
+
     @include smMobile() {
+        .filter-content {
+            div {
+                div {
+                    &.create-org {
+                        margin-top: 20px !important;
+                        div {
+                            text-align: left;
+                            font-size: 13px;
+                        }
+                    }
+                    div {
+                        margin-bottom: 10px;
+                        .my-profile {
+                            font-size: 24px;
+                        }
+                    }
+                }
+            }
+            .search {
+               text-align: left;
+            }
+        }
+
+        .user-orgs {
+            padding: 0px;
+        }
+
         .my-profile {
             margin-left: 0 !important;
         }
 
-        .sidenav .sidebar-submenu.open {
-            padding: 10px 30px !important;
-            width: 45%;
-        }
+        .sidenav {
+            .sidebar-submenu.open {
+                padding: 10px 30px !important;
+                width: 45%;
+                display: block;
 
-        .sidebar-submenu {
-            li {
-                a,
-                a:hover,
-                a:active,
-                a:focus {
-                    &:after {
-                        width: 70px;
-                        left: 70px;
+                li {
+                    a,
+                    a:hover,
+                    a:active,
+                    a:focus {
+                        &:after {
+                            width: 100px;
+                            left: 80px;
+                        }
                     }
                 }
             }
@@ -88,28 +295,25 @@
         .add-terms {
             margin-top: 10px;
         }
-
     }
 
     @include xsMobile() {
         .filter-type li a {
-                font-size: 12px;
+            font-size: 12px;
         }
 
         .sidenav .sidebar-submenu.open {
             padding: 10px 30px !important;
-            width: 60% !important;
-        }
+            width: 100% !important;
 
-        .sidebar-submenu {
             li {
                 a,
                 a:hover,
                 a:active,
                 a:focus {
                     &:after {
-                        width: 70px;
-                        left: 70px;
+                        width: 100px;
+                        left: 80px;
                     }
                 }
             }
@@ -139,9 +343,93 @@
             padding: 5px 12px;
         }
     }
+
+    .filter-content {
+        div {
+            div {
+                &.create-org {
+                    margin-top: 40px;
+                    div {
+                        span {
+                            border-radius: 10px;
+                            padding: 7px;
+                            background-color: #108f9e;
+                            color: white;
+                        }
+                    }
+                }
+            }
+        }
+        .search {
+            input {
+                border-radius: 15px;
+                border: 1px solid black;
+                font-size: 12px;
+                padding: 2px 5px;
+            }
+            padding-top: 9px;
+        }
+    }
 }
 
 .frame {
     margin: 20px;
     border-radius: 10px;
 }
+
+.blue-highlight {
+    background-color: #EAF5F7;
+    width: 100%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+
+    .usr-delete {
+        display: inline-block;
+    }
+
+    .small-text {
+        font-size: 12pt;
+        padding-top: 10px;
+    }
+
+    .conf {
+        margin-top: 22px;
+    }
+
+    p {
+        font-size: 16pt;
+        line-height: 1.2;
+    }
+
+    a {
+        position: relative;
+        bottom: 15px;
+    }
+}
+
+.preview {
+    padding: 5px;
+    margin: 0 auto;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.cust-val {
+    padding-right: 0px !important;
+}
+
+.invite {
+    .frame {
+        padding-left: 40px;
+        padding-right: 40px;
+        margin: 0 auto;
+    }
+
+    .row:last-child {
+        margin-top: 30px;
+        margin-bottom: 30px;
+        display: grid;
+    }
+}
+

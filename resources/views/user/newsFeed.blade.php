@@ -10,9 +10,12 @@
                     <ul class="nav">
                         <li class="js-show-submenu m-t-lg">
                             <ul class="sidebar-submenu open">
+                                <li><a href="{{ url('/user/') }}">Потребители</a></li>
                                 <li><a href="{{ url('/user/organisations') }}">Организации</a></li>
-                                <li><a href="#">Групи</a></li>
-                                <li><a href="#">Набор данни</a></li>
+                                <li><a href="{{ url('/user/groups') }}">Групи</a></li>
+                                <li><a href="{{ url('/user/datasets') }}">Набор данни</a></li>
+                                <li><a href="{{ url('/user/') }}">Основна тема</a></li>
+                                <li><a href="{{ url('/user/') }}">Етикети</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -36,23 +39,68 @@
                             </div>
                         </div>
                     </div>
-                    <div class="articles">
-                        @for ($i = 0; $i < 3; $i++)
-                            <div class="article m-t-md">
-                                <div>Дата на добавяне: {{ date('d.m.Y') }}</div>
-                                <div class="col-sm-12 p-l-none">
-                                    <a href="{{ url('/user/datasetView') }}"><h2>Lorem ipsum dolor sit amet</h2></a>
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            {{ $pagination->render() }}
+                        </div>
+                    </div>
+                    <div class="col-xs-12 p-sm chronology">
+                        @foreach ($actionsHistory as $actionHistory)
+                        @php
+                            $tsDiff = time() - strtotime($actionHistory->occurrence);
+                            $min = floor($tsDiff / 60);
+                            $hours = floor($tsDiff / 3600);
+                            $days = floor($tsDiff / 86000);
+                            $objName = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_name'];
+                            $objType = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_type'];
+                            $objView = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_view'];
+                            $parentObjId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_id'];
+                        @endphp
+                        <div class="row">
+                            <div class="col-xs-1 p-l-none">
+                                <img class="img-thumnail" src="{{ asset('img/'. $objType .'-icon.svg') }}"/>
+                            </div>
+                            <div class="col-xs-11 p-h-sm">
+                                <div class="col-md-1 col-xs-2 logo-img">
+                                    <img class="img-responsive" src="{{ asset('img/test-img/logo-org-4.jpg') }}"/>
+                                </div>
+                                <div class="col-md-10 col-xs-10">
+                                    <div>Дата на добавяне: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
+                                    <a href="{{ url('/user/profile') }}"><h3>{{ $actionHistory->user_firstname }} {{ $actionHistory->user_lastname }}</h3></a>
                                     <p>
-                                        Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi. Ut euismod nibh at ante dapibus, sit amet pharetra lectus blandit. Aliquam eget orci tellus. Aliquam quis dignissim lectus, non dictum purus. Pellentesque scelerisque quis enim at varius. Duis a ex faucibus urna volutpat varius ac quis mauris. Sed porttitor cursus metus, molestie ullamcorper dolor auctor sed. Praesent dictum posuere tellus, vitae eleifend dui ornare et. Donec eu ornare eros. Cras eget velit et ex viverra facilisis eget nec lacus.
+                                        {{ $actionTypes[$actionHistory->action] }} {{ $actionHistory->module }}
+                                        @if ($objView != '')
+                                            <a href="{{ url($objView) }}"><b>{{ $objName }}</b></a>
+                                        @else
+                                            <b>{{ $objName }}</b>
+                                        @endif
+                                        @if ($parentObjId != '')
+                                             към {{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_type'] }}
+                                             <a href="{{ url($actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_view']) }}">
+                                                <b>{{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_name'] }}</b></a>
+                                        @endif
+                                        -
+                                        @if ($hours == 24)
+                                            преди 1 ден
+                                        @elseif ($hours > 24)
+                                            преди {{ $days }} дни
+                                        @elseif ($min == 60)
+                                            преди 1 час
+                                        @elseif ($min > 60)
+                                            преди {{ $hours }} часа
+                                        @else
+                                            {{ $min }} минути
+                                        @endif
                                     </p>
-                                    <div class="col-sm-12 p-l-none">
-                                        <div class="pull-right">
-                                            <span><a href="{{ url('/user/datasetView') }}">Виж още</a></span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-                        @endfor
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            {{ $pagination->render() }}
+                        </div>
                     </div>
                 </div>
             </div>

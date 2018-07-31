@@ -729,6 +729,7 @@ class ResourceController extends ApiController
             ->all();
         $formats = Resource::getFormats();
         $formatLabel = '';
+
         if (!empty($dataSets)) {
             foreach ($dataSets as $key => $value) {
                 foreach ($formats as $id => $format) {
@@ -736,6 +737,7 @@ class ResourceController extends ApiController
                         $formatLabel = $format;
                     }
                 }
+
                 $result[] = [
                     'format'            => $formatLabel,
                     'datasets_count'    => $value,

@@ -181,6 +181,7 @@ class CategoryController extends ApiController
      * API function for lsiting main categories by criteria
      *
      * @param array criteria - optional
+     * @param array criteria[category_ids] - optional
      * @param string criteria[locale] - optional
      * @param string criteria[active] - optional
      * @param array criteria[order] - optional
@@ -196,6 +197,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
+            'criteria.category_ids'  => 'nullable|array',
             'criteria.locale'        => 'nullable|string|max:5',
             'criteria.active'        => 'nullable|integer',
             'criteria.order.type'    => 'nullable|string',
@@ -209,10 +211,12 @@ class CategoryController extends ApiController
             $order = [];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-            $pagination = $this->getRecordsPerPage($post['records_per_page']);
-            $page = !empty($post['page_number']) ? $post['page_number'] : 1;
 
-            $query = Category::select();
+            $query = Category::where('parent_id', null);
+
+            if (isset($criteria['category_ids'])) {
+                $query->whereIn('id', $criteria['category_ids']);
+            }
 
             if (isset($criteria['active'])) {
                 $query->where('active', $criteria['active']);
@@ -222,19 +226,27 @@ class CategoryController extends ApiController
                 $query->orderBy($order['field'], $order['type']);
             }
 
-            if ($pagination && $page) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
+            $count = $query->count();
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
             try {
-                $categoryData = $query->get();
+                $results = $query->get();
 
-                foreach ($categoryData as $category) {
+                $locale = \LaravelLocalization::getCurrentLocale();
+
+                foreach ($results as $category) {
                     $category['name'] = $category->name;
-                    $category['locale'] = \LaravelLocalization::getCurrentLocale();
+                    $category['locale'] = $locale;
                 }
 
-                return $this->successResponse($categoryData);
+                return $this->successResponse([
+                    'total_records' => $count,
+                    'categories'    => $results,
+                ], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -408,6 +420,7 @@ class CategoryController extends ApiController
      * API function for lsiting tags by criteria
      *
      * @param array criteria - optional
+     * @param array criteria[tag_ids] - optional
      * @param string criteria[locale] - optional
      * @param string criteria[active] - optional
      * @param integer criteria[category_id] - optional
@@ -426,6 +439,7 @@ class CategoryController extends ApiController
         $validator = \Validator::make($post, [
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
+            'criteria.tag_ids'      => 'nullable|array',
             'criteria.locale'       => 'nullable|string|max:5',
             'criteria.category_id'  => 'nullable|integer',
             'criteria.active'       => 'nullable|integer',
@@ -438,10 +452,12 @@ class CategoryController extends ApiController
             $order = [];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-            $pagination = $this->getRecordsPerPage($post['records_per_page']);
-            $page = !empty($post['page_number']) ? $post['page_number'] : 1;
 
             $query = Category::where('parent_id', '!=', null);
+
+            if (!empty($criteria['tag_ids'])) {
+                $query->whereIn('id', $request->criteria['tag_ids']);
+            }
 
             if (!empty($criteria['category_id'])) {
                 $query->where('parent_id', $criteria['category_id']);
@@ -451,15 +467,16 @@ class CategoryController extends ApiController
                 $query->where('active', $criteria['active']);
             }
 
-            $count = $query->count();
-
             if ($order) {
                 $query->orderBy($order['field'], $order['type']);
             }
 
-            if ($pagination && $page) {
-                $query->paginate($pagination, ['*'], 'page', $page);
-            }
+            $count = $query->count();
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
             try {
                 $data = $query->get();
@@ -467,6 +484,7 @@ class CategoryController extends ApiController
 
                 foreach ($data as $record) {
                     $tags[] = [
+                        'id'            => $record->id,
                         'name'          => $record->name,
                         'category_id'   => $record->parent_id,
                         'locale'        => \LaravelLocalization::getCurrentLocale(),

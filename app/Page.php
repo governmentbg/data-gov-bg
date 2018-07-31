@@ -26,7 +26,7 @@ class Page extends Model implements TranslatableInterface
         'abstract'          => 'text',
         'body'              => 'text',
         'head_title'        => 'label',
-        'meta_desctript'    => 'text',
+        'meta_descript'     => 'text',
         'meta_key_words'    => 'label',
     ];
 
@@ -38,7 +38,7 @@ class Page extends Model implements TranslatableInterface
             'abstract'          => $this->concatTranslations('abstract'),
             'body'              => $this->concatTranslations('body'),
             'head_title'        => $this->concatTranslations('head_title'),
-            'meta_desctript'    => $this->concatTranslations('meta_desctript'),
+            'meta_descript'     => $this->concatTranslations('meta_descript'),
             'meta_key_words'    => $this->concatTranslations('meta_key_words'),
         ];
     }

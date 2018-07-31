@@ -494,17 +494,17 @@ class DatabaseTest extends TestCase
             $locale = $this->faker->randomElement($locales)['locale'];
             $section = $this->faker->randomElement($sections)['id'];
             $dbData = [
-                'section_id' => $section,
-                'title' => $this->faker->randomDigit(),
-                'abstract' =>$this->faker->randomDigit(),
-                'body' => $this->faker->randomDigit(),
-                'head_title' => $this->faker->randomDigit(),
-                'meta_desctript' => $this->faker->randomDigit(),
+                'section_id'     => $section,
+                'title'          => $this->faker->randomDigit(),
+                'abstract'       => $this->faker->randomDigit(),
+                'body'           => $this->faker->randomDigit(),
+                'head_title'     => $this->faker->randomDigit(),
+                'meta_descript'  => $this->faker->randomDigit(),
                 'meta_key_words' => $this->faker->randomDigit(),
-                'forum_link' => $this->faker->word,
-                'active' => $this->faker->boolean,
-                'valid_from' => $this->faker->date,
-                'valid_to' => $this->faker->date,
+                'forum_link'     => $this->faker->word,
+                'active'         => $this->faker->boolean,
+                'valid_from'     => $this->faker->date,
+                'valid_to'       => $this->faker->date,
             ];
 
             try {
@@ -530,13 +530,13 @@ class DatabaseTest extends TestCase
             $record = null;
             $locale = $this->faker->randomElement($locales)['locale'];
             $dbData = [
-                'name'      => [$locale=>$this->faker->word],
+                'name'         => [$locale=>$this->faker->word],
                 'parent_id'    => 1,
-                'active'    => $this->faker->boolean(),
-                'ordering'    => $this->faker->boolean(),
+                'active'       => $this->faker->boolean(),
+                'ordering'     => $this->faker->boolean(),
                 'read_only'    => $this->faker->boolean(),
-                'forum_link'    => $this->faker->url(),
-                'theme'    => $this->faker->randomDigit(),
+                'forum_link'   => $this->faker->url(),
+                'theme'        => $this->faker->randomDigit(),
             ];
 
             try {
@@ -569,7 +569,7 @@ class DatabaseTest extends TestCase
 
             $dbData = [
                 'user_id'       => $user,
-                'occurrence'     => $this->faker->dateTime(),
+                'occurrence'    => $this->faker->dateTime(),
                 'module_name'   => $module,
                 'action'        => $type,
                 'action_object' => $this->faker->sentence(),
@@ -763,11 +763,11 @@ class DatabaseTest extends TestCase
             $record = null;
             $dbData = [
                 'resource_id' => $resource,
-                'descript' =>$this->faker->sentence(4),
-                'firstname' => $this->faker->firstName(),
-                'lastname' => $this->faker->lastName(),
-                'email'=> $this->faker->email(),
-                'status' => $this->faker->boolean()
+                'descript'    =>$this->faker->sentence(4),
+                'firstname'   => $this->faker->firstName(),
+                'lastname'    => $this->faker->lastName(),
+                'email'       => $this->faker->email(),
+                'status'      => $this->faker->boolean()
             ];
 
             try {
@@ -1051,9 +1051,9 @@ class DatabaseTest extends TestCase
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
             $record = null;
             $dbData = [
-                'index' => $this->faker->word,
+                'index'       => $this->faker->word,
                 'index_type'  => $this->faker->word,
-                'doc' => $this->faker->randomDigit()
+                'doc'         => $this->faker->randomDigit()
             ];
 
             try {
@@ -1081,11 +1081,11 @@ class DatabaseTest extends TestCase
             $organisation = $this->faker->randomElement($organisations)['id'];
             $record = null;
             $dbData = [
-                'org_id' => $organisation,
+                'org_id'       => $organisation,
                 'data_set_id'  => null,
-                'resource_id' => null,
-                'key' => 1,
-                'value' => 2
+                'resource_id'  => null,
+                'key'          => 1,
+                'value'        => 2
             ];
 
             try {

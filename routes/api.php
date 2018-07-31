@@ -59,7 +59,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('/sendDataRequest', 'Api\DataRequestController@sendDataRequest');
     Route::post('/editDataRequest', 'Api\DataRequestController@editDataRequest');
-    Route::get('/deleteDataRequest', 'Api\DataRequestController@deleteDataRequest');
+    Route::post('/deleteDataRequest', 'Api\DataRequestController@deleteDataRequest');
     Route::post('/listDataRequests', 'Api\DataRequestController@listDataRequests');
 
     Route::post('/addDocument', 'Api\DocumentController@addDocument');

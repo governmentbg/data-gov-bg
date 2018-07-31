@@ -14,7 +14,7 @@ class CreateUserToOrgRoleTable extends Migration
     public function up()
     {
         Schema::create('user_to_org_role', function (Blueprint $table) {
-            $table->integer('user_id')->unsigned()->primary();
+            $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
             $table->integer('org_id')->unsigned()->nullable();
             $table->foreign('org_id')->references('id')->on('organisations');

@@ -20,7 +20,7 @@ class RoleTest extends TestCase
      */
     public function testAddRole()
     {
-        $response = $this->post(url('api/roles/addRole'), [
+        $response = $this->post(url('api/addRole'), [
             'api_key' => $this->getApiKey(),
             'name'    => 'addedFromTest',
             'active'  => 1,
@@ -38,7 +38,7 @@ class RoleTest extends TestCase
             'active'    => 1,
         ]);
 
-        $response = $this->post(url('api/roles/editRole'), [
+        $response = $this->post(url('api/editRole'), [
             'api_key'   => $this->getApiKey(),
             'id'        => $role->id,
             'name'      => $this->faker->firstName(),
@@ -57,7 +57,7 @@ class RoleTest extends TestCase
             'active'    => 1,
         ]);
 
-        $response = $this->post(url('api/roles/deleteRole'), [
+        $response = $this->post(url('api/deleteRole'), [
             'api_key'   => $this->getApiKey(),
             'id'        => $role->id,
         ]);
@@ -69,7 +69,7 @@ class RoleTest extends TestCase
 
     public function testListeRole()
     {
-        $response = $this->post(url('api/roles/listRoles'), [
+        $response = $this->post(url('api/listRoles'), [
             'api_key'   => $this->getApiKey(),
             'active'    => 0
         ]);
@@ -86,7 +86,7 @@ class RoleTest extends TestCase
             'active'    => 1,
         ]);
 
-        $response = $this->post(url('api/roles/modifyRoleRights'), [
+        $response = $this->post(url('api/modifyRoleRights'), [
             'api_key'   => $this->getApiKey(),
             'id'        => $role->id,
             'data'      => [
@@ -123,7 +123,7 @@ class RoleTest extends TestCase
             'active'    => 1,
         ]);
 
-        $response = $this->post(url('api/roles/getRoleRights'), [
+        $response = $this->post(url('api/getRoleRights'), [
             'api_key'   => $this->getApiKey(),
             'id'        => $role->id,
         ]);

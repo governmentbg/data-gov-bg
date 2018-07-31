@@ -10,7 +10,7 @@
                     <ul class="nav">
                         <li class="js-show-submenu m-t-lg">
                             <ul class="sidebar-submenu open">
-                                <li><a class="active" href="#">Организации</a></li>
+                                <li><a href="{{ url('/user/organisations') }}">Организации</a></li>
                                 <li><a href="#">Групи</a></li>
                                 <li><a href="#">Набор данни</a></li>
                             </ul>
@@ -24,10 +24,12 @@
                                 <div class="col-sm-12 p-l-none">
                                     <div>
                                         <ul class="nav filter-type right-border">
-                                            <li><a class="active p-l-none" href="{{ url('/user') }}">нюзфийд</a></li>
+                                            <li><a class="active p-l-none" href="{{ url('/user') }}">известия</a></li>
                                             <li><a href="{{ url('/user/datasets') }}">моите данни</a></li>
-                                            <li><a href="{{ url('/user/create') }}">нов набор</a></li>
+                                            <li><a href="{{ url('/user/groups') }}">групи</a></li>
+                                            <li><a href="{{ url('/user/organisations') }}">организации</a></li>
                                             <li><a href="{{ url('/user/settings') }}">настройки</a></li>
+                                            <li><a href="{{ url('/user/invite') }}">покана</a></li>
                                         </ul>
                                     </div>
                                 </div>

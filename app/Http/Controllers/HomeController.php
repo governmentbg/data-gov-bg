@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class HomeController extends Controller {
 
@@ -24,8 +28,4 @@ class HomeController extends Controller {
     public function index() {
 
     }
-
-    public function login() {
-    }
-
 }

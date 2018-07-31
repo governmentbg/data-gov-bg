@@ -2,16 +2,18 @@
 
 namespace App;
 
-use App\Http\Controllers\Traits\RecordSignature;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Http\Controllers\Traits\RecordSignature;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
     use SoftDeletes;
-    use RecordSignature;
     use Notifiable;
+    use Searchable;
+    use RecordSignature;
 
     /**
      * The attributes that are mass assignable.
@@ -42,6 +44,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function toSearchableArray()
+    {
+        $array['id'] = $this->id;
+        $array['firstname'] = $this->firstname;
+        $array['lastname'] = $this->lastname;
+        $array['username'] = $this->username;
+        $array['email'] = $this->email;
+
+        return $array;
+    }
     /**
      * Get the system user
      *
@@ -59,7 +71,7 @@ class User extends Authenticatable
 
     public function userToOrgRole()
     {
-        return $this->hasOne('App\UserToOrgRole');
+        return $this->hasMany('App\UserToOrgRole');
     }
 
     public function newsletterDigestLog()
@@ -70,5 +82,10 @@ class User extends Authenticatable
     public function follow()
     {
         return $this->hasMany('App\UserFollow');
+    }
+
+    public function searchableAs()
+    {
+        return 'users';
     }
 }

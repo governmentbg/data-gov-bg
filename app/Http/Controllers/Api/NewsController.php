@@ -178,48 +178,48 @@ class NewsController extends ApiController
         if (!$validator->fails()) {
             try {
                 $locale = $editData['data']['locale'];
-            $newsToEdit = Page::find($editData['news_id']);
-            DB::beginTransaction();
+                $newsToEdit = Page::find($editData['news_id']);
+                DB::beginTransaction();
 
-            if (isset($editData['data']['title'])) {
-                $newsToEdit->title = $this->trans($locale, $editData['data']['title']);
-            }
+                if (isset($editData['data']['title'])) {
+                    $newsToEdit->title = $this->trans($locale, $editData['data']['title']);
+                }
 
-            if (isset($editData['data']['abstract'])) {
-                $newsToEdit->abstract = $this->trans($locale, $editData['data']['abstract']);
-            }
+                if (isset($editData['data']['abstract'])) {
+                    $newsToEdit->abstract = $this->trans($locale, $editData['data']['abstract']);
+                }
 
-            if (isset($editData['data']['body'])) {
-                $newsToEdit->body = $this->trans($locale, $editData['data']['body']);
-            }
+                if (isset($editData['data']['body'])) {
+                    $newsToEdit->body = $this->trans($locale, $editData['data']['body']);
+                }
 
-            if (isset($editData['data']['head_title'])) {
-                $newsToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
-            }
+                if (isset($editData['data']['head_title'])) {
+                    $newsToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
+                }
 
-            if (isset($editData['data']['meta_description'])) {
-                $newsToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
-            }
+                if (isset($editData['data']['meta_description'])) {
+                    $newsToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
+                }
 
-            if (isset($editData['data']['meta_keywords'])) {
-                $newsToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
-            }
+                if (isset($editData['data']['meta_keywords'])) {
+                    $newsToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
+                }
 
-            if (isset($editData['data']['forum_link'])) {
-                $newsToEdit->forum_link = $editData['data']['forum_link'];
-            }
+                if (isset($editData['data']['forum_link'])) {
+                    $newsToEdit->forum_link = $editData['data']['forum_link'];
+                }
 
-            if (isset($editData['data']['active'])) {
-                $newsToEdit->active = $editData['data']['active'];
-            }
+                if (isset($editData['data']['active'])) {
+                    $newsToEdit->active = $editData['data']['active'];
+                }
 
-            if (isset($editData['data']['valid_from'])) {
-                $newsToEdit->valid_from = $editData['data']['valid_from'];
-            }
+                if (isset($editData['data']['valid_from'])) {
+                    $newsToEdit->valid_from = $editData['data']['valid_from'];
+                }
 
-            if (isset($editData['data']['valid_to'])) {
-                $newsToEdit->valid_to = $editData['data']['valid_to'];
-            }
+                if (isset($editData['data']['valid_to'])) {
+                    $newsToEdit->valid_to = $editData['data']['valid_to'];
+                }
 
                 $newsToEdit->save();
                 DB::commit();

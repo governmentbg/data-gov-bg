@@ -333,6 +333,7 @@ class OrganisationController extends ApiController
      * List organisations by criteria
      *
      * @param array criteria - optional
+     * @param array criteria[org_ids] - optional
      * @param string criteria[locale] - optional
      * @param integer criteria[org_id] - optional
      * @param integer criteria[active] - optional
@@ -351,6 +352,7 @@ class OrganisationController extends ApiController
         $count = 0;
 
         $validator = \Validator::make($request->all(), [
+            'criteria.org_ids'      => 'nullable|array',
             'criteria.locale'       => 'nullable|string',
             'criteria.active'       => 'nullable|bool',
             'criteria.approved'     => 'nullable|bool',
@@ -375,7 +377,11 @@ class OrganisationController extends ApiController
             }
 
             try {
-                $query = Organisation::select();
+                $query = Organisation::with('CustomSetting')->where('type', '!=', Organisation::TYPE_GROUP);
+
+                if (!empty($request->criteria['org_ids'])) {
+                    $query->whereIn('id', $request->criteria['org_ids']);
+                }
 
                 if (!empty($criteria)) {
                     $query->where($criteria);
@@ -403,6 +409,7 @@ class OrganisationController extends ApiController
                     }
 
                     $results[] = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $org->locale,
@@ -963,6 +970,7 @@ class OrganisationController extends ApiController
      * List all listGroups
      *
      * @param integer criteria - optional
+     * @param array criteria[group_ids] - optional
      * @param integer criteria[dataset_id] - optional
      * @param string criteria[locale] - optional
      * @param array criteria[order] - optional
@@ -989,6 +997,7 @@ class OrganisationController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
+                'criteria.group_ids'    => 'nullable|array',
                 'criteria.locale'       => 'nullable|string|max:5',
                 'criteria.dataset_id'   => 'nullable|integer',
                 'criteria.order.type'   => 'nullable|string',
@@ -998,6 +1007,10 @@ class OrganisationController extends ApiController
             ]);
 
             if (!$validator->fails()) {
+                if (!empty($request->criteria['group_ids'])) {
+                    $query->whereIn('id', $request->criteria['group_ids']);
+                }
+
                 if (!empty($criteria['dataset_id'])) {
                     $query->whereHas('dataSet', function($q) use ($criteria) {
                         $q->where('id', $criteria['dataset_id']);
@@ -1032,6 +1045,7 @@ class OrganisationController extends ApiController
                 }
 
                 $result[] = [
+                    'id'                => $group->id,
                     'name'              => $group->name,
                     'description'       => $group->descript,
                     'locale'            => $locale,

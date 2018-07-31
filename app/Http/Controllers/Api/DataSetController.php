@@ -51,7 +51,7 @@ class DataSetController extends ApiController
             'data.category_id'      => 'required|integer',
             'data.terms_of_use_id'  => 'nullable|integer',
             'data.visibility'       => 'nullable|integer',
-            'data.version'          => 'nullable|string',
+            'data.version'          => 'nullable',
             'data.author_name'      => 'nullable|string',
             'data.author_email'     => 'nullable|email',
             'data.support_name'     => 'nullable|string',
@@ -90,6 +90,7 @@ class DataSetController extends ApiController
             }
 
             unset($post['data']['sla'], $post['data']['name'], $post['data']['description']);
+            unset($post['data']['locale']);
 
             $newDataSet->fill($post['data']);
 
@@ -106,11 +107,10 @@ class DataSetController extends ApiController
                     }
 
                     DB::commit();
+
                     return $this->successResponse(['uri' => $newDataSet->uri], true);
                 } else {
                     DB::rollback();
-
-                    return $this->errorResponse('Add DataSet Failure');
                 }
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -158,7 +158,7 @@ class DataSetController extends ApiController
             'data.tags.*'           => 'nullable|string',
             'data.terms_of_use_id'  => 'nullable|integer',
             'data.visibility'       => 'nullable|integer',
-            'data.version'          => 'nullable|string',
+            'data.version'          => 'nullable',
             'data.author_name'      => 'nullable|string',
             'data.author_email'     => 'nullable|email',
             'data.support_name'     => 'nullable|string',
@@ -236,12 +236,9 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
-                $dataset->deleted_by = \Auth::id();
-                $dataset->save();
-                $dataset->delete();
-
-                return $this->successResponse();
+                if (DataSet::where('uri', $post['dataset_uri'])->delete()) {
+                    return $this->successResponse();
+                }
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -255,6 +252,7 @@ class DataSetController extends ApiController
      * API function for listing Data Sets
      *
      * @param array criteria - optional
+     * @param array criteria[dataset_ids] - optional
      * @param string criteria[locale] - optional
      * @param integer criteria[org_id] - optional
      * @param integer criteria[group_id] - optional
@@ -263,6 +261,7 @@ class DataSetController extends ApiController
      * @param integer criteria[terms_of_use_id] - optional
      * @param string criteria[format] - optional
      * @param integer criteria[reported] - optional
+     * @param integer criteria[created_by] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -282,8 +281,8 @@ class DataSetController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
+                'criteria.dataset_ids'       => 'nullable|array',
                 'criteria.locale'            => 'nullable|string|max:5',
-                'criteria.creator'           => 'nullable|integer',
                 'criteria.org_id'            => 'nullable|integer',
                 'criteria.group_id'          => 'nullable|integer',
                 'criteria.category_id'       => 'nullable|integer',
@@ -291,6 +290,7 @@ class DataSetController extends ApiController
                 'criteria.format'            => 'nullable|string',
                 'criteria.terms_of_use_id'   => 'nullable|integer',
                 'criteria.reported'          => 'nullable|integer',
+                'criteria.created_by'        => 'nullable|integer',
                 'criteria.order.type'        => 'nullable|string',
                 'criteria.order.field'       => 'nullable|string',
                 'records_per_page'           => 'nullable|integer',
@@ -302,12 +302,14 @@ class DataSetController extends ApiController
                 $reported = [];
 
                 try {
-                    $query = DataSet::select();
+                    $query = DataSet::where('status', DataSet::STATUS_DRAFT);
+
+                    if (!empty($request->criteria['dataset_ids'])) {
+                        $query->whereIn('id', $request->criteria['dataset_ids']);
+                    }
 
                     if (!empty($criteria['created_by'])) {
                         $query->where('created_by', $criteria['created_by']);
-                    } else {
-                        $query->where('status', DataSet::STATUS_PUBLISHED);
                     }
 
                     if (!empty($criteria['org_id'])) {
@@ -315,7 +317,9 @@ class DataSetController extends ApiController
                     }
 
                     if (!empty($criteria['group_id'])) {
-                        $query->where('group_id', $criteria['group_id']);
+                        $query->whereHas('datasetgroup', function($q) use($criteria) {
+                            $q->where('group_id', $criteria['group_id']);
+                        });
                     }
 
                     if (!empty($criteria['category_id'])) {
@@ -323,8 +327,8 @@ class DataSetController extends ApiController
                     }
 
                     if (!empty($criteria['tag_id'])) {
-                        $query->whereHas('category', function($q) use($criteria) {
-                            $q->where('id', $criteria['tag_id']);
+                        $query->whereHas('datasetsubcategory', function($q) use($criteria) {
+                            $q->where('sub_cat_id', $criteria['tag_id']);
                         });
                     }
 
@@ -432,65 +436,65 @@ class DataSetController extends ApiController
     public function searchDataSet(Request $request)
     {
         $post = $request->all();
-        $criteria = isset($post['criteria']) ? $post['criteria'] : false;
 
-        if (!empty($criteria)) {
-            $validator = \Validator::make($post, [
-                'criteria.locale'       => 'nullable|string|max:5',
-                'criteria.keywords'     => 'required|string',
-                'criteria.order.type'   => 'nullable|string',
-                'criteria.order.field'  => 'nullable|string',
-                'records_per_page'      => 'nullable|integer',
-                'page_number'           => 'nullable|integer',
-            ]);
+        $validator = \Validator::make($post, [
+            'criteria'              => 'required|array',
+            'criteria.locale'       => 'nullable|string|max:5',
+            'criteria.keywords'     => 'required|string',
+            'criteria.order.type'   => 'nullable|string',
+            'criteria.order.field'  => 'nullable|string',
+            'records_per_page'      => 'nullable|integer',
+            'page_number'           => 'nullable|integer',
+        ]);
 
-            if (!$validator->fails()) {
-                $data = [];
-                $order = [];
-                $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-                $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-                $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
-                $page = !empty($post['page_number']) ? $post['page_number'] : null;
-                $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
+        if (!$validator->fails()) {
+            $data = [];
+            $criteria = $post['criteria'];
+            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
+            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
+            $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
+            $page = !empty($post['page_number']) ? $post['page_number'] : null;
+            $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
 
-                try {
-                    $ids = DataSet::search($search)->get()->pluck('id');
-                    $query = DataSet::whereIn('id', $ids);
+            try {
+                $ids = DataSet::search($search)->get()->pluck('id');
+                $query = DataSet::whereIn('id', $ids);
 
-                    $count = $query->count();
+                $count = $query->count();
 
-                    $query->forPage(
-                        $request->offsetGet('page_number'),
-                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                    );
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
 
-                    $data = $query->get();
+                $results = [];
 
-                    foreach ($data as $set) {
-                        $set['name'] = $set->name;
-                        $set['sla'] = $set->sla;
-                        $set['descript'] = $set->descript;
-                        $set['followers_count'] = $set->userFollow()->count();
-                        $set['reported'] = 0;
+                foreach ($query->get() as $set) {
+                    $result['name'] = $set->name;
+                    $result['sla'] = $set->sla;
+                    $result['descript'] = $set->descript;
+                    $result['followers_count'] = $set->userFollow()->count();
+                    $result['reported'] = 0;
 
-                        $hasRes = $set->resource()->count();
+                    $hasRes = $set->resource()->count();
 
-                        if ($hasRes) {
-                            foreach ($set->resource as $resourse) {
-                                if ($resourse->is_reported) {
-                                    $set['reported'] = 1;
-                                }
+                    if ($hasRes) {
+                        foreach ($set->resource as $resourse) {
+                            if ($resourse->is_reported) {
+                                $result['reported'] = 1;
                             }
                         }
                     }
 
-                    return $this->successResponse([
-                        'datasets'      => $data,
-                        'total_records' => $count,
-                    ], true);
-                } catch (QueryException $ex) {
-                    Log::error($ex->getMessage());
+                    $results[] = $result;
                 }
+
+                return $this->successResponse([
+                    'datasets'      => $results,
+                    'total_records' => $count,
+                ], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
@@ -558,7 +562,7 @@ class DataSetController extends ApiController
      *
      * @return json success or error
      */
-    public function addDataSetToGroup (Request $request)
+    public function addDataSetToGroup(Request $request)
     {
         $post = $request->all();
 

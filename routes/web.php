@@ -25,17 +25,21 @@ Route::get('/logout', function() {
     return view('home/index', ['class' => 'index']);
 });
 
-Route::get('/login', 'Auth\LoginController@login');
-Route::post('/login', 'Auth\LoginController@login')->name('login');
+Route::middleware('auth')->group(function() {
+    Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
+    Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
+});
 
-Route::get('/registration', 'UserController@registration');
-Route::post('/registration', 'UserController@registration');
+Route::get('/preGenerated', 'UserController@preGenerated');
 
-Route::get('/confirmation', 'HomeController@confirmation');
-Route::post('/confirmation', 'HomeController@confirmation');
+Route::match(['get', 'post'],'/login', 'Auth\LoginController@login')->name('login');
 
-Route::get('/orgRegistration', 'UserController@orgRegistration');
-Route::post('/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
+Route::match(['get', 'post'],'/registration', 'UserController@registration');
+Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
+
+Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
+Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
+
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
@@ -88,6 +92,9 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
+Route::get('/user/newsFeed', 'UserController@newsFeed');
+Route::post('/user/newsFeed', 'UserController@newsFeed');
+
 Route::get('/user/datasets', 'UserController@datasets');
 Route::get('/user/datasetView/{uri}', 'UserController@datasetView');
 Route::post('/user/deleteDataset', 'UserController@deleteDataset');
@@ -129,10 +136,6 @@ Route::get('/user/edit', function () {
     return view('user/edit', ['class' => 'user']);
 });
 
-Route::get('/user/settings', function () {
-    return view('user/settings', ['class' => 'user']);
-});
-
 Route::get('/user/orgRegistration', function () {
     return view('user/orgRegistration', ['class' => 'user']);
 });
@@ -168,3 +171,5 @@ Route::get('/contact', function () {
 Route::get('/visualisation', function () {
     return view('visualisation/visualisation', ['class' => 'visualisations']);
 });
+
+Route::get('lang/{lang}', ['as'=>'lang.switch', 'uses'=>'LanguageController@switchLang']);

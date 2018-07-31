@@ -12,6 +12,7 @@ use App\UserToOrgRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 Use \DB;
@@ -31,6 +32,7 @@ class UserController extends ApiController
      * @param integer criteria[org_id] - optional
      * @param integer criteria[role_id] - optional
      * @param integer criteria[id] - optional
+     * @param array criteria[user_ids] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -52,6 +54,7 @@ class UserController extends ApiController
             'criteria.role_id'      => 'nullable|integer',
             'criteria.org_id'       => 'nullable|integer',
             'criteria.id'           => 'nullable|interger',
+            'criteria.user_ids'     => 'nullable|array',
             'criteria.order'        => 'nullable|array',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
@@ -86,6 +89,8 @@ class UserController extends ApiController
 
             if (!empty($criteria['id'])) {
                 $query->where('id', $criteria['id']);
+            } elseif (isset($criteria['user_ids'])) {
+                $query->whereIn('id', $criteria['user_ids']);
             }
 
             $count = $query->count();
@@ -183,15 +188,16 @@ class UserController extends ApiController
 
                 foreach($user->userToOrgRole as $role) {
                     $result[] = [
-                        'org_id' => $role->org_id,
-                        'role_id' => $role->role_id,
+                        'org_id'    => $role->org_id,
+                        'role_id'   => $role->role_id,
                     ];
                 }
+
                 return $this->successResponse(['roles' => $result]);
             }
         }
 
-        return $this->errorResponse('Get user roles failure', $validator->errors->messages());
+        return $this->errorResponse('Get user roles failure', $validator->errors()->messages());
     }
 
     /**
@@ -228,7 +234,7 @@ class UserController extends ApiController
                         $result['follows'][] = [
                             'news'        => $follow['news'],
                             'org_id'      => $follow['org_id'],
-                            'dataset_id'  => $follow['dataset_id'],
+                            'dataset_id'  => $follow['data_set_id'],
                             'category_id' => $follow['category_id'],
                         ];
                     }
@@ -370,13 +376,13 @@ class UserController extends ApiController
      * @param string api_key - required
      * @param integer id - required
      * @param array data - required
-     * @param string data[firstname] - required
-     * @param string data[lastname] - required
-     * @param string data[email] - required
+     * @param string data[firstname] - optional
+     * @param string data[lastname] - optional
+     * @param string data[email] - optional
      * @param string data[add_info] - optional
      * @param string data[username] - optional
-     * @param string data[password] - required
-     * @param string data[password_confirm] - required
+     * @param string data[password] - optional
+     * @param string data[password_confirm] - optional
      * @param integer data[role_id] - optional
      * @param integer data[is_admin] - optional
      * @param array data[user_settings] - optional
@@ -398,6 +404,7 @@ class UserController extends ApiController
                 'data.firstname'        => 'nullable|string',
                 'data.lastname'         => 'nullable|string',
                 'data.email'            => 'nullable|email',
+                'data.add_info'         => 'nullable|string',
                 'data.password'         => 'nullable|string',
                 'data.is_admin'         => 'nullable|integer',
                 'data.password_confirm' => 'nullable|string|same:data.password',
@@ -423,8 +430,21 @@ class UserController extends ApiController
             $newUserData['lastname'] = $data['lastname'];
         }
 
-        if (!empty($data['email'])) {
-            $newUserData['email'] = $data['email'];
+        if (!empty($data['email']) && $data['email'] !== $user->email) {
+            $mailData = [
+                'user'  => $user->firstname,
+                'hash'  => $user->hash_id,
+                'mail'  => $data['email']
+            ];
+
+            Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {
+                $m->from('info@finite-soft.com', 'Open Data');
+                $m->to($data['email'], $data['firstname'])->subject('Смяна на екектронен адрес!');
+            });
+
+            if (count(Mail::failures()) > 0) {
+                return $this->errorResponse('Failed to send mail');
+            }
         }
 
         if (!empty($data['add_info'])) {
@@ -522,7 +542,7 @@ class UserController extends ApiController
 
         if (!empty($newSettings)) {
             try {
-                UserSetting::where('user_id', $request->id)->update($newSettings);
+                UserSetting::updateOrCreate(['user_id' => $request->id], $newSettings);
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
@@ -632,7 +652,6 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'id'            => 'required|integer',
                 'data'          => 'required|array',
                 'data.email'    => 'required|email',
                 'data.is_admin' => 'nullable|integer',
@@ -646,6 +665,7 @@ class UserController extends ApiController
             return $this->errorResponse('Invite user failure', $validator->errors()->messages());
         }
 
+        $password = Uuid::generate(4)->string;
         $reqOrgId = isset($request->data['org_id']) ? $request->data['org_id']: null;
 
         $loggedUser = User::with('userToOrgRole')->find(\Auth::id());
@@ -657,7 +677,7 @@ class UserController extends ApiController
         $user = new User;
 
         $user->username = $this->generateUsername($request->data['email']);
-        $user->password = bcrypt(Uuid::generate(4)->string);
+        $user->password = bcrypt($password);
         $user->email = $request->data['email'];
         $user->firstname = '';
         $user->lastname = '';
@@ -681,6 +701,21 @@ class UserController extends ApiController
 
             try {
                 $user->save();
+
+                $mailData = [
+                    'user'      => \Auth::user()->firstname .' '. \Auth::user()->lastname,
+                    'username'  => $user->username,
+                    'pass'      => $password,
+                ];
+
+                Mail::send('mail/generateMail', $mailData, function ($m) use ($user) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($user->email)->subject('Получихте покана за opendata.bg!');
+                });
+
+                if (count(Mail::failures()) > 0) {
+                    return $this->errorResponse('Failed to send mail');
+                }
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
@@ -762,7 +797,7 @@ class UserController extends ApiController
      */
     public function register(Request $request)
     {
-        $data = $request->data;
+        $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
             'firstname'         => 'required|string',
@@ -792,13 +827,27 @@ class UserController extends ApiController
             : null;
         $user->is_admin = 0;
         $user->active = 0;
-        $user->approved = 0;
+        $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
         $user->api_key = $apiKey;
         $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
         $user->remember_token = null;
 
         try {
             $registered = $user->save();
+
+            $mailData = [
+                'user'  => $user->firstname,
+                'hash'  => $user->hash_id,
+            ];
+
+            Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                $m->from('info@finite-soft.com', 'Open Data');
+                $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+            });
+
+            if (count(Mail::failures()) > 0) {
+                return $this->errorResponse('Failed to send mail');
+            }
         } catch (QueryException $e) {
             return $this->errorResponse('User registration failure');
         }
@@ -888,7 +937,7 @@ class UserController extends ApiController
             $organisation->active = 0;
             $organisation->approved = 0;
             $organisation->created_by = $user->id;
-            $organisation->name =  $data['org_data']['name'];
+            $organisation->name = $data['org_data']['name'];
             $organisation->descript = $data['org_data']['description'];
             $organisation->activity_info = $data['org_data']['activity_info'];
             $organisation->contacts = $data['org_data']['contacts'];

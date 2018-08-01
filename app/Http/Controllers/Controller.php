@@ -42,4 +42,17 @@ class Controller extends BaseController
             'paginate' => $paginator
         ];
     }
+
+    /**
+     * Get image data
+     *
+     * @param binary $data
+     * @param string $mime
+     *
+     * @return string
+     */
+    protected function getImageData($data, $mime)
+    {
+        return 'data:'. $mime .';base64,'. base64_encode($data);
+    }
 }

@@ -118,6 +118,20 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addFollow', 'Api\UserFollowController@addFollow');
     Route::post('/unFollow', 'Api\UserFollowController@unFollow');
     Route::post('/getFollowersCount', 'Api\UserFollowController@getFollowersCount');
+
+    Route::post('/xml2json', 'Api\ConversionController@xml2json');
+    Route::post('/json2xml', 'Api\ConversionController@json2xml');
+    Route::post('/csv2json', 'Api\ConversionController@csv2json');
+    Route::post('/json2csv', 'Api\ConversionController@json2csv');
+    Route::post('/kml2json', 'Api\ConversionController@kml2json');
+    Route::post('/json2kml', 'Api\ConversionController@json2kml');
+    Route::post('/rdf2json', 'Api\ConversionController@rdf2json');
+    Route::post('/json2rdf', 'Api\ConversionController@json2rdf');
+    Route::post('/toJSON', 'Api\ConversionController@toJSON');
+    Route::post('/toXML', 'Api\ConversionController@toXML');
+    Route::post('/toCSV', 'Api\ConversionController@toCSV');
+    Route::post('/toKML', 'Api\ConversionController@toKML');
+    Route::post('/toRDF', 'Api\ConversionController@toRDF');
 });
 
 Route::post('/register', 'Api\UserController@register');

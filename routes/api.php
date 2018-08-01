@@ -44,6 +44,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('deletePage', 'Api\PageController@deletePage');
     Route::post('listPages', 'Api\PageController@listPages');
     Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+    Route::post('/listModules', 'Api\ActionsHistoryController@listModules');
 
     Route::post('/listRights', 'Api\RightController@listRights');
 

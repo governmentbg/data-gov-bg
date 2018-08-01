@@ -9,8 +9,8 @@ use App\Http\Controllers\Traits\RecordSignature;
 
 class Category extends Model implements TranslatableInterface
 {
-    use RecordSignature;
     use Translatable;
+    use RecordSignature;
 
     protected $guarded = ['id'];
     protected $table = 'categories';

@@ -11,6 +11,8 @@ class Signal extends Model
 
     protected $guarded = ['id'];
 
+    const TYPE_NEW = 1;
+
     public function resource()
     {
         $this->belongsTo('App\Resource');

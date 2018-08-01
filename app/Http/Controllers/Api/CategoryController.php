@@ -522,7 +522,7 @@ class CategoryController extends ApiController
 
         $validator = \Validator::make($post, [
             'tag_id' => 'required|integer',
-            "locale" => 'nullable|string|max:5',
+            'locale' => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {

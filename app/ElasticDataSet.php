@@ -16,4 +16,19 @@ class ElasticDataSet extends Model
     {
         $this->belongsTo('App\Resource');
     }
+
+    public static function getElasticData($id)
+    {
+        $elasticData = ElasticDataSet::find($id);
+
+        if (!empty($elasticData)) {
+            $data = \Elasticsearch::get([
+                'index' => $elasticData->index,
+                'type'  => $elasticData->index_type,
+                'id'    => $elasticData->doc,
+            ]);
+        }
+
+        return !empty($data['_source']) ? $data['_source'] : null;
+    }
 }

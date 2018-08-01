@@ -51,6 +51,7 @@ class PageTest extends TestCase
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
+
         // check that a record is made
         $this->assertTrue($count + 1 == Page::all()->count());
     }
@@ -155,14 +156,15 @@ class PageTest extends TestCase
         $this->post(
             url('api/deletePage'),
             [
-                'api_key'     => $this->getApiKey(),
-                'page_id'   => null,
+                'api_key'    => $this->getApiKey(),
+                'page_id'    => null,
             ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
         $count = Page::all()->count();
+
         //test successful delete
         $this->post(
             url('api/deletePage'),

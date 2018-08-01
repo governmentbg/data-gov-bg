@@ -59,12 +59,10 @@ class SignalsController extends ApiController
                 return $this->successResponse(['signal_id :' . $newSignal->id]);
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
-
             }
         }
 
         return $this->errorResponse('Send signal failure', $validator->errors()->messages());
-
     }
 
     /**
@@ -132,8 +130,8 @@ class SignalsController extends ApiController
                 Log::error($e->getMessage());
             }
         }
-        return $this->errorResponse('Signal edit failure', $validator->errors()->messages());
 
+        return $this->errorResponse('Signal edit failure', $validator->errors()->messages());
     }
 
     /**
@@ -161,6 +159,7 @@ class SignalsController extends ApiController
                 Log::error($e->getMessage());
             }
         }
+
         return $this->errorResponse('Delete signal failure', $validator->errors()->messages());
     }
 
@@ -181,7 +180,6 @@ class SignalsController extends ApiController
      *
      * @return json response with success or error message
      */
-
     public function listSignals(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -219,6 +217,7 @@ class SignalsController extends ApiController
             'created_by',
             'updated_by',
         ];
+
         $signalList = Signal::select($columns);
 
         if (isset($criteria['signal_id'])) {
@@ -239,6 +238,7 @@ class SignalsController extends ApiController
                 $criteria['order']['type'] == 'asc' ? 'asc' : 'desc'
             );
         }
+
         if (isset($criteria['status'])) {
             $signalList->where('status', $criteria['status']);
         }
@@ -285,6 +285,7 @@ class SignalsController extends ApiController
                 ];
             }
         }
+
         return $this->successResponse([
             'total_records' => $total_records,
             'signals' => $result,

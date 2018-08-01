@@ -1,9 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 
-Use Uuid;
 use App\DataSet;
-use App\Category;
 use App\Resource;
 use App\ElasticDataSet;
 use Illuminate\Http\Request;
@@ -716,5 +714,37 @@ class ResourceController extends ApiController
         }
 
         return $this->errorResponse('Linked data failure', $validator->errors()->messages());
+    }
+
+    /**
+     * Lists the count of the datasets per format
+     *
+     * @param Request $request
+     * @return json response
+     */
+    public function listDataFormats(Request $request)
+    {
+        $dataSets = Resource::select('file_format', DB::raw('count(*) as total'))
+            ->groupBy('file_format')->pluck('total', 'file_format')
+            ->all();
+        $formats = Resource::getFormats();
+        $formatLabel = '';
+
+        if (!empty($dataSets)) {
+            foreach ($dataSets as $key => $value) {
+                foreach ($formats as $id => $format) {
+                    if ($id == $key) {
+                        $formatLabel = $format;
+                    }
+                }
+
+                $result[] = [
+                    'format'            => $formatLabel,
+                    'datasets_count'    => $value,
+                ];
+            }
+
+            return $this->successResponse(['data_formats' => $result], true);
+        }
     }
 }

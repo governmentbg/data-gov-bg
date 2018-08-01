@@ -32,7 +32,7 @@
                     <div>
                         <div class="col-sm-7 col-xs-12 p-l-none">
                             <ul class="p-l-none">
-                                <li>Отгиворник подръжка:</li>
+                                <li>Отговорник подръжка:</li>
                                 <li>Версия:</li>
                                 <li>Последен ъпдейт:</li>
                                 <li>Създаден:</li>

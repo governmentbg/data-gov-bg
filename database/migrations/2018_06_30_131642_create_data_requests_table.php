@@ -18,10 +18,10 @@ class CreateDataRequestsTable extends Migration
             $table->integer('org_id')->unsigned();
             $table->foreign('org_id')->references('id')->on('organisations');
             $table->string('descript');
-            $table->string('published_url');
-            $table->string('contact_name');
+            $table->string('published_url')->nullable();
+            $table->string('contact_name')->nullable();
             $table->string('email');
-            $table->text('notes');
+            $table->text('notes')->nullable();
             $table->unsignedTinyInteger('status');
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();

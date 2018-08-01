@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<?php
+    $lang = App::getLocale();
+    $altLang = $lang == 'bg' ? 'en' : 'bg';
+?>
+<html lang="{{ $lang }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,6 +12,7 @@
     <title>{{ config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Roboto&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
+    <link rel="stylesheet" href="/css/custom.css">
     <link href="{{ asset('fonts/vendor/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -18,10 +23,10 @@
             <div class="container">
                 <div class="navbar-header">
                     <div class="nav-logos col-lg-3 col-md-4 col-sm-4 col-xs-9">
-                        <a href="{{ url('/') }}"><img alt='Лого на портала' src="{{ asset('img/opendata-logo-color.svg') }}"></a>
+                        <a href="{{ url('/') }}"><img alt="Лого на портала" src="{{ asset('img/opendata-logo-color.svg') }}"></a>
                         <a href="https://europa.eu/european-union/index_bg" target="_blank">
                             <img
-                                alt='Официална страница на Европейския съюз'
+                                alt="Официална страница на Европейския съюз"
                                 src="{{ asset('img/euro-union.png') }}"
                             >
                         </a>
@@ -55,21 +60,27 @@
                         </button>
                     </div>
                     <div class="nav-controls col-lg-3 col-md-1 text-right hidden-xs hidden-sm">
-                        <!-- if user is logged in -->
-                        <span class="user-icon pull-right">
-                            <a href="{{ url('/user') }}" class="user-icon"><img src="{{ asset('img/user.svg') }}"></a>
-                        </span>
-                        <!-- else -->
-<!--                        <span class="login-link">>
-                            <a href="{{ url('home/login') }}">вход</a>
-                        </span>-->
+                        @if (\Auth::check())
+                            <span class="user-icon pull-right">
+                                <a href="{{ url('/user') }}" class="user-icon"><img src="{{ asset('img/user.svg') }}"></a>
+                            </span>
+                            <span class="login-link">>
+                                <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
+                            </span>
+                        @else
+                            <span class="login-link">>
+                                <a href="{{ url('/login') }}">{{ __('custom.login') }}</a>
+                            </span>
+                        @endif
                     </div>
                     <div class="nav-controls col-lg-4 col-md-5 col-sm-6 text-right hidden-xs">
                         <span class="search-input">
                             <input type="text" placeholder="търсене..">
                         </span>
                         <span class="trans-link">
-                            <a href="#">EN</a>
+                            <a
+                                href="{{ route('lang.switch', $altLang) }}"
+                            >{{ strtoupper($altLang) }}</a>
                         </span>
                         <span class="social-icons">
                             <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
@@ -107,14 +118,15 @@
                         <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                             <a href="{{ url('/contact') }}">Контакти</a>
                         </li>
-                        <!-- if user is logged in (mobile view) -->
+                        @if (\Auth::check())
                             <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
-                                <a href="{{ url('/user') }}">Профил</a>
+                                <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
                             </li>
-                        <!-- else -->
-<!--                        <li class="hidden-lg hidden-md {{ Request::segment(2) == 'login' ? 'active' : '' }}">
-                            <a href="{{ url('/home/login') }}">Вход</a>
-                        </li>-->
+                        @else
+                            <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                                <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
+                            </li>
+                        @endif
                         <li class="hidden-lg hidden-md hidden-sm">
                             <input type="text" placeholder="търсене..." class="form-control rounded-input input-long">
                         </li>

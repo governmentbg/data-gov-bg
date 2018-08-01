@@ -3,14 +3,19 @@
 namespace App\Http\Controllers\Traits;
 
 use App\User;
+use Illuminate\Support\Facades\Auth;
 
 trait RecordSignature
 {
     protected static function bootRecordSignature()
     {
-        $userId = \Auth::check() ?
-            \Auth::user()->id :
-            User::select('id')->where('username', 'system')->first()->id;
+        $userId = null;
+
+        if (Auth::check()) {
+            $userId = Auth::user()->id;
+        } else if (!empty($system = User::select('id')->where('username', 'system')->first())) {
+            $userId = $system->id;
+        }
 
         static::updating(function ($model) use ($userId) {
             $model->updated_by = $userId;

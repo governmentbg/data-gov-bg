@@ -26,11 +26,11 @@ class UserTest extends TestCase
 
     public function testSearchUsers()
     {
-        $criteria = ['locale' => app()->getLocale()];
+        $criteria = ['locale' => app()->getLocale(), 'keywords' => 'search'];
 
         $this->post(url('api/searchUsers'), ['api_key' => $this->getApiKey()])
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
 
         $this->post(url('api/searchUsers'), ['api_key' => $this->getApiKey(), 'criteria' => $criteria])
             ->assertStatus(200)
@@ -71,7 +71,7 @@ class UserTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    public function testaddUser()
+    public function testAddUser()
     {
         $password = bcrypt(str_random(10));
 
@@ -168,7 +168,7 @@ class UserTest extends TestCase
 
     public function testRegister()
     {
-        $password = bcrypt(str_random(10));
+        $password = str_random(10);
 
         $this->post(url('api/register'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
@@ -179,11 +179,11 @@ class UserTest extends TestCase
             [
                 'api_key' => $this->getApiKey(),
                 'data'    => [
-                    'firstname'        => $this->faker->name(),
-                    'lastname'         => $this->faker->name(),
-                    'email'            => $this->faker->safeEmail(),
-                    'password'         => bcrypt(str_random(10)),
-                    'password_confirm' => bcrypt(str_random(10)),
+                    'firstname'         => $this->faker->name(),
+                    'lastname'          => $this->faker->name(),
+                    'email'             => 'dimitar@finite-soft.com',
+                    'password'          => $password,
+                    'password_confirm'  => $password,
                 ]
             ]
         )
@@ -195,11 +195,12 @@ class UserTest extends TestCase
             [
                 'api_key' => $this->getApiKey(),
                 'data'    => [
-                    'firstname'        => $this->faker->name(),
-                    'lastname'         => $this->faker->name(),
-                    'email'            => $this->faker->safeEmail(),
-                    'password'         => $password,
-                    'password_confirm' => $password,
+                    'username'          => $this->faker->name(),
+                    'firstname'         => $this->faker->name(),
+                    'lastname'          => $this->faker->name(),
+                    'email'             => 'dimitar@finite-soft.com',
+                    'password'          => $password,
+                    'password_confirm'  => $password,
                 ]
             ]
         )
@@ -217,6 +218,7 @@ class UserTest extends TestCase
             url('api/inviteUser'),
             [
                 'api_key' => $this->getApiKey(),
+                'id' => $this->getUserId(),
                 'data'    => [
                     'email' => $this->faker->safeEmail(),
                 ]

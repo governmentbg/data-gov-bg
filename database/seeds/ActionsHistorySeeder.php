@@ -30,7 +30,7 @@ class ActionsHistorySeeder extends Seeder
 
             ActionsHistory::create([
                 'user_id'       => $user,
-                'occurrence'     => $this->faker->dateTime(),
+                'occurrence'    => $this->faker->dateTime(),
                 'module_name'   => $module,
                 'action'        => $type,
                 'action_object' => $this->faker->sentence(),

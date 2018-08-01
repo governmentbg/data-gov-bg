@@ -14,9 +14,9 @@ class ElasticSearchTest extends TestCase
      */
     public function test()
     {
-        $this->insert();
-        $this->search();
-        $this->delete();
+        $this->insertTest();
+        $this->searchTest();
+        $this->deleteTest();
     }
 
     /**
@@ -24,10 +24,10 @@ class ElasticSearchTest extends TestCase
      *
      * @return void
      */
-    public function insert()
+    public function insertTest()
     {
         $data = [
-            'body' => [
+            'body'      => [
                 'testField' => 'testing_string'
             ],
             'index'     => 'test_index',
@@ -36,9 +36,8 @@ class ElasticSearchTest extends TestCase
         ];
 
         $insert = \Elasticsearch::index($data);
-        $insert = \Elasticsearch::index($data);
 
-        $this->assertTrue(is_array($insert));
+        $this->assertTrue(!empty($insert['result']) && $insert['result'] == 'created');
     }
 
     /**
@@ -46,7 +45,7 @@ class ElasticSearchTest extends TestCase
      *
      * @return void
      */
-    public function search()
+    public function searchTest()
     {
         $data = [
             'index' => 'test_index',
@@ -60,6 +59,8 @@ class ElasticSearchTest extends TestCase
             }',
         ];
 
+        sleep(1); // It takes some time for the data to be indexed in the previos step
+
         $search = \Elasticsearch::search($data);
 
         $this->assertTrue(!empty($search['hits']['total']));
@@ -70,10 +71,10 @@ class ElasticSearchTest extends TestCase
      *
      * @return void
      */
-    public function delete()
+    public function deleteTest()
     {
-        $delete = \Elasticsearch::indices()->delete(['index' => 'test_index']);
+        $delete = \Elasticsearch::delete(['index' => 'test_index', 'type' => 'test_type', 'id' => 'test_id']);
 
-        $this->assertTrue(!empty($delete['acknowledged']));
+        $this->assertTrue(!empty($delete['result']) && $delete['result'] == 'deleted');
     }
 }

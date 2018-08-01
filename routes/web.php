@@ -28,6 +28,9 @@ Route::get('/logout', function() {
 Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
     Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
+    Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
+    Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
+    Route::get('/users/list/search', 'UserController@searchUsers');
 });
 
 Route::get('/preGenerated', 'UserController@preGenerated');
@@ -39,7 +42,6 @@ Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration
 
 Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
 Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
-
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);

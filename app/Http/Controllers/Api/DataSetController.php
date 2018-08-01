@@ -667,4 +667,34 @@ class DataSetController extends ApiController
             return false;
         }
     }
+
+    /**
+     * Function for getting the number of DataSets a given user has
+     *
+     * @param string api_key - required
+     * @param array criteria - required
+     * @param integer id - required
+     *
+     * @return json result with DataSet count or error
+     */
+    public function getUsersDataSetCount(Request $request)
+    {
+        $data = $request->criteria;
+
+        $validator = \Validator::make($data, ['id' => 'required|integer']);
+
+        if (!$validator->fails()) {
+            $sets = DataSet::where('created_by', $data['id']);
+
+            try {
+                $count = $sets->count();
+
+                return $this->successResponse(['count' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Get Users DataSet count failure');
+    }
 }

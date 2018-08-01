@@ -62,6 +62,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
+    Route::post('/getUsersDataSetCount', 'Api\DataSetController@getUsersDataSetCount');
 
     Route::post('/sendDataRequest', 'Api\DataRequestController@sendDataRequest');
     Route::post('/editDataRequest', 'Api\DataRequestController@editDataRequest');
@@ -113,6 +114,10 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addTag', 'Api\CategoryController@addTag');
     Route::post('/editTag', 'Api\CategoryController@editTag');
     Route::post('/deleteTag', 'Api\CategoryController@deleteTag');
+
+    Route::post('/addFollow', 'Api\UserFollowController@addFollow');
+    Route::post('/unFollow', 'Api\UserFollowController@unFollow');
+    Route::post('/getFollowersCount', 'Api\UserFollowController@getFollowersCount');
 });
 
 Route::post('/register', 'Api\UserController@register');

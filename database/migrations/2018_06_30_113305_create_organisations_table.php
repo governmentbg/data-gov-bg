@@ -37,7 +37,7 @@ class CreateOrganisationsTable extends Migration
             $table->softDeletes();
         });
 
-        DB::statement("ALTER TABLE logo_data ADD data MEDIUMBLOB");
+        DB::statement("ALTER TABLE organisations ADD logo_data MEDIUMBLOB");
 
         DB::unprepared("
             CREATE TRIGGER check_organisations_insert BEFORE INSERT ON organisations

@@ -29,7 +29,7 @@ class CreateCategoriesTable extends Migration
             $table->foreign('created_by')->references('id')->on('users');
         });
 
-        DB::statement("ALTER TABLE icon_data ADD data MEDIUMBLOB");
+        DB::statement("ALTER TABLE categories ADD icon_data MEDIUMBLOB");
     }
 
     /**

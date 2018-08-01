@@ -143,7 +143,7 @@ class ApiController extends Controller
      * @param string|null $locale
      * @param string|array $data
      */
-    protected function trans(&$locale, $data, $isUpdate = false) {
+    public static function trans(&$locale, $data, $isUpdate = false) {
         $defaultLocale = \LaravelLocalization::getDefaultLocale();
 
         if (isset($locale)) {

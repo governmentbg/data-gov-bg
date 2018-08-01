@@ -12,25 +12,27 @@ class SetLocale
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
-        $controller = explode('@', class_basename($request->route()->getAction()['controller']))[0];
+        if ($request->route()->getAction() == 'api') {
+            $controller = explode('@', class_basename($request->route()->getAction()['controller']))[0];
 
-        if ($controller != 'LocaleController') {
-            if (isset($request->locale)) {
-                $locale = $request->locale;
-            } else if (isset($request->data['locale'])) {
-                $locale = $request->data['locale'];
-            } else if (isset($request->criteria['locale'])) {
-                $locale = $request->criteria['locale'];
-            } else if (isset($request->org_data['locale'])) {
-                $locale = $request->org_data['locale'];
-            } else if (isset($request->user_settings['locale'])) {
-                $locale = $request->user_settings['locale'];
+            if ($controller != 'LocaleController') {
+                if (isset($request->locale)) {
+                    $locale = $request->locale;
+                } else if (isset($request->data['locale'])) {
+                    $locale = $request->data['locale'];
+                } else if (isset($request->criteria['locale'])) {
+                    $locale = $request->criteria['locale'];
+                } else if (isset($request->org_data['locale'])) {
+                    $locale = $request->org_data['locale'];
+                } else if (isset($request->user_settings['locale'])) {
+                    $locale = $request->user_settings['locale'];
+                }
             }
 
             if (isset($locale)) {
@@ -40,6 +42,8 @@ class SetLocale
                     return ApiController::errorResponse('Language `'. $locale .'` does not exist in database');
                 }
             }
+        } else {
+            \LaravelLocalization::setLocale(\Session::get('locale'));
         }
 
         return $next($request);

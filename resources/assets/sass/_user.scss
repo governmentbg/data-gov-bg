@@ -419,4 +419,17 @@
     padding-right: 0px !important;
 }
 
+.invite {
+    .frame {
+        padding-left: 40px;
+        padding-right: 40px;
+        margin: 0 auto;
+    }
+
+    .row:last-child {
+        margin-top: 30px;
+        margin-bottom: 30px;
+        display: grid;
+    }
+}
 

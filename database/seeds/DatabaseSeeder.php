@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ActionsHistorySeeder::class);
         $this->call(TermsOfUseSeeder::class);
         $this->call(CategorySeeder::class);
+        $this->call(DataRequestSeeder::class);
         $this->call(DataSetSeeder::class);
         $this->call(DataSetSubCategorySeeder::class);
         $this->call(DataSetGroupSeeder::class);

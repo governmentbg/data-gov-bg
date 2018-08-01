@@ -14,6 +14,7 @@ use App\RoleRight;
 use App\TermsOfUse;
 use App\UserFollow;
 use Tests\TestCase;
+use App\Translator\Translation;
 use App\UserSetting;
 use App\DataSetGroup;
 use App\Organisation;
@@ -25,7 +26,7 @@ use App\TermsOfUseRequest;
 use App\DataSetSubCategory;
 use Faker\Factory as Faker;
 use App\NewsletterDigestLog;
-use App\Translator\Translation;
+use App\DataRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -43,6 +44,7 @@ class DatabaseTest extends TestCase
     const NEWSLETTER_DIGEST_LOG_RECORDS = 10;
     const TRANSLATION_RECORDS = 10;
     const ORGANISATION_RECORDS = 10;
+    const DATA_REQUESTS_RECORDS = 10;
     const ACTIONS_HISTORY_RECORDS = 10;
     const CATEGORY_RECORDS = 10;
     const DATASET_RECORDS = 10;
@@ -74,6 +76,7 @@ class DatabaseTest extends TestCase
         $this->locale();
         $this->translations();
         $this->organisations();
+        $this->data_requests();
         $this->actionsHistory();
         $this->category();
         $this->dataSets();
@@ -473,6 +476,36 @@ class DatabaseTest extends TestCase
         }
     }
 
+     /**
+     * Tests DataRequest table structure and models
+     *
+     * @return void
+     */
+    private function data_requests()
+    {
+        // Test creation
+        $orgs = Organisation::orderBy('created_at', 'desc')->limit(self::DATA_REQUESTS_RECORDS)->get()->toArray();
+        foreach (range(1, self::DATA_REQUESTS_RECORDS) as $i) {
+            $org = $this->faker->randomElement($orgs)['id'];
+            $record = null;
+            $dbData = [
+                'org_id'=> $org,
+                'descript' => $this->faker->sentence(3),
+                'published_url' => $this->faker->url,
+                'contact_name' => $this->faker->name,
+                'email' => $this->faker->email,
+                'notes' => $this->faker->sentence(4),
+                'status' => $this->faker->boolean()
+            ];
+
+            try {
+                $record = DataRequest::create($dbData);
+            }
+            catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+        }
+    }
     /**
      * Tests actions_history table structure and models
      *
@@ -767,6 +800,7 @@ class DatabaseTest extends TestCase
             }
 
             $this->assertNotNull($record);
+            $this->assertDatabaseHas('data_requests', ['id' => $record->id]);
 
             if (!empty($record->id)) {
                 $this->assertDatabaseHas('terms_of_use_requests', ['id' => $record->id]);
@@ -847,7 +881,7 @@ class DatabaseTest extends TestCase
                 }
 
                 $this->assertNotNull($record);
-    
+
                 if (!empty($record->id)) {
                     $this->assertDatabaseHas('user_settings', ['id' => $record->id]);
                 }

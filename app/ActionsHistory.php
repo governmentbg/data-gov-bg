@@ -15,7 +15,10 @@ class ActionsHistory extends Model
         'Category',
         'Tag',
         'Organization',
-        'Group'
+        'Group',
+        'User',
+        'Dataset',
+        'Resource'
     ];
 
     public $timestamps = false;

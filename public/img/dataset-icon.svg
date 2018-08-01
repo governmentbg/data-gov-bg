@@ -1,0 +1,31 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.53 49.53">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #d5e2dd;
+      }
+
+      .cls-2 {
+        fill: #af3c99;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-4 {
+        fill: #373737;
+      }
+    </style>
+  </defs>
+  <title>Dokument</title>
+  <circle class="cls-1" cx="24.8" cy="24.76" r="24.76" transform="translate(-1.91 47.49) rotate(-85.4)"/>
+  <path class="cls-2" d="M37,15.52H21.74V13.86A1.88,1.88,0,0,0,19.86,12H12.57a1.89,1.89,0,0,0-1.88,1.88v21.8a1.88,1.88,0,0,0,1.88,1.88H37a1.88,1.88,0,0,0,1.88-1.88V17.4A1.88,1.88,0,0,0,37,15.52Z" transform="translate(-0.03)"/>
+  <rect class="cls-3" x="13.79" y="18.23" width="21.94" height="10.28"/>
+  <g>
+    <rect class="cls-4" x="15.13" y="19.49" width="19.27" height="0.63"/>
+    <rect class="cls-4" x="15.13" y="21.12" width="19.27" height="0.63"/>
+    <rect class="cls-4" x="15.13" y="22.75" width="19.27" height="0.63"/>
+  </g>
+  <path class="cls-2" d="M10.69,24.47V35.66a1.88,1.88,0,0,0,1.88,1.88H37a1.88,1.88,0,0,0,1.88-1.88V24.47Z" transform="translate(-0.03)"/>
+</svg>

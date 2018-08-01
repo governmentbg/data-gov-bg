@@ -25,19 +25,21 @@ Route::get('/logout', function() {
     return view('home/index', ['class' => 'index']);
 });
 
-Route::get('/login', 'Auth\LoginController@login');
-Route::post('/login', 'Auth\LoginController@login')->name('login');
+Route::middleware('auth')->group(function() {
+    Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
+    Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
+});
 
-Route::get('/registration', 'UserController@registration');
-Route::post('/registration', 'UserController@registration');
+Route::get('/preGenerated', 'UserController@preGenerated');
+
+Route::match(['get', 'post'],'/login', 'Auth\LoginController@login')->name('login');
+
+Route::match(['get', 'post'],'/registration', 'UserController@registration');
+Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
 
 Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
 Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
 
-Route::get('/orgRegistration', 'UserController@orgRegistration');
-Route::post('/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
-
-Route::match(['get', 'post'], '/user/settings', 'UserController@settings');
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
@@ -89,6 +91,9 @@ Route::get('/organisation/chronology', function () {
 
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
+
+Route::get('/user/newsFeed', 'UserController@newsFeed');
+Route::post('/user/newsFeed', 'UserController@newsFeed');
 
 Route::get('/user/datasets', 'UserController@datasets');
 Route::get('/user/datasetView/{uri}', 'UserController@datasetView');

@@ -168,7 +168,7 @@ class UserTest extends TestCase
 
     public function testRegister()
     {
-        $password = bcrypt(str_random(10));
+        $password = str_random(10);
 
         $this->post(url('api/register'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
@@ -179,11 +179,11 @@ class UserTest extends TestCase
             [
                 'api_key' => $this->getApiKey(),
                 'data'    => [
-                    'firstname'        => $this->faker->name(),
-                    'lastname'         => $this->faker->name(),
-                    'email'            => $this->faker->safeEmail(),
-                    'password'         => bcrypt(str_random(10)),
-                    'password_confirm' => bcrypt(str_random(10)),
+                    'firstname'         => $this->faker->name(),
+                    'lastname'          => $this->faker->name(),
+                    'email'             => 'dimitar@finite-soft.com',
+                    'password'          => $password,
+                    'password_confirm'  => $password,
                 ]
             ]
         )
@@ -195,11 +195,12 @@ class UserTest extends TestCase
             [
                 'api_key' => $this->getApiKey(),
                 'data'    => [
-                    'firstname'        => $this->faker->name(),
-                    'lastname'         => $this->faker->name(),
-                    'email'            => $this->faker->safeEmail(),
-                    'password'         => $password,
-                    'password_confirm' => $password,
+                    'username'          => $this->faker->name(),
+                    'firstname'         => $this->faker->name(),
+                    'lastname'          => $this->faker->name(),
+                    'email'             => 'dimitar@finite-soft.com',
+                    'password'          => $password,
+                    'password_confirm'  => $password,
                 ]
             ]
         )

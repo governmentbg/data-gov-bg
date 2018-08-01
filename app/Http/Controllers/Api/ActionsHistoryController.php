@@ -21,12 +21,13 @@ class ActionsHistoryController extends ApiController
      * @param integer criteria[user_id] - optional
      * @param string criteria[module] - optional
      * @param integer criteria[action] - optional
-     * @param integer criteria[category_id] - optional
-     * @param integer criteria[tag_id] - optional
-     * @param integer criteria[org_id] - optional
-     * @param integer criteria[group_id] - optional
-     * @param string criteria[dataset_uri] - optional
-     * @param string criteria[ip_adress] - optional
+     * @param array criteria[category_ids] - optional
+     * @param array criteria[tag_ids] - optional
+     * @param array criteria[org_ids] - optional
+     * @param array criteria[group_ids] - optional
+     * @param array criteria[user_ids] - optional
+     * @param array criteria[dataset_ids] - optional
+     * @param array criteria[resource_uris] - optional
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      *
@@ -35,37 +36,40 @@ class ActionsHistoryController extends ApiController
     public function listActionHistory(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'criteria'             => 'nullable|array',
-            'criteria.period_from' => 'nullable|date',
-            'criteria.period_to'   => 'nullable|date',
-            'criteria.username'    => 'nullable|string',
-            'criteria.user_id'     => 'nullable|integer',
-            'criteria.module'      => 'nullable|string',
-            'criteria.action'      => 'nullable|integer',
-            'criteria.category_id' => 'nullable|integer',
-            'criteria.tag_id'      => 'nullable|integer',
-            'criteria.org_id'      => 'nullable|integer',
-            'criteria.group_id'    => 'nullable|integer',
-            'criteria.dataset_uri' => 'nullable|string',
-            'criteria.ip_adress'   => 'nullable|string',
-            'records_per_page'     => 'nullable|integer',
-            'page_number'          => 'nullable|integer',
+            'criteria'               => 'nullable|array',
+            'criteria.period_from'   => 'nullable|date',
+            'criteria.period_to'     => 'nullable|date',
+            'criteria.username'      => 'nullable|string',
+            'criteria.user_id'       => 'nullable|integer',
+            'criteria.module'        => 'nullable|string',
+            'criteria.action'        => 'nullable|integer',
+            'criteria.category_ids'  => 'nullable|array',
+            'criteria.tag_ids'       => 'nullable|array',
+            'criteria.org_ids'       => 'nullable|array',
+            'criteria.group_ids'     => 'nullable|array',
+            'criteria.user_ids'      => 'nullable|array',
+            'criteria.dataset_ids'   => 'nullable|array',
+            'criteria.resource_uris' => 'nullable|array',
+            'criteria.ip_adress'     => 'nullable|string',
+            'records_per_page'       => 'nullable|integer',
+            'page_number'            => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
             return $this->errorResponse('List action history failure', $validator->errors()->messages());
         }
 
-        $criteria = $request->json('criteria');
+        $criteria = $request->criteria;
 
         $history = ActionsHistory::select(
+            'id',
             'occurrence',
             'module_name',
             'action',
             'action_object',
             'action_msg',
             'user_id'
-        )->with('user:id,username')->orderBy('occurrence', 'desc');
+        )->with('user:id,username,firstname,lastname')->orderBy('occurrence', 'desc');
 
         if (isset($criteria['period_from'])) {
             $history->where('occurrence', '>=', $criteria['period_from']);
@@ -97,49 +101,55 @@ class ActionsHistoryController extends ApiController
             $history->where('action', $criteria['action']);
         }
 
-        if (isset($criteria['category_id'])) {
-            $history->where([
-                'action_object'    => $criteria['category_id'],
-                'module_name'      => ActionsHistory::MODULE_NAMES[0],
-            ]);
+        $actObjCriteria = [];
+        if (isset($criteria['category_ids'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[0]] = $criteria['category_ids'];
         }
 
-        if (isset($criteria['tag_id'])) {
-            $history->where([
-                'action_object'    => $criteria['tag_id'],
-                'module_name'      => ActionsHistory::MODULE_NAMES[1],
-            ]);
+        if (isset($criteria['tag_ids'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[1]] = $criteria['tag_ids'];
         }
 
-        if (isset($criteria['org_id'])) {
-            $history->where([
-                'action_object'    => $criteria['org_id'],
-                'module_name'      => ActionsHistory::MODULE_NAMES[2],
-            ]);
+        if (isset($criteria['org_ids'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[2]] = $criteria['org_ids'];
         }
 
-        if (isset($criteria['group_id'])) {
-            $history->where([
-                'action_object'    => $criteria['group_id'],
-                'module_name'      => ActionsHistory::MODULE_NAMES[3],
-            ]);
+        if (isset($criteria['group_ids'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[3]] = $criteria['group_ids'];
         }
 
-        if (isset($criteria['dataset_uri'])) {
-            $dataSet = DataSet::whereUri($criteria['dataset_uri'])->get();
-
-            if (!$dataSet->isEmpty()) {
-                $history->where([
-                    'action_object'    => $dataSet->org_id,
-                    'module_name'      => ActionsHistory::MODULE_NAMES[2],
-                ]);
-            }
+        if (isset($criteria['user_ids'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[4]] = $criteria['user_ids'];
         }
 
-        $recordsPerPage = $request->json('records_per_page');
+        if (isset($criteria['dataset_ids'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[5]] = $criteria['dataset_ids'];
+        }
+
+        if (isset($criteria['resource_uris'])) {
+            $actObjCriteria[ActionsHistory::MODULE_NAMES[6]] = $criteria['resource_uris'];
+        }
+
+        if (!empty($actObjCriteria)) {
+            $history->where(function ($history)  use ($actObjCriteria) {
+                $isFirst = true;
+                foreach ($actObjCriteria as $moduleName => $actionObjects) {
+                    if ($isFirst) {
+                        $isFirst = false;
+                        $history->whereIn('action_object', $actionObjects)->where('module_name', $moduleName);
+                    } else {
+                        $history->orWhereIn('action_object', $actionObjects)->where('module_name', $moduleName);
+                    }
+                }
+            });
+        }
+
         $count = $history->count();
 
-        $history->forPage($request->json('page_number'), $this->getRecordsPerPage($recordsPerPage));
+        $history->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
 
         $results = [];
         $history = $history->get();
@@ -147,12 +157,16 @@ class ActionsHistoryController extends ApiController
         if (!empty($history)) {
             foreach ($history as $key => $record) {
                 $results[] = [
-                    'user'          => $record->user->username,
-                    'occurrence'    => $record->occurrence,
-                    'module'        => $record->module_name,
-                    'action'        => $record->action,
-                    'action_object' => $record->action_object,
-                    'action_msg'    => $record->action_msg,
+                    'id'             => $record->id,
+                    'user_id'        => $record->user->id,
+                    'user'           => $record->user->username,
+                    'user_firstname' => $record->user->firstname,
+                    'user_lastname'  => $record->user->lastname,
+                    'occurrence'     => $record->occurrence,
+                    'module'         => $record->module_name,
+                    'action'         => $record->action,
+                    'action_object'  => $record->action_object,
+                    'action_msg'     => $record->action_msg,
                 ];
             }
         }

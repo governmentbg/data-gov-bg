@@ -36,30 +36,28 @@ class TermsOfUseRequestController extends ApiController
             'status'        => 'integer|min:1'
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Send terms of use request failure');
+        if (!$validator->fails()) {
+            // set default values to optional fields
+            if (!isset($data['status'])) {
+                $data['status'] = TermsOfUseRequest::STATUS_NEW;
+            }
+
+            //prepare model data
+            $newTerms = new TermsOfUseRequest;
+            $newTerms->descript = $data['description'];
+            unset($data['description']);
+            $newTerms->fill($data);
+
+            try {
+                $newTerms->save();
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+
+            return $this->successResponse(['id' => $newTerms->id], true);
         }
 
-        // set default values to optional fields
-        if (!isset($data['status'])) {
-            $data['status'] = TermsOfUseRequest::STATUS_NEW;
-        }
-
-        //prepare model data
-        $newTerms = new TermsOfUseRequest;
-        $newTerms->descript = $data['description'];
-        unset($data['description']);
-        $newTerms->fill($data);
-
-        try {
-            $newTerms->save();
-        } catch (QueryException $ex) {
-            Log::error($ex->getMessage());
-
-            return $this->errorResponse('Send terms of use request failure');
-        }
-
-        return $this->successResponse(['id' => $newTerms->id], true);
+        return $this->errorResponse('Send terms of use request failure', $validator->errors()->messages());
     }
 
     /**
@@ -96,16 +94,16 @@ class TermsOfUseRequestController extends ApiController
             $terms->descript = $data['description'];
             unset($data['description']);
             $terms->fill($data);
-    
+
             try {
                 $terms->save();
-    
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
         }
-        
+
         return $this->errorResponse('Edit terms of use request failure', $validator->errors()->messages());
     }
 

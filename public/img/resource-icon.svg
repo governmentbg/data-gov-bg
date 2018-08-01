@@ -1,0 +1,42 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.97 49.97">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #373737;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        fill: #4eb7b4;
+      }
+    </style>
+  </defs>
+  <title>Resurs</title>
+  <g>
+    <circle class="cls-1" cx="25.02" cy="24.98" r="24.98" transform="translate(-1.93 47.91) rotate(-85.4)"/>
+    <g>
+      <rect class="cls-2" x="13.53" y="11.84" width="22.91" height="26.28" rx="1.35" ry="1.35"/>
+      <g>
+        <g>
+          <rect class="cls-3" x="17.05" y="15.59" width="2.82" height="2.82"/>
+          <rect class="cls-3" x="21.5" y="16.4" width="11.41" height="1.21"/>
+        </g>
+        <g>
+          <rect class="cls-3" x="17.05" y="20.91" width="2.82" height="2.82"/>
+          <rect class="cls-3" x="21.5" y="21.72" width="11.41" height="1.21"/>
+        </g>
+        <g>
+          <rect class="cls-3" x="17.05" y="26.23" width="2.82" height="2.82"/>
+          <rect class="cls-3" x="21.5" y="27.04" width="11.41" height="1.21"/>
+        </g>
+        <g>
+          <rect class="cls-3" x="17.05" y="31.55" width="2.82" height="2.82"/>
+          <rect class="cls-3" x="21.5" y="32.36" width="11.41" height="1.21"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -5,6 +5,7 @@ namespace Tests\Unit\Api;
 use App\Locale;
 use Tests\TestCase;
 use App\Organisation;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -168,8 +169,8 @@ class OrganisationTest extends TestCase
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => [$locale => $name],
-            'descript'          => [$locale => $this->faker->text(intval(8000))],
+            'name'              => ApiController::trans($locale, $name),
+            'descript'          => ApiController::trans($locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),
@@ -180,7 +181,8 @@ class OrganisationTest extends TestCase
 
         $this->post(url('api/searchOrganisations'), [
             'criteria'  => [
-                'keywords'   => $name,
+                'locale'    => 'bg',
+                'keywords'  => $name,
             ],
         ])->assertStatus(200)->assertJson(['success' => true, 'organisations' => [['name' => $name]]]);
     }
@@ -201,8 +203,8 @@ class OrganisationTest extends TestCase
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => [$locale => $name],
-            'descript'          => [$locale => $this->faker->text(intval(8000))],
+            'name'              => ApiController::trans($locale, $name),
+            'descript'          => ApiController::trans($locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),

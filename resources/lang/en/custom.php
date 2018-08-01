@@ -9,6 +9,7 @@ return [
     |
     */
 
-    'test' => 'Test',
+    'login' => 'log in',
+    'logout' => 'log out',
 
 ];

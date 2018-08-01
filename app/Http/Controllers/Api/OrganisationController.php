@@ -75,6 +75,8 @@ class OrganisationController extends ApiController
 
             $organisation->type = $data['type'];
 
+            DB::beginTransaction();
+
             $organisation->name = $this->trans($empty, $data['name']);
             $organisation->descript = !empty($data['description'])
                     ? $this->trans($empty, $data['description'])
@@ -92,7 +94,13 @@ class OrganisationController extends ApiController
                 if (!empty($img)) {
                     $organisation->logo_file_name = basename($data['logo']);
                     $organisation->logo_mime_type = $img->mime();
-                    $organisation->logo_data = $img->encode('data-url');
+
+                    $temp = tmpfile();
+                    $path = stream_get_meta_data($temp)['uri'];
+                    $img->save($path);
+                    $organisation->logo_data = file_get_contents($path);
+
+                    fclose($temp);
                 }
             } elseif (isset($data['logo_filename']) && isset($data['logo_mimetype']) && isset($data['logo_data'])) {
                 $organisation->logo_file_name = $data['logo_filename'];
@@ -101,21 +109,19 @@ class OrganisationController extends ApiController
             }
 
             if (!isset($organisation->logo_data) || $this->checkImageSize($organisation->logo_data)) {
-                $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($empty, $data['activity_info']) : null;
-                $organisation->contacts = !empty($data['contacts']) ? $this->trans($empty, $data['contacts']) : null;
-                $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
-                $organisation->active = isset($data['active']) ? $data['active'] : 1;
-                $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
-                    ? $data['approved']
-                    : 0;
-
-                if (!empty($data['custom_fields'])) {
-                    $customFields = $data['custom_fields'];
-                }
-
-                DB::beginTransaction();
-
                 try {
+                    $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($empty, $data['activity_info']) : null;
+                    $organisation->contacts = !empty($data['contacts']) ? $this->trans($empty, $data['contacts']) : null;
+                    $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
+                    $organisation->active = isset($data['active']) ? $data['active'] : 1;
+                    $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
+                        ? $data['approved']
+                        : 0;
+
+                    if (!empty($data['custom_fields'])) {
+                        $customFields = $data['custom_fields'];
+                    }
+
                     $organisation->save();
 
                     if (!empty($customFields)) {
@@ -232,7 +238,13 @@ class OrganisationController extends ApiController
                 if (!empty($img)) {
                     $orgData['logo_file_name'] = basename($data['logo']);
                     $orgData['logo_mime_type'] = $img->mime();
-                    $orgData['logo_data'] = $img->encode('data-url');
+
+                    $temp = tmpfile();
+                    $path = stream_get_meta_data($temp)['uri'];
+                    $img->save($path);
+                    $orgData['logo_data'] = file_get_contents($path);
+
+                    fclose($temp);
                 }
             }
 

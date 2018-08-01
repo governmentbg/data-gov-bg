@@ -44447,9 +44447,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 // show on load functionality
 $(function () {
-    $(window).on('load', function () {
+    $(document).ready(function () {
         $('.js-show-on-load').css('visibility', 'visible');
     });
+});
+
+$(window).load(function () {
+    alert("window load occurred!");
 });
 
 $(function () {

@@ -176,4 +176,25 @@ class ActionsHistoryController extends ApiController
             'actions_history'   => $results,
         ], true);
     }
+
+    /**
+     * Lists modules from ActionsHistory model
+     *
+     * @param Request $request
+     * @return json response
+     */
+    public function listModules(Request $request)
+    {
+        $modules = ActionsHistory::getModuleNames();
+
+        if (!empty($modules)) {
+            foreach ($modules as $module) {
+                $result[] = ['name' => $module];
+            }
+
+            return $this->successResponse(['modules'=>$result],true);
+        }
+
+        return $this->errorResponse('Get data failure');
+    }
 }

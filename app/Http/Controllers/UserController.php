@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Locale;
 use App\UserSetting;
 use App\Organisation;
+use App\ActionsHistory;
+use App\CustomSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +17,13 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\ApiController as ApiController;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
+use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class UserController extends Controller {
 
@@ -25,8 +32,51 @@ class UserController extends Controller {
      *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
 
+    }
+
+    public static function getTransFields()
+    {
+        return [
+            [
+                'label'    => 'Наименование',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'Описание',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'Дейност',
+                'name'     => 'activity_info',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'Контакти',
+                'name'     => 'contacts',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['Заглавие', 'Стойност'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
     }
 
     /**
@@ -35,9 +85,7 @@ class UserController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request) {
-
-
-        return view('user/newsFeed', ['class' => 'user']);
+        return redirect()->action('UserController@newsFeed');
     }
 
     public function datasets(Request $request) {
@@ -294,14 +342,14 @@ class UserController extends Controller {
     {
         $perPage = 6;
         $params = [
-            'api_key'        => \Auth::user()->api_key,
+            'api_key'          => \Auth::user()->api_key,
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $request = Request::create('/api/getOrganisations', 'POST', $params);
+        $request = Request::create('/api/getUserOrganisations', 'POST', $params);
         $api = new ApiOrganisations($request);
-        $result = $api->getOrganisations($request)->getData();
+        $result = $api->getUserOrganisations($request)->getData();
 
         $paginationData = $this->getPaginationData($result->organisations, $result->total_records, [], $perPage);
 
@@ -319,14 +367,16 @@ class UserController extends Controller {
     {
         $params = [
             'api_key' => \Auth::user()->api_key,
-            'org_id'  => $request->id,
+            'org_id'  => $request->org_id,
         ];
 
         $request = Request::create('/api/deleteOrganisation', 'POST', $params);
         $api = new ApiOrganisations($request);
         $result = $api->deleteOrganisation($request)->getData();
 
-        return redirect('/user/organisations');
+        return !$result->success
+            ? redirect('/user/organisations')->with('result', $result)
+            : redirect('/user/organisations')->with('success', 'Организацията беше изтрита успешно!');
     }
 
     public function searchOrg(Request $request)
@@ -368,43 +418,42 @@ class UserController extends Controller {
         );
     }
 
-
-    public function confirmation(Request $request)
+    public function registerOrg(Request $request)
     {
-        $class = 'user';
-        $hash = $request->offsetGet('hash');
+        $post = [
+            'data' => $request->all()
+        ];
 
-        if ($hash) {
-            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+        if (!empty($post['data']['logo'])) {
+            try {
+                $img = \Image::make($post['data']['logo']);
 
-            if ($user) {
-                $user->active = true;
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo_mimetype'] = $img->mime();
+                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
-                try {
-                    $user->save();
-                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
-
-                    return redirect('login');
-                } catch (QueryException $ex) {
-                    Log::error($ex->getMessage());
-                }
-            }
-
-            if ($request->has('generate')) {
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
-                });
+                unset($post['data']['logo']);
+            } catch (NotReadableException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return view('confirmError', compact('class'));
+        $post['data']['description'] = $post['data']['descript'];
+        $request = Request::create('/api/addOrganisation', 'POST', $post);
+        $api = new ApiOrganisations($request);
+        $result = $api->addOrganisation($request)->getData();
+
+        if ($result->success) {
+            session()->flash('success', 'Промените бяха запазени успешно!');
+        } else {
+            session()->flash('result', $result);
+        }
+
+        return $result->success
+            ? redirect('/organisation/profile')
+            : redirect('user/organisations/register')->withInput(Input::all());
     }
+
 
     public function mailConfirmation(Request $request)
     {
@@ -445,6 +494,80 @@ class UserController extends Controller {
         }
 
         return view('confirmError', compact('class'));
+    }
+
+    public function showOrgRegisterForm() {
+
+        return view('user/orgRegister', ['class' => 'user', 'fields' => self::getTransFields()]);
+    }
+
+    public function editOrg(Request $request)
+    {
+        if (isset($request->view)) {
+            $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
+            $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+            $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+            return view(
+                'user/orgEdit',
+                [
+                    'class'     => 'user',
+                    'model'     => $orgModel,
+                    'withModel' => $customModel,
+                    'fields'    => self::getTransFields()
+                ]
+            );
+        }
+
+        $post = [
+            'data'   => $request->all(),
+            'org_id' => $request->org_id
+        ];
+
+        if (!empty($post['data']['logo'])) {
+            try {
+                $img = \Image::make($post['data']['logo']);
+
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo_mimetype'] = $img->mime();
+                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
+
+                unset($post['data']['logo']);
+            } catch (NotReadableException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
+        $post['data']['description'] = $post['data']['descript'];
+        $request = Request::create('/api/editOrganisation', 'POST', $post);
+        $api = new ApiOrganisations($request);
+        $result = $api->editOrganisation($request)->getData();
+        $errors = !empty($result->errors) ? $result->errors : [];
+
+        $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
+        $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+        $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+        return !$result->success
+            ? view(
+                'user/orgEdit',
+                [
+                    'class'     => 'user',
+                    'model'     => $orgModel,
+                    'withModel' => $customModel,
+                    'fields'    => self::getTransFields()
+                ]
+            )->with('result', $result)
+            : view(
+                'user/orgEdit',
+                [
+                    'class'     => 'user',
+                    'model'     => $orgModel,
+                    'withModel' => $customModel,
+                    'fields'    => self::getTransFields()
+                ]
+            )->with('success', 'Промените бяха запазени успешно!');
     }
 
     public function inviteUser(Request $request)
@@ -530,6 +653,441 @@ class UserController extends Controller {
             }
         } else {
             $request->session()->flash('alert-danger', 'Грешни параметри на заявка');
+
+            return redirect('/');
+        }
+    }
+
+    public function newsFeed(Request $request)
+    {
+        $user = User::find(Auth::id());
+        if ($user) {
+            $criteria = [];
+            $actObjData = [];
+
+            $params = [
+                'api_key' => $user->api_key,
+                'id'      => $user->id
+            ];
+            $rq = Request::create('/api/getUserSettings', 'POST', $params);
+            $api = new ApiUser($rq);
+            $result = $api->getUserSettings($rq)->getData();
+            if (!empty($result->user) && !empty($result->user->follows)) {
+                $userFollows = [
+                    'org_id'         => [],
+                    'group_id'       => [],
+                    'category_id'    => [],
+                    'tag_id'         => [],
+                    'follow_user_id' => [],
+                    'dataset_id'     => []
+                ];
+                foreach ($result->user->follows as $follow) {
+                    foreach ($follow as $followProp => $followId) {
+                        if ($followId) {
+                            $userFollows[$followProp][] = $followId;
+                        }
+                    }
+                }
+
+                $locale = \LaravelLocalization::getCurrentLocale();
+                if (!empty($userFollows['org_id'])) {
+                    $params = [
+                        'criteria' => ['org_ids' => $userFollows['org_id'], 'locale' => $locale]
+                    ];
+                    $rq = Request::create('/api/listOrganisations', 'POST', $params);
+                    $api = new ApiOrganisations($rq);
+                    $res = $api->listOrganisations($rq)->getData();
+                    if (isset($res->success) && $res->success == 1 && !empty($res->organisations)) {
+                        $objType = ActionsHistory::MODULE_NAMES[2];
+                        $actObjData[$objType] = [];
+                        foreach ($res->organisations as $org) {
+                            $actObjData[$objType][$org->id] = [
+                                'obj_id'   => $org->id,
+                                'obj_name' => $org->name,
+                                'obj_type' => 'org',
+                                'obj_view' => '/organisation/profile',
+                                'parent_obj_id' => ''
+                            ];
+                            $criteria['org_ids'][] = $org->id;
+                            $params = [
+                                'criteria' => ['org_id' => $org->id, 'locale' => $locale]
+                            ];
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                        }
+                    }
+                }
+                if (!empty($userFollows['group_id'])) {
+                    $params = [
+                        'criteria' => ['group_ids' => $userFollows['group_id'], 'locale' => $locale]
+                    ];
+                    $rq = Request::create('/api/listGroups', 'POST', $params);
+                    $api = new ApiOrganisations($rq);
+                    $res = $api->listGroups($rq)->getData();
+                    if (isset($res->success) && $res->success == 1 && !empty($res->groups)) {
+                        $objType = ActionsHistory::MODULE_NAMES[3];
+                        $actObjData[$objType] = [];
+                        foreach ($res->groups as $group) {
+                            $actObjData[$objType][$group->id] = [
+                                'obj_id'   => $group->id,
+                                'obj_name' => $group->name,
+                                'obj_type' => 'group',
+                                'obj_view' => '/group/profile',
+                                'parent_obj_id' => ''
+                            ];
+                            $criteria['group_ids'][] = $group->id;
+                            $params = [
+                                'criteria' => ['group_id' => $group->id, 'locale' => $locale]
+                            ];
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                        }
+                    }
+                }
+                if (!empty($userFollows['category_id'])) {
+                    $params = [
+                        'criteria' => ['category_ids' => $userFollows['category_id'], 'locale' => $locale]
+                    ];
+                    $rq = Request::create('/api/listMainCategories', 'POST', $params);
+                    $api = new ApiCategory($rq);
+                    $res = $api->listMainCategories($rq)->getData();
+                    if (isset($res->success) && $res->success == 1 && !empty($res->categories)) {
+                        $objType = ActionsHistory::MODULE_NAMES[0];
+                        $actObjData[$objType] = [];
+                        foreach ($res->categories as $category) {
+                            $actObjData[$objType][$category->id] = [
+                                'obj_id'   => $category->id,
+                                'obj_name' => $category->name,
+                                'obj_type' => 'category',
+                                'obj_view' => '',
+                                'parent_obj_id' => ''
+                            ];
+                            $criteria['category_ids'][] = $category->id;
+                            $params = [
+                                'criteria' => ['category_id' => $category->id, 'locale' => $locale]
+                            ];
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                        }
+                    }
+                }
+                if (!empty($userFollows['tag_id'])) {
+                    $params = [
+                        'criteria' => ['tag_ids' => $userFollows['tag_id'], 'locale' => $locale]
+                    ];
+                    $rq = Request::create('/api/listTags', 'POST', $params);
+                    $api = new ApiCategory($rq);
+                    $res = $api->listTags($rq)->getData();
+                    if (isset($res->success) && $res->success == 1 && !empty($res->tags)) {
+                        $objType = ActionsHistory::MODULE_NAMES[1];
+                        $actObjData[$objType] = [];
+                        foreach ($res->tags as $tag) {
+                            $actObjData[$objType][$tag->id] = [
+                                'obj_id'   => $tag->id,
+                                'obj_name' => $tag->name,
+                                'obj_type' => 'tag',
+                                'obj_view' => '',
+                                'parent_obj_id' => ''
+                            ];
+                            $criteria['tag_ids'][] = $tag->id;
+                            $params = [
+                                'criteria' => ['tag_id' => $tag->id, 'locale' => $locale]
+                            ];
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                        }
+                    }
+                }
+                if (!empty($userFollows['follow_user_id'])) {
+                    $params = [
+                        'criteria' => ['user_ids' => $userFollows['follow_user_id']]
+                    ];
+                    $rq = Request::create('/api/listUsers', 'POST', $params);
+                    $api = new ApiUser($rq);
+                    $res = $api->listUsers($rq)->getData();
+                    if (isset($res->success) && $res->success == 1 && !empty($res->users)) {
+                        foreach ($res->users as $followUser) {
+                            $objType = ActionsHistory::MODULE_NAMES[4];
+                            $actObjData[$objType] = [];
+                            $actObjData[$objType][$followUser->id] = [
+                                'obj_id'   => $followUser->id,
+                                'obj_name' => $followUser->firstname .' '. $followUser->lastname,
+                                'obj_type' => 'user',
+                                'obj_view' => '/user/profile',
+                                'parent_obj_id' => ''
+                            ];
+                            $criteria['user_ids'][] = $followUser->id;
+                            $params = [
+                                'criteria' => ['created_by' => $followUser->id, 'locale' => $locale]
+                            ];
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                        }
+                    }
+                }
+                if (!empty($userFollows['dataset_id'])) {
+                    $params = [
+                        'criteria' => ['dataset_ids' => $userFollows['dataset_id'], 'locale' => $locale]
+                    ];
+                    $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                }
+            }
+
+            // user profile actions
+            $objType = ActionsHistory::MODULE_NAMES[4];
+            $actObjData[$objType] = [
+                $user->id => [
+                    'obj_id'   => $user->id,
+                    'obj_name' => $user->firstname .' '. $user->lastname,
+                    'obj_type' => 'user',
+                    'obj_view' => '/user/profile',
+                    'parent_obj_id' => ''
+                ]
+            ];
+            $criteria['user_ids'][] = $user->id;
+
+            $perPage = 5;
+            $params = [
+                'api_key'          => $user->api_key,
+                'criteria'         => $criteria,
+                'records_per_page' => $perPage,
+                'page_number'      => !empty($request->page) ? $request->page : 1,
+            ];
+
+            $rq = Request::create('/api/listActionHistory', 'POST', $params);
+            $api = new ApiActionsHistory($rq);
+            $result = $api->listActionHistory($rq)->getData();
+            $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
+            $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+
+            return view(
+                'user/newsFeed',
+                [
+                    'class'          => 'user',
+                    'actionsHistory' => $paginationData['items'],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => ActionsHistory::getTypes(),
+                    'pagination'     => $paginationData['paginate']
+                ]
+            );
+        }
+
+        return redirect('/');
+    }
+
+    private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData) {
+        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $api = new ApiDataSets($rq);
+        $res = $api->listDataSets($rq)->getData();
+        if (isset($res->success) && $res->success == 1 && !empty($res->datasets)) {
+            $objType = ActionsHistory::MODULE_NAMES[5];
+            if (!isset($actObjData[$objType])) {
+                $actObjData[$objType] = [];
+            }
+            foreach ($res->datasets as $dataset) {
+                if (!isset($actObjData[$objType][$dataset->id])) {
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id' => $dataset->id,
+                        'obj_name' => $dataset->name,
+                        'obj_type' => 'dataset',
+                        'obj_view' => '/data/view',
+                        'parent_obj_id' => ''
+                    ];
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    if (!empty($dataset->resource)) {
+                        $objTypeRes = ActionsHistory::MODULE_NAMES[6];
+                        foreach ($dataset->resource as $resource) {
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id' => $resource->uri,
+                                'obj_name' => $resource->name,
+                                'obj_type' => 'resource',
+                                'obj_view' => '/data/resourceView',
+                                'parent_obj_id' => $dataset->id,
+                                'parent_obj_name' => $dataset->name,
+                                'parent_obj_type' => 'dataset',
+                                'parent_obj_view' => '/data/view'
+                            ];
+                            $criteria['resource_uris'][] = $resource->uri;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function confirmation(Request $request)
+    {
+        $class = 'user';
+        $hash = $request->offsetGet('hash');
+
+        if ($hash) {
+            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+
+            if ($user) {
+                $user->active = true;
+
+                try {
+                    $user->save();
+                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
+
+                    return redirect('login');
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            }
+
+            if ($request->has('generate')) {
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                ];
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+                });
+            }
+        }
+
+        return view('confirmError', compact('class'));
+    }
+
+    public function listUsers(Request $request)
+    {
+        $perPage = 6;
+        $class = 'user';
+        $users = [];
+        $params = [
+            'api_key'           => Auth::user()->api_key,
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $listReq = Request::create('/api/listUsers', 'POST', $params);
+        $api = new ApiUser($listReq);
+        $result = $api->listUsers($listReq)->getData();
+
+        $paginationData = $this->getPaginationData($result->users, $result->total_records, [], $perPage);
+
+        return view('/user/list', [
+            'class'         => $class,
+            'users'         => $paginationData['items'],
+            'pagination'    => $paginationData['paginate'],
+        ]);
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $perPage = 6;
+        $search = $request->search;
+
+        if (empty(trim($search))) {
+            return redirect()->route('usersList');
+        }
+
+        $params = [
+            'api_key'           => Auth::user()->api_key,
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+            'criteria'          => [
+                'keywords'          => $search,
+            ],
+        ];
+
+        $searchReq = Request::create('/api/searchUsers', 'POST', $params);
+        $api = new ApiUser($searchReq);
+        $result = $api->searchUsers($searchReq)->getData();
+
+        $users = !empty($result->users) ? $result->users : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $getParams = [
+            'search' => $search
+        ];
+
+        $paginationData = $this->getPaginationData($users, $count, $getParams, $perPage);
+
+        return view(
+            'user/list',
+            [
+                'class'         => 'user',
+                'users'         => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'search'        => $search
+            ]
+        );
+    }
+
+    public function profile(Request $request, $id)
+    {
+        $followersCount = 0;
+        $followed = false;
+        $params = [
+            'api_key'   => Auth::user()->api_key,
+            'criteria'  => [
+                'id'        => $id,
+            ],
+        ];
+
+        $listReq = Request::create('/api/listUsers', 'POST', $params);
+        $apiUser = new ApiUser($listReq);
+        $result = $apiUser->listUsers($listReq)->getData();
+
+        if ($result->success) {
+            $follReq = Request::create('api/getFollowersCount', 'POST', $params);
+            $apiFollow = new ApiFollow($follReq);
+            $followers = $apiFollow->getFollowersCount($follReq)->getData();
+
+            if ($followers->success) {
+                $followersCount = $followers->count;
+
+                foreach($followers->followers as $follower) {
+                    if ($follower->user_id == Auth::user()->id) {
+                        $followed = true;
+
+                        break;
+                    }
+                }
+            }
+
+            $setsReq = Request::create('api/getUsersDataSetCount', 'POST', $params);
+            $apiDataSet = new ApiDataSets($setsReq);
+            $setsCount = $apiDataSet->getUsersDataSetCount($setsReq)->getData();
+
+            if ($request->has('follow')) {
+                $follow = Request::create('api/addFollow', 'POST', [
+                    'api_key'           => Auth::user()->api_key,
+                    'user_id'           => Auth::user()->id,
+                    'follow_user_id'    => $id,
+                ]);
+
+                $followResult = $apiFollow->addFollow($follow)->getData();
+
+                if ($followResult->success) {
+
+                    return back();
+                }
+            }
+
+            if ($request->has('unfollow')) {
+                $follow = Request::create('api/unFollow', 'POST', [
+                    'api_key'           => Auth::user()->api_key,
+                    'user_id'           => Auth::user()->id,
+                    'follow_user_id'    => $id,
+                ]);
+
+                $followResult = $apiFollow->unFollow($follow)->getData();
+
+                if ($followResult->success) {
+
+                    return back();
+                }
+            }
+
+            return view('user/profile', [
+                'user'              => $result->users[0],
+                'class'             => 'user',
+                'ownProfile'        => $id == Auth::id(),
+                'followersCount'    => $followersCount,
+                'followed'          => $followed,
+                'dataSetsCount'     => $setsCount->success ? $setsCount->count : 0,
+            ]);
+        } else {
 
             return redirect('/');
         }

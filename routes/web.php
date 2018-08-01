@@ -28,6 +28,9 @@ Route::get('/logout', function() {
 Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
     Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
+    Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
+    Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
+    Route::get('/users/list/search', 'UserController@searchUsers');
 });
 
 Route::get('/preGenerated', 'UserController@preGenerated');
@@ -39,7 +42,6 @@ Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration
 
 Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
 Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
-
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
@@ -92,6 +94,9 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
+Route::get('/user/newsFeed', 'UserController@newsFeed');
+Route::post('/user/newsFeed', 'UserController@newsFeed');
+
 Route::get('/user/datasets', 'UserController@datasets');
 Route::get('/user/datasetView/{uri}', 'UserController@datasetView');
 Route::post('/user/deleteDataset', 'UserController@deleteDataset');
@@ -101,13 +106,21 @@ Route::get('/user/resourceView', function () {
     return view('user/resourceView', ['class' => 'user']);
 });
 
-Route::get('/user/organisations', 'UserController@organisations');
-Route::post('/user/organisation/delete', 'UserController@deleteOrg');
-Route::get('/user/organisations/search', 'UserController@searchOrg');
-
 Route::get('/user/groups', function () {
     return view('user/groups', ['class' => 'user']);
 });
+
+Route::get('/user/organisations', 'UserController@organisations');
+
+Route::post('/user/organisation/delete', 'UserController@deleteOrg');
+
+Route::get('/user/organisations/search', 'UserController@searchOrg');
+
+Route::post('/user/organisations/register', 'UserController@registerOrg');
+
+Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+
+Route::post('/user/organisation/edit', 'UserController@editOrg');
 
 Route::get('/user/groupView', function () {
     return view('user/groupView', ['class' => 'user']);
@@ -169,4 +182,4 @@ Route::get('/visualisation', function () {
     return view('visualisation/visualisation', ['class' => 'visualisations']);
 });
 
-Route::get('lang/{lang}', ['as'=>'lang.switch', 'uses'=>'LanguageController@switchLang']);
+Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'LanguageController@switchLang']);

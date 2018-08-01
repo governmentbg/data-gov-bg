@@ -4,6 +4,16 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12 m-t-md">
+                @if (isset(session('result')->error))
+                    <div class="alert alert-danger">
+                        {{ session('result')->error->message }}
+                    </div>
+                @endif
+                @if (!empty(session('success')))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
                 <div class="row">
                     <div class="col-xs-12 p-sm">
                         <div class="filter-content">
@@ -35,7 +45,7 @@
                                 </div>
                                 <div class="row create-org">
                                     <div class="col-xs-12 p-l-none text-right">
-                                        <span>създаване на организация</span>
+                                        <a href="{{ url('/user/organisations/register') }}"><span>създаване на организация</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -60,11 +70,16 @@
                         </div>
                         <div class="col-xs-12 ch-del-btns">
                             <div class="row">
-                                <div class="col-xs-6"><button type="submit" name="change">промяна</button></div>
+                                <form method="POST" action="{{ url('/user/organisation/edit') }}">
+                                    {{ csrf_field() }}
+                                    <div class="col-xs-6"><button type="submit" name="edit">промяна</button></div>
+                                    <input type="hidden" name="org_id" value="{{ $organisation->id }}">
+                                    <input type="hidden" name="view" value="1">
+                                </form>
                                 <form method="POST" action="{{ url('/user/organisation/delete') }}">
                                     {{ csrf_field() }}
                                     <div class="col-xs-6 text-right"><button type="submit" name="delete">изтриване</button></div>
-                                    <input class="user-org-del" type="hidden" name="id" value="{{ $organisation->id }}">
+                                    <input class="user-org-del" type="hidden" name="org_id" value="{{ $organisation->id }}">
                                 </form>
                             </div>
                         </div>

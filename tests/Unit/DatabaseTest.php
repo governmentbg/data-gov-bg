@@ -6,6 +6,8 @@ use App\Role;
 use App\User;
 use App\Locale;
 use App\Signal;
+use App\Page;
+use App\Section;
 use App\DataSet;
 use App\Category;
 use App\Document;
@@ -14,6 +16,7 @@ use App\RoleRight;
 use App\TermsOfUse;
 use App\UserFollow;
 use Tests\TestCase;
+use App\Translator\Translation;
 use App\UserSetting;
 use App\DataSetGroup;
 use App\Organisation;
@@ -25,7 +28,7 @@ use App\TermsOfUseRequest;
 use App\DataSetSubCategory;
 use Faker\Factory as Faker;
 use App\NewsletterDigestLog;
-use App\Translator\Translation;
+use App\DataRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -43,6 +46,9 @@ class DatabaseTest extends TestCase
     const NEWSLETTER_DIGEST_LOG_RECORDS = 10;
     const TRANSLATION_RECORDS = 10;
     const ORGANISATION_RECORDS = 10;
+    const PAGES_RECORDS = 10;
+    const SECTIONS_RECORDS = 10;
+    const DATA_REQUESTS_RECORDS = 10;
     const ACTIONS_HISTORY_RECORDS = 10;
     const CATEGORY_RECORDS = 10;
     const DATASET_RECORDS = 10;
@@ -74,6 +80,9 @@ class DatabaseTest extends TestCase
         $this->locale();
         $this->translations();
         $this->organisations();
+        $this->pages();
+        $this->sections();
+        $this->dataRequests();
         $this->actionsHistory();
         $this->category();
         $this->dataSets();
@@ -473,6 +482,106 @@ class DatabaseTest extends TestCase
         }
     }
 
+     /**
+     * Tests DataRequest table structure and models
+     *
+     * @return void
+     */
+    private function dataRequests()
+    {
+        // Test creation
+        $orgs = Organisation::orderBy('created_at', 'desc')->limit(self::DATA_REQUESTS_RECORDS)->get()->toArray();
+        foreach (range(1, self::DATA_REQUESTS_RECORDS) as $i) {
+            $org = $this->faker->randomElement($orgs)['id'];
+            $record = null;
+            $dbData = [
+                'org_id'=> $org,
+                'descript' => $this->faker->sentence(3),
+                'published_url' => $this->faker->url,
+                'contact_name' => $this->faker->name,
+                'email' => $this->faker->email,
+                'notes' => $this->faker->sentence(4),
+                'status' => $this->faker->boolean()
+            ];
+
+            try {
+                $record = DataRequest::create($dbData);
+            }
+            catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+        }
+    }
+    /**
+     * Tests pages table structure and models
+     *
+     * @return void
+     */
+    private function pages()
+    {
+        // Test creation
+        $locales = Locale::where('active', 1)->limit(self::PAGES_RECORDS)->get()->toArray();
+        $sections = Section::limit(self::PAGES_RECORDS)->get()->toArray();
+        foreach (range(1, self::PAGES_RECORDS) as $i) {
+            $record = null;
+            $locale = $this->faker->randomElement($locales)['locale'];
+            $section = $this->faker->randomElement($sections)['id'];
+            $dbData = [
+                'section_id'     => $section,
+                'title'          => $this->faker->randomDigit(),
+                'abstract'       => $this->faker->randomDigit(),
+                'body'           => $this->faker->randomDigit(),
+                'head_title'     => $this->faker->randomDigit(),
+                'meta_descript'  => $this->faker->randomDigit(),
+                'meta_key_words' => $this->faker->randomDigit(),
+                'forum_link'     => $this->faker->word,
+                'active'         => $this->faker->boolean,
+                'valid_from'     => $this->faker->date,
+                'valid_to'       => $this->faker->date,
+            ];
+
+            try {
+                $record = Page::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+
+            $this->assertNotNull($record);
+            $this->assertDatabaseHas('pages', ['id' => $record->id]);
+        }
+    }
+    /**
+     * Tests sections table structure and models
+     *
+     * @return void
+     */
+    private function sections()
+    {
+        // Test creation
+        $locales = Locale::where('active', 1)->limit(self::SECTIONS_RECORDS)->get()->toArray();
+        foreach (range(1, self::SECTIONS_RECORDS) as $i) {
+            $record = null;
+            $locale = $this->faker->randomElement($locales)['locale'];
+            $dbData = [
+                'name'         => [$locale=>$this->faker->word],
+                'parent_id'    => 1,
+                'active'       => $this->faker->boolean(),
+                'ordering'     => $this->faker->boolean(),
+                'read_only'    => $this->faker->boolean(),
+                'forum_link'   => $this->faker->url(),
+                'theme'        => $this->faker->randomDigit(),
+            ];
+
+            try {
+                $record = Section::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+
+            $this->assertNotNull($record);
+            $this->assertDatabaseHas('sections', ['id' => $record->id]);
+        }
+    }
     /**
      * Tests actions_history table structure and models
      *
@@ -493,7 +602,7 @@ class DatabaseTest extends TestCase
 
             $dbData = [
                 'user_id'       => $user,
-                'occurrence'     => $this->faker->dateTime(),
+                'occurrence'    => $this->faker->dateTime(),
                 'module_name'   => $module,
                 'action'        => $type,
                 'action_object' => $this->faker->sentence(),
@@ -687,11 +796,11 @@ class DatabaseTest extends TestCase
             $record = null;
             $dbData = [
                 'resource_id' => $resource,
-                'descript' =>$this->faker->sentence(4),
-                'firstname' => $this->faker->firstName(),
-                'lastname' => $this->faker->lastName(),
-                'email'=> $this->faker->email(),
-                'status' => $this->faker->boolean()
+                'descript'    =>$this->faker->sentence(4),
+                'firstname'   => $this->faker->firstName(),
+                'lastname'    => $this->faker->lastName(),
+                'email'       => $this->faker->email(),
+                'status'      => $this->faker->boolean()
             ];
 
             try {
@@ -767,6 +876,7 @@ class DatabaseTest extends TestCase
             }
 
             $this->assertNotNull($record);
+            $this->assertDatabaseHas('data_requests', ['id' => $record->id]);
 
             if (!empty($record->id)) {
                 $this->assertDatabaseHas('terms_of_use_requests', ['id' => $record->id]);
@@ -847,7 +957,7 @@ class DatabaseTest extends TestCase
                 }
 
                 $this->assertNotNull($record);
-    
+
                 if (!empty($record->id)) {
                     $this->assertDatabaseHas('user_settings', ['id' => $record->id]);
                 }
@@ -975,9 +1085,9 @@ class DatabaseTest extends TestCase
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
             $record = null;
             $dbData = [
-                'index' => $this->faker->word,
+                'index'       => $this->faker->word,
                 'index_type'  => $this->faker->word,
-                'doc' => $this->faker->randomDigit()
+                'doc'         => $this->faker->randomDigit()
             ];
 
             try {
@@ -1005,11 +1115,11 @@ class DatabaseTest extends TestCase
             $organisation = $this->faker->randomElement($organisations)['id'];
             $record = null;
             $dbData = [
-                'org_id' => $organisation,
+                'org_id'       => $organisation,
                 'data_set_id'  => null,
-                'resource_id' => null,
-                'key' => 1,
-                'value' => 2
+                'resource_id'  => null,
+                'key'          => 1,
+                'value'        => 2
             ];
 
             try {

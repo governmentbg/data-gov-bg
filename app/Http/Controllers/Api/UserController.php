@@ -32,6 +32,7 @@ class UserController extends ApiController
      * @param integer criteria[org_id] - optional
      * @param integer criteria[role_id] - optional
      * @param integer criteria[id] - optional
+     * @param array criteria[user_ids] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -52,7 +53,8 @@ class UserController extends ApiController
             'criteria.is_admin'     => 'nullable|integer',
             'criteria.role_id'      => 'nullable|integer',
             'criteria.org_id'       => 'nullable|integer',
-            'criteria.id'           => 'nullable|interger',
+            'criteria.id'           => 'nullable|integer',
+            'criteria.user_ids'     => 'nullable|array',
             'criteria.order'        => 'nullable|array',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
@@ -87,7 +89,11 @@ class UserController extends ApiController
 
             if (!empty($criteria['id'])) {
                 $query->where('id', $criteria['id']);
+            } elseif (isset($criteria['user_ids'])) {
+                $query->whereIn('id', $criteria['user_ids']);
             }
+
+            $query->where('username', '!=', 'system');
 
             $count = $query->count();
 
@@ -143,6 +149,7 @@ class UserController extends ApiController
             $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
             $query = User::whereIn('id', $ids);
 
+            $query->where('username', '!=', 'system');
             $count = $query->count();
 
             $query->forPage(
@@ -230,7 +237,7 @@ class UserController extends ApiController
                         $result['follows'][] = [
                             'news'        => $follow['news'],
                             'org_id'      => $follow['org_id'],
-                            'dataset_id'  => $follow['dataset_id'],
+                            'dataset_id'  => $follow['data_set_id'],
                             'category_id' => $follow['category_id'],
                         ];
                     }
@@ -818,8 +825,8 @@ class UserController extends ApiController
         $user->email = $request->data['email'];
         $user->firstname = $request->data['firstname'];
         $user->lastname = $request->data['lastname'];
-        $user->add_info = !empty($request->data['addinfo'])
-            ? $request->data['addinfo']
+        $user->add_info = !empty($request->data['add_info'])
+            ? $request->data['add_info']
             : null;
         $user->is_admin = 0;
         $user->active = 0;
@@ -969,4 +976,6 @@ class UserController extends ApiController
 
         return $username;
     }
+
+    // public function getUserFollows()
 }

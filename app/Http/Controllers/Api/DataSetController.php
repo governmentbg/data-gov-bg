@@ -252,6 +252,7 @@ class DataSetController extends ApiController
      * API function for listing Data Sets
      *
      * @param array criteria - optional
+     * @param array criteria[dataset_ids] - optional
      * @param string criteria[locale] - optional
      * @param integer criteria[org_id] - optional
      * @param integer criteria[group_id] - optional
@@ -260,6 +261,7 @@ class DataSetController extends ApiController
      * @param integer criteria[terms_of_use_id] - optional
      * @param string criteria[format] - optional
      * @param integer criteria[reported] - optional
+     * @param integer criteria[created_by] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -279,6 +281,7 @@ class DataSetController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
+                'criteria.dataset_ids'       => 'nullable|array',
                 'criteria.locale'            => 'nullable|string|max:5',
                 'criteria.org_id'            => 'nullable|integer',
                 'criteria.group_id'          => 'nullable|integer',
@@ -287,6 +290,7 @@ class DataSetController extends ApiController
                 'criteria.format'            => 'nullable|string',
                 'criteria.terms_of_use_id'   => 'nullable|integer',
                 'criteria.reported'          => 'nullable|integer',
+                'criteria.created_by'        => 'nullable|integer',
                 'criteria.order.type'        => 'nullable|string',
                 'criteria.order.field'       => 'nullable|string',
                 'records_per_page'           => 'nullable|integer',
@@ -300,12 +304,22 @@ class DataSetController extends ApiController
                 try {
                     $query = DataSet::where('status', DataSet::STATUS_DRAFT);
 
+                    if (!empty($request->criteria['dataset_ids'])) {
+                        $query->whereIn('id', $request->criteria['dataset_ids']);
+                    }
+
+                    if (!empty($criteria['created_by'])) {
+                        $query->where('created_by', $criteria['created_by']);
+                    }
+
                     if (!empty($criteria['org_id'])) {
                         $query->where('org_id', $criteria['org_id']);
                     }
 
                     if (!empty($criteria['group_id'])) {
-                        $query->where('group_id', $criteria['group_id']);
+                        $query->whereHas('datasetgroup', function($q) use($criteria) {
+                            $q->where('group_id', $criteria['group_id']);
+                        });
                     }
 
                     if (!empty($criteria['category_id'])) {
@@ -313,8 +327,8 @@ class DataSetController extends ApiController
                     }
 
                     if (!empty($criteria['tag_id'])) {
-                        $query->whereHas('category', function($q) use($criteria) {
-                            $q->where('id', $criteria['tag_id']);
+                        $query->whereHas('datasetsubcategory', function($q) use($criteria) {
+                            $q->where('sub_cat_id', $criteria['tag_id']);
                         });
                     }
 
@@ -652,5 +666,35 @@ class DataSetController extends ApiController
 
             return false;
         }
+    }
+
+    /**
+     * Function for getting the number of DataSets a given user has
+     *
+     * @param string api_key - required
+     * @param array criteria - required
+     * @param integer id - required
+     *
+     * @return json result with DataSet count or error
+     */
+    public function getUsersDataSetCount(Request $request)
+    {
+        $data = $request->criteria;
+
+        $validator = \Validator::make($data, ['id' => 'required|integer']);
+
+        if (!$validator->fails()) {
+            $sets = DataSet::where('created_by', $data['id']);
+
+            try {
+                $count = $sets->count();
+
+                return $this->successResponse(['count' => $count], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Get Users DataSet count failure');
     }
 }

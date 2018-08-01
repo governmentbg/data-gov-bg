@@ -21,7 +21,6 @@ class CreateOrganisationsTable extends Migration
             $table->string('uri')->unique();
             $table->string('logo_file_name')->nullable();
             $table->string('logo_mime_type')->nullable();
-            $table->binary('logo_data')->nullable();
             $table->integer('activity_info')->unsigned()->nullable();
             $table->integer('contacts')->unsigned()->nullable();
             $table->integer('parent_org_id')->unsigned()->nullable();
@@ -37,6 +36,8 @@ class CreateOrganisationsTable extends Migration
             $table->foreign('deleted_by')->references('id')->on('users');
             $table->softDeletes();
         });
+
+        DB::statement("ALTER TABLE organisations ADD logo_data MEDIUMBLOB");
 
         DB::unprepared("
             CREATE TRIGGER check_organisations_insert BEFORE INSERT ON organisations

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Locale;
 use App\UserSetting;
 use App\Organisation;
 use App\ActionsHistory;
+use App\CustomSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\ApiController as ApiController;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
@@ -28,8 +31,51 @@ class UserController extends Controller {
      *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
 
+    }
+
+    public static function getTransFields()
+    {
+        return [
+            [
+                'label'    => 'Наименование',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'Описание',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'Дейност',
+                'name'     => 'activity_info',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'Контакти',
+                'name'     => 'contacts',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['Заглавие', 'Стойност'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
     }
 
     /**
@@ -295,14 +341,14 @@ class UserController extends Controller {
     {
         $perPage = 6;
         $params = [
-            'api_key'        => \Auth::user()->api_key,
+            'api_key'          => \Auth::user()->api_key,
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $request = Request::create('/api/getOrganisations', 'POST', $params);
+        $request = Request::create('/api/getUserOrganisations', 'POST', $params);
         $api = new ApiOrganisations($request);
-        $result = $api->getOrganisations($request)->getData();
+        $result = $api->getUserOrganisations($request)->getData();
 
         $paginationData = $this->getPaginationData($result->organisations, $result->total_records, [], $perPage);
 
@@ -320,14 +366,16 @@ class UserController extends Controller {
     {
         $params = [
             'api_key' => \Auth::user()->api_key,
-            'org_id'  => $request->id,
+            'org_id'  => $request->org_id,
         ];
 
         $request = Request::create('/api/deleteOrganisation', 'POST', $params);
         $api = new ApiOrganisations($request);
         $result = $api->deleteOrganisation($request)->getData();
 
-        return redirect('/user/organisations');
+        return !$result->success
+            ? redirect('/user/organisations')->with('result', $result)
+            : redirect('/user/organisations')->with('success', 'Организацията беше изтрита успешно!');
     }
 
     public function searchOrg(Request $request)
@@ -369,43 +417,42 @@ class UserController extends Controller {
         );
     }
 
-
-    public function confirmation(Request $request)
+    public function registerOrg(Request $request)
     {
-        $class = 'user';
-        $hash = $request->offsetGet('hash');
+        $post = [
+            'data' => $request->all()
+        ];
 
-        if ($hash) {
-            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+        if (!empty($post['data']['logo'])) {
+            try {
+                $img = \Image::make($post['data']['logo']);
 
-            if ($user) {
-                $user->active = true;
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo_mimetype'] = $img->mime();
+                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
-                try {
-                    $user->save();
-                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
-
-                    return redirect('login');
-                } catch (QueryException $ex) {
-                    Log::error($ex->getMessage());
-                }
-            }
-
-            if ($request->has('generate')) {
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
-                });
+                unset($post['data']['logo']);
+            } catch (NotReadableException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return view('confirmError', compact('class'));
+        $post['data']['description'] = $post['data']['descript'];
+        $request = Request::create('/api/addOrganisation', 'POST', $post);
+        $api = new ApiOrganisations($request);
+        $result = $api->addOrganisation($request)->getData();
+
+        if ($result->success) {
+            session()->flash('success', 'Промените бяха запазени успешно!');
+        } else {
+            session()->flash('result', $result);
+        }
+
+        return $result->success
+            ? redirect('/organisation/profile')
+            : redirect('user/organisations/register')->withInput(Input::all());
     }
+
 
     public function mailConfirmation(Request $request)
     {
@@ -446,6 +493,80 @@ class UserController extends Controller {
         }
 
         return view('confirmError', compact('class'));
+    }
+
+    public function showOrgRegisterForm() {
+
+        return view('user/orgRegister', ['class' => 'user', 'fields' => self::getTransFields()]);
+    }
+
+    public function editOrg(Request $request)
+    {
+        if (isset($request->view)) {
+            $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
+            $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+            $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+            return view(
+                'user/orgEdit',
+                [
+                    'class'     => 'user',
+                    'model'     => $orgModel,
+                    'withModel' => $customModel,
+                    'fields'    => self::getTransFields()
+                ]
+            );
+        }
+
+        $post = [
+            'data'   => $request->all(),
+            'org_id' => $request->org_id
+        ];
+
+        if (!empty($post['data']['logo'])) {
+            try {
+                $img = \Image::make($post['data']['logo']);
+
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo_mimetype'] = $img->mime();
+                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
+
+                unset($post['data']['logo']);
+            } catch (NotReadableException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
+        $post['data']['description'] = $post['data']['descript'];
+        $request = Request::create('/api/editOrganisation', 'POST', $post);
+        $api = new ApiOrganisations($request);
+        $result = $api->editOrganisation($request)->getData();
+        $errors = !empty($result->errors) ? $result->errors : [];
+
+        $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
+        $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+        $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+        return !$result->success
+            ? view(
+                'user/orgEdit',
+                [
+                    'class'     => 'user',
+                    'model'     => $orgModel,
+                    'withModel' => $customModel,
+                    'fields'    => self::getTransFields()
+                ]
+            )->with('result', $result)
+            : view(
+                'user/orgEdit',
+                [
+                    'class'     => 'user',
+                    'model'     => $orgModel,
+                    'withModel' => $customModel,
+                    'fields'    => self::getTransFields()
+                ]
+            )->with('success', 'Промените бяха запазени успешно!');
     }
 
     public function inviteUser(Request $request)
@@ -786,5 +907,42 @@ class UserController extends Controller {
                 }
             }
         }
+    }
+
+    public function confirmation(Request $request)
+    {
+        $class = 'user';
+        $hash = $request->offsetGet('hash');
+
+        if ($hash) {
+            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+
+            if ($user) {
+                $user->active = true;
+
+                try {
+                    $user->save();
+                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
+
+                    return redirect('login');
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            }
+
+            if ($request->has('generate')) {
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                ];
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+                });
+            }
+        }
+
+        return view('confirmError', compact('class'));
     }
 }

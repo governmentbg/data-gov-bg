@@ -92,6 +92,9 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
+Route::get('/user/newsFeed', 'UserController@newsFeed');
+Route::post('/user/newsFeed', 'UserController@newsFeed');
+
 Route::get('/user/datasets', 'UserController@datasets');
 Route::get('/user/datasetView/{uri}', 'UserController@datasetView');
 Route::post('/user/deleteDataset', 'UserController@deleteDataset');
@@ -168,3 +171,5 @@ Route::get('/contact', function () {
 Route::get('/visualisation', function () {
     return view('visualisation/visualisation', ['class' => 'visualisations']);
 });
+
+Route::get('lang/{lang}', ['as'=>'lang.switch', 'uses'=>'LanguageController@switchLang']);

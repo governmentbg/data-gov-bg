@@ -18,15 +18,17 @@ class SignalSeeder extends Seeder
     {
         $this->faker = Faker::create();
         $resources = Resource::limit(self::SIGNAL_RECORDS)->get()->toArray();
+
         foreach (range(1, self::SIGNAL_RECORDS) as $i) {
             $resource = $this->faker->randomElement($resources)['id'];
+
             Signal::create([
-                'resource_id' => $resource,
-                'descript' =>$this->faker->sentence(4),
-                'firstname' => $this->faker->firstName(),
-                'lastname' => $this->faker->lastName(),
-                'email'=> $this->faker->email(),
-                'status' => $this->faker->boolean()
+                'resource_id'   => $resource,
+                'descript'      => $this->faker->sentence(4),
+                'firstname'     => $this->faker->firstName(),
+                'lastname'      => $this->faker->lastName(),
+                'email'         => $this->faker->email(),
+                'status'        => $this->faker->boolean(),
             ]);
         }
     }

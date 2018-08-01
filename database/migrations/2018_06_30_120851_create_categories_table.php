@@ -18,7 +18,6 @@ class CreateCategoriesTable extends Migration
             $table->integer('name')->unsigned();
             $table->string('icon_file_name')->nullable();
             $table->string('icon_mime_type')->nullable();
-            $table->binary('icon_data')->nullable();
             $table->integer('parent_id')->unsigned()->nullable();
             $table->foreign('parent_id')->references('id')->on('categories');
             $table->boolean('active');
@@ -29,6 +28,8 @@ class CreateCategoriesTable extends Migration
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
         });
+
+        DB::statement("ALTER TABLE icon_data ADD data MEDIUMBLOB");
     }
 
     /**

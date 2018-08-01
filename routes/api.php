@@ -38,6 +38,11 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
 
+    Route::post('rights/listRights', 'Api\RightController@listRights');
+    Route::post('addPage', 'Api\PageController@addPage');
+    Route::post('editPage', 'Api\PageController@editPage');
+    Route::post('deletePage', 'Api\PageController@deletePage');
+    Route::post('listPages', 'Api\PageController@listPages');
     Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
 
     Route::post('/listRights', 'Api\RightController@listRights');

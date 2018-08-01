@@ -1287,24 +1287,24 @@ class OrganisationController extends ApiController
 
                     foreach ($customFields as $field) {
                         if (!empty($field['label']) && !empty($field['value'])) {
-                            foreach (\Lang::getInstance()->getActive() as $active) {
+                            foreach ($field['label'] as $locale => $label) {
                                 if (
-                                    (empty($field['label'][$active->locale]) && empty($field['value'][$active->locale]))
-                                    || (!empty($field['label'][$active->locale]) && !empty($field['value'][$active->locale]))
+                                    (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                                    || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
                                 ) {
-                                    $saveField = new CustomSetting;
-                                    $saveField->org_id = $orgId;
-                                    $saveField->created_by = \Auth::user()->id;
-                                    $saveField->key = $this->trans($empty, $field['label']);
-                                    $saveField->value = $this->trans($empty, $field['value']);
-
-                                    $saveField->save();
-                                } else {
                                     DB::rollback();
 
                                     return false;
                                 }
                             }
+
+                            $saveField = new CustomSetting;
+                            $saveField->org_id = $orgId;
+                            $saveField->created_by = \Auth::user()->id;
+                            $saveField->key = $this->trans($empty, $field['label']);
+                            $saveField->value = $this->trans($empty, $field['value']);
+
+                            $saveField->save();
                         } else {
                             DB::rollback();
 

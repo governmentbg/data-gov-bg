@@ -15,7 +15,7 @@
     <div class="col-md-8 basic-stats">
         <div class="row">
             <div class="col-md-6">
-                <a href="#" class="reg-users">
+                <a href="{{ url('/users/list') }}" class="reg-users">
                     <p>300</p>
                     <hr>
                     <p>Регистрирани потребители</p>

@@ -20,8 +20,9 @@ use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\ApiController as ApiController;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
-use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\UserFollowController as ApiFollow;
+use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class UserController extends Controller {
@@ -944,5 +945,151 @@ class UserController extends Controller {
         }
 
         return view('confirmError', compact('class'));
+    }
+
+    public function listUsers(Request $request)
+    {
+        $perPage = 6;
+        $class = 'user';
+        $users = [];
+        $params = [
+            'api_key'           => Auth::user()->api_key,
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $listReq = Request::create('/api/listUsers', 'POST', $params);
+        $api = new ApiUser($listReq);
+        $result = $api->listUsers($listReq)->getData();
+
+        $paginationData = $this->getPaginationData($result->users, $result->total_records, [], $perPage);
+
+        return view('/user/list', [
+            'class'         => $class,
+            'users'         => $paginationData['items'],
+            'pagination'    => $paginationData['paginate'],
+        ]);
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $perPage = 6;
+        $search = $request->search;
+
+        if (empty(trim($search))) {
+            return redirect()->route('usersList');
+        }
+
+        $params = [
+            'api_key'           => Auth::user()->api_key,
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+            'criteria'          => [
+                'keywords'          => $search,
+            ],
+        ];
+
+        $searchReq = Request::create('/api/searchUsers', 'POST', $params);
+        $api = new ApiUser($searchReq);
+        $result = $api->searchUsers($searchReq)->getData();
+
+        $users = !empty($result->users) ? $result->users : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $getParams = [
+            'search' => $search
+        ];
+
+        $paginationData = $this->getPaginationData($users, $count, $getParams, $perPage);
+
+        return view(
+            'user/list',
+            [
+                'class'         => 'user',
+                'users'         => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'search'        => $search
+            ]
+        );
+    }
+
+    public function profile(Request $request, $id)
+    {
+        $followersCount = 0;
+        $followed = false;
+        $params = [
+            'api_key'   => Auth::user()->api_key,
+            'criteria'  => [
+                'id'        => $id,
+            ],
+        ];
+
+        $listReq = Request::create('/api/listUsers', 'POST', $params);
+        $apiUser = new ApiUser($listReq);
+        $result = $apiUser->listUsers($listReq)->getData();
+
+        if ($result->success) {
+            $follReq = Request::create('api/getFollowersCount', 'POST', $params);
+            $apiFollow = new ApiFollow($follReq);
+            $followers = $apiFollow->getFollowersCount($follReq)->getData();
+
+            if ($followers->success) {
+                $followersCount = $followers->count;
+
+                foreach($followers->followers as $follower) {
+                    if ($follower->user_id == Auth::user()->id) {
+                        $followed = true;
+
+                        break;
+                    }
+                }
+            }
+
+            $setsReq = Request::create('api/getUsersDataSetCount', 'POST', $params);
+            $apiDataSet = new ApiDataSets($setsReq);
+            $setsCount = $apiDataSet->getUsersDataSetCount($setsReq)->getData();
+
+            if ($request->has('follow')) {
+                $follow = Request::create('api/addFollow', 'POST', [
+                    'api_key'           => Auth::user()->api_key,
+                    'user_id'           => Auth::user()->id,
+                    'follow_user_id'    => $id,
+                ]);
+
+                $followResult = $apiFollow->addFollow($follow)->getData();
+
+                if ($followResult->success) {
+
+                    return back();
+                }
+            }
+
+            if ($request->has('unfollow')) {
+                $follow = Request::create('api/unFollow', 'POST', [
+                    'api_key'           => Auth::user()->api_key,
+                    'user_id'           => Auth::user()->id,
+                    'follow_user_id'    => $id,
+                ]);
+
+                $followResult = $apiFollow->unFollow($follow)->getData();
+
+                if ($followResult->success) {
+
+                    return back();
+                }
+            }
+
+            return view('user/profile', [
+                'user'              => $result->users[0],
+                'class'             => 'user',
+                'ownProfile'        => $id == Auth::id(),
+                'followersCount'    => $followersCount,
+                'followed'          => $followed,
+                'dataSetsCount'     => $setsCount->success ? $setsCount->count : 0,
+            ]);
+        } else {
+
+            return redirect('/');
+        }
     }
 }

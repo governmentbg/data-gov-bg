@@ -13082,6 +13082,159 @@ textarea {
   display: grid;
 }
 
+.users-list {
+  line-height: 1.4;
+}
+
+.users-list h3 {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.users-list .user-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  height: 95px;
+  margin-bottom: 5px;
+}
+
+.users-list .user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.users-list .user-search {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.users-list .show-more {
+  font-size: 15px;
+}
+
+.users-list .user-col {
+  padding: 20px;
+}
+
+.user-profile .contacts p {
+  margin-bottom: 10px;
+}
+
+.user-profile .user-data {
+  margin-left: 15px;
+}
+
+.user-profile .basic-stats {
+  margin-bottom: 30px;
+  margin-top: 75px;
+}
+
+@media screen and (max-width: 1199px) {
+  .user-profile .basic-stats {
+    margin-bottom: 5px;
+  }
+}
+
+.user-profile .basic-stats a {
+  display: inline-block;
+  width: 100%;
+  margin-top: 15px;
+  position: relative;
+  height: 85px;
+  border-radius: 10px;
+}
+
+.user-profile .basic-stats a img {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+.user-profile .basic-stats a.reg-users {
+  background: #77AD3E;
+}
+
+.user-profile .basic-stats a.data-sets {
+  background: #c02e54;
+}
+
+.user-profile .basic-stats a p {
+  color: #fff;
+  margin: 0;
+}
+
+.user-profile .basic-stats a p:first-child {
+  padding: 5px 17px 3px 17px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.user-profile .basic-stats a p:nth-child(3) {
+  padding: 6px 17px 0 17px;
+  font-size: 16px;
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.user-profile .basic-stats a hr {
+  text-align: left;
+  margin: 0 0 0 17px;
+  width: 100px;
+}
+
+.user-profile .social-icons a {
+  font-size: 14px;
+  text-decoration: none;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  padding: 2px;
+  color: #108f9e;
+}
+
+.user-profile .social-icons a span {
+  display: inline-block;
+  border: 1px solid #333333;
+  border-radius: 13px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-color: #108f9e;
+}
+
+.user-profile .social-icons a span:hover {
+  -webkit-transition: 0.5s ease-in;
+  transition: 0.5s ease-in;
+  background-color: #108f9e;
+  color: white;
+  border-color: transparent;
+}
+
+.user-profile .social-icons a.fb span {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.user-profile .social-icons a.tw span {
+  padding-left: 5.5px;
+  padding-right: 5.5px;
+}
+
+.user-profile .social-icons a.gp span {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;

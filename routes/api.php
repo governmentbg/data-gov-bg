@@ -24,7 +24,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('/addOrganisation', 'Api\OrganisationController@addOrganisation');
     Route::post('/editOrganisation', 'Api\OrganisationController@editOrganisation');
-    Route::post('/getOrganisations', 'Api\OrganisationController@getOrganisations');
+    Route::post('/getUserOrganisations', 'Api\OrganisationController@getUserOrganisations');
     Route::post('/deleteOrganisation', 'Api\OrganisationController@deleteOrganisation');
 
     Route::post('/addGroup', 'Api\OrganisationController@addGroup');

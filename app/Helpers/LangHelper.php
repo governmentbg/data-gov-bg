@@ -116,3 +116,45 @@ function _hn($singular, $plural, $number)
 {
     return htmlspecialchars(ngettext($singular, $plural, $number));
 }
+
+/**
+ * Converts the locale code ('en') to a country flag
+ * matching the "flag-icon-css" npm package
+ * @method locale_to_flag
+ * @param  string $locale
+ * @return string country code
+ */
+function locale_to_flag($locale)
+{
+    switch ($locale) {
+        case 'en':
+            return 'gb';
+        break;
+        default:
+            return $locale;
+    }
+}
+
+class Lang {
+    protected static $instance;
+
+    public static function getInstance()
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
+    public function getActive()
+    {
+        if (!empty($this->activeLocales)) {
+           return $this->activeLocales;
+        }
+
+        $this->activeLocales = \App\Locale::where('active', 1)->get();
+
+        return $this->activeLocales;
+    }
+}

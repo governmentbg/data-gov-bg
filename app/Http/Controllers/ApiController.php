@@ -118,8 +118,8 @@ class ApiController extends Controller
     /**
      * Convert array to xml
      *
-     * @param type $data
-     * @param type $xmlData
+     * @param array $data
+     * @param string $xmlData
      */
     public static function arrayToXml($data, &$xmlData) {
         foreach ($data as $key => $value) {
@@ -167,5 +167,26 @@ class ApiController extends Controller
         }
 
         return [[]];
+    }
+
+     /* Check if image data is less than the max image size
+     *
+     * @param string $imageData
+     *
+     * @return bool $flag
+     */
+    protected function checkImageSize($imageData)
+    {
+        return (strlen(bin2hex($imageData)) / 2) <= env('IMAGE_MAX_SIZE', 16777215);
+    }
+
+    /**
+     * Get image size error message
+     *
+     * @return string $text
+     */
+    protected function getImageSizeError()
+    {
+        return 'Image size too big (Max size is '. env('IMAGE_MAX_SIZE', 16777215) .' bytes)';
     }
 }

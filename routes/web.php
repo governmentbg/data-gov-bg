@@ -104,13 +104,21 @@ Route::get('/user/resourceView', function () {
     return view('user/resourceView', ['class' => 'user']);
 });
 
-Route::get('/user/organisations', 'UserController@organisations');
-Route::post('/user/organisation/delete', 'UserController@deleteOrg');
-Route::get('/user/organisations/search', 'UserController@searchOrg');
-
 Route::get('/user/groups', function () {
     return view('user/groups', ['class' => 'user']);
 });
+
+Route::get('/user/organisations', 'UserController@organisations');
+
+Route::post('/user/organisation/delete', 'UserController@deleteOrg');
+
+Route::get('/user/organisations/search', 'UserController@searchOrg');
+
+Route::post('/user/organisations/register', 'UserController@registerOrg');
+
+Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+
+Route::post('/user/organisation/edit', 'UserController@editOrg');
 
 Route::get('/user/groupView', function () {
     return view('user/groupView', ['class' => 'user']);

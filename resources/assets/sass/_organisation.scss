@@ -66,13 +66,13 @@
         }
 
         @include smMobile() {
-            .logo-img > img{
+            .logo-img > img {
                 margin: 15px 10px;
             }
         }
 
         @include xsMobile() {
-            .logo-img > img{
+            .logo-img > img {
                 display: none;
             }
         }
@@ -155,8 +155,8 @@
     }
 }
 
-    @include xsMobile {
-        .exclamation-sign img {
-            min-width: 30px;
-        }
+@include xsMobile {
+    .exclamation-sign img {
+        min-width: 30px;
     }
+}

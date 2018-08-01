@@ -94,39 +94,37 @@
                         <span><img class="js-close-navbar" src="{{ asset('img/close-btn.png') }}"></span>
                     </div>
                     <ul class="nav navbar-nav">
-                        <li class="{{ Request::is('/') ? 'active' : '' }}">
+                        <li class="index {{ Request::is('/') ? 'active' : '' }}">
                             <a href="{{ url('/') }}">Начало</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'data' ? 'active' : '' }}">
+                        <li class="data {{ Request::segment(1) == 'data' ? 'active' : '' }}">
                             <a href="{{ url('/data') }}">Данни</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'organisation'  ? 'active' : '' }}">
+                        <li class="organisation {{ Request::segment(1) == 'organisation' ? 'active' : '' }}">
                             <a href="{{ url('/organisation') }}">Организации</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'request' ? 'active' : '' }}">
+                        <li class="request {{ Request::segment(1) == 'request' ? 'active' : '' }}">
                             <a href="{{ url('/request') }}">Заявки за данни</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
+                        <li class="visualisation {{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
                             <a href="{{ url('/visualisation') }}">Визуализации</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'news' ? 'active' : '' }}">
+                        <li class="news {{ Request::segment(1) == 'news' ? 'active' : '' }}">
                             <a href="{{ url('/news') }}">Новини и събития</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'document' ? 'active' : '' }}">
+                        <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
                             <a href="{{ url('/document') }}">Документи</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
+                        <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                             <a href="{{ url('/contact') }}">Контакти</a>
                         </li>
-                        @if (\Auth::check())
-                            <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                        <li class="hidden-lg hidden-md user {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                            @if (\Auth::check())
                                 <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
-                            </li>
-                        @else
-                            <li class="hidden-lg hidden-md {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                            @else
                                 <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
-                            </li>
-                        @endif
+                            @endif
+                        </li>
                         <li class="hidden-lg hidden-md hidden-sm">
                             <input type="text" placeholder="търсене..." class="form-control rounded-input input-long">
                         </li>

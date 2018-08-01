@@ -264,6 +264,7 @@ body {
                 margin: 0;
                 font-size: 0;
                 margin-top: 20px;
+
                 li {
                     a {
                         color: #000;
@@ -275,6 +276,13 @@ body {
                         margin-bottom: 8px;
                     }
 
+                    &:before, &:after {
+                        content: '';
+                        display: block;
+                        width: 40px;
+                        margin: 0 auto;
+                    }
+
                     &:hover, &.active {
                         a {
                             margin-top: 0;
@@ -282,10 +290,7 @@ body {
                         }
 
                         &:before, &:after {
-                            content: '';
-                            display: block;
-                            width: 40px;
-                            margin: 0 auto;
+                            transition: 0.4s ease-in;
                         }
 
                         &:before {
@@ -297,8 +302,76 @@ body {
                         }
                     }
 
-                    &.active {
-                        /*font-weight: bold;*/
+                    &.index {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeIndex;
+                            }
+                        }
+                    }
+
+                    &.data {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeData;
+                            }
+                        }
+                    }
+
+                    &.organisation {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeOrganisation;
+                            }
+                        }
+                    }
+
+                    &.request {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeRequest;
+                            }
+                        }
+                    }
+
+                    &.visualisation {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeVisualisations;
+                            }
+                        }
+                    }
+
+                    &.news {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeNews;
+                            }
+                        }
+                    }
+
+                    &.document {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeDocuments;
+                            }
+                        }
+                    }
+
+                    &.contact {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeContact;
+                            }
+                        }
+                    }
+
+                    &.user {
+                        &:hover, &.active {
+                            &:before, &:after {
+                                background: $themeUser;
+                            }
+                        }
                     }
 
                     @include smMobile() {

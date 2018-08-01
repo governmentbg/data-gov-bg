@@ -11057,6 +11057,14 @@ body #app .navbar .navbar-nav li a {
   margin-bottom: 8px;
 }
 
+body #app .navbar .navbar-nav li:before,
+body #app .navbar .navbar-nav li:after {
+  content: '';
+  display: block;
+  width: 40px;
+  margin: 0 auto;
+}
+
 body #app .navbar .navbar-nav li:hover a,
 body #app .navbar .navbar-nav li.active a {
   margin-top: 0;
@@ -11067,10 +11075,8 @@ body #app .navbar .navbar-nav li:hover:before,
 body #app .navbar .navbar-nav li:hover:after,
 body #app .navbar .navbar-nav li.active:before,
 body #app .navbar .navbar-nav li.active:after {
-  content: '';
-  display: block;
-  width: 40px;
-  margin: 0 auto;
+  -webkit-transition: 0.4s ease-in;
+  transition: 0.4s ease-in;
 }
 
 body #app .navbar .navbar-nav li:hover:before,
@@ -11083,8 +11089,67 @@ body #app .navbar .navbar-nav li.active:after {
   height: 8px;
 }
 
-body #app .navbar .navbar-nav li.active {
-  /*font-weight: bold;*/
+body #app .navbar .navbar-nav li.index:hover:before,
+body #app .navbar .navbar-nav li.index:hover:after,
+body #app .navbar .navbar-nav li.index.active:before,
+body #app .navbar .navbar-nav li.index.active:after {
+  background: #c02e54;
+}
+
+body #app .navbar .navbar-nav li.data:hover:before,
+body #app .navbar .navbar-nav li.data:hover:after,
+body #app .navbar .navbar-nav li.data.active:before,
+body #app .navbar .navbar-nav li.data.active:after {
+  background: #4e57aa;
+}
+
+body #app .navbar .navbar-nav li.organisation:hover:before,
+body #app .navbar .navbar-nav li.organisation:hover:after,
+body #app .navbar .navbar-nav li.organisation.active:before,
+body #app .navbar .navbar-nav li.organisation.active:after {
+  background: #76ad3f;
+}
+
+body #app .navbar .navbar-nav li.request:hover:before,
+body #app .navbar .navbar-nav li.request:hover:after,
+body #app .navbar .navbar-nav li.request.active:before,
+body #app .navbar .navbar-nav li.request.active:after {
+  background: #e8d429;
+}
+
+body #app .navbar .navbar-nav li.visualisation:hover:before,
+body #app .navbar .navbar-nav li.visualisation:hover:after,
+body #app .navbar .navbar-nav li.visualisation.active:before,
+body #app .navbar .navbar-nav li.visualisation.active:after {
+  background: #e98911;
+}
+
+body #app .navbar .navbar-nav li.news:hover:before,
+body #app .navbar .navbar-nav li.news:hover:after,
+body #app .navbar .navbar-nav li.news.active:before,
+body #app .navbar .navbar-nav li.news.active:after {
+  background: #0a7b5d;
+}
+
+body #app .navbar .navbar-nav li.document:hover:before,
+body #app .navbar .navbar-nav li.document:hover:after,
+body #app .navbar .navbar-nav li.document.active:before,
+body #app .navbar .navbar-nav li.document.active:after {
+  background: #145c99;
+}
+
+body #app .navbar .navbar-nav li.contact:hover:before,
+body #app .navbar .navbar-nav li.contact:hover:after,
+body #app .navbar .navbar-nav li.contact.active:before,
+body #app .navbar .navbar-nav li.contact.active:after {
+  background: #791292;
+}
+
+body #app .navbar .navbar-nav li.user:hover:before,
+body #app .navbar .navbar-nav li.user:hover:after,
+body #app .navbar .navbar-nav li.user.active:before,
+body #app .navbar .navbar-nav li.user.active:after {
+  background: #108f9e;
 }
 
 @media screen and (max-width: 767px) {

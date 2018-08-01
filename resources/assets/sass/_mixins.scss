@@ -290,16 +290,16 @@
 }
 
 $themes: (
-    theme-index: #c02e54,
-    theme-data: #4e57aa,
-    theme-data-attention: #d32a31,
-    theme-organisation: #76ad3f,
-    theme-request: #e8d429,
-    theme-visualisations: #e98911,
-    theme-news: #0a7b5d,
-    theme-documents: #145c99,
-    theme-contact: #791292,
-    theme-user: #108f9e,
+    theme-index: $themeIndex,
+    theme-data: $themeData,
+    theme-data-attention: $themeDataAttention,
+    theme-organisation: $themeOrganisation,
+    theme-request: $themeRequest,
+    theme-visualisations: $themeVisualisations,
+    theme-news: $themeNews,
+    theme-documents: $themeDocuments,
+    theme-contact: $themeContact,
+    theme-user: $themeUser,
 ) !default;
 
 @each $theme, $primary in $themes {

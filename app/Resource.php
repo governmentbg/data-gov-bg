@@ -20,13 +20,14 @@ class Resource extends Model implements TranslatableInterface
 
     const TYPE_FILE = 1;
     const TYPE_HYPERLINK = 2;
+    const TYPE_API = 3;
 
     const FORMAT_CSV = 1;
     const FORMAT_JSON = 2;
     const FORMAT_KML = 3;
     const FORMAT_RDF = 4;
-    const FORMAT_WMS = 5;
-    const FORMAT_XML = 6;
+    const FORMAT_XML = 5;
+    const FORMAT_WMS = 6;
 
     const HTTP_POST = 1;
     const HTTP_GET = 2;
@@ -40,7 +41,8 @@ class Resource extends Model implements TranslatableInterface
     {
         return [
             self::TYPE_FILE         => 'File',
-            self::TYPE_HYPERLINK    => 'Hyperlink'
+            self::TYPE_HYPERLINK    => 'Hyperlink',
+            self::TYPE_API          => 'Api',
         ];
     }
 
@@ -67,9 +69,9 @@ class Resource extends Model implements TranslatableInterface
     public function toSearchableArray()
     {
         return [
+            'id'        => $this->id,
             'name'      => $this->concatTranslations('name'),
             'descript'  => $this->concatTranslations('descript'),
-            'id'        => $this->id,
         ];
     }
 
@@ -80,7 +82,7 @@ class Resource extends Model implements TranslatableInterface
 
     public function elasticDataSet()
     {
-        return $this->hasOne('App\ElasticDataSet');
+        return $this->hasOne('App\ElasticDataSet', 'id');
     }
 
     public function dataSet()

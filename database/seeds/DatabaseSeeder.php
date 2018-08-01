@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(NewsletterDigestLogSeeder::class);
         $this->call(LocaleSeeder::class);
         $this->call(OrganisationSeeder::class);
+        $this->call(SignalSeeder::class);
         $this->call(ActionsHistorySeeder::class);
         $this->call(TermsOfUseSeeder::class);
         $this->call(CategorySeeder::class);
@@ -32,5 +33,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSettingSeeder::class);
         $this->call(UserToOrgRoleSeeder::class);
         $this->call(CustomSettingSeeder::class);
+
     }
 }

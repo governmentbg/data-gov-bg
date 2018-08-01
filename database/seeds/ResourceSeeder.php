@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class ResourceSeeder extends Seeder
 {
-    const RESOURCE_RECORDS = 10;
+    const RESOURCE_RECORDS = 100;
 
     /**
      * Run the database seeds.

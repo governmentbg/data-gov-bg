@@ -214,28 +214,18 @@ class UserTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        $this->post(
-            url('api/inviteUser'),
-            [
-                'api_key' => $this->getApiKey(),
-                'id' => $this->getUserId(),
-                'data'    => [
-                    'email' => $this->faker->safeEmail(),
-                ]
+        $this->post(url('api/inviteUser'), [
+            'api_key' => $this->getApiKey(),
+            'id' => $this->getUserId(),
+            'data'    => [
+                'email' => 'dimitar@finite-soft.com',
             ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        ])->assertStatus(200)->assertJson(['success' => true]);
 
-        $this->post(
-            url('api/inviteUser'),
-            [
-                'data'    => [
-                    'email' => $this->faker->safeEmail(),
-                ]
+        $this->post(url('api/inviteUser'), [
+            'data'    => [
+                'email' => 'dimitar@finite-soft.com',
             ]
-        )
-            ->assertStatus(403)
-            ->assertJson(['success' => false]);
+        ])->assertStatus(403)->assertJson(['success' => false]);
     }
 }

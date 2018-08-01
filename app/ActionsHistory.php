@@ -25,6 +25,11 @@ class ActionsHistory extends Model
     protected $guarded = ['id'];
     protected $table = 'actions_history';
 
+    public static function getModuleNames()
+    {
+        return self::MODULE_NAMES;
+    }
+
     public static function getTypes()
     {
         return [

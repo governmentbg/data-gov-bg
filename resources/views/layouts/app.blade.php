@@ -21,7 +21,7 @@
     <div id="app">
         <nav class="navbar navbar-default navbar-static-top">
             <div class="container">
-                <div class="navbar-header">
+                <div class="navbar-header js-show-on-load">
                     <div class="nav-logos col-lg-3 col-md-4 col-sm-4 col-xs-9">
                         <a href="{{ url('/') }}"><img alt="Лого на портала" src="{{ asset('img/opendata-logo-color.svg') }}"></a>
                         <a href="https://europa.eu/european-union/index_bg" target="_blank">

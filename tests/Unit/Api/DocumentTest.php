@@ -87,26 +87,26 @@ class DocumentTest extends TestCase
             url('api/editDocument'),
             [
                 'api_key'   => $this->getApiKey(),
-                'doc_id'   => $document->id,
+                'doc_id'    => $document->id,
                 'data'      => [],
             ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful testEdit
+        // test successful test Edit
         $this->post(
             url('api/editDocument'),
             [
-                'api_key'       => $this->getApiKey(),
-                'doc_id'       => $document->id,
-                'data'          => [
-                    'locale'       => 'en',
-                    'name'         => $this->faker->word(),
-                    'description'  => $this->faker->word(),
-                    'filename'     => $this->faker->word(),
-                    'mimetype'     => $this->faker->word(),
-                    'data'         => $this->faker->word()
+                'api_key'   => $this->getApiKey(),
+                'doc_id'    => $document->id,
+                'data'      => [
+                    'locale'        => 'en',
+                    'name'          => $this->faker->word(),
+                    'description'   => $this->faker->word(),
+                    'filename'      => $this->faker->word(),
+                    'mimetype'      => $this->faker->word(),
+                    'data'          => $this->faker->word()
                 ],
             ]
         )
@@ -134,7 +134,7 @@ class DocumentTest extends TestCase
             url('api/deleteDocument'),
             [
                 'api_key'   => $this->getApiKey(),
-                'doc_id'   => null,
+                'doc_id'    => null,
             ]
         )
             ->assertStatus(500)
@@ -147,7 +147,7 @@ class DocumentTest extends TestCase
             url('api/deleteDocument'),
             [
                 'api_key'   => $this->getApiKey(),
-                'doc_id'   => $document->id,
+                'doc_id'    => $document->id,
             ]
         )
             ->assertStatus(200)
@@ -161,7 +161,7 @@ class DocumentTest extends TestCase
     {
         $response = $this->post(
             url('api/listDocuments'),
-            ['api_key' => $this->getApiKey()]
+            ['api_key'  => $this->getApiKey()]
         );
 
         $response
@@ -175,8 +175,8 @@ class DocumentTest extends TestCase
         $this->post(
             url('api/searchDocuments'),
             [
-                'api_key' => $this->getApiKey(),
-                'criteria' => [],
+                'api_key'   => $this->getApiKey(),
+                'criteria'  => [],
             ]
         )
             ->assertStatus(500)
@@ -186,9 +186,9 @@ class DocumentTest extends TestCase
         $this->post(
             url('api/searchDocuments'),
             [
-                'api_key' => $this->getApiKey(),
-                'criteria' => [
-                    'search'  => $this->faker->word(),
+                'api_key'   => $this->getApiKey(),
+                'criteria'  => [
+                    'search'    => $this->faker->word(),
                 ],
             ]
         )

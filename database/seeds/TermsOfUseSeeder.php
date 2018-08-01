@@ -2,10 +2,13 @@
 
 use App\TermsOfUse;
 use Faker\Factory as Faker;
+use App\Locale;
 use Illuminate\Database\Seeder;
 
 class TermsOfUseSeeder extends Seeder
 {
+    const TERMS_RECORDS = 10;
+
     /**
      * Run the database seeds.
      *
@@ -13,17 +16,17 @@ class TermsOfUseSeeder extends Seeder
      */
     public function run()
     {
-        $faker = Faker::create();
-
-        foreach (range(1,3) as $index) {
+        $this->faker = Faker::create();
+        $locales = Locale::where('active', 1)->limit(self::TERMS_RECORDS)->get()->toArray();
+        foreach (range(1, self::TERMS_RECORDS) as $i) {
+            $locale = $this->faker->randomElement($locales)['locale'];
             TermsOfUse::create([
-                'name'          => $faker->name,
-                'descript'      => $faker->text,
-                'active'        => 1,
-                'is_default'    => 1,
-                'ordering'      => 1,
+                'name'          => [$locale => $this->faker->randomDigit()],
+                'descript'      => [$locale => $this->faker->randomDigit()],
+                'active'        => $this->faker->boolean(),
+                'is_default'    => $this->faker->boolean(),
+                'ordering'      => $this->faker->randomDigit(),
             ]);
         }
     }
 }
-

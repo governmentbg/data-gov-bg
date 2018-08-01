@@ -68,6 +68,14 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/listDocuments', 'Api\DocumentController@listDocuments');
     Route::post('/searchDocuments', 'Api\DocumentController@searchDocuments');
 
+    Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
+    Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
+    Route::post('rights/listRights', 'Api\RightController@listRights');
+
+    Route::post('sendSignal', 'Api\SignalsController@sendSignal');
+    Route::post('editSignal', 'Api\SignalsController@editSignal');
+    Route::post('deleteSignal', 'Api\SignalsController@deleteSignal');
+    Route::post('listSignals', 'Api\SignalsController@listSignals');
     Route::post('/addTermsOfUse', 'Api\TermsOfUseController@addTermsOfUse');
     Route::post('/editTermsOfUse', 'Api\TermsOfUseController@editTermsOfUse');
     Route::post('/deleteTermsOfUse', 'Api\TermsOfUseController@deleteTermsOfUse');

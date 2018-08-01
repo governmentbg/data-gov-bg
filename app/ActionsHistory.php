@@ -15,12 +15,20 @@ class ActionsHistory extends Model
         'Category',
         'Tag',
         'Organization',
-        'Group'
+        'Group',
+        'User',
+        'Dataset',
+        'Resource'
     ];
 
     public $timestamps = false;
     protected $guarded = ['id'];
     protected $table = 'actions_history';
+
+    public static function getModuleNames()
+    {
+        return self::MODULE_NAMES;
+    }
 
     public static function getTypes()
     {

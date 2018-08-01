@@ -1,0 +1,26 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.97 49.97">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #c13d3d;
+      }
+
+      .cls-2 {
+        fill: #ffc840;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <title>Osnovna tema</title>
+  <circle class="cls-1" cx="25.02" cy="24.98" r="24.98" transform="translate(-1.93 47.91) rotate(-85.4)"/>
+  <g>
+    <path class="cls-2" d="M42.16,29.53a3.91,3.91,0,0,1-3.92,3.92H16.05l-5.93,4.13,1.64-4.13a3.91,3.91,0,0,1-3.92-3.92V16.34a3.92,3.92,0,0,1,3.92-3.92H38.24a3.92,3.92,0,0,1,3.92,3.92Z" transform="translate(-0.03)"/>
+    <rect class="cls-3" x="13.73" y="16.29" width="22.57" height="2.03"/>
+    <rect class="cls-3" x="13.73" y="20.06" width="22.57" height="2.03"/>
+    <rect class="cls-3" x="13.73" y="23.83" width="22.57" height="2.03"/>
+    <rect class="cls-3" x="13.73" y="27.6" width="22.57" height="2.03"/>
+  </g>
+</svg>

@@ -38,7 +38,13 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
 
+    Route::post('rights/listRights', 'Api\RightController@listRights');
+    Route::post('addPage', 'Api\PageController@addPage');
+    Route::post('editPage', 'Api\PageController@editPage');
+    Route::post('deletePage', 'Api\PageController@deletePage');
+    Route::post('listPages', 'Api\PageController@listPages');
     Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+    Route::post('/listModules', 'Api\ActionsHistoryController@listModules');
 
     Route::post('/listRights', 'Api\RightController@listRights');
 
@@ -57,12 +63,25 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('/removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
 
+    Route::post('/sendDataRequest', 'Api\DataRequestController@sendDataRequest');
+    Route::post('/editDataRequest', 'Api\DataRequestController@editDataRequest');
+    Route::post('/deleteDataRequest', 'Api\DataRequestController@deleteDataRequest');
+    Route::post('/listDataRequests', 'Api\DataRequestController@listDataRequests');
+
     Route::post('/addDocument', 'Api\DocumentController@addDocument');
     Route::post('/editDocument', 'Api\DocumentController@editDocument');
     Route::post('/deleteDocument', 'Api\DocumentController@deleteDocument');
     Route::post('/listDocuments', 'Api\DocumentController@listDocuments');
     Route::post('/searchDocuments', 'Api\DocumentController@searchDocuments');
 
+    Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
+    Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
+    Route::post('rights/listRights', 'Api\RightController@listRights');
+
+    Route::post('sendSignal', 'Api\SignalsController@sendSignal');
+    Route::post('editSignal', 'Api\SignalsController@editSignal');
+    Route::post('deleteSignal', 'Api\SignalsController@deleteSignal');
+    Route::post('listSignals', 'Api\SignalsController@listSignals');
     Route::post('/addTermsOfUse', 'Api\TermsOfUseController@addTermsOfUse');
     Route::post('/editTermsOfUse', 'Api\TermsOfUseController@editTermsOfUse');
     Route::post('/deleteTermsOfUse', 'Api\TermsOfUseController@deleteTermsOfUse');

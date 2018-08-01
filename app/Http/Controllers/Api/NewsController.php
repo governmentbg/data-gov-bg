@@ -6,6 +6,7 @@ use App\Page;
 use \Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 
@@ -51,21 +52,24 @@ class NewsController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            try {
+            DB::beginTransaction();
             $newNews = new Page;
-            $newNews->title = $newsData['data']['title'];
-            $newNews->abstract = $newsData['data']['abstract'];
-            $newNews->body = $newsData['data']['body'];
+            $locale = $newsData['data']['locale'];
+            $newNews->title = $this->trans($locale, $newsData['data']['title']);
+            $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
+            $newNews->body = $this->trans($locale, $newsData['data']['body']);
 
             if (isset($newsData['data']['head_title'])) {
-                $newNews->head_title = $newsData['data']['head_title'];
+                $newNews->head_title = $this->trans($locale, $newsData['data']['head_title']);
             }
 
             if (isset($newsData['data']['meta_description'])) {
-                $newNews->meta_desctript = $newsData['data']['meta_description'];
+                $newNews->meta_descript = $this->trans($locale, $newsData['data']['meta_description']);
             }
 
             if (isset($newsData['data']['meta_key_words'])) {
-                $newNews->meta_key_words = $newsData['data']['meta_key_words'];
+                $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_key_words']);
             }
 
             if (isset($newsData['data']['forum_link'])) {
@@ -82,11 +86,11 @@ class NewsController extends ApiController
 
             $newNews->active = $newsData['data']['active'];
 
-            try {
                 $newNews->save();
-
+                DB::commit();
                 return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
+                DB::rollback();
                 Log::error($e->getMessage());
             }
         }
@@ -120,7 +124,7 @@ class NewsController extends ApiController
         $editData = $request->all();
 
         $validator = Validator::make($editData, [
-            'news_id'               => 'required|integer',
+            'news_id'               => 'required|integer|exists:pages,id',
             'data'                  => 'required|array',
             'data.locale'           => 'nullable|string',
             'data.title'            => 'nullable|string',
@@ -171,54 +175,57 @@ class NewsController extends ApiController
             });
         }
 
-        $newsToEdit = Page::find($editData['news_id']);
-
-        if ($newsToEdit && !$validator->fails()) {
-            if (isset($editData['data']['title'])) {
-                $newsToEdit->title = $editData['data']['title'];
-            }
-
-            if (isset($editData['data']['abstract'])) {
-                $newsToEdit->abstract = $editData['data']['abstract'];
-            }
-
-            if (isset($editData['data']['body'])) {
-                $newsToEdit->body = $editData['data']['body'];
-            }
-
-            if (isset($editData['data']['head_title'])) {
-                $newsToEdit->head_title = $editData['data']['head_title'];
-            }
-
-            if (isset($editData['data']['meta_description'])) {
-                $newsToEdit->meta_desctript = $editData['data']['meta_description'];
-            }
-
-            if (isset($editData['data']['meta_key_words'])) {
-                $newsToEdit->meta_key_words = $editData['data']['meta_key_words'];
-            }
-
-            if (isset($editData['data']['forum_link'])) {
-                $newsToEdit->forum_link = $editData['data']['forum_link'];
-            }
-
-            if (isset($editData['data']['active'])) {
-                $newsToEdit->active = $editData['data']['active'];
-            }
-
-            if (isset($editData['data']['valid_from'])) {
-                $newsToEdit->valid_from = $editData['data']['valid_from'];
-            }
-
-            if (isset($editData['data']['valid_to'])) {
-                $newsToEdit->valid_to = $editData['data']['valid_to'];
-            }
-
+        if (!$validator->fails()) {
             try {
-                $newsToEdit->save();
+                $locale = $editData['data']['locale'];
+                $newsToEdit = Page::find($editData['news_id']);
+                DB::beginTransaction();
 
+                if (isset($editData['data']['title'])) {
+                    $newsToEdit->title = $this->trans($locale, $editData['data']['title']);
+                }
+
+                if (isset($editData['data']['abstract'])) {
+                    $newsToEdit->abstract = $this->trans($locale, $editData['data']['abstract']);
+                }
+
+                if (isset($editData['data']['body'])) {
+                    $newsToEdit->body = $this->trans($locale, $editData['data']['body']);
+                }
+
+                if (isset($editData['data']['head_title'])) {
+                    $newsToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
+                }
+
+                if (isset($editData['data']['meta_description'])) {
+                    $newsToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
+                }
+
+                if (isset($editData['data']['meta_keywords'])) {
+                    $newsToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
+                }
+
+                if (isset($editData['data']['forum_link'])) {
+                    $newsToEdit->forum_link = $editData['data']['forum_link'];
+                }
+
+                if (isset($editData['data']['active'])) {
+                    $newsToEdit->active = $editData['data']['active'];
+                }
+
+                if (isset($editData['data']['valid_from'])) {
+                    $newsToEdit->valid_from = $editData['data']['valid_from'];
+                }
+
+                if (isset($editData['data']['valid_to'])) {
+                    $newsToEdit->valid_to = $editData['data']['valid_to'];
+                }
+
+                $newsToEdit->save();
+                DB::commit();
                 return $this->successResponse();
             } catch (QueryException $e) {
+                DB::rollback();
                 Log::error($e->getMessage());
             }
         }
@@ -240,17 +247,13 @@ class NewsController extends ApiController
     {
         $newsDeleteData = $request->all();
         $validator = Validator::make($newsDeleteData, [
-            'news_id' => 'required|integer',
+            'news_id' => 'required|integer|exists:pages,id',
         ]);
 
         if (!$validator->fails()) {
-            $deleteNews = Page::find($newsDeleteData['news_id']);
-
-            if (!$deleteNews) {
-                return $this->errorResponse('Delete news failure');
-            }
-
             try {
+                $deleteNews = Page::find($newsDeleteData['news_id']);
+
                 $deleteNews->delete();
 
                 return $this->successResponse();
@@ -303,7 +306,7 @@ class NewsController extends ApiController
         if (!$validator->fails()) {
             $result = [];
             $criteria = $request->offsetGet('criteria');
-
+            $locale = \LaravelLocalization::getCurrentLocale();
             $newsList = Page::select();
 
             $filterColumn = 'created_at';
@@ -390,7 +393,7 @@ class NewsController extends ApiController
                         'abstract'          => $singleNews->abstract,
                         'body'              => $singleNews->body,
                         'head_title'        => $singleNews->head_title,
-                        'meta_description'  => $singleNews->meta_desctript,
+                        'meta_description'  => $singleNews->meta_descript,
                         'meta_keywords'     => $singleNews->meta_key_words,
                         'forum_link'        => $singleNews->forum_link,
                         'active'            => $singleNews->active,
@@ -443,6 +446,8 @@ class NewsController extends ApiController
             'page_number'           => 'nullable|integer',
         ]);
 
+        $locale = \LaravelLocalization::getCurrentLocale();
+
         if (!$validator->fails()) {
             $result = [];
             $criteria = $request->offsetGet('criteria');
@@ -473,7 +478,7 @@ class NewsController extends ApiController
                         'abstract'          => $singleNews->abstract,
                         'body'              => $singleNews->body,
                         'head_title'        => $singleNews->head_title,
-                        'meta_description'  => $singleNews->meta_desctript,
+                        'meta_description'  => $singleNews->meta_descript,
                         'meta_keywords'     => $singleNews->meta_key_words,
                         'forum_link'        => $singleNews->forum_link,
                         'active'            => $singleNews->active,
@@ -510,9 +515,9 @@ class NewsController extends ApiController
 
         $validator = Validator::make($newsSearchData, [
             'locale' => 'string',
-            'news_id' => 'integer|required',
+            'news_id' => 'integer|required|exists:pages,id',
         ]);
-
+        $locale = \LaravelLocalization::getCurrentLocale();
         if (!$validator->fails()) {
             $singleNews = Page::find($newsSearchData['news_id']);
 
@@ -524,7 +529,7 @@ class NewsController extends ApiController
                     'abstract'          => $singleNews->abstract,
                     'body'              => $singleNews->body,
                     'head_title'        => $singleNews->head_title,
-                    'meta_description'  => $singleNews->meta_desctript,
+                    'meta_description'  => $singleNews->meta_descript,
                     'meta_keywords'     => $singleNews->meta_key_words,
                     'forum_link'        => $singleNews->forum_link,
                     'active'            => $singleNews->active,

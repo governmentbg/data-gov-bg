@@ -82,7 +82,7 @@ class DatabaseTest extends TestCase
         $this->organisations();
         $this->pages();
         $this->sections();
-        $this->data_requests();
+        $this->dataRequests();
         $this->actionsHistory();
         $this->category();
         $this->dataSets();
@@ -487,7 +487,7 @@ class DatabaseTest extends TestCase
      *
      * @return void
      */
-    private function data_requests()
+    private function dataRequests()
     {
         // Test creation
         $orgs = Organisation::orderBy('created_at', 'desc')->limit(self::DATA_REQUESTS_RECORDS)->get()->toArray();

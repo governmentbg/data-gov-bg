@@ -2,7 +2,6 @@
 
 use App\DataSet;
 use App\Resource;
-
 use App\ElasticDataSet;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
@@ -44,12 +43,12 @@ class ElasticDataSetSeeder extends Seeder
                 'hash_id'   => $this->faker->md5(),
             ];
 
-//            $insert = \Elasticsearch::index([
-//                'body'  => $data,
-//                'index' => $index,
-//                'type'  => ElasticDataSet::ELASTIC_TYPE,
-//                'id'    => $id,
-//            ]);
+           \Elasticsearch::index([
+               'body'  => $data,
+               'index' => $index,
+               'type'  => ElasticDataSet::ELASTIC_TYPE,
+               'id'    => $id,
+           ]);
         }
     }
 }

@@ -102,7 +102,7 @@
                                 <textarea
                                     type="text"
                                     class="input-border-r-12 form-control"
-                                    name="description"
+                                    name="add_info"
                                 ></textarea>
                                 @if (!empty($error->description))
                                     <span class="error">{{ $error->description[0] }}</span>

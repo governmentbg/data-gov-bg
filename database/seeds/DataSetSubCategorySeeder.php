@@ -23,13 +23,16 @@ class DataSetSubCategorySeeder extends Seeder
         $categories = Category::select('id')->limit(self::DATA_SET_SUB_CATEGORIES_RECORDS)->get()->toArray();
 
         foreach (range(1, self::DATA_SET_SUB_CATEGORIES_RECORDS) as $index) {
-            $dataSet =  $this->faker->unique()->randomElement($dataSets)['id'];
+            $dataSet = $this->faker->randomElement($dataSets)['id'];
             $category = $this->faker->randomElement($categories)['id'];
-
-            DataSetSubCategory::create([
+            $dbData = [
                 'data_set_id' => $dataSet,
                 'sub_cat_id'  => $category
-            ]);
+            ];
+
+            if (!DataSetSubCategory::where($dbData)->count()) {
+                DataSetSubCategory::create($dbData);
+            }
         }
     }
 }

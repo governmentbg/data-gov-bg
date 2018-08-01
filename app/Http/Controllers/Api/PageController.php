@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\ApiController;
-use Illuminate\Database\QueryException;
+use \App\Page;
+use \Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use \App\Page;
-use \Validator;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 
 class PageController extends ApiController
 {
@@ -29,7 +29,6 @@ class PageController extends ApiController
      *
      * @return json response with new page id on success and error on fail
      */
-
     public function addPage(Request $request)
     {
         $pageData = $request->all();
@@ -90,6 +89,7 @@ class PageController extends ApiController
                 Log::error($e->getMessage());
             }
         }
+
         return $this->errorResponse('Page add failure', $validator->errors()->messages());
     }
 
@@ -132,7 +132,6 @@ class PageController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-
             try {
                 $pageToEdit = Page::find($editData['page_id']);
 
@@ -178,11 +177,10 @@ class PageController extends ApiController
             } catch (QueryException $e) {
                 DB::rollback();
                 Log::error($e->getMessage());
-
             }
         }
-        return $this->errorResponse('Page edit failure', $validator->errors()->messages());
 
+        return $this->errorResponse('Page edit failure', $validator->errors()->messages());
     }
 
     /**
@@ -203,7 +201,6 @@ class PageController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-
             try {
                 $pageToBeDeleted = Page::find($deleteData['page_id']);
 
@@ -213,9 +210,10 @@ class PageController extends ApiController
                 Log::error($ex->getMessage());
             }
         }
-        return $this->errorResponse('Delete page failure', $validator->errors()->messages());
 
+        return $this->errorResponse('Delete page failure', $validator->errors()->messages());
     }
+
     /**
      * Lists pages based on request input
      *
@@ -336,6 +334,5 @@ class PageController extends ApiController
             'total_records' => $total_records,
             'pages' => $result,
         ], true);
-
     }
 }

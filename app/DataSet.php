@@ -68,7 +68,7 @@ class DataSet extends Model implements TranslatableInterface
 
     public function dataSetSubCategory()
     {
-        return $this->hasMany('App\DataSetSubCategory');
+        return $this->belongsToMany('App\Category', 'data_set_sub_categories', 'data_set_id', 'sub_cat_id');
     }
 
     public function resource()

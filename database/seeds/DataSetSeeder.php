@@ -32,6 +32,7 @@ class DataSetSeeder extends Seeder
                 'author_email'  => $this->faker->email(),
                 'support_name'  => $this->faker->name(),
                 'support_email' => $this->faker->email(),
+                'source'        => $this->faker->url(),
                 'visibility'    => $visibility,
                 'version'       => 1,
                 'status'        => $status,

@@ -32,6 +32,6 @@ class Category extends Model implements TranslatableInterface
 
     public function dataSetSubCategory()
     {
-        return $this->hasMany('App\DataSetSubCategories');
+        return $this->belongsToMany('App\DataSet', 'data_set_sub_categories', 'sub_cat_id', 'data_set_id');
     }
 }

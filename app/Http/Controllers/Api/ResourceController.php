@@ -435,7 +435,7 @@ class ResourceController extends ApiController
                     'version'               => $result->version,
                     'schema_description'    => $result->schema_descript,
                     'schema_url'            => $result->schema_url,
-                    'type'                  => $types[$result->type],
+                    'type'                  => $types[$result->resource_type],
                     'resource_url'          => $result->resource_url,
                     'http_rq_type'          => $rqTypes[$result->http_rq_type],
                     'authentication'        => $result->authentication,
@@ -746,5 +746,33 @@ class ResourceController extends ApiController
 
             return $this->successResponse(['data_formats' => $result], true);
         }
+    }
+
+    /**
+     * Check if user has reported resources
+     *
+     * @param int user_id - required
+     * @return json with results or error
+     */
+    public function hasReportedResource(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'user_id'   => 'required|int|exists:users,id',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $hasReported = Resource::where('created_by', $post['user_id'])
+                        ->where('is_reported', 1)->count();
+
+                return $this->successResponse(['flag' => ($hasReported) ? true : false], true);
+            } catch (Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Search reported resources failure', $validator->errors()->messages());
     }
 }

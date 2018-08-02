@@ -89,7 +89,9 @@ class OrganisationController extends ApiController
             if (!empty($data['logo'])) {
                 try {
                     $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {}
+                } catch (NotReadableException $ex) {
+                    // TODO Log exception
+                }
 
                 if (!empty($img)) {
                     $organisation->logo_file_name = basename($data['logo']);
@@ -384,6 +386,7 @@ class OrganisationController extends ApiController
             'criteria.active'       => 'nullable|bool',
             'criteria.approved'     => 'nullable|bool',
             'criteria.org_id'       => 'nullable|integer',
+            'criteria.user_id'      => 'nullable|integer|exists:users,id',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
@@ -403,6 +406,10 @@ class OrganisationController extends ApiController
                 $criteria['parent_org_id'] = $request->criteria['org_id'];
             }
 
+            if (isset($request->criteria['user_id'])) {
+                $criteria['user_id'] = $request->criteria['user_id'];
+            }
+
             try {
                 $query = Organisation::with('CustomSetting')->where('type', '!=', Organisation::TYPE_GROUP);
 
@@ -410,7 +417,12 @@ class OrganisationController extends ApiController
                     $query->whereIn('id', $request->criteria['org_ids']);
                 }
 
-                //$query = Organisation::with('CustomSetting');
+                if (!empty($criteria['user_id'])) {
+                    $query->whereHas('userToOrgRole', function($q) use ($criteria) {
+                        $q->where('user_id', $criteria['user_id']);
+                    });
+                    unset($criteria['user_id']);
+                }
 
                 if (!empty($criteria)) {
                     $query->where($criteria);
@@ -438,25 +450,25 @@ class OrganisationController extends ApiController
                     }
 
                     $results[] = [
-                        'id'              => $org->id,
-                        'name'            => $org->name,
-                        'description'     => $org->descript,
-                        'locale'          => $org->locale,
-                        'uri'             => $org->uri,
-                        'type'            => $org->type,
-                        'logo'            => $org->logo,
-                        'activity_info'   => $org->activity_info,
-                        'contacts'        => $org->contacts,
-                        'parent_org_id'   => $org->parent_org_id,
-                        'approved'        => $org->approved,
-                        'active'          => $org->active,
-                        'custom_fields'   => $customFields,
-                        'datasets_count'  => $org->dataSet()->count(),
-                        'followers_count' => $org->userFollow()->count(),
-                        'created_at'      => $org->created_at->toDateTimeString(),
-                        'updated_at'      => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
-                        'created_by'      => $org->created_by,
-                        'updated_by'      => $org->updated_by,
+                        'id'                => $org->id,
+                        'name'              => $org->name,
+                        'description'       => $org->descript,
+                        'locale'            => $org->locale,
+                        'uri'               => $org->uri,
+                        'type'              => $org->type,
+                        'logo'              => $org->logo_data,
+                        'activity_info'     => $org->activity_info,
+                        'contacts'          => $org->contacts,
+                        'parent_org_id'     => $org->parent_org_id,
+                        'approved'          => $org->approved,
+                        'active'            => $org->active,
+                        'custom_fields'     => $customFields,
+                        'datasets_count'    => $org->dataSet()->count(),
+                        'followers_count'   => $org->userFollow()->count(),
+                        'created_at'        => $org->created_at->toDateTimeString(),
+                        'updated_at'        => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
+                        'created_by'        => $org->created_by,
+                        'updated_by'        => $org->updated_by,
                     ];
                 }
 
@@ -469,7 +481,7 @@ class OrganisationController extends ApiController
         return ApiController::errorResponse('List organisation failure', $validator->errors()->messages());
     }
 
-        /**
+    /**
      * List organisations by criteria
      *
      * @param array criteria -optional
@@ -1035,6 +1047,7 @@ class OrganisationController extends ApiController
                 'criteria.group_ids'    => 'nullable|array',
                 'criteria.locale'       => 'nullable|string|max:5',
                 'criteria.dataset_id'   => 'nullable|integer',
+                'criteria.user_id'      => 'nullable|integer|exists:users,id',
                 'criteria.order.type'   => 'nullable|string',
                 'criteria.order.field'  => 'nullable|string',
                 'records_per_page'      => 'nullable|integer',
@@ -1049,6 +1062,12 @@ class OrganisationController extends ApiController
                 if (!empty($criteria['dataset_id'])) {
                     $query->whereHas('dataSet', function($q) use ($criteria) {
                         $q->where('id', $criteria['dataset_id']);
+                    });
+                }
+
+                if (!empty($criteria['user_id'])) {
+                    $query->whereHas('userToOrgRole', function($q) use ($criteria) {
+                        $q->where('user_id', $criteria['user_id']);
                     });
                 }
             }
@@ -1223,7 +1242,7 @@ class OrganisationController extends ApiController
 
                     $result[] = [
                         'name'              => $group->name,
-                        'type'               => $group->type,
+                        'type'              => $group->type,
                         'description'       => $group->descript,
                         'locale'            => $group->locale,
                         'uri'               => $group->uri,
@@ -1246,7 +1265,6 @@ class OrganisationController extends ApiController
 
         return ApiController::errorResponse('Search groups failure', $validator->errors()->messages());
     }
-
 
     /**
      * Get unique uri for organisation (group) using the name

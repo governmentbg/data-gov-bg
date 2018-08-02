@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Locale;
+use App\DataSet;
 use App\UserSetting;
 use App\Organisation;
 use App\ActionsHistory;
@@ -20,7 +21,9 @@ use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\ApiController as ApiController;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
@@ -79,16 +82,60 @@ class UserController extends Controller {
         ];
     }
 
+    public static function getDatasetTransFields()
+    {
+        return [
+            [
+                'label'    => 'Наименование',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'Описание',
+                'name'     => 'description',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'Етикети',
+                'name'     => 'tags',
+                'type'     => 'text',
+                'view'     => 'translation_tags',
+                'required' => false,
+            ],
+            [
+                'label'    => 'Споразумение за ниво на обсужване',
+                'name'     => 'sla',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['Заглавие', 'Стойност'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
     /**
      * Show the application dashboard.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         return redirect()->action('UserController@newsFeed');
     }
 
-    public function datasets(Request $request) {
+    public function datasets(Request $request)
+    {
         $params['api_key'] = \Auth::user()->api_key;
         $params['criteria']['created_by'] = \Auth::user()->id;
         $params['records_per_page'] = '10';
@@ -101,17 +148,24 @@ class UserController extends Controller {
         return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets]);
     }
 
-    public function datasetView(Request $request) {
+    public function datasetView(Request $request)
+    {
         $params['dataset_uri'] = $request->uri;
 
-        $request = Request::create('/api/getDataSetDetails', 'POST', $params);
-        $api = new ApiDataSets($request);
-        $dataset = $api->getDataSetDetails($request)->getData();
+        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSets($detailsReq);
+        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        unset($params['dataset_uri']);
+        $params['criteria']['dataset_uri'] = $request->uri;
 
-        return view('user/datasetView', ['class' => 'user', 'dataset' => $dataset->data]);
+        $resourcesReq = Request::create('/api/listResources', 'POST', $params);
+        $apiResources = new ApiResource($resourcesReq);
+        $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        return view('user/datasetView', ['class' => 'user', 'dataset' => $dataset->data, 'resources' => $resources->resources]);
     }
 
-    public function deleteDataset(Request $request)
+    public function datasetDelete(Request $request)
     {
         $params['api_key'] = \Auth::user()->api_key;
         $params['dataset_uri'] = $request->input('dataset_uri');
@@ -123,13 +177,88 @@ class UserController extends Controller {
         return redirect('user/datasets');
     }
 
-    public function create() {
+    public function datasetCreate(Request $request, DataSet $datasetModel)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $data = $request->all();
+
+        if ($data) {
+            // prepare post data for API request
+            $data['locale'] = \LaravelLocalization::getCurrentLocale();
+            Log::debug($data['tags']);
+            if (isset($data['tags'])) {
+                foreach ($data['tags'] as $locale => $tags) {
+                    $data['tags'][$locale] = explode(',', $tags);
+                }
+            }
+            Log::debug($data['tags']);
+
+            if (!empty($data['group_id'])) {
+                $groupId = $data['group_id'];
+            }
+
+            unset($data['group_id']);
+
+            // make request to API
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['data'] = $data;
+            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $api = new ApiDataSets($savePost);
+            $result = $api->addDataSet($savePost)->getData();
+
+            if ($result->success) {
+                // connect data set to group
+                if (isset($groupId)) {
+                    $gropupParams['group_id'] = $groupId;
+                    $gropupParams['data_set_uri'] = $result->uri;
+                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $gropupParams);
+                    $result = $api->addDataSetToGroup($addGroup)->getData();
+                }
+
+                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                return redirect()->route('datasetView', ['uri' => $request->uri]);
+            } else {
+
+                foreach ($result->errors as $field => $msg) {
+                    $errors[substr($field, strpos($field, ".") + 1)] = $msg[0];
+                }
+
+                $request->flash();
+                $request->session()->flash('errors', $errors);
+                $request->session()->flash('alert-danger', $result->error->message);
+            }
+        }
+
+        return view('user/datasetCreate', [
+            'class'         => 'user',
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ])->with('errors', $errors);
     }
 
-    public function translate() {
+    public function datasetEdit()
+    {
+        return view('user/datasetEdit', [
+            'class' => 'user',
+        ]);
     }
 
-    public function settings(Request $request) {
+    public function translate()
+    {
+    }
+
+    public function settings(Request $request)
+    {
         $class = 'user';
         $user = User::find(Auth::id());
         $digestFreq = UserSetting::getDigestFreq();
@@ -246,7 +375,8 @@ class UserController extends Controller {
         return redirect('/');
     }
 
-    public function registration(Request $request) {
+    public function registration(Request $request)
+    {
         $class = 'user';
         $params = [];
         $error = [];
@@ -282,7 +412,8 @@ class UserController extends Controller {
         return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail'));
     }
 
-    public function orgRegistration(Request $request) {
+    public function orgRegistration(Request $request)
+    {
         $class = 'user';
         $params = [];
         $error = [];
@@ -335,7 +466,12 @@ class UserController extends Controller {
         return view('user/orgRegistration', compact('class', 'error', 'orgTypes'));
     }
 
-    public function createLicense() {
+    public function createLicense()
+    {
+    }
+
+    public function resourceView()
+    {
     }
 
     public function organisations(Request $request)
@@ -568,6 +704,68 @@ class UserController extends Controller {
                     'fields'    => self::getTransFields()
                 ]
             )->with('success', 'Промените бяха запазени успешно!');
+    }
+
+    private function prepareMainCategories()
+    {
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['criteria']['active'] = 1;
+        $request = Request::create('/api/listMainCategories', 'POST', $params);
+        $api = new ApiCategory($request);
+        $result = $api->listMainCategories($request)->getData();
+        $categories = [];
+
+        foreach ($result->categories as $row) {
+            $categories[$row->id] = $row->name;
+        }
+
+        return $categories;
+    }
+
+    private function prepareTermsOfUse()
+    {
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['criteria']['active'] = 1;
+        $request = Request::create('/api/listTermsOfUse', 'POST', $params);
+        $api = new ApiTermsOfUse($request);
+        $result = $api->listTermsOfUse($request)->getData();
+        $termsOfUse = [];
+
+        foreach ($result->data as $row) {
+            $termsOfUse[$row->id] = $row->name;
+        }
+
+        return $termsOfUse;
+    }
+
+    private function prepareOrganisations()
+    {
+        $params['criteria']['user_id'] = \Auth::user()->id;
+        $request = Request::create('/api/listOrganisations', 'POST', $params);
+        $api = new ApiOrganisations($request);
+        $result = $api->listOrganisations($request)->getData();
+        $organisations = [];
+
+        foreach ($result->organisations as $row) {
+            $organisations[$row->id] = $row->name;
+        }
+
+        return $organisations;
+    }
+
+    private function prepareGroups()
+    {
+        $params['criteria']['user_id'] = \Auth::user()->id;
+        $request = Request::create('/api/listGroups', 'POST', $params);
+        $api = new ApiOrganisations($request);
+        $result = $api->listGroups($request)->getData();
+        $groups = [];
+
+        foreach ($result->groups as $row) {
+            $groups[$row->id] = $row->name;
+        }
+
+        return $groups;
     }
 
     public function inviteUser(Request $request)

@@ -1,4 +1,5 @@
 $footerHeight: 50px;
+$footerMobileHeight: 140px;
 
 body {
     cursor: default;
@@ -9,13 +10,24 @@ body {
         min-height: 100%;
         margin-bottom: -$footerHeight;
 
+        @include smMobile {
+            margin-bottom: -$footerMobileHeight;
+        }
+
         .navbar {
             margin-bottom: 10px;
+
+            @include mdMobile() {
+                .container {
+                    width: 100%;
+                }
+            }
 
             .navbar-header {
                 width: 100%;
                 margin-left: 0;
                 margin-right: 0;
+                font-size: 0;
 
                 > div {
                     font-size: 0;
@@ -24,21 +36,17 @@ body {
 
                     &.nav-logos {
                         display: inline-block;
+                        vertical-align: top;
                         margin-top: 7px;
                         margin-bottom: 7px;
                         text-align: center;
 
                         > a {
-                            display: table-cell;
-                            width: 33%;
-                            /*padding: 5px;*/
+                            display: inline-block;
+                            margin-right: 10px;
 
-                            @include desctop() {
-                                padding-right: 10px;
-
-                                &:last-child {
-                                    padding-right: 0;
-                                }
+                            &:last-child {
+                                margin-right: 0;
                             }
 
                             &:first-of-type img {
@@ -46,38 +54,44 @@ body {
                                 height: 50px;
                             }
                         }
+                    }
+
+                    &.access-terms-icons {
+                        display: inline-block;
+                        vertical-align: top;
+                        margin-top: 11px;
 
                         @include smMobile() {
-                            display: table;
-                            /*width: 100%;*/
+                            display: none;
+                        }
 
-                            > a {
-                                width: 20%;
-                            }
+                        > a {
+                            display: inline-block;
                         }
                     }
 
-                    .svgIcons {
-                        padding: 10px;
-
+                    .svg-icons {
                         > svg {
                             width: 45px;
                             height: 23px;
                             margin-top: 10px;
+                            margin-left: 10px;
+                            transition: 0.1s ease-in;
 
                             &.puzzle {
                                 max-width: 23px;
                             }
 
                             &:hover {
-                                transition: 0.4s ease-in;
+                                transition: 0.3s ease-out;
                             }
                         }
                     }
 
                     &.nav-controls {
-                        padding-top: 15px;
+                        height: 65px;
                         display: table;
+                        float: right;
 
                         > span {
                             padding-right: 3px;
@@ -105,10 +119,11 @@ body {
                                         border-radius: 13px;
                                         padding-top: 5px;
                                         padding-bottom: 5px;
+                                        transition: 0.1s ease-in;
 
                                         &:hover {
-                                            transition: 0.5s ease-in;
-                                            background-color: grey;
+                                            transition: 0.3s ease-out;
+                                            // background-color: grey;
                                             color: white;
                                             border-color: transparent;
                                         }
@@ -159,10 +174,9 @@ body {
 
                             &.login-link {
                                 width: auto;
-                                padding-right: 30px;
-                                padding-top: 5px;
+                                padding-right: 18px;
 
-                                @include xsMobile() {
+                                @include mdMobile() {
                                     padding-right: 8px;
                                 }
 
@@ -231,27 +245,6 @@ body {
                                 }
                             }
                         }
-
-                        @include smMobile() {
-                            width: 100%;
-                            padding-top: 0;
-                            padding-bottom: 10px;
-                        }
-                    }
-
-                    @include xsMobile() {
-                        &.nav-logos {
-                            a {
-                                padding-right: 2.5px;
-                                padding-left: 2.5px;
-                            }
-                        }
-                    }
-                }
-
-                @include smMobile {
-                    .navbar-header {
-                        width: 25% !important;
                     }
                 }
             }
@@ -281,6 +274,7 @@ body {
                         display: block;
                         width: 40px;
                         margin: 0 auto;
+                        transition: 0.1s ease-in;
                     }
 
                     &:hover, &.active {
@@ -290,7 +284,7 @@ body {
                         }
 
                         &:before, &:after {
-                            transition: 0.4s ease-in;
+                            transition: 0.3s ease-out;
                         }
 
                         &:before {
@@ -391,12 +385,18 @@ body {
             content: "";
             display: block;
             height: $footerHeight;
+
+            @include smMobile {
+                height: $footerMobileHeight;
+            }
         }
 
         @include smMobile() {
-            .navbar-default .navbar-toggle {
+            .hamburger-trigger .navbar-toggle {
                 float: none;
                 border-color: transparent;
+                margin-right: -10px;
+                padding: 9px 10px;
 
                 > .icon-bar {
                     background-color: #707070;
@@ -407,7 +407,7 @@ body {
                 }
             }
 
-            #myNavbar {
+            #my-navbar {
                 width: 100%;
                 background-color: rgba(0, 0, 0, 0.91);
                 position: absolute;
@@ -484,51 +484,55 @@ body {
         padding: 0 15px;
         height: $footerHeight;
         text-align: center;
-        display: table;
         width: 100%;
 
+        .image-links {
+            display: none;
+        }
+
         .copiright {
-            display: table-cell;
-            vertical-align: middle;
+            display: flex;
+            align-items: center;
             justify-content: center;
-        }
-    }
-
-    .footer-mobile {
-        height: 70px;
-        .svgIcons > svg {
-            fill: white;
-            width: 60px;
-            height: 30px;
-            margin: 20px 12px 0px;
-
-            &.puzzle {
-                max-width: 30px;
-            }
-
-            &:hover {
-                fill: black;
-            }
+            height: 100%;
         }
 
-        @include smMobile() {
-            .copiright {
-                color: white;
-                padding: 28px 0;
+        @include smMobile {
+            height: $footerMobileHeight;
 
-                a {
-                    color: white;
+            .image-links {
+                display: block;
+                padding-right: 2px;
+
+                .svg-icons > svg {
+                    fill: white;
+                    width: 60px;
+                    height: 30px;
+                    margin: 20px 12px 0px;
+
+                    &.puzzle {
+                        max-width: 30px;
+                    }
 
                     &:hover {
-                        color: black;
+                        fill: black;
                     }
                 }
             }
-        }
 
-        @include xsMobile() {
-            .copiright {
-                padding: 28px 0;
+            @include smMobile() {
+                .copiright {
+                    color: white;
+                    height: 80px;
+
+                    a {
+                        color: white;
+
+                        &:hover {
+                            color: black;
+                        }
+                    }
+                }
             }
         }
     }

@@ -44452,10 +44452,6 @@ $(function () {
     });
 });
 
-$(window).load(function () {
-    alert("window load occurred!");
-});
-
 $(function () {
     if ($('.js-check').length) {
         $('.js-check').iCheck({
@@ -44512,7 +44508,7 @@ $(function () {
 
 //close navbar menu on mobile version
 $('.js-close-navbar').on('click', function () {
-    $('#myNavbar').removeClass('in');
+    $('#my-navbar').removeClass('in');
 });
 
 $('.btn-sidebar').click(function (e) {

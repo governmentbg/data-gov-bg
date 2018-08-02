@@ -298,6 +298,12 @@ body {
 
                     &.index {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeIndex !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeIndex;
                             }
@@ -306,6 +312,12 @@ body {
 
                     &.data {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeData !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeData;
                             }
@@ -314,6 +326,12 @@ body {
 
                     &.organisation {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeOrganisation !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeOrganisation;
                             }
@@ -322,6 +340,12 @@ body {
 
                     &.request {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeRequest !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeRequest;
                             }
@@ -330,6 +354,12 @@ body {
 
                     &.visualisation {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeVisualisations !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeVisualisations;
                             }
@@ -338,6 +368,12 @@ body {
 
                     &.news {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeNews !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeNews;
                             }
@@ -346,6 +382,12 @@ body {
 
                     &.document {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeDocuments !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeDocuments;
                             }
@@ -354,6 +396,12 @@ body {
 
                     &.contact {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeContact !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeContact;
                             }
@@ -362,6 +410,12 @@ body {
 
                     &.user {
                         &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeUser !important;
+                                }
+                            }
+
                             &:before, &:after {
                                 background: $themeUser;
                             }

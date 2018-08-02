@@ -5,7 +5,10 @@ Use Uuid;
 use App\DataSet;
 use App\Category;
 use App\DataSetGroup;
+use \App\Organisation;
+use App\CustomSetting;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
@@ -20,19 +23,20 @@ class DataSetController extends ApiController
      * @param integer org_id - optional
      * @param array data - required
      * @param string data[locale] - required
-     * @param string data[name] - required
+     * @param mixed data[name] - required
      * @param string data[uri] - optional
-     * @param string data[description] - optional
+     * @param mixed data[description] - optional
      * @param array data[tags] - optional
      * @param integer data[category_id] - required
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
+     * @param string data[source] - optional
      * @param string data[version] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
      * @param string data[support_name] - optional
      * @param string data[support_email] - optional
-     * @param string data[sla] - optional
+     * @param mixed data[sla] - optional
      *
      * @return json response with id of Data Set or error
      */
@@ -44,26 +48,43 @@ class DataSetController extends ApiController
             'org_id'                => 'nullable|integer',
             'data'                  => 'required',
             'data.locale'           => 'required|string|max:5',
-            'data.name'             => 'required|string',
-            'data.uri'              => 'nullable|string',
-            'data.description'      => 'nullable|string',
-            'data.tags.*'           => 'nullable|string',
+            'data.name'             => 'required',
+            'data.uri'              => 'nullable|string|unique:data_sets,uri',
+            'data.description'      => 'nullable',
+            'data.tags.*'           => 'nullable|array',
             'data.category_id'      => 'required|integer',
             'data.terms_of_use_id'  => 'nullable|integer',
             'data.visibility'       => 'nullable|integer',
-            'data.version'          => 'nullable',
+            'data.source'           => 'nullable|string|max:255',
+            'data.version'          => 'nullable|string|max:15',
             'data.author_name'      => 'nullable|string',
             'data.author_email'     => 'nullable|email',
             'data.support_name'     => 'nullable|string',
             'data.support_email'    => 'nullable|email',
-            'data.sla'              => 'nullable|string',
+            'data.sla'              => 'nullable',
+            'custom_fields.*.label' => 'nullable',
+            'custom_fields.*.value' => 'nullable',
         ]);
+
+        $validator->after(function ($validator) use ($post) {
+            if (is_array($post['data']['name']) && empty(array_filter($post['data']['name']))) {
+                $validator->errors()->add('name', 'name is required');
+            }
+         });
 
         if(!$validator->fails() && !empty($post['data'])) {
             DB::beginTransaction();
 
             if (empty($post['data']['uri'])) {
                 $post['data']['uri'] = Uuid::generate(4)->string;
+            }
+
+            if (empty($post['data']['visibility'])) {
+                $post['data']['visibility'] = DataSet::VISIBILITY_PRIVATE;
+            }
+
+            if (empty($post['data']['version'])) {
+                $post['data']['version'] = 1;
             }
 
             $post['data']['status'] = DataSet::STATUS_DRAFT;
@@ -73,21 +94,26 @@ class DataSetController extends ApiController
                 unset($post['data']['tags']);
             }
 
+            if (!empty($post['data']['custom_fields'])) {
+                $customFields = $post['data']['custom_fields'];
+                unset($post['data']['custom_fields']);
+            }
+
             if (!empty($post['org_id'])) {
                 $post['data']['org_id'] = $post['org_id'];
             }
 
             $newDataSet = new DataSet;
+            $newDataSet->name = $this->trans($empty, $post['data']['name']);
 
-            $newDataSet->name = $post['data']['name'];
+            $newDataSet->descript = !empty($post['data']['description'])
+                    ? $this->trans($empty, $post['data']['description'])
+                    : null;
 
-            if (!empty($post['data']['sla'])) {
-                $newDataSet->sla = $post['data']['sla'];
-            }
+            $newDataSet->sla = !empty($post['data']['sla'])
+                    ? $this->trans($empty, $post['data']['sla'])
+                    : null;
 
-            if (!empty($post['data']['description'])) {
-                $newDataSet->descript = $post['data']['description'];
-            }
 
             unset($post['data']['sla'], $post['data']['name'], $post['data']['description']);
             unset($post['data']['locale']);
@@ -99,7 +125,15 @@ class DataSetController extends ApiController
 
                 if ($newDataSet) {
                     if (!empty($tags)) {
-                        if (!$this->checkAndCreateTags($tags, $post['data']['category_id'])) {
+                        if (!$this->checkAndCreateTags($newDataSet, $tags, $post['data']['category_id'])) {
+                            DB::rollback();
+
+                            return $this->errorResponse('Add DataSet Failure');
+                        }
+                    }
+
+                    if (!empty($customFields)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $newDataSet->id)) {
                             DB::rollback();
 
                             return $this->errorResponse('Add DataSet Failure');
@@ -134,6 +168,7 @@ class DataSetController extends ApiController
      * @param integer data[category_id] - required
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
+     * @param string data[source] - optional
      * @param string data[version] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
@@ -154,11 +189,12 @@ class DataSetController extends ApiController
             'data.name'             => 'nullable|string',
             'data.description'      => 'nullable|string',
             'data.category_id'      => 'required|integer',
-            'data.uri'              => 'nullable|string',
-            'data.tags.*'           => 'nullable|string',
+            'data.uri'              => 'nullable|string|unique:data_sets,uri',
+            'data.tags.*'           => 'nullable|array',
             'data.terms_of_use_id'  => 'nullable|integer',
             'data.visibility'       => 'nullable|integer',
-            'data.version'          => 'nullable',
+            'data.source'           => 'nullable|string|max:255',
+            'data.version'          => 'nullable|string|max:15',
             'data.author_name'      => 'nullable|string',
             'data.author_email'     => 'nullable|email',
             'data.support_name'     => 'nullable|string',
@@ -196,7 +232,7 @@ class DataSetController extends ApiController
                 $dataSet->fill($post['data']);
 
                 if (!empty($tags)) {
-                    if (!$this->checkAndCreateTags($tags, $post['data']['category_id'])) {
+                    if (!$this->checkAndCreateTags($dataSet, $tags, $post['data']['category_id'])) {
                         DB::rollback();
 
                         return $this->errorResponse('Edit dataset failure');
@@ -234,17 +270,33 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, ['dataset_uri' => 'required|string']);
 
-        if (!$validator->fails()) {
-            try {
-                if (DataSet::where('uri', $post['dataset_uri'])->delete()) {
-                    return $this->successResponse();
-                }
-            } catch (QueryException $ex) {
-                Log::error($ex->getMessage());
-            }
+        if ($validator->fails()) {
+            return $this->errorResponse('Delete dataset failure', $validator->errors()->messages());
         }
 
-        return $this->errorResponse('Delete dataset failure', $validator->errors()->messages());
+        if (empty($dataset = DataSet::where('uri', $post['dataset_uri'])->first())) {
+            return $this->errorResponse('Delete dataset failure');
+        }
+
+        try {
+            $dataset->delete();
+        } catch (QueryException $ex) {
+            Log::error($ex->getMessage());
+
+            return $this->errorResponse('Delete dataset failure');
+        }
+
+        try {
+            $dataset->deleted_by = \Auth::id();
+            $dataset->save();
+
+        } catch (QueryException $ex) {
+            Log::error($ex->getMessage());
+
+            return $this->errorResponse('Delete dataset failure');
+        }
+
+        return $this->successResponse();
     }
 
 
@@ -567,8 +619,14 @@ class DataSetController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'group_id'      => 'required|integer',
             'data_set_uri'  => 'required|string',
+            'group_id'      => [
+                                    'required',
+                                    'integer',
+                                    Rule::exists('organisations','id')->where(function ($query) {
+                                        $query->where('type', Organisation::TYPE_GROUP);
+                                    }),
+                                ],
         ]);
 
         if (!$validator->fails()) {
@@ -637,30 +695,90 @@ class DataSetController extends ApiController
     /**
      * Function for adding tags to Data Set
      *
-     * @param array $tags - required
+     * @param array $allTags - required
      * @param integer $parent - required
-     *
+     * @param string $locale - required
      * @return result true or false
      */
-    public function checkAndCreateTags($tags, $parent)
+    private function checkAndCreateTags($dataSet, $allTags, $parent)
     {
         try {
-            foreach ($tags as $tag) {
-                $exists = Category::where(['name' => $tag, 'parent_id' => $parent])->count();
+            $tagIds = [];
+            foreach ($allTags as $locale => $tags) {
+                foreach ($tags as $tag) {
+                    $exists = Category::where(['name' => $tag, 'parent_id' => $parent])->first();
 
-                if (!$exists) {
-                    $tag = [
-                        'name'              => $tag,
-                        'parent_id'         => $parent,
-                        'active'            => 1,
-                        'ordering'          => Category::ORDERING_ASC,
-                    ];
+                    if (!$exists) {
+                        $newTag = new Category;
+                        $newTag->name = [$locale => $tag];
+                        $newTag->parent_id = $parent;
+                        $newTag->active = 1;
+                        $newTag->ordering = Category::ORDERING_ASC;
 
-                    $saveTag = Category::create($tag);
+                        $newTag->save();
+                        $tagIds[] = $newTag->id;
+                    } else {
+                        $tagIds[] = $exists->id;
+                    }
                 }
             }
+            $dataSet->dataSetSubCategory()->sync($tagIds);
 
             return true;
+        } catch (QueryException $ex) {
+            Log::error($ex->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Check and create custom settings for datasets
+     *
+     * @param array $customFields
+     * @param int   $datasetId
+     *
+     * @return true if successful, false otherwise
+     */
+    public function checkAndCreateCustomSettings($customFields, $datasetId)
+    {
+        try {
+            if (count($customFields) <= 3) {
+                if ($datasetId) {
+                    DB::beginTransaction();
+                    $deletedRows = CustomSetting::where('org_id', $datasetId)->delete();
+
+                    foreach ($customFields as $field) {
+                        if (!empty($field['label']) && !empty($field['value'])) {
+                            foreach ($field['label'] as $locale => $label) {
+                                if (
+                                    (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                                    || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
+                                ) {
+                                    DB::rollback();
+
+                                    return false;
+                                }
+                            }
+
+                            $saveField = new CustomSetting;
+                            $saveField->data_set_id = $datasetId;
+                            $saveField->created_by = \Auth::user()->id;
+                            $saveField->key = $this->trans($empty, $field['label']);
+                            $saveField->value = $this->trans($empty, $field['value']);
+
+                            $saveField->save();
+                        } else {
+                            DB::rollback();
+
+                            return false;
+                        }
+                    }
+                    DB::commit();
+
+                    return true;
+                }
+            }
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 

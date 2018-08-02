@@ -107,6 +107,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/editResourceMetadata', 'Api\ResourceController@editResourceMetadata');
     Route::post('/updateResourceData', 'Api\ResourceController@updateResourceData');
     Route::post('/deleteResource', 'Api\ResourceController@deleteResource');
+    Route::post('/hasReportedResource', 'Api\ResourceController@hasReportedResource');
     Route::post('/listDataFormats', 'Api\ResourceController@listDataFormats');
 
     Route::post('/addMainCategory', 'Api\CategoryController@addMainCategory');

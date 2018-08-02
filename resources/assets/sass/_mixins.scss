@@ -93,7 +93,7 @@
                     }
                 }
 
-                &li.js-show-submenu:after {
+                & li.js-show-submenu:after {
                     border: 1px solid $primary;
                 }
 
@@ -276,17 +276,17 @@
         @include smMobile() {
              #my-navbar {
                 .nav.navbar-nav {
-                    >li:not(.icons) {
+                    > li:not(.icons) {
                         &:hover, &.active {
                             border-color: $primary;
+
                             a {
                                 font-weight: 500;
-                                color: opacify($primary, .5) !important;
                             }
                         }
                     }
 
-                    li.icons>a:hover {
+                    li.icons > a:hover {
                         color: opacify($primary, .5) !important;
                     }
                 }

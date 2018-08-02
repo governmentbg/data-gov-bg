@@ -17,7 +17,7 @@
         "laravel-mix": "^2.0",
         "lodash": "^4.17.4",
         "postcss-cli": "^4.1.1",
-        "vue": "^2.5.7"
+        "vue": "2.5.16"
     },
     "dependencies": {
         "flag-icon-css": "^3.0.0",

@@ -168,3 +168,6 @@ Route::post('/getTermsOfUseDetails', 'Api\TermsOfUseController@getTermsOfUseDeta
 
 Route::post('/listLocale', 'Api\LocaleController@listLocale');
 Route::post('/getLocaleDetails', 'Api\LocaleController@getLocaleDetails');
+
+Route::post('/forgottenPassword', 'Api\UserController@forgottenPassword');
+Route::post('/passwordReset', 'Api\UserController@passwordReset');

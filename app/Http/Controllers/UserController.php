@@ -925,6 +925,10 @@ class UserController extends Controller {
     {
         $user = User::find(Auth::id());
         if ($user) {
+            $filter = $request->offsetGet('filter');
+            $objIdFilter = $request->offsetGet('objId');
+            $filters = $this->getNewsFeedFilters();
+
             $criteria = [];
             $actObjData = [];
 
@@ -946,6 +950,13 @@ class UserController extends Controller {
                 ];
                 foreach ($result->user->follows as $follow) {
                     foreach ($follow as $followProp => $followId) {
+                        if ($filter == 'organisations' && $followProp != 'org_id' ||
+                            $filter == 'groups' && $followProp != 'group_id' ||
+                            $filter == 'categories' && $followProp != 'category_id' ||
+                            $filter == 'tags' && $followProp != 'tag_id' ||
+                            $filter == 'users' && $followProp != 'follow_user_id') {
+                            continue;
+                        }
                         if ($followId) {
                             $userFollows[$followProp][] = $followId;
                         }
@@ -964,6 +975,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[2];
                         $actObjData[$objType] = [];
                         foreach ($res->organisations as $org) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$org->id] = $org->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $org->id) {
+                                    continue;
+                                }
+                                $criteria['org_ids'][] = $org->id;
+                            }
                             $actObjData[$objType][$org->id] = [
                                 'obj_id'   => $org->id,
                                 'obj_name' => $org->name,
@@ -971,11 +991,10 @@ class UserController extends Controller {
                                 'obj_view' => '/organisation/profile',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['org_ids'][] = $org->id;
                             $params = [
                                 'criteria' => ['org_id' => $org->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -990,6 +1009,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[3];
                         $actObjData[$objType] = [];
                         foreach ($res->groups as $group) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$group->id] = $group->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $group->id) {
+                                    continue;
+                                }
+                                $criteria['group_ids'][] = $group->id;
+                            }
                             $actObjData[$objType][$group->id] = [
                                 'obj_id'   => $group->id,
                                 'obj_name' => $group->name,
@@ -997,11 +1025,10 @@ class UserController extends Controller {
                                 'obj_view' => '/group/profile',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['group_ids'][] = $group->id;
                             $params = [
                                 'criteria' => ['group_id' => $group->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -1016,6 +1043,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[0];
                         $actObjData[$objType] = [];
                         foreach ($res->categories as $category) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$category->id] = $category->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $category->id) {
+                                    continue;
+                                }
+                                $criteria['category_ids'][] = $category->id;
+                            }
                             $actObjData[$objType][$category->id] = [
                                 'obj_id'   => $category->id,
                                 'obj_name' => $category->name,
@@ -1023,11 +1059,10 @@ class UserController extends Controller {
                                 'obj_view' => '',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['category_ids'][] = $category->id;
                             $params = [
                                 'criteria' => ['category_id' => $category->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -1042,6 +1077,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[1];
                         $actObjData[$objType] = [];
                         foreach ($res->tags as $tag) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$tag->id] = $tag->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $tag->id) {
+                                    continue;
+                                }
+                                $criteria['tag_ids'][] = $tag->id;
+                            }
                             $actObjData[$objType][$tag->id] = [
                                 'obj_id'   => $tag->id,
                                 'obj_name' => $tag->name,
@@ -1049,11 +1093,10 @@ class UserController extends Controller {
                                 'obj_view' => '',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['tag_ids'][] = $tag->id;
                             $params = [
                                 'criteria' => ['tag_id' => $tag->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -1065,9 +1108,18 @@ class UserController extends Controller {
                     $api = new ApiUser($rq);
                     $res = $api->listUsers($rq)->getData();
                     if (isset($res->success) && $res->success == 1 && !empty($res->users)) {
+                        $objType = ActionsHistory::MODULE_NAMES[4];
+                        $actObjData[$objType] = [];
                         foreach ($res->users as $followUser) {
-                            $objType = ActionsHistory::MODULE_NAMES[4];
-                            $actObjData[$objType] = [];
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$followUser->id] = $followUser->firstname .' '. $followUser->lastname;
+                                }
+                                if ($objIdFilter && $objIdFilter != $followUser->id) {
+                                    continue;
+                                }
+                                $criteria['user_ids'][] = $followUser->id;
+                            }
                             $actObjData[$objType][$followUser->id] = [
                                 'obj_id'   => $followUser->id,
                                 'obj_name' => $followUser->firstname .' '. $followUser->lastname,
@@ -1075,11 +1127,10 @@ class UserController extends Controller {
                                 'obj_view' => '/user/profile',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['user_ids'][] = $followUser->id;
                             $params = [
                                 'criteria' => ['created_by' => $followUser->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -1087,45 +1138,53 @@ class UserController extends Controller {
                     $params = [
                         'criteria' => ['dataset_ids' => $userFollows['dataset_id'], 'locale' => $locale]
                     ];
-                    $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                    $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                 }
             }
 
             // user profile actions
-            $objType = ActionsHistory::MODULE_NAMES[4];
-            $actObjData[$objType] = [
-                $user->id => [
-                    'obj_id'   => $user->id,
-                    'obj_name' => $user->firstname .' '. $user->lastname,
-                    'obj_type' => 'user',
-                    'obj_view' => '/user/profile',
-                    'parent_obj_id' => ''
-                ]
-            ];
-            $criteria['user_ids'][] = $user->id;
+            if (!isset($filters[$filter])) {
+                $objType = ActionsHistory::MODULE_NAMES[4];
+                $actObjData[$objType] = [
+                    $user->id => [
+                        'obj_id'   => $user->id,
+                        'obj_name' => $user->firstname .' '. $user->lastname,
+                        'obj_type' => 'user',
+                        'obj_view' => '/user/profile',
+                        'parent_obj_id' => ''
+                    ]
+                ];
+                $criteria['user_ids'][] = $user->id;
+            }
 
-            $perPage = 5;
-            $params = [
-                'api_key'          => $user->api_key,
-                'criteria'         => $criteria,
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
+            $paginationData = [];
+            if (!empty($criteria)) {
+                $perPage = 5;
+                $params = [
+                    'api_key'          => $user->api_key,
+                    'criteria'         => $criteria,
+                    'records_per_page' => $perPage,
+                    'page_number'      => !empty($request->page) ? $request->page : 1,
+                ];
 
-            $rq = Request::create('/api/listActionHistory', 'POST', $params);
-            $api = new ApiActionsHistory($rq);
-            $result = $api->listActionHistory($rq)->getData();
-            $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
-            $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+                $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                $api = new ApiActionsHistory($rq);
+                $result = $api->listActionHistory($rq)->getData();
+                $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
+                $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+            }
 
             return view(
                 'user/newsFeed',
                 [
                     'class'          => 'user',
-                    'actionsHistory' => $paginationData['items'],
+                    'actionsHistory' => !empty($paginationData) ? $paginationData['items'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => ActionsHistory::getTypes(),
-                    'pagination'     => $paginationData['paginate']
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
+                    'filter'         => $filter,
+                    'objIdFilter'    => $objIdFilter
                 ]
             );
         }
@@ -1133,7 +1192,7 @@ class UserController extends Controller {
         return redirect('/');
     }
 
-    private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData) {
+    private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData, &$filters, $filter, $objIdFilter = false) {
         $rq = Request::create('/api/listDataSets', 'POST', $params);
         $api = new ApiDataSets($rq);
         $res = $api->listDataSets($rq)->getData();
@@ -1144,26 +1203,71 @@ class UserController extends Controller {
             }
             foreach ($res->datasets as $dataset) {
                 if (!isset($actObjData[$objType][$dataset->id])) {
+                    if ($dataset->org_id) {
+                        $params = [
+                            'org_id' => $dataset->org_id,
+                        ];
+                        $rq = Request::create('/api/getOrganisationDetails', 'GET', $params);
+                        $api = new ApiOrganisations($rq);
+                        $res = $api->getOrganisationDetails($rq)->getData();
+                        $objOwner = [
+                            'id' => (isset($res->data) && isset($res->data->id)) ? $res->data->id : '',
+                            'name' => (isset($res->data) && isset($res->data->name)) ? $res->data->name : '',
+                            'logo' => (isset($res->data) && isset($res->data->logo)) ? $res->data->logo : '',
+                            'view' => '/organisation/profile'
+                        ];
+                    } else {
+                        $params = [
+                            'api_key'  => Auth::user()->api_key,
+                            'criteria' => [
+                                'id' => $dataset->created_by,
+                            ],
+                        ];
+                        $rq = Request::create('/api/listUsers', 'POST', $params);
+                        $api = new ApiUser($rq);
+                        $res = $api->listUsers($rq)->getData();
+                        $user = isset($res->users) ? array_first($res->users) : [];
+                        $objOwner = [
+                            'id' => isset($user->id) ? $user->id : '',
+                            'name' => (isset($user->firstname) && isset($user->lastname)) ? $user->firstname .' '. $user->lastname : '',
+                            'logo' => null,
+                            'view' => '/user/profile'
+                        ];
+                    }
+                    if ($filter == 'datasets') {
+                        $filters[$filter]['data'][$dataset->uri] = $dataset->name;
+                        if ($objIdFilter && $objIdFilter != $dataset->uri) {
+                            continue;
+                        }
+                    }
                     $actObjData[$objType][$dataset->id] = [
-                        'obj_id' => $dataset->id,
-                        'obj_name' => $dataset->name,
-                        'obj_type' => 'dataset',
-                        'obj_view' => '/data/view',
-                        'parent_obj_id' => ''
+                        'obj_id'         => $dataset->uri,
+                        'obj_name'       => $dataset->name,
+                        'obj_type'       => 'dataset',
+                        'obj_view'       => '/data/view',
+                        'parent_obj_id'  => '',
+                        'obj_owner_id'   => $objOwner['id'],
+                        'obj_owner_name' => $objOwner['name'],
+                        'obj_owner_logo' => $objOwner['logo'],
+                        'obj_owner_view' => $objOwner['view']
                     ];
                     $criteria['dataset_ids'][] = $dataset->id;
                     if (!empty($dataset->resource)) {
                         $objTypeRes = ActionsHistory::MODULE_NAMES[6];
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
-                                'obj_id' => $resource->uri,
-                                'obj_name' => $resource->name,
-                                'obj_type' => 'resource',
-                                'obj_view' => '/data/resourceView',
-                                'parent_obj_id' => $dataset->id,
+                                'obj_id'          => $resource->uri,
+                                'obj_name'        => $resource->name,
+                                'obj_type'        => 'resource',
+                                'obj_view'        => '/data/resourceView',
+                                'parent_obj_id'   => $dataset->uri,
                                 'parent_obj_name' => $dataset->name,
                                 'parent_obj_type' => 'dataset',
-                                'parent_obj_view' => '/data/view'
+                                'parent_obj_view' => '/data/view',
+                                'obj_owner_id'    => $objOwner['id'],
+                                'obj_owner_name'  => $objOwner['name'],
+                                'obj_owner_logo'  => $objOwner['logo'],
+                                'obj_owner_view'  => $objOwner['view']
                             ];
                             $criteria['resource_uris'][] = $resource->uri;
                         }
@@ -1171,6 +1275,41 @@ class UserController extends Controller {
                 }
             }
         }
+    }
+
+    private function getNewsFeedFilters() {
+        return [
+            'organisations' => [
+                'key'   => 'organisation',
+                'label' => 'custom.select_org',
+                'data'  => []
+            ],
+            'groups'        => [
+                'key'   => 'group',
+                'label' => 'custom.select_group',
+                'data'  => []
+            ],
+            'categories'    => [
+                'key'   => 'category',
+                'label' => 'custom.select_main_topic',
+                'data'  => []
+            ],
+            'tags'          => [
+                'key'   => 'tag',
+                'label' => 'custom.select_label',
+                'data'  => []
+            ],
+            'users'         => [
+                'key'   => 'user',
+                'label' => 'custom.select_user',
+                'data'  => []
+            ],
+            'datasets'      => [
+                'key'   => 'dataset',
+                'label' => 'custom.select_dataset',
+                'data'  => []
+            ]
+        ];
     }
 
     public function confirmation(Request $request)

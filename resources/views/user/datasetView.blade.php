@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar')
+    @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-md">
         <div class="col-xs-12 m-t-lg">
             <div class="articles">

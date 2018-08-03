@@ -124,6 +124,34 @@ class UserController extends Controller {
         ];
     }
 
+    public static function getGroupTransFields()
+    {
+        return [
+            [
+                'label'    => 'Наименование',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'Описание',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['Заглавие', 'Стойност'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
     /**
      * Show the application dashboard.
      *
@@ -1289,5 +1317,165 @@ class UserController extends Controller {
 
             return redirect('/');
         }
+    }
+
+    public function registerGroup(Request $request)
+    {
+        $class = 'user';
+        $fields = self::getGroupTransFields();
+
+        if ($request->has('create')) {
+            $data = $request->all();
+            $data['description'] = $data['descript'];
+
+            if (!empty($data['logo'])) {
+                try {
+                    $img = \Image::make($data['logo']);
+
+                    $data['logo_filename'] = $data['logo']->getClientOriginalName();
+                    $data['logo_mimetype'] = $img->mime();
+                    $data['logo_data'] = file_get_contents($data['logo']);
+
+                    unset($data['logo']);
+                } catch (NotReadableException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            }
+
+            $params = [
+                'api_key'   => Auth::user()->api_key,
+                'data'      => $data,
+            ];
+
+            $groupReq = Request::create('api/addGroup', 'POST', $params);
+            $orgApi = new ApiOrganisations($groupReq);
+            $result = $orgApi->addGroup($groupReq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', 'Успешно създадена група!');
+
+                return redirect('/user/groupView/'. $result->id);
+            } else {
+                $request->session()->flash('alert-danger', 'Възникна грешла при създаване на група!');
+                $request->session()->flash('result', $result);
+
+                return back();
+            }
+        }
+
+        return view('/user/groupRegistration', compact('class', 'fields'));
+    }
+
+    public function userGroups(Request $request)
+    {
+        $class = 'user';
+        $groups = [];
+        $perPage = 6;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $api = new ApiOrganisations($orgReq);
+        $result = $api->getUserOrganisations($orgReq)->getData();
+
+        if ($result->success) {
+            foreach ($result->organisations as $org) {
+                if ($org->type == Organisation::TYPE_GROUP) {
+                    $groups[] = $org;
+                }
+            }
+        }
+
+        $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
+
+        return view('/user/groups', [
+            'class'         => 'user',
+            'groups'        => $paginationData['items'],
+            'pagination'    => $paginationData['paginate']
+        ]);
+    }
+
+    public function groupView(Request $request, $id)
+    {
+        $class = 'user';
+
+        $params = ['group_id' => $id];
+
+        $grpReq = Request::create('/api/getGroupDetails', 'POST', $params);
+        $api = new ApiOrganisations($grpReq);
+        $result = $api->getGroupDetails($grpReq)->getData();
+
+        if ($result->success) {
+            $group = $result->data;
+
+            return view('user/groupView', compact('class', 'group'));
+        } else {
+            $request->session()->flash('alert-danger', 'Не беше намерена група!');
+
+            return redirect('/');
+        }
+    }
+
+    public function deleteGroup(Request $request, $id)
+    {
+        $delArr = [
+            'api_key'   => Auth::user()->api_key,
+            'group_id'  => $id,
+        ];
+
+        $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
+        $api = new ApiOrganisations($delReq);
+        $delRes = $api->deleteGroup($delReq)->getData();
+
+        if ($delRes->success) {
+            $request->session()->flash('alert-success', 'Успешно изтрита група!');
+
+            return back();
+        } else {
+            $request->session()->flash('alert-danger', 'Неуспешно изтриване на група!');
+
+            return back();
+        }
+    }
+
+    public function editGroup(Request $request, $id)
+    {
+        $class = 'user';
+        $fields = self::getGroupTransFields();
+
+        $model = Organisation::find($id)->loadTranslations();
+        $withModel = CustomSetting::where('org_id', $id)->get()->loadTranslations();
+        $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type);
+
+        if ($request->has('edit')) {
+            $data = $request->all();
+            $data['locale'] = \LaravelLocalization::getCurrentLocale();
+            $data['description'] = $data['descript'];
+
+            $params = [
+                'api_key'   => Auth::user()->api_key,
+                'group_id'  => $id,
+                'data'      => $data,
+            ];
+
+            $editReq = Request::create('/api/editGroup', 'POST', $params);
+            $api = new ApiOrganisations($editReq);
+            $result = $api->editGroup($editReq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', 'Успешно запазени данни!');
+
+                return back();
+            } else {
+                $request->session()->flash('alert-danger', 'Грешно въведени данни!');
+
+                return back();
+            }
+        }
+
+        return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
     }
 }

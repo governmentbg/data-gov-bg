@@ -23,7 +23,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a href="{{ url('/users/list') }}">потребители</a></li>
                                     <li><a class="active" href="#">потребител</a></li>
-                                    <li><a href="{{ url('/user/groups') }}">данни</a></li>
+                                    <li><a href="{{ url('/user/userGroups') }}">данни</a></li>
                                     <li><a href="{{ url('/user/organisations') }}">поток на дейността</a></li>
                                     <li><a href="{{ url('/user/invite') }}">членове</a></li>
                                 </ul>
@@ -74,7 +74,7 @@
                                     class="btn btn-primary pull-right"
                                     type="submit"
                                     name="unfollow"
-                                >Отследвай</button>
+                                >Спри последването</button>
                             </div>
                         @endif
                     </form>

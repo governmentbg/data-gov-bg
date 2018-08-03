@@ -12,7 +12,7 @@
                             <ul class="sidebar-submenu open">
                                 <li><a href="{{ url('/user/') }}">Потребители</a></li>
                                 <li><a href="{{ url('/user/organisations') }}">Организации</a></li>
-                                <li><a href="{{ url('/user/groups') }}">Групи</a></li>
+                                <li><a href="{{ url('/user/userGroups') }}">Групи</a></li>
                                 <li><a href="{{ url('/user/datasets') }}">Набор данни</a></li>
                                 <li><a href="{{ url('/user/') }}">Основна тема</a></li>
                                 <li><a href="{{ url('/user/') }}">Етикети</a></li>
@@ -29,7 +29,7 @@
                                         <ul class="nav filter-type right-border">
                                             <li><a class="active p-l-none" href="{{ url('/user') }}">известия</a></li>
                                             <li><a href="{{ url('/user/datasets') }}">моите данни</a></li>
-                                            <li><a href="{{ url('/user/groups') }}">групи</a></li>
+                                            <li><a href="{{ url('/user/userGroups') }}">групи</a></li>
                                             <li><a href="{{ url('/user/organisations') }}">организации</a></li>
                                             <li><a href="{{ url('/user/settings') }}">настройки</a></li>
                                             <li><a href="{{ url('/user/invite') }}">покана</a></li>

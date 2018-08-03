@@ -599,3 +599,60 @@
 .user-nav-bar {
     margin-top: 10px;
 }
+
+.user-group {
+    padding: 50px;
+
+    .ch-del-btns {
+        margin-top: 10px;
+        margin-bottom: 35px;
+
+        button {
+            border-radius: 10px;
+            padding: 7px;
+            background-color: #108f9e;
+            color: white;
+            border: none;
+        }
+    }
+    .group-desc {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 7;
+        height: 150px;
+    }
+    .group-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+    }
+    .logo {
+        &img {
+            height: 200px;
+        }
+    }
+    .show-more {
+        margin-top: 10px;
+    }
+    .group-col {
+        margin-bottom: 30px;
+    }
+    .pagination {
+        li {
+            &.active {
+                span {
+                    background-color: #108f9e;
+                    border-color: #108f9e;
+                    color: white;
+                }
+            }
+            span, a {
+                color: #108f9e;
+            }
+        }
+    }
+}

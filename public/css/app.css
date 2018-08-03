@@ -13451,6 +13451,63 @@ textarea {
   margin-top: 10px;
 }
 
+.user-group {
+  padding: 50px;
+}
+
+.user-group .ch-del-btns {
+  margin-top: 10px;
+  margin-bottom: 35px;
+}
+
+.user-group .ch-del-btns button {
+  border-radius: 10px;
+  padding: 7px;
+  background-color: #108f9e;
+  color: white;
+  border: none;
+}
+
+.user-group .group-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+  height: 150px;
+}
+
+.user-group .group-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.user-group .logoimg {
+  height: 200px;
+}
+
+.user-group .show-more {
+  margin-top: 10px;
+}
+
+.user-group .group-col {
+  margin-bottom: 30px;
+}
+
+.user-group .pagination li.active span {
+  background-color: #108f9e;
+  border-color: #108f9e;
+  color: white;
+}
+
+.user-group .pagination li span,
+.user-group .pagination li a {
+  color: #108f9e;
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;

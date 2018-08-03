@@ -7,6 +7,7 @@ use App\Locale;
 use App\DataSet;
 use App\UserSetting;
 use App\Organisation;
+use App\UserToOrgRole;
 use App\ActionsHistory;
 use App\CustomSetting;
 use Illuminate\Http\Request;
@@ -44,35 +45,35 @@ class UserController extends Controller {
     {
         return [
             [
-                'label'    => 'Наименование',
+                'label'    => 'custom.label_name',
                 'name'     => 'name',
                 'type'     => 'text',
                 'view'     => 'translation',
                 'required' => true,
             ],
             [
-                'label'    => 'Описание',
+                'label'    => 'custom.description',
                 'name'     => 'descript',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => 'Дейност',
+                'label'    => 'custom.activity',
                 'name'     => 'activity_info',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => 'Контакти',
+                'label'    => 'custom.contacts',
                 'name'     => 'contacts',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => ['Заглавие', 'Стойност'],
+                'label'    => ['custom.title', 'custom.value'],
                 'name'     => 'custom_fields',
                 'type'     => 'text',
                 'view'     => 'translation_custom',
@@ -86,35 +87,63 @@ class UserController extends Controller {
     {
         return [
             [
-                'label'    => 'Наименование',
+                'label'    => 'custom.label_name',
                 'name'     => 'name',
                 'type'     => 'text',
                 'view'     => 'translation',
                 'required' => true,
             ],
             [
-                'label'    => 'Описание',
+                'label'    => 'custom.description',
                 'name'     => 'description',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => 'Етикети',
+                'label'    => 'custom.labels',
                 'name'     => 'tags',
                 'type'     => 'text',
                 'view'     => 'translation_tags',
                 'required' => false,
             ],
             [
-                'label'    => 'Споразумение за ниво на обсужване',
+                'label'    => 'custom.sla_agreement',
                 'name'     => 'sla',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => ['Заглавие', 'Стойност'],
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
+    public static function getGroupTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
                 'name'     => 'custom_fields',
                 'type'     => 'text',
                 'view'     => 'translation_custom',
@@ -146,6 +175,31 @@ class UserController extends Controller {
         $datasets = $api->listDataSets($request)->getData();
 
         return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets]);
+    }
+
+    public function orgDatasets(Request $request) {
+        $perPage = 6;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+        $userOrgIds = UserToOrgRole::where('user_id', \Auth::user()->id)->pluck('org_id')->toArray();
+        $dataSetIds = DataSet::whereIn('org_id', $userOrgIds)->pluck('id')->toArray();
+        $params['criteria']['dataset_ids'] = $dataSetIds;
+        $request = Request::create('/api/listDataSets', 'POST', $params);
+        $api = new ApiDataSets($request);
+        $datasets = $api->listDataSets($request)->getData();
+        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+
+        return view(
+            'user/datasets',
+            [
+                'class'         => 'user',
+                'datasets'      => $paginationData['items'],
+                'pagination'    => $paginationData['paginate']
+            ]
+        );
     }
 
     public function datasetView(Request $request)
@@ -586,8 +640,19 @@ class UserController extends Controller {
         }
 
         return $result->success
-            ? redirect('/organisation/profile')
+            ? redirect()->route('userOrgView', ['org_id' => $result->org_id])
             : redirect('user/organisations/register')->withInput(Input::all());
+    }
+
+    public function viewOrg(Request $request)
+    {
+        $uri = $request->uri;
+        $orgId = $request->has('org_id') ? $request->org_id : Organisation::where('uri', $uri)->value('id');
+        $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
+        $api = new ApiOrganisations($request);
+        $result = $api->getOrganisationDetails($request)->getData();
+
+        return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
     }
 
 
@@ -860,6 +925,10 @@ class UserController extends Controller {
     {
         $user = User::find(Auth::id());
         if ($user) {
+            $filter = $request->offsetGet('filter');
+            $objIdFilter = $request->offsetGet('objId');
+            $filters = $this->getNewsFeedFilters();
+
             $criteria = [];
             $actObjData = [];
 
@@ -881,6 +950,13 @@ class UserController extends Controller {
                 ];
                 foreach ($result->user->follows as $follow) {
                     foreach ($follow as $followProp => $followId) {
+                        if ($filter == 'organisations' && $followProp != 'org_id' ||
+                            $filter == 'groups' && $followProp != 'group_id' ||
+                            $filter == 'categories' && $followProp != 'category_id' ||
+                            $filter == 'tags' && $followProp != 'tag_id' ||
+                            $filter == 'users' && $followProp != 'follow_user_id') {
+                            continue;
+                        }
                         if ($followId) {
                             $userFollows[$followProp][] = $followId;
                         }
@@ -899,6 +975,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[2];
                         $actObjData[$objType] = [];
                         foreach ($res->organisations as $org) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$org->id] = $org->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $org->id) {
+                                    continue;
+                                }
+                                $criteria['org_ids'][] = $org->id;
+                            }
                             $actObjData[$objType][$org->id] = [
                                 'obj_id'   => $org->id,
                                 'obj_name' => $org->name,
@@ -906,11 +991,10 @@ class UserController extends Controller {
                                 'obj_view' => '/organisation/profile',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['org_ids'][] = $org->id;
                             $params = [
                                 'criteria' => ['org_id' => $org->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -925,6 +1009,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[3];
                         $actObjData[$objType] = [];
                         foreach ($res->groups as $group) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$group->id] = $group->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $group->id) {
+                                    continue;
+                                }
+                                $criteria['group_ids'][] = $group->id;
+                            }
                             $actObjData[$objType][$group->id] = [
                                 'obj_id'   => $group->id,
                                 'obj_name' => $group->name,
@@ -932,11 +1025,10 @@ class UserController extends Controller {
                                 'obj_view' => '/group/profile',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['group_ids'][] = $group->id;
                             $params = [
                                 'criteria' => ['group_id' => $group->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -951,6 +1043,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[0];
                         $actObjData[$objType] = [];
                         foreach ($res->categories as $category) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$category->id] = $category->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $category->id) {
+                                    continue;
+                                }
+                                $criteria['category_ids'][] = $category->id;
+                            }
                             $actObjData[$objType][$category->id] = [
                                 'obj_id'   => $category->id,
                                 'obj_name' => $category->name,
@@ -958,11 +1059,10 @@ class UserController extends Controller {
                                 'obj_view' => '',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['category_ids'][] = $category->id;
                             $params = [
                                 'criteria' => ['category_id' => $category->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -977,6 +1077,15 @@ class UserController extends Controller {
                         $objType = ActionsHistory::MODULE_NAMES[1];
                         $actObjData[$objType] = [];
                         foreach ($res->tags as $tag) {
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$tag->id] = $tag->name;
+                                }
+                                if ($objIdFilter && $objIdFilter != $tag->id) {
+                                    continue;
+                                }
+                                $criteria['tag_ids'][] = $tag->id;
+                            }
                             $actObjData[$objType][$tag->id] = [
                                 'obj_id'   => $tag->id,
                                 'obj_name' => $tag->name,
@@ -984,11 +1093,10 @@ class UserController extends Controller {
                                 'obj_view' => '',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['tag_ids'][] = $tag->id;
                             $params = [
                                 'criteria' => ['tag_id' => $tag->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -1000,9 +1108,18 @@ class UserController extends Controller {
                     $api = new ApiUser($rq);
                     $res = $api->listUsers($rq)->getData();
                     if (isset($res->success) && $res->success == 1 && !empty($res->users)) {
+                        $objType = ActionsHistory::MODULE_NAMES[4];
+                        $actObjData[$objType] = [];
                         foreach ($res->users as $followUser) {
-                            $objType = ActionsHistory::MODULE_NAMES[4];
-                            $actObjData[$objType] = [];
+                            if ($filter != 'datasets') {
+                                if (isset($filters[$filter])) {
+                                    $filters[$filter]['data'][$followUser->id] = $followUser->firstname .' '. $followUser->lastname;
+                                }
+                                if ($objIdFilter && $objIdFilter != $followUser->id) {
+                                    continue;
+                                }
+                                $criteria['user_ids'][] = $followUser->id;
+                            }
                             $actObjData[$objType][$followUser->id] = [
                                 'obj_id'   => $followUser->id,
                                 'obj_name' => $followUser->firstname .' '. $followUser->lastname,
@@ -1010,11 +1127,10 @@ class UserController extends Controller {
                                 'obj_view' => '/user/profile',
                                 'parent_obj_id' => ''
                             ];
-                            $criteria['user_ids'][] = $followUser->id;
                             $params = [
                                 'criteria' => ['created_by' => $followUser->id, 'locale' => $locale]
                             ];
-                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                            $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                         }
                     }
                 }
@@ -1022,45 +1138,53 @@ class UserController extends Controller {
                     $params = [
                         'criteria' => ['dataset_ids' => $userFollows['dataset_id'], 'locale' => $locale]
                     ];
-                    $this->prepareNewsFeedDatasets($params, $criteria, $actObjData);
+                    $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
                 }
             }
 
             // user profile actions
-            $objType = ActionsHistory::MODULE_NAMES[4];
-            $actObjData[$objType] = [
-                $user->id => [
-                    'obj_id'   => $user->id,
-                    'obj_name' => $user->firstname .' '. $user->lastname,
-                    'obj_type' => 'user',
-                    'obj_view' => '/user/profile',
-                    'parent_obj_id' => ''
-                ]
-            ];
-            $criteria['user_ids'][] = $user->id;
+            if (!isset($filters[$filter])) {
+                $objType = ActionsHistory::MODULE_NAMES[4];
+                $actObjData[$objType] = [
+                    $user->id => [
+                        'obj_id'   => $user->id,
+                        'obj_name' => $user->firstname .' '. $user->lastname,
+                        'obj_type' => 'user',
+                        'obj_view' => '/user/profile',
+                        'parent_obj_id' => ''
+                    ]
+                ];
+                $criteria['user_ids'][] = $user->id;
+            }
 
-            $perPage = 5;
-            $params = [
-                'api_key'          => $user->api_key,
-                'criteria'         => $criteria,
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
+            $paginationData = [];
+            if (!empty($criteria)) {
+                $perPage = 5;
+                $params = [
+                    'api_key'          => $user->api_key,
+                    'criteria'         => $criteria,
+                    'records_per_page' => $perPage,
+                    'page_number'      => !empty($request->page) ? $request->page : 1,
+                ];
 
-            $rq = Request::create('/api/listActionHistory', 'POST', $params);
-            $api = new ApiActionsHistory($rq);
-            $result = $api->listActionHistory($rq)->getData();
-            $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
-            $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+                $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                $api = new ApiActionsHistory($rq);
+                $result = $api->listActionHistory($rq)->getData();
+                $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
+                $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+            }
 
             return view(
                 'user/newsFeed',
                 [
                     'class'          => 'user',
-                    'actionsHistory' => $paginationData['items'],
+                    'actionsHistory' => !empty($paginationData) ? $paginationData['items'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => ActionsHistory::getTypes(),
-                    'pagination'     => $paginationData['paginate']
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
+                    'filter'         => $filter,
+                    'objIdFilter'    => $objIdFilter
                 ]
             );
         }
@@ -1068,7 +1192,7 @@ class UserController extends Controller {
         return redirect('/');
     }
 
-    private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData) {
+    private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData, &$filters, $filter, $objIdFilter = false) {
         $rq = Request::create('/api/listDataSets', 'POST', $params);
         $api = new ApiDataSets($rq);
         $res = $api->listDataSets($rq)->getData();
@@ -1079,26 +1203,71 @@ class UserController extends Controller {
             }
             foreach ($res->datasets as $dataset) {
                 if (!isset($actObjData[$objType][$dataset->id])) {
+                    if ($dataset->org_id) {
+                        $params = [
+                            'org_id' => $dataset->org_id,
+                        ];
+                        $rq = Request::create('/api/getOrganisationDetails', 'GET', $params);
+                        $api = new ApiOrganisations($rq);
+                        $res = $api->getOrganisationDetails($rq)->getData();
+                        $objOwner = [
+                            'id' => (isset($res->data) && isset($res->data->id)) ? $res->data->id : '',
+                            'name' => (isset($res->data) && isset($res->data->name)) ? $res->data->name : '',
+                            'logo' => (isset($res->data) && isset($res->data->logo)) ? $res->data->logo : '',
+                            'view' => '/organisation/profile'
+                        ];
+                    } else {
+                        $params = [
+                            'api_key'  => Auth::user()->api_key,
+                            'criteria' => [
+                                'id' => $dataset->created_by,
+                            ],
+                        ];
+                        $rq = Request::create('/api/listUsers', 'POST', $params);
+                        $api = new ApiUser($rq);
+                        $res = $api->listUsers($rq)->getData();
+                        $user = isset($res->users) ? array_first($res->users) : [];
+                        $objOwner = [
+                            'id' => isset($user->id) ? $user->id : '',
+                            'name' => (isset($user->firstname) && isset($user->lastname)) ? $user->firstname .' '. $user->lastname : '',
+                            'logo' => null,
+                            'view' => '/user/profile'
+                        ];
+                    }
+                    if ($filter == 'datasets') {
+                        $filters[$filter]['data'][$dataset->uri] = $dataset->name;
+                        if ($objIdFilter && $objIdFilter != $dataset->uri) {
+                            continue;
+                        }
+                    }
                     $actObjData[$objType][$dataset->id] = [
-                        'obj_id' => $dataset->id,
-                        'obj_name' => $dataset->name,
-                        'obj_type' => 'dataset',
-                        'obj_view' => '/data/view',
-                        'parent_obj_id' => ''
+                        'obj_id'         => $dataset->uri,
+                        'obj_name'       => $dataset->name,
+                        'obj_type'       => 'dataset',
+                        'obj_view'       => '/data/view',
+                        'parent_obj_id'  => '',
+                        'obj_owner_id'   => $objOwner['id'],
+                        'obj_owner_name' => $objOwner['name'],
+                        'obj_owner_logo' => $objOwner['logo'],
+                        'obj_owner_view' => $objOwner['view']
                     ];
                     $criteria['dataset_ids'][] = $dataset->id;
                     if (!empty($dataset->resource)) {
                         $objTypeRes = ActionsHistory::MODULE_NAMES[6];
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
-                                'obj_id' => $resource->uri,
-                                'obj_name' => $resource->name,
-                                'obj_type' => 'resource',
-                                'obj_view' => '/data/resourceView',
-                                'parent_obj_id' => $dataset->id,
+                                'obj_id'          => $resource->uri,
+                                'obj_name'        => $resource->name,
+                                'obj_type'        => 'resource',
+                                'obj_view'        => '/data/resourceView',
+                                'parent_obj_id'   => $dataset->uri,
                                 'parent_obj_name' => $dataset->name,
                                 'parent_obj_type' => 'dataset',
-                                'parent_obj_view' => '/data/view'
+                                'parent_obj_view' => '/data/view',
+                                'obj_owner_id'    => $objOwner['id'],
+                                'obj_owner_name'  => $objOwner['name'],
+                                'obj_owner_logo'  => $objOwner['logo'],
+                                'obj_owner_view'  => $objOwner['view']
                             ];
                             $criteria['resource_uris'][] = $resource->uri;
                         }
@@ -1106,6 +1275,41 @@ class UserController extends Controller {
                 }
             }
         }
+    }
+
+    private function getNewsFeedFilters() {
+        return [
+            'organisations' => [
+                'key'   => 'organisation',
+                'label' => 'custom.select_org',
+                'data'  => []
+            ],
+            'groups'        => [
+                'key'   => 'group',
+                'label' => 'custom.select_group',
+                'data'  => []
+            ],
+            'categories'    => [
+                'key'   => 'category',
+                'label' => 'custom.select_main_topic',
+                'data'  => []
+            ],
+            'tags'          => [
+                'key'   => 'tag',
+                'label' => 'custom.select_label',
+                'data'  => []
+            ],
+            'users'         => [
+                'key'   => 'user',
+                'label' => 'custom.select_user',
+                'data'  => []
+            ],
+            'datasets'      => [
+                'key'   => 'dataset',
+                'label' => 'custom.select_dataset',
+                'data'  => []
+            ]
+        ];
     }
 
     public function confirmation(Request $request)
@@ -1290,4 +1494,253 @@ class UserController extends Controller {
             return redirect('/');
         }
     }
+
+    public function registerGroup(Request $request)
+    {
+        $class = 'user';
+        $fields = self::getGroupTransFields();
+
+        if ($request->has('create')) {
+            $data = $request->all();
+            $data['description'] = $data['descript'];
+
+            if (!empty($data['logo'])) {
+                try {
+                    $img = \Image::make($data['logo']);
+
+                    $data['logo_filename'] = $data['logo']->getClientOriginalName();
+                    $data['logo_mimetype'] = $img->mime();
+                    $data['logo_data'] = file_get_contents($data['logo']);
+
+                    unset($data['logo']);
+                } catch (NotReadableException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            }
+
+            $params = [
+                'api_key'   => Auth::user()->api_key,
+                'data'      => $data,
+            ];
+
+            $groupReq = Request::create('api/addGroup', 'POST', $params);
+            $orgApi = new ApiOrganisations($groupReq);
+            $result = $orgApi->addGroup($groupReq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', 'Успешно създадена група!');
+
+                return redirect('/user/groupView/'. $result->id);
+            } else {
+                $request->session()->flash('alert-danger', 'Възникна грешла при създаване на група!');
+                $request->session()->flash('result', $result);
+
+                return back();
+            }
+        }
+
+        return view('/user/groupRegistration', compact('class', 'fields'));
+    }
+
+    public function userGroups(Request $request)
+    {
+        $class = 'user';
+        $groups = [];
+        $perPage = 6;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $api = new ApiOrganisations($orgReq);
+        $result = $api->getUserOrganisations($orgReq)->getData();
+
+        if ($result->success) {
+            foreach ($result->organisations as $org) {
+                if ($org->type == Organisation::TYPE_GROUP) {
+                    $groups[] = $org;
+                }
+            }
+        }
+
+        $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
+
+        return view('/user/groups', [
+            'class'         => 'user',
+            'groups'        => $paginationData['items'],
+            'pagination'    => $paginationData['paginate']
+        ]);
+    }
+
+    public function groupView(Request $request, $id)
+    {
+        $class = 'user';
+
+        $params = ['group_id' => $id];
+
+        $grpReq = Request::create('/api/getGroupDetails', 'POST', $params);
+        $api = new ApiOrganisations($grpReq);
+        $result = $api->getGroupDetails($grpReq)->getData();
+
+        if ($result->success) {
+            $group = $result->data;
+
+            return view('user/groupView', compact('class', 'group'));
+        } else {
+            $request->session()->flash('alert-danger', 'Не беше намерена група!');
+
+            return redirect('/');
+        }
+    }
+
+    public function deleteGroup(Request $request, $id)
+    {
+        $delArr = [
+            'api_key'   => Auth::user()->api_key,
+            'group_id'  => $id,
+        ];
+
+        $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
+        $api = new ApiOrganisations($delReq);
+        $delRes = $api->deleteGroup($delReq)->getData();
+
+        if ($delRes->success) {
+            $request->session()->flash('alert-success', 'Успешно изтрита група!');
+
+            return back();
+        } else {
+            $request->session()->flash('alert-danger', 'Неуспешно изтриване на група!');
+
+            return back();
+        }
+    }
+
+    public function editGroup(Request $request, $id)
+    {
+        $class = 'user';
+        $fields = self::getGroupTransFields();
+
+        $model = Organisation::find($id)->loadTranslations();
+        $withModel = CustomSetting::where('org_id', $id)->get()->loadTranslations();
+        $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type);
+
+        if ($request->has('edit')) {
+            $data = $request->all();
+            $data['locale'] = \LaravelLocalization::getCurrentLocale();
+            $data['description'] = $data['descript'];
+
+            $params = [
+                'api_key'   => Auth::user()->api_key,
+                'group_id'  => $id,
+                'data'      => $data,
+            ];
+
+            $editReq = Request::create('/api/editGroup', 'POST', $params);
+            $api = new ApiOrganisations($editReq);
+            $result = $api->editGroup($editReq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', 'Успешно запазени данни!');
+
+                return back();
+            } else {
+                $request->session()->flash('alert-danger', 'Грешно въведени данни!');
+
+                return back();
+            }
+        }
+
+        return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
+    }
+
+    /**
+     * Forgotten password
+     *
+     * @param string username - required
+     *
+     * @return true - if user is found and email is sent false - otherwise
+     */
+    public function forgottenPassword(Request $request)
+    {
+        $errors = [];
+
+        if ($request->isMethod('post')) {
+            $params['username'] = $request->input('username');
+
+            $req = Request::create('/api/forgottenPassword', 'POST', ['data' => $params]);
+            $api = new ApiUser($req);
+            $result = $api->forgottenPassword($req)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-warning', __('custom.receive_email'));
+
+                return redirect('/login');
+            } else {
+                foreach ($result->errors as $field => $msg) {
+                    $errors[substr($field, strpos($field, ".") )] = $msg[0];
+                }
+            }
+        }
+
+        return view(
+            'user/forgottenPassword',
+            [
+                'class' => 'index',
+            ]
+        )->with('errors', $errors);
+    }
+
+    /**
+     * Password reset
+     *
+     * @param string hash - required
+     * @param string password - required
+     * @param string password_confirm - required
+     *
+     * @return true - if password is changed false - otherwise
+     */
+    public function passwordReset(Request $request)
+    {
+        Auth::logout();
+        $hash = $request->offsetGet('hash');
+        $username = $request->offsetGet('username');
+        $errors = [];
+
+        $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+
+        if (!$user) {
+            $request->session()->flash('alert-danger', __('custom.wrong_reset_link'));
+
+            return redirect('/login');
+        }
+
+        if ($request->isMethod('post')) {
+            $params['hash'] = $hash;
+            $params['password'] = $request->input('password');
+            $params['password_confirm'] = $request->input('password_confirm');
+
+            $req = Request::create('/api/passwordReset', 'POST', ['data' => $params]);
+            $api = new ApiUser($req);
+            $result = $api->passwordReset($req)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.pass_change_succ'));
+
+                return redirect('login');
+            } else {
+                foreach ($result->errors as $field => $msg) {
+                    $errors[substr($field, strpos($field, ".") )] = $msg[0];
+                }
+            }
+        }
+
+        return view(
+            'user/passwordReset',[
+                'class' => 'index',
+            ]
+        )->with('errors', $errors);
+    }
+
 }

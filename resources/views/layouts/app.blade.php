@@ -70,11 +70,11 @@
                                 ><img src="{{ asset('img/user.svg') }}"></a>
                             </span>
                             <span class="login-link">>
-                                <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
+                                <a href="{{ url('/logout') }}"> {{ utrans('custom.logout') }}</a>
                             </span>
                         @else
                             <span class="login-link">>
-                                <a href="{{ url('/login') }}">{{ __('custom.login') }}</a>
+                                <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
                             </span>
                         @endif
                         <span class="search-input">
@@ -97,38 +97,41 @@
                         <span><img class="js-close-navbar" src="{{ asset('img/close-btn.png') }}"></span>
                     </div>
                     <ul class="nav navbar-nav">
-                        <li class="index {{ Request::is('/') ? 'active' : null }}">
-                            <a href="{{ url('/') }}">Начало</a>
+                        <li class="{{ Request::is('/') ? 'active' : '' }}">
+                            <a href="{{ url('/') }}">{{ utrans('custom.home') }}</a>
                         </li>
-                        <li class="data {{ Request::segment(1) == 'data' ? 'active' : null }}">
-                            <a href="{{ url('/data') }}">Данни</a>
+                        <li class="{{ Request::segment(1) == 'data' ? 'active' : '' }}">
+                            <a href="{{ url('/data') }}">{{ utrans('custom.data') }}</a>
                         </li>
-                        <li class="organisation {{ Request::segment(1) == 'organisation' ? 'active' : null }}">
-                            <a href="{{ url('/organisation') }}">Организации</a>
+                        <li class="{{ Request::segment(1) == 'organisation'  ? 'active' : '' }}">
+                            <a href="{{ url('/organisation') }}">{{ utrans('custom.organisations',2) }}</a>
                         </li>
-                        <li class="request {{ Request::segment(1) == 'request' ? 'active' : null }}">
-                            <a href="{{ url('/request') }}">Заявки за данни</a>
+                        <li class="{{ Request::segment(1) == 'request' ? 'active' : '' }}">
+                            <a href="{{ url('/request') }}">{{ __('custom.data_requests') }}</a>
                         </li>
-                        <li class="visualisation {{ Request::segment(1) == 'visualisation' ? 'active' : null }}">
-                            <a href="{{ url('/visualisation') }}">Визуализации</a>
+                        <li class="{{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
+                            <a href="{{ url('/visualisation') }}">{{ utrans('custom.visualizations') }}</a>
                         </li>
-                        <li class="news {{ Request::segment(1) == 'news' ? 'active' : null }}">
-                            <a href="{{ url('/news') }}">Новини и събития</a>
+                        <li class="{{ Request::segment(1) == 'news' ? 'active' : '' }}">
+                            <a href="{{ url('/news') }}">{{ __('custom.news_events') }}</a>
                         </li>
-                        <li class="document {{ Request::segment(1) == 'document' ? 'active' : null }}">
-                            <a href="{{ url('/document') }}">Документи</a>
+                        <li class="{{ Request::segment(1) == 'document' ? 'active' : '' }}">
+                            <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
                         </li>
-                        <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : null }}">
-                            <a href="{{ url('/contact') }}">Контакти</a>
+                        <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
+                            <a href="{{ url('/contact') }}">{{ utrans('custom.contacts',2) }}</a>
                         </li>
-                        <li class="hidden-lg hidden-md user {{ in_array(
+                        <li class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
                                 Request::segment(1),
                                 ['user', 'login', 'registration']
                             ) ? 'active' : null }}">
-                            @if (\Auth::check())
-                                <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
-                            @else
+                            @if (!\Auth::check())
                                 <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
+                            @else
+                                <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
+                            </li>
+                            <li class="hidden-lg hidden-md hidden-sm index">
+                                <a href="{{ url('/logout') }}">{{ utrans('custom.logout') }}&nbsp;<i class="fa fa-sign-out"></i></a>
                             @endif
                         </li>
                         <li class="hidden-lg hidden-md hidden-sm">
@@ -172,10 +175,15 @@
             </a>
         </div>
         <div class="copiright text-center col-xs-12">
-            <a
-                target="_blank"
-                href="https://opendata.government.bg/"
-            ><strong>Copyright &copy; 2018</strong> by Портал за отворени данни на РБ</a>
+            <strong>Copyright &copy; 2018</strong> by
+            <a target="_blank" href="https://opendata.government.bg/">{{ __('custom.copyright_title') }}</a>
+        </div>
+    </footer>
+
+    <footer class="footer hidden-xs">
+        <div class="copiright">
+            <strong>Copyright &copy; 2018</strong> by
+            <a target="_blank" href="https://opendata.government.bg/">{{ __('custom.copyright') }}</a>
         </div>
     </footer>
     <!-- Scripts -->

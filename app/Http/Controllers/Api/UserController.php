@@ -237,8 +237,11 @@ class UserController extends ApiController
                         $result['follows'][] = [
                             'news'        => $follow['news'],
                             'org_id'      => $follow['org_id'],
+                            'group_id'      => $follow['group_id'],
                             'dataset_id'  => $follow['data_set_id'],
                             'category_id' => $follow['category_id'],
+                            'tag_id' => $follow['tag_id'],
+                            'follow_user_id' => $follow['follow_user_id'],
                         ];
                     }
                 }
@@ -975,6 +978,99 @@ class UserController extends ApiController
         }
 
         return $username;
+    }
+
+    /**
+     * Forgotten password
+     *
+     * @param string username - required
+     *
+     * @return json response with status (true - if user is found and email is sent false - otherwise)
+     */
+    public function forgottenPassword(Request $request)
+    {
+        $data = $request->get('data', []);
+
+        $validator = \Validator::make($data, [
+            'username' => 'required|string|exists:users,username,deleted_at,NULL'
+        ]);
+
+        if (!$validator->fails()) {
+            $user = User::where('username', '=', $data['username'])->first();
+
+            if (!empty($user['email'])) {
+                $mailData = [
+                    'user'      => $user['firstname'] .' '. $user['lastname'],
+                    'hash'      => str_replace('-', '', Uuid::generate(4)->string),
+                    'username'  => $user['username']
+                ];
+
+                Mail::send('mail/passReset', $mailData, function ($m) use ($user) {
+                    $m->from('info@finite-soft.com', 'Open Data');
+                    $m->to($user['email'], $user['firstname'])->subject(__('custom.pass_change').'!');
+                });
+
+                $newUserData['hash_id'] = $mailData['hash'];
+                $newUserData['updated_by'] = $user['id'];
+
+                if (count(Mail::failures()) <= 0) {
+                    try {
+                        User::where('username', $user['username'])->update($newUserData);
+                    } catch (QueryException $e) {
+                        Log::error($e->getMessage());
+                    }
+                } else {
+                    return $this->errorResponse(__('custm.email_send_err'));
+                }
+
+                return $this->successResponse();
+            }
+        }
+
+        return $this->errorResponse('Reset Passoword failure', $validator->errors()->messages());
+    }
+
+    /**
+     * Password reset
+     *
+     * @param string hash - required
+     * @param string password - required
+     * @param string password_confirm - required
+     *
+     * @return json response with status (true - if password is changed false - otherwise)
+     */
+    public function passwordReset(Request $request)
+    {
+        $data = $request->get('data', []);
+
+        $validator = \Validator::make($data, [
+            'hash'              => 'required|string',
+            'password'          => 'required|string',
+            'password_confirm'  => 'required|string|same:password',
+        ]);
+
+        if (!$validator->fails()) {
+            $user = User::where('hash_id', '=', $data['hash'])->first();
+
+            if ($user) {
+                $newUserData['password'] = bcrypt($data['password']);
+
+                if (!empty($newUserData)) {
+                    $newUserData['updated_by'] = $user->id;
+                    try {
+                        User::where('id', $user->id)->update($newUserData);
+                    } catch (QueryException $e) {
+                        Log::error($e->getMessage());
+                    }
+
+                    return $this->successResponse();
+                }
+            } else {
+                return $this->errorResponse(__('custm.wrong_reset_link'));
+            }
+        }
+
+        return $this->errorResponse('custom.pass_change_err', $validator->errors()->messages());
     }
 
     // public function getUserFollows()

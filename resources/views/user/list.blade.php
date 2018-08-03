@@ -15,7 +15,7 @@
                 @endforeach
             </div>
             <div class="col-sm-3 col-xs-12 sidenav">
-                <h2 class="my-profile">Списък с потребители</h2>
+                <h2 class="my-profile">{{ __('custom.users_list') }}</h2>
             </div>
             <div class="col-sm-9 col-xs-12">
                 <div class="filter-content">
@@ -24,11 +24,11 @@
                             <div class="col-sm-12">
                                 <div>
                                     <ul class="nav filter-type right-border">
-                                        <li><a class="active" href="{{ url('/users/list') }}">потребители</a></li>
-                                        <li><a href="{{ url('/user/profile/'. Auth::user()->id) }}">потребител</a></li>
-                                        <li><a href="{{ url('/user/groups') }}">данни</a></li>
-                                        <li><a href="{{ url('/user/organisations') }}">поток на дейността</a></li>
-                                        <li><a href="{{ url('/user/invite') }}">членове</a></li>
+                                        <li><a class="active" href="{{ url('/users/list') }}">{{ utrans('custom.users', 2) }}</a></li>
+                                        <li><a href="{{ url('/user/profile/'. Auth::user()->id) }}">{{ utrans('custom.users', 1) }}</a></li>
+                                        <li><a href="{{ url('/user/userGroups') }}">{{ utrans('custom.groups', 2) }}</a></li>
+                                        <li><a href="{{ url('/user/organisations') }}">{{ utrans('custom.organisations', 2) }}</a></li>
+                                        <li><a href="{{ url('/user/invite') }}">{{ __('custom.invite') }}</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -53,7 +53,7 @@
                         <div class="col-md-4 col-xs-12 user-col">
                             <a href="{{ url('/user/profile/'. $user->id) }}"><h3 class="user-name">{{ $user->username }}</h3></a>
                             <div class="user-desc">{{ $user->add_info }}</div>
-                            <p class="text-right show-more"><a href="{{ url('/user/profile'. $user->username) }}" class="view-profile">виж още</a></p>
+                            <p class="text-right show-more"><a href="{{ url('/user/profile/'. $user->id) }}" class="view-profile">{{ __('custom.see_more') }}</a></p>
                         </div>
                     @endforeach
                 </div>

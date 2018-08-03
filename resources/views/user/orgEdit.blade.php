@@ -16,13 +16,13 @@
                     </div>
                 @endif
                 <div>
-                    <h2>Редакция на организация</h2>
-                    <p class='req-fields m-t-lg m-b-lg'>Всички полета маркирани с * са задължителни.</p>
+                    <h2>{{ __('custom.edit_org') }}</h2>
+                    <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
                 </div>
-                <form method="POST" action="{{ url('/user/organisation/edit') }}" class="m-t-lg" enctype="multipart/form-data">
+                <form method="POST" action="{{ url('/user/organisations/edit') }}" class="m-t-lg" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <div class="form-group row">
-                        <label class="col-sm-3 col-xs-12 col-form-label">Изображение:</label>
+                        <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>
                         <div class="col-sm-9">
                             <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md">
                                 <img
@@ -32,7 +32,7 @@
                                 />
                             </div>
                             <div class="inline-block">
-                                <span class="badge badge-pill"><label class="js-logo" for="logo">избери изображение</label></span>
+                                <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                                 <input class="hidden js-logo-input" type="file" name="logo" value="">
                                 @if (isset($result->errors->logo))
                                     <span class="error">{{ $result->errors->logo[0] }}</span>
@@ -41,7 +41,7 @@
                         </div>
                     </div>
                     <div class="form-group row {{ !empty($errors->parent_org_id) ? 'has-error' : '' }}">
-                        <label for="baseOrg" class="col-sm-3 col-xs-12 col-form-label">Основна организация:</label>
+                        <label for="baseOrg" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_organisation') }}:</label>
                         <div class="col-sm-9">
                             <input
                                 type="text"
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                     <div class="form-group row {{ !empty($errors->uri) ? 'has-error' : '' }}">
-                        <label for="uri" class="col-sm-3 col-xs-12 col-form-label">Уникален идентификатор:</label>
+                        <label for="uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                         <div class="col-sm-9">
                             <input
                                 type="text"
@@ -78,11 +78,11 @@
                         @endif
                     @endforeach
                     <div class="form-group row {{ !empty($errors->type) ? 'has-error' : '' }} required">
-                        <label for="type" class="col-lg-3 col-sm-3 col-xs-12 col-form-label">Тип:</label>
+                        <label for="type" class="col-lg-3 col-sm-3 col-xs-12 col-form-label">{{ __('custom.type') }}:</label>
                         @foreach (\App\Organisation::getPublicTypes() as $id => $name)
                             <div class="col-lg-4 col-md-4 col-xs-12 m-b-md">
                                 <label class="radio-label">
-                                    {{ $name }}
+                                    {{ utrans($name) }}
                                     <div class="js-check">
                                         <input
                                             type="radio"
@@ -99,7 +99,7 @@
                         @endif
                     </div>
                     <div class="form-group row">
-                        <label for="active" class="col-sm-3 col-xs-12 col-form-label">Активнa:</label>
+                        <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.active') }}:</label>
                         <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                             <div class="js-check">
                                 <input
@@ -113,7 +113,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-12 text-right">
-                            <button type="submit" class="m-l-md btn btn-primary">готово</button>
+                            <button type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                         </div>
                     </div>
                     <input type="hidden" name="org_id" value="{{ !empty($model['id']) ? $model['id'] : '' }}">

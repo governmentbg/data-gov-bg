@@ -252,3 +252,9 @@
 .login-form {
     max-width: 400px;
 }
+
+.btn {
+    &:hover, &:active, &:focus {
+        color: white !important;
+    }
+}

@@ -3,68 +3,73 @@
 @section('content')
 <div class="container">
     <div class="row">
-        <div class="col-lg-10 col-md-11 col-xs-12 col-lg-offset-2 col-md-offset-1 m-t-md p-l-r-none">
+        <div class="col-lg-10 col-md-11 col-xs-12 col-lg-offset-1 col-md-offset-1 m-t-md p-l-r-none">
             <div class="row">
+                @include('partials.alerts-bar')
+                @include('partials.user-nav-bar', ['view' => 'group'])
                 <div class="col-xs-12">
                     <div>
-                        <h2>Регистрация на група</h2>
-                        <p class='req-fields m-t-lg m-b-lg'>Всички полета маркирани с * са задължителни.</p>
+                        <h2>{{ __('custom.group_registration') }}</h2>
+                        <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
                     </div>
-                    <form class="m-t-lg">
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-xs-12 col-form-label">Изображение:</label>
+                    <form method="POST" class="m-t-lg" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="form-group row {{ isset(session('result')->errors->logo) ? 'has-error' : '' }}">
+                            <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>
                             <div class="col-sm-9">
-                                <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md"></div>
+                                <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md">
+                                    <img class="preview js-preview hidden" src="#" alt="organisation logo" />
+                                </div>
                                 <div class="inline-block">
-                                    <span class="badge badge-pill"><label for="org-img">избери изображение</label></span>
-                                    <input type="file" id="org-img">
+                                    <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
+                                    <input class="hidden js-logo-input" type="file" name="logo">
+                                    @if (isset(session('result')->errors->logo))
+                                        <span class="error">{{ session('result')->errors->logo[0] }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                         <div class="form-group row required">
-                            <label for="name" class="col-sm-3 col-xs-12 col-form-label">Наименование:</label>
+                            <label for="name" class="col-sm-3 col-xs-12 col-form-label"> {{ __('custom.label_name') }}:</label>
                             <div class="col-sm-9">
                                 <input type="text" class="input-border-r-12 form-control" id="name" placeholder="Тест ЕООД">
                             </div>
                         </div>
-                        <div class="form-group row">
-                            <label for="uri" class="col-sm-3 col-xs-12 col-form-label">Уникален идентификатор:</label>
+                        <div class="form-group row {{ isset(session('result')->errors->uri) ? 'has-error' : '' }}">
+                            <label for="uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="uri" placeholder="Тест432593">
+                                <input
+                                    type="text"
+                                    class="input-border-r-12 form-control"
+                                    name="uri"
+                                    value="{{ old('uri') }}"
+                                >
+                                @if (isset(session('result')->errors->uri))
+                                    <span class="error">{{ session('result')->errors->uri[0] }}</span>
+                                @endif
                             </div>
                         </div>
-                        <div class="form-group row">
-                            <label for="description" class="col-sm-3 col-xs-12 col-form-label">Описание:</label>
-                            <div class="col-sm-9">
-                                <textarea type="text" class="input-border-r-12 form-control" id="description" placeholder="Описание"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            @for($i = 1; $i <= 3; $i++)
-                                <div class="m-t-sm col-sm-12 p-l-r-none">
-                                    <div class="col-xs-12 m-t-sm">Допълнително поле:</div>
-                                    <div class="col-sm-12 col-xs-12 p-r-none">
-                                        <div class="row">
-                                            <div class="col-sm-6 col-xs-12">
-                                                <label for="sla" class="col-sm-2 col-xs-12 col-form-label p-h-xs">Заглавие:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="email" class="input-border-r-12 form-control" id="author-email" placeholder="Lorem ipsum">
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6 col-xs-12">
-                                                <label for="sla" class="col-sm-2 col-xs-12 col-form-label p-h-xs">Стойност:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="email" class="input-border-r-12 form-control" id="author-email" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endfor
-                        </div>
+                        @foreach($fields as $field)
+                            @if($field['view'] == 'translation')
+                                @include(
+                                    'components.form_groups.translation_input',
+                                    ['field' => $field, 'result' => session('result')]
+                                )
+                            @elseif($field['view'] == 'translation_txt')
+                                @include(
+                                    'components.form_groups.translation_textarea',
+                                    ['field' => $field, 'result' => session('result')]
+                                )
+                            @elseif($field['view'] == 'translation_custom')
+                                @include(
+                                    'components.form_groups.translation_custom_fields',
+                                    ['field' => $field, 'result' => session('result')]
+                                )
+                            @endif
+                        @endforeach
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="submit" class="m-l-md btn btn-primary">готово</button>
+                                <button type="submit" name="create" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                             </div>
                         </div>
                     </form>

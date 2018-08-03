@@ -14,14 +14,28 @@
 //Route::get('/', 'HomeController@index');
 //
 //Auth::routes();
-Route::middleware(['web', 'check.resources'])->group(function () {
-    Route::get('/user/datasets', 'UserController@datasets');
-    Route::get('/user/datasetView', 'UserController@datasetView')->name('datasetView');
-    Route::post('/user/datasetDelete', 'UserController@datasetDelete');
-    Route::match(['get', 'post'], '/user/datasetCreate', 'UserController@datasetCreate');
-    Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
-    Route::get('/user/datasetEdit', 'UserController@datasetEdit');
+Route::middleware('auth')->group(function () {
+    Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
+    Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
+    Route::get('/users/list/search', 'UserController@searchUsers');
+
+    Route::middleware('check.resources')->group(function () {
+        Route::get('/user/datasets', 'UserController@datasets');
+        Route::get('/user/datasetView', 'UserController@datasetView')->name('datasetView');
+        Route::post('/user/datasetDelete', 'UserController@datasetDelete');
+        Route::match(['get', 'post'], '/user/datasetCreate', 'UserController@datasetCreate');
+        Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
+        Route::get('/user/datasetEdit', 'UserController@datasetEdit');
+        Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
+        Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
+        Route::match(['get', 'post'],'/user/registerGroup', 'UserController@registerGroup');
+        Route::match(['get', 'post'],'/user/userGroups', 'UserController@userGroups');
+        Route::match(['get', 'post'],'/user/groupView/{uri}', 'UserController@groupView');
+        Route::match(['get', 'post'],'/user/editGroup/{id}', 'UserController@editGroup');
+        Route::post('/user/deleteGroup/{id}', 'UserController@deleteGroup');
+    });
 });
+
 Route::get('/', function () {
     return view('home/index', ['class' => 'index']);
 });
@@ -30,14 +44,6 @@ Route::get('/logout', function() {
     Auth::logout();
 
     return view('home/index', ['class' => 'index']);
-});
-
-Route::middleware('auth')->group(function() {
-    Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
-    Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
-    Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
-    Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
-    Route::get('/users/list/search', 'UserController@searchUsers');
 });
 
 Route::get('/preGenerated', 'UserController@preGenerated');
@@ -104,10 +110,6 @@ Route::post('/user', 'UserController@index');
 Route::get('/user/newsFeed', 'UserController@newsFeed');
 Route::post('/user/newsFeed', 'UserController@newsFeed');
 
-Route::get('/user/groups', function () {
-    return view('user/groups', ['class' => 'user']);
-});
-
 Route::get('/user/organisations', 'UserController@organisations');
 
 Route::post('/user/organisation/delete', 'UserController@deleteOrg');
@@ -136,13 +138,6 @@ Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);
 });
 
-Route::get('/user/orgRegistration', function () {
-    return view('user/orgRegistration', ['class' => 'user']);
-});
-
-Route::get('/user/groupRegistration', function () {
-    return view('user/groupRegistration', ['class' => 'user']);
-});
 
 Route::get('/request', function () {
     return view('request/dataRequest', ['class' => 'request']);

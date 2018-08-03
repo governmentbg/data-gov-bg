@@ -2,161 +2,59 @@
 
 @section('content')
 <div class="container">
-    <div class="row">
-        <div class="col-xs-12 m-t-md">
-            <div class="row">
-                <div class="col-sm-3 cl-xs-12 sidenav m-b-md">
-                    <span class="my-profile m-b-lg m-b-lg">Моят профил</span>
-                    <span class="badge badge-pill m-t-lg new-data"><a  href="{{ url('/user/groupRegistration') }}">Създаване на група</a></span>
-                </div>
-                <div class="col-sm-9 cl-xs-12">
-                    <div class="filter-content tex">
-                        <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-sm-12 p-l-none">
-                                    <div>
-                                        <ul class="nav filter-type right-border">
-                                            <li><a class="p-l-none" href="{{ url('/user') }}">известия</a></li>
-                                            <li><a href="{{ url('/user/datasets') }}">моите данни</a></li>
-                                            <li><a class="active" href="{{ url('/user/groups') }}">групи</a></li>
-                                            <li><a href="{{ url('/user/organisations') }}">организации</a></li>
-                                            <li><a href="{{ url('/user/settings') }}">настройки</a></li>
-                                            <li><a href="{{ url('/user/invite') }}">покана</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 p-l-none">
-                                    <div class="m-r-md p-h-xs col-md-6">
-                                        <input class="rounded-input" type="text">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="col-lg-10 col-md-11 col-xs-12 col-lg-offset-1 m-t-md p-l-r-none">
+        <div class="row">
+            @include('partials.alerts-bar')
+            @include('partials.user-nav-bar', ['view' => 'group'])
+            <div class="col-xs-12 m-t-md">
+                <div class="row">
+                    <div class="col-xs-12 p-l-none">
+                        <input class="rounded-input pull-right" type="text">
+                        <span class="badge badge-pill m-t-lg new-data"><a  href="{{ url('/user/registerGroup') }}">Създаване на група</a></span>
                     </div>
-                </div>
-                <div class="col-xs-12 page-content p-sm">
-                    <div class="col-xs-12 list-orgs">
-                        <div class="row">
-                            <div class="col-sm-4 p-md">
-                                <div class="col-xs-12 org-logo">
-                                    <a href="{{ url('/user/groupView') }}">
-                                        <img class="img-responsive" src="{{ asset('img/test-img/logo-org-4.jpg') }}"/>
-                                    </a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView') }}"><h3>Име на организация</h3></a>
-                                    <p class="text-justify">Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi.</p>
-                                    <p class="text-right"><a href="{{ url('/user/groupView') }}" class="view-profile">виж още</a></p>
-                                    <div class="control-btns text-center">
-                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/groupEdit') }}">промяна</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на група?');"
-                                                >изтриване</a>
-                                        </span>
+                    <div class="col-xs-12 page-content p-sm">
+                        <div class="col-xs-12 user-group">
+                            <div class="row">
+                                @foreach($groups as $group)
+                                    <input type="hidden" value="{{ $group->id }}" name="group_id">
+                                    <div class="col-sm-4 p-md group-wrap">
+                                        <div class="col-xs-12 org-logo">
+                                            <a href="{{ url('/user/groupView/'. $group->id) }}">
+                                                <img class="img-responsive" src="{{ $group->logo }}"/>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12">
+                                            <a href="{{ url('/user/groupView/'. $group->id) }}"><h3 class="group-name">{{ $group->name }}</h3></a>
+                                            <p class="text-justify group-desc">{{ $group->description }}</p>
+                                            <p class="text-right show-more"><a href="{{ url('/user/groupView/'. $group->id) }}" class="view-profile">виж още</a></p>
+                                            <div class="control-btns text-center ch-del-btns">
+                                                <div class="col-xs-6">
+                                                    <a href="{{ url('/user/editGroup/'. $group->id) }}">
+                                                        <button
+                                                            type="submit"
+                                                            name="edit"
+                                                            class="btn btn-custom m-r-md"
+                                                        >промяна</button>
+                                                    </a>
+                                                </div>
+                                                <form method="POST" action="{{ url('/user/deleteGroup/'. $group->id) }}">
+                                                    {{ csrf_field() }}
+                                                    <div class="col-xs-6">
+                                                        <button
+                                                            type="submit"
+                                                            name="delete"
+                                                            class="btn btn-custom m-r-md"
+                                                        >изтриване</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
-                            <div class="col-sm-4 p-md">
-                                <div class="col-xs-12 org-logo">
-                                    <a href="{{ url('/user/groupView') }}">
-                                        <img class="img-responsive" src="{{ asset('img/test-img/logo-org-1.jpg') }}"/>
-                                    </a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView') }}"><h3>Име на организация</h3></a>
-                                    <p>Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi.</p>
-                                    <p class="text-right"><a href="{{ url('/user/groupView') }}" class="view-profile">виж още</a></p>
-                                    <div class="control-btns text-center">
-                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/groupEdit') }}">промяна</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на група?');"
-                                                >изтриване</a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-4 p-md">
-                                <div class="col-xs-12 org-logo">
-                                    <a href="{{ url('/user/groupView') }}"><img class="img-responsive" src="{{ asset('img/test-img/logo-org-2.jpg') }}"/></a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView') }}"><h3>Име на организация</h3></a>
-                                    <p>Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi.</p>
-                                    <p class="text-right"><a href="{{ url('/user/groupView') }}" class="view-profile">виж още</a></p>
-                                    <div class="control-btns text-center">
-                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/groupEdit') }}">промяна</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на група?');"
-                                                >изтриване</a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4 p-md">
-                                <div class="col-xs-12 org-logo">
-                                    <a href="{{ url('/user/groupView') }}"><img class="img-responsive" src="{{ asset('img/test-img/logo-org-3.jpg') }}"/></a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView') }}"><h3>Име на организация</h3></a>
-                                    <p>Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi.</p>
-                                    <p class="text-right"><a href="{{ url('/user/groupView') }}" class="view-profile">виж още</a></p>
-                                    <div class="control-btns text-center">
-                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/Edit') }}">промяна</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на група?');"
-                                                >изтриване</a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-4 p-md">
-                                <div class="col-xs-12 org-logo">
-                                    <a href="{{ url('/user/groupView') }}">
-                                        <img class="img-responsive" src="{{ asset('img/test-img/logo-org-1.jpg') }}"/>
-                                    </a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView') }}"><h3>Име на организация</h3></a>
-                                    <p>Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi.</p>
-                                    <p class="text-right"><a href="{{ url('/user/groupView') }}" class="view-profile">виж още</a></p>
-                                    <div class="control-btns text-center">
-                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/groupEdit') }}">промяна</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на група?');"
-                                                >изтриване</a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-4 p-md">
-                                <div class="col-xs-12 org-logo">
-                                    <a href="{{ url('/user/groupView') }}"><img class="img-responsive" src="{{ asset('img/test-img/logo-org-2.jpg') }}"/></a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView') }}"><h3>Име на организация</h3></a>
-                                    <p>Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi.</p>
-                                    <p class="text-right"><a href="{{ url('/user/groupView') }}" class="view-profile">виж още</a></p>
-                                    <div class="control-btns text-center">
-                                        <span class="badge badge-pill m-r-md m-b-sm"><a href="{{ url('/user/groupEdit') }}">промяна</a></span>
-                                        <span class="badge badge-pill m-b-sm">
-                                            <a
-                                                href="#"
-                                                onclick="return confirm('Изтриване на група?');"
-                                                >изтриване</a>
-                                        </span>
-                                    </div>
+                            <div class="row">
+                                <div class="col-xs-12 text-center">
+                                    {{ $pagination->render() }}
                                 </div>
                             </div>
                         </div>

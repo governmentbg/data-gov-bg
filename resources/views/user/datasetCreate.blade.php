@@ -49,7 +49,7 @@
 
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar')
+    @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-lg">
         <p class='req-fields'>Всички полета маркирани с * са задължителни.</p>
         <form method="POST" action="{{ url('/user/datasetCreate') }}">

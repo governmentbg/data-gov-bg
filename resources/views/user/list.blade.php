@@ -26,7 +26,7 @@
                                     <ul class="nav filter-type right-border">
                                         <li><a class="active" href="{{ url('/users/list') }}">потребители</a></li>
                                         <li><a href="{{ url('/user/profile/'. Auth::user()->id) }}">потребител</a></li>
-                                        <li><a href="{{ url('/user/groups') }}">данни</a></li>
+                                        <li><a href="{{ url('/user/userGroups') }}">данни</a></li>
                                         <li><a href="{{ url('/user/organisations') }}">поток на дейността</a></li>
                                         <li><a href="{{ url('/user/invite') }}">членове</a></li>
                                     </ul>
@@ -53,7 +53,7 @@
                         <div class="col-md-4 col-xs-12 user-col">
                             <a href="{{ url('/user/profile/'. $user->id) }}"><h3 class="user-name">{{ $user->username }}</h3></a>
                             <div class="user-desc">{{ $user->add_info }}</div>
-                            <p class="text-right show-more"><a href="{{ url('/user/profile'. $user->username) }}" class="view-profile">виж още</a></p>
+                            <p class="text-right show-more"><a href="{{ url('/user/profile'. $user->id) }}" class="view-profile">виж още</a></p>
                         </div>
                     @endforeach
                 </div>

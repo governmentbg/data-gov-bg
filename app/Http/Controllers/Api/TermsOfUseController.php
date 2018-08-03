@@ -150,7 +150,7 @@ class TermsOfUseController extends ApiController
         $post = $request->criteria;
 
         if (!empty($post)) {
-            $validator = \Validator::make($request->all(), [
+            $validator = \Validator::make($post, [
                 'active'    => 'boolean',
                 'locale'    => 'string|max:5',
             ]);

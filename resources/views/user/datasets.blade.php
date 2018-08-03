@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar')
+    @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="row">
         <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/datasetCreate') }}">Добави нов набор</a></span>
     </div>

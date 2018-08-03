@@ -17,7 +17,7 @@
                                         <ul class="nav filter-type right-border">
                                             <li><a class="p-l-none" href="{{ url('/user') }}">известия</a></li>
                                             <li><a href="{{ url('/user/datasets') }}">моите данни</a></li>
-                                            <li><a class="active" href="{{ url('/user/groups') }}">групи</a></li>
+                                            <li><a class="active" href="{{ url('/user/userGroups') }}">групи</a></li>
                                             <li><a href="{{ url('/user/organisations') }}">организации</a></li>
                                             <li><a href="{{ url('/user/settings') }}">настройки</a></li>
                                             <li><a href="{{ url('/user/invite') }}">покана</a></li>

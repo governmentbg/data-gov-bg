@@ -13,10 +13,10 @@
     <tr>
         <td>
             <p>
-                Здравейте, <?= $user ?>
-                <br/>Вие се регистрирахте успешно на ОПИНДАТЪТЪ
-                <br/>За да активирате акаунта си, моля натиснете тук:<br/>
-                <a href="<?= url('/confirmation?hash='. $hash) ?>">Потвърди</a>
+            {{ __('custom.greetings') }}, <?= $user ?>
+                <br/>{{ __('custom.register_success') }}
+                <br/>{{ __('custom.to_activate') }}:<br/>
+                <a href="<?= url('/confirmation?hash='. $hash) ?>">{{ __('custom.confirm') }}</a>
             </p>
         </td>
     </tr>

@@ -4,7 +4,7 @@
 <div class="container">
     <div class="col-xs-12 p-lg">
         <div>
-            <h3>Условия за ползване</h3><br>
+            <h3>{{ __('custom.terms_and_conditions') }}</h3><br>
             <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                 incididunt ut labore et magna aliqua. Adipiscing commodo elit at imperdiet.

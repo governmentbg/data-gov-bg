@@ -44,8 +44,8 @@ class Organisation extends Model implements TranslatableInterface
     public static function getPublicTypes()
     {
         return [
-            self::TYPE_CIVILIAN => 'Гражданска',
-            self::TYPE_COUNTRY  => 'Обществена',
+            self::TYPE_CIVILIAN => 'custom.civilian',
+            self::TYPE_COUNTRY  => 'custom.municipal',
         ];
     }
 

@@ -21,11 +21,11 @@
                         <div class="col-sm-12">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a href="{{ url('/users/list') }}">потребители</a></li>
-                                    <li><a class="active" href="#">потребител</a></li>
-                                    <li><a href="{{ url('/user/groups') }}">данни</a></li>
-                                    <li><a href="{{ url('/user/organisations') }}">поток на дейността</a></li>
-                                    <li><a href="{{ url('/user/invite') }}">членове</a></li>
+                                    <li><a href="{{ url('/users/list') }}">{{ utrans('custom.users', 2) }}</a></li>
+                                    <li><a class="active" href="#">{{ utrans('custom.users', 1) }}</a></li>
+                                    <li><a href="{{ url('/user/userGroups') }}">{{ utrans('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/user/organisations') }}">{{ __('custom.chronology') }}</a></li>
+                                    <li><a href="{{ url('/user/invite') }}">{{ __('custom.members') }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -37,7 +37,7 @@
                     <a href="#" class="reg-users">
                         <p>{{ $followersCount }}</p>
                         <hr>
-                        <p>Последователи</p>
+                        <p>{{ __('custom.followers') }}</p>
                         <img src="{{ asset('/img/followers.svg') }}">
                     </a>
                 </div>
@@ -45,7 +45,7 @@
                     <a href="#" class="data-sets">
                         <p>{{ $dataSetsCount }}</p>
                         <hr>
-                        <p>Набори данни</p>
+                        <p>{{ __('custom.data_sets') }}</p>
                         <img src="{{ asset('/img/data-sets.svg') }}">
                     </a>
                 </div>
@@ -66,7 +66,7 @@
                                     class="btn btn-primary pull-right"
                                     type="submit"
                                     name="follow"
-                                >Последвай</button>
+                                >{{ __('custom.follow') }}</button>
                             </div>
                         @else
                             <div class="row">
@@ -74,19 +74,19 @@
                                     class="btn btn-primary pull-right"
                                     type="submit"
                                     name="unfollow"
-                                >Отследвай</button>
+                                >{{ __('custom.stop_follow') }}</button>
                             </div>
                         @endif
                     </form>
                 @endif
                 <div class="row contacts">
-                    <p>За контакти</p><br>
+                    <p>{{ utrans('custom.contacts', 2) }}</p><br>
                     <p>Иван Иванов<br>Дирекция Български пощи</p><br>
                     <p>тел. 02/ 940 2445</p><br>
                     <p class="email">Email: {{ $user->email }}</p>
                 </div>
                 <div class="row social-icons">
-                    <span>Последвайте ни в</span><br>
+                    <span>{{ __('custom.follow_us') }}</span><br>
                     <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
                     <a href="#" class="tw"><span class="fa fa-twitter"></span></a>
                     <a href="#" class="gp"><span class="fa fa-google-plus"></span></a>

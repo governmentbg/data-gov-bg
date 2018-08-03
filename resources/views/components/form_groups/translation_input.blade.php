@@ -7,7 +7,7 @@
             {{ isset($result->errors->{ $field['name'] }) ? 'has-error' : '' }}
         "
     >
-        <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ !$key ? $field['label'] . ':' : '' }}</label>
+        <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ !$key ? utrans($field['label']) . ':' : '' }}</label>
         <div class="col-sm-9">
             <div class="input-group">
                 @if (isset($model) && empty(old($field['name'])))

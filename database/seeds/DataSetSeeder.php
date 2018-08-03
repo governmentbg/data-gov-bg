@@ -19,15 +19,18 @@ class DataSetSeeder extends Seeder
 
         $statuses = array_keys(DataSet::getStatus());
         $visibilities = array_keys(DataSet::getVisibility());
+        $organisations = Organisation::select('id')->limit(self::DATA_SET_RECORDS)->get()->toArray();
 
         foreach (range(1, self::DATA_SET_RECORDS) as $index) {
             $status = $this->faker->randomElement($statuses);
             $visibility = $this->faker->randomElement($visibilities);
+            $organisation = $this->faker->randomElement($organisations)['id'];
 
             DataSet::create([
+                'org_id'        => $organisation,
                 'uri'           => $this->faker->uuid(),
-                'name'          => $this->faker->word(),
-                'descript'      => $this->faker->text(),
+                'name'          => ApiController::trans($locale, $this->faker->word()),
+                'descript'      => ApiController::trans($locale, $this->faker->text()),
                 'author_name'   => $this->faker->name(),
                 'author_email'  => $this->faker->email(),
                 'support_name'  => $this->faker->name(),

@@ -11,9 +11,9 @@
                         <div class="col-md-6 p-l-r-none">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="active p-l-none" href="{{ url('/data') }}">данни</a></li>
-                                    <li><a href="{{ url('/data/relatedData') }}">свързани данни</a></li>
-                                    <li><a href="{{ url('/data/reportedList') }}">сигнализирани данни</a></li>
+                                    <li><a class="active p-l-none" href="{{ url('/data') }}">{{ utrans('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/data/relatedData') }}">{{ utrans('custom.linked_data') }}</a></li>
+                                    <li><a href="{{ url('/data/reportedList') }}">{{ utrans('custom.signal_data') }}</a></li>
                                 </ul>
                             </div>
                             <div>
@@ -26,12 +26,12 @@
                 </div>
                 <div>
                     <div class="m-r-md p-h-xs">
-                        <p>Списъкът може да се подрежда по:</p>
+                        <p>{{ __('custom.list_order_by') }}:</p>
                         <ul class="nav sort-by">
-                            <li><a class="p-l-none" href="#">Уменстност</a></li>
-                            <li><a class="active" href="#">Имена възходящ ред</a></li>
-                            <li><a href="#">Имена низходящ ред</a></li>
-                            <li><a href="#">Дата на последна промяна</a></li>
+                            <li><a class="p-l-none" href="#">{{ __('custom.relevance') }}</a></li>
+                            <li><a class="active" href="#">{{ __('custom.names_asc') }}</a></li>
+                            <li><a href="#">{{ __('custom.names_desc') }}</a></li>
+                            <li><a href="#">{{ __('custom.last_change') }}</a></li>
                         </ul>
                     </div>
                 </div>
@@ -61,14 +61,14 @@
                                             <span><a href="#"><i class="fa fa-envelope"></i></a></span>
                                         </div>
                                         <div class="status p-w-sm">
-                                            <span>одобрен</span>
+                                            <span>{{ __('custom.approved') }} </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-5 col-xs-12">
                                 <div class="follow p-w-sm pull-right">
-                                    <span class="badge badge-pill"><a href="#">Последване</a></span>
+                                    <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +84,7 @@
                                     <span class="badge badge-pill">ТАГ</span>
                                 </div>
                                 <div class="pull-right">
-                                    <span><a href="{{ url('/data/view') }}">Виж още</a></span>
+                                    <span><a href="{{ url('/data/view') }}">{{ __('custom.see_more') }}</a></span>
                                 </div>
                             </div>
                         </div>
@@ -113,14 +113,14 @@
                                         <span><a href="#"><i class="fa fa-envelope"></i></a></span>
                                     </div>
                                     <div class="status notApproved p-w-sm">
-                                        <span>непроверен</span>
+                                        <span>{{ __('custom.unapproved') }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-5 col-xs-12">
                             <div class="follow p-w-sm pull-right">
-                                <span class="badge badge-pill"><a href="#">Последване</a></span>
+                                <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
                             </div>
                         </div>
                     </div>
@@ -136,7 +136,7 @@
                                 <span class="badge badge-pill">ТАГ</span>
                             </div>
                             <div class="pull-right">
-                                <span><a href="{{ url('/data/view') }}">Виж още</a></span>
+                                <span><a href="{{ url('/data/view') }}">{{ __('custom.see_more') }}</a></span>
                             </div>
                         </div>
                     </div>

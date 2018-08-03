@@ -10,9 +10,9 @@
                         <div class="col-xs-12 p-l-r-none">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="p-l-none" href="{{ url('/data') }}">данни</a></li>
-                                    <li><a class="active" href="{{ url('/data/relatedData') }}">свързани данни</a></li>
-                                    <li><a href="{{ url('/data/reportedList') }}">сигнализирани данни</a></li>
+                                    <li><a class="p-l-none" href="{{ url('/data') }}">{{ utrans('custom.data') }}</a></li>
+                                    <li><a class="active" href="{{ url('/data/relatedData') }}">{{ utrans('custom.linked_data') }}</a></li>
+                                    <li><a href="{{ url('/data/reportedList') }}">{{ utrans('custom.signal_data') }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -35,11 +35,11 @@
         <div class="col-xs-12 m-t-md">
             <div>
                 <p>
-                    Можете да търсите метаданните, включени в базата данни тип triplestore на портала за отворени данни на ЕС, чрез редактора за търсене SPARQL крайна точка по-долу.
+                {{ __('custom.related_message') }}
                 </p>
             </div>
             <div class="m-t-lg">
-                <h3>Пространства от имена *</h3>
+                <h3>{{ __('custom.namespaces') }} *</h3>
             </div>
             <div class="col-xs-12 p-l-none m-t-lg">
                 <p class="example">
@@ -51,7 +51,7 @@
                 </p>
             </div>
             <div class="p-h-sm">
-                <h3>Търсене чрез SPARQL *</h3>
+                <h3>{{ __('custom.sparql_search') }} *</h3>
             </div>
             <div class="col-xs-12 p-l-none">
                 <input class="input-border-r-12 input-long" name="query" placeholder="select distinct ?g ?o where {graph ?g {?s dc:title ?o. filter regex(?o, 'Statistics','i')}}} LIMIT 10">
@@ -60,25 +60,25 @@
                 <div class="row m-t-md">
                     <div class="col-md-4 col-sm-5">
                         <p>
-                            <span>Формат *</span>&nbsp;
+                            <span>{{ __('custom.format') }} *</span>&nbsp;
                             <input class="input-border-r-12" name="format">
                         </p>
                     </div>
                     <div class="col-md-offset-1 col-md-7 col-sm-7">
                         <p>
-                            <span>Ограничаване на резултатите *</span>&nbsp;
+                            <span> {{ __('custom.limit_results') }} *</span>&nbsp;
                             <input class="input-border-r-12" name="format">
                         </p>
                     </div>
                 </div>
             </div>
             <div class="col-xs-12 p-h-sm">
-                <span class="badge badge-pill m-r-md m-b-sm"><a href="#">Начало на търсенето</a></span>
-                <span class="badge badge-pill m-b-sm"><a href="#">URL за резултатите от търсенето</a></span>
+                <span class="badge badge-pill m-r-md m-b-sm"><a href="#"> {{ __('custom.begin_search') }}</a></span>
+                <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.search_results_url') }}</a></span>
             </div>
             <div class="col-xs-12 p-h-sm">
-                <h3>Речник на метаданните</h3>
-                <p>Речникът на метаданните е създаден въз основа на речниците Data Catalogue (DCAT и DCT). Речникът се предоставя като работен.</p>
+                <h3>{{ __('custom.metadata_vocab') }}</h3>
+                <p>{{ __('custom.vocab_message') }}</p>
             </div>
         </div><!-- .col-md-12 -->
     </div>

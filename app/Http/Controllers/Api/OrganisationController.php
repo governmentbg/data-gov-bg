@@ -89,9 +89,7 @@ class OrganisationController extends ApiController
             if (!empty($data['logo'])) {
                 try {
                     $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {
-                    // TODO Log exception
-                }
+                } catch (NotReadableException $ex) {}
 
                 if (!empty($img)) {
                     $organisation->logo_file_name = basename($data['logo']);
@@ -121,7 +119,14 @@ class OrganisationController extends ApiController
                         : 0;
 
                     if (!empty($data['custom_fields'])) {
-                        $customFields = $data['custom_fields'];
+                        foreach ($data['custom_fields'] as $fieldSet) {
+                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                $customFields[] = [
+                                    'value' => $fieldSet['value'],
+                                    'label' => $fieldSet['label'],
+                                ];
+                            }
+                        }
                     }
 
                     $organisation->save();
@@ -456,7 +461,7 @@ class OrganisationController extends ApiController
                         'locale'            => $org->locale,
                         'uri'               => $org->uri,
                         'type'              => $org->type,
-                        'logo'              => $org->logo_data,
+                        'logo'              => $this->getImageData($org->logo_data, $org->logo_mime_type),
                         'activity_info'     => $org->activity_info,
                         'contacts'          => $org->contacts,
                         'parent_org_id'     => $org->parent_org_id,
@@ -649,6 +654,7 @@ class OrganisationController extends ApiController
                     }
 
                     $results[] = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $org->locale,
@@ -713,12 +719,13 @@ class OrganisationController extends ApiController
                     }
 
                     $result = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $locale,
                         'uri'             => $org->uri,
                         'type'            => $org->type,
-                        'logo'            => $org->logo,
+                        'logo'            => $this->getImageData($org->logo_data, $org->logo_mime_type),
                         'activity_info'   => $org->activity_info,
                         'contacts'        => $org->contacts,
                         'parent_org_id'   => $org->parent_org_id,
@@ -770,9 +777,9 @@ class OrganisationController extends ApiController
         $post = $request->offsetGet('data');
 
         $validator = \Validator::make($post, [
-            'locale'                => 'required|string',
-            'name'                  => 'required|string',
-            'description'           => 'nullable|string',
+            'locale'                => 'nullable|string',
+            'name'                  => 'required',
+            'description'           => 'nullable',
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'required_with:logo_mimetype,logo_data|string',
@@ -780,15 +787,21 @@ class OrganisationController extends ApiController
             'logo_data'             => 'required_with:llogo_filename,logo_mimetype|string',
             'activity_info'         => 'nullable|string',
             'active'                => 'nullable|integer',
-            'custom_fields.*.label' => 'nullable|string',
-            'custom_fields.*.value' => 'nullable|string',
+            'custom_fields.*.label' => 'nullable',
+            'custom_fields.*.value' => 'nullable',
         ]);
+
+        $validator->after(function ($validator) use ($post) {
+            if (is_array($post['name']) && empty(array_filter($post['name']))) {
+                $validator->errors()->add('name', 'name is required');
+            }
+         });
 
         if (!$validator->fails()) {
             $newGroup = new Organisation;
 
-            $newGroup->name =$post['name'];
-            $newGroup->descript = !empty($post['description']) ? $post['description'] : null;
+            $newGroup->name = $this->trans($empty, $post['name']);
+            $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
             $newGroup->uri = !empty($post['uri'])
                 ? $post['uri']
                 : $this->generateOrgUri($post['name']);
@@ -807,9 +820,15 @@ class OrganisationController extends ApiController
                 }
 
                 if (!empty($img)) {
-                    $newGroup->logo_file_name = basename($post['logo']);
+                    $newGroup->logo_file_name = basename($data['logo']);
                     $newGroup->logo_mime_type = $img->mime();
-                    $newGroup->logo_data = $img->encode('data-url');
+
+                    $temp = tmpfile();
+                    $path = stream_get_meta_data($temp)['uri'];
+                    $img->save($path);
+                    $newGroup->logo_data = file_get_contents($path);
+
+                    fclose($temp);
                 }
             } else {
                 $newGroup->logo_file_name = isset($post['logo_filename']) ? $post['logo_filename'] : null;
@@ -818,7 +837,14 @@ class OrganisationController extends ApiController
             }
 
             if (!empty($post['custom_fields'])) {
-                $customFields = $post['custom_fields'];
+                foreach ($post['custom_fields'] as $fieldSet) {
+                    if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                        $customFields[] = [
+                            'value' => $fieldSet['value'],
+                            'label' => $fieldSet['label'],
+                        ];
+                    }
+                }
             }
 
             if (!isset($newGroup->logo_data) || $this->checkImageSize($newGroup->logo_data)) {
@@ -881,8 +907,8 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($request->all(),[
             'group_id'              => 'required',
             'data'                  => 'required|array',
-            'data.name'             => 'nullable|string',
-            'data.description'      => 'nullable|string',
+            'data.name'             => 'nullable',
+            'data.description'      => 'nullable',
             'data.locale'           => 'required_with:data.name,data.description',
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
@@ -921,7 +947,13 @@ class OrganisationController extends ApiController
                 if (!empty($img)) {
                     $newGroupData['logo_file_name'] = basename($data['logo']);
                     $newGroupData['logo_mime_type'] = $img->mime();
-                    $newGroupData['logo_data'] = $img->encode('data-url');
+
+                    $temp = tmpfile();
+                    $path = stream_get_meta_data($temp)['uri'];
+                    $img->save($path);
+                    $newGroupData['logo_data'] = file_get_contents($path);
+
+                    fclose($temp);
                 }
             }
 
@@ -1158,7 +1190,7 @@ class OrganisationController extends ApiController
                         'description'   => $group->descript,
                         'locale'        => $locale,
                         'uri'           => $group->uri,
-                        'logo'          => $group->logo,
+                        'logo'          => $this->getImageData($group->logo_data, $group->logo_mime_type),
                         'custom_fields' => $customFields
                     ];
 
@@ -1309,6 +1341,7 @@ class OrganisationController extends ApiController
                                 if (
                                     (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
                                     || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
+
                                 ) {
                                     DB::rollback();
 
@@ -1339,5 +1372,10 @@ class OrganisationController extends ApiController
 
             return false;
         }
+    }
+
+    public function getUserGrops(Request $request)
+    {
+
     }
 }

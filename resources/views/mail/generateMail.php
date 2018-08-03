@@ -13,10 +13,10 @@
     <tr>
         <td>
             <p>
-                Здравейте, получихте покана от <?= $user ?>
-                <br>Моля последвайте препратката, за да актуализирате генерираният Ви профил
-                <br>Парола: <?= $pass ?>
-                <br><a href="<?= url('/preGenerated?username='. $username .'&pass=' .$pass) ?>">Потвърди</a>
+                {{ __('custom.greeting_invite') }} <?= $user ?>
+                <br>{{ __('custom.please_follow_link_update') }}
+                <br>{{ __('custom.password') }}: <?= $pass ?>
+                <br><a href="<?= url('/preGenerated?username='. $username .'&pass=' .$pass) ?>">{{ __('custom.confirm') }}</a>
             </p>
         </td>
     </tr>

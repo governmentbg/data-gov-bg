@@ -6,7 +6,7 @@
         <div class="col-xs-12 m-t-md">
             <div class="row">
                 <div class="col-sm-3 col-xs-12 sidenav">
-                    <span class="my-profile m-b-lg m-l-sm">Моят профил</span>
+                    <span class="my-profile m-b-lg m-l-sm">{{ __('custom.my_profile') }}</span>
                 </div>
                 <div class="col-sm-9 col-xs-12">
                     <div class="filter-content">
@@ -15,19 +15,19 @@
                                 <div class="col-sm-12 p-l-none">
                                     <div>
                                         <ul class="nav filter-type right-border">
-                                            <li><a class="p-l-none" href="{{ url('/user') }}">известия</a></li>
+                                            <li><a class="p-l-none" href="{{ url('/user') }}">{{ __('custom.notifications') }}</a></li>
                                             <li>
                                                 <!-- if there is resource with signal -->
                                                 <div class="col-xs-12 text-center exclamation-sign">
                                                     <img src="{{ asset('img/reported.svg') }}">
                                                 </div>
                                                 <!-- end-->
-                                                <a class="active" href="{{ url('/user/datasets') }}">моите данни</a>
+                                                <a class="active" href="{{ url('/user/datasets') }}">{{ __('custom.my_data') }}</a>
                                             </li>
-                                            <li><a href="{{ url('/user/groups') }}">групи</a></li>
-                                            <li><a href="{{ url('/user/organisations') }}">организации</a></li>
-                                            <li><a href="{{ url('/user/settings') }}">настройки</a></li>
-                                            <li><a href="{{ url('/user/invite') }}">покана</a></li>
+                                            <li><a href="{{ url('/user/userGroups') }}">{{ utrans('custom.groups', 2) }}</a></li>
+                                            <li><a href="{{ url('/user/organisations') }}">{{ utrans('custom.organisations', 2) }}</a></li>
+                                            <li><a href="{{ url('/user/settings') }}">{{ __('custom.settings') }}</a></li>
+                                            <li><a href="{{ url('/user/invite') }}">{{ __('custom.invite') }}</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -41,10 +41,10 @@
                             <div>
                                 <div class="col-sm-12 col-xs-12 p-l-none">
                                     <ul class="p-l-none">
-                                        <li>Отговорник подръжка:</li>
-                                        <li>Версия:</li>
-                                        <li>Последен ъпдейт:</li>
-                                        <li>Създаден:</li>
+                                        <li>{{ __('custom.contact_support_name') }}:</li>
+                                        <li>{{ __('custom.version') }}:</li>
+                                        <li>{{ __('custom.last_update') }}:</li>
+                                        <li>{{ __('custom.created') }}:</li>
                                     </ul>
                                 </div>
                             </div>
@@ -91,7 +91,7 @@
                                                 <a
                                                     href="#"
                                                     onclick="return confirm('Изтриване на данните?');"
-                                                    >изтриване</a>
+                                                    >{{ __('custom.remove') }}</a>
                                             </span>
                                         </div>
                                     </div>
@@ -101,13 +101,13 @@
                                     <div class="pull-left history">
                                         <div>
                                             <a href="#">
-                                                <span class="version-heading">Заглавие</span>
+                                                <span class="version-heading">{{ __('custom.title') }}</span>
                                                 <span class="version">&nbsp;&#8211;&nbsp;версия 3</span>
                                             </a>
                                         </div>
                                         <div>
                                             <a href="#">
-                                                <span class="version-heading">Заглавие</span>
+                                                <span class="version-heading">{{ __('custom.title') }}</span>
                                                 <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
                                             </a>
                                         </div>

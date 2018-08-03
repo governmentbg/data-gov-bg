@@ -118,8 +118,7 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
-Route::get('/user/newsFeed', 'UserController@newsFeed');
-Route::post('/user/newsFeed', 'UserController@newsFeed');
+Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
 /*Route::get('/user/resourceView', function () {
     return view('user/resourceView', ['class' => 'user']);

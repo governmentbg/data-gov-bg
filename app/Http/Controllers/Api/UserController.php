@@ -237,8 +237,11 @@ class UserController extends ApiController
                         $result['follows'][] = [
                             'news'        => $follow['news'],
                             'org_id'      => $follow['org_id'],
+                            'group_id'      => $follow['group_id'],
                             'dataset_id'  => $follow['data_set_id'],
                             'category_id' => $follow['category_id'],
+                            'tag_id' => $follow['tag_id'],
+                            'follow_user_id' => $follow['follow_user_id'],
                         ];
                     }
                 }

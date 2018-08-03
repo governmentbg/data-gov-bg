@@ -719,6 +719,7 @@ class OrganisationController extends ApiController
                     }
 
                     $result = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $locale,

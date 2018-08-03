@@ -2,20 +2,20 @@
         <div class="col-sm-3 sidenav p-l-r-none hidden-xs">
             <ul class="nav">
                 <li class="js-show-submenu">
-                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;теми</a>
+                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.topics') }}</a>
                     <ul class="sidebar-submenu">
-                        <li><a class="active" href="#">здравеопазване</a></li>
-                        <li><a href="#">иновации</a></li>
-                        <li><a href="#">образование</a></li>
-                        <li><a href="#">публичен сектор</a></li>
-                        <li><a href="#">общиние</a></li>
-                        <li><a href="#">земеделие</a></li>
-                        <li><a href="#">правосъдие</a></li>
-                        <li><a href="#">икономика и бизнес</a></li>
+                        <li><a class="active" href="#">{{ __('custom.healthcare') }}</a></li>
+                        <li><a href="#">{{ __('custom.innovation') }}</a></li>
+                        <li><a href="#">{{ __('custom.education') }}</a></li>
+                        <li><a href="#">{{ __('custom.public_sector') }}</a></li>
+                        <li><a href="#">{{ __('custom.municipalities') }}</a></li>
+                        <li><a href="#">{{ __('custom.agriculture') }}</a></li>
+                        <li><a href="#">{{ __('custom.justice') }}</a></li>
+                        <li><a href="#">{{ __('custom.economy_business') }}</a></li>
                     </ul>
                 </li>
                 <li class="js-show-submenu">
-                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;формат</a>
+                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.format') }}</a>
                     <ul class="sidebar-submenu">
                         <li><a href="#">csv</a></li>
                         <li><a href="#">json</a></li>
@@ -28,7 +28,7 @@
                     </ul>
                 </li>
                 <li class="js-show-submenu">
-                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;организации</a>
+                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ untrans('custom.organisations', 2) }}</a>
                     <ul class="sidebar-submenu">
                         <li><a href="#">Lorem ipsum</a></li>
                         <li><a href="#">Lorem ipsum</a></li>
@@ -51,23 +51,23 @@
         <div class="sidenav js-sidenav p-l-r-none hidden-lg hidden-md hidden-sm" id="sidebar-wrapper">
             <ul class="nav">
                 <li>
-                    <span>теми</span>
+                    <span>{{ __('custom.topics') }}</span>
                     <button type="button" class="navbar-toggle btn-sidebar pull-right" data-toggle="collapse" data-target="#sidebar-wrapper">
                         <span><i class="fa fa-angle-left"></i></span>
                     </button>
                     <ul class="sidebar-submenu">
-                        <li><a class="active" href="#">здравеопазване</a></li>
-                        <li><a href="#">иновации</a></li>
-                        <li><a href="#">образование</a></li>
-                        <li><a href="#">публичен сектор</a></li>
-                        <li><a href="#">общиние</a></li>
-                        <li><a href="#">земеделие</a></li>
-                        <li><a href="#">правосъдие</a></li>
-                        <li><a href="#">икономика и бизнес</a></li>
+                    <li><a class="active" href="#">{{ __('custom.healthcare') }}</a></li>
+                        <li><a href="#">{{ __('custom.innovation') }}</a></li>
+                        <li><a href="#">{{ __('custom.education') }}</a></li>
+                        <li><a href="#">{{ __('custom.public_sector') }}</a></li>
+                        <li><a href="#">{{ __('custom.municipalities') }}</a></li>
+                        <li><a href="#">{{ __('custom.agriculture') }}</a></li>
+                        <li><a href="#">{{ __('custom.justice') }}</a></li>
+                        <li><a href="#">{{ __('custom.economy_business') }}</a></li>
                     </ul>
                 </li>
                 <li>
-                    <span>формат</span>
+                    <span>{{ __('custom.format') }}</span>
                     <ul class="sidebar-submenu">
                         <li><a href="#">csv</a></li>
                         <li><a href="#">json</a></li>
@@ -80,7 +80,7 @@
                     </ul>
                 </li>
                 <li>
-                    <span>организации</span>
+                    <span>{{ utrans('custom.organisations', 2) }}</span>
                     <ul class="sidebar-submenu">
                         <li><a href="#">Lorem ipsum</a></li>
                         <li><a href="#">Lorem ipsum</a></li>

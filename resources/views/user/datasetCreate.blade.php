@@ -6,38 +6,38 @@
         <div class="modal-content">
             <div class="frame">
                 <div class="p-w-md">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <h2>Заявка за добавяне на лиценз</h2>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ __('custom.close') }}</span></button>
+                    <h2>{{ __('custom.license_add_req') }}</h2>
                 </div>
                 <div class="modal-body">
                     <form class="m-t-lg">
                         <div class="form-group row">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">Име:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
                             <div class="col-sm-9">
                                 <input type="text" class="input-border-r-12 form-control" id="fname" placeholder="Иван">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="lname" class="col-sm-3 col-xs-12 col-form-label">Фамилия:</label>
+                            <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.family_name') }}:</label>
                             <div class="col-sm-9">
                                 <input type="text" class="input-border-r-12 form-control" id="lname" placeholder="Иванов">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="email" class="col-sm-3 col-xs-12 col-form-label">E-mail:</label>
+                            <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.e_mail') }}:</label>
                             <div class="col-sm-9">
                                 <input type="email" class="input-border-r-12 form-control" id="email" placeholder="ivanov@abv.bg">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="description" class="col-sm-3 col-xs-12 col-form-label">Описание:</label>
+                            <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.description') }}:</label>
                             <div class="col-sm-9">
                                 <textarea class="input-border-r-12 form-control" id="description" placeholder="Описание"></textarea>
                             </div>
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="submit" class="m-l-md btn btn-custom">Изпрати</button>
+                                <button type="submit" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
                             </div>
                         </div>
                     </form>
@@ -51,11 +51,11 @@
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-lg">
-        <p class='req-fields'>Всички полета маркирани с * са задължителни.</p>
+        <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST" action="{{ url('/user/datasetCreate') }}">
             {{ csrf_field() }}
             <div class="form-group row {{ isset($errors['uri']) ? 'has-error' : '' }}">
-                <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">Уникален идентификатор:</label>
+                <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="identifier"
@@ -70,14 +70,14 @@
                 </div>
             </div>
             <div class="form-group row required {{ isset($errors['category_id']) ? 'has-error' : '' }}">
-                <label for="theme" class="col-sm-3 col-xs-12 col-form-label">Основна тема:</label>
+                <label for="theme" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_topic') }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="theme"
                         class="input-border-r-12 form-control"
                         name="category_id"
                     >
-                        <option value="">Изберете основна тема</option>
+                        <option value="">{{ __('custom.select_main_topic') }}</option>
                         @foreach ($categories as $id => $category)
                             <option
                                 value="{{ $id }}"
@@ -111,7 +111,7 @@
             @endforeach
 
             <div class="form-group row {{ isset($errors['terms_of_use_id']) ? 'has-error' : '' }}">
-                <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">Условия за ползване:</label>
+                <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.terms_and_conditions') }}:</label>
                 <div class="col-sm-6">
                     <select
                         id="termsOfuse"
@@ -131,18 +131,18 @@
                     @endif
                 </div>
                 <div class="col-sm-3 text-right add-terms">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">Нови условия</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">{{ __('custom.new_terms_and_conditions') }}</button>
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['org_id']) ? 'has-error' : '' }}">
-                <label for="organisation" class="col-sm-3 col-xs-12 col-form-label">Организация:</label>
+                <label for="organisation" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.organisations', 1) }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="organisation"
                         class="input-border-r-12 form-control"
                         name="org_id"
                     >
-                        <option value="">Изберете организация</option>
+                        <option value=""> {{ utrans('custom.select_org') }}</option>
                         @foreach ($organisations as $id =>$org)
                             <option
                                 value="{{ $id }}"
@@ -156,14 +156,14 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['group_id']) ? 'has-error' : '' }}">
-                <label for="group" class="col-sm-3 col-xs-12 col-form-label">Група:</label>
+                <label for="group" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.groups', 1) }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="group"
                         class="input-border-r-12 form-control"
                         name="group_id"
                     >
-                        <option value="">Изберете група</option>
+                        <option value="">{{ utrans('custom.groups', 1) }} </option>
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"
@@ -177,14 +177,14 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['visibility']) ? 'has-error' : '' }}">
-                <label for="visibility" class="col-sm-3 col-xs-12 col-form-label">Видимост:</label>
+                <label for="visibility" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.visibility') }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="visibility"
                         class="input-border-r-12 form-control"
                         name="visibility"
                     >
-                        <option value="">Изберете видимост</option>
+                        <option value="">{{ utrans('custom.select_visibility') }}</option>
                         @foreach ($visibilityOpt as $id => $visOpt)
                             <option
                                 value="{{ $id }}"
@@ -198,7 +198,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['source']) ? 'has-error' : '' }}">
-                <label for="source" class="col-sm-3 col-xs-12 col-form-label">Източник:</label>
+                <label for="source" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.source') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="source"
@@ -213,7 +213,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['version']) ? 'has-error' : '' }}">
-                <label for="version" class="col-sm-3 col-xs-12 col-form-label">Версия:</label>
+                <label for="version" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.version') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="version"
@@ -228,7 +228,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['author_name']) ? 'has-error' : '' }}">
-                <label for="author" class="col-sm-3 col-xs-12 col-form-label">Автор:</label>
+                <label for="author" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.author') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="author"
@@ -243,7 +243,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['author_email']) ? 'has-error' : '' }}">
-                <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">E-mail на автора:</label>
+                <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.author_email') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="author-email"
@@ -258,7 +258,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['support_name']) ? 'has-error' : '' }}">
-                <label for="support" class="col-sm-3 col-xs-12 col-form-label">Контакт:</label>
+                <label for="support" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.contacts') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="support"
@@ -273,7 +273,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['support_email']) ? 'has-error' : '' }}">
-                <label for="support-email" class="col-sm-3 col-xs-12 col-form-label">E-mail за контакти:</label>
+                <label for="support-email" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.contact_email') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="support-email"
@@ -298,8 +298,8 @@
             @endforeach
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
-                    <button type="button" class="btn btn-primary">изглед</button>
-                    <button type="submit" class="btn btn-primary">запази</button>
+                    <button type="button" class="btn btn-primary">{{ utrans('custom.preview') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ utrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

@@ -10,9 +10,9 @@
                         <div class="col-xs-12 p-l-r-none">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="p-l-none" href="{{ url('/organisation/profile') }}">профил</a></li>
-                                    <li><a href="{{ url('/organisation/datasets') }}">данни</a></li>
-                                    <li><a class="active" href="{{ url('/organisation/chronology') }}">поток на дейността</a></li>
+                                    <li><a class="p-l-none" href="{{ url('/organisation/profile') }}">{{ __('custom.profile') }}</a></li>
+                                    <li><a href="{{ url('/organisation/datasets') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a class="active" href="{{ url('/organisation/chronology') }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
                         </div>

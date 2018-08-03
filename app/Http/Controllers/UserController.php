@@ -45,35 +45,35 @@ class UserController extends Controller {
     {
         return [
             [
-                'label'    => 'Наименование',
+                'label'    => 'custom.label_name',
                 'name'     => 'name',
                 'type'     => 'text',
                 'view'     => 'translation',
                 'required' => true,
             ],
             [
-                'label'    => 'Описание',
+                'label'    => 'custom.description',
                 'name'     => 'descript',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => 'Дейност',
+                'label'    => 'custom.activity',
                 'name'     => 'activity_info',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => 'Контакти',
+                'label'    => 'custom.contacts',
                 'name'     => 'contacts',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => ['Заглавие', 'Стойност'],
+                'label'    => ['custom.title', 'custom.value'],
                 'name'     => 'custom_fields',
                 'type'     => 'text',
                 'view'     => 'translation_custom',
@@ -87,35 +87,35 @@ class UserController extends Controller {
     {
         return [
             [
-                'label'    => 'Наименование',
+                'label'    => 'custom.label_name',
                 'name'     => 'name',
                 'type'     => 'text',
                 'view'     => 'translation',
                 'required' => true,
             ],
             [
-                'label'    => 'Описание',
+                'label'    => 'custom.description',
                 'name'     => 'description',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => 'Етикети',
+                'label'    => 'custom.labels',
                 'name'     => 'tags',
                 'type'     => 'text',
                 'view'     => 'translation_tags',
                 'required' => false,
             ],
             [
-                'label'    => 'Споразумение за ниво на обсужване',
+                'label'    => 'custom.sla_agreement',
                 'name'     => 'sla',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => ['Заглавие', 'Стойност'],
+                'label'    => ['custom.title', 'custom.value'],
                 'name'     => 'custom_fields',
                 'type'     => 'text',
                 'view'     => 'translation_custom',
@@ -129,21 +129,21 @@ class UserController extends Controller {
     {
         return [
             [
-                'label'    => 'Наименование',
+                'label'    => 'custom.label_name',
                 'name'     => 'name',
                 'type'     => 'text',
                 'view'     => 'translation',
                 'required' => true,
             ],
             [
-                'label'    => 'Описание',
+                'label'    => 'custom.description',
                 'name'     => 'descript',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
             ],
             [
-                'label'    => ['Заглавие', 'Стойност'],
+                'label'    => ['custom.title', 'custom.value'],
                 'name'     => 'custom_fields',
                 'type'     => 'text',
                 'view'     => 'translation_custom',

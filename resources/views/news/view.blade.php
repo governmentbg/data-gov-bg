@@ -24,7 +24,7 @@
                                     justo eget magna fermentum iaculis eu.
                                 </p>
                                 <div class="col-xs-12 m-t-sm p-l-none text-right">
-                                    <span class="badge badge-pill"><a href="#">коментар</a></span>
+                                    <span class="badge badge-pill"><a href="#">{{ __('custom.comment') }}</a></span>
                                 </div>
                             </div>
                         </div>
@@ -34,7 +34,7 @@
                                 @for ($i=0; $i<3; $i++)
                                     <div class="comment-box p-lg m-b-lg">
                                         <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>
-                                        <p class="comment-author p-b-xs">Име на профила</p>
+                                        <p class="comment-author p-b-xs">{{ __('custom.profile_name') }}</p>
                                         <p>
                                             Lorem ipsum dolor sit amet, consectetur adipiscing elit,
                                             sed do eiusmod tempor incididunt ut labore et dolore magna

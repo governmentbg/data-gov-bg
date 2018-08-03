@@ -13,6 +13,8 @@
                         <div>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</div>
                         <div>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</div>
                         <div>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</div>
+                    <div class="col-sm-12">
+                        <div>{{ __('custom.date_added') }}: {{ $dataset->created_at }}</div>
                         <h2>{{ $dataset->name }}</h2>
                         <div class="desc">
                             {{ $dataset->descript }}
@@ -34,15 +36,29 @@
                         </div>
                         <div class="info-bar col-sm-7 col-xs-12 p-l-none">
                             <ul class="p-l-none">
-                                <li>Отговорник по подръжка: {{ $dataset->support_name }}</li>
-                                <li>Връзка с отговорник подръжка: {{ $dataset->support_email }}</li>
+                                <li>{{ __('custom.author') }}: {{ $dataset->author_name }}</li>
+                                <li>{{ __('custom.contact_author') }}: {{ $dataset->author_email }}</li>
+                                <li>{{ __('custom.contact_support_name') }}: {{ $dataset->support_name }}</li>
+                                <li>{{ __('custom.contact_support') }}: {{ $dataset->support_email }}</li>
+                                <li>{{ __('custom.created') }}: {{ $dataset->created_at }}</li>
                             </ul>
                         </div>
                         <!-- IF there are old versions of this article -->
                         <div class="col-xs-12 pull-left m-t-md p-l-none">
                             <div class="pull-left history">
                                 <div class="m-b-sm">
-                                    <span class="version">{{ utrans('custom.version') }}&nbsp;{{ $dataset->version }}</span>
+                                    <span class="version">{{ __('custom.version') }}&nbsp;{{ $dataset->version }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- signals -->
+                        <div class="col-sm-12 pull-left m-t-md p-l-none">
+                            <div class="comments signal p-lg">
+                                <div class="comment-box p-lg m-b-lg">
+                                    <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>
+                                    <p class="comment-author p-b-xs">{{ __('custom.profile_name') }}</p>
+                                    <p class="p-b-xs">{{ __('custom.signal_contents') }}</p>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
                                 </div>
                             </div>
                         </div>

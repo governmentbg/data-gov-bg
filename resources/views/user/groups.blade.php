@@ -10,7 +10,7 @@
                 <div class="row">
                     <div class="col-xs-12 p-l-none">
                         <input class="rounded-input pull-right" type="text">
-                        <span class="badge badge-pill m-t-lg new-data"><a  href="{{ url('/user/registerGroup') }}">Създаване на група</a></span>
+                        <span class="badge badge-pill m-t-lg new-data"><a  href="{{ url('/user/registerGroup') }}">{{ __('custom.create_group') }}</a></span>
                     </div>
                     <div class="col-xs-12 page-content p-sm">
                         <div class="col-xs-12 user-group">
@@ -26,7 +26,7 @@
                                         <div class="col-xs-12">
                                             <a href="{{ url('/user/groupView/'. $group->id) }}"><h3 class="group-name">{{ $group->name }}</h3></a>
                                             <p class="text-justify group-desc">{{ $group->description }}</p>
-                                            <p class="text-right show-more"><a href="{{ url('/user/groupView/'. $group->id) }}" class="view-profile">виж още</a></p>
+                                            <p class="text-right show-more"><a href="{{ url('/user/groupView/'. $group->id) }}" class="view-profile">{{ __('custom.see_more') }}</a></p>
                                             <div class="control-btns text-center ch-del-btns">
                                                 <div class="col-xs-6">
                                                     <a href="{{ url('/user/editGroup/'. $group->id) }}">
@@ -34,7 +34,7 @@
                                                             type="submit"
                                                             name="edit"
                                                             class="btn btn-custom m-r-md"
-                                                        >промяна</button>
+                                                        >{{ __('custom.edit') }}</button>
                                                     </a>
                                                 </div>
                                                 <form method="POST" action="{{ url('/user/deleteGroup/'. $group->id) }}">
@@ -44,7 +44,7 @@
                                                             type="submit"
                                                             name="delete"
                                                             class="btn btn-custom m-r-md"
-                                                        >изтриване</button>
+                                                        >{{ __('custom.remove') }}</button>
                                                     </div>
                                                 </form>
                                             </div>

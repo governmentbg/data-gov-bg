@@ -13,10 +13,10 @@
     <tr>
         <td>
             <p>
-                Здравейте, <?= $user ?>
-                <br/>Вие сменихте електронният си адрес
-                <br/>За да го потвърдите, моля натиснете тук:<br/>
-                <a href="<?= url('/mailConfirmation?hash='. $hash .'&mail='. $mail) ?>">Потвърди</a>
+            {{ __('custom.greetings') }}, <?= $user ?>
+                <br/> {{ __('custom.have_changed') }}
+                <br/> {{ __('custom.to_confirm') }}:<br/>
+                <a href="<?= url('/mailConfirmation?hash='. $hash .'&mail='. $mail) ?>">{{ __('custom.confirm') }}</a>
             </p>
         </td>
     </tr>

@@ -38,7 +38,7 @@
         <div class="row">
             <div class="col-sm-6 col-xs-12 text-left">
                 <span class="badge badge-pill m-t-md new-data user-add-btn">
-                    <a href="{{ url('/user/organisations/datasets') }}">{{ __('custom.datasets') }}</a>
+                    <a href="{{ url('/user/organisations/datasets') }}">{{ __('custom.data_sets') }}</a>
                 </span>
             </div>
         </div>
@@ -55,7 +55,7 @@
                             <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
                             <div class="org-desc">{{ $organisation->description }}</div>
                             <p class="text-right show-more">
-                                <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}" class="view-profile">{{ __('custom.show_more') }}</a>
+                                <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                             </p>
                         </div>
                         <div class="col-xs-12 ch-del-btns">

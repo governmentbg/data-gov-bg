@@ -27,7 +27,7 @@
                     <div class="articles m-t-lg">
                         @foreach ($datasets as $set)
                             <div class="article m-b-lg col-xs-12 user-dataset">
-                                <div>Дата на добавяне: {{ $set->created_at }}</div>
+                                <div>{{ __('custom.date_added') }}: {{ $set->created_at }}</div>
                                 <div class="col-sm-12 p-l-none">
                                     <a href="{{ route('datasetView', ['uri' => $set->uri]) }}">
                                         <h2 class="m-t-xs">{{ $set->name }}</h2>
@@ -65,7 +65,7 @@
                                             </div>
                                         </div>
                                         <div class="pull-right">
-                                            <span><a href="{{ route('datasetView', ['uri' => $set->uri]) }}">{{ __('custom.show_more') }}</a></span>
+                                            <span><a href="{{ route('datasetView', ['uri' => $set->uri]) }}">{{ __('custom.see_more') }}</a></span>
                                         </div>
                                     </div>
                                 </div>

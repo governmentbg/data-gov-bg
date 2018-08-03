@@ -13,9 +13,9 @@
     <tr>
         <td>
             <p>
-                Здравейте, получихте покана от <?= $user ?>
-                <br/>Моля последвайте препратката, за да регистрирате профил
-                <a href="<?= url('/registration?mail='. $mail) ?>">Потвърди</a>
+                {{ __('custom.greeting_invite') }} <?= $user ?>
+                <br/>{{ __('custom.please_follow_link_register') }}
+                <a href="<?= url('/registration?mail='. $mail) ?>">{{ __('custom.confirm') }}</a>
             </p>
         </td>
     </tr>

@@ -44531,6 +44531,20 @@ $('.btn-sidebar').click(function (e) {
     }
 });
 
+//on li hover get href and change color
+$('.js-check-url').mouseover(function () {
+    $href = $(this).children('a').attr('href');
+    $href = $href.split('/');
+
+    if ($href[3] != 'undefined' && $href[3] == 'user') {
+        $('.js-check-url').addClass('user');
+        $('.js-check-url').removeClass('index');
+    } else {
+        $('.js-check-url').addClass('index');
+        $('.js-check-url').removeClass('user');
+    }
+});
+
 /***/ }),
 /* 46 */
 /***/ (function(module, exports) {

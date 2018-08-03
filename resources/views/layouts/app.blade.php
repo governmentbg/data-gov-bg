@@ -121,14 +121,17 @@
                         <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                             <a href="{{ url('/contact') }}">{{ utrans('custom.contacts',2) }}</a>
                         </li>
-                        <li class="hidden-lg hidden-md user {{ in_array(
+                        <li class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
                                 Request::segment(1),
                                 ['user', 'login', 'registration']
                             ) ? 'active' : null }}">
-                            @if (\Auth::check())
-                                <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
-                            @else
+                            @if (!\Auth::check())
                                 <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
+                            @else
+                                <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
+                            </li>
+                            <li class="hidden-lg hidden-md hidden-sm index">
+                                <a href="{{ url('/logout') }}">{{ utrans('custom.logout') }}&nbsp;<i class="fa fa-sign-out"></i></a>
                             @endif
                         </li>
                         <li class="hidden-lg hidden-md hidden-sm">

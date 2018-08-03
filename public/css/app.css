@@ -12897,6 +12897,12 @@ textarea {
   max-width: 400px;
 }
 
+.btn:hover,
+.btn:active,
+.btn:focus {
+  color: white !important;
+}
+
 .theme-data .underline-thin,
 .theme-data-attention .underline-thin {
   background-color: #4F57AA;

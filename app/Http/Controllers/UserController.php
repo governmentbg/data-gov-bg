@@ -1515,4 +1515,93 @@ class UserController extends Controller {
 
         return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
     }
+
+    /**
+     * Forgotten password
+     *
+     * @param string username - required
+     *
+     * @return true - if user is found and email is sent false - otherwise
+     */
+    public function forgottenPassword(Request $request)
+    {
+        $errors = [];
+
+        if ($request->isMethod('post')) {
+            $params['username'] = $request->input('username');
+
+            $req = Request::create('/api/forgottenPassword', 'POST', ['data' => $params]);
+            $api = new ApiUser($req);
+            $result = $api->forgottenPassword($req)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-warning', __('custom.receive_email'));
+
+                return redirect('/login');
+            } else {
+                foreach ($result->errors as $field => $msg) {
+                    $errors[substr($field, strpos($field, ".") )] = $msg[0];
+                }
+            }
+        }
+
+        return view(
+            'user/forgottenPassword',
+            [
+                'class' => 'index',
+            ]
+        )->with('errors', $errors);
+    }
+
+    /**
+     * Password reset
+     *
+     * @param string hash - required
+     * @param string password - required
+     * @param string password_confirm - required
+     *
+     * @return true - if password is changed false - otherwise
+     */
+    public function passwordReset(Request $request)
+    {
+        Auth::logout();
+        $hash = $request->offsetGet('hash');
+        $username = $request->offsetGet('username');
+        $errors = [];
+
+        $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+
+        if (!$user) {
+            $request->session()->flash('alert-danger', __('custom.wrong_reset_link'));
+
+            return redirect('/login');
+        }
+
+        if ($request->isMethod('post')) {
+            $params['hash'] = $hash;
+            $params['password'] = $request->input('password');
+            $params['password_confirm'] = $request->input('password_confirm');
+
+            $req = Request::create('/api/passwordReset', 'POST', ['data' => $params]);
+            $api = new ApiUser($req);
+            $result = $api->passwordReset($req)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.pass_change_succ'));
+
+                return redirect('login');
+            } else {
+                foreach ($result->errors as $field => $msg) {
+                    $errors[substr($field, strpos($field, ".") )] = $msg[0];
+                }
+            }
+        }
+
+        return view(
+            'user/passwordReset',[
+                'class' => 'index',
+            ]
+        )->with('errors', $errors);
+    }
+
 }

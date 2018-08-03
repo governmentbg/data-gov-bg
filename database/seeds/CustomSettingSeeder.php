@@ -23,7 +23,7 @@ class CustomSettingSeeder extends Seeder
         $organisations = Organisation::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
 
         foreach (range(1, self::CUSTOM_SETTING_RECORDS) as $index) {
-            $organisation =  $this->faker->randomElement($organisations)['id'];
+            $organisation = $this->faker->randomElement($organisations)['id'];
 
             CustomSetting::create([
                 'org_id' => $organisation,

@@ -14,10 +14,15 @@
 //Route::get('/', 'HomeController@index');
 //
 //Auth::routes();
+
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
     Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
     Route::get('/users/list/search', 'UserController@searchUsers');
+
+    Route::post('/user/organisations/register', 'UserController@registerOrg');
+    Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+    Route::post('/user/organisations/edit', 'UserController@editOrg');
 
     Route::middleware('check.resources')->group(function () {
         Route::get('/user/datasets', 'UserController@datasets');
@@ -33,6 +38,12 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'],'/user/groupView/{uri}', 'UserController@groupView');
         Route::match(['get', 'post'],'/user/editGroup/{id}', 'UserController@editGroup');
         Route::post('/user/deleteGroup/{id}', 'UserController@deleteGroup');
+
+        Route::get('/user/organisations/datasets', 'UserController@orgDatasets');
+        Route::get('/user/organisations', 'UserController@organisations');
+        Route::post('/user/organisations/delete', 'UserController@deleteOrg');
+        Route::get('/user/organisations/search', 'UserController@searchOrg');
+        Route::get('/user/organisations/view', 'UserController@viewOrg')->name('userOrgView');
     });
 });
 
@@ -110,17 +121,13 @@ Route::post('/user', 'UserController@index');
 Route::get('/user/newsFeed', 'UserController@newsFeed');
 Route::post('/user/newsFeed', 'UserController@newsFeed');
 
-Route::get('/user/organisations', 'UserController@organisations');
+/*Route::get('/user/resourceView', function () {
+    return view('user/resourceView', ['class' => 'user']);
+});*/
 
-Route::post('/user/organisation/delete', 'UserController@deleteOrg');
-
-Route::get('/user/organisations/search', 'UserController@searchOrg');
-
-Route::post('/user/organisations/register', 'UserController@registerOrg');
-
-Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
-
-Route::post('/user/organisation/edit', 'UserController@editOrg');
+Route::get('/user/groups', function () {
+    return view('user/groups', ['class' => 'user']);
+});
 
 Route::get('/user/groupView', function () {
     return view('user/groupView', ['class' => 'user']);
@@ -128,10 +135,6 @@ Route::get('/user/groupView', function () {
 
 Route::get('/user/groupMembers', function () {
     return view('user/groupMembers', ['class' => 'user']);
-});
-
-Route::get('/user/orgView', function () {
-    return view('user/orgView', ['class' => 'user']);
 });
 
 Route::get('/user/orgMembers', function () {

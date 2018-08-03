@@ -343,3 +343,49 @@ textarea {
 .custom-trans-filed {
     padding-right: 0px;
 }
+
+.user-add-btn {
+    margin-left: 10px;
+}
+
+.pagination {
+    li {
+        &.active {
+            span {
+                background-color: #108f9e;
+                border-color: #108f9e;
+                color: white;
+            }
+        }
+        span, a {
+            color: #108f9e;
+        }
+    }
+}
+
+.user-dataset {
+    .desc {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        //max-height: 150px;
+    }
+    .btns {
+        padding-top: 15px;
+    }
+}
+
+.search-field {
+    input {
+        border-radius: 15px;
+        border: 1px solid black;
+        font-size: 12px;
+        padding: 2px 5px;
+    }
+    @include smMobile() {
+        text-align: left !important;
+        margin-left: 10px;
+    }
+}

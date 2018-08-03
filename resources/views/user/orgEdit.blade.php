@@ -19,7 +19,7 @@
                     <h2>Редакция на организация</h2>
                     <p class='req-fields m-t-lg m-b-lg'>Всички полета маркирани с * са задължителни.</p>
                 </div>
-                <form method="POST" action="{{ url('/user/organisation/edit') }}" class="m-t-lg" enctype="multipart/form-data">
+                <form method="POST" action="{{ url('/user/organisations/edit') }}" class="m-t-lg" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <div class="form-group row">
                         <label class="col-sm-3 col-xs-12 col-form-label">Изображение:</label>

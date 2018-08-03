@@ -200,20 +200,6 @@
         .org-col {
             margin-bottom: 30px;
         }
-        .pagination {
-            li {
-                &.active {
-                    span {
-                        background-color: #108f9e;
-                        border-color: #108f9e;
-                        color: white;
-                    }
-                }
-                span, a {
-                    color: #108f9e;
-                }
-            }
-        }
     }
 
     @include mobile() {
@@ -265,7 +251,8 @@
         }
 
         .user-orgs {
-            padding: 0px;
+            padding: 0;
+            margin-top: 50px;
         }
 
         .my-profile {

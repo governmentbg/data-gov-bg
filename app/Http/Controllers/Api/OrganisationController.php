@@ -461,7 +461,7 @@ class OrganisationController extends ApiController
                         'locale'            => $org->locale,
                         'uri'               => $org->uri,
                         'type'              => $org->type,
-                        'logo'              => $org->logo_data,
+                        'logo'              => $this->getImageData($org->logo_data, $org->logo_mime_type),
                         'activity_info'     => $org->activity_info,
                         'contacts'          => $org->contacts,
                         'parent_org_id'     => $org->parent_org_id,
@@ -654,6 +654,7 @@ class OrganisationController extends ApiController
                     }
 
                     $results[] = [
+                        'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
                         'locale'          => $org->locale,
@@ -723,7 +724,7 @@ class OrganisationController extends ApiController
                         'locale'          => $locale,
                         'uri'             => $org->uri,
                         'type'            => $org->type,
-                        'logo'            => $org->logo,
+                        'logo'            => $this->getImageData($org->logo_data, $org->logo_mime_type),
                         'activity_info'   => $org->activity_info,
                         'contacts'        => $org->contacts,
                         'parent_org_id'   => $org->parent_org_id,

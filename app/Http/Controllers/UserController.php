@@ -7,6 +7,7 @@ use App\Locale;
 use App\DataSet;
 use App\UserSetting;
 use App\Organisation;
+use App\UserToOrgRole;
 use App\ActionsHistory;
 use App\CustomSetting;
 use Illuminate\Http\Request;
@@ -174,6 +175,31 @@ class UserController extends Controller {
         $datasets = $api->listDataSets($request)->getData();
 
         return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets]);
+    }
+
+    public function orgDatasets(Request $request) {
+        $perPage = 6;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+        $userOrgIds = UserToOrgRole::where('user_id', \Auth::user()->id)->pluck('org_id')->toArray();
+        $dataSetIds = DataSet::whereIn('org_id', $userOrgIds)->pluck('id')->toArray();
+        $params['criteria']['dataset_ids'] = $dataSetIds;
+        $request = Request::create('/api/listDataSets', 'POST', $params);
+        $api = new ApiDataSets($request);
+        $datasets = $api->listDataSets($request)->getData();
+        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+
+        return view(
+            'user/datasets',
+            [
+                'class'         => 'user',
+                'datasets'      => $paginationData['items'],
+                'pagination'    => $paginationData['paginate']
+            ]
+        );
     }
 
     public function datasetView(Request $request)
@@ -614,8 +640,19 @@ class UserController extends Controller {
         }
 
         return $result->success
-            ? redirect('/organisation/profile')
+            ? redirect()->route('userOrgView', ['org_id' => $result->org_id])
             : redirect('user/organisations/register')->withInput(Input::all());
+    }
+
+    public function viewOrg(Request $request)
+    {
+        $uri = $request->uri;
+        $orgId = $request->has('org_id') ? $request->org_id : Organisation::where('uri', $uri)->value('id');
+        $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
+        $api = new ApiOrganisations($request);
+        $result = $api->getOrganisationDetails($request)->getData();
+
+        return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
     }
 
 

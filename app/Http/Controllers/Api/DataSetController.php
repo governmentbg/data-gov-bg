@@ -404,10 +404,11 @@ class DataSetController extends ApiController
                         $query->orderBy($order['field'], $order['type']);
                     }
 
-                    if (!empty($pagination) && !empty($page)) {
-                        $query->paginate($pagination, ['*'], 'page', $page);
-                    }
-
+                    $count = $query->count();
+                    $query->forPage(
+                        $request->offsetGet('page_number'),
+                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                    );
                     $data = $query->get();
 
                     foreach ($data as $set) {
@@ -428,7 +429,8 @@ class DataSetController extends ApiController
                     }
 
                     return $this->successResponse([
-                        'datasets'  => $data,
+                        'datasets'      => $data,
+                        'total_records' => $count
                     ], true);
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());

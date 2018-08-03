@@ -23,13 +23,16 @@ class DataSetGroupSeeder extends Seeder
         $organisations = Organisation::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
 
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $index) {
-            $dataSet =  $this->faker->unique()->randomElement($dataSets)['id'];
+            $dataSet = $this->faker->randomElement($dataSets)['id'];
             $organisation = $this->faker->randomElement($organisations)['id'];
+            $dbData = [
+                'data_set_id'   => $dataSet,
+                'group_id'      => $organisation
+            ];
 
-            DataSetGroup::create([
-                'data_set_id' => $dataSet,
-                'group_id'  => $organisation
-            ]);
+            if (!DataSetGroup::where($dbData)->count()) {
+                DataSetGroup::create($dbData);
+            }
         }
     }
 }

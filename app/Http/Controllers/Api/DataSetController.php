@@ -326,10 +326,6 @@ class DataSetController extends ApiController
     {
         $post = $request->all();
         $criteria = !empty($post['criteria']) ? $post['criteria'] : false;
-        $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : 15;
-        $page = !empty($post['page_number']) ? $post['page_number'] : 1;
-        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
 
         if ($criteria) {
             $validator = \Validator::make($post, [
@@ -369,7 +365,7 @@ class DataSetController extends ApiController
                     }
 
                     if (!empty($criteria['group_id'])) {
-                        $query->whereHas('datasetgroup', function($q) use($criteria) {
+                        $query->whereHas('dataSetGroup', function($q) use($criteria) {
                             $q->where('group_id', $criteria['group_id']);
                         });
                     }
@@ -623,12 +619,12 @@ class DataSetController extends ApiController
         $validator = \Validator::make($post, [
             'data_set_uri'  => 'required|string',
             'group_id'      => [
-                                    'required',
-                                    'integer',
-                                    Rule::exists('organisations','id')->where(function ($query) {
-                                        $query->where('type', Organisation::TYPE_GROUP);
-                                    }),
-                                ],
+                'required',
+                'integer',
+                Rule::exists('organisations','id')->where(function ($query) {
+                    $query->where('type', Organisation::TYPE_GROUP);
+                }),
+            ],
         ]);
 
         if (!$validator->fails()) {
@@ -655,7 +651,7 @@ class DataSetController extends ApiController
 
 
     /**
-     * API function for adding Data Set to group
+     * API function for removing Data Set from group
      *
      * @param string api_key - required
      * @param integer data_set_uri - required

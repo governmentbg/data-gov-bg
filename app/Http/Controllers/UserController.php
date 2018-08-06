@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
-use App\Http\Controllers\ApiController as ApiController;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
@@ -171,11 +170,23 @@ class UserController extends Controller {
         $params['records_per_page'] = '10';
         $params['page_number'] = '1';
 
-        $request = Request::create('/api/listDataSets', 'POST', $params);
-        $api = new ApiDataSets($request);
-        $datasets = $api->listDataSets($request)->getData();
+        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $api = new ApiDataSets($rq);
+        $datasets = $api->listDataSets($rq)->getData();
 
-        return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets]);
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+            } else {
+                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+            }
+
+            return back();
+        }
+
+        return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets, 'activeMenu' => 'dataset']);
     }
 
     public function orgDatasets(Request $request) {
@@ -188,17 +199,30 @@ class UserController extends Controller {
         $userOrgIds = UserToOrgRole::where('user_id', \Auth::user()->id)->pluck('org_id')->toArray();
         $dataSetIds = DataSet::whereIn('org_id', $userOrgIds)->pluck('id')->toArray();
         $params['criteria']['dataset_ids'] = $dataSetIds;
-        $request = Request::create('/api/listDataSets', 'POST', $params);
-        $api = new ApiDataSets($request);
-        $datasets = $api->listDataSets($request)->getData();
+        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $api = new ApiDataSets($rq);
+        $datasets = $api->listDataSets($rq)->getData();
         $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+            } else {
+                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+            }
+
+            return back();
+        }
 
         return view(
             'user/datasets',
             [
                 'class'         => 'user',
                 'datasets'      => $paginationData['items'],
-                'pagination'    => $paginationData['paginate']
+                'pagination'    => $paginationData['paginate'],
+                'activeMenu'       => 'organisation',
             ]
         );
     }
@@ -217,19 +241,23 @@ class UserController extends Controller {
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
-        return view('user/datasetView', ['class' => 'user', 'dataset' => $dataset->data, 'resources' => $resources->resources]);
+        return view('user/datasetView', ['class' => 'user', 'dataset' => $dataset->data, 'resources' => $resources->resources, 'activeMenu' => 'dataset']);
     }
 
-    public function datasetDelete(Request $request)
+    public function datasetDelete($uri)
     {
         $params['api_key'] = \Auth::user()->api_key;
-        $params['dataset_uri'] = $request->input('dataset_uri');
+        $params['dataset_uri'] = $uri;
 
         $request = Request::create('/api/deleteDataSet', 'POST', $params);
         $api = new ApiDataSets($request);
         $datasets = $api->deleteDataSet($request)->getData();
 
-        return redirect('user/datasets');
+        if ($datasets->success) {
+            return true;
+        }
+
+        return false;
     }
 
     public function datasetCreate(Request $request, DataSet $datasetModel)
@@ -1756,5 +1784,101 @@ class UserController extends Controller {
         $result = $apiTermsOfUseReq->sendTermsOfUseRequest($sendRequest)->getData();
 
         return json_encode($result);
+    }
+
+    public function groupDatasets(Request $request)
+    {
+        $class = 'user';
+        $actMenu = 'group';
+        $groups = [];
+        $perPage = 6;
+
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $api = new ApiOrganisations($orgReq);
+        $result = $api->getUserOrganisations($orgReq)->getData();
+
+        if ($result->success) {
+            foreach ($result->organisations as $org) {
+                if ($org->type == Organisation::TYPE_GROUP) {
+                    $groups[] = $org->id;
+                }
+            }
+        }
+
+        $dataSetIds = DataSet::whereIn('org_id', $groups)->pluck('id')->toArray();
+
+        if (!empty($dataSetIds)) {
+            $params['criteria']['dataset_ids'] = $dataSetIds;
+            $dataRq = Request::create('/api/listDataSets', 'POST', $params);
+            $dataApi = new ApiDataSets($dataRq);
+            $datasets = $dataApi->listDataSets($dataRq)->getData();
+            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+        } else {
+            $request->session()->flash('alert-danger', 'Вашите групи, нямат свързани набори от данни!');
+
+            return back();
+        }
+
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+            } else {
+                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+            }
+
+            return back();
+        }
+
+        return view('user/datasets', [
+                'class'         => 'user',
+                'datasets'      => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'activeMenu'    => $actMenu,
+        ]);
+    }
+
+    public function searchGroups(Request $request)
+    {
+        $perPage = 6;
+        $search = $request->offsetGet('search');
+
+        if (empty($search)) {
+            return redirect('user/userGroups');
+        }
+
+        $params = [
+            'records_per_page'  => $perPage,
+            'criteria'          => [
+                'keywords'          => $search,
+                'user_id'           => Auth::user()->id,
+            ]
+        ];
+
+        $searchRq = Request::create('/api/searchGroups', 'POST', $params);
+        $api = new ApiOrganisations($searchRq);
+        $grpData = $api->searchGroups($searchRq)->getData();
+
+        $groups = !empty($grpData->groups) ? $grpData->groups : [];
+        $count = !empty($grpData->total_records) ? $grpData->total_records : 0;
+
+        $getParams = [
+            'search' => $search
+        ];
+
+        $paginationData = $this->getPaginationData($groups, $count, $getParams, $perPage);
+
+        return view('user/groups', [
+            'class'         => 'user',
+            'groups'        => $paginationData['items'],
+            'pagination'    => $paginationData['paginate']
+        ]);
     }
 }

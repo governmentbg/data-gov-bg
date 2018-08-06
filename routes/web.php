@@ -20,12 +20,17 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
     Route::get('/users/list/search', 'UserController@searchUsers');
 
+    Route::post('/user/organisations/register', 'UserController@registerOrg');
+    Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+
+    Route::get('/user/searchGroups', 'UserController@searchGroups');
+
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
-        Route::get('/user/datasets', 'UserController@datasets');
         Route::get('/user/datasetView', 'UserController@datasetView')->name('datasetView');
         Route::post('/user/datasetDelete', 'UserController@datasetDelete');
+        Route::match(['get', 'post'], '/user/datasets', 'UserController@datasets');
         Route::match(['get', 'post'], '/user/datasetCreate', 'UserController@datasetCreate');
         Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
         Route::get('/user/datasetEdit', 'UserController@datasetEdit');
@@ -35,9 +40,10 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'],'/user/userGroups', 'UserController@userGroups');
         Route::match(['get', 'post'],'/user/groupView/{uri}', 'UserController@groupView');
         Route::match(['get', 'post'],'/user/editGroup/{id}', 'UserController@editGroup');
-        Route::post('/user/deleteGroup/{id}', 'UserController@deleteGroup');
+        Route::post('/user/group/delete/{id}', 'UserController@deleteGroup');
+        Route::match(['get', 'post'], '/user/groupDatasets', 'UserController@groupDatasets');
 
-        Route::get('/user/organisations/datasets', 'UserController@orgDatasets');
+        Route::match(['get', 'post'], '/user/organisations/datasets', 'UserController@orgDatasets');
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete', 'UserController@deleteOrg');
         Route::get('/user/organisations/search', 'UserController@searchOrg');

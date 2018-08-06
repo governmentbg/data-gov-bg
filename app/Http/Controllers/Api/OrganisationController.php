@@ -620,6 +620,7 @@ class OrganisationController extends ApiController
             'criteria.locale'       => 'nullable|string|max:5',
             'criteria.keywords'     => 'required|string',
             'criteria.order.type'   => 'nullable|string',
+            'criteria.user_id'      => 'nullable|integer|exists:users,id',
             'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
@@ -1236,6 +1237,7 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($request->all(), [
             'criteria.locale'       => 'nullable|string|max:5',
             'criteria.keywords'     => 'required|string',
+            'criteria.user_id'      => 'nullable|integer|exists:users,id',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
@@ -1250,6 +1252,12 @@ class OrganisationController extends ApiController
 
                 $query = Organisation::where('type', Organisation::TYPE_GROUP);
                 $query = Organisation::whereIn('id', $ids);
+
+                if (!empty($criteria['user_id'])) {
+                    $query->whereHas('userToOrgRole', function($q) use ($criteria) {
+                        $q->where('user_id', $criteria['user_id']);
+                    });
+                }
 
                 $count = $query->count();
                 $query->forPage(
@@ -1273,12 +1281,13 @@ class OrganisationController extends ApiController
                     }
 
                     $result[] = [
+                        'id'                => $group->id,
                         'name'              => $group->name,
                         'type'              => $group->type,
                         'description'       => $group->descript,
                         'locale'            => $group->locale,
                         'uri'               => $group->uri,
-                        'logo'              => $group->logo,
+                        'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type),
                         'custom_fields'     => $customFields,
                         'datasets_count'    => $group->dataSet()->count(),
                         'followers_count'   => $group->userFollow()->count(),
@@ -1372,10 +1381,5 @@ class OrganisationController extends ApiController
 
             return false;
         }
-    }
-
-    public function getUserGrops(Request $request)
-    {
-
     }
 }

@@ -30,6 +30,67 @@
     $darker-primary: darken($primary, 10%);
     $secondary: white;
 
+    .select2-container--default.select2-container--open.select2-container--above .select2-selection--single, .select2-container--default.select2-container--open.select2-container--above .select2-selection--multiple {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-top: none !important;
+    }
+
+    .select2-container--default.select2-container--open.select2-container--below .select2-selection--single, .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom: none !important;
+    }
+
+    .select2-container--default {
+        .select2-selection--single {
+            border: 1px solid $primary;
+            border-color: $primary;
+            border-radius: 15px;
+        }
+    }
+
+    .select2-selection .select2-selection--single {
+        border-color: $primary !important;
+    }
+
+    .select2-dropdown {
+        border-color: $primary !important;
+
+        .select2-results__option {
+            padding-left: 8px !important;
+        }
+
+        &.select2-dropdown--below {
+            border-top-right-radius: 0px !important;
+            border-top-left-radius: 0px !important;
+            border-bottom-left-radius: 15px !important;
+            border-bottom-right-radius: 15px !important;
+
+            .select2-results__options {
+                &:last-child {
+                    padding-bottom: 10px;
+                }
+            }
+        }
+        &.select2-dropdown--above {
+            border-bottom-right-radius: 0px !important;
+            border-bottom-left-radius: 0px !important;
+            border-top-right-radius: 15px !important;
+            border-top-left-radius: 15px !important;
+
+            .select2-results__options {
+                &:last-child {
+                    padding-top: 10px;
+                }
+            }
+        }
+    }
+
+    .select2-results__option[aria-selected=true] {
+        display: none !important;
+    }
+
     .#{$name} {
         .navbar {
             .navbar-header {

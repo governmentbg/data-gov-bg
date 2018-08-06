@@ -4,6 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'dataset'])
+
     <div class="col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <p class='req-fields has-error'>{{ __('custom.all_fields_required') }}</p>
@@ -11,13 +12,13 @@
             <div class="form-group row required">
                 <label for="title" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.title') }}:</label>
                 <div class="col-sm-9">
-                    <input type="email" class="input-border-r-12 form-control" id="title" value="Lorem ipsum BG">
+                    <input class="input-border-r-12 form-control" id="title" value="Lorem ipsum BG">
                 </div>
             </div>
             <div class="form-group row required has-error">
                 <label for="titleTR" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.title') }}:</label>
                 <div class="col-sm-9">
-                    <input type="email" class="input-border-r-12 form-control" id="titleTR" value="Lorem ipsum EN">
+                    <input class="input-border-r-12 form-control" id="titleTR" value="Lorem ipsum EN">
                 </div>
             </div>
             <div class="form-group row">
@@ -128,6 +129,7 @@
                 {{ __('custom.author_email') }}:
                     <span class="info-icon"><i class="fa fa-info"></i></span>
                 </label>
+
                 <div class="col-sm-9">
                     <input type="email" class="input-border-r-12 form-control" id="author-email" value="ivanov@abv.bg">
                 </div>

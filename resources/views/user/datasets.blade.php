@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'dataset'])
+    @include('partials.user-nav-bar', ['view' => $activeMenu])
     <div class="row">
         <div class="col-sm-6 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/datasetCreate') }}">{{ __('custom.add_new_dataset') }}</a></span>
@@ -43,7 +43,7 @@
                                                 </span>
                                             </div>
                                             <div class="col-xs-6">
-                                                <form method="POST" action="{{ url('/user/deleteDataset') }}">
+                                                <form method="POST">
                                                     {{ csrf_field() }}
                                                     <div class="col-xs-6 text-right">
                                                         <button

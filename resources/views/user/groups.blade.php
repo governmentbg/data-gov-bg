@@ -12,6 +12,19 @@
     </div>
     <div class="col-xs-12 m-t-md">
         <div class="row">
+            <div class="col-xs-12 p-l-none">
+                <form method="GET" action="{{ url('/user/searchGroups') }}">
+                    <input
+                        type="text"
+                        class="rounded-input pull-right"
+                        placeholder="{{ __('custom.search') }}"
+                        value="{{ isset($search) ? $search : '' }}"
+                        name="search"
+                    >
+                </form>
+                <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/registerGroup') }}">{{ __('custom.create_group') }}</a></span><br>
+                <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/groupDatasets') }}">{{ __('custom.data_sets') }}</a></span>
+            </div>
             <div class="col-xs-12 page-content p-sm">
                 <div class="col-xs-12 user-group">
                     <div class="row">
@@ -24,9 +37,16 @@
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ url('/user/groupView/'. $group->id) }}"><h3 class="group-name">{{ $group->name }}</h3></a>
+                                    <a href="{{ url('/user/groupView/'. $group->id) }}">
+                                        <h3 class="group-name">{{ $group->name }}</h3>
+                                    </a>
                                     <p class="text-justify group-desc">{{ $group->description }}</p>
-                                    <p class="text-right show-more"><a href="{{ url('/user/groupView/'. $group->id) }}" class="view-profile">{{ __('custom.see_more') }}</a></p>
+                                    <p class="text-right show-more">
+                                        <a
+                                            href="{{ url('/user/groupView/'. $group->id) }}"
+                                            class="view-profile"
+                                        >{{ __('custom.see_more') }}</a>
+                                    </p>
                                     <div class="control-btns text-center ch-del-btns">
                                         <div class="col-xs-6">
                                             <a href="{{ url('/user/editGroup/'. $group->id) }}">

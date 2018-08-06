@@ -31,6 +31,10 @@ $(function() {
             $('#delete-confirm').modal('toggle');
         })
     }
+
+    if ($('.js-select').length) {
+        $('.js-select').select2({minimumResultsForSearch: -1});
+    }
 });
 
 $(function(){

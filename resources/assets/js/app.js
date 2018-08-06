@@ -31,3 +31,6 @@ require('./UserController');
 
 // Checkboxes
 require('icheck');
+
+// Dropdowns
+require('./select2.full.min');

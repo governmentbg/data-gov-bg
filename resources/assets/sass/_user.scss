@@ -383,7 +383,7 @@
         margin-top: 22px;
     }
 
-    p {
+    span {
         font-size: 16pt;
         line-height: 1.2;
     }
@@ -638,5 +638,15 @@
                 color: #108f9e;
             }
         }
+    }
+}
+
+.del-modal-btn {
+    background-color: $error-color !important;
+    border-color: $error-color !important;
+
+    &:hover, &:active, &:focus {
+        background-color: #991e3e !important;
+        border-color: #991e3e !important;
     }
 }

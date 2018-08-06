@@ -1,7 +1,7 @@
 <div style="text-align:center;margin-right:350px;">
-<a href="https://opendata.finite-soft.com/ " style="margin-right: 15px;"><img src="{{asset('img/op-logo.png')}}"></a>
-<a href="https://europa.eu/european-union/index_bg"><img src="{{asset('img/eu-logo.png')}}"></a>
-<a href="https://opendata.finite-soft.com/" style="margin-left: 15px;"><img src="{{asset('img/opdu-logo.png')}}"></a><br/>
+    <a href="https://opendata.finite-soft.com/ " style="margin-right: 15px;"><img src="{{asset('img/op-logo.png')}}"></a>
+    <a href="https://europa.eu/european-union/index_bg"><img src="{{asset('img/eu-logo.png')}}"></a>
+    <a href="https://opendata.finite-soft.com/" style="margin-left: 15px;"><img src="{{asset('img/opdu-logo.png')}}"></a><br/>
 </div>
 <hr style="
     margin-left:30%;

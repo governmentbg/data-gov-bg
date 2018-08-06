@@ -7,7 +7,12 @@
             <div class="col-md-12">
                 <div class="row">
                     <ul class="nav filter-type right-border js-nav">
-                        <li><a class="p-l-none" href="{{ url('/user') }}">{{ __('custom.notifications') }}</a></li>
+                        <li>
+                            <a
+                                class="{{ $view == 'newsfeed' ? 'active' : '' }}"
+                                href="{{ url('/user') }}"
+                            >{{ __('custom.notifications') }}</a>
+                        </li>
                         <li>
                             <!-- if there is resource with signal -->
                             @if (isset($hasReported))

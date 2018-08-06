@@ -260,4 +260,5 @@ return [
     'edit_group' => 'Edit group',
     'contact' => 'Contacts',
     'label' => 'Labels',
+    'reg_invite' => 'Registration invitation.',
 ];

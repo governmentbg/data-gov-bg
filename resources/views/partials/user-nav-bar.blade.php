@@ -24,13 +24,13 @@
                             <a
                                 class="{{ $view == 'group' ? 'active' : '' }}"
                                 href="{{ url('/user/userGroups') }}"
-                            >{{ utrans('custom.groups', 2) }}</a>
+                            >{{ trans_choice(__('custom.groups'), 2) }}</a>
                         </li>
                         <li>
                             <a
                                 class="{{ $view == 'organisation' ? 'active' : '' }}"
                                 href="{{ url('/user/organisations') }}"
-                            >{{ utrans('custom.organisations', 2) }}</a>
+                            >{{ trans_choice(__('custom.organisations'), 2) }}</a>
                         </li>
                         <li>
                             <a

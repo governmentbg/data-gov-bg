@@ -17,7 +17,7 @@
                     </div>
                 @endif
                 <div>
-                    <h2>Регистрация на организация</h2>
+                    <h2>{{ __('custom.org_registration') }}</h2>
                     <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
                 </div>
                 <form method="POST" action="{{ url('/user/organisations/register') }}" class="m-t-lg" enctype="multipart/form-data">
@@ -88,7 +88,7 @@
                         @foreach (\App\Organisation::getPublicTypes() as $id => $name)
                             <div class="col-lg-4 col-md-4 col-xs-12 m-b-md">
                                 <label class="radio-label">
-                                    {{ $name }}
+                                    {{ __($name) }}
                                     <div class="js-check">
                                         <input
                                             type="radio"

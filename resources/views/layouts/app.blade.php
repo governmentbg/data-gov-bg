@@ -70,15 +70,15 @@
                                 ><img src="{{ asset('img/user.svg') }}"></a>
                             </span>
                             <span class="login-link">>
-                                <a href="{{ url('/logout') }}"> {{ utrans('custom.logout') }}</a>
+                                <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
                             </span>
                         @else
                             <span class="login-link">>
-                                <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
+                                <a href="{{ url('/login') }}">{{ __('custom.login') }}</a>
                             </span>
                         @endif
                         <span class="search-input">
-                            <input type="text" placeholder="търсене..">
+                            <input type="text" placeholder="{{ __('custom.search') }}">
                         </span>
                         <span class="trans-link">
                             <a
@@ -97,29 +97,29 @@
                         <span><img class="js-close-navbar" src="{{ asset('img/close-btn.png') }}"></span>
                     </div>
                     <ul class="nav navbar-nav">
-                        <li class="{{ Request::is('/') ? 'active' : '' }}">
+                        <li class="index {{ Request::is('/') ? 'active' : '' }}">
                             <a href="{{ url('/') }}">{{ utrans('custom.home') }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'data' ? 'active' : '' }}">
+                        <li class="data {{ Request::segment(1) == 'data' ? 'active' : '' }}">
                             <a href="{{ url('/data') }}">{{ utrans('custom.data') }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'organisation'  ? 'active' : '' }}">
-                            <a href="{{ url('/organisation') }}">{{ utrans('custom.organisations',2) }}</a>
+                        <li class="organisation {{ Request::segment(1) == 'organisation'  ? 'active' : '' }}">
+                            <a href="{{ url('/organisation') }}">{{ utrans('custom.organisations', 2) }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'request' ? 'active' : '' }}">
+                        <li class="request {{ Request::segment(1) == 'request' ? 'active' : '' }}">
                             <a href="{{ url('/request') }}">{{ __('custom.data_requests') }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
+                        <li class="visualisation {{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
                             <a href="{{ url('/visualisation') }}">{{ utrans('custom.visualizations') }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'news' ? 'active' : '' }}">
+                        <li class="news {{ Request::segment(1) == 'news' ? 'active' : '' }}">
                             <a href="{{ url('/news') }}">{{ __('custom.news_events') }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'document' ? 'active' : '' }}">
+                        <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
                             <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
                         </li>
-                        <li class="{{ Request::segment(1) == 'contact' ? 'active' : '' }}">
-                            <a href="{{ url('/contact') }}">{{ utrans('custom.contacts',2) }}</a>
+                        <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : '' }}">
+                            <a href="{{ url('/contact') }}">{{ utrans('custom.contacts', 2) }}</a>
                         </li>
                         <li class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
                                 Request::segment(1),
@@ -135,7 +135,7 @@
                             @endif
                         </li>
                         <li class="hidden-lg hidden-md hidden-sm">
-                            <input type="text" placeholder="търсене..." class="form-control rounded-input input-long">
+                            <input type="text" placeholder="{{ __('custom.search') }}" class="form-control rounded-input input-long">
                         </li>
                         <li class="hidden-lg hidden-md hidden-sm icons">
                             <a
@@ -175,15 +175,8 @@
             </a>
         </div>
         <div class="copiright text-center col-xs-12">
-            <strong>Copyright &copy; 2018</strong> by
-            <a target="_blank" href="https://opendata.government.bg/">{{ __('custom.copyright_title') }}</a>
-        </div>
-    </footer>
-
-    <footer class="footer hidden-xs">
-        <div class="copiright">
-            <strong>Copyright &copy; 2018</strong> by
-            <a target="_blank" href="https://opendata.government.bg/">{{ __('custom.copyright') }}</a>
+            <strong>Copyright &copy; 2018 </strong> &nbsp;{{ __('custom.by') }}&nbsp;
+            <a target="_blank" href="https://opendata.government.bg/"> {{ __('custom.copyright_title') }}</a>
         </div>
     </footer>
     <!-- Scripts -->

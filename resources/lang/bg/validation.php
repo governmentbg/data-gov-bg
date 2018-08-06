@@ -117,7 +117,7 @@ return [
     */
 
     'attributes' => [
-        'username' => 'Потребителско Име',
+        'username' => 'Потребителско име',
         'password' => 'Парола',
         'firstname' => 'Име',
         'lastname' => 'Фамилия',

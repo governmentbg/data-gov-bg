@@ -18,7 +18,7 @@
             {{ csrf_field() }}
 
             <div class="form-group row">
-                <label for="username" class="col-xs-12 col-form-label">{{ utrans('custom.user_name') }}:</label>
+                <label for="username" class="col-xs-12 col-form-label">{{ __('custom.user_name') }}:</label>
                 <div class="col-xs-12">
                     <input type="text" class="input-border-r-12 form-control" name="username">
                     @if (!empty($error['username']))
@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="password" class="col-xs-12 col-form-label">{{ utrans('custom.password') }}:</label>
+                <label for="password" class="col-xs-12 col-form-label">{{ __('custom.password') }}:</label>
                 <div class="col-xs-12">
                     <input type="password" class="input-border-r-12 form-control" name="password">
                     @if (!empty($error['password']))
@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="remember_me" class="col-xs-6 col-form-label">{{ uctrans('custom.remember_me') }}</label>
+                <label for="remember_me" class="col-xs-6 col-form-label">{{ __('custom.remember_me') }}</label>
                 <div class="col-xs-6">
                     <div class="js-check pull-right">
                         <input type="checkbox" name="remember_me" value="1">
@@ -45,21 +45,18 @@
             </div>
             <div class="form-group row">
                 <div class="col-xs-12">
-                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ utrans('custom.login') }}</button>
+                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ __('custom.login') }}</button>
                 </div>
             </div>
         </form>
         <div class="form-group row">
             <div class="col-xs-12">
-                 <a
-                    href="{{ url('/password/forgotten') }}"
-                    class="col-xs-12 btn btn-primary"
-                >{{ utrans('custom.forgotten_password') }}</a>
+                <button type="button" class="col-xs-12 btn btn-primary">{{ __('custom.forgotten_password') }}</button>
             </div>
         </div>
         <div class="form-group row text-center">
             <div class="col-xs-12">
-                <a href="{{ url('/registration') }}"><h3>{{ utrans('custom.new_profile') }}</h3></a>
+                <a href="{{ url('/registration') }}"><h3>{{ __('custom.new_profile') }}</h3></a>
             </div>
         </div>
     </div>

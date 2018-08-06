@@ -90,7 +90,7 @@
                         @foreach ($orgTypes as $id => $name)
                             <div class="col-lg-4 col-md-4 col-xs-12 m-b-md">
                                 <label class="radio-label">
-                                    {{ $name }}
+                                    {{ __($name) }}
                                     <div class="js-check">
                                         <input type="radio" name="type" value="{{ $id }}">
                                     </div>

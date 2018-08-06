@@ -21,9 +21,9 @@
                         <div class="col-sm-12">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a href="{{ url('/users/list') }}">{{ utrans('custom.users', 2) }}</a></li>
-                                    <li><a class="active" href="#">{{ utrans('custom.users', 1) }}</a></li>
-                                    <li><a href="{{ url('/user/userGroups') }}">{{ utrans('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/users/list') }}">{{ trans_choice(__('custom.users'), 2) }}</a></li>
+                                    <li><a class="active" href="#">{{ trans_choice(__('custom.users'), 1) }}</a></li>
+                                    <li><a href="{{ url('/user/userGroups') }}">{{ __('custom.data') }}</a></li>
                                     <li><a href="{{ url('/user/organisations') }}">{{ __('custom.chronology') }}</a></li>
                                     <li><a href="{{ url('/user/invite') }}">{{ __('custom.members') }}</a></li>
                                 </ul>
@@ -66,7 +66,7 @@
                                     class="btn btn-primary pull-right"
                                     type="submit"
                                     name="follow"
-                                >{{ __('custom.follow') }}</button>
+                                >{{ utrans('custom.follow') }}</button>
                             </div>
                         @else
                             <div class="row">
@@ -74,13 +74,13 @@
                                     class="btn btn-primary pull-right"
                                     type="submit"
                                     name="unfollow"
-                                >{{ __('custom.stop_follow') }}</button>
+                                >{{ mb_ucfirst(__('custom.stop_follow')) }}</button>
                             </div>
                         @endif
                     </form>
                 @endif
                 <div class="row contacts">
-                    <p>{{ utrans('custom.contacts', 2) }}</p><br>
+                    <p>{{ mb_ucfirst(__('custom.to_contact')) }}</p><br>
                     <p>Иван Иванов<br>Дирекция Български пощи</p><br>
                     <p>тел. 02/ 940 2445</p><br>
                     <p class="email">Email: {{ $user->email }}</p>

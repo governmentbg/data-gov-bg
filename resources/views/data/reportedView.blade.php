@@ -12,9 +12,9 @@
                             <div class="col-md-8 col-sm-10 col-xs-10 p-l-none">
                                 <div>
                                     <ul class="nav filter-type right-border">
-                                        <li><a class="p-l-none" href="{{ url('/data') }}">{{ utrans('custom.data') }}</a></li>
-                                        <li><a href="{{ url('/data/relatedData') }}">{{ utrans('custom.linked_data') }}</a></li>
-                                        <li><a class="active" href="{{ url('/data/reportedList') }}">{{ utrans('custom.signal_data') }}</a></li>
+                                        <li><a class="p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                        <li><a href="{{ url('/data/relatedData') }}">{{ __('custom.linked_data') }}</a></li>
+                                        <li><a class="active" href="{{ url('/data/reportedList') }}">{{ __('custom.signal_data') }}</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -38,9 +38,9 @@
                         <div>
                             <div class="col-sm-7 col-xs-12 p-l-none">
                                 <ul class="p-l-none">
-                                    <li>{{ utrans('custom.managed_by') }}:</li>
+                                    <li>{{ __('custom.managed_by') }}:</li>
                                     <li>{{ utrans('custom.version') }}:</li>
-                                    <li>{{ utrans('custom.last_update') }}:</li>
+                                    <li>{{ __('custom.last_update') }}:</li>
                                     <li>{{ utrans('custom.created') }}:</li>
                                 </ul>
                             </div>
@@ -76,20 +76,20 @@
                            <div class="col-xs-12 pull-left m-t-md p-l-r-none">
                                 <div class="col-md-6 col-xs-12 text-left p-l-r-none m-b-md">
                                     <div class="badge-info m-r-md pull-left">
-                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ utrans('custom.information') }}</span>
+                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ __('custom.information') }}</span>
                                         <div class="info-box">
                                             <p>
                                             {{ utrans('custom.row') }}<br>
-                                            {{ utrans('custom.from') }} ... &nbsp; {{ utrans('custom.to') }} ...
+                                            {{ __('custom.from') }} ... &nbsp; {{ __('custom.to') }} ...
                                             </p>
                                             <p>
                                             {{ utrans('custom.column') }}<br>
-                                            {{ utrans('custom.from') }} ... &nbsp; {{ utrans('custom.to') }} ...
+                                            {{ __('custom.from') }} ... &nbsp; {{ __('custom.to') }} ...
                                             </p>
                                         </div>
                                     </div>
                                     <div class="badge-info m-r-md">
-                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ utrans('custom.show_as') }}</span>
+                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ __('custom.show_as') }}</span>
                                         <div class="info-box">
                                             <p>lorem ipsum</p>
                                             <p>lorem ipsum</p>
@@ -98,9 +98,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-xs-12 text-right p-l-r-none m-b-md group-three">
-                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ utrans('custom.download') }}</a></span>
-                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ utrans('custom.signal') }}</a></span>
-                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ utrans('custom.comment') }}</a></span>
+                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.download') }}</a></span>
+                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.signal') }}</a></span>
+                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.comment') }}</a></span>
                                 </div>
                             </div>
 
@@ -109,8 +109,8 @@
                                 <div class="comments p-lg">
                                     <div class="comment-box p-lg m-b-lg">
                                         <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>
-                                        <p class="comment-author p-b-xs">{{ utrans('custom.profile_name') }}</p>
-                                        <p class="p-b-xs">{{ utrans('custom.signal_content') }}</p>
+                                        <p class="comment-author p-b-xs">{{ __('custom.profile_name') }}</p>
+                                        <p class="p-b-xs">{{ __('custom.signal_content') }}</p>
                                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
                                     </div>
                                 </div>

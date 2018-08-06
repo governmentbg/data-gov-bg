@@ -77,7 +77,7 @@
                 @foreach (\App\Organisation::getPublicTypes() as $id => $name)
                     <div class="col-lg-4 col-md-4 col-xs-12 m-b-md">
                         <label class="radio-label">
-                            {{ $name }}
+                            {{ utrans($name) }}
                             <div class="js-check">
                                 <input
                                     type="radio"

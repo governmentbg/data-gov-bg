@@ -12949,7 +12949,8 @@ textarea {
   padding-right: 0px;
 }
 
-.user-add-btn {
+.user-add-btn,
+.m-l-10 {
   margin-left: 10px;
 }
 
@@ -13618,6 +13619,11 @@ textarea {
 .theme-user .info-bar li {
   list-style: none;
   padding: 10px 0;
+}
+
+.theme-user .info-bar-sm li {
+  list-style: none;
+  padding: 5px 0;
 }
 
 .theme-user .history .version-heading {

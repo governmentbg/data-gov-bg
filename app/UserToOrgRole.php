@@ -10,6 +10,10 @@ class UserToOrgRole extends Model
     protected $guarded = [];
     public $timestamps = false;
 
+    const ROLE_ADMIN = 1;
+    const ROLE_MODERATOR = 2;
+    const ROLE_MEMBER = 3;
+
     public function user()
     {
         return $this->belongsTo('App\User');

@@ -428,7 +428,7 @@ class ResourceController extends ApiController
             foreach ($query->get() as $result) {
                 $results[] = [
                     'uri'                   => $result->uri,
-                    'dataset_uri'           => $result->dataSet->uri,
+                    'dataset_uri'           => isset($result->dataSet->uri) ? $result->dataSet->uri : null,
                     'name'                  => $result->name,
                     'description'           => $result->descript,
                     'locale'                => $locale,

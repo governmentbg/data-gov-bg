@@ -43,7 +43,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/user/group/delete/{id}', 'UserController@deleteGroup');
         Route::match(['get', 'post'], '/user/groupDatasets', 'UserController@groupDatasets');
 
+
         Route::match(['get', 'post'], '/user/organisations/datasets', 'UserController@orgDatasets');
+        Route::get('/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
+        Route::get('/user/organisations/datasetView', 'UserController@orgDatasetView')->name('orgDatasetView');
+
+
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete', 'UserController@deleteOrg');
         Route::get('/user/organisations/search', 'UserController@searchOrg');
@@ -51,6 +56,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/user/organisations/edit', 'UserController@editOrg');
         Route::post('/user/organisations/register', 'UserController@registerOrg');
         Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+        Route::get('/user/organisations/datasets/search', 'UserController@searchDataset');
+
     });
 });
 
@@ -126,9 +133,7 @@ Route::get('/organisation/chronology', function () {
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
 
-/*Route::get('/user/resourceView', function () {
-    return view('user/resourceView', ['class' => 'user']);
-});*/
+Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
 Route::get('/user/groups', function () {
     return view('user/groups', ['class' => 'user']);

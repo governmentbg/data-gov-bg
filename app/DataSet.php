@@ -58,7 +58,7 @@ class DataSet extends Model implements TranslatableInterface
 
     public function organisation()
     {
-        return $this->belongsTo('App\Organisation');
+        return $this->belongsTo('App\Organisation', 'org_id');
     }
 
     public function dataSetGroup()
@@ -73,7 +73,7 @@ class DataSet extends Model implements TranslatableInterface
 
     public function resource()
     {
-        return $this->hasMany('App\Resource');
+        return $this->hasMany('App\Resource', 'data_set_id');
     }
 
     public function userFollow()

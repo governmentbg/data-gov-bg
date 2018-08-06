@@ -15,7 +15,7 @@
                     <input
                         type="text"
                         class="m-t-md"
-                        placeholder="{{ __('custom.search') }}.."
+                        placeholder="{{ __('custom.search') }}"
                         value="{{ isset($search) ? $search : '' }}"
                         name="q"
                     >
@@ -31,49 +31,57 @@
         </div>
         <div class="col-xs-12 m-t-md list-orgs user-orgs">
             <div class="row">
-                @foreach ($organisations as $organisation)
-                    <div class="col-md-4 col-sm-12 org-col">
-                        <div class="col-xs-12">
-                            <a href="{{ url('/organisation/profile') }}">
-                                <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
-                            </a>
-                        </div>
-                        <div class="col-xs-12">
-                            <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
-                            <div class="org-desc">{{ $organisation->description }}</div>
-                            <p class="text-right show-more">
-                                <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                            </p>
-                        </div>
-                        <div class="col-xs-12 ch-del-btns">
-                            <div class="row">
-                                <form method="POST" action="{{ url('/user/organisations/edit') }}">
-                                    {{ csrf_field() }}
-                                    <div class="col-xs-6"><button type="submit" name="edit">{{ __('custom.edit') }}</button></div>
-                                    <input type="hidden" name="org_id" value="{{ $organisation->id }}">
-                                    <input type="hidden" name="view" value="1">
-                                </form>
-                                <form method="POST" action="{{ url('/user/organisations/delete') }}">
-                                    {{ csrf_field() }}
-                                    <div class="col-xs-6 text-right">
-                                        <button
-                                            type="submit"
-                                            name="delete"
-                                            onclick="return confirm('{{ __('custom.delete_organisation') }}?');"
-                                        >{{ __('custom.remove') }}</button>
-                                    </div>
-                                    <input class="user-org-del" type="hidden" name="org_id" value="{{ $organisation->id }}">
-                                </form>
+                @if (count($organisations))
+                    @foreach ($organisations as $organisation)
+                        <div class="col-md-4 col-sm-12 org-col">
+                            <div class="col-xs-12">
+                                <a href="{{ url('/organisation/profile') }}">
+                                    <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
+                                </a>
+                            </div>
+                            <div class="col-xs-12">
+                                <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
+                                <div class="org-desc">{{ $organisation->description }}</div>
+                                <p class="text-right show-more">
+                                    <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                                </p>
+                            </div>
+                            <div class="col-xs-12 ch-del-btns">
+                                <div class="row">
+                                    <form method="POST" action="{{ url('/user/organisations/edit') }}">
+                                        {{ csrf_field() }}
+                                        <div class="col-xs-6"><button type="submit" name="edit">{{ __('custom.edit') }}</button></div>
+                                        <input type="hidden" name="org_id" value="{{ $organisation->id }}">
+                                        <input type="hidden" name="view" value="1">
+                                    </form>
+                                    <form method="POST" action="{{ url('/user/organisations/delete') }}">
+                                        {{ csrf_field() }}
+                                        <div class="col-xs-6 text-right">
+                                            <button
+                                                type="submit"
+                                                name="delete"
+                                                onclick="return confirm('{{ __('custom.delete_organisation') }}?');"
+                                            >{{ __('custom.remove') }}</button>
+                                        </div>
+                                        <input class="user-org-del" type="hidden" name="org_id" value="{{ $organisation->id }}">
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                    @endforeach
+                @else
+                    <div class="col-sm-9 m-t-xl text-center">
+                        {{ __('custom.no_info') }}
                     </div>
-                @endforeach
+                @endif
             </div>
-            <div class="row">
-                <div class="col-xs-12 text-center">
-                    {{ $pagination->render() }}
+            @if (isset($pagination))
+                <div class="row">
+                    <div class="col-xs-12 text-center">
+                        {{ $pagination->render() }}
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 @endsection

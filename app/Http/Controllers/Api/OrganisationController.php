@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Locale;
 use App\Organisation;
 use App\CustomSetting;
+use App\UserToOrgRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -113,7 +114,7 @@ class OrganisationController extends ApiController
                     $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($empty, $data['activity_info']) : null;
                     $organisation->contacts = !empty($data['contacts']) ? $this->trans($empty, $data['contacts']) : null;
                     $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
-                    $organisation->active = isset($data['active']) ? $data['active'] : 1;
+                    $organisation->active = isset($data['active']) ? $data['active'] : 0;
                     $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
                         ? $data['approved']
                         : 0;
@@ -130,6 +131,20 @@ class OrganisationController extends ApiController
                     }
 
                     $organisation->save();
+
+                    $userToOrgRole = new UserToOrgRole;
+                    $userToOrgRole->org_id = $organisation->id;
+                    $userToOrgRole->user_id = \Auth::user()->id;
+                    $userToOrgRole->role_id = UserToOrgRole::ROLE_ADMIN;
+
+                    try {
+                        $userToOrgRole->save();
+                    } catch (QueryException $ex) {
+                        Log::error($ex->getMessage());
+                        DB::rollback();
+
+                        return $this->errorResponse('Add Organisation Failure.');
+                    }
 
                     if (!empty($customFields)) {
                         if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
@@ -619,6 +634,7 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($request->all(), [
             'criteria.locale'       => 'nullable|string|max:5',
             'criteria.keywords'     => 'required|string',
+            'criteria.user_id'      => 'nullable|string',
             'criteria.order.type'   => 'nullable|string',
             'criteria.user_id'      => 'nullable|integer|exists:users,id',
             'criteria.order.field'  => 'nullable|string',
@@ -632,6 +648,12 @@ class OrganisationController extends ApiController
 
                 $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
                 $query = Organisation::whereIn('id', $ids);
+
+                if (!empty($criteria['user_id'])) {
+                    $query->whereHas('userToOrgRole', function($q) use ($criteria) {
+                        $q->where('user_id', $criteria['user_id']);
+                    });
+                }
 
                 $count = $query->count();
                 $query->forPage(
@@ -661,7 +683,7 @@ class OrganisationController extends ApiController
                         'locale'          => $org->locale,
                         'uri'             => $org->uri,
                         'type'            => $org->type,
-                        'logo'            => $org->logo,
+                        'logo'            => $this->getImageData($org->logo_data, $org->logo_mime_type),
                         'activity_info'   => $org->activity_info,
                         'contacts'        => $org->contacts,
                         'parent_org_id'   => $org->parent_org_id,

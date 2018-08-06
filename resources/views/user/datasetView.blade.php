@@ -57,14 +57,14 @@
                                 <div class="comment-box p-lg m-b-lg">
                                     <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>
                                     <p class="comment-author p-b-xs">{{ __('custom.profile_name') }}</p>
-                                    <p class="p-b-xs">{{ __('custom.signal_contents') }}</p>
+                                    <p class="p-b-xs">{{ __('custom.signal_content') }}</p>
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-12 m-t-lg p-l-none">
                             <div class="pull-left">
-                                <a type="button" class="badge badge-pill m-b-sm" href="{{ url('/user/edit') }}">{{ utrans('custom.edit') }}</a>
+                                <a type="button" class="badge badge-pill m-b-sm" href="{{ url('/user/edit') }}">{{ __('custom.edit') }}</a>
                                 <form method="POST" action="{{ url('/user/deleteDataset') }}">
                                     {{ csrf_field() }}
                                     <div class="col-xs-6 text-right">
@@ -73,7 +73,7 @@
                                             type="submit"
                                             name="delete"
                                             onclick="return confirm('Изтриване на данните?');"
-                                        >{{ utrans('custom.remove') }}</button>
+                                        >{{ __('custom.remove') }}</button>
                                     </div>
                                     <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                                 </form>

@@ -243,7 +243,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['author_email']) ? 'has-error' : '' }}">
-                <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.author_email') }}:</label>
+                <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.author_email') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="author-email"
@@ -273,7 +273,7 @@
                 </div>
             </div>
             <div class="form-group row {{ isset($errors['support_email']) ? 'has-error' : '' }}">
-                <label for="support-email" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.contact_email') }}:</label>
+                <label for="support-email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.contact_email') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="support-email"
@@ -298,8 +298,8 @@
             @endforeach
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
-                    <button type="button" class="btn btn-primary">{{ utrans('custom.preview') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ utrans('custom.save') }}</button>
+                    <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('custom.save') }}</button>
                 </div>
             </div>
         </form>

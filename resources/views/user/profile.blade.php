@@ -74,13 +74,13 @@
                                     class="btn btn-primary pull-right"
                                     type="submit"
                                     name="unfollow"
-                                >{{ mb_ucfirst(__('custom.stop_follow')) }}</button>
+                                >{{ uctrans('custom.stop_follow') }}</button>
                             </div>
                         @endif
                     </form>
                 @endif
                 <div class="row contacts">
-                    <p>{{ mb_ucfirst(__('custom.to_contact')) }}</p><br>
+                    <p>{{ uctrans('custom.to_contact') }}</p><br>
                     <p>Иван Иванов<br>Дирекция Български пощи</p><br>
                     <p>тел. 02/ 940 2445</p><br>
                     <p class="email">Email: {{ $user->email }}</p>

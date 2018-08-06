@@ -126,11 +126,11 @@
                                 <button
                                     class="btn btn-primary m-b-sm add-org"
                                     name="add_org"
-                                >{{ mb_ucfirst(__('custom.add_organisation')) }}</button>
+                                >{{ uctrans('custom.add_organisation') }}</button>
                                 <button
                                     type="submit"
                                     class="m-l-md btn btn-primary m-b-sm"
-                                >{{ mb_ucfirst(__('custom.save')) }}</button>
+                                >{{ uctrans('custom.save') }}</button>
                             </div>
                         </div>
                     </form>

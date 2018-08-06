@@ -65,7 +65,7 @@
                         </div>
                     </div>
                 @endif
-                <button type="submit" name="send" class="m-l-md btn btn-primary m-b-sm pull-right">{{ mb_ucfirst(__('custom.invite')) }}</button>
+                <button type="submit" name="send" class="m-l-md btn btn-primary m-b-sm pull-right">{{ uctrans('custom.invite') }}</button>
                 @if (Auth::user()->is_admin)
                     <button type="submit" name="generate" class="m-l-md btn btn-primary m-b-sm pull-right">{{ __('custom.generate') }}</button>
                 @endif

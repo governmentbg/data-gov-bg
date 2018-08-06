@@ -258,5 +258,6 @@ return [
     'by' => 'by',
     'to_contact' => 'contacts',
     'edit_group' => 'Edit group',
-
+    'contact' => 'Contacts',
+    'label' => 'Labels',
 ];

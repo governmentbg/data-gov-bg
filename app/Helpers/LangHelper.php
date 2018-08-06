@@ -25,10 +25,10 @@ function utrans($value, $count = 1, $params = [], $lang = null)
  */
 function uptrans($value, $count = 1, $params = [], $lang = null)
 {
-    return strtoupper(trans_choice($value, $count, $params, $lang));
+    return mb_strtoupper(trans_choice($value, $count, $params, $lang));
 }
 
- function mb_ucfirst($string)
+function mb_ucfirst($string)
 {
     return mb_strtoupper(mb_substr($string, 0, 1)) . mb_substr($string, 1);
 }
@@ -44,7 +44,7 @@ function uptrans($value, $count = 1, $params = [], $lang = null)
  */
 function uctrans($value, $count = 1, $params = [], $lang = null)
 {
-    return ucfirst(trans_choice($value, $count, $params, $lang));
+    return mb_ucfirst(trans_choice($value, $count, $params, $lang));
 }
 
 /**
@@ -58,7 +58,7 @@ function uctrans($value, $count = 1, $params = [], $lang = null)
  */
 function ultrans($value, $count = 1, $params = [], $lang = null)
 {
-    return strtolower(trans_choice($value, $count, $params, $lang));
+    return mb_strtolower(trans_choice($value, $count, $params, $lang));
 }
 
 /**

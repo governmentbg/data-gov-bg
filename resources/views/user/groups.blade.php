@@ -4,12 +4,6 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'group'])
-    <div class="row">
-        <div class="col-xs-12">
-            <input class="rounded-input pull-right" type="text">
-            <span class="badge badge-pill m-t-lg new-data"><a  href="{{ url('/user/registerGroup') }}">{{ __('custom.create_group') }}</a></span>
-        </div>
-    </div>
     <div class="col-xs-12 m-t-md">
         <div class="row">
             <div class="col-xs-12 p-l-none">

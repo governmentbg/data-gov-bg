@@ -29,7 +29,7 @@
                 </span>
             </div>
         </div>
-        <div class="col-xs-12 list-orgs user-orgs">
+        <div class="col-xs-12 m-t-md list-orgs user-orgs">
             <div class="row">
                 @foreach ($organisations as $organisation)
                     <div class="col-md-4 col-sm-12 org-col">

@@ -170,9 +170,9 @@ class TermsOfUseController extends ApiController
             $terms = TermsOfUse::all();
         }
 
-        $response = $this->prepareTerms($terms);
+        $response['terms_of_use'] = $this->prepareTerms($terms);
 
-        return $this->successResponse($response);
+        return $this->successResponse($response, true);
     }
 
     /**
@@ -212,8 +212,9 @@ class TermsOfUseController extends ApiController
     private function prepareTerms($terms)
     {
         $results = [];
+
         foreach ($terms as $term) {
-            $results[] = [
+            $results['term_of_use'] = [
                     'id'            => $term->id,
                     'name'          => $term->name,
                     'description'   => $term->descript,

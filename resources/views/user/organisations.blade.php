@@ -2,20 +2,7 @@
 
 @section('content')
     <div class="container">
-        <div class="row">
-            <div class="col-xs-12 m-t-md">
-                @if (isset(session('result')->error))
-                    <div class="alert alert-danger">
-                        {{ session('result')->error->message }}
-                    </div>
-                @endif
-                @if (!empty(session('success')))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-            </div>
-        </div>
+        @include('partials.alerts-bar')
         @include('partials.user-nav-bar', ['view' => 'organisation'])
         <div class="row">
             <div class="col-sm-6 col-xs-12 text-left">

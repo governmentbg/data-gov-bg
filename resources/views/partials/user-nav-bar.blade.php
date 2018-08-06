@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row m-t-md">
     <div class="col-sm-3 col-xs-12 sidenav">
         <span class="my-profile m-b-lg m-l-sm">{{ __('custom.my_profile') }}</span>
     </div>

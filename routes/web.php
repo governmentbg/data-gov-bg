@@ -22,7 +22,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/user/organisations/register', 'UserController@registerOrg');
     Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
-    Route::post('/user/organisations/edit', 'UserController@editOrg');
 
     Route::middleware('check.resources')->group(function () {
         Route::get('/user/datasets', 'UserController@datasets');
@@ -44,9 +43,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/user/organisations/delete', 'UserController@deleteOrg');
         Route::get('/user/organisations/search', 'UserController@searchOrg');
         Route::get('/user/organisations/view', 'UserController@viewOrg')->name('userOrgView');
+        Route::post('/user/organisations/edit', 'UserController@editOrg');
     });
 });
 
+Route::post('/user/sendTermsOfUseReq', 'UserController@sendTermsOfUseReq');
 Route::get('/', function () {
     return view('home/index', ['class' => 'index']);
 });

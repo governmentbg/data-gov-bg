@@ -27,7 +27,6 @@ class CheckReportedResources
         $reportedResFlag = $api->hasReportedResource($checkReq)->getData();
 
         if ($reportedResFlag->success) {
-//            $request->merge(['hasReported' => $reportedResFlag->flag]);
             View::share('hasReported', $reportedResFlag->flag);
         }
 

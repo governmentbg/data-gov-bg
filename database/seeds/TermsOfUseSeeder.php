@@ -21,8 +21,8 @@ class TermsOfUseSeeder extends Seeder
         foreach (range(1, self::TERMS_RECORDS) as $i) {
             $locale = $this->faker->randomElement($locales)['locale'];
             TermsOfUse::create([
-                'name'          => [$locale => $this->faker->randomDigit()],
-                'descript'      => [$locale => $this->faker->randomDigit()],
+                'name'          => [$locale => $this->faker->word()],
+                'descript'      => [$locale => $this->faker->text()],
                 'active'        => $this->faker->boolean(),
                 'is_default'    => $this->faker->boolean(),
                 'ordering'      => $this->faker->randomDigit(),

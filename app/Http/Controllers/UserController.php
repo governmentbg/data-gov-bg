@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\DataSetController as ApiDataSets;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
+use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
@@ -796,7 +797,7 @@ class UserController extends Controller {
         $result = $api->listTermsOfUse($request)->getData();
         $termsOfUse = [];
 
-        foreach ($result->data as $row) {
+        foreach ($result->terms_of_use as $row) {
             $termsOfUse[$row->id] = $row->name;
         }
 
@@ -1743,4 +1744,17 @@ class UserController extends Controller {
         )->with('errors', $errors);
     }
 
+    public function sendTermsOfUseReq(Request $request)
+    {
+        $params = [
+            'api_key'   => Auth::user()->api_key,
+            'data'      => $request->all(),
+        ];
+
+        $sendRequest = Request::create('api/sendTermsOfUseRequest', 'POST', $params);
+        $apiTermsOfUseReq = new ApiTermsOfUseRequest($sendRequest);
+        $result = $apiTermsOfUseReq->sendTermsOfUseRequest($sendRequest)->getData();
+
+        return json_encode($result);
+    }
 }

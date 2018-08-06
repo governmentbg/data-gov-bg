@@ -66,7 +66,7 @@ class UserController extends Controller {
                 'required' => false,
             ],
             [
-                'label'    => 'custom.contacts',
+                'label'    => 'custom.contact',
                 'name'     => 'contacts',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
@@ -101,7 +101,7 @@ class UserController extends Controller {
                 'required' => false,
             ],
             [
-                'label'    => 'custom.labels',
+                'label'    => 'custom.label',
                 'name'     => 'tags',
                 'type'     => 'text',
                 'view'     => 'translation_tags',

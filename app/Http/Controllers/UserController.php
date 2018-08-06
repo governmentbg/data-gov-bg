@@ -217,12 +217,12 @@ class UserController extends Controller {
         }
 
         return view(
-            'user/datasets',
+            'user/orgDatasets',
             [
                 'class'         => 'user',
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
-                'activeMenu'       => 'organisation',
+                'activeMenu'    => 'organisation'
             ]
         );
     }
@@ -242,6 +242,46 @@ class UserController extends Controller {
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
         return view('user/datasetView', ['class' => 'user', 'dataset' => $dataset->data, 'resources' => $resources->resources, 'activeMenu' => 'dataset']);
+    }
+
+    public function orgDatasetView(Request $request)
+    {
+        $params['dataset_uri'] = $request->uri;
+
+        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSets($detailsReq);
+        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        unset($params['dataset_uri']);
+        $params['criteria']['dataset_uri'] = $request->uri;
+
+        $resourcesReq = Request::create('/api/listResources', 'POST', $params);
+        $apiResources = new ApiResource($resourcesReq);
+        $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        if (isset($dataset->data->name)) {
+
+            if (
+                $dataset->data->updated_by == $dataset->data->created_by
+                && !is_null($dataset->data->created_by)
+            ) {
+                $username = User::find($dataset->data->created_by)->value('username');
+                $dataset->data->updated_by = $username;
+                $dataset->data->created_by = $username;
+            } else {
+                $dataset->data->updated_by = is_null($dataset->data->updated_by) ? null : User::find($dataset->data->updated_by)->value('username');
+                $dataset->data->created_by = is_null($dataset->data->created_by) ? null : User::find($dataset->data->created_by)->value('username');
+            }
+        }
+
+        return view(
+            'user/orgDatasetView',
+            [
+                'class'      => 'user',
+                'dataset'    => $dataset->data,
+                'resources'  => $resources->resources,
+                'activeMenu' => 'organisation'
+            ]
+        );
     }
 
     public function datasetDelete($uri)
@@ -557,6 +597,33 @@ class UserController extends Controller {
     {
     }
 
+    public function orgResourceView(Request $request)
+    {
+        $uri = $request->uri;
+
+        $resourcesReq = Request::create('/api/listResources', 'POST', ['criteria' => ['resource_uri' => $uri]]);
+        $apiResources = new ApiResource($resourcesReq);
+        $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resource = !empty($resources->resources) ? $resources->resources[0] : null;
+
+        if (!is_null($resource) && isset($resource->name)) {
+
+            if (
+                $resource->updated_by == $resource->created_by
+                && !is_null($resource->created_by)
+            ) {
+                $username = User::find($resource->created_by)->value('username');
+                $resource->updated_by = $username;
+                $resource->created_by = $username;
+            } else {
+                $resource->updated_by = is_null($resource->updated_by) ? null : User::find($resource->updated_by)->value('username');
+                $resource->created_by = is_null($resource->created_by) ? null : User::find($resource->created_by)->value('username');
+            }
+        }
+
+        return view('user/orgResourceView', ['class' => 'user', 'resource' => $resource, 'activeMenu' => 'organisation']);
+    }
+
     public function organisations(Request $request)
     {
         $perPage = 6;
@@ -609,7 +676,10 @@ class UserController extends Controller {
         $perPage = 6;
         $params = [
             'api_key'          => \Auth::user()->api_key,
-            'criteria'         => ['keywords' => $search],
+            'criteria'         => [
+                'keywords' => $search,
+                'user_id'  => \Auth::user()->id
+            ],
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
@@ -633,6 +703,48 @@ class UserController extends Controller {
                 'organisations' => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'search'        => $search
+            ]
+        );
+    }
+
+    public function searchDataset(Request $request)
+    {
+        $search = $request->q;
+
+        if (empty(trim($search))) {
+            return redirect('/user/organisations/datasets');
+        }
+
+        $perPage = 6;
+        $params = [
+            'criteria' => [
+                'keywords' => $search,
+                'user_id'  => \Auth::user()->id
+            ],
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $request = Request::create('/api/searchDataset', 'POST', $params);
+        $api = new ApiDatasets($request);
+        $result = $api->searchDataset($request)->getData();
+        $datasets = !empty($result->datasets) ? $result->datasets : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $getParams = [
+            'q' => $search
+        ];
+
+        $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
+
+        return view(
+            'user/datasets',
+            [
+                'class'      => 'user',
+                'datasets'   => $paginationData['items'],
+                'pagination' => $paginationData['paginate'],
+                'search'     => $search,
+                'activeMenu' => 'organisation'
             ]
         );
     }
@@ -663,9 +775,12 @@ class UserController extends Controller {
         $result = $api->addOrganisation($request)->getData();
 
         if ($result->success) {
-            session()->flash('success', 'Промените бяха запазени успешно!');
+            session()->flash('alert-success', 'Промените бяха запазени успешно!');
         } else {
-            session()->flash('result', $result);
+            session()->flash(
+                'alert-danger',
+                isset($result->error) ? $result->error->message : __('Add organisation failure!')
+            );
         }
 
         return $result->success
@@ -779,6 +894,15 @@ class UserController extends Controller {
         $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
         $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
+        if ($result->success) {
+            session()->flash('alert-success', 'Промените бяха запазени успешно!');
+        } else {
+            session()->flash(
+                'alert-danger',
+                isset($result->error) ? $result->error->message : __('Add organisation failure!')
+            );
+        }
+
         return !$result->success
             ? view(
                 'user/orgEdit',
@@ -786,9 +910,10 @@ class UserController extends Controller {
                     'class'     => 'user',
                     'model'     => $orgModel,
                     'withModel' => $customModel,
-                    'fields'    => self::getTransFields()
+                    'fields'    => self::getTransFields(),
+                    'result'    => $result
                 ]
-            )->with('result', $result)
+            )
             : view(
                 'user/orgEdit',
                 [
@@ -797,7 +922,7 @@ class UserController extends Controller {
                     'withModel' => $customModel,
                     'fields'    => self::getTransFields()
                 ]
-            )->with('success', 'Промените бяха запазени успешно!');
+            );
     }
 
     private function prepareMainCategories()

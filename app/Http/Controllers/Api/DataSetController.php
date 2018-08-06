@@ -5,6 +5,7 @@ Use Uuid;
 use App\DataSet;
 use App\Category;
 use App\DataSetGroup;
+use App\UserToOrgRole;
 use \App\Organisation;
 use App\CustomSetting;
 use Illuminate\Http\Request;
@@ -491,6 +492,7 @@ class DataSetController extends ApiController
             'criteria'              => 'required|array',
             'criteria.locale'       => 'nullable|string|max:5',
             'criteria.keywords'     => 'required|string',
+            'criteria.user_id'      => 'nullable|integer',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
@@ -507,8 +509,20 @@ class DataSetController extends ApiController
             $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
 
             try {
-                $ids = DataSet::search($search)->get()->pluck('id');
-                $query = DataSet::whereIn('id', $ids);
+
+                if (!empty($criteria['user_id'])) {
+                    $orgIds = UserToOrgRole::where('user_id', $criteria['user_id'])->get()->pluck('org_id');
+                    $ids = DataSet::search($search)->get()->pluck('id');
+                    $query = DataSet::whereIn('id', $ids)
+                        ->whereIn('org_id', $orgIds);
+                } else {
+                    $ids = DataSet::search($search)->get()->pluck('id');
+                    $query = DataSet::whereIn('id', $ids);
+
+                    $query->orWhereHas('resource', function($q) use ($ids) {
+                        $q->whereIn('data_set_id', $ids);
+                    });
+                }
 
                 $count = $query->count();
 
@@ -523,6 +537,8 @@ class DataSetController extends ApiController
                     $result['name'] = $set->name;
                     $result['sla'] = $set->sla;
                     $result['descript'] = $set->descript;
+                    $result['uri'] = $set->uri;
+                    $result['created_at'] = (string) $set->created_at;
                     $result['followers_count'] = $set->userFollow()->count();
                     $result['reported'] = 0;
 

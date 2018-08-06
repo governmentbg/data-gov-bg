@@ -17,8 +17,8 @@
                                         <ul class="nav filter-type right-border">
                                             <li><a class="p-l-none" href="{{ url('/user') }}">{{ __('custom.notifications') }}</a></li>
                                             <li><a class="active" href="{{ url('/user/datasets') }}">{{ __('custom.my_data') }}</a></li>
-                                            <li><a href="{{ url('/user/userGroups') }}">{{ utrans('custom.groups', 2) }}</a></li>
-                                            <li><a href="{{ url('/user/organisations') }}">{{ utrans('custom.organisations', 2) }}</a></li>
+                                            <li><a href="{{ url('/user/userGroups') }}">{{ trans_choice(__('custom.groups'), 2)}}</a></li>
+                                            <li><a href="{{ url('/user/organisations') }}">{{ trans_choice(__('custom.organisations'), 2) }}</a></li>
                                             <li><a href="{{ url('/user/settings') }}">{{ __('custom.settings') }}</a></li>
                                             <li><a href="{{ url('/user/invite') }}">{{ __('custom.invite') }}</a></li>
                                         </ul>
@@ -121,7 +121,7 @@
                             <label for="visibility" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.visibility') }}:</label>
                             <div class="col-sm-9">
                                 <select class="input-border-r-12 form-control" id="visibility">
-                                    <option value="">{{ __('custom.select_visibility') }}т</option>
+                                    <option value="">{{ __('custom.select_visibility') }}</option>
                                     <option value="idVisibility">видим за всички</option>
                                     <option value="idVisibility">видим за всички</option>
                                     <option value="idVisibility">видим за всички</option>

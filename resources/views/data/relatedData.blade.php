@@ -10,9 +10,9 @@
                         <div class="col-xs-12 p-l-r-none">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="p-l-none" href="{{ url('/data') }}">{{ utrans('custom.data') }}</a></li>
-                                    <li><a class="active" href="{{ url('/data/relatedData') }}">{{ utrans('custom.linked_data') }}</a></li>
-                                    <li><a href="{{ url('/data/reportedList') }}">{{ utrans('custom.signal_data') }}</a></li>
+                                    <li><a class="p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a class="active" href="{{ url('/data/relatedData') }}">{{ __('custom.linked_data') }}</a></li>
+                                    <li><a href="{{ url('/data/reportedList') }}">{{ __('custom.signal_data') }}</a></li>
                                 </ul>
                             </div>
                         </div>

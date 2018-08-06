@@ -24,10 +24,10 @@
                             <div class="col-sm-12">
                                 <div>
                                     <ul class="nav filter-type right-border">
-                                        <li><a class="active" href="{{ url('/users/list') }}">{{ utrans('custom.users', 2) }}</a></li>
-                                        <li><a href="{{ url('/user/profile/'. Auth::user()->id) }}">{{ utrans('custom.users', 1) }}</a></li>
-                                        <li><a href="{{ url('/user/userGroups') }}">{{ utrans('custom.groups', 2) }}</a></li>
-                                        <li><a href="{{ url('/user/organisations') }}">{{ utrans('custom.organisations', 2) }}</a></li>
+                                        <li><a class="active" href="{{ url('/users/list') }}">{{trans_choice(__('custom.users'), 2) }}</a></li>
+                                        <li><a href="{{ url('/user/profile/'. Auth::user()->id) }}">{{ trans_choice(__('custom.users'), 1) }}</a></li>
+                                        <li><a href="{{ url('/user/userGroups') }}">{{trans_choice(__('custom.groups'), 2) }}</a></li>
+                                        <li><a href="{{ url('/user/organisations') }}">{{trans_choice(__('custom.organisations'), 2) }}</a></li>
                                         <li><a href="{{ url('/user/invite') }}">{{ __('custom.invite') }}</a></li>
                                     </ul>
                                 </div>

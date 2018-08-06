@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                            <label class="col-lg-4 col-md-6 col-xs-12 col-form-label">{{ !$key ? utrans($field['label'][1]) : '' }}</label>
+                            <label class="col-lg-4 col-md-6 col-xs-12 col-form-label">{{ !$key ? utrans($field['label'][1], 2) : '' }}</label>
                             <div class="col-lg-8 col-md-6 col-sm-6 col-sm-12 custom-trans-filed">
                                 <div class="input-group">
                                     @if (isset($model) && empty(old($field['name'])))

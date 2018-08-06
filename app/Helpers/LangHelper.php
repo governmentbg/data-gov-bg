@@ -28,6 +28,11 @@ function uptrans($value, $count = 1, $params = [], $lang = null)
     return strtoupper(trans_choice($value, $count, $params, $lang));
 }
 
+ function mb_ucfirst($string)
+{
+    return mb_strtoupper(mb_substr($string, 0, 1)) . mb_substr($string, 1);
+}
+
 /**
  * Translates the string and converts its first letter to capital
  *

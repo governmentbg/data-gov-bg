@@ -5,12 +5,12 @@
                     <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.topics') }}</a>
                     <ul class="sidebar-submenu">
                         <li><a class="active" href="#">{{ utrans('custom.healthcare') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.innovation') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.education') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.public_sector') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.municipalities') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.agriculture') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.justice') }}</a></li>
+                        <li><a href="#">{{ __('custom.innovation') }}</a></li>
+                        <li><a href="#">{{ __('custom.education') }}</a></li>
+                        <li><a href="#">{{ __('custom.public_sector') }}</a></li>
+                        <li><a href="#">{{ __('custom.municipalities') }}</a></li>
+                        <li><a href="#">{{ __('custom.agriculture') }}</a></li>
+                        <li><a href="#">{{ __('custom.justice') }}</a></li>
                         <li><a href="#">{{ __('custom.economy_business') }}</a></li>
                     </ul>
                 </li>
@@ -56,13 +56,13 @@
                         <span><i class="fa fa-angle-left"></i></span>
                     </button>
                     <ul class="sidebar-submenu">
-                    <li><a class="active" href="#">{{ utrans('custom.healthcare') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.innovation') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.education') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.public_sector') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.municipalities') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.agriculture') }}</a></li>
-                        <li><a href="#">{{ utrans('custom.justice') }}</a></li>
+                    <li><a class="active" href="#">{{ __('custom.healthcare') }}</a></li>
+                        <li><a href="#">{{ __('custom.innovation') }}</a></li>
+                        <li><a href="#">{{ __('custom.education') }}</a></li>
+                        <li><a href="#">{{ __('custom.public_sector') }}</a></li>
+                        <li><a href="#">{{ __('custom.municipalities') }}</a></li>
+                        <li><a href="#">{{ __('custom.agriculture') }}</a></li>
+                        <li><a href="#">{{ __('custom.justice') }}</a></li>
                         <li><a href="#">{{ __('custom.economy_business') }}</a></li>
                     </ul>
                 </li>

@@ -10,33 +10,66 @@
                     <h2>{{ __('custom.license_add_req') }}</h2>
                 </div>
                 <div class="modal-body">
-                    <form class="m-t-lg">
-                        <div class="form-group row">
+                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>Вашата заявка за лиценз беше приета.</p>
+                    </div>
+                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>Имаше проблем с вашата заявка за лиценз.</p>
+                    </div>
+                    <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
+                        {{ csrf_field() }}
+                        <div class="form-group row required">
                             <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="fname" placeholder="Иван">
+                                <input
+                                    id="fname"
+                                    class="input-border-r-12 form-control"
+                                    name="firstname"
+                                    type="text"
+                                >
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row required">
                             <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.family_name') }}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="lname" placeholder="Иванов">
+                                <input
+                                    id="lname"
+                                    class="input-border-r-12 form-control"
+                                    name="lastname"
+                                    type="text"
+                                >
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row required">
                             <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.e_mail') }}:</label>
                             <div class="col-sm-9">
-                                <input type="email" class="input-border-r-12 form-control" id="email" placeholder="ivanov@abv.bg">
+                                <input
+                                    id="email"
+                                    class="input-border-r-12 form-control"
+                                    name="email"
+                                    type="email"
+                                >
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row required">
                             <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.description') }}:</label>
                             <div class="col-sm-9">
-                                <textarea class="input-border-r-12 form-control" id="description" placeholder="Описание"></textarea>
+                                <textarea
+                                    id="description"
+                                    class="input-border-r-12 form-control"
+                                    name="description"
+                                ></textarea>
                             </div>
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
+                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">Close</button>
                                 <button type="submit" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
                             </div>
                         </div>

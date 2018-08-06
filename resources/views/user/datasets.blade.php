@@ -34,19 +34,12 @@
                                     </a>
                                     <div class="desc">
                                         {{ $set->descript }}
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
-                                        descript descript descript descript descript descript descript descript descript descript descript descript
                                     </div>
                                     <div class="col-sm-12 p-l-none btns">
                                         <div class="pull-left row">
                                             <div class="col-xs-6">
                                                 <span class="badge badge-pill m-r-md m-b-sm">
-                                                    <a href="{{ url('/user/edit') }}">{{ __('custom.edit') }}</a>
+                                                    <a href="{{ url('/user/datasetEdit') }}">{{ __('custom.edit') }}</a>
                                                 </span>
                                             </div>
                                             <div class="col-xs-6">

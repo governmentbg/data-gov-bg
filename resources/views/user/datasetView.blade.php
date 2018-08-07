@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.user-nav-bar', ['view' => $activeMenu])
+        @include('partials.user-nav-bar', ['view' => 'dataset'])
         @if (isset($dataset->name))
             <div class="row">
                 <div class="col-sm-12 user-dataset m-l-10">

@@ -31,9 +31,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/datasetView', 'UserController@datasetView')->name('datasetView');
         Route::post('/user/datasetDelete', 'UserController@datasetDelete');
         Route::match(['get', 'post'], '/user/datasets', 'UserController@datasets');
-        Route::match(['get', 'post'], '/user/datasetCreate', 'UserController@datasetCreate');
+        Route::match(['get', 'post'], '/user/dataset/search', 'UserController@datasetSearch');
+        Route::match(['get', 'post'], '/user/dataset/create', 'UserController@datasetCreate');
+        Route::match(['get', 'post'], '/user/dataset/edit', 'UserController@datasetEdit')->name('datasetEdit');
+
         Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
-        Route::get('/user/datasetEdit', 'UserController@datasetEdit');
         Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
         Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
         Route::match(['get', 'post'],'/user/registerGroup', 'UserController@registerGroup');

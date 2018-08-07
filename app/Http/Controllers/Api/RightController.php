@@ -13,7 +13,7 @@ class RightController extends ApiController
      *
      * @param string api_key required
      *
-     * @return json wit list of rights or error
+     * @return json with list of rights or error
      */
     public function listRights(Request $request)
     {

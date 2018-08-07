@@ -60,7 +60,7 @@
                                             <button
                                                 type="submit"
                                                 name="delete"
-                                                onclick="return confirm('{{ __('custom.delete_organisation') }}?');"
+                                                onclick="return confirm('Изтриване на организацията?');"
                                             >{{ __('custom.remove') }}</button>
                                         </div>
                                         <input class="user-org-del" type="hidden" name="org_id" value="{{ $organisation->id }}">

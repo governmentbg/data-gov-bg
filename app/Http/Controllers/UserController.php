@@ -198,11 +198,16 @@ class UserController extends Controller {
         ];
         $userOrgIds = UserToOrgRole::where('user_id', \Auth::user()->id)->pluck('org_id')->toArray();
         $dataSetIds = DataSet::whereIn('org_id', $userOrgIds)->pluck('id')->toArray();
-        $params['criteria']['dataset_ids'] = $dataSetIds;
-        $rq = Request::create('/api/listDataSets', 'POST', $params);
-        $api = new ApiDataSets($rq);
-        $datasets = $api->listDataSets($rq)->getData();
-        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+
+        if (!empty($dataSetIds)) {
+            $params['criteria']['dataset_ids'] = $dataSetIds;
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSets($rq);
+            $datasets = $api->listDataSets($rq)->getData();
+            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+        } else {
+            $paginationData = $this->getPaginationData([], 0, [], $perPage);
+        }
 
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');

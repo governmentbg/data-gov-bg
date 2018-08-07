@@ -70,7 +70,7 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="col-sm-9 m-t-xl text-center">
+                    <div class="col-sm-12 m-t-xl text-center">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

@@ -166,7 +166,7 @@ class LocaleController extends ApiController
     }
 
     /**
-     * Delete a locale based on request data
+     * Get locale details based on request data
      *
      * @param string locale - required
      *

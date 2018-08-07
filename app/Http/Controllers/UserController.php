@@ -743,7 +743,7 @@ class UserController extends Controller {
         $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
 
         return view(
-            'user/datasets',
+            'user/orgDatasets',
             [
                 'class'      => 'user',
                 'datasets'   => $paginationData['items'],

@@ -25,12 +25,12 @@ require('./bootstrap-tagsinput');
 require('./bootstrap-datepicker.min');
 require('./bootstrap-datepicker.bg');
 
-// Main js
-require('./custom');
-require('./UserController');
+// Dropdowns
+require('./select2.full.min');
 
 // Checkboxes
 require('icheck');
 
-// Dropdowns
-require('./select2.full.min');
+// Main js
+require('./custom');
+require('./user');

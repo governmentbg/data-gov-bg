@@ -1,45 +1,45 @@
 
 // Fonts
-@import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
+@import url('https://fonts.googleapis.com/css?family=Raleway:300,400,600');
 
 // Variables
-@import "variables";
+@import 'variables';
 
 // Mixins
-@import "mixins";
+@import 'mixins';
 
 // Bootstrap
-@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+@import '~bootstrap-sass/assets/stylesheets/bootstrap';
 
 // Layout
-@import "app_layout";
+@import 'app_layout';
 
 // Base
-@import "base";
+@import 'base';
 
 // Tags styles
-@import "tags-input/bootstrap-tagsinput";
+@import 'tags-input/bootstrap-tagsinput';
 
 // Common
-@import "main";
+@import 'main';
 
 // Articles for data and organisations
-@import "articles";
+@import 'articles';
 
 // Home page
-@import "home";
+@import 'home';
 
 // Data pages
-@import "data";
+@import 'data';
 
 // User pages
-@import "user";
+@import 'user';
 
 // Organisation pages
-@import "organisation";
+@import 'organisation';
 
 // Request page
-@import "request";
+@import 'request';
 
 // Flag icons
 @import 'node_modules/flag-icon-css/sass/flag-icon.scss';

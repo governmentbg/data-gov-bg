@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         @include('partials.sidebar-org-short')
-        <div class="col-sm-9 col-xs-11 page-content p-sm">
+        <div class="col-sm-9 col-xs-12 page-content p-sm">
             <div class="col-xs-12 list-orgs">
                 <div class="row">
                     <div class="col-sm-6">

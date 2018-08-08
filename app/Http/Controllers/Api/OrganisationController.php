@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Role;
+use App\User;
 use App\Locale;
 use App\Organisation;
 use App\CustomSetting;
@@ -20,7 +22,7 @@ class OrganisationController extends ApiController
      * Add new organisation record
      *
      * @param string api_key - required
-     * @param array data -required
+     * @param array data - required
      * @param string data[name] - required
      * @param string data[locale] - required
      * @param integer data[type] - optional
@@ -46,9 +48,9 @@ class OrganisationController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'locale'                => 'nullable|string|max:5',
+            'locale'                => 'nullable|max:5',
             'name'                  => 'required',
-            'type'                  => 'required|integer|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+            'type'                  => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
             'description'           => 'nullable',
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
@@ -57,35 +59,29 @@ class OrganisationController extends ApiController
             'logo_data'             => 'nullable',
             'activity_info'         => 'nullable',
             'contacts'              => 'nullable',
-            'parent_org_id'         => 'nullable|integer',
-            'active'                => 'nullable|integer',
-            'approved'              => 'nullable|integer',
+            'parent_org_id'         => 'nullable|int',
+            'active'                => 'nullable|bool',
+            'approved'              => 'nullable|bool',
             'custom_fields.*.label' => 'nullable',
             'custom_fields.*.value' => 'nullable',
         ]);
 
         $validator->after(function ($validator) use ($data) {
-            if (is_array($data['name']) && empty(array_filter($data['name']))) {
+            if (
+                empty($data['name'])
+                || is_array($data['name'])
+                && empty(array_filter($data['name']))
+            ) {
                 $validator->errors()->add('name', 'name is required');
             }
          });
 
         if (!$validator->fails()) {
             $organisation = new Organisation;
-            $locale = \LaravelLocalization::getCurrentLocale();
 
             $organisation->type = $data['type'];
 
             DB::beginTransaction();
-
-            $organisation->name = $this->trans($empty, $data['name']);
-            $organisation->descript = !empty($data['description'])
-                    ? $this->trans($empty, $data['description'])
-                    : null;
-
-            $organisation->uri = !empty($request->data['uri'])
-                ? $request->data['uri']
-                : $this->generateOrgUri($request->data['name']);
 
             if (!empty($data['logo'])) {
                 try {
@@ -111,8 +107,17 @@ class OrganisationController extends ApiController
 
             if (!isset($organisation->logo_data) || $this->checkImageSize($organisation->logo_data)) {
                 try {
-                    $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($empty, $data['activity_info']) : null;
-                    $organisation->contacts = !empty($data['contacts']) ? $this->trans($empty, $data['contacts']) : null;
+                    $organisation->name = $this->trans($data['locale'], $data['name']);
+                    $organisation->descript = !empty($data['description'])
+                        ? $this->trans($data['locale'], $data['description'])
+                        : null;
+
+                    $organisation->uri = !empty($request->data['uri'])
+                        ? $request->data['uri']
+                        : $this->generateOrgUri($request->data['name']);
+
+                    $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($data['locale'], $data['activity_info']) : null;
+                    $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
                     $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
                     $organisation->active = isset($data['active']) ? $data['active'] : 0;
                     $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
@@ -135,7 +140,7 @@ class OrganisationController extends ApiController
                     $userToOrgRole = new UserToOrgRole;
                     $userToOrgRole->org_id = $organisation->id;
                     $userToOrgRole->user_id = \Auth::user()->id;
-                    $userToOrgRole->role_id = UserToOrgRole::ROLE_ADMIN;
+                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
 
                     try {
                         $userToOrgRole->save();
@@ -197,17 +202,17 @@ class OrganisationController extends ApiController
      */
     public function editOrganisation(Request $request)
     {
-        $data = $request->get('data');
+        $data = $request->get('data', []);
 
         if ($request->org_id) {
             $data['org_id'] = $request->org_id;
         }
 
         $validator = \Validator::make($data, [
-            'org_id'                   => 'required|integer',
-            'locale'                   => 'required|string',
+            'org_id'                   => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'locale'                   => 'required',
             'name'                     => 'required',
-            'type'                     => 'required|integer|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+            'type'                     => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
             'description'              => 'nullable',
             'uri'                      => 'nullable|string',
             'logo'                     => 'nullable|string',
@@ -216,15 +221,19 @@ class OrganisationController extends ApiController
             'logo_data'                => 'nullable|string',
             'activity_info'            => 'nullable',
             'contacts'                 => 'nullable',
-            'parent_org_id'            => 'nullable|integer',
-            'active'                   => 'nullable|integer',
-            'approved'                 => 'nullable|integer',
+            'parent_org_id'            => 'nullable|int',
+            'active'                   => 'nullable|bool',
+            'approved'                 => 'nullable|bool',
             'custom_fields.*.label'    => 'nullable',
             'custom_fields.*.value'    => 'nullable',
         ]);
 
         $validator->after(function ($validator) use ($data) {
-            if (is_array($data['name']) && empty(array_filter($data['name']))) {
+            if (
+                empty($data['name'])
+                || is_array($data['name'])
+                && empty(array_filter($data['name']))
+            ) {
                 $validator->errors()->add('name', 'name is required');
             }
          });
@@ -233,83 +242,82 @@ class OrganisationController extends ApiController
             !$validator->fails()
             && !empty($organisation = Organisation::find($request->org_id))
         ) {
-            $locale = \LaravelLocalization::getCurrentLocale();
-            $orgData = [];
-
-            if (!empty($data['name'])) {
-                $orgData['name'] = $this->trans($empty, $data['name']);
-            }
-
-            if (!empty($data['description'])) {
-                $orgData['descript'] = $this->trans($empty, $data['description']);
-            }
-
-            if (!empty($data['uri'])) {
-                $orgData['uri'] = $data['uri'];
-            }
-
-            if (!empty($data['type'])) {
-                $orgData['type'] = $data['type'];
-            }
-
-            if (!empty($data['logo'])) {
-                try {
-                    $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {}
-
-                if (!empty($img)) {
-                    $orgData['logo_file_name'] = basename($data['logo']);
-                    $orgData['logo_mime_type'] = $img->mime();
-
-                    $temp = tmpfile();
-                    $path = stream_get_meta_data($temp)['uri'];
-                    $img->save($path);
-                    $orgData['logo_data'] = file_get_contents($path);
-
-                    fclose($temp);
-                }
-            }
-
-            if (!empty($data['logo_filename'])) {
-                $orgData['logo_file_name'] = $data['logo_filename'];
-            }
-
-            if (!empty($data['logo_mimetype'])) {
-                $orgData['logo_mime_type'] = $data['logo_mimetype'];
-            }
-
-            if (!empty($data['logo_data'])) {
-                $orgData['logo_data'] = $data['logo_data'];
-            }
-
-            if (!empty($data['activity_info'])) {
-                $orgData['activity_info'] = $this->trans($empty, $data['activity_info']);
-            }
-
-            if (!empty($data['contacts'])) {
-                $orgData['contacts'] = $this->trans($empty, $data['contacts']);
-            }
-
-            if (!empty($data['parent_org_id'])) {
-                $orgData['parent_org_id'] = $data['parent_org_id'];
-            }
-
-            if (isset($data['active'])) {
-                $orgData['active'] = $data['active'];
-            }
-
-            if (isset($data['approved'])) {
-                $orgData['approved'] = $data['approved'];
-            }
-
-            if (!empty($data['custom_fields'])) {
-                $customFields = $data['custom_fields'];
-            }
-
-            $newOrgSettingsData = [];
-
             if (!isset($orgData['logo_data']) || $this->checkImageSize($orgData['logo_data'])) {
                 DB::beginTransaction();
+
+                $orgData = [];
+
+                if (!empty($data['name'])) {
+                    $orgData['name'] = $this->trans($data['locale'], $data['name']);
+                }
+
+                if (!empty($data['description'])) {
+                    $orgData['descript'] = $this->trans($data['locale'], $data['description']);
+                }
+
+                if (!empty($data['uri'])) {
+                    $orgData['uri'] = $data['uri'];
+                }
+
+                if (!empty($data['type'])) {
+                    $orgData['type'] = $data['type'];
+                }
+
+                if (!empty($data['logo'])) {
+                    try {
+                        $img = \Image::make($data['logo']);
+                    } catch (NotReadableException $ex) {}
+
+                    if (!empty($img)) {
+                        $orgData['logo_file_name'] = basename($data['logo']);
+                        $orgData['logo_mime_type'] = $img->mime();
+
+                        $temp = tmpfile();
+                        $path = stream_get_meta_data($temp)['uri'];
+                        $img->save($path);
+                        $orgData['logo_data'] = file_get_contents($path);
+
+                        fclose($temp);
+                    }
+                }
+
+                if (!empty($data['logo_filename'])) {
+                    $orgData['logo_file_name'] = $data['logo_filename'];
+                }
+
+                if (!empty($data['logo_mimetype'])) {
+                    $orgData['logo_mime_type'] = $data['logo_mimetype'];
+                }
+
+                if (!empty($data['logo_data'])) {
+                    $orgData['logo_data'] = $data['logo_data'];
+                }
+
+                if (!empty($data['activity_info'])) {
+                    $orgData['activity_info'] = $this->trans($data['locale'], $data['activity_info']);
+                }
+
+                if (!empty($data['contacts'])) {
+                    $orgData['contacts'] = $this->trans($data['locale'], $data['contacts']);
+                }
+
+                if (!empty($data['parent_org_id'])) {
+                    $orgData['parent_org_id'] = $data['parent_org_id'];
+                }
+
+                if (isset($data['active'])) {
+                    $orgData['active'] = $data['active'];
+                }
+
+                if (isset($data['approved'])) {
+                    $orgData['approved'] = $data['approved'];
+                }
+
+                if (!empty($data['custom_fields'])) {
+                    $customFields = $data['custom_fields'];
+                }
+
+                $newOrgSettingsData = [];
 
                 try {
                     if (!empty($orgData)) {
@@ -332,7 +340,6 @@ class OrganisationController extends ApiController
 
                     return $this->successResponse();
                 } catch (QueryException $ex) {
-
                     DB::rollback();
 
                     Log::error($ex->getMessage());
@@ -357,7 +364,7 @@ class OrganisationController extends ApiController
     public function deleteOrganisation(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'org_id' => 'required',
+            'org_id' => 'required|exists:organisations,id,deleted_at,NULL',
         ]);
 
         if (
@@ -405,12 +412,12 @@ class OrganisationController extends ApiController
             'criteria.locale'       => 'nullable|string',
             'criteria.active'       => 'nullable|bool',
             'criteria.approved'     => 'nullable|bool',
-            'criteria.org_id'       => 'nullable|integer',
-            'criteria.user_id'      => 'nullable|integer|exists:users,id',
+            'criteria.org_id'       => 'nullable|int',
+            'criteria.user_id'      => 'nullable|int|exists:users,id',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -525,12 +532,12 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.active'       => 'nullable|integer',
-            'criteria.approved'     => 'nullable|integer',
+            'criteria.active'       => 'nullable|bool',
+            'criteria.approved'     => 'nullable|bool',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -571,7 +578,6 @@ class OrganisationController extends ApiController
 
                 $query->orderBy($field, $type);
 
-                $customFields = [];
                 foreach ($query->get() as $org) {
                     $customFields = [];
 
@@ -605,7 +611,7 @@ class OrganisationController extends ApiController
                     ];
                 }
 
-                return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
+                return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -638,8 +644,8 @@ class OrganisationController extends ApiController
             'criteria.order.type'   => 'nullable|string',
             'criteria.user_id'      => 'nullable|integer|exists:users,id',
             'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -721,7 +727,7 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'   => 'required|integer',
+            'org_id'   => 'required|int|exists:organisations,id,deleted_at,NULL',
             'locale'   => 'nullable|string',
         ]);
 
@@ -773,6 +779,154 @@ class OrganisationController extends ApiController
         return $this->errorResponse('Get Organisation Details Failure', $validator->errors()->messages());
     }
 
+    /**
+     * Get organisation members
+     *
+     * @param integer org_id - required
+     * @param integer role_id - optional
+     * @param boolean for_approval - optional
+     *
+     * @return json with organisaion member details or error
+     */
+    public function getMembers(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'org_id'            => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'role_id'           => 'nullable|int|exists:roles,id',
+            'keywords'          => 'nullable|string',
+            'for_approval'      => 'nullable|bool',
+            'records_per_page'  => 'nullable|int',
+            'page_number'       => 'nullable|int',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $query = User::select('id', 'username', 'firstname', 'lastname', 'email')->with('UserToOrgRole');
+
+                if (isset($post['for_approval'])) {
+                    $query->where('approved', $post['for_approval'] ? false : true);
+                }
+
+                if (isset($post['keywords'])) {
+                    $ids = User::search($post['keywords'])->get()->pluck('id');
+                    $query = $query->whereIn('id', $ids);
+                }
+
+                $query->whereHas('UserToOrgRole', function($q) use ($post) {
+                    $q->whereHas('Organisation', function($q) use ($post) {
+                        $q->where('id', $post['org_id']);
+                    });
+
+                    if (isset($post['role_id'])) {
+                        $q->where('role_id', $post['role_id']);
+                    }
+                });
+
+                $count = $query->count();
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
+
+                $members = [];
+
+                foreach ($query->get()->toArray() as $member) {
+                    $members[] = [
+                        'id'        => $member['id'],
+                        'username'  => $member['username'],
+                        'firstname' => $member['firstname'],
+                        'lastname'  => $member['lastname'],
+                        'email'     => $member['email'],
+                        'role_id'   => $member['user_to_org_role'][0]['role_id'],
+                    ];
+                }
+
+                return $this->successResponse([
+                    'members'       => $members,
+                    'total_records' => $count,
+                ], true);
+            } catch (QueryException $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Get Members Failure', $validator->errors()->messages());
+    }
+
+    /**
+     * Delete organisation member
+     *
+     * @param integer org_id - required
+     * @param integer user_id - required
+     *
+     * @return json success or error
+     */
+    public function delMember(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                UserToOrgRole::where([
+                    'org_id'    => $post['org_id'],
+                    'user_id'   => $post['user_id'],
+                ])->delete();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Delete Member Failure', $validator->errors()->messages());
+    }
+
+    /**
+     * Edit organisation member role
+     *
+     * @param integer org_id - required
+     * @param integer user_id - required
+     * @param integer role_id - required
+     *
+     * @return json success or error
+     */
+    public function editMember(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
+            'role_id'       => 'nullable|int|exists:roles,id',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $user = UserToOrgRole::where([
+                    'org_id'    => $post['org_id'],
+                    'user_id'   => $post['user_id'],
+                ])->first();
+
+                $user->role_id = $post['role_id'];
+
+                $user->save();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Edit Member Failure', $validator->errors()->messages());
+    }
+
     /************************   MANAGE GROUPS   ************************/
     /**
      * Add new Group
@@ -806,10 +960,10 @@ class OrganisationController extends ApiController
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'required_with:logo_mimetype,logo_data|string',
-            'logo_mimetype'         => 'required_with:llogo_filename,logo_data|string',
-            'logo_data'             => 'required_with:llogo_filename,logo_mimetype|string',
+            'logo_mimetype'         => 'required_with:logo_filename,logo_data|string',
+            'logo_data'             => 'required_with:logo_filename,logo_mimetype|string',
             'activity_info'         => 'nullable|string',
-            'active'                => 'nullable|integer',
+            'active'                => 'nullable|bool',
             'custom_fields.*.label' => 'nullable',
             'custom_fields.*.value' => 'nullable',
         ]);
@@ -1044,7 +1198,7 @@ class OrganisationController extends ApiController
     public function deleteGroup(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'group_id' => 'required|integer',
+            'group_id' => 'required|int',
         ]);
 
         $group = Organisation::find($request->group_id);
@@ -1101,12 +1255,12 @@ class OrganisationController extends ApiController
             $validator = \Validator::make($post, [
                 'criteria.group_ids'    => 'nullable|array',
                 'criteria.locale'       => 'nullable|string|max:5',
-                'criteria.dataset_id'   => 'nullable|integer',
-                'criteria.user_id'      => 'nullable|integer|exists:users,id',
+                'criteria.dataset_id'   => 'nullable|int',
+                'criteria.user_id'      => 'nullable|int|exists:users,id',
                 'criteria.order.type'   => 'nullable|string',
                 'criteria.order.field'  => 'nullable|string',
-                'records_per_page'      => 'nullable|integer',
-                'page_number'           => 'nullable|integer',
+                'records_per_page'      => 'nullable|int',
+                'page_number'           => 'nullable|int',
             ]);
 
             if (!$validator->fails()) {
@@ -1213,7 +1367,7 @@ class OrganisationController extends ApiController
                         'description'   => $group->descript,
                         'locale'        => $locale,
                         'uri'           => $group->uri,
-                        'logo'          => $this->getImageData($group->logo_data, $group->logo_mime_type),
+                        'logo'          => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
                         'custom_fields' => $customFields
                     ];
 
@@ -1262,8 +1416,8 @@ class OrganisationController extends ApiController
             'criteria.user_id'      => 'nullable|integer|exists:users,id',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -1309,7 +1463,7 @@ class OrganisationController extends ApiController
                         'description'       => $group->descript,
                         'locale'            => $group->locale,
                         'uri'               => $group->uri,
-                        'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type),
+                        'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
                         'custom_fields'     => $customFields,
                         'datasets_count'    => $group->dataSet()->count(),
                         'followers_count'   => $group->userFollow()->count(),

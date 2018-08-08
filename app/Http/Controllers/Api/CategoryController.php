@@ -349,7 +349,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'tag_id'            => 'required|integer',
+            'tag_id'            => 'required|int|exists:categories,id',
             'data.name'         => 'nullable|string',
             'data.locale'       => 'nullable|string',
             'data.category_id'  => 'nullable|integer',
@@ -521,26 +521,25 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'tag_id' => 'required|integer',
+            'tag_id' => 'required|int|exists:categories,id',
             'locale' => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
-            $data = [];
             $tag = Category::find($post['tag_id']);
 
-            if ($tag) {
-                $data['name'] = $tag->name;
-                $data['category_id'] = $tag->parent_id;
-                $data['locale'] = \LaravelLocalization::getCurrentLocale();
-                $data['active'] = $tag->active;
-                $data['created_at'] = $tag['created_at'];
-                $data['created_by'] = $tag['created_by'];
-                $data['updated_at'] = $tag['updated_at'];
-                $data['updated_by'] = $tag['updated_by'];
+            $data = [
+                'name'          => $tag->name,
+                'category_id'   => $tag->parent_id,
+                'locale'        => \LaravelLocalization::getCurrentLocale(),
+                'active'        => $tag->active,
+                'created_at'    => $tag->created_at->toDateTimeString(),
+                'updated_at'    => isset($tag->updated_at) ? $tag->updated_at->toDateTimeString() : null,
+                'created_by'    => $tag->created_by,
+                'updated_by'    => $tag->updated_by,
+            ];
 
-                return $this->successResponse(['tag' => $data], true);
-            }
+            return $this->successResponse(['tag' => $data], true);
         }
 
         return $this->errorResponse('Get tag details failure', $validator->errors()->messages());

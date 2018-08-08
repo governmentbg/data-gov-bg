@@ -110,7 +110,7 @@
                 <label for="locales" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.language') }}:</label>
                 <div class="col-sm-4 col-xs-8">
                     <select class="input-border-r-12 form-control js-select" name="locale" id="locales">
-                        @foreach($localeList as $locale)
+                        @foreach ($localeList as $locale)
                             <option
                                 value="{{ $locale->locale }}"
                                 {{

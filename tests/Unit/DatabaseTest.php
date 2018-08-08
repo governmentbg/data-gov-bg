@@ -109,7 +109,6 @@ class DatabaseTest extends TestCase
     {
         // Test system user
         $this->assertDatabaseHas('users', ['username' => 'system']);
-
         // Test creation
         foreach (range(1, self::USER_RECORDS) as $i) {
             $user = null;
@@ -227,7 +226,6 @@ class DatabaseTest extends TestCase
     {
         $rights = array_keys(RoleRight::getRights());
         $roles = Role::limit(self::ROLES_RECORDS)->get()->toArray();
-
         // Test creation
         foreach ($roles as $role) {
             foreach ($rights as $right) {
@@ -278,7 +276,6 @@ class DatabaseTest extends TestCase
     {
         $types = array_keys(NewsletterDigestLog::getTypes());
         $users = User::limit(self::NEWSLETTER_DIGEST_LOG_RECORDS)->get()->toArray();
-
         // Test creation
         foreach ($users as $user) {
             $record = null;
@@ -330,7 +327,6 @@ class DatabaseTest extends TestCase
                 'ru'    => false,
                 'xx'    => false,
             ];
-
             // Test creation
             foreach ($languages as $language => $active) {
                 $record = null;
@@ -359,10 +355,8 @@ class DatabaseTest extends TestCase
     private function translations()
     {
         $locales = Locale::limit(self::TRANSLATION_RECORDS)->get()->toArray();
-
-        // Test creation
         $count = 0;
-
+        // Test creation
         while ($count != self::TRANSLATION_RECORDS) {
             foreach ($locales as $i => $locale) {
                 $count++;
@@ -412,7 +406,6 @@ class DatabaseTest extends TestCase
     {
         $locales = Locale::where('active', 1)->limit(self::ORGANISATION_RECORDS)->get()->toArray();
         $types = array_keys(Organisation::getTypes());
-
         // Test creation
         foreach (range(1, self::ORGANISATION_RECORDS) as $i) {
             $type = $this->faker->randomElement($types);
@@ -482,15 +475,15 @@ class DatabaseTest extends TestCase
         }
     }
 
-     /**
+    /**
      * Tests DataRequest table structure and models
      *
      * @return void
      */
     private function dataRequests()
     {
-        // Test creation
         $orgs = Organisation::orderBy('created_at', 'desc')->limit(self::DATA_REQUESTS_RECORDS)->get()->toArray();
+        // Test creation
         foreach (range(1, self::DATA_REQUESTS_RECORDS) as $i) {
             $org = $this->faker->randomElement($orgs)['id'];
             $record = null;
@@ -512,6 +505,7 @@ class DatabaseTest extends TestCase
             }
         }
     }
+
     /**
      * Tests pages table structure and models
      *
@@ -519,9 +513,9 @@ class DatabaseTest extends TestCase
      */
     private function pages()
     {
-        // Test creation
         $locales = Locale::where('active', 1)->limit(self::PAGES_RECORDS)->get()->toArray();
         $sections = Section::limit(self::PAGES_RECORDS)->get()->toArray();
+        // Test creation
         foreach (range(1, self::PAGES_RECORDS) as $i) {
             $record = null;
             $locale = $this->faker->randomElement($locales)['locale'];
@@ -550,6 +544,7 @@ class DatabaseTest extends TestCase
             $this->assertDatabaseHas('pages', ['id' => $record->id]);
         }
     }
+
     /**
      * Tests sections table structure and models
      *
@@ -557,8 +552,8 @@ class DatabaseTest extends TestCase
      */
     private function sections()
     {
-        // Test creation
         $locales = Locale::where('active', 1)->limit(self::SECTIONS_RECORDS)->get()->toArray();
+        // Test creation
         foreach (range(1, self::SECTIONS_RECORDS) as $i) {
             $record = null;
             $locale = $this->faker->randomElement($locales)['locale'];
@@ -582,6 +577,7 @@ class DatabaseTest extends TestCase
             $this->assertDatabaseHas('sections', ['id' => $record->id]);
         }
     }
+
     /**
      * Tests actions_history table structure and models
      *
@@ -876,7 +872,6 @@ class DatabaseTest extends TestCase
             }
 
             $this->assertNotNull($record);
-            $this->assertDatabaseHas('data_requests', ['id' => $record->id]);
 
             if (!empty($record->id)) {
                 $this->assertDatabaseHas('terms_of_use_requests', ['id' => $record->id]);
@@ -908,7 +903,7 @@ class DatabaseTest extends TestCase
                 'org_id'      => $organisation,
                 'data_set_id' => $dataSet,
                 'category_id' => $category,
-                'news'        => $this->faker->numberBetween(10,20)
+                'news'        => $this->faker->numberBetween(10, 20)
             ];
 
             try {
@@ -935,7 +930,6 @@ class DatabaseTest extends TestCase
         $users = User::select('id')->limit(self::USER_SETTING_RECORDS)->get()->toArray();
         $locales = Locale::where('active', 1)->limit(self::USER_SETTING_RECORDS)->get()->toArray();
         $newsLetters = NewsLetterDigestLog::select('id')->limit(self::USER_SETTING_RECORDS)->get()->toArray();
-
         // Test creation
         foreach (range(1, self::USER_SETTING_RECORDS) as $i) {
             $user = $this->faker->unique()->randomElement($users)['id'];
@@ -976,7 +970,6 @@ class DatabaseTest extends TestCase
         $organisations = Organisation::select('id')->limit(self::USER_TO_ORG_RECORDS)->get()->toArray();
         $roles = Role::limit(self::USER_TO_ORG_RECORDS)->get()->toArray();
         $newFaker = Faker::create();
-
         // Test creation
         foreach (range(1, self::USER_TO_ORG_RECORDS) as $i) {
             $user =  $newFaker->unique()->randomElement($users)['id'];
@@ -1013,9 +1006,7 @@ class DatabaseTest extends TestCase
     {
         $dataSets = DataSet::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
-
-        $groupFaker = Faker::create(); //creating a new instance so the unique() works. Can be revised if solution is found.
-
+        $groupFaker = Faker::create();
         // Test creation
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
             $dataSet = $groupFaker->unique()->randomElement($dataSets)['id'];
@@ -1109,7 +1100,6 @@ class DatabaseTest extends TestCase
         $dataSets = DataSet::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
         $resources = Resource::limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
-
         // Test creation
         foreach (range(1, self::CUSTOM_SETTING_RECORDS) as $i) {
             $organisation = $this->faker->randomElement($organisations)['id'];

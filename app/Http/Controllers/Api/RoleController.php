@@ -122,7 +122,10 @@ class RoleController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['criteria.active' => 'nullable|boolean']);
+        $validator = \Validator::make($post, [
+            'criteria.active' => 'nullable|boolean',
+            'criteria.org_id' => 'nullable|int|exists:organisations,id,deleted_at,NULL',
+        ]);
 
         if (!$validator->fails()) {
             $query = Role::select();
@@ -131,8 +134,14 @@ class RoleController extends ApiController
                 $query->where('active', $post['criteria']['active']);
             }
 
+            if (isset($post['criteria']['org_id'])) {
+                $query->whereHas('userToOrg', function($q) use ($post) {
+                    $q->where('org_id', $post['criteria']['org_id']);
+                });
+            }
+
             try {
-                $roles = $query->get();
+                $roles = $query->get()->toArray();
 
                 return $this->successResponse(['roles' => $roles], true);
             } catch (QueryException $ex) {

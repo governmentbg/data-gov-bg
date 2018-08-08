@@ -21,7 +21,7 @@
                                 <div class="input-group">
                                     @if (isset($model) && empty(old($field['name'])))
                                         <input
-                                            value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][0] } : '' }}"
+                                            value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][0] } : null }}"
                                             name="{{ $field['name'] }}[{{ $i }}][label][{{ $active['locale'] }}]"
                                             class="input-border-r-12 form-control"
                                         >
@@ -56,7 +56,7 @@
                                 <div class="input-group">
                                     @if (isset($model) && empty(old($field['name'])))
                                         <input
-                                            value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][1]} : '' }}"
+                                            value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][1]} : null }}"
                                             name="{{ $field['name'] }}[{{ $i }}][{{ $field['val'][1] }}][{{ $active['locale'] }}]"
                                             class="input-border-r-12 form-control"
                                         >

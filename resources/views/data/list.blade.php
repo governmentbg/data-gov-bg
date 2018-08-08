@@ -4,11 +4,11 @@
 <div class="container">
     <div class="row">
         @include('partials.sidebar')
-        <div class="col-sm-9 col-xs-11 p-sm page-content">
+        <div class="col-sm-9 col-xs-12 p-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">
                     <div class="row">
-                        <div class="col-md-6 p-l-r-none">
+                        <div class="col-lg-12 p-l-r-none">
                             <div>
                                 <ul class="nav filter-type right-border">
                                     <li><a class="active p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>

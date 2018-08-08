@@ -4,6 +4,7 @@ use App\Locale;
 use App\Organisation;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use App\Http\Controllers\ApiController;
 
 class OrganisationSeeder extends Seeder
 {
@@ -29,18 +30,35 @@ class OrganisationSeeder extends Seeder
 
             $parentId = empty($parentId) && empty($record) || $type == Organisation::TYPE_GROUP ? null : $record->id;
 
+            $logo = $this->faker->imageUrl();
+
+            try {
+                $img = \Image::make($logo);
+            } catch (NotReadableException $ex) {}
+
             $dbData = [
                 'type'              => $type,
-                'name'              => $this->faker->name,
-                'descript'          => $this->faker->text(intval(8000)),
+                'name'              => ApiController::trans($locale, $this->faker->name),
+                'descript'          => ApiController::trans($locale, $this->faker->text(intval(8000))),
                 'uri'               => $this->faker->uuid(),
-                'logo_file_name'    => $i != 1 ? $this->faker->imageUrl() : null,
-                'logo_mime_type'    => $i != 1 ? $this->faker->mimeType() : null,
-                'logo_data'         => $i != 1 ? $this->faker->text(intval(8000)) : null,
                 'parent_org_id'     => is_null($parentId) ? null : $parentId,
                 'active'            => $this->faker->boolean(),
                 'approved'          => $this->faker->boolean(),
             ];
+
+            if (!empty($img)) {
+                $logoData['logo_file_name'] = basename($logo);
+                $logoData['logo_mime_type'] = $img->mime();
+
+                $temp = tmpfile();
+                $path = stream_get_meta_data($temp)['uri'];
+                $img->save($path);
+                $logoData['logo_data'] = file_get_contents($path);
+
+                fclose($temp);
+
+                $dbData = array_merge($dbData, $logoData);
+            }
 
             if ($i != 1) {
                 $dbData = array_merge($dbData, [

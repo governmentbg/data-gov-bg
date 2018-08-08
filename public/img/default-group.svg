@@ -1,0 +1,50 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 13.88">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #878784;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        fill: #373737;
+      }
+    </style>
+  </defs>
+  <title>grupi-snimka</title>
+  <g>
+    <g>
+      <path class="cls-1" d="M49,23H40.69v-.9a1,1,0,0,0-1-1h-4a1,1,0,0,0-1,1V34a1,1,0,0,0,1,1H49a1,1,0,0,0,1-1V24.06A1,1,0,0,0,49,23Z" transform="translate(0 -21.12)"/>
+      <rect class="cls-2" x="36.39" y="3.39" width="11.91" height="5.58"/>
+      <g>
+        <rect class="cls-3" x="37.11" y="4.07" width="10.46" height="0.34"/>
+        <rect class="cls-3" x="37.11" y="4.96" width="10.46" height="0.34"/>
+        <rect class="cls-3" x="37.11" y="5.84" width="10.46" height="0.34"/>
+      </g>
+      <path class="cls-1" d="M34.69,27.9V34a1,1,0,0,0,1,1H49a1,1,0,0,0,1-1V27.9Z" transform="translate(0 -21.12)"/>
+    </g>
+    <g>
+      <path class="cls-1" d="M31.64,23h-8.3v-.9a1,1,0,0,0-1-1h-4a1,1,0,0,0-1,1V34a1,1,0,0,0,1,1H31.64a1,1,0,0,0,1-1V24.06A1,1,0,0,0,31.64,23Z" transform="translate(0 -21.12)"/>
+      <rect class="cls-2" x="19.04" y="3.39" width="11.91" height="5.58"/>
+      <g>
+        <rect class="cls-3" x="19.77" y="4.07" width="10.46" height="0.34"/>
+        <rect class="cls-3" x="19.77" y="4.96" width="10.46" height="0.34"/>
+        <rect class="cls-3" x="19.77" y="5.84" width="10.46" height="0.34"/>
+      </g>
+      <path class="cls-1" d="M17.34,27.9V34a1,1,0,0,0,1,1H31.64a1,1,0,0,0,1-1V27.9Z" transform="translate(0 -21.12)"/>
+    </g>
+    <g>
+      <path class="cls-1" d="M14.29,23H6v-.9a1,1,0,0,0-1-1H1a1,1,0,0,0-1,1V34a1,1,0,0,0,1,1H14.29a1,1,0,0,0,1-1V24.06A1,1,0,0,0,14.29,23Z" transform="translate(0 -21.12)"/>
+      <rect class="cls-2" x="1.7" y="3.39" width="11.91" height="5.58"/>
+      <g>
+        <rect class="cls-3" x="2.42" y="4.07" width="10.46" height="0.34"/>
+        <rect class="cls-3" x="2.42" y="4.96" width="10.46" height="0.34"/>
+        <rect class="cls-3" x="2.42" y="5.84" width="10.46" height="0.34"/>
+      </g>
+      <path class="cls-1" d="M0,27.9V34a1,1,0,0,0,1,1H14.29a1,1,0,0,0,1-1V27.9Z" transform="translate(0 -21.12)"/>
+    </g>
+  </g>
+</svg>

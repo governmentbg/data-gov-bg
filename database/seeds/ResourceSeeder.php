@@ -5,10 +5,11 @@ use App\DataSet;
 use App\Resource;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use App\Http\Controllers\ApiController;
 
 class ResourceSeeder extends Seeder
 {
-    const RESOURCE_RECORDS = 100;
+    const RESOURCE_RECORDS = 10;
 
     /**
      * Run the database seeds.
@@ -32,8 +33,6 @@ class ResourceSeeder extends Seeder
             $fileType = $this->faker->randomElement($files);
             $httpType = $this->faker->randomElement($httpTypes);
 
-            \LaravelLocalization::setLocale($locale);
-
             Resource::create([
                 'data_set_id'       => $dataSet,
                 'uri'               => $this->faker->uuid(),
@@ -45,8 +44,8 @@ class ResourceSeeder extends Seeder
                 'authentication'    => $this->faker->name(),
                 'post_data'         => $this->faker->name(),
                 'http_headers'      => $this->faker->text(),
-                'name'              => $this->faker->name(),
-                'descript'          => $this->faker->text(),
+                'name'              => ApiController::trans($locale, $this->faker->name()),
+                'descript'          => ApiController::trans($locale, $this->faker->text()),
                 'schema_descript'   => $this->faker->text(),
                 'schema_url'        => $this->faker->name(),
                 'is_reported'       => $this->faker->boolean(),

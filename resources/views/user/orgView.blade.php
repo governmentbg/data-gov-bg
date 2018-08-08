@@ -4,13 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'organisation'])
-    <div class="row">
-        <div class="col-xs-12 text-left">
-            <span class="badge badge-pill m-t-md new-data user-add-btn">
-                <a href="{{ url('/user/organisations/register') }}">{{ __('custom.add_new_organisation') }}</a>
-            </span>
-        </div>
-    </div>
+    @include('partials.org-nav-bar', ['view' => 'view', 'organisation' => $organisation])
     @if (!empty($organisation))
         <div class="row">
             <div class="col-xs-12 m-t-md">

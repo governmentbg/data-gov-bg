@@ -2,9 +2,12 @@
 
 namespace Tests\Unit\Api;
 
+use App\Role;
+use App\User;
 use App\Locale;
 use Tests\TestCase;
 use App\Organisation;
+use App\UserToOrgRole;
 use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -216,5 +219,73 @@ class OrganisationTest extends TestCase
         $this->post(url('api/getOrganisationDetails'), [
             'org_id' => $org->id,
         ])->assertStatus(200)->assertJson(['success' => true, 'data' => ['name' => $name]]);
+    }
+
+    public function testMembers()
+    {
+        // test empty criteria
+        $this->post(url('api/getMembers'))
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
+
+        // test search criteria
+        $org = Organisation::select('id')->inRandomOrder()->first()->toArray();
+        $role = Role::select('id')->inRandomOrder()->first()->toArray();
+
+        if (!empty($org)) {
+            $this->post(url('api/getMembers'), [
+                'org_id'        => $org['id'],
+                'role_id'       => $role['id'],
+                'for_approval'  => $this->faker->boolean(),
+                'keywords'      => $this->faker->word,
+            ])->assertStatus(200)->assertJson(['success' => true]);
+        }
+    }
+
+    public function testDelMember()
+    {
+        // test no api key
+        $this->post(url('api/delMember'))
+            ->assertStatus(403)
+            ->assertJson(['success' => false]);
+
+        // test empty criteria
+        $this->post(url('api/delMember'), ['api_key' => $this->getApiKey()])
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
+
+        $userToOrgRole = UserToOrgRole::inRandomOrder()->first()->toArray();
+
+        if (!empty($userToOrgRole)) {
+            $this->post(url('api/delMember'), [
+                'api_key'       => $this->getApiKey(),
+                'org_id'        => $userToOrgRole['org_id'],
+                'user_id'       => $userToOrgRole['user_id'],
+            ])->assertStatus(200)->assertJson(['success' => true]);
+        }
+    }
+
+    public function testEditMember()
+    {
+        // test no api key
+        $this->post(url('api/editMember'))
+            ->assertStatus(403)
+            ->assertJson(['success' => false]);
+
+        // test empty criteria
+        $this->post(url('api/editMember'), ['api_key' => $this->getApiKey()])
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
+
+        $userToOrgRole = UserToOrgRole::inRandomOrder()->first()->toArray();
+
+        if (!empty($userToOrgRole)) {
+            $this->post(url('api/delMember'), [
+                'api_key'       => $this->getApiKey(),
+                'org_id'        => $userToOrgRole['org_id'],
+                'user_id'       => $userToOrgRole['user_id'],
+                'role_id'       => $userToOrgRole['role_id'],
+            ])->assertStatus(200)->assertJson(['success' => true]);
+        }
     }
 }

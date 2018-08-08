@@ -8,11 +8,8 @@ class UserToOrgRole extends Model
 {
     protected $table = 'user_to_org_role';
     protected $guarded = [];
+    protected $primaryKey = 'role_id';
     public $timestamps = false;
-
-    const ROLE_ADMIN = 1;
-    const ROLE_MODERATOR = 2;
-    const ROLE_MEMBER = 3;
 
     public function user()
     {
@@ -21,7 +18,7 @@ class UserToOrgRole extends Model
 
     public function organisation()
     {
-        return $this->belongsTo('App\Organisation');
+        return $this->belongsTo('App\Organisation', 'org_id');
     }
 
     public function role()

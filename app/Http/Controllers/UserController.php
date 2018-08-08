@@ -22,12 +22,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
-use App\Http\Controllers\Api\DataSetController as ApiDataSets;
-use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
+use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
-use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
+use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 
@@ -195,7 +195,7 @@ class UserController extends Controller {
         $params['page_number'] = '1';
 
         $rq = Request::create('/api/listDataSets', 'POST', $params);
-        $api = new ApiDataSets($rq);
+        $api = new ApiDataSet($rq);
         $datasets = $api->listDataSets($rq)->getData();
 
         if ($request->has('delete')) {
@@ -238,7 +238,7 @@ class UserController extends Controller {
         ];
 
         $searchRq = Request::create('/api/searchDataSet', 'POST', $params);
-        $api = new ApiDataSets($searchRq);
+        $api = new ApiDataSet($searchRq);
         $result = $api->searchDataSet($searchRq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
@@ -273,7 +273,7 @@ class UserController extends Controller {
         if (!empty($dataSetIds)) {
             $params['criteria']['dataset_ids'] = $dataSetIds;
             $rq = Request::create('/api/listDataSets', 'POST', $params);
-            $api = new ApiDataSets($rq);
+            $api = new ApiDataSet($rq);
             $datasets = $api->listDataSets($rq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
@@ -316,7 +316,7 @@ class UserController extends Controller {
         $params['dataset_uri'] = $request->uri;
 
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
-        $api = new ApiDataSets($detailsReq);
+        $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
         // prepera request for resources
         unset($params['dataset_uri']);
@@ -346,7 +346,7 @@ class UserController extends Controller {
         $params['dataset_uri'] = $request->uri;
 
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
-        $api = new ApiDataSets($detailsReq);
+        $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $request->uri;
@@ -394,7 +394,7 @@ class UserController extends Controller {
         $params['dataset_uri'] = $uri;
 
         $request = Request::create('/api/deleteDataSet', 'POST', $params);
-        $api = new ApiDataSets($request);
+        $api = new ApiDataSet($request);
         $datasets = $api->deleteDataSet($request)->getData();
 
         if ($datasets->success) {
@@ -442,16 +442,16 @@ class UserController extends Controller {
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
             $savePost = Request::create('/api/addDataSet', 'POST', $params);
-            $api = new ApiDataSets($savePost);
+            $api = new ApiDataSet($savePost);
             $result = $api->addDataSet($savePost)->getData();
 
             if ($result->success) {
                 // connect data set to group
                 if (isset($groupId)) {
-                    $gropupParams['group_id'] = $groupId;
-                    $gropupParams['data_set_uri'] = $result->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $gropupParams);
-                    $resultGroup = $api->addDataSetToGroup($addGroup)->getData();
+                    $groupParams['group_id'] = $groupId;
+                    $groupParams['data_set_uri'] = $result->uri;
+                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+                    $result = $api->addDataSetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
@@ -499,7 +499,7 @@ class UserController extends Controller {
 
         $params['dataset_uri'] = $request->uri;
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
-        $api = new ApiDataSets($detailsReq);
+        $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
 
         $datasetData = $dataset->data;
@@ -668,9 +668,8 @@ class UserController extends Controller {
             $result = $api->register($rq)->getData();
 
             if ($result->success) {
-                $user = User::where('api_key', $result->api_key)->first();
-
                 if ($request->has('add_org')) {
+                    $user = User::where('api_key', $result->api_key)->first();
                     $key = $user->username;
 
                     return redirect()->route('orgRegistration', compact('key', 'message'));
@@ -733,7 +732,7 @@ class UserController extends Controller {
                 }
 
                 $req = Request::create('/addOrganisation', 'POST', ['api_key' => $apiKey,'data' => $params]);
-                $api = new ApiOrganisations($req);
+                $api = new ApiOrganisation($req);
                 $result = $api->addOrganisation($req)->getData();
 
                 if ($result->success) {
@@ -808,7 +807,7 @@ class UserController extends Controller {
         ];
 
         $request = Request::create('/api/getUserOrganisations', 'POST', $params);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->getUserOrganisations($request)->getData();
 
         $paginationData = $this->getPaginationData($result->organisations, $result->total_records, [], $perPage);
@@ -838,7 +837,7 @@ class UserController extends Controller {
         ];
 
         $request = Request::create('/api/deleteOrganisation', 'POST', $params);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->deleteOrganisation($request)->getData();
 
         return !$result->success
@@ -874,7 +873,7 @@ class UserController extends Controller {
         ];
 
         $request = Request::create('/api/searchOrganisations', 'POST', $params);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->searchOrganisations($request)->getData();
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
@@ -923,7 +922,7 @@ class UserController extends Controller {
         ];
 
         $request = Request::create('/api/searchDataset', 'POST', $params);
-        $api = new ApiDatasets($request);
+        $api = new ApiDataSet($request);
         $result = $api->searchDataset($request)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
@@ -976,7 +975,7 @@ class UserController extends Controller {
 
         $post['data']['description'] = $post['data']['descript'];
         $request = Request::create('/api/addOrganisation', 'POST', $post);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->addOrganisation($request)->getData();
 
         if ($result->success) {
@@ -1002,15 +1001,161 @@ class UserController extends Controller {
      */
     public function viewOrg(Request $request)
     {
-        $uri = $request->uri;
+        $uri = $request->offsetGet('uri');
         $orgId = $request->has('org_id') ? $request->org_id : Organisation::where('uri', $uri)->value('id');
-        $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
-        $api = new ApiOrganisations($request);
-        $result = $api->getOrganisationDetails($request)->getData();
 
-        return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
+        if ($orgId) {
+            $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
+            $api = new ApiOrganisation($request);
+            $result = $api->getOrganisationDetails($request)->getData();
+
+            return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
+        }
+
+        return redirect('/user/organisations');
     }
 
+    public function viewOrgMembers(Request $request)
+    {
+        $perPage = 6;
+        $uri = $request->offsetGet('uri');
+        $filter = $request->offsetGet('filter');
+        $userId = $request->offsetGet('user_id');
+        $roleId = $request->offsetGet('role_id');
+        $keywords = $request->offsetGet('keywords');
+        $org = $request->has('org_id')
+            ? Organisation::find($request->org_id)
+            : Organisation::where('uri', $uri)->first();
+
+        if ($org) {
+            $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
+
+            $criteria = ['org_id' => $org->id];
+
+            if ($filter == 'for_approval') {
+                $criteria['for_approval'] = true;
+            }
+
+            if (is_numeric($filter)) {
+                $criteria['role_id'] = $filter;
+            }
+
+            if (!empty($keywords)) {
+                $criteria['keywords'] = $keywords;
+            }
+
+            $criteria['records_per_page'] = $perPage;
+            $criteria['page_number'] = $request->offsetGet('page', 1);
+
+            $rq = Request::create('/api/getMembers', 'POST', $criteria);
+            $api = new ApiOrganisation($rq);
+            $result = $api->getMembers($rq)->getData();
+            $paginationData = $this->getPaginationData(
+                $result->members,
+                $result->total_records,
+                $request->except('page'),
+                $perPage
+            );
+
+            $rq = Request::create('/api/listRoles', 'POST');
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+
+            if ($request->has('edit_member')) {
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+            }
+
+            return view('user/orgMembers', [
+                'class'         => 'user',
+                'members'       => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'organisation'  => $org,
+                'roles'         => $roles,
+                'filter'        => $filter,
+                'keywords'      => $keywords,
+            ]);
+        }
+
+        return redirect('/user/organisations');
+    }
+
+    public function addOrgMembersNew(Request $request)
+    {
+        $uri = $request->offsetGet('uri');
+        $org = $request->has('org_id')
+            ? Organisation::find($request->org_id)
+            : Organisation::where('uri', $uri)->first();
+
+        if ($org && $request->isMethod('post')) {
+            $post = $request->all();
+
+            $rq = Request::create('/register', 'POST', ['data' => $post]);
+            $api = new ApiUser($rq);
+            $result = $api->register($rq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+
+                return redirect()->route('userOrgMembersView', ['uri' => $org->uri]);
+            } else {
+                $error = $result->errors;
+            }
+
+            $rq = Request::create('/api/listRoles', 'POST');
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+
+            return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail', 'roles'));
+        }
+
+        return redirect('/user/organisations');
+    }
+
+    public function delOrgMember(Request $request)
+    {
+        $id = $request->offsetGet('id');
+        $uri = $request->offsetGet('uri');
+        $org = $request->has('org_id')
+            ? Organisation::find($request->org_id)
+            : Organisation::where('uri', $uri)->first();
+
+        if (Auth::check() && $org && $id) {
+            $rq = Request::create('/api/delMember', 'POST', [
+                'api_key'   => Auth::user()->api_key,
+                'org_id'    => $org->id,
+                'user_id'   => $id,
+            ]);
+            $api = new ApiOrganisation($rq);
+            $result = $api->delMember($rq)->getData();
+
+            if (!empty($result->success)) {
+                $request->session()->flash('alert-success', __('custom.delete_success'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.delete_error'));
+            }
+        }
+
+        return redirect()->action('UserController@viewOrgMembers', ['uri' => $uri]);
+    }
+
+    public function addOrgMembersByMail(Request $request)
+    {
+
+    }
 
     /**
      * Sends a confirmation email when changing email
@@ -1118,7 +1263,7 @@ class UserController extends Controller {
         $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
         $post['data']['description'] = $post['data']['descript'];
         $request = Request::create('/api/editOrganisation', 'POST', $post);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->editOrganisation($request)->getData();
         $errors = !empty($result->errors) ? $result->errors : [];
 
@@ -1208,7 +1353,7 @@ class UserController extends Controller {
     {
         $params['criteria']['user_id'] = \Auth::user()->id;
         $request = Request::create('/api/listOrganisations', 'POST', $params);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->listOrganisations($request)->getData();
         $organisations = [];
 
@@ -1228,7 +1373,7 @@ class UserController extends Controller {
     {
         $params['criteria']['user_id'] = \Auth::user()->id;
         $request = Request::create('/api/listGroups', 'POST', $params);
-        $api = new ApiOrganisations($request);
+        $api = new ApiOrganisation($request);
         $result = $api->listGroups($request)->getData();
         $groups = [];
 
@@ -1393,7 +1538,7 @@ class UserController extends Controller {
                     ];
 
                     $rq = Request::create('/api/listOrganisations', 'POST', $params);
-                    $api = new ApiOrganisations($rq);
+                    $api = new ApiOrganisation($rq);
                     $res = $api->listOrganisations($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->organisations)) {
@@ -1438,7 +1583,7 @@ class UserController extends Controller {
                     ];
 
                     $rq = Request::create('/api/listGroups', 'POST', $params);
-                    $api = new ApiOrganisations($rq);
+                    $api = new ApiOrganisation($rq);
                     $res = $api->listGroups($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->groups)) {
@@ -1686,7 +1831,7 @@ class UserController extends Controller {
      */
     private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData, &$filters, $filter, $objIdFilter = false) {
         $rq = Request::create('/api/listDataSets', 'POST', $params);
-        $api = new ApiDataSets($rq);
+        $api = new ApiDataSet($rq);
         $res = $api->listDataSets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
@@ -1704,7 +1849,7 @@ class UserController extends Controller {
                         ];
 
                         $rq = Request::create('/api/getOrganisationDetails', 'GET', $params);
-                        $api = new ApiOrganisations($rq);
+                        $api = new ApiOrganisation($rq);
                         $res = $api->getOrganisationDetails($rq)->getData();
 
                         $objOwner = [
@@ -2006,7 +2151,7 @@ class UserController extends Controller {
             }
 
             $setsReq = Request::create('api/getUsersDataSetCount', 'POST', $params);
-            $apiDataSet = new ApiDataSets($setsReq);
+            $apiDataSet = new ApiDataSet($setsReq);
             $setsCount = $apiDataSet->getUsersDataSetCount($setsReq)->getData();
 
             if ($request->has('follow')) {
@@ -2089,7 +2234,7 @@ class UserController extends Controller {
             ];
 
             $groupReq = Request::create('api/addGroup', 'POST', $params);
-            $orgApi = new ApiOrganisations($groupReq);
+            $orgApi = new ApiOrganisation($groupReq);
             $result = $orgApi->addGroup($groupReq)->getData();
 
             if ($result->success) {
@@ -2126,7 +2271,7 @@ class UserController extends Controller {
         ];
 
         $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
-        $api = new ApiOrganisations($orgReq);
+        $api = new ApiOrganisation($orgReq);
         $result = $api->getUserOrganisations($orgReq)->getData();
 
         if ($result->success) {
@@ -2161,7 +2306,7 @@ class UserController extends Controller {
         $params = ['group_id' => $id];
 
         $grpReq = Request::create('/api/getGroupDetails', 'POST', $params);
-        $api = new ApiOrganisations($grpReq);
+        $api = new ApiOrganisation($grpReq);
         $result = $api->getGroupDetails($grpReq)->getData();
 
         if ($result->success) {
@@ -2191,7 +2336,7 @@ class UserController extends Controller {
         ];
 
         $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
-        $api = new ApiOrganisations($delReq);
+        $api = new ApiOrganisation($delReq);
         $delRes = $api->deleteGroup($delReq)->getData();
 
         if ($delRes->success) {
@@ -2219,7 +2364,7 @@ class UserController extends Controller {
 
         $model = Organisation::find($id)->loadTranslations();
         $withModel = CustomSetting::where('org_id', $id)->get()->loadTranslations();
-        $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type);
+        $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
         if ($request->has('edit')) {
             $data = $request->all();
@@ -2233,7 +2378,7 @@ class UserController extends Controller {
             ];
 
             $editReq = Request::create('/api/editGroup', 'POST', $params);
-            $api = new ApiOrganisations($editReq);
+            $api = new ApiOrganisation($editReq);
             $result = $api->editGroup($editReq)->getData();
 
             if ($result->success) {
@@ -2380,7 +2525,7 @@ class UserController extends Controller {
         ];
 
         $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
-        $api = new ApiOrganisations($orgReq);
+        $api = new ApiOrganisation($orgReq);
         $result = $api->getUserOrganisations($orgReq)->getData();
 
         if ($result->success) {
@@ -2396,7 +2541,7 @@ class UserController extends Controller {
         if (!empty($dataSetIds)) {
             $params['criteria']['dataset_ids'] = $dataSetIds;
             $dataRq = Request::create('/api/listDataSets', 'POST', $params);
-            $dataApi = new ApiDataSets($dataRq);
+            $dataApi = new ApiDataSet($dataRq);
             $datasets = $dataApi->listDataSets($dataRq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
@@ -2450,7 +2595,7 @@ class UserController extends Controller {
         ];
 
         $searchRq = Request::create('/api/searchGroups', 'POST', $params);
-        $api = new ApiOrganisations($searchRq);
+        $api = new ApiOrganisation($searchRq);
         $grpData = $api->searchGroups($searchRq)->getData();
 
         $groups = !empty($grpData->groups) ? $grpData->groups : [];

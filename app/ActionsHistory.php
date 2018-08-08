@@ -14,7 +14,7 @@ class ActionsHistory extends Model
     const MODULE_NAMES = [
         'Category',
         'Tag',
-        'Organization',
+        'Organisation',
         'Group',
         'User',
         'Dataset',

@@ -167,13 +167,8 @@ Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);
 });
 
-<<<<<<< Updated upstream
 Route::match(['get', 'post'],'/password/forgotten', 'UserController@forgottenPassword');
 Route::match(['get', 'post'],'/password/reset', 'UserController@passwordReset')->name('passReset');
-=======
-Route::match(['get', 'post'], '/password/forgotten', 'UserController@forgottenPassword');
-Route::match(['get', 'post'], '/password/reset', 'UserController@passwordReset');
->>>>>>> Stashed changes
 
 Route::get('/request', function () {
     return view('request/dataRequest', ['class' => 'request']);

@@ -3,13 +3,13 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => $activeMenu])
+    @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="row">
         <div class="col-sm-6 col-xs-12 text-left">
-            <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/datasetCreate') }}">{{ __('custom.add_new_dataset') }}</a></span>
+            <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>
         </div>
         <div class="col-sm-6 col-xs-12 search-field text-right">
-            <form method="GET" action="{{ url('/user/organisations/search') }}">
+            <form method="GET" action="{{ url('/user/dataset/search') }}">
                 <input
                     type="text"
                     class="m-t-lg"
@@ -39,7 +39,7 @@
                                         <div class="pull-left row">
                                             <div class="col-xs-6">
                                                 <span class="badge badge-pill m-r-md m-b-sm">
-                                                    <a href="{{ url('/user/datasetEdit') }}">{{ __('custom.edit') }}</a>
+                                                    <a href="{{ route('datasetEdit', ['uri' => $set->uri]) }}">{{ __('custom.edit') }}</a>
                                                 </span>
                                             </div>
                                             <div class="col-xs-6">

@@ -219,6 +219,45 @@ class UserController extends Controller {
      * @return view with datasets
      *
      */
+    public function datasetSearch(Request $request)
+    {
+        $search = $request->q;
+
+        if (empty(trim($search))) {
+            return redirect('/user/datasets');
+        }
+
+        $perPage = 6;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'criteria'         => ['keywords' => $search],
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $searchRq = Request::create('/api/searchDataSet', 'POST', $params);
+        $api = new ApiDataSets($searchRq);
+        $result = $api->searchDataSet($searchRq)->getData();
+        $datasets = !empty($result->datasets) ? $result->datasets : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $getParams = [
+            'q' => $search
+        ];
+
+        $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
+
+        return view(
+            'user/datasets',
+            [
+                'class'         => 'user',
+                'datasets'      => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'search'        => $search
+            ]
+        );
+    }
+
     public function orgDatasets(Request $request) {
         $perPage = 6;
         $params = [
@@ -277,6 +316,7 @@ class UserController extends Controller {
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSets($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        // prepera request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $request->uri;
 
@@ -284,7 +324,11 @@ class UserController extends Controller {
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
-        return view('user/datasetView', ['class' => 'user', 'dataset' => $dataset->data, 'resources' => $resources->resources, 'activeMenu' => 'dataset']);
+        return view('user/datasetView', [
+            'class'     => 'user',
+            'dataset'   => $dataset->data,
+            'resources' => $resources->resources
+        ]);
     }
 
     /**
@@ -370,7 +414,6 @@ class UserController extends Controller {
     public function datasetCreate(Request $request, DataSet $datasetModel)
     {
         $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
@@ -381,13 +424,11 @@ class UserController extends Controller {
         if ($data) {
             // prepare post data for API request
             $data['locale'] = \LaravelLocalization::getCurrentLocale();
-            Log::debug($data['tags']);
             if (isset($data['tags'])) {
                 foreach ($data['tags'] as $locale => $tags) {
                     $data['tags'][$locale] = explode(',', $tags);
                 }
             }
-            Log::debug($data['tags']);
 
             if (!empty($data['group_id'])) {
                 $groupId = $data['group_id'];
@@ -408,11 +449,11 @@ class UserController extends Controller {
                     $gropupParams['group_id'] = $groupId;
                     $gropupParams['data_set_uri'] = $result->uri;
                     $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $gropupParams);
-                    $result = $api->addDataSetToGroup($addGroup)->getData();
+                    $resultGroup = $api->addDataSetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
-                return redirect()->route('datasetView', ['uri' => $request->uri]);
+                return redirect()->route('datasetView', ['uri' => $result->uri]);
             } else {
 
                 foreach ($result->errors as $field => $msg) {
@@ -444,11 +485,33 @@ class UserController extends Controller {
      *
      * @return view for edditing a dataset
      */
-    public function datasetEdit()
+    public function datasetEdit(Request $request, DataSet $datasetModel)
     {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $data = $request->all();
+
+        $params['dataset_uri'] = $request->uri;
+        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSets($detailsReq);
+        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+
+        $datasetData = $dataset->data;
+
         return view('user/datasetEdit', [
-            'class' => 'user',
-        ]);
+            'class'         => 'user',
+            'fields'        => $dataset,
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ])->with('errors', $errors);
     }
 
     public function translate()

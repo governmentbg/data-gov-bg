@@ -51,7 +51,10 @@
         </form>
         <div class="form-group row">
             <div class="col-xs-12">
-                <button type="button" class="col-xs-12 btn btn-primary">{{ __('custom.forgotten_password') }}</button>
+                 <a
+                    href="{{ url('/password/forgotten') }}"
+                    class="col-xs-12 btn btn-primary"
+                >{{ __('custom.forgotten_password') }}</a>
             </div>
         </div>
         <div class="form-group row text-center">

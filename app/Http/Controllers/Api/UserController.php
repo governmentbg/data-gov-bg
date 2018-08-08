@@ -11,11 +11,12 @@ use App\Organisation;
 use App\UserToOrgRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-Use \DB;
 Use Uuid;
 
 class UserController extends ApiController
@@ -444,8 +445,9 @@ class UserController extends ApiController
             ];
 
             Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {
-                $m->from('info@finite-soft.com', 'Open Data');
-                $m->to($data['email'], $data['firstname'])->subject('Смяна на екектронен адрес!');
+                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                $m->to($data['email'], $data['firstname']);
+                $m->subject('Смяна на екектронен адрес!');
             });
 
             if (count(Mail::failures()) > 0) {
@@ -525,7 +527,7 @@ class UserController extends ApiController
         }
 
         if (!empty($newUserData)) {
-            $newUserData['updated_by'] = \Auth::id();
+            $newUserData['updated_by'] = Auth::id();
 
             try {
                 User::where('id', $request->id)->update($newUserData);
@@ -595,7 +597,7 @@ class UserController extends ApiController
         }
 
         try {
-            $user->deleted_by = \Auth::id();
+            $user->deleted_by = Auth::id();
             $user->save();
         } catch (QueryException $e) {
             Log::error($e->getMessage());
@@ -628,7 +630,7 @@ class UserController extends ApiController
 
         try {
             $user->api_key = Uuid::generate(4)->string;
-            $user->updated_by = \Auth::id();
+            $user->updated_by = Auth::id();
             $user->save();
         } catch (QueryException $e) {
             Log::error($e->getMessage());
@@ -650,124 +652,132 @@ class UserController extends ApiController
      * @param integer data[role_id] - optional
      * @param integer data[org_id] - optional
      *
-     *
      * @return json $response - response with status
      */
     public function inviteUser(Request $request)
     {
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'data'          => 'required|array',
-                'data.email'    => 'required|email',
-                'data.is_admin' => 'nullable|integer',
-                'data.approved' => 'nullable|integer',
-                'data.role_id'  => 'nullable|integer',
-                'data.org_id'   => 'nullable|integer',
-            ]
-        );
+        $errors = [];
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required|array']);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Invite user failure', $validator->errors()->messages());
+            $errors = $validator->errors()->messages();
+        } else {
+            $validator = \Validator::make($post['data'], [
+                'email'    => 'required|email',
+                'is_admin' => 'nullable|integer',
+                'approved' => 'nullable|integer',
+                'role_id'  => 'nullable|integer|required_with:org_id',
+                'org_id'   => 'nullable|integer|required_with:role_id',
+                'generate' => 'nullable|boolean',
+            ]);
+
+            if ($validator->fails()) {
+                $errors = $validator->errors()->messages();
+            }
         }
 
-        $password = Uuid::generate(4)->string;
-        $reqOrgId = isset($request->data['org_id']) ? $request->data['org_id']: null;
+        if (!empty($errors)) {
+            return $this->errorResponse('Invite user failure', $errors);
+        }
 
-        $loggedUser = User::with('userToOrgRole')->find(\Auth::id());
-        $loggedOrgId = isset($loggedUser['userToOrgRole']['org_id']) ? $loggedUser['userToOrgRole']['org_id'] : null;
-        $loggedRoleRight = isset($loggedUser['userToOrgRole']['role_id'])
-            ? RoleRight::where('role_id', $loggedUser['userToOrgRole']['role_id'])->value('right')
-            : null;
+        if (!empty($post['data']['generate'])) {
+            DB::beginTransaction();
 
-        $user = new User;
+            $password = Uuid::generate(4)->string;
+            $reqOrgId = isset($request->data['org_id']) ? $request->data['org_id']: null;
 
-        $user->username = $this->generateUsername($request->data['email']);
-        $user->password = bcrypt($password);
-        $user->email = $request->data['email'];
-        $user->firstname = '';
-        $user->lastname = '';
-        $user->add_info = '';
-        $user->is_admin = isset($request->data['is_admin']) && $loggedUser->is_admin
-            ? (int) $request->data['is_admin']
-            : 0;
-        $user->active = 0;
-        $user->approved = 0;
-        $user->api_key = Uuid::generate(4)->string;
-        $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
-        $user->remember_token = null;
+            $loggedUser = User::with('userToOrgRole')->find(Auth::id());
+            $loggedOrgId = isset($loggedUser['userToOrgRole']['org_id']) ? $loggedUser['userToOrgRole']['org_id'] : null;
+            $loggedRoleRight = isset($loggedUser['userToOrgRole']['role_id'])
+                ? RoleRight::where('role_id', $loggedUser['userToOrgRole']['role_id'])->value('right')
+                : null;
 
-        if (
-            $loggedUser->is_admin ||
-            ($loggedOrgId == $reqOrgId && in_array($loggedRoleRight, [RoleRight::RIGHT_EDIT, RoleRight::RIGHT_ALL]))
-        ) {
-            if (isset($request->data['approved'])) {
-                $user->approved = $request->data['approved'];
-            }
+            $user = new User;
+
+            $user->username = $this->generateUsername($request->data['email']);
+            $user->password = bcrypt($password);
+            $user->email = $request->data['email'];
+            $user->firstname = '';
+            $user->lastname = '';
+            $user->add_info = '';
+            $user->is_admin = isset($request->data['is_admin']) && $loggedUser->is_admin
+                ? (int) $request->data['is_admin']
+                : 0;
+            $user->active = 0;
+            $user->approved = 0;
+            $user->api_key = Uuid::generate(4)->string;
+            $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
+            $user->remember_token = null;
 
             try {
                 $user->save();
 
-                $mailData = [
-                    'user'      => \Auth::user()->firstname .' '. \Auth::user()->lastname,
-                    'username'  => $user->username,
-                    'pass'      => $password,
-                ];
+                if (
+                    $loggedUser->is_admin
+                    || (
+                        $loggedOrgId == $reqOrgId
+                        && in_array($loggedRoleRight, [RoleRight::RIGHT_EDIT, RoleRight::RIGHT_ALL])
+                    )
+                ) {
+                    if (isset($request->data['approved'])) {
+                        $user->approved = $request->data['approved'];
+                    }
 
-                Mail::send('mail/generateMail', $mailData, function ($m) use ($user) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($user->email)->subject('Получихте покана за opendata.bg!');
-                });
+                    $template = 'mail/generateMail';
+                    $mailData = [
+                        'user'      => Auth::user()->firstname .' '. Auth::user()->lastname,
+                        'username'  => $user->username,
+                        'pass'      => $password,
+                    ];
 
-                if (count(Mail::failures()) > 0) {
-                    return $this->errorResponse('Failed to send mail');
+                    if (isset($request->data['role_id']) && isset($request->data['org_id'])) {
+                        $userToOrgRole = new UserToOrgRole;
+
+                        $userToOrgRole->user_id = $user->id;
+                        $userToOrgRole->role_id = $request->data['role_id'];
+                        $userToOrgRole->org_id = $request->data['org_id'];
+
+                        $userToOrgRole->save();
+                    }
                 }
+
+                DB::commit();
             } catch (QueryException $e) {
+                $mailData = null;
+
+                DB::rollback();
+
                 Log::error($e->getMessage());
-
-                return $this->errorResponse('Invite user failure');
-            }
-
-            if (isset($request->data['role_id']) || isset($request->data['org_id'])) {
-
-                $validator = \Validator::make(
-                    $request->all(),
-                    [
-                        'data.role_id' => 'required',
-                        'data.org_id'  => 'required',
-                    ]
-                );
-
-                if ($validator->fails()) {
-
-                    return $this->errorResponse('Invite user failure');
-                }
-
-                $userToOrgRole = new UserToOrgRole;
-
-                $userToOrgRole->user_id = $user->id;
-                $userToOrgRole->role_id = $request->data['role_id'];
-                $userToOrgRole->org_id = $request->data['org_id'];
-
-                try {
-                    $userToOrgRole->save();
-                } catch (QueryException $e) {
-                    Log::error($e->getMessage());
-
-                    return $this->errorResponse('Invite user failure');
-                }
             }
         } else {
-            try {
-                $user->save();
-            } catch (QueryException $e) {
-                Log::error($e->getMessage());
-
-                return $this->errorResponse('Invite user failure');
-            }
+            $template = 'mail/inviteMail';
+            $mailData = [
+                'user'  => Auth::user()->firstname .' '. Auth::user()->lastname,
+                'mail'  => $post['data']['email'],
+            ];
         }
 
-        //to do: send mail with hash id to user
+        if (!empty($mailData)) {
+            if ($mailData['user'] == ' ') {
+                $mailData['user'] = Auth::user()->username;
+            }
+
+            try {
+                Mail::send($template, $mailData, function ($m) use ($post) {
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($post['data']['email']);
+                    $m->subject(__('custom.invite_subject'));
+                });
+            } catch (\Swift_TransportException $ex) {
+                Log::error($ex->getMessage());
+
+                $validator->errors()->add('email', __('custom.send_mail_failed'));
+
+                return $this->errorResponse('Invite user failure', $validator->errors()->messages());
+            }
+        }
 
         return $this->successResponse();
     }
@@ -847,8 +857,9 @@ class UserController extends ApiController
             ];
 
             Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                $m->from('info@finite-soft.com', 'Open Data');
-                $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                $m->to($user->email, $user->firstname);
+                $m->subject('Акаунтът ви беше успешно създаден!');
             });
 
             if (count(Mail::failures()) > 0) {
@@ -1006,8 +1017,9 @@ class UserController extends ApiController
                 ];
 
                 Mail::send('mail/passReset', $mailData, function ($m) use ($user) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($user['email'], $user['firstname'])->subject(__('custom.pass_change').'!');
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user['email'], $user['firstname']);
+                    $m->subject(__('custom.pass_change').'!');
                 });
 
                 $newUserData['hash_id'] = $mailData['hash'];

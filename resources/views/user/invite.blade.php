@@ -33,7 +33,7 @@
             </div>
         </div>
     </div>
-    <div class="row text-center">
+    <div class="row">
         <div class="frame col-lg-6">
             <form class="form-horizontal" method="post">
                 {{ csrf_field() }}

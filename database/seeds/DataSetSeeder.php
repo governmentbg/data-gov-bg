@@ -1,5 +1,6 @@
 <?php
 
+use App\Locale;
 use App\DataSet;
 use App\Organisation;
 use Faker\Factory as Faker;
@@ -33,8 +34,8 @@ class DataSetSeeder extends Seeder
             DataSet::create([
                 'org_id'        => $organisation,
                 'uri'           => $this->faker->uuid(),
-                'name'          => ApiController::trans($locale, [$locale => $this->faker->word()]),
-                'descript'      => ApiController::trans($locale, [$locale => $this->faker->text()]),
+                'name'          => ApiController::trans($empty, [$locale => $this->faker->word()]),
+                'descript'      => ApiController::trans($empty, [$locale => $this->faker->text()]),
                 'author_name'   => $this->faker->name(),
                 'author_email'  => $this->faker->email(),
                 'support_name'  => $this->faker->name(),

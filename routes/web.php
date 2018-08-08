@@ -74,15 +74,15 @@ Route::get('/logout', function() {
     return view('home/index', ['class' => 'index']);
 });
 
-Route::get('/preGenerated', 'UserController@preGenerated');
+Route::get('/preGenerated', 'UserController@preGenerated')->name('preGenerated');
 
 Route::match(['get', 'post'],'/login', 'Auth\LoginController@login')->name('login');
 
-Route::match(['get', 'post'],'/registration', 'UserController@registration');
+Route::match(['get', 'post'],'/registration', 'UserController@registration')->name('registration');
 Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
 
-Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
-Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
+Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation')->name('confirmation');
+Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation')->name('mailConfirmation');
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
@@ -154,7 +154,7 @@ Route::get('/user/orgMembers', function () {
 });
 
 Route::match(['get', 'post'],'/password/forgotten', 'UserController@forgottenPassword');
-Route::match(['get', 'post'],'/password/reset', 'UserController@passwordReset');
+Route::match(['get', 'post'],'/password/reset', 'UserController@passwordReset')->name('passReset');
 
 Route::get('/request', function () {
     return view('request/dataRequest', ['class' => 'request']);

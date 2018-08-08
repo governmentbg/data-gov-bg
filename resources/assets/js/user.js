@@ -31,13 +31,9 @@ $(function() {
             $('#delete-confirm').modal('toggle');
         })
     }
-
-    if ($('.js-select').length) {
-        $('.js-select').select2({minimumResultsForSearch: -1});
-    }
 });
 
-$(function(){
+$(function() {
     $('#sendTermOfUseReq').on('submit', function(e) {
         e.preventDefault();
         $.ajax({
@@ -65,5 +61,31 @@ $(function(){
                 });
             }
         });
+    });
+});
+
+/**
+ * Select 2 functionality
+ *
+ */
+function initSelect2() {
+    if ($('.js-select').length) {
+        $('.js-select').select2({minimumResultsForSearch: -1});
+    }
+};
+initSelect2();
+
+$(function() {
+    $('.js-member-edit').on('click', function(e) {
+        var $controls = $(this).closest('.js-member-admin-controls');
+        $controls.addClass('hidden');
+        $controls.siblings('.js-member-edit-controls').removeClass('hidden');
+        initSelect2();
+    });
+
+    $('.js-member-cancel').on('click', function(e) {
+        var $controls = $(this).closest('.js-member-edit-controls');
+        $controls.siblings('.js-member-admin-controls').removeClass('hidden');
+        $controls.addClass('hidden');
     });
 });

@@ -1,7 +1,11 @@
 .container {
     .filter-content {
         .filter-type, .sort-by {
+            display: inline-block;
+            font-size: 0;
+
             li {
+                font-size: 15px;
                 display: inline-block;
 
                 > a {
@@ -14,7 +18,7 @@
                         background: none;
                     }
 
-                    @include xsMobile() {
+                    @include smMobile() {
                         padding: 5px;
                         font-size: 13px;
                     }
@@ -32,6 +36,29 @@
 
         .rounded-input {
             width: 80%;
+        }
+
+        .invite-choice {
+            > div {
+                display: inline-block;
+                vertical-align: top;
+            }
+
+            > ul {
+                display: inline-block;
+                vertical-align: top;
+                margin-left: 20px;
+            }
+
+            @include xsMobile() {
+                > div {
+                    float: none;
+                }
+
+                > ul {
+                    float: none;
+                }
+            }
         }
     }
 

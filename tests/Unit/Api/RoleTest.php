@@ -2,8 +2,11 @@
 
 namespace Tests\Unit\Api;
 
-use Tests\TestCase;
 use App\Role;
+use App\Locale;
+use Tests\TestCase;
+use App\Organisation;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -67,16 +70,35 @@ class RoleTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    public function testListeRole()
+    public function testListRole()
     {
         $response = $this->post(url('api/listRoles'), [
             'api_key'   => $this->getApiKey(),
-            'active'    => 0
+            'criteria'  => [
+                'active'    => 0,
+            ]
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $locales = Locale::where('active', 1)->get()->toArray();
+        $locale = $this->faker->randomElement($locales)['locale'];
+        $types = array_keys(Organisation::getPublicTypes());
+        $type = $this->faker->randomElement($types);
+        $name = $this->faker->name;
+        
+        $org = Organisation::create([
+            'type'              => $type,
+            'name'              => ApiController::trans($locale, $name),
+            'uri'               => $this->faker->uuid(),
+            'active'            => $this->faker->boolean(),
+            'approved'          => $this->faker->boolean(),
         ]);
 
-        $response
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        $response = $this->post(url('api/listRoles'), [
+            'api_key'   => $this->getApiKey(),
+            'criteria'  => [
+                'org_id'    => $org->id,
+            ]
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testModifyRoleRights()

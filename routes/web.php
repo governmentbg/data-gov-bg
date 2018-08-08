@@ -11,13 +11,9 @@
 |
 */
 
-//Route::get('/', 'HomeController@index');
-//
-//Auth::routes();
-
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
-    Route::match(['get', 'post'],'/user/profile/{id}', 'UserController@profile');
+    Route::match(['get', 'post'], '/user/profile/{id}', 'UserController@profile');
     Route::get('/users/list/search', 'UserController@searchUsers');
 
     Route::post('/user/organisations/register', 'UserController@registerOrg');
@@ -36,20 +32,19 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/user/dataset/edit', 'UserController@datasetEdit')->name('datasetEdit');
 
         Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
-        Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
+        Route::get('/user/datasetEdit', 'UserController@datasetEdit');
+        Route::match(['get', 'post'], '/user/invite', 'UserController@inviteUser');
         Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
-        Route::match(['get', 'post'],'/user/registerGroup', 'UserController@registerGroup');
-        Route::match(['get', 'post'],'/user/userGroups', 'UserController@userGroups');
-        Route::match(['get', 'post'],'/user/groupView/{uri}', 'UserController@groupView');
-        Route::match(['get', 'post'],'/user/editGroup/{id}', 'UserController@editGroup');
+        Route::match(['get', 'post'], '/user/registerGroup', 'UserController@registerGroup');
+        Route::match(['get', 'post'], '/user/userGroups', 'UserController@userGroups');
+        Route::match(['get', 'post'], '/user/groupView/{uri}', 'UserController@groupView');
+        Route::match(['get', 'post'], '/user/editGroup/{id}', 'UserController@editGroup');
         Route::post('/user/group/delete/{id}', 'UserController@deleteGroup');
         Route::match(['get', 'post'], '/user/groupDatasets', 'UserController@groupDatasets');
-
 
         Route::match(['get', 'post'], '/user/organisations/datasets', 'UserController@orgDatasets');
         Route::get('/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
         Route::get('/user/organisations/datasetView', 'UserController@orgDatasetView')->name('orgDatasetView');
-
 
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete', 'UserController@deleteOrg');
@@ -60,6 +55,27 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
         Route::get('/user/organisations/datasets/search', 'UserController@searchDataset');
 
+        Route::match(
+            ['get', 'post'],
+            '/user/organisations/members',
+            'UserController@viewOrgMembers'
+        )->name('userOrgMembersView');
+        Route::get(
+            '/user/organisations/members/addByMail',
+            'UserController@addOrgMembersByMail'
+        )->name('addOrgMembersByMail');
+        Route::get(
+            '/user/organisations/members/addNew',
+            'UserController@addOrgMembersNew'
+        )->name('addOrgMembersNew');
+        Route::get(
+            '/user/organisations/members/addExisting',
+            'UserController@addOrgMembersExisting'
+        )->name('addOrgMembersExisting');
+        Route::get(
+            '/user/organisations/members/delete',
+            'UserController@delOrgMember'
+        )->name('delOrgMember');
     });
 });
 
@@ -76,7 +92,7 @@ Route::get('/logout', function() {
 
 Route::get('/preGenerated', 'UserController@preGenerated')->name('preGenerated');
 
-Route::match(['get', 'post'],'/login', 'Auth\LoginController@login')->name('login');
+Route::match(['get', 'post'], '/login', 'Auth\LoginController@login')->name('login');
 
 Route::match(['get', 'post'],'/registration', 'UserController@registration')->name('registration');
 Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
@@ -151,8 +167,13 @@ Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);
 });
 
+<<<<<<< Updated upstream
 Route::match(['get', 'post'],'/password/forgotten', 'UserController@forgottenPassword');
 Route::match(['get', 'post'],'/password/reset', 'UserController@passwordReset')->name('passReset');
+=======
+Route::match(['get', 'post'], '/password/forgotten', 'UserController@forgottenPassword');
+Route::match(['get', 'post'], '/password/reset', 'UserController@passwordReset');
+>>>>>>> Stashed changes
 
 Route::get('/request', function () {
     return view('request/dataRequest', ['class' => 'request']);

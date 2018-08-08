@@ -69,17 +69,17 @@ $('.js-close-navbar').on('click', function(){
 
     var $sidebar = $('.js-sidenav');
 
-    if ($("#sidebar-wrapper").is(':visible')) {
-        $("#sidebar-wrapper").css('display', 'none');
+    if ($('#sidebar-wrapper').is(':visible')) {
+        $('#sidebar-wrapper').css('display', 'none');
         $('.sidebar-open').show();
         $('#app').css('min-height', 'auto');
     } else {
         $('.sidebar-open').hide();
-        $("#sidebar-wrapper").css('display', 'block');
-        $("#sidebar-wrapper").css('height', 'max-content !important');
+        $('#sidebar-wrapper').css('display', 'block');
+        $('#sidebar-wrapper').css('height', 'max-content !important');
 
         if ($('#app').height() < $sidebar.height()) {
-            $('#app').css('min-height', ($sidebar.height() + 220) +'px');
+            $('#app').css('min-height', ($sidebar.height() + 220) + 'px');
         }
     }
 });
@@ -96,4 +96,16 @@ $('.js-check-url').mouseover(function(){
         $('.js-check-url').addClass('index');
         $('.js-check-url').removeClass('user');
     }
+});
+
+/**
+ * Confirmation dialog
+ *
+ */
+$(function() {
+    $('[data-confirm]').on('click', function(e) {
+        if (!confirm($(this).data('confirm'))) {
+            e.preventDefault();
+        }
+    })
 });

@@ -1,23 +1,26 @@
 .theme-user {
-    .sidenav {
-        background-color: transparent !important;
+    .container > .sidenav {
+        margin-left: -15px;
     }
+
+    .sidenav {
+        .nav {
+            @include mdMobile() {
+                padding-left: 0;
+            }
+        }
+    }
+
     .sidebar-submenu.open {
         display: block;
+    }
 
-        li {
-            > a {
-                &:after {
-                    display: none;
-                }
+    .org-nav-bar {
+        margin-top: 10px;
 
-                &.active, &:hover, &:focus, &:active {
-                    &:after {
-                        left: 39%;
-                        display:block;
-                    }
-                }
-            }
+        .filter-type {
+            border-radius: 5px;
+            border: 1px solid $themeUser;
         }
     }
 
@@ -26,6 +29,7 @@
             clear: both;
         }
     }
+
     .my-profile {
         color: $black;
         font-size: 28px;
@@ -67,6 +71,7 @@
         font-weight: normal;
         margin-bottom: 0;
     }
+
     #org-img {
         opacity: 0;
         position: absolute;
@@ -215,12 +220,12 @@
                 div {
                     &.create-org {
                         margin-top: 20px !important;
+
                         div {
                             text-align: left;
                         }
                     }
                     div {
-                        margin-bottom: 10px;
                         .my-profile {
                             font-size: 24px;
                         }
@@ -239,19 +244,21 @@
                 div {
                     &.create-org {
                         margin-top: 20px !important;
+
                         div {
                             text-align: left;
                             font-size: 13px;
                         }
                     }
+
                     div {
-                        margin-bottom: 10px;
                         .my-profile {
                             font-size: 24px;
                         }
                     }
                 }
             }
+
             .search {
                text-align: left;
             }
@@ -656,4 +663,8 @@
         background-color: #991e3e !important;
         border-color: #991e3e !important;
     }
+}
+
+.member-edit-form {
+    max-width: 310px;
 }

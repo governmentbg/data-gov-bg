@@ -327,6 +327,8 @@ class DataSetController extends ApiController
     {
         $post = $request->all();
         $criteria = !empty($post['criteria']) ? $post['criteria'] : false;
+        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
 
         if ($criteria) {
             $validator = \Validator::make($post, [
@@ -351,14 +353,17 @@ class DataSetController extends ApiController
                 $reported = [];
 
                 try {
-                    $query = DataSet::where('status', DataSet::STATUS_DRAFT);
+                    $query = DataSet::select();
 
                     if (!empty($request->criteria['dataset_ids'])) {
                         $query->whereIn('id', $request->criteria['dataset_ids']);
                     }
 
+                    // if user id criteria passed get all his datasets, if not get only published
                     if (!empty($criteria['created_by'])) {
                         $query->where('created_by', $criteria['created_by']);
+                    } else {
+                        $query->where('status', DataSet::STATUS_PUBLISHED);
                     }
 
                     if (!empty($criteria['org_id'])) {
@@ -535,12 +540,17 @@ class DataSetController extends ApiController
 
                 foreach ($query->get() as $set) {
                     $result['name'] = $set->name;
+                    $result['uri'] = $set->uri;
                     $result['sla'] = $set->sla;
                     $result['descript'] = $set->descript;
                     $result['uri'] = $set->uri;
                     $result['created_at'] = (string) $set->created_at;
                     $result['followers_count'] = $set->userFollow()->count();
                     $result['reported'] = 0;
+                    $result['created_at'] = isset($set->created_at) ? $set->created_at->toDateTimeString() : null;
+                    $result['updated_at'] = isset($set->updated_at) ? $set->updated_at->toDateTimeString() : null;
+                    $result['created_by'] = $set->created_by;
+                    $result['updated_by'] = $set->updated_by;
 
                     $hasRes = $set->resource()->count();
 
@@ -595,7 +605,9 @@ class DataSetController extends ApiController
                 $data['sla'] = $data->sla;
                 $data['descript'] = $data->descript;
                 $data['reported'] = 0;
-                $data->category;
+                //TODO show category and tags
+                $category = $data->category;
+                $tags = $data->dataSetSubCategory;
 
                 $hasRes = $data->resource()->count();
 

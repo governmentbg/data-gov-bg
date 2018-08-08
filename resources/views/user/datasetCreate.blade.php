@@ -85,7 +85,7 @@
     @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
-        <form method="POST" action="{{ url('/user/datasetCreate') }}">
+        <form method="POST" action="{{ url('/user/dataset/create') }}">
             {{ csrf_field() }}
             <div class="form-group row {{ isset($errors['uri']) ? 'has-error' : '' }}">
                 <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>

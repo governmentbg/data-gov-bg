@@ -117,12 +117,12 @@ return [
     */
 
     'attributes' => [
-        'username' => 'Потребителско име',
-        'password' => 'Парола',
-        'firstname' => 'Име',
-        'lastname' => 'Фамилия',
-        'email' => 'Имейл Адрес',
-        'password_confirm' => 'Потвърди парола',
+        'username' => 'потребителско име',
+        'password' => 'парола',
+        'firstname' => 'име',
+        'lastname' => 'фамилия',
+        'email' => 'имейл адрес',
+        'password_confirm' => 'потвърди парола',
     ],
 
 ];

@@ -9,6 +9,10 @@ return [
     |
     */
 
+    'send_mail_failed' => 'A problem occured while sending e-mail!',
+    'invite_subject' => 'Invite received for Open Data!',
+    'invite_fail' => 'Invite sent failure!',
+    'invite_success' => 'Invite sent successfully!',
     'login' => 'log in',
     'logout' => 'log out',
     'add_new_dataset' => 'Add new dataset',

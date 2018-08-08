@@ -7,27 +7,28 @@ use App\Locale;
 use App\DataSet;
 use App\UserSetting;
 use App\Organisation;
+use App\CustomSetting;
 use App\UserToOrgRole;
 use App\ActionsHistory;
-use App\CustomSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSets;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
-use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
-use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
+use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisations;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
+use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 
 class UserController extends Controller {
 
@@ -1053,8 +1054,9 @@ class UserController extends Controller {
                 ];
 
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($mailData['mail'], $mailData['user'])->subject('Смяна на екектронен адрес!');
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($mailData['mail'], $mailData['user']);
+                    $m->subject('Смяна на екектронен адрес!');
                 });
             }
         }
@@ -1252,9 +1254,9 @@ class UserController extends Controller {
     {
         $class = 'user';
         $invData = $request->all();
-
+        $apiKey = Auth::user()->api_key;
         $roleReqData = [
-            'api_key'   => Auth::user()->api_key,
+            'api_key'   => $apiKey,
             'criteria'  => [
                 'active'    => 1,
             ],
@@ -1263,46 +1265,30 @@ class UserController extends Controller {
         $roleReq = Request::create('/api/listRoles', 'POST', $roleReqData);
         $roleApi = new ApiRole($roleReq);
         $roleResult = $roleApi->listRoles($roleReq)->getData();
+        $roleList = isset($roleResult->roles) ? $roleResult->roles : [];
 
-        if ($roleResult->success) {
-            $roleList = $roleResult->roles;
-        } else {
-            $request->session()->flash('alert-danger', 'Не успяхме да се свържем с РОЛИ!');
+        if ($request->has('generate') || $request->has('send')) {
+            $post = $request->all();
 
-            return back();
-        }
+            $validator = Validator::make($request->all(), ['email' => 'required|email']);
 
-        if ($request->has('generate')) {
-            $invData['api_key'] = Auth::user()->api_key;
+            $invData['api_key'] = $apiKey;
+            $invData['generate'] = $request->has('generate');
 
-            $invRequset = Request::create('/api/inviteUser', 'POST', ['data' => $invData]);
-            $api = new ApiUser($invRequset);
-            $result = $api->inviteUser($invRequset)->getData();
+            $invRequest = Request::create('/api/inviteUser', 'POST', ['data' => $invData]);
+            $api = new ApiUser($invRequest);
+            $result = $api->inviteUser($invRequest)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', 'Успешно изпращане на покана!');
+                $request->session()->flash('alert-success', __('custom.invite_success'));
             } else {
-                foreach ($result->errors as $key => $msg) {
-                    $request->session()->flash('alert-danger', $msg[0]);
-                }
+                $errors = $result->errors;
             }
         }
 
-        if ($request->has('send')) {
-            $mailData = [
-                'user'  => Auth::user()->firstname .' '. Auth::user()->lastname,
-                'mail'  => $invData['email'],
-            ];
-
-            Mail::send('mail/inviteMail', $mailData, function ($m) use ($invData) {
-                $m->from('info@finite-soft.com', 'Open Data');
-                $m->to($invData['email'])->subject('Получихте покана за opendata.bg!');
-            });
-
-            if (count(Mail::failures()) > 0) {
-                $request->session()->flash('alert-danger', 'Неуспешно изпращане на покана!');
-            } else {
-                $request->session()->flash('alert-success', 'Успешно изпратена покана!');
+        if (!empty($errors)) {
+            foreach ($errors as $msg) {
+                $request->session()->flash('alert-danger', $msg[0]);
             }
         }
 
@@ -1790,8 +1776,9 @@ class UserController extends Controller {
                 ];
 
                 Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from('info@finite-soft.com', 'Open Data');
-                    $m->to($user->email, $user->firstname)->subject('Акаунтът ви беше успешно създаден!');
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user->email, $user->firstname);
+                    $m->subject('Акаунтът ви беше успешно създаден!');
                 });
             }
         }

@@ -9,6 +9,8 @@ return [
     |
     */
 
+    'register_subject' => 'Your account was created successfully!',
+    'confirm_mail_sent' => 'A confirmation email is sent to the specified email address.',
     'send_mail_failed' => 'A problem occured while sending e-mail!',
     'invite_subject' => 'Invite received for Open Data!',
     'invite_fail' => 'Invite sent failure!',

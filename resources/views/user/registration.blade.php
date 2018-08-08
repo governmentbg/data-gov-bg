@@ -20,11 +20,10 @@
                                     type="text"
                                     class="input-border-r-12 form-control"
                                     name="firstname"
+                                    value="{{ old('firstname') }}"
                                     placeholder="Иван"
                                 >
-                                @if (!empty($error->firstname))
-                                    <span class="error">{{ $error->firstname[0] }}</span>
-                                @endif
+                                <span class="error">{{ $errors->first('firstname') }}</span>
                             </div>
                         </div>
                         <div class="form-group row required">
@@ -34,11 +33,10 @@
                                     type="text"
                                     class="input-border-r-12 form-control"
                                     name="lastname"
+                                    value="{{ old('lastname') }}"
                                     placeholder="Иванов"
                                 >
-                                @if (!empty($error->lastname))
-                                    <span class="error">{{ $error->lastname[0] }}</span>
-                                @endif
+                                <span class="error">{{ $errors->first('lastname') }}</span>
                             </div>
                         </div>
                         <div class="form-group row required">
@@ -49,11 +47,9 @@
                                     class="input-border-r-12 form-control"
                                     name="email"
                                     placeholder="ivanov@abv.bg"
-                                    value="{{ !empty($invMail) ? $invMail : ''}}"
+                                    value="{{ !empty($invMail) ? $invMail : old('email') }}"
                                 >
-                                @if (!empty($error->email))
-                                    <span class="error">{{ $error->email[0] }}</span>
-                                @endif
+                                <span class="error">{{ $errors->first('email') }}</span>
                             </div>
                         </div>
                         <div class="form-group row required">
@@ -63,11 +59,10 @@
                                     type="text"
                                     class="input-border-r-12 form-control"
                                     name="username"
+                                    value="{{ old('username') }}"
                                     placeholder="Иванов"
                                 >
-                                @if (!empty($error->username))
-                                    <span class="error">{{ $error->username[0] }}</span>
-                                @endif
+                                <span class="error">{{ $errors->first('username') }}</span>
                             </div>
                         </div>
                         <div class="form-group row required">
@@ -77,10 +72,9 @@
                                     type="password"
                                     class="input-border-r-12 form-control"
                                     name="password"
+                                    value="{{ old('password') }}"
                                 >
-                                @if (!empty($error->password))
-                                    <span class="error">{{ $error->password[0] }}</span>
-                                @endif
+                                <span class="error">{{ $errors->first('password') }}</span>
                             </div>
                         </div>
                         <div class="form-group row required">
@@ -91,9 +85,7 @@
                                     class="input-border-r-12 form-control"
                                     name="password_confirm"
                                 >
-                                @if (!empty($error->password_confirm))
-                                    <span class="error">{{ $error->password_confirm[0] }}</span>
-                                @endif
+                                <span class="error">{{ $errors->first('password_confirm') }}</span>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -103,10 +95,8 @@
                                     type="text"
                                     class="input-border-r-12 form-control"
                                     name="add_info"
-                                ></textarea>
-                                @if (!empty($error->description))
-                                    <span class="error">{{ $error->description[0] }}</span>
-                                @endif
+                                >{{ old('add_info') }}</textarea>
+                                <span class="error">{{ $errors->first('add_info') }}</span>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -118,7 +108,10 @@
                                     size="5"
                                 >
                                     @foreach ($digestFreq as $id => $freq)
-                                        <option value="{{ $id }}">{{ $freq }}</option>
+                                        <option
+                                            value="{{ $id }}"
+                                            {{ old('user_settings')['newsletter_digest'] == $id ? 'selected' : null }}
+                                        >{{ $freq }}</option>
                                     @endforeach
                                 </select>
                             </div>

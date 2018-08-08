@@ -61,7 +61,6 @@ class LoginController extends Controller
                 $rememberMe = isset($loginData['remember_me']) ? $loginData['remember_me'] : false;
 
                 if (Auth::attempt($credentials, $rememberMe)) {
-
                     return redirect('/');
                 } else {
                     $error['password'][0] = 'Wrong password given.';
@@ -70,7 +69,6 @@ class LoginController extends Controller
                 $error = $validator->errors()->messages();
             }
         }
-
 
         return view('home/login', compact('error', 'class', $request->offsetGet('confirmed') ? 'message' : ''));
     }

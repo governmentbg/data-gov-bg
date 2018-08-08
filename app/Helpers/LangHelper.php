@@ -28,6 +28,16 @@ function uptrans($value, $count = 1, $params = [], $lang = null)
     return mb_strtoupper(trans_choice($value, $count, $params, $lang));
 }
 
+/**
+ * Translates the string and converts its first letter to upper case
+ * Works for cyrillic strings
+ *
+ * @method mb_ucfirst
+ * @param string  $string
+ *
+ * @return string
+ */
+
 function mb_ucfirst($string)
 {
     return mb_strtoupper(mb_substr($string, 0, 1)) . mb_substr($string, 1);

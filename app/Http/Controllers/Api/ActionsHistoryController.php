@@ -192,7 +192,7 @@ class ActionsHistoryController extends ApiController
                 $result[] = ['name' => $module];
             }
 
-            return $this->successResponse(['modules'=>$result],true);
+            return $this->successResponse(['modules'=>$result], true);
         }
 
         return $this->errorResponse('Get data failure');

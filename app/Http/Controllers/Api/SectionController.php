@@ -79,7 +79,7 @@ class SectionController extends ApiController
      * @param integer data[theme] - optional
      * @param string data[forum_link] - optional
      *
-     * @return JsonResponse - wint success or error
+     * @return JsonResponse - with success or error
      */
     public function editSection(Request $request)
     {

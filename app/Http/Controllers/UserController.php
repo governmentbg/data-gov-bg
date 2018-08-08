@@ -41,6 +41,11 @@ class UserController extends Controller {
 
     }
 
+    /**
+     * Function for getting an array of translatable fields
+     *
+     * @return array of fields
+     */
     public static function getTransFields()
     {
         return [
@@ -83,6 +88,11 @@ class UserController extends Controller {
         ];
     }
 
+     /**
+     * Function for getting an array of translatable fields for datasets
+     *
+     * @return array of fields
+     */
     public static function getDatasetTransFields()
     {
         return [
@@ -125,6 +135,11 @@ class UserController extends Controller {
         ];
     }
 
+    /**
+     * Function for getting an array of translatable fields for groups
+     *
+     * @return array of fields
+     */
     public static function getGroupTransFields()
     {
         return [
@@ -163,6 +178,13 @@ class UserController extends Controller {
         return redirect()->action('UserController@newsFeed');
     }
 
+    /**
+     * Displays a list of datasets created by the logged user
+     *
+     * @param Request $request
+     * @return view with datasets
+     *
+     */
     public function datasets(Request $request)
     {
         $params['api_key'] = \Auth::user()->api_key;
@@ -189,6 +211,14 @@ class UserController extends Controller {
         return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets, 'activeMenu' => 'dataset']);
     }
 
+     /**
+     * Displays a list of datasets created by the logged user
+     * for the given organisation
+     *
+     * @param Request $request
+     * @return view with datasets
+     *
+     */
     public function datasetSearch(Request $request)
     {
         $search = $request->q;
@@ -271,6 +301,14 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Displays detail information for a given dataset
+     * created by the given user
+     *
+     * @param Request $request
+     * @return view with dataset information
+     *
+     */
     public function datasetView(Request $request)
     {
         $params['dataset_uri'] = $request->uri;
@@ -293,6 +331,14 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Displays detailed information for a given dataset
+     * created by the given user for the organisation
+     *
+     * @param Request $request
+     * @return view with dataset information
+     *
+     */
     public function orgDatasetView(Request $request)
     {
         $params['dataset_uri'] = $request->uri;
@@ -333,6 +379,13 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Attempts to delete a dataset based on uri
+     *
+     * @param Request $request
+     * @return true on success and false on failure
+     *
+     */
     public function datasetDelete($uri)
     {
         $params['api_key'] = \Auth::user()->api_key;
@@ -349,6 +402,15 @@ class UserController extends Controller {
         return false;
     }
 
+    /**
+     * Prepares data and makes an API call to create a dataset
+     *
+     * @param Request $request
+     * @param DataSet $dataSetModel
+     *
+     * @return view with input fields for creation or with created dataset
+     *
+     */
     public function datasetCreate(Request $request, DataSet $datasetModel)
     {
         $visibilityOptions = $datasetModel->getVisibility();
@@ -415,6 +477,14 @@ class UserController extends Controller {
         ])->with('errors', $errors);
     }
 
+    /**
+     * Returns a view for editing a dataset
+     *
+     * @param Request $request
+     * @param Dataset $datasetModel
+     *
+     * @return view for edditing a dataset
+     */
     public function datasetEdit(Request $request, DataSet $datasetModel)
     {
         $visibilityOptions = $datasetModel->getVisibility();
@@ -448,6 +518,14 @@ class UserController extends Controller {
     {
     }
 
+    /**
+     * Loads a view for editing settings if user is logged
+     *
+     * @param Request $request
+     *
+     * @return view to homepage if user is not logged
+     * or a message if edit was successful or not
+     */
     public function settings(Request $request)
     {
         $class = 'user';
@@ -566,6 +644,14 @@ class UserController extends Controller {
         return redirect('/');
     }
 
+    /**
+     * Loads a view for editing settings if user is logged
+     *
+     * @param Request $request
+     *
+     * @return view to homepage if user is not logged
+     * or a message if edit was successful or not
+     */
     public function registration(Request $request)
     {
         $class = 'user';
@@ -603,6 +689,14 @@ class UserController extends Controller {
         return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail'));
     }
 
+    /**
+     * Loads a view for creating or creates an organisation
+     *
+     * @param Request $request
+     *
+     * @return view to login page organisation was created
+     * or a view for input
+     */
     public function orgRegistration(Request $request)
     {
         $class = 'user';
@@ -665,6 +759,13 @@ class UserController extends Controller {
     {
     }
 
+    /**
+     * Loads a view for browsing organisational resources
+     *
+     * @param Request $request
+     *
+     * @return view for browsing org resources
+     */
     public function orgResourceView(Request $request)
     {
         $uri = $request->uri;
@@ -692,6 +793,13 @@ class UserController extends Controller {
         return view('user/orgResourceView', ['class' => 'user', 'resource' => $resource, 'activeMenu' => 'organisation']);
     }
 
+    /**
+     * Loads a view for browsing organisations
+     *
+     * @param Request $request
+     *
+     * @return view for browsing organisations
+     */
     public function organisations(Request $request)
     {
         $perPage = 6;
@@ -717,6 +825,13 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Loads a view for deleting organisations
+     *
+     * @param Request $request
+     *
+     * @return view with a list of organisations and request success message
+     */
     public function deleteOrg(Request $request)
     {
         $params = [
@@ -733,6 +848,14 @@ class UserController extends Controller {
             : redirect('/user/organisations')->with('success', 'Организацията беше изтрита успешно!');
     }
 
+    /**
+     * Loads a view for searching organisations
+     *
+     * @param Request $request
+     *
+     * @return view with a list of organisations or
+     * a list of filtered organisations if search string is provided
+     */
     public function searchOrg(Request $request)
     {
         $search = $request->q;
@@ -775,6 +898,14 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Loads a view for searching datasets
+     *
+     * @param Request $request
+     *
+     * @return view with a list of datasets or
+     * a list of filtered datasets if search string is provided
+     */
     public function searchDataset(Request $request)
     {
         $search = $request->q;
@@ -817,6 +948,14 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Loads a view for registering an organisation
+     *
+     * @param Request $request
+     *
+     * @return view to register an organisation or
+     * a view to view the registered organisation
+     */
     public function registerOrg(Request $request)
     {
         $post = [
@@ -856,6 +995,13 @@ class UserController extends Controller {
             : redirect('user/organisations/register')->withInput(Input::all());
     }
 
+     /**
+     * Loads a view for viewing an organisation
+     *
+     * @param Request $request
+     *
+     * @return view to view the a registered organisation
+     */
     public function viewOrg(Request $request)
     {
         $uri = $request->uri;
@@ -868,6 +1014,13 @@ class UserController extends Controller {
     }
 
 
+    /**
+     * Sends a confirmation email when changing email
+     *
+     * @param Request $request
+     *
+     * @return view login on success or error on fail
+     */
     public function mailConfirmation(Request $request)
     {
         Auth::logout();
@@ -909,11 +1062,23 @@ class UserController extends Controller {
         return view('confirmError', compact('class'));
     }
 
+    /**
+     * Loads a view for registering an organisations
+     *
+     * @return view login on success or error on fail
+     */
     public function showOrgRegisterForm() {
 
         return view('user/orgRegister', ['class' => 'user', 'fields' => self::getTransFields()]);
     }
 
+    /**
+     * Loads a view for editing an organisation
+     *
+     * @param Request $request
+     *
+     * @return view for editing  org details
+     */
     public function editOrg(Request $request)
     {
         if (isset($request->view)) {
@@ -993,6 +1158,11 @@ class UserController extends Controller {
             );
     }
 
+    /**
+     * Prepares an array of categories
+     *
+     * @return array categories
+     */
     private function prepareMainCategories()
     {
         $params['api_key'] = \Auth::user()->api_key;
@@ -1009,6 +1179,11 @@ class UserController extends Controller {
         return $categories;
     }
 
+    /**
+     * Prepares an array of terms of use
+     *
+     * @return array termsOfUse
+     */
     private function prepareTermsOfUse()
     {
         $params['api_key'] = \Auth::user()->api_key;
@@ -1025,6 +1200,11 @@ class UserController extends Controller {
         return $termsOfUse;
     }
 
+    /**
+     * Prepares an array of organisations
+     *
+     * @return array organisations
+     */
     private function prepareOrganisations()
     {
         $params['criteria']['user_id'] = \Auth::user()->id;
@@ -1040,6 +1220,11 @@ class UserController extends Controller {
         return $organisations;
     }
 
+    /**
+     * Prepares an array of groups
+     *
+     * @return array groups
+     */
     private function prepareGroups()
     {
         $params['criteria']['user_id'] = \Auth::user()->id;
@@ -1055,6 +1240,14 @@ class UserController extends Controller {
         return $groups;
     }
 
+    /**
+     * Generates an email with user credential for an invited user or
+     * sends an invite email
+     *
+     * @param Request $request
+     *
+     * @return view on success or fail with corresponding messages
+     */
     public function inviteUser(Request $request)
     {
         $class = 'user';
@@ -1116,6 +1309,12 @@ class UserController extends Controller {
         return view('/user/invite', compact('class', 'roleList'));
     }
 
+    /**
+     * Checks if pregenerated credentials are correct
+     *
+     * @param Request $request
+     * @return redirect to corresponding route
+     */
     public function preGenerated(Request $request)
     {
         $data = $request->all();
@@ -1143,6 +1342,13 @@ class UserController extends Controller {
         }
     }
 
+    /**
+     * Loads the newsfeed list if user is logged
+     *
+     * @param Request $request
+     *
+     * @return view newsfeed or redirect to home if user is not logged
+     */
     public function newsFeed(Request $request)
     {
         $user = User::find(Auth::id());
@@ -1414,6 +1620,17 @@ class UserController extends Controller {
         return redirect('/');
     }
 
+    /**
+     * Prepares newsfeed datasets
+     *
+     * @param mixed $params
+     * @param mixed $criteria
+     * @param mixed $actObjData
+     * @param mixed $filters
+     * @param mixed $filter
+     * @param boolean $objIdFilter
+     * @return void
+     */
     private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData, &$filters, $filter, $objIdFilter = false) {
         $rq = Request::create('/api/listDataSets', 'POST', $params);
         $api = new ApiDataSets($rq);
@@ -1499,6 +1716,11 @@ class UserController extends Controller {
         }
     }
 
+    /**
+     * Returns an array of newfeed filters
+     *
+     * @return array
+     */
     private function getNewsFeedFilters() {
         return [
             'organisations' => [
@@ -1534,6 +1756,12 @@ class UserController extends Controller {
         ];
     }
 
+    /**
+     * Activates an account on confirmation
+     *
+     * @param Request $request
+     * @return view error view on error or sends email on success
+     */
     public function confirmation(Request $request)
     {
         $class = 'user';
@@ -1571,6 +1799,12 @@ class UserController extends Controller {
         return view('confirmError', compact('class'));
     }
 
+    /**
+     * Loads a view with a list of users
+     *
+     * @param Request $request
+     * @return view with list of users
+     */
     public function listUsers(Request $request)
     {
         $perPage = 6;
@@ -1595,6 +1829,12 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Filters users based on input
+     *
+     * @param Request $request
+     * @return view with list of users
+     */
     public function searchUsers(Request $request)
     {
         $perPage = 6;
@@ -1637,6 +1877,14 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Loads profile information
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return view with profile data
+     */
     public function profile(Request $request, $id)
     {
         $followersCount = 0;
@@ -1717,6 +1965,13 @@ class UserController extends Controller {
         }
     }
 
+    /**
+     * Registers a group
+     *
+     * @param Request $request
+     *
+     * @return view with registered group
+     */
     public function registerGroup(Request $request)
     {
         $class = 'user';
@@ -1764,6 +2019,13 @@ class UserController extends Controller {
         return view('/user/groupRegistration', compact('class', 'fields'));
     }
 
+    /**
+     * Lists the groups in which the user is a member of
+     *
+     * @param Request $request
+     *
+     * @return view with list of groups
+     */
     public function userGroups(Request $request)
     {
         $class = 'user';
@@ -1796,6 +2058,14 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Displays information for a given group
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return view on success on failure redirect to homepage
+     */
     public function groupView(Request $request, $id)
     {
         $class = 'user';
@@ -1817,6 +2087,14 @@ class UserController extends Controller {
         }
     }
 
+    /**
+     * Deletes a group
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return view to previous page
+     */
     public function deleteGroup(Request $request, $id)
     {
         $delArr = [
@@ -1839,6 +2117,13 @@ class UserController extends Controller {
         }
     }
 
+    /**
+     * Edit a group based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return view on success with messages
+     */
     public function editGroup(Request $request, $id)
     {
         $class = 'user';
@@ -1965,6 +2250,13 @@ class UserController extends Controller {
         )->with('errors', $errors);
     }
 
+    /**
+     * Send terms of use request
+     *
+     * @param Request $request
+     *
+     * @return json response with result
+     */
     public function sendTermsOfUseReq(Request $request)
     {
         $params = [
@@ -1979,6 +2271,13 @@ class UserController extends Controller {
         return json_encode($result);
     }
 
+    /**
+     * Loads a list of group datasets
+     *
+     * @param Request $request
+     *
+     * @return view with list of datasets
+     */
     public function groupDatasets(Request $request)
     {
         $class = 'user';
@@ -2038,6 +2337,13 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Filters groups based on search string
+     *
+     * @param Request $request
+     *
+     * @return view with filtered group list
+     */
     public function searchGroups(Request $request)
     {
         $perPage = 6;

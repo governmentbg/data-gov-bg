@@ -661,6 +661,20 @@ class ResourceController extends ApiController
         return $this->errorResponse('Search resource data failure', $validator->errors()->messages());
     }
 
+    /**
+     * Gets linked data
+     *
+     * @param Request $request
+     * @param string namespaces - required
+     * @param query - required
+     * @param string order[type] - optional
+     * @param string order[field] - optional
+     * @param string format - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
+     *
+     * @return json response with data or error response
+     */
     public function getLinkedData(Request $request)
     {
         $post = $request->all();

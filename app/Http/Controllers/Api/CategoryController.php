@@ -90,7 +90,7 @@ class CategoryController extends ApiController
      * @param integer data[active] - optional
      * @param integer data[ordering] - optional
      *
-     * @return json with succes true or errors on failure
+     * @return json with success true or errors on failure
      */
     public function editMainCategory(Request $request)
     {
@@ -154,7 +154,7 @@ class CategoryController extends ApiController
      * @param string api_key - required
      * @param integer category_id - required
      *
-     * @return json with succes true or errors on failure
+     * @return json with success true or errors on failure
      */
     public function deleteMainCategory(Request $request)
     {
@@ -178,7 +178,7 @@ class CategoryController extends ApiController
     }
 
     /**
-     * API function for lsiting main categories by criteria
+     * API function for listing main categories by criteria
      *
      * @param array criteria - optional
      * @param array criteria[category_ids] - optional
@@ -256,7 +256,7 @@ class CategoryController extends ApiController
     }
 
     /**
-     * API function for viewig main category details
+     * API function for viewing main category details
      *
      * @param integer category_id - required
      * @param string locale - optional
@@ -417,7 +417,7 @@ class CategoryController extends ApiController
     }
 
     /**
-     * API function for lsiting tags by criteria
+     * API function for listing tags by criteria
      *
      * @param array criteria - optional
      * @param array criteria[tag_ids] - optional
@@ -509,7 +509,7 @@ class CategoryController extends ApiController
     }
 
     /**
-     * API function for viewig tag details
+     * API function for viewing tag details
      *
      * @param integer tag_id - required
      * @param string locale - optional

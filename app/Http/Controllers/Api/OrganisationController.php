@@ -392,7 +392,7 @@ class OrganisationController extends ApiController
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      *
-     * @return json lsit with organisations or error
+     * @return json list with organisations or error
      */
     public function listOrganisations(Request $request)
     {
@@ -514,7 +514,7 @@ class OrganisationController extends ApiController
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      *
-     * @return json lsit with organisations or error
+     * @return json list with organisations or error
      */
     public function getUserOrganisations(Request $request)
     {
@@ -714,7 +714,7 @@ class OrganisationController extends ApiController
      * @param string locale - required
      * @param integer org_id - required
      *
-     * @return json with organisatin deetails or error
+     * @return json with organisation details or error
      */
     public function getOrganisationDetails(Request $request)
     {

@@ -129,7 +129,7 @@ class UserController extends ApiController
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      *
-     * @return json response with fount users or error
+     * @return json response with found users or error
      */
     public function searchUsers(Request $request)
     {
@@ -270,7 +270,7 @@ class UserController extends ApiController
      * @param string data[user_settings][locale] - optional
      * @param integer data[user_settings][newsletter_digest] - optional
      *
-     * @return json $response - response with status and api key if successfull
+     * @return json $response - response with status and api key if successful
      */
     public function addUser(Request $request)
     {
@@ -395,7 +395,7 @@ class UserController extends ApiController
      * @param string data[user_settings][locale] - optional
      * @param integer data[user_settings][newsletter_digest] - optional
      *
-     * @return json $response - response with status and api key if successfull
+     * @return json $response - response with status and api key if successful
      */
     public function editUser(Request $request)
     {

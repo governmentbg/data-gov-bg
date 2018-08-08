@@ -578,7 +578,7 @@ class DataSetController extends ApiController
     }
 
     /**
-     * API function for viewing iformation about existing Data Set
+     * API function for viewing information about an existing Data Set
      *
      * @param string api_key - optional
      * @param integer dataset_uri - required

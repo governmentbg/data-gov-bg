@@ -76,7 +76,8 @@ class DataRequestController extends ApiController
     }
 
      /**
-     * edit a request based on input
+     * Edit a request based on input
+     *
      * @param integer request_id - required
      * @param array data - required
      * @param integer data[org_id] - optional
@@ -148,7 +149,7 @@ class DataRequestController extends ApiController
     }
 
     /**
-     * Delete a data reuqest based on id
+     * Delete a data request based on id
      *
      * @param integer request_id - required
      *

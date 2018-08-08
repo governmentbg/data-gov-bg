@@ -133,6 +133,7 @@ class ActionsHistoryController extends ApiController
         if (!empty($actObjCriteria)) {
             $history->where(function ($history)  use ($actObjCriteria) {
                 $isFirst = true;
+
                 foreach ($actObjCriteria as $moduleName => $actionObjects) {
                     if ($isFirst) {
                         $isFirst = false;

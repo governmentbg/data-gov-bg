@@ -58,30 +58,30 @@ class DataSetTest extends TestCase
             'status'        => $this->faker->numberBetween(1, 2),
         ]);
 
-        // // test missing api_key
-        // $this->post(url('api/editDataSet'), ['api_key' => null])
-        //     ->assertStatus(403)
-        //     ->assertJson(['success' => false]);
+        // test missing api_key
+        $this->post(url('api/editDataSet'), ['api_key' => null])
+            ->assertStatus(403)
+            ->assertJson(['success' => false]);
 
-        // // test missing DataSet uri
-        // $this->post(url('api/editDataSet'), [
-        //     'api_key'   => $this->getApiKey(),
-        //     'data'      => [
-        //         'name'          => $this->faker->word(),
-        //         'locale'        => 'en',
-        //         'category_id'   => $this->faker->numberBetween(1, 3),
-        //         'visibility'    => $this->faker->numberBetween(1, 2),
-        //         'version'       => $this->faker->randomDigit(),
-        //         'status'        => $this->faker->numberBetween(1, 2),
-        //     ]
-        // ])->assertStatus(500)->assertJson(['success' => false]);
+        // test missing DataSet uri
+        $this->post(url('api/editDataSet'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => [
+                'name'          => $this->faker->word(),
+                'locale'        => 'en',
+                'category_id'   => $this->faker->numberBetween(1, 3),
+                'visibility'    => $this->faker->numberBetween(1, 2),
+                'version'       => $this->faker->randomDigit(),
+                'status'        => $this->faker->numberBetween(1, 2),
+            ]
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
-        // // test empty data
-        // $this->post(url('api/editDataSet'), [
-        //     'api_key'       => $this->getApiKey(),
-        //     'dataset_uri'   => $dataSet->uri,
-        //     'data'          => [],
-        // ])->assertStatus(500)->assertJson(['success' => false]);
+        // test empty data
+        $this->post(url('api/editDataSet'), [
+            'api_key'       => $this->getApiKey(),
+            'dataset_uri'   => $dataSet->uri,
+            'data'          => [],
+        ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful edit
         $this->post(url('api/editDataSet'), [

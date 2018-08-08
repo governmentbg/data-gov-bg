@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\RoleController as ApiRole;
@@ -656,18 +657,15 @@ class UserController extends Controller {
     public function registration(Request $request)
     {
         $class = 'user';
-        $params = [];
-        $error = [];
         $invMail = $request->offsetGet('mail');
 
         $digestFreq = UserSetting::getDigestFreq();
 
         if ($request->isMethod('post')) {
             $params = $request->all();
-
-            $req = Request::create('/register', 'POST', ['invite' => !empty($invMail), 'data' => $params]);
-            $api = new ApiUser($req);
-            $result = $api->register($req)->getData();
+            $rq = Request::create('/register', 'POST', ['invite' => !empty($invMail), 'data' => $params]);
+            $api = new ApiUser($rq);
+            $result = $api->register($rq)->getData();
 
             if ($result->success) {
                 $user = User::where('api_key', $result->api_key)->first();
@@ -675,19 +673,18 @@ class UserController extends Controller {
                 if ($request->has('add_org')) {
                     $key = $user->username;
 
-                    return redirect()->route(
-                        'orgRegistration', compact('key', 'message')
-                    );
+                    return redirect()->route('orgRegistration', compact('key', 'message'));
                 }
-                $request->session()->flash('alert-success', 'Пратено е съобщение за потвърждение, на посоченият от вас адрес.');
+
+                $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
 
                 return redirect('login');
             } else {
-                $error = $result->errors;
+                return redirect()->back()->withInput()->withErrors($result->errors);
             }
         }
 
-        return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail'));
+        return view('user/registration', compact('class', 'digestFreq', 'invMail'));
     }
 
     /**

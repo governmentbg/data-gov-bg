@@ -828,27 +828,27 @@ class UserController extends ApiController
             return $this->errorResponse('User registration failure', $validator->errors()->messages());
         }
 
-        $apiKey = Uuid::generate(4)->string;
-        $user = new User;
-
-        $user->username = !empty($request->data['username'])
-            ? $request->data['username']
-            : $this->generateUsername($request->data['email']);
-        $user->password = bcrypt($request->data['password']);
-        $user->email = $request->data['email'];
-        $user->firstname = $request->data['firstname'];
-        $user->lastname = $request->data['lastname'];
-        $user->add_info = !empty($request->data['add_info'])
-            ? $request->data['add_info']
-            : null;
-        $user->is_admin = 0;
-        $user->active = 0;
-        $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
-        $user->api_key = $apiKey;
-        $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
-        $user->remember_token = null;
-
         try {
+            $apiKey = Uuid::generate(4)->string;
+            $user = new User;
+
+            $user->username = !empty($request->data['username'])
+                ? $request->data['username']
+                : $this->generateUsername($request->data['email']);
+            $user->password = bcrypt($request->data['password']);
+            $user->email = $request->data['email'];
+            $user->firstname = $request->data['firstname'];
+            $user->lastname = $request->data['lastname'];
+            $user->add_info = !empty($request->data['add_info'])
+                ? $request->data['add_info']
+                : null;
+            $user->is_admin = 0;
+            $user->active = 0;
+            $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
+            $user->api_key = $apiKey;
+            $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
+            $user->remember_token = null;
+
             $registered = $user->save();
 
             $mailData = [
@@ -856,39 +856,28 @@ class UserController extends ApiController
                 'hash'  => $user->hash_id,
             ];
 
-            Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                $m->to($user->email, $user->firstname);
-                $m->subject('Акаунтът ви беше успешно създаден!');
-            });
+            try {
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user->email, $user->firstname);
+                    $m->subject(__('custom.register_subject'));
+                });
+            } catch (\Swift_TransportException $ex) {
+                Log::error($ex->getMessage());
 
-            if (count(Mail::failures()) > 0) {
-                return $this->errorResponse('Failed to send mail');
+                $validator->errors()->add('email', __('custom.send_mail_failed'));
+
+                return $this->errorResponse('Invite user failure', $validator->errors()->messages());
             }
         } catch (QueryException $e) {
-            return $this->errorResponse('User registration failure');
-        }
-
-        if (!$registered) {
-            return $this->errorResponse('User registration failure');
-        }
-
-        try {
-            User::where('id', $user->id)->update(['created_by' => $user->id]);
-        } catch (QueryException $e) {
             Log::error($e->getMessage());
-
-            return $this->errorResponse('User registration failure');
         }
 
         if (isset($data['role_id']) || isset($data['org_id'])) {
-            $validator = \Validator::make(
-                $request->all(),
-                [
-                    'data.role_id' => 'required|integer',
-                    'data.org_id'  => 'required|integer',
-                ]
-            );
+            $validator = \Validator::make($request->all(), [
+                'data.role_id' => 'required|integer',
+                'data.org_id'  => 'required|integer',
+            ]);
 
             if ($validator->fails()) {
                 return $this->errorResponse('Edit user failure', $validator->errors()->messages());
@@ -904,8 +893,6 @@ class UserController extends ApiController
                 $userToOrgRole->save();
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
-
-                return $this->errorResponse('User registration failure');
             }
         }
 
@@ -919,20 +906,17 @@ class UserController extends ApiController
         $userSettings->user_id = $user->id;
         $userSettings->locale = $userLocale;
 
-        if(
+        if (
             isset($data['user_settings']['newsletter_digest'])
             && is_numeric($data['user_settings']['newsletter_digest'])
         ) {
             $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
         }
-        $userSettings->created_by = $user->id;
 
         try {
             $userSettings->save();
         } catch (QueryException $e) {
             Log::error($e->getMessage());
-
-            return $this->errorResponse('User registration failure');
         }
 
         if (!empty($data['org_data'])) {
@@ -954,8 +938,8 @@ class UserController extends ApiController
             $organisation->active = 0;
             $organisation->approved = 0;
             $organisation->created_by = $user->id;
-            $organisation->name = $data['org_data']['name'];
-            $organisation->descript = $data['org_data']['description'];
+            $organisation->name = $this->trans($locale, $data['org_data']['name']);
+            $organisation->descript = $this->trans($locale, $data['org_data']['description']);
             $organisation->activity_info = $data['org_data']['activity_info'];
             $organisation->contacts = $data['org_data']['contacts'];
 

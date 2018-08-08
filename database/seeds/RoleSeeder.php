@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
-    const ROLE_RECORDS = 10;
+    const ROLE_RECORDS = 2;
 
     /**
      * Run the database seeds.

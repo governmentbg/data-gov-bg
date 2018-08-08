@@ -1,6 +1,6 @@
 <div class="row m-t-md">
     <div class="col-sm-3 col-xs-12 sidenav">
-        <span class="my-profile m-b-lg m-l-sm">{{ __('custom.my_profile') }}</span>
+        <span class="my-profile">{{ __('custom.my_profile') }}</span>
     </div>
     <div class="col-sm-9 col-xs-12">
         <div class="filter-content">
@@ -42,12 +42,6 @@
                                 class="{{ $view == 'setting' ? 'active' : '' }}"
                                 href="{{ url('/user/settings') }}"
                             >{{ __('custom.settings') }}</a>
-                        </li>
-                        <li>
-                            <a
-                                class="{{ $view == 'invite' ? 'active' : '' }}"
-                                href="{{ url('/user/invite') }}"
-                            >{{ __('custom.invite') }}</a>
                         </li>
                     </ul>
                 </div>

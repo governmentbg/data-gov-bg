@@ -51,8 +51,12 @@ class Controller extends BaseController
      *
      * @return string
      */
-    protected function getImageData($data, $mime)
+    protected function getImageData($data, $mime, $type = 'org')
     {
+        if (empty($data) || empty($mime)) {
+            return asset('img/default-'. $type .'.svg');
+        }
+
         return 'data:'. $mime .';base64,'. base64_encode($data);
     }
 }

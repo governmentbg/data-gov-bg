@@ -79,13 +79,13 @@
                 </div>
             </div>
             <div class="form-group row tagsBG">
-                <label for="tagsBG" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.label_BG') }}:</label>
+                <label for="tagsBG" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.label_bg') }}:</label>
                 <div class="col-sm-9 example ">
                     <input type="text" class="input-border-r-12 form-control"  id="tagsBG" value="образование,наредба" data-role="tagsinput">
                 </div>
             </div>
             <div class="form-group row tagsEN">
-                <label for="tagsEN" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.label_EN') }}:</label>
+                <label for="tagsEN" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.label_en') }}:</label>
                 <div class="col-sm-9">
                     <input type="text" class="input-border-r-12 form-control"  id="tagsEN" value="education,regulation" data-role="tagsinput">
                 </div>

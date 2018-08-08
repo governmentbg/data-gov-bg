@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use Uuid;
 use App\DataSet;
 use App\Resource;
 use App\ElasticDataSet;
@@ -80,10 +81,14 @@ class ResourceController extends ApiController
         });
 
         if (!$validator->fails()) {
+            DB::beginTransaction();
+
             $dbData = [
                 'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
-                'name'              => $post['data']['name'],
-                'descript'          => isset($post['data']['description']) ? $post['data']['description'] : null,
+                'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
+                'descript'          => isset($post['data']['description'])
+                    ? $this->trans($post['data']['locale'], $post['data']['description'])
+                    : null,
                 'uri'               => Uuid::generate(4)->string,
                 'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
                 'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
@@ -100,8 +105,12 @@ class ResourceController extends ApiController
                 $resource = Resource::create($dbData);
                 $resource->searchable();
 
+                DB::commit();
+
                 return $this->successResponse(['uri' => $resource->uri]);
             } catch (QueryException $ex) {
+                DB::rollback();
+
                 Log::error($ex->getMessage());
             }
         }
@@ -223,6 +232,8 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            DB::beginTransaction();
+
             $resource = Resource::where('uri', $post['resource_uri'])->first();
 
             if (isset($post['data']['resource_uri'])) {
@@ -230,11 +241,11 @@ class ResourceController extends ApiController
             }
 
             if (isset($post['data']['name'])) {
-                $resource->name = $post['data']['name'];
+                $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
             }
 
             if (isset($post['data']['description'])) {
-                $resource->descript = $post['data']['description'];
+                $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
             }
 
             if (isset($post['data']['version'])) {
@@ -276,8 +287,12 @@ class ResourceController extends ApiController
             try {
                 $resource->save();
 
+                DB::commit();
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
+                DB::rollback();
+
                 Log::error($ex->getMessage());
             }
         }

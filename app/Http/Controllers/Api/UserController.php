@@ -134,7 +134,9 @@ class UserController extends ApiController
      */
     public function searchUsers(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $search = $request->all();
+
+        $validator = \Validator::make($search, [
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
             'criteria'              => 'required|array',
@@ -143,8 +145,6 @@ class UserController extends ApiController
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
         ]);
-
-        $search = $request->all();
 
         if (!$validator->fails()) {
             $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
@@ -419,7 +419,6 @@ class UserController extends ApiController
         );
 
         if ($validator->fails()) {
-
             return $this->errorResponse('Edit user failure', $validator->errors()->messages());
         }
 

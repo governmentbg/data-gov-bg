@@ -31,9 +31,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/datasetView', 'UserController@datasetView')->name('datasetView');
         Route::post('/user/datasetDelete', 'UserController@datasetDelete');
         Route::match(['get', 'post'], '/user/datasets', 'UserController@datasets');
-        Route::match(['get', 'post'], '/user/datasetCreate', 'UserController@datasetCreate');
+        Route::match(['get', 'post'], '/user/dataset/search', 'UserController@datasetSearch');
+        Route::match(['get', 'post'], '/user/dataset/create', 'UserController@datasetCreate');
+        Route::match(['get', 'post'], '/user/dataset/edit', 'UserController@datasetEdit')->name('datasetEdit');
+
         Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
-        Route::get('/user/datasetEdit', 'UserController@datasetEdit');
         Route::match(['get', 'post'],'/user/invite', 'UserController@inviteUser');
         Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
         Route::match(['get', 'post'],'/user/registerGroup', 'UserController@registerGroup');
@@ -72,15 +74,15 @@ Route::get('/logout', function() {
     return view('home/index', ['class' => 'index']);
 });
 
-Route::get('/preGenerated', 'UserController@preGenerated');
+Route::get('/preGenerated', 'UserController@preGenerated')->name('preGenerated');
 
 Route::match(['get', 'post'],'/login', 'Auth\LoginController@login')->name('login');
 
-Route::match(['get', 'post'],'/registration', 'UserController@registration');
+Route::match(['get', 'post'],'/registration', 'UserController@registration')->name('registration');
 Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration')->name('orgRegistration');
 
-Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation');
-Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation');
+Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation')->name('confirmation');
+Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation')->name('mailConfirmation');
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
@@ -152,7 +154,7 @@ Route::get('/user/orgMembers', function () {
 });
 
 Route::match(['get', 'post'],'/password/forgotten', 'UserController@forgottenPassword');
-Route::match(['get', 'post'],'/password/reset', 'UserController@passwordReset');
+Route::match(['get', 'post'],'/password/reset', 'UserController@passwordReset')->name('passReset');
 
 Route::get('/request', function () {
     return view('request/dataRequest', ['class' => 'request']);

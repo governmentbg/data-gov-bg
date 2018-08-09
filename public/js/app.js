@@ -31858,7 +31858,7 @@ module.exports = function spread(callback) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.17
+ * Vue.js v2.5.16
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -36947,7 +36947,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.17';
+Vue.version = '2.5.16';
 
 /*  */
 
@@ -46393,6 +46393,26 @@ $(function () {
     if ($('#delete-confirm').length) {
         $('#confirm').on('click', function (e) {
             $('#delete-confirm').modal('toggle');
+        });
+    }
+
+    if ($('.js-select').length) {
+        $('.js-select').select2({ minimumResultsForSearch: -1 });
+    }
+
+    if ($('.js-autocomplete').length) {
+        $('.js-autocomplete').select2({
+            matcher: function matcher(params, data) {
+                if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
+                    return data;
+                }
+
+                if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                    return data;
+                } else {
+                    return false;
+                }
+            }
         });
     }
 });

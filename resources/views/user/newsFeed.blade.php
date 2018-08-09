@@ -28,8 +28,13 @@
                     <div class="form-group row">
                         <label for="{{ $filterData['key'] }}" class="col-sm-3 col-xs-12 col-form-label"></label>
                         <div class="col-sm-6 col-sm-pull-1 text-center">
-                            <select class="input-border-r-12 form-control" name="{{ $filterData['key'] }}" id="filter"
-                                onchange="document.location.href = '{{ $path }}' + '/' + this.value">
+                            <select
+                                class="input-border-r-12 form-control js-autocomplete"
+                                name="{{ $filterData['key'] }}"
+                                id="filter"
+                                onchange="document.location.href = '{{ $path }}' + '/' + this.value"
+                                data-live-search="true"
+                            >
                                 <option value="">{{  __($filterData['label']) }}</option>
                                 @foreach ($filterData['data'] as $id => $name)
                                     <option value="{{ $id }}"{{ ($id == $objIdFilter) ? ' selected' : ''}}>{{ $name }}</option>

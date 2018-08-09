@@ -1128,17 +1128,17 @@ class UserController extends Controller {
         $result = $api->addOrganisation($request)->getData();
 
         if ($result->success) {
-            session()->flash('alert-success', 'Промените бяха запазени успешно!');
+            session()->flash('alert-success', __('custom.add_org_success'));
         } else {
             session()->flash(
                 'alert-danger',
-                isset($result->error) ? $result->error->message : __('Add organisation failure!')
+                isset($result->error) ? $result->error->message : __('custom.add_org_error')
             );
         }
 
         return $result->success
             ? redirect()->route('userOrgView', ['org_id' => $result->org_id])
-            : redirect('user/organisations/register')->withInput(Input::all());
+            : redirect('user/organisations/register')->withInput(Input::all())->withErrors($result->errors);
     }
 
      /**
@@ -1361,8 +1361,22 @@ class UserController extends Controller {
      * @return view login on success or error on fail
      */
     public function showOrgRegisterForm() {
+        $query = Organisation::select('id', 'name');
 
-        return view('user/orgRegister', ['class' => 'user', 'fields' => self::getTransFields()]);
+        $query->whereHas('userToOrgRole', function($q) {
+            $q->where('user_id', \Auth::user()->id);
+        });
+
+        $parentOrgs = $query->get();
+
+        return view(
+            'user/orgRegister',
+            [
+                'class'      => 'user',
+                'fields'     => self::getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ]
+        );
     }
 
     /**
@@ -1374,6 +1388,14 @@ class UserController extends Controller {
      */
     public function editOrg(Request $request)
     {
+        $query = Organisation::select('id', 'name');
+
+        $query->whereHas('userToOrgRole', function($q) {
+            $q->where('user_id', \Auth::user()->id);
+        });
+
+        $parentOrgs = $query->get();
+
         if (isset($request->view)) {
             $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
@@ -1382,10 +1404,11 @@ class UserController extends Controller {
             return view(
                 'user/orgEdit',
                 [
-                    'class'     => 'user',
-                    'model'     => $orgModel,
-                    'withModel' => $customModel,
-                    'fields'    => self::getTransFields()
+                    'class'      => 'user',
+                    'model'      => $orgModel,
+                    'withModel'  => $customModel,
+                    'fields'     => self::getTransFields(),
+                    'parentOrgs' => $parentOrgs
                 ]
             );
         }
@@ -1409,7 +1432,6 @@ class UserController extends Controller {
             }
         }
 
-        $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
         $post['data']['description'] = $post['data']['descript'];
         $request = Request::create('/api/editOrganisation', 'POST', $post);
         $api = new ApiOrganisation($request);
@@ -1421,11 +1443,11 @@ class UserController extends Controller {
         $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
         if ($result->success) {
-            session()->flash('alert-success', 'Промените бяха запазени успешно!');
+            session()->flash('alert-success', __('custom.edit_success'));
         } else {
             session()->flash(
                 'alert-danger',
-                isset($result->error) ? $result->error->message : __('Add organisation failure!')
+                isset($result->error) ? $result->error->message : __('custom.edit_error')
             );
         }
 
@@ -1433,20 +1455,21 @@ class UserController extends Controller {
             ? view(
                 'user/orgEdit',
                 [
-                    'class'     => 'user',
-                    'model'     => $orgModel,
-                    'withModel' => $customModel,
-                    'fields'    => self::getTransFields(),
-                    'result'    => $result
+                    'class'      => 'user',
+                    'model'      => $orgModel,
+                    'withModel'  => $customModel,
+                    'fields'     => self::getTransFields(),
+                    'parentOrgs' => $parentOrgs
                 ]
-            )
+            )->withErrors($result->errors)
             : view(
                 'user/orgEdit',
                 [
-                    'class'     => 'user',
-                    'model'     => $orgModel,
-                    'withModel' => $customModel,
-                    'fields'    => self::getTransFields()
+                    'class'      => 'user',
+                    'model'      => $orgModel,
+                    'withModel'  => $customModel,
+                    'fields'     => self::getTransFields(),
+                    'parentOrgs' => $parentOrgs
                 ]
             );
     }
@@ -2392,9 +2415,8 @@ class UserController extends Controller {
                 return redirect('/user/groupView/'. $result->id);
             } else {
                 $request->session()->flash('alert-danger', 'Възникна грешла при създаване на група!');
-                $request->session()->flash('result', $result);
 
-                return back();
+                return back()->withErrors($result->errors)->withInput(Input::all());
             }
         }
 
@@ -2517,7 +2539,6 @@ class UserController extends Controller {
 
         if ($request->has('edit')) {
             $data = $request->all();
-            $data['locale'] = \LaravelLocalization::getCurrentLocale();
             $data['description'] = $data['descript'];
 
             $params = [
@@ -2537,7 +2558,7 @@ class UserController extends Controller {
             } else {
                 $request->session()->flash('alert-danger', 'Грешно въведени данни!');
 
-                return back();
+                return back()->withErrors($result->errors);
             }
         }
 

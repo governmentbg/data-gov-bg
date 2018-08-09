@@ -20,8 +20,8 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
-                        @if (isset(session('result')->errors->logo))
-                            <span class="error">{{ session('result')->errors->logo[0] }}</span>
+                        @if (isset($errors) && $errors->has('logo'))
+                            <span class="error">{{ $errors->first('logo') }}</span>
                         @endif
                     </div>
                 </div>
@@ -29,14 +29,29 @@
             <div class="form-group row {{ isset(session('result')->errors->parent_org_id) ? 'has-error' : '' }}">
                 <label for="baseOrg" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_organisation') }}:</label>
                 <div class="col-sm-9">
-                    <input
-                        type="text"
-                        class="input-border-r-12 form-control"
+                    <select
+                        class="input-border-r-12 form-control js-autocomplete"
                         name="parent_org_id"
-                        value="{{ old('parent_org_id') }}"
+                        id="filter"
+                        data-live-search="true"
                     >
-                    @if (isset(session('result')->errors->parent_org_id))
-                        <span class="error">{{ session('result')->errors->parent_org_id[0] }}</span>
+                        @if (isset($parentOrgs[0]))
+                            <option value="">&nbsp;</option>
+                            @foreach ($parentOrgs as $parent)
+                                <option
+                                    value="{{ $parent->id }}"
+                                    {{ $parent->id == old('parent_org_id')
+                                        ? ' selected'
+                                        : ''
+                                    }}
+                                >{{ $parent->name }}</option>
+                            @endforeach
+                        @else
+                            <option value="" selected >{{ __('custom.no_info') }}</option>
+                        @endif
+                    </select>
+                    @if (isset($errors) && $errors->has('parent_org_id'))
+                        <span class="error">{{ $errors->first('parent_org_id') }}</span>
                     @endif
                 </div>
             </div>
@@ -49,8 +64,8 @@
                         name="uri"
                         value="{{ old('uri') }}"
                     >
-                    @if (isset(session('result')->errors->uri))
-                        <span class="error">{{ session('result')->errors->uri[0] }}</span>
+                    @if (isset($errors) && $errors->has('uri'))
+                        <span class="error">{{ $errors->first('uri') }}</span>
                     @endif
                 </div>
             </div>
@@ -75,7 +90,7 @@
             <div class="form-group row {{ !empty($errors->type) ? 'has-error' : '' }} required">
                 <label for="type" class="col-lg-3 col-sm-3 col-xs-12 col-form-label">{{ __('custom.type') }}:</label>
                 @foreach (\App\Organisation::getPublicTypes() as $id => $name)
-                    <div class="col-lg-4 col-md-4 col-xs-12 m-b-md">
+                    <div class="col-md-4 col-xs-12 m-b-md">
                         <label class="radio-label">
                             {{ utrans($name) }}
                             <div class="js-check">
@@ -89,8 +104,12 @@
                         </label>
                     </div>
                 @endforeach
-                @if (isset(session('result')->errors->type))
-                    <span class="error">{{ session('result')->errors->type[0] }}</span>
+                @if (isset($errors) && $errors->has('type'))
+                    <div class="row">
+                        <div class="col-xs-12 m-l-md">
+                            <span class="error">{{ $errors->first('type') }}</span>
+                        </div>
+                    </div>
                 @endif
             </div>
             <div class="form-group row">

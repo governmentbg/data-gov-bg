@@ -6,12 +6,14 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use App\Section;
+use App\Http\Controllers\ApiController;
 
 class SectionTest extends TestCase
 {
     use DatabaseTransactions;
     use WithFaker;
 
+    private $locale = 'en';
     /**
      * Test for SectionController@addSection
      */
@@ -58,7 +60,7 @@ class SectionTest extends TestCase
     public function testEditSection()
     {
         $section = Section::create([
-            'name'          => ['en' => $this->faker->word()],
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'read_only'     => $this->faker->boolean(),
             'forum_link'    => $this->faker->url(),
@@ -130,7 +132,7 @@ class SectionTest extends TestCase
     public function testDeleteSection()
     {
         $section = Section::create([
-            'name'          => ['en' => $this->faker->word()],
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'read_only'     => $this->faker->boolean(),
             'forum_link'    => $this->faker->url(),

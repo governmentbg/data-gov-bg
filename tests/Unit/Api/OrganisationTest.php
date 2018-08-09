@@ -61,8 +61,8 @@ class OrganisationTest extends TestCase
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => [$locale => $this->faker->name],
-            'descript'          => [$locale => $this->faker->text(intval(8000))],
+            'name'              => Apicontroller::trans($locale, $this->faker->name),
+            'descript'          => Apicontroller::trans($locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),
@@ -111,8 +111,8 @@ class OrganisationTest extends TestCase
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => [$locale => $this->faker->name],
-            'descript'          => [$locale => $this->faker->text(intval(8000))],
+            'name'              => Apicontroller::trans($locale, $this->faker->name),
+            'descript'          => Apicontroller::trans($locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),

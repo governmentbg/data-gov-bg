@@ -15,7 +15,7 @@ class ThemeTest extends TestCase
     {
         // test missing api_key
         $this->post(
-            url('api/listSections'),
+            url('api/listThemes'),
             ['api_key' => null]
         )
             ->assertStatus(403)

@@ -147,6 +147,7 @@ class OrganisationController extends ApiController
                         $userToOrgRole->save();
                     } catch (QueryException $ex) {
                         Log::error($ex->getMessage());
+
                         DB::rollback();
 
                         return $this->errorResponse('Add Organisation Failure.');
@@ -565,6 +566,7 @@ class OrganisationController extends ApiController
 
             try {
                 $query = Organisation::with('CustomSetting')->with('UserToOrgRole');
+                $query = $query->whereIn('type', array_flip(Organisation::getPublicTypes()));
 
                 $userId = \Auth::user()->id;
 
@@ -1041,6 +1043,21 @@ class OrganisationController extends ApiController
                 try {
                     $newGroup->save();
 
+                    $userToOrgRole = new UserToOrgRole;
+                    $userToOrgRole->org_id = $newGroup->id;
+                    $userToOrgRole->user_id = \Auth::user()->id;
+                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                    try {
+                        $userToOrgRole->save();
+                    } catch (QueryException $ex) {
+                        Log::error($ex->getMessage());
+
+                        DB::rollback();
+
+                        return $this->errorResponse('Add Organisation Failure.');
+                    }
+
                     if ($newGroup) {
                         $userToOrgRole = new UserToOrgRole;
                         $userToOrgRole->org_id = $newGroup->id;
@@ -1055,6 +1072,7 @@ class OrganisationController extends ApiController
                                 return $this->errorResponse('Add Group Failure.');
                             }
                         }
+
                         DB::commit();
 
                         return $this->successResponse(['id' => $newGroup->id], true);
@@ -1262,12 +1280,10 @@ class OrganisationController extends ApiController
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
         $locale = !empty($post['criteria']['locale'])
-                ? $post['criteria']['locale']
-                : \LaravelLocalization::getCurrentLocale();
+            ? $post['criteria']['locale']
+            : \LaravelLocalization::getCurrentLocale();
         $groups = [];
         $result = [];
-
-        $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
         if ($criteria) {
             $validator = \Validator::make($post, [
@@ -1282,8 +1298,10 @@ class OrganisationController extends ApiController
             ]);
 
             if (!$validator->fails()) {
-                if (!empty($request->criteria['group_ids'])) {
-                    $query->whereIn('id', $request->criteria['group_ids']);
+                $query = Organisation::where('type', Organisation::TYPE_GROUP);
+
+                if (!empty($criteria['group_ids'])) {
+                    $query->whereIn('id', $criteria['group_ids']);
                 }
 
                 if (!empty($criteria['dataset_id'])) {
@@ -1331,7 +1349,7 @@ class OrganisationController extends ApiController
                     'description'       => $group->descript,
                     'locale'            => $locale,
                     'uri'               => $group->uri,
-                    'logo'              => $group->logo,
+                    'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
                     'custom_fields'     => $customFields,
                     'datasets_count'    => $group->dataSet()->count(),
                     'followers_count'   => $group->userFollow()->count(),
@@ -1342,10 +1360,10 @@ class OrganisationController extends ApiController
                 ];
             }
 
-            return $this->successResponse(['groups'=> $result, 'total_records' => $count], true);
-        } else {
-            return ApiController::errorResponse('No Groups Found.', $validator->errors()->messages());
+            return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
         }
+
+        return $this->errorResponse('No Groups Found.', $validator->errors()->messages());
     }
 
     /**
@@ -1443,9 +1461,9 @@ class OrganisationController extends ApiController
                 $criteria = $request->criteria;
 
                 $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
-
-                $query = Organisation::where('type', Organisation::TYPE_GROUP);
                 $query = Organisation::whereIn('id', $ids);
+
+                $query->where('type', Organisation::TYPE_GROUP);
 
                 if (!empty($criteria['user_id'])) {
                     $query->whereHas('userToOrgRole', function($q) use ($criteria) {
@@ -1465,7 +1483,6 @@ class OrganisationController extends ApiController
                 $query->orderBy($field, $type);
 
                 foreach ($query->get() as $group) {
-
                     //get custom fields
                     foreach ($group->customSetting()->get() as $setting) {
                         $customFields[] = [
@@ -1498,7 +1515,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Search groups failure', $validator->errors()->messages());
+        return $this->errorResponse('Search groups failure', $validator->errors()->messages());
     }
 
     /**

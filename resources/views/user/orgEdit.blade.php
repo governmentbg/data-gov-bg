@@ -3,13 +3,13 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'group'])
+    @include('partials.user-nav-bar', ['view' => 'organisation'])
     <div class="col-xs-12 m-t-lg">
         <div>
             <h2>{{ __('custom.edit_org') }}</h2>
             <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
         </div>
-        <form method="POST" action="{{ url('/user/organisations/edit') }}" class="m-t-lg" enctype="multipart/form-data">
+        <form method="POST" class="m-t-lg" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="form-group row">
                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>

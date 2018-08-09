@@ -1040,7 +1040,7 @@ class UserController extends ApiController
                     return $this->successResponse();
                 }
             } else {
-                return $this->errorResponse(__('custm.wrong_reset_link'));
+                return $this->errorResponse(__('custom.wrong_reset_link'));
             }
         }
 

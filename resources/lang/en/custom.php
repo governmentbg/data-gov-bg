@@ -9,6 +9,8 @@ return [
     |
     */
 
+    'delete_group_confirm' => 'Delete group?',
+    'delete_organisation_confirm' => 'Delete organisation?',
     'register_subject' => 'Your account was created successfully!',
     'confirm_mail_sent' => 'A confirmation email is sent to the specified email address.',
     'send_mail_failed' => 'A problem occured while sending e-mail!',
@@ -21,6 +23,7 @@ return [
     'login' => 'log in',
     'logout' => 'log out',
     'add_new_dataset' => 'Add new dataset',
+    'add_new_group' => 'Add new group',
     'add_new_organisation' => 'Add new organisation',
     'created_at' => 'Created at',
     'created_by' => 'Created by',

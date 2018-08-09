@@ -260,4 +260,15 @@ return [
     'contact' => 'Contacts',
     'label' => 'Labels',
     'reg_invite' => 'Registration invitation.',
+    'admin_profile' => 'Administrator profile',
+    'create_profile' => 'create profile',
+    'stats_analytics' => 'statistics and analytics',
+    'topics_categories' => 'topics and categories',
+    'topics_subtopics' => 'topics and subtopics',
+    'languages' => 'languages',
+    'actions_history' => 'actions history',
+    'logins_history' => 'login history',
+    'signals' => 'signals',
+    'manage_roles' => 'manage roles',
+
 ];

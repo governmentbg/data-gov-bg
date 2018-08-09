@@ -261,5 +261,15 @@ return [
     'contact' => 'Контакти',
     'label' => 'Етикети',
     'reg_invite' => 'Покана за регистрация.',
+    'admin_profile' => 'Администраторски профил',
+    'create_profile' => 'създаване на профил',
+    'stats_analytics' => 'статистика и анализ',
+    'topics_categories' => 'теми и категории',
+    'topics_subtopics' => 'теми и подтеми',
+    'languages' => 'езици',
+    'actions_history' => 'история на действията',
+    'logins_history' => 'история на влизанията',
+    'signals' => 'сигнали',
+    'manage_roles' => 'управление на роли',
 
 ];

@@ -67,7 +67,14 @@
                             <span class="user-icon {{ Request::segment(1) == 'user' ? 'active' : '' }}">
                                 <a
                                     href="{{ url('/user') }}"
-                                ><img src="{{ asset('img/user.svg') }}"></a>
+                                    class="user-icon"
+                                >
+                                    @if (Auth::user()->is_admin)
+                                        <img src="{{ asset('img/admin.svg') }}">
+                                    @else
+                                        <img src="{{ asset('img/user.svg') }}">
+                                    @endif
+                                </a>
                             </span>
                             <span class="login-link">>
                                 <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>

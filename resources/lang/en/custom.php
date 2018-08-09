@@ -260,4 +260,5 @@ return [
     'contact' => 'Contacts',
     'label' => 'Labels',
     'reg_invite' => 'Registration invitation.',
+    'no_dataset' => 'No Data Set found!',
 ];

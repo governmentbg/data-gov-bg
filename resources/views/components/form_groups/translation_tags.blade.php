@@ -1,4 +1,14 @@
+
+
 @foreach (Lang::getInstance()->getActive() as $key => $active)
+@php
+    $tags = '';
+    if (!empty($model)):
+        foreach ($model as $mod):
+            $tags = $tags .','. $mod->translate($active['locale'], $active['locale'])->name;
+        endforeach;
+    endif
+@endphp
     <div
         class="
             form-group
@@ -13,7 +23,7 @@
                     <input
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
                         class="input-border-r-12 form-control"
-                        value="{{ $model->translate($active['locale'], $active['locale'])->{ $field['name'] } }}"
+                        value="{{ $tags }}"
                         data-role="tagsinput"
                     >
                 @elseif (is_array(old($field['name'])) && !empty(old($field['name'])[$active['locale']]))

@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'dataset'])
+    @include('partials.user-nav-bar', ['view' => 'organisation'])
     <div class="col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST">
@@ -28,8 +28,8 @@
                     <select
                         id="theme"
                         class="js-select form-control"
-                        name="category_id"
                         data-placeholder="{{ __('custom.select_main_topic') }}"
+                        name="category_id"
                     >
                         <option></option>
                         @foreach ($categories as $id => $category)
@@ -89,11 +89,10 @@
                 <div class="col-sm-9">
                     <select
                         id="organisation"
-                        class="js-select form-control"
-                        data-placeholder="{{ utrans('custom.select_org') }}"
+                        class="js-autocomplete form-control"
+                        placeholder="{{ utrans('custom.select_org') }}"
                         name="org_id"
                     >
-                        <option></option>
                         @foreach ($organisations as $id =>$org)
                             <option
                                 value="{{ $id }}"
@@ -109,11 +108,10 @@
                 <div class="col-sm-9">
                     <select
                         id="group"
-                        class="js-select form-control"
-                        name="group_id"
+                        class="js-autocomplete form-control"
                         data-placeholder="{{ utrans('custom.groups', 1) }}"
+                        name="group_id"
                     >
-                        <option></option>
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"
@@ -130,8 +128,8 @@
                     <select
                         id="visibility"
                         class="js-select form-control"
-                        name="visibility"
                         data-placeholder="{{ utrans('custom.select_visibility') }}"
+                        name="visibility"
                     >
                         <option></option>
                         @foreach ($visibilityOpt as $id => $visOpt)

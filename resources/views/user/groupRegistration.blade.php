@@ -26,12 +26,6 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group row required">
-                <label for="name" class="col-sm-3 col-xs-12 col-form-label"> {{ __('custom.label_name') }}:</label>
-                <div class="col-sm-9">
-                    <input type="text" class="input-border-r-12 form-control" id="name" placeholder="Тест ЕООД">
-                </div>
-            </div>
             <div class="form-group row {{ isset(session('result')->errors->uri) ? 'has-error' : '' }}">
                 <label for="uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">

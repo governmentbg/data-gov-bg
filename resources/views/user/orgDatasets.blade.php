@@ -40,7 +40,7 @@
                                             <div class="pull-left row">
                                                 <div class="col-xs-6">
                                                     <span class="badge badge-pill m-r-md m-b-sm">
-                                                        <a href="{{ url('/user/datasetEdit') }}">{{ __('custom.edit') }}</a>
+                                                        <a href="{{ url('/user/organisations/datasets/edit/'. $set->uri) }}">{{ __('custom.edit') }}</a>
                                                     </span>
                                                 </div>
                                                 <div class="col-xs-6">

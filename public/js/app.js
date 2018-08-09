@@ -46396,12 +46396,9 @@ $(function () {
         });
     }
 
-    if ($('.js-select').length) {
-        $('.js-select').select2({ minimumResultsForSearch: -1 });
-    }
-
     if ($('.js-autocomplete').length) {
         $('.js-autocomplete').select2({
+            placeholder: $('.js-autocomplete').data('palceholder'),
             matcher: function matcher(params, data) {
                 if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
                     return data;
@@ -46454,7 +46451,12 @@ $(function () {
  */
 function initSelect2() {
     if ($('.js-select').length) {
-        $('.js-select').select2({ minimumResultsForSearch: -1 });
+        $('.js-select').each(function () {
+            $(this).select2({
+                placeholder: $(this).data('placeholder'),
+                minimumResultsForSearch: -1
+            });
+        });
     }
 };
 initSelect2();

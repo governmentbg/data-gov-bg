@@ -28,7 +28,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'group' ? 'active' : '' }}"
-                                href="{{ url('/user/userGroups') }}"
+                                href="{{ url('/user/groups') }}"
                             >{{ trans_choice(__('custom.groups'), 2) }}</a>
                         </li>
                         <li>

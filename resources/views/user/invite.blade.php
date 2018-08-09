@@ -22,7 +22,7 @@
                             <ul class="nav filter-type right-border">
                                 <li><a href="{{ url('/user') }}">{{ __('custom.notifications') }}</a></li>
                                 <li><a href="{{ url('/user/datasets') }}">{{ __('custom.my_data') }}</a></li>
-                                <li><a href="{{ url('/user/userGroups') }}">{{ trans_choice(__('custom.groups'), 2) }}</a></li>
+                                <li><a href="{{ url('/user/groups') }}">{{ trans_choice(__('custom.groups'), 2) }}</a></li>
                                 <li><a href="{{ url('/user/organisations') }}">{{ trans_choice(__('custom.organisations'), 2) }}</a></li>
                                 <li><a href="{{ url('/user/settings') }}">{{ __('custom.settings') }}</a></li>
                                 <li><a class="active" href="{{ url('/user/invite') }}">{{ __('custom.invite') }}</a></li>

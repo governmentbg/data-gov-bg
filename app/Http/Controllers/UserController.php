@@ -24,8 +24,8 @@ use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
@@ -33,17 +33,6 @@ use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 
 class UserController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Function for getting an array of translatable fields
      *
@@ -978,20 +967,32 @@ class UserController extends Controller {
      *
      * @return view with a list of organisations and request success message
      */
-    public function deleteOrg(Request $request)
+    public function deleteOrg(Request $request, $id)
     {
-        $params = [
-            'api_key' => \Auth::user()->api_key,
-            'org_id'  => $request->org_id,
-        ];
+        $orgId = Organisation::where('id', $id)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
 
-        $request = Request::create('/api/deleteOrganisation', 'POST', $params);
-        $api = new ApiOrganisation($request);
-        $result = $api->deleteOrganisation($request)->getData();
+        if ($this->checkUserOrg($orgId)) {
+            $params = [
+                'api_key' => \Auth::user()->api_key,
+                'org_id'  => $id,
+            ];
 
-        return !$result->success
-            ? redirect('/user/organisations')->with('result', $result)
-            : redirect('/user/organisations')->with('success', 'Организацията беше изтрита успешно!');
+            $request = Request::create('/api/deleteOrganisation', 'POST', $params);
+            $api = new ApiOrganisation($request);
+            $result = $api->deleteOrganisation($request)->getData();
+
+            if ($result->success) {
+                session()->flash('alert-success', 'Успешно изтриване!');
+
+                return back();
+            }
+        }
+
+        session()->flash('alert-danger', 'Неуспешно изтриване!');
+
+        return back();
     }
 
     /**
@@ -1137,31 +1138,51 @@ class UserController extends Controller {
         }
 
         return $result->success
-            ? redirect()->route('userOrgView', ['org_id' => $result->org_id])
+            ? redirect('user/organisations/view/'. $result->org_id)
             : redirect('user/organisations/register')->withInput(Input::all())->withErrors($result->errors);
     }
 
-     /**
+    /**
      * Loads a view for viewing an organisation
      *
      * @param Request $request
      *
      * @return view to view the a registered organisation
      */
-    public function viewOrg(Request $request)
+    public function viewOrg(Request $request, $uri)
     {
-        $uri = $request->offsetGet('uri');
-        $orgId = $request->has('org_id') ? $request->org_id : Organisation::where('uri', $uri)->value('id');
+        $orgId = Organisation::where('uri', $uri)
+            ->orWhere('id', $uri)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
 
-        if ($orgId) {
+        if ($this->checkUserOrg($orgId)) {
             $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
             $api = new ApiOrganisation($request);
             $result = $api->getOrganisationDetails($request)->getData();
 
-            return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
+            if ($result->success) {
+                return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
+            }
         }
 
         return redirect('/user/organisations');
+    }
+
+    /**
+     * Checks if the logged user belongs to an organisation
+     *
+     * @param Request $request
+     *
+     * @return true or false
+     */
+    private function checkUserOrg($orgId)
+    {
+        if (UserToOrgRole::where(['user_id' => \Auth::user()->id, 'org_id' => $orgId])->count()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function viewOrgMembers(Request $request)
@@ -1384,94 +1405,104 @@ class UserController extends Controller {
      *
      * @param Request $request
      *
-     * @return view for editing  org details
+     * @return view for editing org details
      */
-    public function editOrg(Request $request)
+    public function editOrg(Request $request, $uri)
     {
-        $query = Organisation::select('id', 'name');
+        $orgId = Organisation::where('uri', $uri)
+            ->orWhere('id', $uri)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
 
-        $query->whereHas('userToOrgRole', function($q) {
-            $q->where('user_id', \Auth::user()->id);
-        });
+        if ($this->checkUserOrg($orgId)) {
+            $query = Organisation::select('id', 'name');
 
-        $parentOrgs = $query->get();
+            $query->whereHas('userToOrgRole', function($q) {
+                $q->where('user_id', \Auth::user()->id);
+            });
 
-        if (isset($request->view)) {
-            $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
+            $parentOrgs = $query->get();
+
+            if (isset($request->view)) {
+                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+                return view(
+                    'user/orgEdit',
+                    [
+                        'class'     => 'user',
+                        'model'     => $orgModel,
+                        'withModel' => $customModel,
+                        'fields'    => self::getTransFields()
+                    ]
+                );
+            }
+
+            $post = [
+                'data'          => $request->all(),
+                'org_id'        => $orgId,
+                'parentOrgs'    => $parentOrgs,
+            ];
+
+            if (!empty($post['data']['logo'])) {
+                try {
+                    $img = \Image::make($post['data']['logo']);
+
+                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                    $post['data']['logo_mimetype'] = $img->mime();
+                    $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
+
+                    unset($post['data']['logo']);
+                } catch (NotReadableException $ex) {
+                    Log::error($ex->getMessage());
+                }
+            }
+
+            $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
+            $post['data']['description'] = $post['data']['descript'];
+            $request = Request::create('/api/editOrganisation', 'POST', $post);
+            $api = new ApiOrganisation($request);
+            $result = $api->editOrganisation($request)->getData();
+            $errors = !empty($result->errors) ? $result->errors : [];
+
+            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            return view(
-                'user/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]
-            );
-        }
-
-        $post = [
-            'data'   => $request->all(),
-            'org_id' => $request->org_id
-        ];
-
-        if (!empty($post['data']['logo'])) {
-            try {
-                $img = \Image::make($post['data']['logo']);
-
-                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                $post['data']['logo_mimetype'] = $img->mime();
-                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-                unset($post['data']['logo']);
-            } catch (NotReadableException $ex) {
-                Log::error($ex->getMessage());
+            if ($result->success) {
+                session()->flash('alert-success', __('custom.edit_success'));
+            } else {
+                session()->flash(
+                    'alert-danger',
+                    isset($result->error) ? $result->error->message : __('custom.edit_error')
+                );
             }
+
+            return !$result->success
+                ? view(
+                    'user/orgEdit',
+                    [
+                        'class'      => 'user',
+                        'model'      => $orgModel,
+                        'withModel'  => $customModel,
+                        'fields'     => self::getTransFields(),
+                        'parentOrgs' => $parentOrgs
+                    ]
+                )->withErrors($result->errors)
+                : view(
+                    'user/orgEdit',
+                    [
+                        'class'      => 'user',
+                        'model'      => $orgModel,
+                        'withModel'  => $customModel,
+                        'fields'     => self::getTransFields(),
+                        'parentOrgs' => $parentOrgs
+                    ]
+                );
         }
 
-        $post['data']['description'] = $post['data']['descript'];
-        $request = Request::create('/api/editOrganisation', 'POST', $post);
-        $api = new ApiOrganisation($request);
-        $result = $api->editOrganisation($request)->getData();
-        $errors = !empty($result->errors) ? $result->errors : [];
-
-        $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
-        $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-        $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
-
-        if ($result->success) {
-            session()->flash('alert-success', __('custom.edit_success'));
-        } else {
-            session()->flash(
-                'alert-danger',
-                isset($result->error) ? $result->error->message : __('custom.edit_error')
-            );
-        }
-
-        return !$result->success
-            ? view(
-                'user/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]
-            )->withErrors($result->errors)
-            : view(
-                'user/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]
-            );
+        return redirect('/user/organisations');
     }
 
     /**
@@ -2412,9 +2443,9 @@ class UserController extends Controller {
             if ($result->success) {
                 $request->session()->flash('alert-success', 'Успешно създадена група!');
 
-                return redirect('/user/groupView/'. $result->id);
+                return redirect('/user/groups/view/'. $result->id);
             } else {
-                $request->session()->flash('alert-danger', 'Възникна грешла при създаване на група!');
+                $request->session()->flash('alert-danger', 'Възникна грешка при създаване на група!');
 
                 return back()->withErrors($result->errors)->withInput(Input::all());
             }
@@ -2430,27 +2461,26 @@ class UserController extends Controller {
      *
      * @return view with list of groups
      */
-    public function userGroups(Request $request)
+    public function groups(Request $request)
     {
         $class = 'user';
         $groups = [];
         $perPage = 6;
         $params = [
             'api_key'          => \Auth::user()->api_key,
+            'criteria'         => [
+                'user_id'           => \Auth::user()->id,
+            ],
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $orgReq = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($orgReq);
-        $result = $api->getUserOrganisations($orgReq)->getData();
+        $result = $api->listGroups($orgReq)->getData();
 
-        if ($result->success) {
-            foreach ($result->organisations as $org) {
-                if ($org->type == Organisation::TYPE_GROUP) {
-                    $groups[] = $org;
-                }
-            }
+        if (!empty($result->groups)) {
+            $groups = $result->groups;
         }
 
         $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
@@ -2470,25 +2500,27 @@ class UserController extends Controller {
      *
      * @return view on success on failure redirect to homepage
      */
-    public function groupView(Request $request, $id)
+    public function viewGroup(Request $request, $uri)
     {
-        $class = 'user';
+        $orgId = Organisation::where('uri', $uri)
+            ->orWhere('id', $uri)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
 
-        $params = ['group_id' => $id];
+        if ($orgId) {
+            $request = Request::create('/api/getGroupDetails', 'POST', [
+                'group_id'  => $orgId,
+                'locale'    => \LaravelLocalization::getCurrentLocale(),
+            ]);
+            $api = new ApiOrganisation($request);
+            $result = $api->getGroupDetails($request)->getData();
 
-        $grpReq = Request::create('/api/getGroupDetails', 'POST', $params);
-        $api = new ApiOrganisation($grpReq);
-        $result = $api->getGroupDetails($grpReq)->getData();
-
-        if ($result->success) {
-            $group = $result->data;
-
-            return view('user/groupView', compact('class', 'group'));
-        } else {
-            $request->session()->flash('alert-danger', 'Не беше намерена група!');
-
-            return redirect('/');
+            if ($result->success) {
+                return view('user/groupView', ['class' => 'user', 'group' => $result->data]);
+            }
         }
+
+        return redirect('/user/groups');
     }
 
     /**
@@ -2501,24 +2533,30 @@ class UserController extends Controller {
      */
     public function deleteGroup(Request $request, $id)
     {
-        $delArr = [
-            'api_key'   => Auth::user()->api_key,
-            'group_id'  => $id,
-        ];
+        $orgId = Organisation::where('id', $id)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
 
-        $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
-        $api = new ApiOrganisation($delReq);
-        $delRes = $api->deleteGroup($delReq)->getData();
+        if ($this->checkUserOrg($orgId)) {
+            $delArr = [
+                'api_key'   => Auth::user()->api_key,
+                'group_id'  => $id,
+            ];
 
-        if ($delRes->success) {
-            $request->session()->flash('alert-success', 'Успешно изтрита група!');
+            $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
+            $api = new ApiOrganisation($delReq);
+            $result = $api->deleteGroup($delReq)->getData();
 
-            return back();
-        } else {
-            $request->session()->flash('alert-danger', 'Неуспешно изтриване на група!');
+            if ($result->success) {
+                $request->session()->flash('alert-success', 'Успешно изтриване!');
 
-            return back();
+                return back();
+            }
         }
+
+        $request->session()->flash('alert-danger', 'Неуспешно изтриване!');
+
+        return back();
     }
 
     /**
@@ -2528,41 +2566,48 @@ class UserController extends Controller {
      * @param integer $id
      * @return view on success with messages
      */
-    public function editGroup(Request $request, $id)
+    public function editGroup(Request $request, $uri)
     {
-        $class = 'user';
-        $fields = self::getGroupTransFields();
+        $orgId = Organisation::where('uri', $uri)
+            ->orWhere('id', $uri)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
 
-        $model = Organisation::find($id)->loadTranslations();
-        $withModel = CustomSetting::where('org_id', $id)->get()->loadTranslations();
-        $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
+        if ($this->checkUserOrg($orgId)) {
+            $class = 'user';
+            $fields = self::getGroupTransFields();
 
-        if ($request->has('edit')) {
-            $data = $request->all();
-            $data['description'] = $data['descript'];
+            if ($request->has('edit')) {
+                $data = $request->all();
+                $data['description'] = $data['descript'];
 
-            $params = [
-                'api_key'   => Auth::user()->api_key,
-                'group_id'  => $id,
-                'data'      => $data,
-            ];
+                $model = Organisation::find($orgId)->loadTranslations();
+                $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
+                $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
-            $editReq = Request::create('/api/editGroup', 'POST', $params);
-            $api = new ApiOrganisation($editReq);
-            $result = $api->editGroup($editReq)->getData();
+                $params = [
+                    'api_key'   => Auth::user()->api_key,
+                    'group_id'  => $orgId,
+                    'data'      => $data,
+                ];
 
-            if ($result->success) {
-                $request->session()->flash('alert-success', 'Успешно запазени данни!');
+                $editReq = Request::create('/api/editGroup', 'POST', $params);
+                $api = new ApiOrganisation($editReq);
+                $result = $api->editGroup($editReq)->getData();
 
-                return back();
-            } else {
-                $request->session()->flash('alert-danger', 'Грешно въведени данни!');
+                if ($result->success) {
+                    $request->session()->flash('alert-success', 'Успешно запазени данни!');
+                } else {
+                    $request->session()->flash('alert-danger', 'Грешно въведени данни!');
+                }
 
                 return back()->withErrors($result->errors);
             }
+
+            return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
         }
 
-        return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
+        return redirect('/user/groups');
     }
 
     /**
@@ -2641,7 +2686,7 @@ class UserController extends Controller {
                 return redirect('login');
             } else {
                 foreach ($result->errors as $field => $msg) {
-                    $errors[substr($field, strpos($field, ".") )] = $msg[0];
+                    $errors[substr($field, strpos($field, '.') )] = $msg[0];
                 }
             }
         }
@@ -2906,10 +2951,10 @@ class UserController extends Controller {
     public function searchGroups(Request $request)
     {
         $perPage = 6;
-        $search = $request->offsetGet('search');
+        $search = $request->offsetGet('q');
 
         if (empty($search)) {
-            return redirect('user/userGroups');
+            return redirect('user/groups');
         }
 
         $params = [

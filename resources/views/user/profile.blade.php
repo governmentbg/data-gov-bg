@@ -23,7 +23,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a href="{{ url('/users/list') }}">{{ trans_choice(__('custom.users'), 2) }}</a></li>
                                     <li><a class="active" href="#">{{ trans_choice(__('custom.users'), 1) }}</a></li>
-                                    <li><a href="{{ url('/user/userGroups') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/user/groups') }}">{{ __('custom.data') }}</a></li>
                                     <li><a href="{{ url('/user/organisations') }}">{{ __('custom.chronology') }}</a></li>
                                     <li><a href="{{ url('/user/invite') }}">{{ __('custom.members') }}</a></li>
                                 </ul>

@@ -972,7 +972,7 @@ class DatabaseTest extends TestCase
         $newFaker = Faker::create();
         // Test creation
         foreach (range(1, self::USER_TO_ORG_RECORDS) as $i) {
-            $user =  $newFaker->unique()->randomElement($users)['id'];
+            $user = $newFaker->unique()->randomElement($users)['id'];
             $organisation = $this->faker->randomElement($organisations)['id'];
             $role = $this->faker->randomElement($roles)['id'];
 
@@ -983,10 +983,12 @@ class DatabaseTest extends TestCase
                 'role_id' => $role
             ];
 
-            try {
-                $record = UserToOrgRole::create($dbData);
-            } catch (QueryException $ex) {
-                $this->log($ex->getMessage());
+            if (!UserToOrgRole::where($dbData)->count()) {
+                try {
+                    $record = UserToOrgRole::create($dbData);
+                } catch (QueryException $ex) {
+                    $this->log($ex->getMessage());
+                }
             }
 
             $this->assertNotNull($record);

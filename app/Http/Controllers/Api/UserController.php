@@ -46,15 +46,15 @@ class UserController extends ApiController
         $criteria = $request->offsetGet('criteria');
 
         $validator = \Validator::make($request->all(), [
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
             'criteria'              => 'nullable|array',
             'criteria.active'       => 'nullable|boolean',
             'criteria.approved'     => 'nullable|boolean',
-            'criteria.is_admin'     => 'nullable|integer',
-            'criteria.role_id'      => 'nullable|integer',
-            'criteria.org_id'       => 'nullable|integer',
-            'criteria.id'           => 'nullable|integer',
+            'criteria.is_admin'     => 'nullable|int',
+            'criteria.role_id'      => 'nullable|int',
+            'criteria.org_id'       => 'nullable|int',
+            'criteria.id'           => 'nullable|int',
             'criteria.user_ids'     => 'nullable|array',
             'criteria.order'        => 'nullable|array',
             'criteria.order.type'   => 'nullable|string',
@@ -137,8 +137,8 @@ class UserController extends ApiController
         $search = $request->all();
 
         $validator = \Validator::make($search, [
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
             'criteria'              => 'required|array',
             'criteria.keywords'     => 'required|string',
             'criteria.order'        => 'nullable|array',
@@ -182,7 +182,7 @@ class UserController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['id' => 'required|integer']);
+        $validator = \Validator::make($post, ['id' => 'required|int']);
 
         if (!$validator->fails()) {
             $user = User::find($post['id']);
@@ -216,7 +216,7 @@ class UserController extends ApiController
     {
         $result = [];
 
-        $validator = \Validator::make($request->all(), ['id' => 'required|integer']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
 
         if (!$validator->fails()) {
             $user = User::with('userSetting', 'follow')->find($request->id);
@@ -275,106 +275,102 @@ class UserController extends ApiController
      */
     public function addUser(Request $request)
     {
-        $data = $request->data;
+        $data = $request->get('data', []);
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'data.firstname'         => 'required|string',
-                'data.lastname'          => 'required|string',
-                'data.email'             => 'required|email',
-                'data.password'          => 'required|string',
-                'data.password_confirm'  => 'required|string|same:data.password',
-            ]
-        );
+        $validator = \Validator::make($data, [
+            'firstname'         => 'required|string',
+            'lastname'          => 'required|string',
+            'username'          => 'nullable|string|unique:users,username,NULL,id,deleted_at,NULL',
+            'email'             => 'required|email',
+            'password'          => 'required|string|min:6',
+            'password_confirm'  => 'required|string|same:password',
+            'role_id'           => 'nullable|int|required_with:org_id',
+            'org_id'            => 'nullable|int|required_with:role_id',
+        ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Add user failure', $validator->errors()->messages());
-        }
-
-        $apiKey = Uuid::generate(4)->string;
-        $user = new User;
-
-        $user->username = !empty($request->data['username'])
-            ? $request->data['username']
-            : $this->generateUsername($request->data['email']);
-        $user->password = bcrypt($request->data['password']);
-        $user->email = $request->data['email'];
-        $user->firstname = $request->data['firstname'];
-        $user->lastname = $request->data['lastname'];
-        $user->add_info = !empty($request->data['addinfo'])
-            ? $request->data['addinfo']
-            : null;
-        $user->is_admin = isset($request->data['is_admin']) ? (int) $request->data['is_admin'] : 0;
-        $user->active = 0;
-        $user->approved = isset($request->data['approved']) ? (int) $request->data['approved'] : 0;
-        $user->api_key = $apiKey;
-        $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
-        $user->remember_token = null;
-
-        try {
-            $user->save();
-        } catch (QueryException $e) {
-            Log::error($e->getMessage());
-
-            return $this->errorResponse('Add user failure');
-        }
-
-        if (isset($data['role_id']) || isset($data['org_id'])) {
-
-            $validator = \Validator::make(
-                $request->all(),
-                [
-                    'data.role_id'         => 'required',
-                    'data.org_id'          => 'required',
-                ]
-            );
-
-            if ($validator->fails()) {
-                return $this->errorResponse('Add user failure', $validator->errors()->messages());
-            }
-
-            $userToOrgRole = new UserToOrgRole;
-
-            $userToOrgRole->user_id = $user->id;
-            $userToOrgRole->role_id = (int) $data['role_id'];
-            $userToOrgRole->org_id = (int) $data['org_id'];
-
+        if (!$validator->fails()) {
             try {
-                $userToOrgRole->save();
-            } catch (QueryException $e) {
-                Log::error($e->getMessage());
+                DB::beginTransaction();
 
-                return $this->errorResponse('Add user failure');
-            }
-        }
+                $apiKey = Uuid::generate(4)->string;
+                $user = new User;
 
-        if (!empty($data['user_settings']['locale']) || isset($data['user_settings']['newsletter_digest'])) {
-            $userSettings = new UserSetting;
+                $user->username = !empty($request->data['username'])
+                    ? $request->data['username']
+                    : $this->generateUsername($request->data['email']);
+                $user->password = bcrypt($request->data['password']);
+                $user->email = $request->data['email'];
+                $user->firstname = $request->data['firstname'];
+                $user->lastname = $request->data['lastname'];
+                $user->add_info = !empty($request->data['add_info'])
+                    ? $request->data['add_info']
+                    : null;
+                $user->is_admin = 0;
+                $user->active = 0;
+                $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
+                $user->api_key = $apiKey;
+                $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
+                $user->remember_token = null;
 
-            $userSettings->user_id = $user->id;
-            $userSettings->locale = $userLocale;
-            $userSettings->created_by = $user->id;
+                $registered = $user->save();
 
-            if(
-                isset($data['user_settings']['newsletter_digest'])
-                && is_numeric($data['user_settings']['newsletter_digest'])
-            ) {
-                $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
-            }
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                ];
 
-            try {
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user->email, $user->firstname);
+                    $m->subject(__('custom.register_subject'));
+                });
+
+                if (isset($data['role_id']) || isset($data['org_id'])) {
+                    $userToOrgRole = new UserToOrgRole;
+
+                    $userToOrgRole->user_id = $user->id;
+                    $userToOrgRole->role_id = (int) $data['role_id'];
+                    $userToOrgRole->org_id = (int) $data['org_id'];
+
+                    $userToOrgRole->save();
+                }
+
+                $userSettings = new UserSetting;
+
+                $userLocale = !empty($data['user_settings']['locale'])
+                    && !empty(Locale::where('locale', $data['user_settings']['locale'])->value('locale'))
+                    ? $data['user_settings']['locale']
+                    : config('app.locale');
+
+                $userSettings->user_id = $user->id;
+                $userSettings->locale = $userLocale;
+
+                if (
+                    isset($data['user_settings']['newsletter_digest'])
+                    && is_numeric($data['user_settings']['newsletter_digest'])
+                ) {
+                    $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
+                }
+
                 $userSettings->save();
-            } catch (QueryException $e) {
-                Log::error($e->getMessage());
 
-                return $this->errorResponse('Add user failure');
+                DB::commit();
+
+                return $this->successResponse(['api_key' => $apiKey], true);
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            } catch (\Swift_TransportException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+
+                $validator->errors()->add('email', __('custom.send_mail_failed'));
             }
         }
 
-        //to do: send mail to user
-
-        return $this->successResponse(['api_key' => $apiKey], true);
+        return $this->errorResponse('User registration failure', $validator->errors()->messages());
     }
 
     /**
@@ -406,14 +402,14 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'id'                    => 'required|integer',
+                'id'                    => 'required|int',
                 'data'                  => 'required|array',
                 'data.firstname'        => 'nullable|string',
                 'data.lastname'         => 'nullable|string',
                 'data.email'            => 'nullable|email',
                 'data.add_info'         => 'nullable|string',
                 'data.password'         => 'nullable|string',
-                'data.is_admin'         => 'nullable|integer',
+                'data.is_admin'         => 'nullable|int',
                 'data.password_confirm' => 'nullable|string|same:data.password',
             ]
         );
@@ -617,7 +613,7 @@ class UserController extends ApiController
      */
     public function generateAPIKey(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|integer']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
 
         if ($validator->fails()) {
             return $this->errorResponse('Generate API key failure', $validator->errors()->messages());
@@ -665,10 +661,10 @@ class UserController extends ApiController
         } else {
             $validator = \Validator::make($post['data'], [
                 'email'    => 'required|email',
-                'is_admin' => 'nullable|integer',
-                'approved' => 'nullable|integer',
-                'role_id'  => 'nullable|integer|required_with:org_id',
-                'org_id'   => 'nullable|integer|required_with:role_id',
+                'is_admin' => 'nullable|int',
+                'approved' => 'nullable|int',
+                'role_id'  => 'nullable|int|required_with:org_id',
+                'org_id'   => 'nullable|int|required_with:role_id',
                 'generate' => 'nullable|boolean',
             ]);
 
@@ -817,141 +813,124 @@ class UserController extends ApiController
         $validator = \Validator::make($data, [
             'firstname'         => 'required|string',
             'lastname'          => 'required|string',
-            'username'          => 'required|string',
+            'username'          => 'required|string|unique:users,username,NULL,id,deleted_at,NULL',
             'email'             => 'required|email',
-            'password'          => 'required|string',
+            'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
+            'role_id'           => 'nullable|int|required_with:org_id',
+            'org_id'            => 'nullable|int|required_with:role_id',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('User registration failure', $validator->errors()->messages());
-        }
-
-        try {
-            $apiKey = Uuid::generate(4)->string;
-            $user = new User;
-
-            $user->username = !empty($request->data['username'])
-                ? $request->data['username']
-                : $this->generateUsername($request->data['email']);
-            $user->password = bcrypt($request->data['password']);
-            $user->email = $request->data['email'];
-            $user->firstname = $request->data['firstname'];
-            $user->lastname = $request->data['lastname'];
-            $user->add_info = !empty($request->data['add_info'])
-                ? $request->data['add_info']
-                : null;
-            $user->is_admin = 0;
-            $user->active = 0;
-            $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
-            $user->api_key = $apiKey;
-            $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
-            $user->remember_token = null;
-
-            $registered = $user->save();
-
-            $mailData = [
-                'user'  => $user->firstname,
-                'hash'  => $user->hash_id,
-            ];
-
+        if (!$validator->fails()) {
             try {
+                DB::beginTransaction();
+
+                $apiKey = Uuid::generate(4)->string;
+                $user = new User;
+
+                $user->username = !empty($request->data['username'])
+                    ? $request->data['username']
+                    : $this->generateUsername($request->data['email']);
+                $user->password = bcrypt($request->data['password']);
+                $user->email = $request->data['email'];
+                $user->firstname = $request->data['firstname'];
+                $user->lastname = $request->data['lastname'];
+                $user->add_info = !empty($request->data['add_info'])
+                    ? $request->data['add_info']
+                    : null;
+                $user->is_admin = 0;
+                $user->active = 0;
+                $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
+                $user->api_key = $apiKey;
+                $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
+                $user->remember_token = null;
+
+                $registered = $user->save();
+
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                ];
+
                 Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
                     $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
                     $m->to($user->email, $user->firstname);
                     $m->subject(__('custom.register_subject'));
                 });
+
+                if (isset($data['role_id']) || isset($data['org_id'])) {
+                    $userToOrgRole = new UserToOrgRole;
+
+                    $userToOrgRole->user_id = $user->id;
+                    $userToOrgRole->role_id = (int) $data['role_id'];
+                    $userToOrgRole->org_id = (int) $data['org_id'];
+
+                    $userToOrgRole->save();
+                }
+
+                $userSettings = new UserSetting;
+
+                $userLocale = !empty($data['user_settings']['locale'])
+                    && !empty(Locale::where('locale', $data['user_settings']['locale'])->value('locale'))
+                    ? $data['user_settings']['locale']
+                    : config('app.locale');
+
+                $userSettings->user_id = $user->id;
+                $userSettings->locale = $userLocale;
+
+                if (
+                    isset($data['user_settings']['newsletter_digest'])
+                    && is_numeric($data['user_settings']['newsletter_digest'])
+                ) {
+                    $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
+                }
+
+                $userSettings->save();
+
+                if (!empty($data['org_data'])) {
+                    $organisation = new Organisation;
+
+                    $organisation->type = $data['org_data']['type'];
+                    $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
+                        ? $data['org_data']['parent_org_id']
+                        : null;
+                    $organisation->logo_file_name = !empty($data['org_data']['logo_file_name'])
+                        ? $data['org_data']['logo_file_name']
+                        : null;
+                    $organisation->logo_mime_type = !empty($data['org_data']['logo_mime_type'])
+                        ? $data['org_data']['logo_mime_type']
+                        : null;
+                    $organisation->logo_data = !empty($data['org_data']['logo_data'])
+                        ? $data['org_data']['logo_data']
+                        : null;
+                    $organisation->active = 0;
+                    $organisation->approved = 0;
+                    $organisation->created_by = $user->id;
+                    $organisation->name = $this->trans($locale, $data['org_data']['name']);
+                    $organisation->descript = $this->trans($locale, $data['org_data']['description']);
+                    $organisation->activity_info = $data['org_data']['activity_info'];
+                    $organisation->contacts = $data['org_data']['contacts'];
+
+                    $organisation->save();
+                }
+
+                DB::commit();
+
+                return $this->successResponse(['api_key' => $apiKey], true);
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
             } catch (\Swift_TransportException $ex) {
+                DB::rollback();
+
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('email', __('custom.send_mail_failed'));
-
-                return $this->errorResponse('Invite user failure', $validator->errors()->messages());
-            }
-        } catch (QueryException $e) {
-            Log::error($e->getMessage());
-        }
-
-        if (isset($data['role_id']) || isset($data['org_id'])) {
-            $validator = \Validator::make($request->all(), [
-                'data.role_id' => 'required|integer',
-                'data.org_id'  => 'required|integer',
-            ]);
-
-            if ($validator->fails()) {
-                return $this->errorResponse('Edit user failure', $validator->errors()->messages());
-            }
-
-            $userToOrgRole = new UserToOrgRole;
-
-            $userToOrgRole->user_id = $user->id;
-            $userToOrgRole->role_id = (int) $data['role_id'];
-            $userToOrgRole->org_id = (int) $data['org_id'];
-
-            try {
-                $userToOrgRole->save();
-            } catch (QueryException $e) {
-                Log::error($e->getMessage());
             }
         }
 
-        $userSettings = new UserSetting;
-
-        $userLocale = !empty($data['user_settings']['locale'])
-            && !empty(Locale::where('locale', $data['user_settings']['locale'])->value('locale'))
-            ? $data['user_settings']['locale']
-            : config('app.locale');
-
-        $userSettings->user_id = $user->id;
-        $userSettings->locale = $userLocale;
-
-        if (
-            isset($data['user_settings']['newsletter_digest'])
-            && is_numeric($data['user_settings']['newsletter_digest'])
-        ) {
-            $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
-        }
-
-        try {
-            $userSettings->save();
-        } catch (QueryException $e) {
-            Log::error($e->getMessage());
-        }
-
-        if (!empty($data['org_data'])) {
-            $organisation = new Organisation;
-
-            $organisation->type = $data['org_data']['type'];
-            $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
-                ? $data['org_data']['parent_org_id']
-                : null;
-            $organisation->logo_file_name = !empty($data['org_data']['logo_file_name'])
-                ? $data['org_data']['logo_file_name']
-                : null;
-            $organisation->logo_mime_type = !empty($data['org_data']['logo_mime_type'])
-                ? $data['org_data']['logo_mime_type']
-                : null;
-            $organisation->logo_data = !empty($data['org_data']['logo_data'])
-                ? $data['org_data']['logo_data']
-                : null;
-            $organisation->active = 0;
-            $organisation->approved = 0;
-            $organisation->created_by = $user->id;
-            $organisation->name = $this->trans($locale, $data['org_data']['name']);
-            $organisation->descript = $this->trans($locale, $data['org_data']['description']);
-            $organisation->activity_info = $data['org_data']['activity_info'];
-            $organisation->contacts = $data['org_data']['contacts'];
-
-            try {
-                $organisation->save();
-            } catch (QueryException $e) {
-                Log::error($e->getMessage());
-
-                return $this->errorResponse('User registration failure');
-            }
-        }
-
-        return $this->successResponse(['api_key' => $apiKey], true);
+        return $this->errorResponse('User registration failure', $validator->errors()->messages());
     }
 
     /**
@@ -1040,7 +1019,7 @@ class UserController extends ApiController
 
         $validator = \Validator::make($data, [
             'hash'              => 'required|string',
-            'password'          => 'required|string',
+            'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
         ]);
 
@@ -1067,6 +1046,4 @@ class UserController extends ApiController
 
         return $this->errorResponse('custom.pass_change_err', $validator->errors()->messages());
     }
-
-    // public function getUserFollows()
 }

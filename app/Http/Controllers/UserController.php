@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Locale;
 use App\DataSet;
+use App\Category;
 use App\UserSetting;
 use App\Organisation;
 use App\CustomSetting;
@@ -107,7 +108,7 @@ class UserController extends Controller {
             ],
             [
                 'label'    => 'custom.description',
-                'name'     => 'description',
+                'name'     => 'descript',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
@@ -303,6 +304,97 @@ class UserController extends Controller {
         );
     }
 
+    public function orgDatasetEdit(Request $request, DataSet $datasetModel, $uri)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $params = ['dataset_uri' => $uri];
+
+        $model = DataSet::where('uri', $uri)->first()->loadTranslations();
+        $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
+        $tagModel = Category::where('parent_id', $model->category_id)
+            ->whereHas('dataSetSubCategory', function($q) use($model) {
+                $q->where('data_set_id', $model->id);
+            })
+            ->get()
+            ->loadTranslations();
+
+        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($setRq);
+        $result = $api->getDataSetDetails($setRq)->getData();
+
+        if (!$result->success) {
+            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+
+            return back();
+        }
+
+        if ($request->has('save')) {
+            $editData = $request->all();
+
+            if ($editData['uri'] == $uri) {
+                unset($editData['uri']);
+            }
+
+            if (!empty($editData['descript'])) {
+                $editData['description'] = $editData['descript'];
+            }
+
+            $tagList = $request->offsetGet('tags');
+
+            if (!empty($tagList)) {
+                unset($editData['tags']);
+                $tagData = [];
+                foreach ($tagList as $lang => $string) {
+                    $tagData[$lang] = array_values(explode(',', $string));
+                }
+
+                foreach ($tagData as $lang => $tags) {
+                    foreach ($tags as $tag) {
+                        $editData['tags'][] = [$lang => $tag];
+                    }
+                }
+            }
+
+            $edit = [
+                'api_key'       => Auth::user()->api_key,
+                'dataset_uri'   => $uri,
+                'data'          => $editData,
+            ];
+
+            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
+            $success = $api->editDataSet($editRq)->getData();
+
+            if ($success->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
+
+                return redirect()->back()->withInput()->withErrors($success->errors);
+            }
+        }
+
+        return view('user/orgDatasetEdit', [
+            'class'         => 'user',
+            'dataSet'       => $model,
+            'tagModel'      => $tagModel,
+            'withModel'     => $withModel,
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
     /**
      * Displays detail information for a given dataset
      * created by the given user
@@ -425,7 +517,6 @@ class UserController extends Controller {
 
         if ($data) {
             // prepare post data for API request
-            $data['locale'] = \LaravelLocalization::getCurrentLocale();
             if (isset($data['tags'])) {
                 foreach ($data['tags'] as $locale => $tags) {
                     $data['tags'][$locale] = explode(',', $tags);
@@ -443,28 +534,24 @@ class UserController extends Controller {
             $params['data'] = $data;
             $savePost = Request::create('/api/addDataSet', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $result = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataSet($savePost)->getData();
 
-            if ($result->success) {
+            if ($save->success) {
                 // connect data set to group
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
-                    $groupParams['data_set_uri'] = $result->uri;
+                    $groupParams['data_set_uri'] = $save->uri;
                     $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
                     $result = $api->addDataSetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
-                return redirect()->route('datasetView', ['uri' => $result->uri]);
+
+                return redirect()->route('datasetView', ['uri' => $save->uri]);
             } else {
+                $request->session()->flash('alert-danger', $save->error->message);
 
-                foreach ($result->errors as $field => $msg) {
-                    $errors[substr($field, strpos($field, ".") + 1)] = $msg[0];
-                }
-
-                $request->flash();
-                $request->session()->flash('errors', $errors);
-                $request->session()->flash('alert-danger', $result->error->message);
+                return redirect()->back()->withInput()->withErrors($save->errors);
             }
         }
 
@@ -476,7 +563,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'fields'        => self::getDatasetTransFields(),
-        ])->with('errors', $errors);
+        ]);
     }
 
     /**
@@ -487,33 +574,95 @@ class UserController extends Controller {
      *
      * @return view for edditing a dataset
      */
-    public function datasetEdit(Request $request, DataSet $datasetModel)
+    public function datasetEdit(Request $request, DataSet $datasetModel, $uri)
     {
         $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
-        $data = $request->all();
+        $params = ['dataset_uri' => $uri];
 
-        $params['dataset_uri'] = $request->uri;
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
-        $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $model = DataSet::where('uri', $uri)->first()->loadTranslations();
+        $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
+        $tagModel = Category::where('parent_id', $model->category_id)
+            ->whereHas('dataSetSubCategory', function($q) use($model) {
+                $q->where('data_set_id', $model->id);
+            })
+            ->get()
+            ->loadTranslations();
 
-        $datasetData = $dataset->data;
+        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($setRq);
+        $result = $api->getDataSetDetails($setRq)->getData();
+
+        if (!$result->success) {
+            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+
+            return back();
+        }
+
+        if ($request->has('save')) {
+            $editData = $request->all();
+
+            if ($editData['uri'] == $uri) {
+                unset($editData['uri']);
+            }
+
+            if (!empty($editData['descript'])) {
+                $editData['description'] = $editData['descript'];
+            }
+
+            $tagList = $request->offsetGet('tags');
+
+            if (!empty($tagList)) {
+                unset($editData['tags']);
+                $tagData = [];
+                foreach ($tagList as $lang => $string) {
+                    $tagData[$lang] = array_values(explode(',', $string));
+                }
+
+                foreach ($tagData as $lang => $tags) {
+                    foreach ($tags as $tag) {
+                        $editData['tags'][] = [$lang => $tag];
+                    }
+                }
+            }
+
+            $edit = [
+                'api_key'       => Auth::user()->api_key,
+                'dataset_uri'   => $uri,
+                'data'          => $editData,
+            ];
+
+            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
+            $success = $api->editDataSet($editRq)->getData();
+
+            if ($success->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
+
+                return redirect()->back()->withInput()->withErrors($success->errors);
+            }
+        }
 
         return view('user/datasetEdit', [
             'class'         => 'user',
-            'fields'        => $dataset,
+            'dataSet'       => $model,
+            'tagModel'      => $tagModel,
+            'withModel'     => $withModel,
             'visibilityOpt' => $visibilityOptions,
             'categories'    => $categories,
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
             'fields'        => self::getDatasetTransFields(),
-        ])->with('errors', $errors);
+        ]);
     }
 
     public function translate()
@@ -2562,12 +2711,168 @@ class UserController extends Controller {
             return back();
         }
 
-        return view('user/datasets', [
+        return view('user/groupDatasets', [
                 'class'         => 'user',
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => $actMenu,
         ]);
+    }
+
+    public function groupDatasetView(Request $request, $uri)
+    {
+        $params['dataset_uri'] = $uri;
+
+        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($detailsReq);
+        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        unset($params['dataset_uri']);
+        $params['criteria']['dataset_uri'] = $uri;
+
+        $resourcesReq = Request::create('/api/listResources', 'POST', $params);
+        $apiResources = new ApiResource($resourcesReq);
+        $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        if (isset($dataset->data->name)) {
+
+            if (
+                $dataset->data->updated_by == $dataset->data->created_by
+                && !is_null($dataset->data->created_by)
+            ) {
+                $username = User::find($dataset->data->created_by)->value('username');
+                $dataset->data->updated_by = $username;
+                $dataset->data->created_by = $username;
+            } else {
+                $dataset->data->updated_by = is_null($dataset->data->updated_by) ? null : User::find($dataset->data->updated_by)->value('username');
+                $dataset->data->created_by = is_null($dataset->data->created_by) ? null : User::find($dataset->data->created_by)->value('username');
+            }
+        }
+
+        return view(
+            'user/groupDatasetView',
+            [
+                'class'      => 'user',
+                'dataset'    => $dataset->data,
+                'resources'  => $resources->resources,
+                'activeMenu' => 'group'
+            ]
+        );
+    }
+
+    public function groupDatasetEdit(Request $request, DataSet $datasetModel, $uri)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $params = ['dataset_uri' => $uri];
+
+        $model = DataSet::where('uri', $uri)->first()->loadTranslations();
+        $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
+        $tagModel = Category::where('parent_id', $model->category_id)
+            ->whereHas('dataSetSubCategory', function($q) use($model) {
+                $q->where('data_set_id', $model->id);
+            })
+            ->get()
+            ->loadTranslations();
+
+        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($setRq);
+        $result = $api->getDataSetDetails($setRq)->getData();
+
+        if (!$result->success) {
+            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+
+            return back();
+        }
+
+        if ($request->has('save')) {
+            $editData = $request->all();
+
+            if ($editData['uri'] == $uri) {
+                unset($editData['uri']);
+            }
+
+            if (!empty($editData['descript'])) {
+                $editData['description'] = $editData['descript'];
+            }
+
+            $tagList = $request->offsetGet('tags');
+
+            if (!empty($tagList)) {
+                unset($editData['tags']);
+                $tagData = [];
+                foreach ($tagList as $lang => $string) {
+                    $tagData[$lang] = array_values(explode(',', $string));
+                }
+
+                foreach ($tagData as $lang => $tags) {
+                    foreach ($tags as $tag) {
+                        $editData['tags'][] = [$lang => $tag];
+                    }
+                }
+            }
+
+            $edit = [
+                'api_key'       => Auth::user()->api_key,
+                'dataset_uri'   => $uri,
+                'data'          => $editData,
+            ];
+
+            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
+            $success = $api->editDataSet($editRq)->getData();
+
+            if ($success->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
+
+                return redirect()->back()->withInput()->withErrors($success->errors);
+            }
+        }
+
+        return view('user/groupDatasetEdit', [
+            'class'         => 'user',
+            'dataSet'       => $model,
+            'tagModel'      => $tagModel,
+            'withModel'     => $withModel,
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
+    public function groupResourceView(Request $request, $uri)
+    {
+        $resourcesReq = Request::create('/api/listResources', 'POST', ['criteria' => ['resource_uri' => $uri]]);
+        $apiResources = new ApiResource($resourcesReq);
+        $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resource = !empty($resources->resources) ? $resources->resources[0] : null;
+
+        if (!is_null($resource) && isset($resource->name)) {
+
+            if (
+                $resource->updated_by == $resource->created_by
+                && !is_null($resource->created_by)
+            ) {
+                $username = User::find($resource->created_by)->value('username');
+                $resource->updated_by = $username;
+                $resource->created_by = $username;
+            } else {
+                $resource->updated_by = is_null($resource->updated_by) ? null : User::find($resource->updated_by)->value('username');
+                $resource->created_by = is_null($resource->created_by) ? null : User::find($resource->created_by)->value('username');
+            }
+        }
+
+        return view('user/groupResourceView', ['class' => 'user', 'resource' => $resource]);
     }
 
     /**

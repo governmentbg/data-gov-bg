@@ -1031,6 +1031,13 @@ class OrganisationController extends ApiController
                     $newGroup->save();
 
                     if ($newGroup) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->org_id = $newGroup->id;
+                        $userToOrgRole->user_id = \Auth::user()->id;
+                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                        $userToOrgRole->save();
+
                         if (!empty($customFields)) {
                             if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
                                 DB::rollback();

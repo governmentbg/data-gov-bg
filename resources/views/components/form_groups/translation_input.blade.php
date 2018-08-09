@@ -33,9 +33,7 @@
                     <span class="flag-icon flag-icon-{{ locale_to_flag($active['locale']) }}"></span>
                 </span>
             </div>
-            @if (isset($result->errors->{ $field['name'] }))
-                <span class="error">{{ $result->errors->{ $field['name'] }[0] }}</span>
-            @endif
+            <span class="error">{{ $errors->first($field['name'] .'.'. $active['locale']) }}</span>
         </div>
     </div>
 @endforeach

@@ -17,7 +17,7 @@
                     >
                 </form>
                 <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/registerGroup') }}">{{ __('custom.create_group') }}</a></span><br>
-                <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/groupDatasets') }}">{{ __('custom.data_sets') }}</a></span>
+                <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/groups/datasets') }}">{{ __('custom.data_sets') }}</a></span>
             </div>
             <div class="col-xs-12 page-content p-sm">
                 <div class="col-xs-12 user-group">

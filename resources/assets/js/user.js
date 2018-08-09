@@ -31,6 +31,26 @@ $(function() {
             $('#delete-confirm').modal('toggle');
         })
     }
+
+    if ($('.js-select').length) {
+        $('.js-select').select2({minimumResultsForSearch: -1});
+    }
+
+    if ($('.js-autocomplete').length) {
+        $('.js-autocomplete').select2({
+            matcher: function(params, data) {
+                if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
+                    return data;
+                }
+
+                if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                    return data;
+                } else {
+                    return false;
+                }
+            }
+        });
+    }
 });
 
 $(function() {

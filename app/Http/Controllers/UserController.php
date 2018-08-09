@@ -1459,7 +1459,6 @@ class UserController extends Controller {
                 }
             }
 
-            $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
             $post['data']['description'] = $post['data']['descript'];
             $request = Request::create('/api/editOrganisation', 'POST', $post);
             $api = new ApiOrganisation($request);
@@ -2577,13 +2576,13 @@ class UserController extends Controller {
             $class = 'user';
             $fields = self::getGroupTransFields();
 
+            $model = Organisation::find($orgId)->loadTranslations();
+            $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
+            $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
+
             if ($request->has('edit')) {
                 $data = $request->all();
                 $data['description'] = $data['descript'];
-
-                $model = Organisation::find($orgId)->loadTranslations();
-                $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
-                $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
                 $params = [
                     'api_key'   => Auth::user()->api_key,
@@ -2601,7 +2600,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-danger', 'Грешно въведени данни!');
                 }
 
-                return back()->withErrors($result->errors);
+                return back()->withErrors(isset($result->errors) ? $result->errors : []);
             }
 
             return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));

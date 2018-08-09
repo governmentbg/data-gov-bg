@@ -20,8 +20,6 @@
                         name="q"
                     >
                 </form>
-                <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/groups/register') }}">{{ __('custom.create_group') }}</a></span><br>
-                <span class="badge badge-pill m-t-lg new-data"><a href="{{ url('/user/groups/datasets') }}">{{ __('custom.data_sets') }}</a></span>
             </div>
         </div>
         <div class="row">

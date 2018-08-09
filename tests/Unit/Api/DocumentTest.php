@@ -6,11 +6,14 @@ use App\Document;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use App\Http\Controllers\ApiController;
 
 class DocumentTest extends TestCase
 {
     use WithFaker;
     use DatabaseTransactions;
+
+    private $locale = 'en';
 
     public function testAddDocument()
     {
@@ -56,8 +59,8 @@ class DocumentTest extends TestCase
     public function testEditDocument()
     {
         $document = Document::create([
-            'name'         => $this->faker->word(),
-            'descript'     => $this->faker->word(),
+            'name'         => ApiController::trans($this->locale, $this->faker->word()),
+            'descript'     => ApiController::trans($this->locale, $this->faker->word()),
             'file_name'    => $this->faker->word(),
             'mime_type'    => $this->faker->word(),
             'data'         => $this->faker->word()
@@ -117,8 +120,8 @@ class DocumentTest extends TestCase
     public function testDeleteDocument()
     {
         $document = Document::create([
-            'name'         => $this->faker->word(),
-            'descript'     => $this->faker->word(),
+            'name'         => ApiController::trans($this->locale, $this->faker->word()),
+            'descript'     => ApiController::trans($this->locale, $this->faker->word()),
             'file_name'    => $this->faker->word(),
             'mime_type'    => $this->faker->word(),
             'data'         => $this->faker->word()

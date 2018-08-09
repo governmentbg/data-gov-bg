@@ -43,14 +43,14 @@ use DatabaseTransactions;
                     'firstname'     => $this->faker->name(),
                     'lastname'      => $this->faker->name(),
                     'email'         => $this->faker->email(),
-                    'status'        => $this->faker->numberBetween(0, 10),
+                    'status'        => $this->faker->numberBetween(1, 10),
                 ]
             ]
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
     }
-    
+
     /**
      * Test for TermsOfUseRequestController@editTermsOfUseRequest
      */
@@ -61,7 +61,7 @@ use DatabaseTransactions;
             'firstname'     => $this->faker->name(),
             'lastname'      => $this->faker->name(),
             'email'         => $this->faker->email(),
-            'status'        => $this->faker->numberBetween(0, 10),
+            'status'        => $this->faker->numberBetween(1, 10),
             'created_by'    => 1,
         ]);
 
@@ -81,7 +81,7 @@ use DatabaseTransactions;
                     'locale'        => 'en',
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
-                    'ordering'      => $this->faker->numberBetween(0, 10),
+                    'ordering'      => $this->faker->numberBetween(1, 10),
                 ]
             ]
         )
@@ -92,9 +92,9 @@ use DatabaseTransactions;
         $this->post(
             url('api/editTermsOfUseRequest'),
             [
-                'api_key'   => $this->getApiKey(),
+                'api_key'     => $this->getApiKey(),
                 'request_id'  => $section->id,
-                'data'      => [],
+                'data'        => [],
             ]
         )
             ->assertStatus(500)
@@ -127,9 +127,9 @@ use DatabaseTransactions;
         $section = TermsOfUseRequest::create([
             'descript'      => $this->faker->word(),
             'firstname'     => $this->faker->name(),
-            'lastname'     => $this->faker->name(),
+            'lastname'      => $this->faker->name(),
             'email'         => $this->faker->email(),
-            'status'        => $this->faker->numberBetween(0,10),
+            'status'        => $this->faker->numberBetween(1, 10),
             'created_by'    => 1,
         ]);
 
@@ -182,7 +182,7 @@ use DatabaseTransactions;
             [
                 'api_key'   => $this->getApiKey(),
                 'criteria'  => [
-                    'status'    => $this->faker->numberBetween(1,2),
+                    'status'    => $this->faker->numberBetween(1, 2),
                 ],
             ]
         )

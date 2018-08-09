@@ -5,6 +5,7 @@ namespace Tests\Unit\Api;
 use App\Page;
 use App\Locale;
 use Tests\TestCase;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -12,6 +13,8 @@ class PageTest extends TestCase
 {
     use WithFaker;
     use DatabaseTransactions;
+
+    private $locale = 'en';
 
     public function testAddPage()
     {
@@ -60,11 +63,11 @@ class PageTest extends TestCase
     public function testEditPage()
     {
         $page = Page::create([
-            'title'             => $this->faker->word(),
-            'body'              => $this->faker->word(),
-            'head_title'        => $this->faker->word(),
-            'meta_descript'     => $this->faker->word(),
-            'meta_key_words'    => $this->faker->word(),
+            'title'             => ApiController::trans($this->locale, $this->faker->word()),
+            'body'              => ApiController::trans($this->locale, $this->faker->word()),
+            'head_title'        => ApiController::trans($this->locale, $this->faker->word()),
+            'meta_descript'     => ApiController::trans($this->locale, $this->faker->word()),
+            'meta_key_words'    => ApiController::trans($this->locale, $this->faker->word()),
             'forum_link'        => $this->faker->word,
             'active'            => $this->faker->boolean,
             'valid_from'        => $this->faker->date,
@@ -131,11 +134,11 @@ class PageTest extends TestCase
     public function testDeletePage()
     {
         $page = Page::create([
-            'title'             => $this->faker->word(),
-            'body'              => $this->faker->word(),
-            'head_title'        => $this->faker->word(),
-            'meta_descript'     => $this->faker->word(),
-            'meta_key_words'    => $this->faker->word(),
+            'title'             => ApiController::trans($this->locale, $this->faker->word()),
+            'body'              => ApiController::trans($this->locale, $this->faker->word()),
+            'head_title'        => ApiController::trans($this->locale, $this->faker->word()),
+            'meta_descript'     => ApiController::trans($this->locale, $this->faker->word()),
+            'meta_key_words'    => ApiController::trans($this->locale, $this->faker->word()),
             'forum_link'        => $this->faker->word,
             'active'            => $this->faker->boolean,
             'valid_from'        => $this->faker->date,

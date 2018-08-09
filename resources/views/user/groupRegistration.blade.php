@@ -20,8 +20,8 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
-                        @if (isset(session('result')->errors->logo))
-                            <span class="error">{{ session('result')->errors->logo[0] }}</span>
+                        @if (isset($errors) && $errors->has('logo'))
+                            <span class="error">{{ $errors->first('logo') }}</span>
                         @endif
                     </div>
                 </div>
@@ -35,8 +35,8 @@
                         name="uri"
                         value="{{ old('uri') }}"
                     >
-                    @if (isset(session('result')->errors->uri))
-                        <span class="error">{{ session('result')->errors->uri[0] }}</span>
+                    @if (isset($errors) && $errors->has('uri'))
+                        <span class="error">{{ $errors->first('uri') }}</span>
                     @endif
                 </div>
             </div>

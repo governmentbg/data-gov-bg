@@ -48,8 +48,9 @@ class OrganisationController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'locale'                => 'nullable|max:5',
-            'name'                  => 'required',
+            'locale'                => 'nullable|string|max:5',
+            'name'                  => 'required_with:locale',
+            'name.*'                => 'required_without:locale|string',
             'type'                  => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
             'description'           => 'nullable',
             'uri'                   => 'nullable|string',
@@ -210,8 +211,9 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($data, [
             'org_id'                   => 'required|int|exists:organisations,id,deleted_at,NULL',
-            'locale'                   => 'required',
-            'name'                     => 'required',
+            'locale'                   => 'nullable|string|max:5',
+            'name'                     => 'required_with:locale',
+            'name.*'                   => 'required_without:locale|string',
             'type'                     => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
             'description'              => 'nullable',
             'uri'                      => 'nullable|string',
@@ -236,7 +238,7 @@ class OrganisationController extends ApiController
             ) {
                 $validator->errors()->add('name', 'name is required');
             }
-         });
+        });
 
         if (
             !$validator->fails()
@@ -253,6 +255,8 @@ class OrganisationController extends ApiController
 
                 if (!empty($data['description'])) {
                     $orgData['descript'] = $this->trans($data['locale'], $data['description']);
+                } else {
+                    $orgData['descript'] = null;
                 }
 
                 if (!empty($data['uri'])) {
@@ -295,14 +299,20 @@ class OrganisationController extends ApiController
 
                 if (!empty($data['activity_info'])) {
                     $orgData['activity_info'] = $this->trans($data['locale'], $data['activity_info']);
+                } else {
+                    $orgData['activity_info'] = null;
                 }
 
                 if (!empty($data['contacts'])) {
                     $orgData['contacts'] = $this->trans($data['locale'], $data['contacts']);
+                } else {
+                    $orgData['contacts'] = null;
                 }
 
                 if (!empty($data['parent_org_id'])) {
                     $orgData['parent_org_id'] = $data['parent_org_id'];
+                } else {
+                    $orgData['parent_org_id'] = null;
                 }
 
                 if (isset($data['active'])) {
@@ -954,8 +964,9 @@ class OrganisationController extends ApiController
         $post = $request->offsetGet('data');
 
         $validator = \Validator::make($post, [
-            'locale'                => 'nullable|string',
-            'name'                  => 'required',
+            'locale'                => 'nullable|string|max:5',
+            'name'                  => 'required_with:locale',
+            'name.*'                => 'required_without:locale|string',
             'description'           => 'nullable',
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
@@ -1037,7 +1048,6 @@ class OrganisationController extends ApiController
                         $userToOrgRole->role_id = Role::ROLE_ADMIN;
 
                         $userToOrgRole->save();
-
                         if (!empty($customFields)) {
                             if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
                                 DB::rollback();
@@ -1091,9 +1101,10 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($request->all(),[
             'group_id'              => 'required',
             'data'                  => 'required|array',
-            'data.name'             => 'nullable',
+            'data.locale'           => 'nullable|string|max:5',
+            'data.name'             => 'required_with:locale',
+            'data.name.*'           => 'required_without:locale|string',
             'data.description'      => 'nullable',
-            'data.locale'           => 'required_with:data.name,data.description',
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'nullable|string',

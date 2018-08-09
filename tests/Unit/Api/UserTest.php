@@ -90,7 +90,7 @@ class UserTest extends TestCase
                 'data'    => [
                     'firstname'        => $this->faker->name(),
                     'lastname'         => $this->faker->name(),
-                    'email'            => $this->faker->safeEmail(),
+                    'email'            => 'dimitar@finite-soft.com',
                     'password'         => $password,
                     'password_confirm' => $password,
                 ]

@@ -173,7 +173,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Add organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('Add organisation failure', $validator->errors()->messages());
     }
 
     /**
@@ -230,16 +230,6 @@ class OrganisationController extends ApiController
             'custom_fields.*.label'    => 'nullable',
             'custom_fields.*.value'    => 'nullable',
         ]);
-
-        $validator->after(function ($validator) use ($data) {
-            if (
-                empty($data['name'])
-                || is_array($data['name'])
-                && empty(array_filter($data['name']))
-            ) {
-                $validator->errors()->add('name', 'name is required');
-            }
-        });
 
         if (
             !$validator->fails()
@@ -328,8 +318,6 @@ class OrganisationController extends ApiController
                     $customFields = $data['custom_fields'];
                 }
 
-                $newOrgSettingsData = [];
-
                 try {
                     if (!empty($orgData)) {
                         foreach ($orgData as $prop => $val) {
@@ -360,7 +348,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Edit organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('Edit organisation failure', $validator->errors()->messages());
     }
 
 
@@ -393,7 +381,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Delete organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('Delete organisation failure', $validator->errors()->messages());
     }
 
     /**
@@ -516,7 +504,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('List organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('List organisation failure', $validator->errors()->messages());
     }
 
     /**
@@ -629,7 +617,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('List organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('List organisation failure', $validator->errors()->messages());
     }
 
     /**
@@ -723,7 +711,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Search organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('Search organisation failure', $validator->errors()->messages());
     }
 
     /**
@@ -1112,28 +1100,29 @@ class OrganisationController extends ApiController
      */
     public function editGroup(Request $request)
     {
-        $data = $request->data;
+        $data = $request->get('data', []);
+        $id = $request->get('group_id');
 
-        $id = $request->group_id;
+        if ($request->group_id) {
+            $data['group_id'] = $request->group_id;
+        }
 
-        $validator = \Validator::make($request->all(),[
+        $validator = \Validator::make($data,[
             'group_id'              => 'required',
-            'data'                  => 'required|array',
-            'data.locale'           => 'nullable|string|max:5',
-            'data.name'             => 'required_with:locale',
-            'data.name.*'           => 'required_without:locale|string',
-            'data.description'      => 'nullable',
+            'locale'                => 'nullable|string|max:5',
+            'name'                  => 'required_with:locale',
+            'name.*'                => 'required_without:locale|string',
+            'description'           => 'nullable',
             'uri'                   => 'nullable|string',
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'nullable|string',
             'logo_mimetype'         => 'nullable|string',
             'logo_data'             => 'nullable|string',
-            'custom_fields.*.label' => 'nullable|string',
-            'custom_fields.*.value' => 'nullable|string',
+            'custom_fields.*.label' => 'nullable',
+            'custom_fields.*.value' => 'nullable',
         ]);
 
         if (!$validator->fails()) {
-
             if (empty($group = Organisation::find($id))) {
                 return $this->errorResponse('No Group Found.');
             }
@@ -1141,11 +1130,11 @@ class OrganisationController extends ApiController
             $newGroupData = [];
 
             if (!empty($data['name'])) {
-                $newGroupData['name'] = $data['name'];
+                $newGroupData['name'] = $this->trans($data['locale'], $data['name']);
             }
 
             if (!empty($data['description'])) {
-                $newGroupData['descript'] = $data['description'];
+                $newGroupData['descript'] = $this->trans($data['locale'], $data['description']);
             }
 
             if (!empty($data['uri'])) {
@@ -1189,14 +1178,14 @@ class OrganisationController extends ApiController
             if (!empty($newGroupData)) {
                 $newGroupData['updated_by'] = \Auth::id();
 
-                foreach ($newGroupData as $prop => $val) {
-                    $group->$prop = $val;
-                }
-
                 if (!isset($newGroupData['logo_data']) || $this->checkImageSize($newGroupData['logo_data'])) {
                     DB::beginTransaction();
 
                     try {
+                        foreach ($newGroupData as $prop => $val) {
+                            $group->$prop = $val;
+                        }
+
                         $group->save();
 
                         if (!empty($customFields)) {
@@ -1206,6 +1195,7 @@ class OrganisationController extends ApiController
                                 return $this->errorResponse('Add Group Failure.');
                             }
                         }
+
                         DB::commit();
 
                         return $this->successResponse();
@@ -1240,7 +1230,7 @@ class OrganisationController extends ApiController
         $group = Organisation::find($request->group_id);
 
         if (empty($group)) {
-            return ApiController::errorResponse('No Group Found.');
+            return $this->errorResponse('No Group Found.');
         }
 
         if (!$validator->fails()) {
@@ -1255,7 +1245,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return ApiController::errorResponse('Delete organisation failure', $validator->errors()->messages());
+        return $this->errorResponse('Delete organisation failure', $validator->errors()->messages());
     }
 
     /**

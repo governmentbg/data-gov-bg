@@ -33,7 +33,7 @@ $(function() {
     }
 
     if ($('.js-select').length) {
-        $('.js-select').select2({minimumResultsForSearch: +1});
+        $('.js-select').select2({minimumResultsForSearch: -1});
     }
 
     if ($('.js-autocomplete').length) {

@@ -115,7 +115,7 @@ class OrganisationController extends ApiController
 
                     $organisation->uri = !empty($request->data['uri'])
                         ? $request->data['uri']
-                        : $this->generateOrgUri($request->data['name']);
+                        : $this->generateOrgUri();
 
                     $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($data['locale'], $data['activity_info']) : null;
                     $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
@@ -982,7 +982,7 @@ class OrganisationController extends ApiController
             $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
             $newGroup->uri = !empty($post['uri'])
                 ? $post['uri']
-                : $this->generateOrgUri($post['name']);
+                : $this->generateOrgUri();
 
             $newGroup->type = Organisation::TYPE_GROUP;
             $newGroup->active = Organisation::ACTIVE_FALSE;
@@ -1499,19 +1499,9 @@ class OrganisationController extends ApiController
      * @param string $name
      * @return string $uri
      */
-    public function generateOrgUri($name)
+    public function generateOrgUri()
     {
-        if (is_array($name)) {
-            $name = reset($name);
-        }
-
-        $uri = $name . rand();
-
-        while (Organisation::where('uri', $uri)->count()) {
-            $uri = $name . rand();
-        }
-
-        return $uri;
+        return \Uuid::generate(4)->string;
     }
 
     /*

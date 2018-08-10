@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DataSetGroup extends Model
 {
     protected $guarded = [];
+    protected $primaryKey = 'data_set_id';
 
     public $timestamps = false;
 

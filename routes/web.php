@@ -22,11 +22,13 @@ Route::middleware('auth')->group(function () {
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
-        Route::get('/user/datasetView', 'UserController@datasetView')->name('datasetView');
+        Route::match(['get', 'post'], '/user/dataset/view/{uri}', 'UserController@datasetView')->name('datasetView');
         Route::post('/user/datasetDelete', 'UserController@datasetDelete');
         Route::match(['get', 'post'], '/user/datasets', 'UserController@datasets');
         Route::match(['get', 'post'], '/user/dataset/search', 'UserController@datasetSearch');
         Route::match(['get', 'post'], '/user/dataset/create', 'UserController@datasetCreate');
+        Route::match(['get', 'post'], '/user/organisations/dataset/create', 'UserController@orgDatasetCreate');
+        Route::match(['get', 'post'], '/user/groups/dataset/create', 'UserController@groupDatasetCreate');
         Route::match(['get', 'post'], '/user/dataset/edit/{uri}', 'UserController@datasetEdit')->name('datasetEdit');
 
         Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
@@ -49,7 +51,7 @@ Route::middleware('auth')->group(function () {
 
         Route::match(['get', 'post'], '/user/organisations/datasets', 'UserController@orgDatasets');
         Route::get('/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
-        Route::get('/user/organisations/datasetView', 'UserController@orgDatasetView')->name('orgDatasetView');
+        Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView');
 
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete/{id}', 'UserController@deleteOrg');

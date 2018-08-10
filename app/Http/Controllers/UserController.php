@@ -1406,7 +1406,7 @@ class UserController extends Controller {
      * @return view login on success or error on fail
      */
     public function showOrgRegisterForm() {
-        $query = Organisation::select('id', 'name');
+        $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
         $query->whereHas('userToOrgRole', function($q) {
             $q->where('user_id', \Auth::user()->id);
@@ -1439,7 +1439,7 @@ class UserController extends Controller {
             ->value('id');
 
         if ($this->checkUserOrg($orgId)) {
-            $query = Organisation::select('id', 'name');
+            $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
             $query->whereHas('userToOrgRole', function($q) {
                 $q->where('user_id', \Auth::user()->id);
@@ -1455,10 +1455,11 @@ class UserController extends Controller {
                 return view(
                     'user/orgEdit',
                     [
-                        'class'     => 'user',
-                        'model'     => $orgModel,
-                        'withModel' => $customModel,
-                        'fields'    => self::getTransFields()
+                        'class'      => 'user',
+                        'model'      => $orgModel,
+                        'withModel'  => $customModel,
+                        'fields'     => self::getTransFields(),
+                        'parentOrgs' => $parentOrgs
                     ]
                 );
             }

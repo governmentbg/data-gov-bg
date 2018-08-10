@@ -399,6 +399,7 @@ class UserController extends ApiController
         $data = $request->data;
         $id = $request->id;
 
+
         $validator = \Validator::make(
             $request->all(),
             [
@@ -433,10 +434,13 @@ class UserController extends ApiController
         }
 
         if (!empty($data['email']) && $data['email'] !== $user->email) {
+            $newUserData['hash_id'] = str_replace('-', '', Uuid::generate(4)->string);
+
             $mailData = [
                 'user'  => $user->firstname,
-                'hash'  => $user->hash_id,
-                'mail'  => $data['email']
+                'hash'  => $newUserData['hash_id'],
+                'mail'  => $data['email'],
+                'id'    => $id,
             ];
 
             Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {

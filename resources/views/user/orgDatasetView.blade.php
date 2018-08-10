@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.user-nav-bar', ['view' => $activeMenu])
+        @include('partials.user-nav-bar', ['view' => 'organisation'])
         @if (isset($dataset->name))
             <div class="row">
                 <div class="info-bar-sm col-sm-7 col-xs-12 m-t-md m-l-10">
@@ -47,10 +47,10 @@
             </div>
             <div class="row">
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
-                    <a type="button" class="badge badge-pill m-b-sm" href="">{{ __('custom.edit') }}</a>
+                    <a type="button" class="badge badge-pill m-b-sm" href="{{ url('/user/organisations/datasets/edit/'. $dataset->uri) }}">{{ __('custom.edit') }}</a>
                 </div>
                 <div class="col-md-9 col-sm-8 text-left m-l-10">
-                    <form method="" action="">
+                    <form method="POST">
                         {{ csrf_field() }}
                         <button
                             class="badge badge-pill m-b-sm"

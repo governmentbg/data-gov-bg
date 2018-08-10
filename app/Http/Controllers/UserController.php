@@ -8,6 +8,7 @@ use App\Locale;
 use App\DataSet;
 use App\Category;
 use App\UserSetting;
+use App\DataSetGroup;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
@@ -263,6 +264,7 @@ class UserController extends Controller {
 
         if (!empty($dataSetIds)) {
             $params['criteria']['dataset_ids'] = $dataSetIds;
+            $params['criteria']['created_by'] = \Auth::user()->id;
             $rq = Request::create('/api/listDataSets', 'POST', $params);
             $api = new ApiDataSet($rq);
             $datasets = $api->listDataSets($rq)->getData();
@@ -305,7 +307,7 @@ class UserController extends Controller {
         $errors = [];
         $params = ['dataset_uri' => $uri];
 
-        $model = DataSet::where('uri', $uri)->first()->loadTranslations();
+        $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
             ->whereHas('dataSetSubCategory', function($q) use($model) {
@@ -351,6 +353,25 @@ class UserController extends Controller {
                 }
             }
 
+            $groupId = $request->offsetGet('group_id');
+
+            if ($groupId) {
+                $post = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $groupId,
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+            }
+
             $edit = [
                 'api_key'       => Auth::user()->api_key,
                 'dataset_uri'   => $uri,
@@ -393,20 +414,30 @@ class UserController extends Controller {
      * @return view with dataset information
      *
      */
-    public function datasetView(Request $request)
+    public function datasetView(Request $request, $uri)
     {
-        $params['dataset_uri'] = $request->uri;
+        $params['dataset_uri'] = $uri;
 
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
         // prepera request for resources
         unset($params['dataset_uri']);
-        $params['criteria']['dataset_uri'] = $request->uri;
+        $params['criteria']['dataset_uri'] = $uri;
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        if ($request->has('delete')) {
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+            } else {
+                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+            }
+
+            return redirect('/user/datasets');
+        }
 
         return view('user/datasetView', [
             'class'     => 'user',
@@ -423,15 +454,15 @@ class UserController extends Controller {
      * @return view with dataset information
      *
      */
-    public function orgDatasetView(Request $request)
+    public function orgDatasetView(Request $request, $uri)
     {
-        $params['dataset_uri'] = $request->uri;
+        $params['dataset_uri'] = $uri;
 
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
-        $params['criteria']['dataset_uri'] = $request->uri;
+        $params['criteria']['dataset_uri'] = $uri;
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -450,6 +481,16 @@ class UserController extends Controller {
                 $dataset->data->updated_by = is_null($dataset->data->updated_by) ? null : User::find($dataset->data->updated_by)->value('username');
                 $dataset->data->created_by = is_null($dataset->data->created_by) ? null : User::find($dataset->data->created_by)->value('username');
             }
+        }
+
+        if ($request->has('delete')) {
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+            } else {
+                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+            }
+
+            return redirect('/user/organisations/datasets');
         }
 
         return view(
@@ -537,7 +578,7 @@ class UserController extends Controller {
 
                 $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
 
-                return redirect()->route('datasetView', ['uri' => $save->uri]);
+                return redirect('/user/dataset/view/'. $save->uri);
             } else {
                 $request->session()->flash('alert-danger', $save->error->message);
 
@@ -546,6 +587,128 @@ class UserController extends Controller {
         }
 
         return view('user/datasetCreate', [
+            'class'         => 'user',
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
+    public function orgDataSetCreate(Request $request, DataSet $datasetModel)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $data = $request->all();
+
+        if ($data) {
+            // prepare post data for API request
+            if (isset($data['tags'])) {
+                foreach ($data['tags'] as $locale => $tags) {
+                    $data['tags'][$locale] = explode(',', $tags);
+                }
+            }
+
+            if (!empty($data['group_id'])) {
+                $groupId = $data['group_id'];
+            }
+
+            unset($data['group_id']);
+
+            // make request to API
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['data'] = $data;
+            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $api = new ApiDataSet($savePost);
+            $save = $api->addDataSet($savePost)->getData();
+
+            if ($save->success) {
+                // connect data set to group
+                if (isset($groupId)) {
+                    $groupParams['group_id'] = $groupId;
+                    $groupParams['data_set_uri'] = $save->uri;
+                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+                    $result = $api->addDataSetToGroup($addGroup)->getData();
+                }
+
+                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+
+                return redirect('/user/organisations/dataset/view/'. $save->uri);
+            } else {
+                $request->session()->flash('alert-danger', $save->error->message);
+
+                return redirect()->back()->withInput()->withErrors($save->errors);
+            }
+        }
+
+        return view('user/orgDatasetCreate', [
+            'class'         => 'user',
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
+    public function groupDataSetCreate(Request $request, DataSet $datasetModel)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $data = $request->all();
+
+        if ($data) {
+            // prepare post data for API request
+            if (isset($data['tags'])) {
+                foreach ($data['tags'] as $locale => $tags) {
+                    $data['tags'][$locale] = explode(',', $tags);
+                }
+            }
+
+            if (!empty($data['group_id'])) {
+                $groupId = $data['group_id'];
+            }
+
+            unset($data['group_id']);
+
+            // make request to API
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['data'] = $data;
+            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $api = new ApiDataSet($savePost);
+            $save = $api->addDataSet($savePost)->getData();
+
+            if ($save->success) {
+                // connect data set to group
+                if (isset($groupId)) {
+                    $groupParams['group_id'] = $groupId;
+                    $groupParams['data_set_uri'] = $save->uri;
+                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+                    $result = $api->addDataSetToGroup($addGroup)->getData();
+                }
+
+                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+
+                return redirect('user/groups/dataset/view/'. $save->uri);
+            } else {
+                $request->session()->flash('alert-danger', $save->error->message);
+
+                return redirect()->back()->withInput()->withErrors($save->errors);
+            }
+        }
+
+        return view('user/groupDatasetCreate', [
             'class'         => 'user',
             'visibilityOpt' => $visibilityOptions,
             'categories'    => $categories,
@@ -575,7 +738,7 @@ class UserController extends Controller {
         $errors = [];
         $params = ['dataset_uri' => $uri];
 
-        $model = DataSet::where('uri', $uri)->first()->loadTranslations();
+        $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
             ->whereHas('dataSetSubCategory', function($q) use($model) {
@@ -618,6 +781,25 @@ class UserController extends Controller {
                     foreach ($tags as $tag) {
                         $editData['tags'][] = [$lang => $tag];
                     }
+                }
+            }
+
+            $groupId = $request->offsetGet('group_id');
+
+            if ($groupId) {
+                $post = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $groupId,
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
                 }
             }
 
@@ -2756,29 +2938,36 @@ class UserController extends Controller {
         $actMenu = 'group';
         $groups = [];
         $perPage = 6;
-
         $params = [
             'api_key'          => \Auth::user()->api_key,
+            'criteria'         => [
+                'user_id'           => \Auth::user()->id,
+            ],
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $orgReq = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($orgReq);
-        $result = $api->getUserOrganisations($orgReq)->getData();
+        $result = $api->listGroups($orgReq)->getData();
 
         if ($result->success) {
-            foreach ($result->organisations as $org) {
-                if ($org->type == Organisation::TYPE_GROUP) {
-                    $groups[] = $org->id;
-                }
+            foreach ($result->groups as $group) {
+                $groups[] = $group->id;
             }
         }
 
-        $dataSetIds = DataSet::whereIn('org_id', $groups)->pluck('id')->toArray();
+        $dataSetIds = DataSetGroup::whereIn('group_id', $groups)->pluck('data_set_id')->toArray();
 
         if (!empty($dataSetIds)) {
+            $params = [
+                'api_key'          => \Auth::user()->api_key,
+                'records_per_page' => $perPage,
+                'page_number'      => !empty($request->page) ? $request->page : 1,
+            ];
+
             $params['criteria']['dataset_ids'] = $dataSetIds;
+            $params['criteria']['created_by'] = \Auth::user()->id;
             $dataRq = Request::create('/api/listDataSets', 'POST', $params);
             $dataApi = new ApiDataSet($dataRq);
             $datasets = $dataApi->listDataSets($dataRq)->getData();
@@ -2838,6 +3027,17 @@ class UserController extends Controller {
             }
         }
 
+
+        if ($request->has('delete')) {
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+            } else {
+                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+            }
+
+            return redirect('/user/groups/datasets');
+        }
+
         return view(
             'user/groupDatasetView',
             [
@@ -2860,7 +3060,7 @@ class UserController extends Controller {
         $errors = [];
         $params = ['dataset_uri' => $uri];
 
-        $model = DataSet::where('uri', $uri)->first()->loadTranslations();
+        $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
             ->whereHas('dataSetSubCategory', function($q) use($model) {
@@ -2903,6 +3103,25 @@ class UserController extends Controller {
                     foreach ($tags as $tag) {
                         $editData['tags'][] = [$lang => $tag];
                     }
+                }
+            }
+
+            $groupId = $request->offsetGet('group_id');
+
+            if ($groupId) {
+                $post = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $groupId,
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
                 }
             }
 

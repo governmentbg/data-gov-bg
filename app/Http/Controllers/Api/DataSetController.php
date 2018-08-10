@@ -455,8 +455,8 @@ class DataSetController extends ApiController
                 try {
                     $query = DataSet::select();
 
-                    if (!empty($request->criteria['dataset_ids'])) {
-                        $query->whereIn('id', $request->criteria['dataset_ids']);
+                    if (!empty($criteria['dataset_ids'])) {
+                        $query->whereIn('id', $criteria['dataset_ids']);
                     }
 
                     // if user id criteria passed get all his datasets, if not get only published
@@ -511,7 +511,9 @@ class DataSetController extends ApiController
                         $request->offsetGet('page_number'),
                         $this->getRecordsPerPage($request->offsetGet('records_per_page'))
                     );
+
                     $data = $query->get();
+
 
                     foreach ($data as $set) {
                         $set['name'] = $set->name;
@@ -701,27 +703,29 @@ class DataSetController extends ApiController
                     ->withCount('userFollow as followers_count')
                     ->first();
 
-                $data['name'] = $data->name;
-                $data['sla'] = $data->sla;
-                $data['descript'] = $data->descript;
-                $data['reported'] = 0;
-                //TODO show category and tags
-                $category = $data->category;
-                $tags = $data->dataSetSubCategory;
+                if ($data) {
+                    $data['name'] = $data->name;
+                    $data['sla'] = $data->sla;
+                    $data['descript'] = $data->descript;
+                    $data['reported'] = 0;
+                    //TODO show category and tags
+                    $category = $data->category;
+                    $tags = $data->dataSetSubCategory;
 
-                $hasRes = $data->resource()->count();
+                    $hasRes = $data->resource()->count();
 
-                if ($hasRes) {
-                    foreach ($data->resource as $resourse) {
-                        if ($resourse->is_reported) {
-                            $data['reported'] = 1;
+                    if ($hasRes) {
+                        foreach ($data->resource as $resourse) {
+                            if ($resourse->is_reported) {
+                                $data['reported'] = 1;
+                            }
                         }
                     }
+
+                    unset($data['resource']);
+
+                    return $this->successResponse($data);
                 }
-
-                unset($data['resource']);
-
-                return $this->successResponse($data);
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
             }
@@ -760,9 +764,8 @@ class DataSetController extends ApiController
                 $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
 
                 if (
-                    DataSetGroup::create([
-                        'data_set_id'   => $dataSetId,
-                        'group_id'      => $post['group_id'],
+                    DataSetGroup::updateOrCreate(['data_set_id' => $dataSetId],
+                        ['group_id' => $post['group_id']
                     ])
                 ) {
 

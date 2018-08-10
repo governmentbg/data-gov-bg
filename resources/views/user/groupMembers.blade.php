@@ -10,7 +10,7 @@
         <div class="col-sm-9 col-xs-12 m-t-md">
             <div class="filter-content tex">
                 <ul class="nav filter-type right-border">
-                    <li><a class="p-l-none" href="{{ url('/user/groupView') }}">{{ trans_choice(__('custom.groups'), 2) }}</a></li>
+                    <li><a class="p-l-none" href="{{ url('/user/viewGroup') }}">{{ trans_choice(__('custom.groups'), 2) }}</a></li>
                     <li><a class="active" href="{{ url('/user/groupMembers') }}">{{ __('custom.members') }}</a></li>
                 </ul>
             </div>

@@ -35,35 +35,41 @@
                     @foreach ($organisations as $organisation)
                         <div class="col-md-4 col-sm-12 org-col">
                             <div class="col-xs-12">
-                                <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}">
+                                <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}">
                                     <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
                                 </a>
                             </div>
                             <div class="col-xs-12">
-                                <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
+                                <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
                                 <div class="org-desc">{{ $organisation->description }}</div>
                                 <p class="text-right show-more">
-                                    <a href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                                 </p>
                             </div>
                             <div class="col-xs-12 ch-del-btns">
                                 <div class="row">
-                                    <form method="POST" action="{{ url('/user/organisations/edit') }}">
+                                    <form
+                                        method="POST"
+                                        action="{{ url('/user/organisations/edit/'. $organisation->uri) }}"
+                                    >
                                         {{ csrf_field() }}
-                                        <div class="col-xs-6"><button type="submit" name="edit">{{ __('custom.edit') }}</button></div>
-                                        <input type="hidden" name="org_id" value="{{ $organisation->id }}">
+                                        <div class="col-xs-6">
+                                            <button type="submit" name="edit">{{ __('custom.edit') }}</button>
+                                        </div>
                                         <input type="hidden" name="view" value="1">
                                     </form>
-                                    <form method="POST" action="{{ url('/user/organisations/delete') }}">
+                                    <form
+                                        method="POST"
+                                        action="{{ url('/user/organisations/delete/'. $organisation->id) }}"
+                                    >
                                         {{ csrf_field() }}
                                         <div class="col-xs-6 text-right">
                                             <button
                                                 type="submit"
                                                 name="delete"
-                                                onclick="return confirm('Изтриване на организацията?');"
+                                                data-confirm="{{ __('custom.delete_organisation_confirm') }}"
                                             >{{ __('custom.remove') }}</button>
                                         </div>
-                                        <input class="user-org-del" type="hidden" name="org_id" value="{{ $organisation->id }}">
                                     </form>
                                 </div>
                             </div>

@@ -9,7 +9,7 @@
             <h2>{{ __('custom.org_registration') }}</h2>
             <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
         </div>
-        <form method="POST" action="{{ url('/user/organisations/register') }}" class="m-t-lg" enctype="multipart/form-data">
+        <form method="POST" class="m-t-lg" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="form-group row {{ isset(session('result')->errors->logo) ? 'has-error' : '' }}">
                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>

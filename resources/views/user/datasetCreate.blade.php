@@ -14,13 +14,13 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Вашата заявка за лиценз беше приета.</p>
+                        <p>{{ __('custom.terms_req_success') }}</p>
                     </div>
                     <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Имаше проблем с вашата заявка за лиценз.</p>
+                        <p>{{ __('custom.terms_req_error') }}</p>
                     </div>
                     <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
                         {{ csrf_field() }}
@@ -311,6 +311,10 @@
             @endforeach
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
+                    <button
+                        class="btn btn-primary"
+                        name="add_resource"
+                    >{{ __('custom.add_resource') }}</button>
                     <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
                     <button type="submit" class="btn btn-primary">{{ __('custom.save') }}</button>
                 </div>

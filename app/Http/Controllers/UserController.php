@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Role;
 use App\Locale;
 use App\DataSet;
 use App\Category;
@@ -836,7 +837,6 @@ class UserController extends Controller {
     {
         $class = 'user';
         $params = [];
-        $error = [];
         $username = $request->offsetGet('key');
         $orgTypes = Organisation::getPublicTypes();
 
@@ -863,27 +863,51 @@ class UserController extends Controller {
                     }
                 }
 
-                $params['locale'] = \LaravelLocalization::getCurrentLocale();
-
-                if (empty($params['type'])) {
-                    $params['type'] = Organisation::TYPE_CIVILIAN;
-                }
-
                 $req = Request::create('/addOrganisation', 'POST', ['api_key' => $apiKey,'data' => $params]);
                 $api = new ApiOrganisation($req);
                 $result = $api->addOrganisation($req)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно създадена организация!');
+                    $userToOrgRole = new UserToOrgRole;
+                    $userToOrgRole->org_id = $result->org_id;
+                    $userToOrgRole->user_id = $user->id;
+                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                    try {
+                        $userToOrgRole->save();
+                        session()->flash('alert-success', __('custom.add_org_success'));
+                    } catch (QueryException $ex) {
+                        Log::error($ex->getMessage());
+                        session()->flash('alert-danger', __('custom.add_org_error'));
+                    }
 
                     return redirect('login');
                 } else {
-                    $error = $result->errors;
+                    session()->flash(
+                        'alert-danger',
+                        isset($result->error) ? $result->error->message : __('custom.add_org_error')
+                    );
+
+                    session()->flash ('_old_input', Input::all());
                 }
             }
         }
 
-        return view('user/orgRegistration', compact('class', 'error', 'orgTypes'));
+        return isset($result)
+            ? view(
+                'user/orgRegistration',
+                [
+                    'class' => 'user',
+                    'fields'=> self::getTransFields(),
+                ]
+            )->withErrors($result->errors)
+            : view(
+                'user/orgRegistration',
+                [
+                    'class' => 'user',
+                    'fields'=> self::getTransFields(),
+                ]
+            );
     }
 
     public function createLicense()

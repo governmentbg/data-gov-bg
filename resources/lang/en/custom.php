@@ -266,4 +266,5 @@ return [
     'no_dataset' => 'No Data Set found!',
     'add_org_error' => 'Add organisation failure!',
     'add_org_success' => 'Add organisation success!',
+    'taken_uri' => 'The uri has already been taken.'
 ];

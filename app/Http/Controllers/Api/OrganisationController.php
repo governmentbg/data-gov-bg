@@ -138,19 +138,20 @@ class OrganisationController extends ApiController
 
                     $organisation->save();
 
-                    $userToOrgRole = new UserToOrgRole;
-                    $userToOrgRole->org_id = $organisation->id;
-                    $userToOrgRole->user_id = \Auth::user()->id;
-                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
+                    if (\Auth::user()) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->org_id = $organisation->id;
+                        $userToOrgRole->user_id = \Auth::user()->id;
+                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
 
-                    try {
-                        $userToOrgRole->save();
-                    } catch (QueryException $ex) {
-                        Log::error($ex->getMessage());
+                        try {
+                            $userToOrgRole->save();
+                        } catch (QueryException $ex) {
+                            Log::error($ex->getMessage());
+                            DB::rollback();
 
-                        DB::rollback();
-
-                        return $this->errorResponse('Add Organisation Failure.');
+                            return $this->errorResponse('Add Organisation Failure.');
+                        }
                     }
 
                     if (!empty($customFields)) {

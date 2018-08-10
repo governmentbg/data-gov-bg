@@ -989,7 +989,6 @@ class OrganisationController extends ApiController
             $newGroup->approved = Organisation::APPROVED_FALSE;
             $newGroup->parent_org_id = null;
 
-
             if (!empty($post['logo'])) {
                 try {
                     $img = \Image::make($post['logo']);
@@ -1031,21 +1030,6 @@ class OrganisationController extends ApiController
                 try {
                     $newGroup->save();
 
-                    $userToOrgRole = new UserToOrgRole;
-                    $userToOrgRole->org_id = $newGroup->id;
-                    $userToOrgRole->user_id = \Auth::user()->id;
-                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
-
-                    try {
-                        $userToOrgRole->save();
-                    } catch (QueryException $ex) {
-                        Log::error($ex->getMessage());
-
-                        DB::rollback();
-
-                        return $this->errorResponse('Add Organisation Failure.');
-                    }
-
                     if ($newGroup) {
                         $userToOrgRole = new UserToOrgRole;
                         $userToOrgRole->org_id = $newGroup->id;
@@ -1053,6 +1037,7 @@ class OrganisationController extends ApiController
                         $userToOrgRole->role_id = Role::ROLE_ADMIN;
 
                         $userToOrgRole->save();
+
                         if (!empty($customFields)) {
                             if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
                                 DB::rollback();

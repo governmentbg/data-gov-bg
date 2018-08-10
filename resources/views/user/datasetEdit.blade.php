@@ -117,7 +117,7 @@
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"
-                                {{ $id == $dataSet->org_id ? 'selected' : '' }}
+                                {{ isset($dataSet->dataSetGroup[0]) && $id == $dataSet->dataSetGroup[0]->group_id ? 'selected' : '' }}
                             >{{ $group }}</option>
                         @endforeach
                     </select>

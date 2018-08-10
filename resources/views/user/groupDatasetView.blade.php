@@ -47,10 +47,10 @@
             </div>
             <div class="row">
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
-                    <a type="button" class="badge badge-pill m-b-sm" href="">{{ __('custom.edit') }}</a>
+                    <a type="button" class="badge badge-pill m-b-sm" href="{{ url('/user/groups/dataset/edit/'. $dataset->uri) }}">{{ __('custom.edit') }}</a>
                 </div>
                 <div class="col-md-9 col-sm-8 text-left m-l-10">
-                    <form method="" action="">
+                    <form method="POST">
                         {{ csrf_field() }}
                         <button
                             class="badge badge-pill m-b-sm"

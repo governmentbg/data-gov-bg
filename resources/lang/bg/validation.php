@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'accepted'             => 'Поле :attribute трябва да бъде приет.',
+    'accepted'             => 'Поле :attribute трябва да бъде прието.',
     'active_url'           => 'Поле :attribute не е валиден URL.',
     'after'                => 'Поле :attribute трябва да бъде след :date.',
     'after_or_equal'       => 'Поле :attribute трябва да бъде дата след или равна на :date.',
@@ -39,11 +39,11 @@ return [
     'dimensions'           => 'Поле :attribute е с невалидни размери.',
     'distinct'             => 'Поле :attribute има дублирана стойност.',
     'email'                => 'Поле :attribute трябва да бъде валиден имейл адрес.',
-    'exists'               => 'Посоченият :attribute е невалиден.',
+    'exists'               => 'Поле :attribute е невалидно.',
     'file'                 => 'Поле :attribute трябва да бъде файл.',
     'filled'               => 'Поле :attribute трябва да има стойност.',
     'image'                => 'Поле :attribute трябва да бъде картинка.',
-    'in'                   => 'Посоченият :attribute е невалиден.',
+    'in'                   => 'Поле :attribute е невалидно.',
     'in_array'             => 'Поле :attribute не съществува в :other.',
     'integer'              => 'Поле :attribute трябва да бъде цяло число.',
     'ip'                   => 'Поле :attribute трябва да бъде валиден IP адрес.',
@@ -64,7 +64,7 @@ return [
         'string'  => 'Поле :attribute трябва да бъде поне :min символа.',
         'array'   => 'Поле :attribute трябва да бъде поне :min елемента.',
     ],
-    'not_in'               => 'Посоченият :attribute е невалиден.',
+    'not_in'               => 'Поле :attribute е невалидно.',
     'numeric'              => 'Поле :attribute трябва да бъде число.',
     'present'              => 'Поле :attribute трябва да фигурира.',
     'regex'                => 'Форматът на :attribute е невалиден.',

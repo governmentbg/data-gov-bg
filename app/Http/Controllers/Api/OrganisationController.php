@@ -53,7 +53,7 @@ class OrganisationController extends ApiController
             'name.*'                => 'required_without:locale|string',
             'type'                  => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
             'description'           => 'nullable',
-            'uri'                   => 'nullable|string',
+            'uri'                   => 'nullable|string|unique:organisations,uri',
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'nullable|string',
             'logo_mimetype'         => 'nullable|string',
@@ -75,7 +75,7 @@ class OrganisationController extends ApiController
             ) {
                 $validator->errors()->add('name', 'name is required');
             }
-         });
+        });
 
         if (!$validator->fails()) {
             $organisation = new Organisation;
@@ -206,10 +206,7 @@ class OrganisationController extends ApiController
     public function editOrganisation(Request $request)
     {
         $data = $request->get('data', []);
-
-        if ($request->org_id) {
-            $data['org_id'] = $request->org_id;
-        }
+        $data['org_id'] = $request->org_id ? $request->org_id : null;
 
         $validator = \Validator::make($data, [
             'org_id'                   => 'required|int|exists:organisations,id,deleted_at,NULL',
@@ -231,6 +228,14 @@ class OrganisationController extends ApiController
             'custom_fields.*.label'    => 'nullable',
             'custom_fields.*.value'    => 'nullable',
         ]);
+
+        $validator->after(function ($validator) use ($data) {
+            if (!empty($data['uri'])) {
+                if (Organisation::where('uri', $data['uri'])->where('id', '!=', $data['org_id'])->value('name')) {
+                    $validator->errors()->add('uri', __('custom.taken_uri'));
+                }
+            }
+        });
 
         if (
             !$validator->fails()
@@ -959,7 +964,7 @@ class OrganisationController extends ApiController
             'name'                  => 'required_with:locale',
             'name.*'                => 'required_without:locale|string',
             'description'           => 'nullable',
-            'uri'                   => 'nullable|string',
+            'uri'                   => 'nullable|string|unique:organisations,uri',
             'logo'                  => 'nullable|string',
             'logo_filename'         => 'required_with:logo_mimetype,logo_data|string',
             'logo_mimetype'         => 'required_with:logo_filename,logo_data|string',
@@ -1088,10 +1093,7 @@ class OrganisationController extends ApiController
     {
         $data = $request->get('data', []);
         $id = $request->get('group_id');
-
-        if ($request->group_id) {
-            $data['group_id'] = $request->group_id;
-        }
+        $data['group_id'] = $request->group_id ? $request->group_id : null;
 
         $validator = \Validator::make($data,[
             'group_id'              => 'required',
@@ -1107,6 +1109,14 @@ class OrganisationController extends ApiController
             'custom_fields.*.label' => 'nullable',
             'custom_fields.*.value' => 'nullable',
         ]);
+
+        $validator->after(function ($validator) use ($data) {
+            if (!empty($data['uri'])) {
+                if (Organisation::where('uri', $data['uri'])->where('id', '!=', $data['group_id'])->value('name')) {
+                    $validator->errors()->add('uri', __('custom.taken_uri'));
+                }
+            }
+        });
 
         if (!$validator->fails()) {
             if (empty($group = Organisation::find($id))) {

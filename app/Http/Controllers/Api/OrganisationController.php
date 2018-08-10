@@ -1145,12 +1145,12 @@ class OrganisationController extends ApiController
                 }
             }
 
-            if (!empty($data['logo_filename'])) {
-                $newGroupData['logo_filename'] = $data['logo_filename'];
+            if (!empty($data['logo_file_name'])) {
+                $newGroupData['logo_file_name'] = $data['logo_file_name'];
             }
 
-            if (!empty($data['logo_mimetype'])) {
-                $newGroupData['logo_mimetype'] = $data['logo_mimetype'];
+            if (!empty($data['logo_mime_type'])) {
+                $newGroupData['logo_mime_type'] = $data['logo_mime_type'];
             }
 
             if (!empty($data['logo_data'])) {
@@ -1186,7 +1186,7 @@ class OrganisationController extends ApiController
 
                         return $this->successResponse();
                     } catch (QueryException $e) {
-                        Log::errror($e->getMessages());
+                        Log::error($e->getMessage());
 
                         DB::rollback();
                     }

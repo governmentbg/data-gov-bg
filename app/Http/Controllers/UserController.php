@@ -2791,6 +2791,18 @@ class UserController extends Controller {
                 $data = $request->all();
                 $data['description'] = $data['descript'];
 
+                if (!empty($data['logo'])) {
+                    try {
+                        $img = \Image::make($data['logo']);
+
+                        $data['logo_file_name'] = $data['logo']->getClientOriginalName();
+                        $data['logo_mime_type'] = $img->mime();
+                        $data['logo_data'] = file_get_contents($data['logo']);
+
+                        unset($data['logo']);
+                    } catch (NotReadableException $ex) {}
+                }
+
                 $params = [
                     'api_key'   => Auth::user()->api_key,
                     'group_id'  => $orgId,
@@ -2973,9 +2985,7 @@ class UserController extends Controller {
             $datasets = $dataApi->listDataSets($dataRq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
-            $request->session()->flash('alert-danger', 'Вашите групи, нямат свързани набори от данни!');
-
-            return back();
+            $paginationData = $this->getPaginationData([], 0, [], $perPage);
         }
 
         if ($request->has('delete')) {

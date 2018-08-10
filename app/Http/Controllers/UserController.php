@@ -1543,15 +1543,15 @@ class UserController extends Controller {
     public function mailConfirmation(Request $request)
     {
         Auth::logout();
-        \Session::flush();
         $class = 'user';
         $hash = $request->offsetGet('hash');
         $mail = $request->offsetGet('mail');
+        $id = $request->offsetGet('id');
 
         if ($hash && $mail) {
-            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+            $user = User::find($id);
 
-            if ($user) {
+            if ($user->hash_id == $hash) {
                 $user->email = $request->offsetGet('mail');
 
                 try {
@@ -1568,7 +1568,8 @@ class UserController extends Controller {
                 $mailData = [
                     'user'  => $user->firstname,
                     'hash'  => $user->hash_id,
-                    'mail'  => $mail
+                    'mail'  => $mail,
+                    'id'    => $id,
                 ];
 
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
@@ -1576,6 +1577,10 @@ class UserController extends Controller {
                     $m->to($mailData['mail'], $mailData['user']);
                     $m->subject('Смяна на екектронен адрес!');
                 });
+
+                $request->session()->flash('alert-warning', 'Мейлът беше изпратен отново!');
+
+                return redirect('login');
             }
         }
 

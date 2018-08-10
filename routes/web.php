@@ -105,6 +105,7 @@ Route::match(['get', 'post'],'/orgRegistration', 'UserController@orgRegistration
 
 Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation')->name('confirmation');
 Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation')->name('mailConfirmation');
+Route::match(['get', 'post'],'/confirmError', 'UserController@confirmError')->name('confirmError');
 
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);

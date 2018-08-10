@@ -599,7 +599,6 @@ class UserController extends Controller {
 
     public function orgDataSetCreate(Request $request, DataSet $datasetModel)
     {
-        error_log('here');
         $visibilityOptions = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();

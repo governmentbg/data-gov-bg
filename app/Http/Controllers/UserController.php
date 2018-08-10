@@ -7,6 +7,7 @@ use App\Role;
 use App\Locale;
 use App\DataSet;
 use App\Category;
+use App\Resource;
 use App\UserSetting;
 use App\DataSetGroup;
 use App\Organisation;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
@@ -135,6 +137,34 @@ class UserController extends Controller {
      * @return array of fields
      */
     public static function getGroupTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
+    public static function getResourceTransFields()
     {
         return [
             [
@@ -558,7 +588,7 @@ class UserController extends Controller {
                 $groupId = $data['group_id'];
             }
 
-            unset($data['group_id']);
+            unset($data['group_id'], $data['add_resource']);
 
             // make request to API
             $params['api_key'] = \Auth::user()->api_key;
@@ -573,10 +603,24 @@ class UserController extends Controller {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
                     $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $result = $api->addDataSetToGroup($addGroup)->getData();
+                    $resultGroup = $api->addDataSetToGroup($addGroup)->getData();
+
+                    if ($resultGroup->success) {
+                        $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+
+                        if ($request->has('add_resource')) {
+                            return redirect()->route('resourceCreate', ['uri' => $result->uri]);
+                        }
+
+                        return redirect()->route('datasetView', ['uri' => $result->uri]);
+                    }
                 }
 
                 $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+
+                if ($request->has('add_resource')) {
+                    return redirect()->route('resourceCreate', ['uri' => $result->uri]);
+                }
 
                 return redirect('/user/dataset/view/'. $save->uri);
             } else {
@@ -1094,6 +1138,114 @@ class UserController extends Controller {
 
     public function createLicense()
     {
+    }
+
+    public function resourceCreate(Request $request)
+    {
+        $apiKey = \Auth::user()->api_key;
+        $types = Resource::getTypes();
+        $datasetUri = $request->offsetGet('uri');
+
+        if (!empty($datasetUri)) {
+            if ($request->isMethod('post')) {
+                if (!$request->has('keep')) {
+                    // process metadata post
+                    $data = $request->all();
+                    // prepare post data for API request
+                    $data['locale'] = \LaravelLocalization::getCurrentLocale();
+                    $metadata['api_key'] = $apiKey;
+                    $metadata['data'] = $data;
+
+                    if (isset($metadata['data']['file'])) {
+                        unset($metadata['data']['file']);
+                    }
+
+                    $metadata['dataset_uri'] = $datasetUri;
+                    Session::put('metadata', $metadata);
+
+                    if (
+                        $data['type'] == Resource::TYPE_FILE
+                        && $request->file('file')->isValid()
+                    ) {
+                        $file = $request->file('file');
+                        $extension = $file->getClientOriginalExtension();
+
+                        // check uploded file extention and use the corresponding converter
+                        switch ($extension) {
+                            case 'csv':
+                                $convertData = [
+                                    'api_key'   => $apiKey,
+                                    'data'      => file_get_contents($request->file->getRealPath()),
+                                ];
+                                $reqConvert = Request::create('/csv2json', 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->csv2json($reqConvert)->getData();
+                                $csvData = $resultConvert->data;
+                                Session::put('csvData', $csvData);
+
+                                return view('user/resourceImportCsv', [
+                                    'class'     => 'user',
+                                    'uri'       => $datasetUri,
+                                    'csvData'   => $csvData,
+                                    'types'     => $types
+                                ]);
+                        }
+                    }
+                } else {
+                    // process elastic search post
+                    $csvData = Session::get('csvData');
+                    Session::forget('csvData');
+
+                    $filtered = [];
+                    $keepColumns = $request->offsetGet('keepcol');
+                    foreach ($csvData as $row) {
+                        $filtered[] = array_intersect_key($row, $keepColumns);
+                    }
+
+                    // transform to associative array - set heading row as keys
+                    $dataToSave = [];
+                    $keys = $filtered[0];
+                    unset($filtered[0]);
+
+                    foreach ($filtered as $index => $row) {
+                        $dataToSave[] = array_combine($keys, $row);
+                    }
+                }
+
+                // make request to API - save metadatada
+                $metadata = Session::get('metadata');
+                Session::forget('metadata');
+
+                $savePost = Request::create('/api/addResourceMetadata', 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $result = $api->addResourceMetadata($savePost)->getData();
+
+                $elasticData = [
+                    'resource_uri'  => $result->data->uri,
+                    'data'          => $dataToSave,
+                ];
+
+                // make request to API - save resource data
+                // ??? maybe move in the $result->success if
+                $reqElastic = Request::create('/addResourceData', 'POST', $elasticData);
+                $api = new ApiResource($reqElastic);
+                $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+
+                    return redirect()->route('datasetView', ['uri' => $datasetUri]);
+                } else {
+                    $request->session()->flash('alert-danger', $result->error->message);
+
+                    return redirect()->back()->withInput()->withErrors($result->errors);
+                }
+            }
+        } else {
+            return redirect('/user/datasets');
+        }
+
+        return view('user/resourceCreate', ['class' => 'user', 'uri' => $datasetUri, 'types' => $types, 'fields' => self::getResourceTransFields()]);
     }
 
     public function resourceView()

@@ -48,6 +48,13 @@
             </div>
             <div class="row">
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
+                    <a type="button"
+                       class="badge badge-pill m-b-sm"
+                       href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
+                    >{{ __('custom.add_resource') }}
+                    </a>
+                </div>
+                <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a type="button" class="badge badge-pill m-b-sm" href="{{ url('/user/dataset/edit/'. $dataset->uri) }}">{{ __('custom.edit') }}</a>
                 </div>
                 <div class="col-md-9 col-sm-8 text-left m-l-10">

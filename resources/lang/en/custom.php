@@ -268,5 +268,10 @@ return [
     'add_org_success' => 'Add organisation success!',
     'taken_uri' => 'The uri has already been taken.',
     'inactive_profile' => 'Inactive user profile.',
-    'not_existing_profile' => 'User profile does not exist.'
+    'not_existing_profile' => 'User profile does not exist.',
+    'schema_description' => 'schema',
+    'schema_url' => 'schema url',
+    'terms_req_success' => 'Your terms of use request was send',
+    'terms_req_error' => 'There was a problem with your terms of use request.',
+    'file' => 'file',
 ];

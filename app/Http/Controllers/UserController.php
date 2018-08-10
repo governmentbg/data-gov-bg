@@ -2506,7 +2506,7 @@ class UserController extends Controller {
             ->where('type', Organisation::TYPE_GROUP)
             ->value('id');
 
-        if ($orgId) {
+        if ($this->checkUserOrg($orgId)) {
             $request = Request::create('/api/getGroupDetails', 'POST', [
                 'group_id'  => $orgId,
                 'locale'    => \LaravelLocalization::getCurrentLocale(),

@@ -79,7 +79,7 @@ function initSelect2() {
     }
 
     if ($('.js-autocomplete').length) {
-        $('.js-autocomplete').each(function()  {
+        $('.js-autocomplete').each(function() {
             $(this).select2({
                 placeholder: $(this).data('placeholder'),
                 matcher: function(params, data) {
@@ -98,7 +98,7 @@ function initSelect2() {
     }
 
     if ($('.js-ajax-autocomplete').length) {
-        $('.js-ajax-autocomplete').each(function()  {
+        $('.js-ajax-autocomplete').each(function() {
             $(this).select2({
                 placeholder: $(this).data('placeholder'),
                 minimumInputLength: 3,

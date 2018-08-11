@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Role;
 use App\User;
 use App\Locale;
 use PDOException;
@@ -399,7 +400,6 @@ class UserController extends ApiController
         $data = $request->data;
         $id = $request->id;
 
-
         $validator = \Validator::make(
             $request->all(),
             [
@@ -688,9 +688,9 @@ class UserController extends ApiController
             $reqOrgId = isset($request->data['org_id']) ? $request->data['org_id']: null;
 
             $loggedUser = User::with('userToOrgRole')->find(Auth::id());
-            $loggedOrgId = isset($loggedUser['userToOrgRole']['org_id']) ? $loggedUser['userToOrgRole']['org_id'] : null;
-            $loggedRoleRight = isset($loggedUser['userToOrgRole']['role_id'])
-                ? RoleRight::where('role_id', $loggedUser['userToOrgRole']['role_id'])->value('right')
+            $loggedOrgId = isset($loggedUser['userToOrgRole'][0]['org_id']) ? $loggedUser['userToOrgRole'][0]['org_id'] : null;
+            $loggedRoleRight = isset($loggedUser['userToOrgRole'][0]['role_id'])
+                ? RoleRight::where('role_id', $loggedUser['userToOrgRole'][0]['role_id'])->value('right')
                 : null;
 
             $user = new User;
@@ -713,13 +713,7 @@ class UserController extends ApiController
             try {
                 $user->save();
 
-                if (
-                    $loggedUser->is_admin
-                    || (
-                        $loggedOrgId == $reqOrgId
-                        && in_array($loggedRoleRight, [RoleRight::RIGHT_EDIT, RoleRight::RIGHT_ALL])
-                    )
-                ) {
+                if (Role::isAdmin($reqOrgId)) {
                     if (isset($request->data['approved'])) {
                         $user->approved = $request->data['approved'];
                     }

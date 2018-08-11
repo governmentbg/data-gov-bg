@@ -869,6 +869,42 @@ class OrganisationController extends ApiController
     }
 
     /**
+     * Add organisation member
+     *
+     * @param integer org_id - required
+     * @param integer user_id - required
+     *
+     * @return json success or error
+     */
+    public function addMember(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
+            'role_id'       => 'nullable|int|exists:roles,id',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $user = new UserToOrgRole;
+                $user->user_id = $post['user_id'];
+                $user->org_id = $post['org_id'];
+                $user->role_id = $post['role_id'];
+
+                $user->save();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Add Member Failure', $validator->errors()->messages());
+    }
+
+    /**
      * Delete organisation member
      *
      * @param integer org_id - required

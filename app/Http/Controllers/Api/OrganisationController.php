@@ -745,7 +745,9 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $org = Organisation::where('id', $post['org_id'])->where('type', '!=', Organisation::TYPE_GROUP)->first();
+                $org = Organisation::where('id', $post['org_id'])
+                    ->where('type', '!=', Organisation::TYPE_GROUP)
+                    ->first();
 
                 if ($org) {
                     $customFields = [];
@@ -813,7 +815,10 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $query = User::select('id', 'username', 'firstname', 'lastname', 'email')->with('UserToOrgRole');
+                $query = User::select('id', 'username', 'firstname', 'lastname', 'email')
+                    ->with(['UserToOrgRole' => function ($q) use($post) {
+                        $q->where('org_id', $post['org_id']);
+                    }]);
 
                 if (isset($post['for_approval'])) {
                     $query->where('approved', $post['for_approval'] ? false : true);
@@ -825,9 +830,7 @@ class OrganisationController extends ApiController
                 }
 
                 $query->whereHas('UserToOrgRole', function($q) use ($post) {
-                    $q->whereHas('Organisation', function($q) use ($post) {
-                        $q->where('id', $post['org_id']);
-                    });
+                    $q->where('org_id', $post['org_id']);
 
                     if (isset($post['role_id'])) {
                         $q->where('role_id', $post['role_id']);

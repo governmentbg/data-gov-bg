@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\UserToOrgRole;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Traits\RecordSignature;
 
@@ -32,5 +34,19 @@ class Role extends Model
     public function userToOrg()
     {
         return $this->hasMany('App\UserToOrgRole');
+    }
+
+    public static function isAdmin($org = null) {
+        if (Auth::user()->is_admin) {
+            return true;
+        } elseif ($org) {
+            return UserToOrgRole::where([
+                'user_id'   => Auth::user()->id,
+                'org_id'    => $org,
+                'role_id'   => self::ROLE_ADMIN,
+            ])->count();
+        }
+
+        return false;
     }
 }

@@ -178,7 +178,7 @@ return [
     'members' => 'членове',
     'add_members' => 'добавяне на член',
     'new_user' => 'нов потребител',
-    'existing_user' => 'същесвтуващ потребител',
+    'existing_user' => 'съществуващ потребител',
     'invite_by_mail' => 'покани по имейл',
     'member_name' => 'Име на член',
     'group_registration' => 'Регистрация на група',

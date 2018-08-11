@@ -62,6 +62,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/organisations/datasets/search', 'UserController@searchDataset');
 
         Route::match(['get', 'post'], '/user/organisations/members/{uri}', 'UserController@viewOrgMembers')->name('userOrgMembersView');
+        Route::match(['get', 'post'], '/user/groups/members/{uri}', 'UserController@viewGroupMembers')->name('userGroupMembersView');
+
+        Route::match(
+            ['get', 'post'],
+            '/user/groups/members/addNew/{uri}',
+            'UserController@addGroupMembersNew'
+        )->name('addGroupMembersNew');
 
         Route::get(
             '/user/organisations/members/addByMail',
@@ -155,10 +162,6 @@ Route::get('/organisation/chronology', function () {
 
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
-
-Route::get('/user/groupMembers', function () {
-    return view('user/groupMembers', ['class' => 'user']);
-});
 
 Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);

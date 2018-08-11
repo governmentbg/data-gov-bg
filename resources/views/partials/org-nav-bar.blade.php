@@ -16,7 +16,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'members' ? 'active' : null }}"
-                                href="{{ route('userOrgMembersView', ['uri' => $organisation->uri]) }}"
+                                href="{{ url('/user/organisations/members/'. $organisation->uri) }}"
                             >{{ ultrans('custom.members') }}</a>
                         </li>
                     </ul>

@@ -520,11 +520,7 @@ class UserController extends Controller {
         $api = new ApiDataSet($request);
         $datasets = $api->deleteDataSet($request)->getData();
 
-        if ($datasets->success) {
-            return true;
-        }
-
-        return false;
+        return $datasets->success;
     }
 
     /**
@@ -1403,7 +1399,7 @@ class UserController extends Controller {
                 $api = new ApiOrganisation($rq);
                 $result = $api->editMember($rq)->getData();
 
-                if (empty($result->success)) {
+                if (!empty($result->success)) {
                     $request->session()->flash('alert-success', __('custom.edit_success'));
                 } else {
                     $request->session()->flash('alert-danger', __('custom.edit_error'));
@@ -1573,11 +1569,7 @@ class UserController extends Controller {
         $api = new ApiOrganisation($rq);
         $result = $api->delMember($rq)->getData();
 
-        if ($result->success) {
-            return true;
-        }
-
-        return false;
+        return $result->success;
     }
 
     public function addOrgMembersByMail(Request $request)

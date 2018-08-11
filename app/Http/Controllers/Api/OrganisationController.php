@@ -868,6 +868,14 @@ class OrganisationController extends ApiController
         return $this->errorResponse('Get Members Failure', $validator->errors()->messages());
     }
 
+    /**
+     * Add organisation member
+     *
+     * @param integer org_id - required
+     * @param integer user_id - required
+     *
+     * @return json success or error
+     */
     public function addMember(Request $request)
     {
         $post = $request->all();

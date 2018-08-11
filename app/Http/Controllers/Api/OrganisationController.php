@@ -926,7 +926,7 @@ class OrganisationController extends ApiController
                     'org_id'    => $post['org_id'],
                     'user_id'   => $post['user_id'],
                 ])->first();
-error_log('roleId: '. print_r($post['role_id'], true));
+
                 $user->role_id = $post['role_id'];
 
                 $user->save();

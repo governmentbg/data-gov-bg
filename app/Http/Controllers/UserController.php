@@ -1404,6 +1404,22 @@ class UserController extends Controller {
             : Organisation::where('uri', $uri)->first();
 
         if ($org) {
+            if ($request->has('edit_member')) {
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+            }
+
             $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
 
             $criteria = ['org_id' => $org->id];
@@ -1437,22 +1453,6 @@ class UserController extends Controller {
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
-
-            if ($request->has('edit_member')) {
-                $rq = Request::create('/api/editMember', 'POST', [
-                    'org_id'    => $org->id,
-                    'user_id'   => $userId,
-                    'role_id'   => $roleId,
-                ]);
-                $api = new ApiOrganisation($rq);
-                $result = $api->editMember($rq)->getData();
-
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.edit_success'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.edit_error'));
-                }
-            }
 
             return view('user/orgMembers', [
                 'class'         => 'user',

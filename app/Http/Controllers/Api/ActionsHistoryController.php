@@ -41,7 +41,7 @@ class ActionsHistoryController extends ApiController
             'criteria.period_to'     => 'nullable|date',
             'criteria.username'      => 'nullable|string',
             'criteria.user_id'       => 'nullable|integer',
-            'criteria.module'        => 'nullable|string',
+            'criteria.module'        => 'nullable',
             'criteria.action'        => 'nullable|integer',
             'criteria.category_ids'  => 'nullable|array',
             'criteria.tag_ids'       => 'nullable|array',
@@ -90,7 +90,11 @@ class ActionsHistoryController extends ApiController
         }
 
         if (isset($criteria['module'])) {
-            $history->where('module_name', $criteria['module']);
+            if (is_array($criteria['module'])){
+                $history->whereIn('module_name', $criteria['module']);
+            } else {
+                $history->where('module_name', $criteria['module']);
+            }
         }
 
         if (isset($criteria['ip_address'])) {

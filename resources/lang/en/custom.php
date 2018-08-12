@@ -51,6 +51,7 @@ return [
     'agency_nuclear' => 'Nuclear regulation agency',
     'most_active_agency' => 'Most active agency for',
     'activity_dynamics' => 'Activity dynamics',
+    'updates' => 'Updates',
     'topics' => 'topics',
     'healthcare' => 'healthcare',
     'innovation' => 'innovation',

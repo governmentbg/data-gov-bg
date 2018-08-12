@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-use Intervention\Image\Exception\NotReadableException;
 
 class OrganisationController extends ApiController
 {
@@ -77,7 +76,7 @@ class OrganisationController extends ApiController
             if (!empty($data['logo'])) {
                 try {
                     $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {}
+                } catch (\Exception $ex) {}
 
                 if (!empty($img)) {
                     $organisation->logo_file_name = basename($data['logo']);
@@ -265,7 +264,7 @@ class OrganisationController extends ApiController
                 if (!empty($data['logo'])) {
                     try {
                         $img = \Image::make($data['logo']);
-                    } catch (NotReadableException $ex) {}
+                    } catch (\Exception $ex) {}
 
                     if (!empty($img)) {
                         $orgData['logo_file_name'] = basename($data['logo']);
@@ -1041,7 +1040,7 @@ class OrganisationController extends ApiController
             if (!empty($post['logo'])) {
                 try {
                     $img = \Image::make($post['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
 
@@ -1186,7 +1185,7 @@ class OrganisationController extends ApiController
             if (!empty($data['logo'])) {
                 try {
                     $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {}
+                } catch (\Exception $ex) {}
 
                 if (!empty($img)) {
                     $newGroupData['logo_file_name'] = basename($data['logo']);

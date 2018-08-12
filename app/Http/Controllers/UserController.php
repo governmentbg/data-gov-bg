@@ -1027,7 +1027,7 @@ class UserController extends Controller {
                 if (!empty($params['logo'])) {
                     try {
                         $img = \Image::make($params['logo']);
-                    } catch (NotReadableException $ex) {
+                    } catch (\Exception $ex) {
                         Log::error($ex->getMessage());
                     }
 
@@ -1312,7 +1312,7 @@ class UserController extends Controller {
                 $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
                 unset($post['data']['logo']);
-            } catch (NotReadableException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -1705,7 +1705,7 @@ class UserController extends Controller {
                     $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
                     unset($post['data']['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
             }
@@ -2619,7 +2619,7 @@ class UserController extends Controller {
                     $data['logo_data'] = file_get_contents($data['logo']);
 
                     unset($data['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
             }
@@ -2787,7 +2787,7 @@ class UserController extends Controller {
                         $data['logo_data'] = file_get_contents($data['logo']);
 
                         unset($data['logo']);
-                    } catch (NotReadableException $ex) {}
+                    } catch (\Exception $ex) {}
                 }
 
                 $params = [

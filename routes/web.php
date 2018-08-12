@@ -91,14 +91,12 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('/user/sendTermsOfUseReq', 'UserController@sendTermsOfUseReq');
-Route::get('/', function () {
-    return view('home/index', ['class' => 'index']);
-});
+Route::get('/', 'HomeController@index');
 
 Route::get('/logout', function() {
     Auth::logout();
 
-    return view('home/index', ['class' => 'index']);
+    return redirect('/');
 });
 
 Route::get('/preGenerated', 'UserController@preGenerated')->name('preGenerated');

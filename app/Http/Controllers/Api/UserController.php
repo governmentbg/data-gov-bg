@@ -1044,4 +1044,16 @@ class UserController extends ApiController
 
         return $this->errorResponse('custom.pass_change_err', $validator->errors()->messages());
     }
+
+    /**
+     * Get active users count
+     *
+     * @return json response with user count
+     */
+    public function userCount(Request $request)
+    {
+        $users = User::where('active', 1)->count();
+
+        return $this->successResponse(['count' => $users], true);
+    }
 }

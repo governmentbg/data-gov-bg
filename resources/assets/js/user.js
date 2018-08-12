@@ -80,7 +80,7 @@ function initSelect2() {
 
     if ($('.js-autocomplete').length) {
         $('.js-autocomplete').each(function() {
-            $(this).select2({
+            var options = {
                 placeholder: $(this).data('placeholder'),
                 matcher: function(params, data) {
                     if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
@@ -93,19 +93,21 @@ function initSelect2() {
 
                     return false;
                 }
-            });
+            };
+
+            $(this).select2(options);
         });
     }
 
     if ($('.js-ajax-autocomplete').length) {
         $('.js-ajax-autocomplete').each(function() {
-            $(this).select2({
+            var options = {
                 placeholder: $(this).data('placeholder'),
                 minimumInputLength: 3,
                 dropdownParent: $($(this).data('parent')),
                 ajax: {
                     url: $(this).data('url'),
-                    type: "POST",
+                    type: 'POST',
                     delay: 1000,
                     data: function (params) {
                         var queryParams = {
@@ -139,11 +141,52 @@ function initSelect2() {
 
                     return false;
                 }
-            });
+            };
+
+            options = addSelect2Translations(options);
+
+            $(this).select2(options);
         });
     }
 };
 initSelect2();
+
+function addSelect2Translations(options) {
+    if ($('#app').data('lang') == 'bg') {
+        options = $.extend({}, options, {
+            language: {
+                errorLoading: function() {
+                    return 'Резултатите не могат да бъдат заредени';
+                },
+                inputTooLong: function(a) {
+                    var b = a.input.length - a.maximum,
+                        c = 'Моля изтрийте ' + b + ' символа';
+
+                    return 1 != b && (c += 's'), c;
+                },
+                inputTooShort: function(a) {
+                    return 'Моля въведете ' + (a.minimum - a.input.length) + ' или повече символа';
+                },
+                loadingMore: function loadingMore() {
+                    return 'Зареждане на резултати…';
+                },
+                maximumSelected: function(a) {
+                    var b = 'Може да изберете само ' + a.maximum + ' елемент';
+
+                    return 1 != a.maximum && (b += 'а'), b;
+                },
+                noResults: function() {
+                    return 'Няма намерени резултати';
+                },
+                searching: function() {
+                    return 'Търсене…';
+                }
+            }
+        })
+    }
+
+    return options;
+}
 
 $(function() {
     $('.js-member-edit').on('click', function(e) {
@@ -168,4 +211,4 @@ $(function() {
     $('#invite').on('show.bs.modal', function (e) {
         setTimeout(function() {initSelect2();}, 200);
     });
-})
+});

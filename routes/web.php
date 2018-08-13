@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/user/organisations/register', 'UserController@registerOrg');
     Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+    Route::match(['get', 'post'], '/user/resource/download/{esid}/{name}', 'UserController@resourceDownload')->name('resourceDownload');
 
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');

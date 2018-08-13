@@ -62,6 +62,11 @@
   display: none !important;
 }
 
+.theme-index .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #c02e54 !important;
+}
+
 .theme-index .navbar .navbar-header .svg-icons:hover > svg,
 .theme-index .navbar .navbar-header .svg-icons:active > svg,
 .theme-index .navbar .navbar-header .svg-icons:focus > svg {
@@ -370,6 +375,11 @@
 
 .theme-data .select2-results__option[aria-selected=true] {
   display: none !important;
+}
+
+.theme-data .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #4e57aa !important;
 }
 
 .theme-data .navbar .navbar-header .svg-icons:hover > svg,
@@ -682,6 +692,11 @@
   display: none !important;
 }
 
+.theme-data-attention .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #d32a31 !important;
+}
+
 .theme-data-attention .navbar .navbar-header .svg-icons:hover > svg,
 .theme-data-attention .navbar .navbar-header .svg-icons:active > svg,
 .theme-data-attention .navbar .navbar-header .svg-icons:focus > svg {
@@ -990,6 +1005,11 @@
 
 .theme-organisation .select2-results__option[aria-selected=true] {
   display: none !important;
+}
+
+.theme-organisation .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #76ad3f !important;
 }
 
 .theme-organisation .navbar .navbar-header .svg-icons:hover > svg,
@@ -1302,6 +1322,11 @@
   display: none !important;
 }
 
+.theme-request .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #e8d429 !important;
+}
+
 .theme-request .navbar .navbar-header .svg-icons:hover > svg,
 .theme-request .navbar .navbar-header .svg-icons:active > svg,
 .theme-request .navbar .navbar-header .svg-icons:focus > svg {
@@ -1610,6 +1635,11 @@
 
 .theme-visualisations .select2-results__option[aria-selected=true] {
   display: none !important;
+}
+
+.theme-visualisations .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #e98911 !important;
 }
 
 .theme-visualisations .navbar .navbar-header .svg-icons:hover > svg,
@@ -1922,6 +1952,11 @@
   display: none !important;
 }
 
+.theme-news .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #0a7b5d !important;
+}
+
 .theme-news .navbar .navbar-header .svg-icons:hover > svg,
 .theme-news .navbar .navbar-header .svg-icons:active > svg,
 .theme-news .navbar .navbar-header .svg-icons:focus > svg {
@@ -2230,6 +2265,11 @@
 
 .theme-documents .select2-results__option[aria-selected=true] {
   display: none !important;
+}
+
+.theme-documents .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #145c99 !important;
 }
 
 .theme-documents .navbar .navbar-header .svg-icons:hover > svg,
@@ -2542,6 +2582,11 @@
   display: none !important;
 }
 
+.theme-contact .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #791292 !important;
+}
+
 .theme-contact .navbar .navbar-header .svg-icons:hover > svg,
 .theme-contact .navbar .navbar-header .svg-icons:active > svg,
 .theme-contact .navbar .navbar-header .svg-icons:focus > svg {
@@ -2850,6 +2895,11 @@
 
 .theme-user .select2-results__option[aria-selected=true] {
   display: none !important;
+}
+
+.theme-user .select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: none !important;
+  color: #108f9e !important;
 }
 
 .theme-user .navbar .navbar-header .svg-icons:hover > svg,
@@ -12800,9 +12850,16 @@ a:active {
   }
 }
 
+.sidenav .org,
+.sidenav-open .org {
+  color: black;
+}
+
 .sidenav .org img,
 .sidenav-open .org img {
   width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .sidenav .org h2,
@@ -12810,6 +12867,7 @@ a:active {
 .sidenav-open .org h2,
 .sidenav-open .org h4 {
   width: 100%;
+  line-height: 1.4;
 }
 
 .sidenav .org h2,
@@ -13812,8 +13870,7 @@ textarea {
 }
 
 .theme-user .org-logo img {
-  width: 228px;
-  height: 128px;
+  height: 140px;
 }
 
 .theme-user .control-btns span {
@@ -13881,6 +13938,7 @@ textarea {
 
 .theme-user .user-orgs .org-col {
   margin-bottom: 30px;
+  height: 433px;
 }
 
 @media screen and (max-width: 1199px) {
@@ -14281,14 +14339,14 @@ textarea {
   color: #108f9e;
 }
 
-.del-modal-btn {
+.del-btn {
   background-color: #C02E54 !important;
   border-color: #C02E54 !important;
 }
 
-.del-modal-btn:hover,
-.del-modal-btn:active,
-.del-modal-btn:focus {
+.del-btn:hover,
+.del-btn:active,
+.del-btn:focus {
   background-color: #991e3e !important;
   border-color: #991e3e !important;
 }
@@ -14305,6 +14363,21 @@ textarea {
 .no-info {
   padding: 0;
   font-size: 33px;
+}
+
+.cust-btn {
+  padding-bottom: 10px;
+  padding-top: 10px;
+  margin-right: 10px;
+}
+
+.user-nav .nav li:first-child a {
+  padding-left: 0;
+}
+
+.view-btns button {
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .theme-organisation .sidebar-submenu .order {

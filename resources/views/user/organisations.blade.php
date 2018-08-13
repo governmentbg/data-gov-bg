@@ -32,7 +32,7 @@
         <div class="col-xs-12 m-t-md list-orgs user-orgs">
             <div class="row">
                 @if (count($organisations))
-                    @foreach ($organisations as $organisation)
+                    @foreach ($organisations as $key => $organisation)
                         <div class="col-md-4 col-sm-12 org-col">
                             <div class="col-xs-12">
                                 <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}">

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -1759,8 +1760,9 @@ class UserController extends Controller {
             );
         }
 
+
         return $result->success
-            ? redirect('user/organisations/view/'. $result->org_id)
+            ? redirect('user/organisations/view/'. Organisation::find($result->org_id)->value('uri'))
             : redirect('user/organisations/register')->withInput(Input::all())->withErrors($result->errors);
     }
 
@@ -1774,7 +1776,6 @@ class UserController extends Controller {
     public function viewOrg(Request $request, $uri)
     {
         $orgId = Organisation::where('uri', $uri)
-            ->orWhere('id', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
             ->value('id');
 
@@ -2088,7 +2089,6 @@ class UserController extends Controller {
     public function editOrg(Request $request, $uri)
     {
         $orgId = Organisation::where('uri', $uri)
-            ->orWhere('id', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
             ->value('id');
 
@@ -3064,7 +3064,7 @@ class UserController extends Controller {
             if ($result->success) {
                 $request->session()->flash('alert-success', 'Успешно създадена група!');
 
-                return redirect('/user/groups/view/'. $result->id);
+                return redirect('/user/groups/view/'. Organisation::find($result->id)->value('uri'));
             } else {
                 $request->session()->flash('alert-danger', 'Възникна грешка при създаване на група!');
 
@@ -3124,7 +3124,6 @@ class UserController extends Controller {
     public function viewGroup(Request $request, $uri)
     {
         $orgId = Organisation::where('uri', $uri)
-            ->orWhere('id', $uri)
             ->where('type', Organisation::TYPE_GROUP)
             ->value('id');
 
@@ -3137,7 +3136,7 @@ class UserController extends Controller {
             $result = $api->getGroupDetails($request)->getData();
 
             if ($result->success) {
-                return view('user/groupView', ['class' => 'user', 'group' => $result->data]);
+                return view('user/groupView', ['class' => 'user', 'group' => $result->data, 'id' => $orgId]);
             }
         }
 
@@ -3190,7 +3189,6 @@ class UserController extends Controller {
     public function editGroup(Request $request, $uri)
     {
         $orgId = Organisation::where('uri', $uri)
-            ->orWhere('id', $uri)
             ->where('type', Organisation::TYPE_GROUP)
             ->value('id');
 

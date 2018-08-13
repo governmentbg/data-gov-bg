@@ -105,7 +105,7 @@
                 </div>
             @endforeach
             <div class="col-xs-12 text-right mng-btns">
-                <a class="btn btn-primary del-modal-btn js-delete-custom-field {{ isset($model) ? '' : 'hidden' }}">{{ __('custom.delete') }}</a>
+                <a class="btn btn-primary del-btn js-delete-custom-field {{ isset($model) ? '' : 'hidden' }}">{{ __('custom.delete') }}</a>
             </div>
         </div>
     @endfor

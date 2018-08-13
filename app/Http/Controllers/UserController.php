@@ -1496,7 +1496,7 @@ class UserController extends Controller {
         $resource = $apiResources->toJSON($convertReq)->getData();
 
         if (!empty($resource->data)) {
-            $handle = fopen($name, 'w+');
+            $handle = fopen('../storage/app/'. $name, 'w+');
             $path = stream_get_meta_data($handle)['uri'];
 
             foreach(json_decode(json_encode($resource->data), true) as $row) {

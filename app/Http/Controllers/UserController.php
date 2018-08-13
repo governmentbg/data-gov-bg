@@ -550,11 +550,7 @@ class UserController extends Controller {
         $api = new ApiDataSet($request);
         $datasets = $api->deleteDataSet($request)->getData();
 
-        if ($datasets->success) {
-            return true;
-        }
-
-        return false;
+        return $datasets->success;
     }
 
     /**
@@ -1075,7 +1071,7 @@ class UserController extends Controller {
                 if (!empty($params['logo'])) {
                     try {
                         $img = \Image::make($params['logo']);
-                    } catch (NotReadableException $ex) {
+                    } catch (\Exception $ex) {
                         Log::error($ex->getMessage());
                     }
 
@@ -1476,7 +1472,7 @@ class UserController extends Controller {
                 $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
                 unset($post['data']['logo']);
-            } catch (NotReadableException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -1543,19 +1539,91 @@ class UserController extends Controller {
         return false;
     }
 
-    public function viewOrgMembers(Request $request)
+    public function viewOrgMembers(Request $request, $uri)
     {
         $perPage = 6;
-        $uri = $request->offsetGet('uri');
         $filter = $request->offsetGet('filter');
         $userId = $request->offsetGet('user_id');
         $roleId = $request->offsetGet('role_id');
         $keywords = $request->offsetGet('keywords');
-        $org = $request->has('org_id')
-            ? Organisation::find($request->org_id)
-            : Organisation::where('uri', $uri)->first();
+        $org = Organisation::where('uri', $uri)->first();
+        $isAdmin = Role::isAdmin($org->id);
 
         if ($org) {
+            if ($request->has('edit_member')) {
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('delete')) {
+                if ($this->delMember($userId, $org->id)) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite_existing')) {
+                $newUser = $request->offsetGet('user');
+                $newRole = $request->offsetGet('role');
+
+                $rq = Request::create('/api/addMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $newUser,
+                    'role_id'   => $newRole,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->addMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite')) {
+                $email = $request->offsetGet('email');
+                $role = $request->offsetGet('role');
+
+                $rq = Request::create('/inviteUser', 'POST', [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'email'     => $email,
+                        'org_id'    => $org->id,
+                        'role_id'   => $role,
+                        'generate'  => true,
+                    ],
+                ]);
+                $api = new ApiUser($rq);
+                $result = $api->inviteUser($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
             $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
 
             $criteria = ['org_id' => $org->id];
@@ -1590,22 +1658,6 @@ class UserController extends Controller {
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
 
-            if ($request->has('edit_member')) {
-                $rq = Request::create('/api/editMember', 'POST', [
-                    'org_id'    => $org->id,
-                    'user_id'   => $userId,
-                    'role_id'   => $roleId,
-                ]);
-                $api = new ApiOrganisation($rq);
-                $result = $api->editMember($rq)->getData();
-
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.edit_success'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.edit_error'));
-                }
-            }
-
             return view('user/orgMembers', [
                 'class'         => 'user',
                 'members'       => $paginationData['items'],
@@ -1614,75 +1666,70 @@ class UserController extends Controller {
                 'roles'         => $roles,
                 'filter'        => $filter,
                 'keywords'      => $keywords,
+                'isAdmin'       => $isAdmin
             ]);
         }
 
         return redirect('/user/organisations');
     }
 
-    public function addOrgMembersNew(Request $request)
+    public function addOrgMembersNew(Request $request, $uri)
     {
-        $uri = $request->offsetGet('uri');
-        $org = $request->has('org_id')
-            ? Organisation::find($request->org_id)
-            : Organisation::where('uri', $uri)->first();
+        $organisation = Organisation::where('uri', $uri)->first();
+        $class = 'user';
 
-        if ($org && $request->isMethod('post')) {
-            $post = $request->all();
-
-            $rq = Request::create('/register', 'POST', ['data' => $post]);
-            $api = new ApiUser($rq);
-            $result = $api->register($rq)->getData();
-
-            if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
-
-                return redirect()->route('userOrgMembersView', ['uri' => $org->uri]);
-            } else {
-                $error = $result->errors;
-            }
-
+        if ($organisation) {
             $rq = Request::create('/api/listRoles', 'POST');
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
+            $digestFreq = UserSetting::getDigestFreq();
 
-            return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail', 'roles'));
-        }
+            if ($request->has('save')) {
+                $post = [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'firstname'         => $request->offsetGet('firstname'),
+                        'lastname'          => $request->offsetGet('lastname'),
+                        'username'          => $request->offsetGet('username'),
+                        'email'             => $request->offsetGet('email'),
+                        'password'          => $request->offsetGet('password'),
+                        'password_confirm'  => $request->offsetGet('password_confirm'),
+                        'role_id'           => $request->offsetGet('role_id'),
+                        'org_id'            => $organisation->id,
+                    ],
+                ];
 
-        return redirect('/user/organisations');
-    }
+                $rq = Request::create('/api/addUser', 'POST', $post);
+                $api = new ApiUser($rq);
+                $result = $api->register($rq)->getData();
 
-    public function delOrgMember(Request $request)
-    {
-        $id = $request->offsetGet('id');
-        $uri = $request->offsetGet('uri');
-        $org = $request->has('org_id')
-            ? Organisation::find($request->org_id)
-            : Organisation::where('uri', $uri)->first();
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
 
-        if (Auth::check() && $org && $id) {
-            $rq = Request::create('/api/delMember', 'POST', [
-                'api_key'   => Auth::user()->api_key,
-                'org_id'    => $org->id,
-                'user_id'   => $id,
-            ]);
-            $api = new ApiOrganisation($rq);
-            $result = $api->delMember($rq)->getData();
+                    return redirect('/user/organisations/members/'. $uri);
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
 
-            if (!empty($result->success)) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
-            } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
+                    return redirect()->back()->withInput()->withErrors($result->errors);
+                }
             }
         }
 
-        return redirect()->action('UserController@viewOrgMembers', ['uri' => $uri]);
+        return view('user/addOrgMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'organisation'));
     }
 
-    public function addOrgMembersByMail(Request $request)
+    public function delMember($id, $orgId)
     {
+        $rq = Request::create('/api/delMember', 'POST', [
+            'api_key'   => Auth::user()->api_key,
+            'org_id'    => $orgId,
+            'user_id'   => $id,
+        ]);
+        $api = new ApiOrganisation($rq);
+        $result = $api->delMember($rq)->getData();
 
+        return $result->success;
     }
 
     /**
@@ -1818,7 +1865,7 @@ class UserController extends Controller {
                     $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
                     unset($post['data']['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
             }
@@ -1951,59 +1998,6 @@ class UserController extends Controller {
     }
 
     /**
-     * Generates an email with user credential for an invited user or
-     * sends an invite email
-     *
-     * @param Request $request
-     *
-     * @return view on success or fail with corresponding messages
-     */
-    public function inviteUser(Request $request)
-    {
-        $class = 'user';
-        $invData = $request->all();
-        $apiKey = Auth::user()->api_key;
-        $roleReqData = [
-            'api_key'   => $apiKey,
-            'criteria'  => [
-                'active'    => 1,
-            ],
-        ];
-
-        $roleReq = Request::create('/api/listRoles', 'POST', $roleReqData);
-        $roleApi = new ApiRole($roleReq);
-        $roleResult = $roleApi->listRoles($roleReq)->getData();
-        $roleList = isset($roleResult->roles) ? $roleResult->roles : [];
-
-        if ($request->has('generate') || $request->has('send')) {
-            $post = $request->all();
-
-            $validator = Validator::make($request->all(), ['email' => 'required|email']);
-
-            $invData['api_key'] = $apiKey;
-            $invData['generate'] = $request->has('generate');
-
-            $invRequest = Request::create('/api/inviteUser', 'POST', ['data' => $invData]);
-            $api = new ApiUser($invRequest);
-            $result = $api->inviteUser($invRequest)->getData();
-
-            if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.invite_success'));
-            } else {
-                $errors = $result->errors;
-            }
-        }
-
-        if (!empty($errors)) {
-            foreach ($errors as $msg) {
-                $request->session()->flash('alert-danger', $msg[0]);
-            }
-        }
-
-        return view('/user/invite', compact('class', 'roleList'));
-    }
-
-    /**
      * Checks if pregenerated credentials are correct
      *
      * @param Request $request
@@ -2025,7 +2019,16 @@ class UserController extends Controller {
             ];
 
             if (Auth::attempt($cred)) {
-                $request->session()->flash('alert-success', 'Моля попълнете вашите данни');
+                $user = User::find(Auth::user()->id);
+
+                $user->active = true;
+
+                try {
+                    $user->save();
+                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си! Моля попълнете вашите данни.');
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
 
                 return redirect()->route('settings');
             }
@@ -2580,19 +2583,6 @@ class UserController extends Controller {
                     Log::error($ex->getMessage());
                 }
             }
-
-            if ($request->has('generate')) {
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject('Акаунтът ви беше успешно създаден!');
-                });
-            }
         }
 
         return view('confirmError', compact('class'));
@@ -2789,7 +2779,7 @@ class UserController extends Controller {
                     $data['logo_data'] = file_get_contents($data['logo']);
 
                     unset($data['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
             }
@@ -2957,7 +2947,7 @@ class UserController extends Controller {
                         $data['logo_data'] = file_get_contents($data['logo']);
 
                         unset($data['logo']);
-                    } catch (NotReadableException $ex) {}
+                    } catch (\Exception $ex) {}
                 }
 
                 $params = [
@@ -3393,5 +3383,185 @@ class UserController extends Controller {
             'groups'        => $paginationData['items'],
             'pagination'    => $paginationData['paginate']
         ]);
+    }
+
+    public function viewGroupMembers(Request $request, $uri)
+    {
+        $perPage = 6;
+        $filter = $request->offsetGet('filter');
+        $userId = $request->offsetGet('user_id');
+        $roleId = $request->offsetGet('role_id');
+        $keywords = $request->offsetGet('keywords');
+        $group = Organisation::where('uri', $uri)->first();
+        $isAdmin = Role::isAdmin($group->id);
+
+        if ($group) {
+            if ($request->has('edit_member')) {
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $group->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('delete')) {
+                if ($this->delMember($userId, $group->id)) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite_existing')) {
+                $newUser = $request->offsetGet('user');
+                $newRole = $request->offsetGet('role');
+
+                $rq = Request::create('/api/addMember', 'POST', [
+                    'org_id'    => $group->id,
+                    'user_id'   => $newUser,
+                    'role_id'   => $newRole,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->addMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite')) {
+                $email = $request->offsetGet('email');
+                $role = $request->offsetGet('role');
+
+                $rq = Request::create('/inviteUser', 'POST', [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'email'     => $email,
+                        'org_id'    => $group->id,
+                        'role_id'   => $role,
+                        'generate'  => true,
+                    ],
+                ]);
+                $api = new ApiUser($rq);
+                $result = $api->inviteUser($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type);
+
+            $criteria = ['org_id' => $group->id];
+
+            if ($filter == 'for_approval') {
+                $criteria['for_approval'] = true;
+            }
+
+            if (is_numeric($filter)) {
+                $criteria['role_id'] = $filter;
+            }
+
+            if (!empty($keywords)) {
+                $criteria['keywords'] = $keywords;
+            }
+
+            $criteria['records_per_page'] = $perPage;
+            $criteria['page_number'] = $request->offsetGet('page', 1);
+
+            $rq = Request::create('/api/getMembers', 'POST', $criteria);
+            $api = new ApiOrganisation($rq);
+            $result = $api->getMembers($rq)->getData();
+            $paginationData = $this->getPaginationData(
+                $result->members,
+                $result->total_records,
+                $request->except('page'),
+                $perPage
+            );
+
+            $rq = Request::create('/api/listRoles', 'POST');
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+
+            return view('user/groupMembers', [
+                'class'         => 'user',
+                'members'       => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'group'         => $group,
+                'roles'         => $roles,
+                'filter'        => $filter,
+                'keywords'      => $keywords,
+                'isAdmin'       => $isAdmin
+            ]);
+        }
+
+        return redirect('/user/groups');
+    }
+
+    public function addGroupMembersNew(Request $request, $uri)
+    {
+        $group = Organisation::where('uri', $uri)->first();
+        $class = 'user';
+
+        if ($group) {
+            $rq = Request::create('/api/listRoles', 'POST');
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+            $digestFreq = UserSetting::getDigestFreq();
+
+            if ($request->has('save')) {
+                $post = [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'firstname'         => $request->offsetGet('firstname'),
+                        'lastname'          => $request->offsetGet('lastname'),
+                        'username'          => $request->offsetGet('username'),
+                        'email'             => $request->offsetGet('email'),
+                        'password'          => $request->offsetGet('password'),
+                        'password_confirm'  => $request->offsetGet('password_confirm'),
+                        'role_id'           => $request->offsetGet('role_id'),
+                        'org_id'            => $group->id,
+                    ],
+                ];
+
+                $rq = Request::create('/api/addUser', 'POST', $post);
+                $api = new ApiUser($rq);
+                $result = $api->register($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+
+                    return redirect('/user/groups/members/'. $uri);
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                    return redirect()->back()->withInput()->withErrors($result->errors);
+                }
+            }
+        }
+
+        return view('user/addGroupMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'group'));
     }
 }

@@ -38,8 +38,8 @@ class ActionsHistorySeeder extends Seeder
             if ($table) {
                 $actionObjects[$module] = DB::table($table)->select('id')
                     ->limit(self::ACTIONS_HISTORY_RECORDS)
-                        ->get()
-                            ->toArray();
+                    ->get()
+                    ->toArray();
             }
         }
 

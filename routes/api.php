@@ -46,7 +46,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('editPage', 'Api\PageController@editPage');
     Route::post('deletePage', 'Api\PageController@deletePage');
     Route::post('listPages', 'Api\PageController@listPages');
-    Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
     Route::post('/listModules', 'Api\ActionsHistoryController@listModules');
 
     Route::post('/listRights', 'Api\RightController@listRights');
@@ -146,6 +145,9 @@ Route::post('/listNews', 'Api\NewsController@listNews');
 
 Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
 Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');
+
+Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+Route::post('/userCount', 'Api\UserController@userCount');
 
 Route::post('/listResources', 'Api\ResourceController@listResources');
 Route::post('/getResourceMetadata', 'Api\ResourceController@getResourceMetadata');

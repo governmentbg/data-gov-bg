@@ -191,8 +191,8 @@
             text-overflow: ellipsis;
             display: -webkit-box;
              -webkit-box-orient: vertical;
-             -webkit-line-clamp: 10;
-            //max-height: 150px;
+             -webkit-line-clamp: 6;
+            height: 130px;
         }
         .org-name {
             overflow: hidden;
@@ -202,12 +202,12 @@
             -webkit-line-clamp: 1;
         }
         .logo {
-            &img {
-                height: 200px;
-            }
+            height: 120px;
+            margin: 0 auto;
         }
         .show-more {
             margin-top: 10px;
+            padding-right: 7px;
         }
         .org-col {
             margin-bottom: 30px;

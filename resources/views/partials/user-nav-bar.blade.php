@@ -43,12 +43,6 @@
                                 href="{{ url('/user/settings') }}"
                             >{{ __('custom.settings') }}</a>
                         </li>
-                        <li>
-                            <a
-                                class="{{ $view == 'invite' ? 'active' : '' }}"
-                                href="{{ url('/user/invite') }}"
-                            >{{ __('custom.invite') }}</a>
-                        </li>
                     </ul>
                 </div>
             </div>

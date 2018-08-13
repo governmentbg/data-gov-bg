@@ -16,7 +16,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'members' ? 'active' : null }}"
-                                href="#"
+                                href="{{ url('/user/groups/members/'. $group->uri) }}"
                             >{{ ultrans('custom.members') }}</a>
                         </li>
                     </ul>

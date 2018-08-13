@@ -16,15 +16,15 @@
         <div class="row">
             <div class="col-md-6">
                 <a href="{{ url('/users/list') }}" class="reg-users">
-                    <p>300</p>
+                    <p>{{ $users }}</p>
                     <hr>
                     <p>{{ __('custom.registered_users') }}</p>
                     <img src="{{ asset('/img/reg-users.svg') }}">
                 </a>
             </div>
             <div class="col-md-6">
-                <a href="#" class="reg-orgs">
-                    <p>86</p>
+                <a href="{{ url('organisation') }}" class="reg-orgs">
+                    <p>{{ $organisations }}</p>
                     <hr>
                     <p>{{ utrans('custom.organisations', 2) }}</p>
                     <img src="{{ asset('/img/reg-orgs.svg') }}">
@@ -33,18 +33,18 @@
         </div>
         <div class="row">
             <div class="col-md-6">
-                <a href="#" class="data-sets">
-                    <p>4 681</p>
+                <a href="{{ url('data') }}" class="data-sets">
+                    <p>{{ $datasets }}1</p>
                     <hr>
                     <p>{{ __('custom.data_sets') }}</p>
                     <img src="{{ asset('/img/data-sets.svg') }}">
                 </a>
             </div>
             <div class="col-md-6">
-                <a href="#" class="updates">
-                    <p>182</p>
+                <a href="{{ url('news') }}" class="updates">
+                    <p>{{ $updates }}</p>
                     <hr>
-                    <p>{{ __('custom.agency_nuclear') }} </p>
+                    <p>{{ __('custom.updates') }} </p>
                     <img src="{{ asset('/img/updates.svg') }}">
                 </a>
             </div>

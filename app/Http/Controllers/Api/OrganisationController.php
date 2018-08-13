@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-use Intervention\Image\Exception\NotReadableException;
 
 class OrganisationController extends ApiController
 {
@@ -77,7 +76,7 @@ class OrganisationController extends ApiController
             if (!empty($data['logo'])) {
                 try {
                     $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {}
+                } catch (\Exception $ex) {}
 
                 if (!empty($img)) {
                     $organisation->logo_file_name = basename($data['logo']);
@@ -265,7 +264,7 @@ class OrganisationController extends ApiController
                 if (!empty($data['logo'])) {
                     try {
                         $img = \Image::make($data['logo']);
-                    } catch (NotReadableException $ex) {}
+                    } catch (\Exception $ex) {}
 
                     if (!empty($img)) {
                         $orgData['logo_file_name'] = basename($data['logo']);
@@ -745,7 +744,9 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $org = Organisation::where('id', $post['org_id'])->where('type', '!=', Organisation::TYPE_GROUP)->first();
+                $org = Organisation::where('id', $post['org_id'])
+                    ->where('type', '!=', Organisation::TYPE_GROUP)
+                    ->first();
 
                 if ($org) {
                     $customFields = [];
@@ -813,7 +814,10 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $query = User::select('id', 'username', 'firstname', 'lastname', 'email')->with('UserToOrgRole');
+                $query = User::select('id', 'username', 'firstname', 'lastname', 'email')
+                    ->with(['UserToOrgRole' => function ($q) use($post) {
+                        $q->where('org_id', $post['org_id']);
+                    }]);
 
                 if (isset($post['for_approval'])) {
                     $query->where('approved', $post['for_approval'] ? false : true);
@@ -825,9 +829,7 @@ class OrganisationController extends ApiController
                 }
 
                 $query->whereHas('UserToOrgRole', function($q) use ($post) {
-                    $q->whereHas('Organisation', function($q) use ($post) {
-                        $q->where('id', $post['org_id']);
-                    });
+                    $q->where('org_id', $post['org_id']);
 
                     if (isset($post['role_id'])) {
                         $q->where('role_id', $post['role_id']);
@@ -863,6 +865,42 @@ class OrganisationController extends ApiController
         }
 
         return $this->errorResponse('Get Members Failure', $validator->errors()->messages());
+    }
+
+    /**
+     * Add organisation member
+     *
+     * @param integer org_id - required
+     * @param integer user_id - required
+     *
+     * @return json success or error
+     */
+    public function addMember(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
+            'role_id'       => 'nullable|int|exists:roles,id',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $user = new UserToOrgRole;
+                $user->user_id = $post['user_id'];
+                $user->org_id = $post['org_id'];
+                $user->role_id = $post['role_id'];
+
+                $user->save();
+
+                return $this->successResponse();
+            } catch (QueryException $e) {
+                Log::error($e->getMessage());
+            }
+        }
+
+        return $this->errorResponse('Add Member Failure', $validator->errors()->messages());
     }
 
     /**
@@ -1002,7 +1040,7 @@ class OrganisationController extends ApiController
             if (!empty($post['logo'])) {
                 try {
                     $img = \Image::make($post['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
 
@@ -1147,7 +1185,7 @@ class OrganisationController extends ApiController
             if (!empty($data['logo'])) {
                 try {
                     $img = \Image::make($data['logo']);
-                } catch (NotReadableException $ex) {}
+                } catch (\Exception $ex) {}
 
                 if (!empty($img)) {
                     $newGroupData['logo_file_name'] = basename($data['logo']);

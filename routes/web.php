@@ -63,17 +63,22 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/user/organisations/datasets/edit/{uri}', 'UserController@orgDatasetEdit');
         Route::get('/user/organisations/datasets/search', 'UserController@searchDataset');
 
+        Route::match(['get', 'post'], '/user/organisations/members/{uri}', 'UserController@viewOrgMembers')->name('userOrgMembersView');
+        Route::match(['get', 'post'], '/user/groups/members/{uri}', 'UserController@viewGroupMembers')->name('userGroupMembersView');
+
         Route::match(
             ['get', 'post'],
-            '/user/organisations/members',
-            'UserController@viewOrgMembers'
-        )->name('userOrgMembersView');
+            '/user/groups/members/addNew/{uri}',
+            'UserController@addGroupMembersNew'
+        )->name('addGroupMembersNew');
+
         Route::get(
             '/user/organisations/members/addByMail',
             'UserController@addOrgMembersByMail'
         )->name('addOrgMembersByMail');
-        Route::get(
-            '/user/organisations/members/addNew',
+        Route::match(
+            ['get', 'post'],
+            '/user/organisations/members/addNew/{uri}',
             'UserController@addOrgMembersNew'
         )->name('addOrgMembersNew');
         Route::get(
@@ -88,14 +93,12 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('/user/sendTermsOfUseReq', 'UserController@sendTermsOfUseReq');
-Route::get('/', function () {
-    return view('home/index', ['class' => 'index']);
-});
+Route::get('/', 'HomeController@index');
 
 Route::get('/logout', function() {
     Auth::logout();
 
-    return view('home/index', ['class' => 'index']);
+    return redirect('/');
 });
 
 Route::get('/preGenerated', 'UserController@preGenerated')->name('preGenerated');
@@ -159,10 +162,6 @@ Route::get('/organisation/chronology', function () {
 
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');
-
-Route::get('/user/groupMembers', function () {
-    return view('user/groupMembers', ['class' => 'user']);
-});
 
 Route::get('/user/orgMembers', function () {
     return view('user/orgMembers', ['class' => 'user']);

@@ -30,7 +30,7 @@
                                 <div class="article m-b-lg col-xs-12 user-dataset">
                                     <div>{{ __('custom.date_added') }}: {{ $set->created_at }}</div>
                                     <div class="col-sm-12 p-l-none">
-                                        <a href="{{ url('/user/groups/dataset/view/'. $set->uri) }}">
+                                        <a href="{{ route('groupDatasetView', $set->uri) }}">
                                             <h2 class="m-t-xs">{{ $set->name }}</h2>
                                         </a>
                                         <div class="desc">

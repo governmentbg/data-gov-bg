@@ -31,16 +31,29 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/user/groups/dataset/create', 'UserController@groupDatasetCreate');
         Route::match(['get', 'post'], '/user/dataset/edit/{uri}', 'UserController@datasetEdit')->name('datasetEdit');
 
-        Route::match(['get', 'post'], '/user/resource/create', 'UserController@resourceCreate')->name('resourceCreate');
+        Route::match(
+            ['get', 'post'],
+            '/user/dataset/resource/create/{uri}',
+            'UserController@resourceCreate'
+        )->name('resourceCreate');
+        Route::match(
+            ['get', 'post'],
+            '/user/group/dataset/resource/create/{uri}',
+            'UserController@groupResourceCreate'
+        )->name('groupResourceCreate');
+        Route::match(
+            ['get', 'post'],
+            '/user/organisation/dataset/resource/create/{uri}',
+            'UserController@orgResourceCreate'
+        )->name('orgResourceCreate');
 
-        Route::get('/user/resourceView', 'UserController@resourceView')->name('resourceView');
+        Route::match(['get', 'post'], '/user/resourceView/{uri}', 'UserController@resourceView')->name('resourceView');
         Route::match(['get', 'post'], '/user/invite', 'UserController@inviteUser');
         Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
 
         Route::match(['get', 'post'], '/user/groups/datasets', 'UserController@groupDatasets');
         Route::match(['get', 'post'], '/user/groups/dataset/edit/{uri}', 'UserController@groupDatasetEdit');
-        Route::match(['get', 'post'], '/user/groups/dataset/view/{uri}', 'UserController@groupDatasetView');
-        Route::match(['get', 'post'], 'user/groups/dataset/{uri}', 'UserController@groupDataSetView');
+        Route::match(['get', 'post'], '/user/groups/dataset/{uri}', 'UserController@groupDatasetView')->name('groupDatasetView');
         Route::match(['get', 'post'], 'user/groups/resource/{uri}', 'UserController@groupResourceView');
 
         Route::match(['get', 'post'], '/user/groups/register', 'UserController@registerGroup');
@@ -52,8 +65,8 @@ Route::middleware('auth')->group(function () {
         Route::match(['get', 'post'], '/user/groups/datasets', 'UserController@groupDatasets');
 
         Route::match(['get', 'post'], '/user/organisations/datasets', 'UserController@orgDatasets');
-        Route::get('/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
-        Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView');
+        Route::match(['get', 'post'], '/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
+        Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView')->name('orgDatasetView');
 
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete/{id}', 'UserController@deleteOrg');

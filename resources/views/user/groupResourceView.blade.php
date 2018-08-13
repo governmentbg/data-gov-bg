@@ -22,9 +22,9 @@
                             </div>
                             <div class="col-sm-12 p-l-none art-heading-bar">
                                 <div class="socialPadding">
-                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
+                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
+                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
+                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
                                 </div>
                                 <div class="sendMail p-w-sm">
                                     <span><a href="#"><i class="fa fa-envelope"></i></a></span>
@@ -41,22 +41,39 @@
                                     </div>
                                 </div>
 
-                                <!-- chart goes here -->
-                                <div class="col-sm-12 pull-left m-t-md p-l-r-none">
-                                    <img class="img-responsive" src="{{ asset('img/test-img/bar-chart.jpg') }}">
+                                <div class="col-sm-12 m-t-lg p-l-r-none">
+                                    @if (empty($data))
+                                        <div class="col-sm-12 m-t-lg text-center">
+                                            {{ __('custom.no_info') }}
+                                        </div>
+                                    @else
+                                        <table class="table m-t-lg">
+                                            @foreach ($data as $index => $row)
+                                                @if ($index == 0)
+                                                    @foreach ($row as $key => $value)
+                                                        <th><p>{{ $value }}</p></th>
+                                                    @endforeach
+                                                @else
+                                                    <tr>
+                                                        @foreach ($row as $key => $value)
+                                                            <td>{{ $value }}</td>
+                                                        @endforeach
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        </table>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="col-xs-12 pull-left m-t-md p-l-r-none text-right">
-                                    <div class="col-sm-12 m-t-lg p-l-none">
-                                        <div>
-                                            <span class="badge badge-pill m-b-sm">
-                                                <a
-                                                    href="#"
-                                                    onclick="return confirm('Изтриване на данните?');"
-                                                    >{{ __('custom.remove') }}</a>
-                                            </span>
-                                        </div>
-                                    </div>
+                            <div class="col-xs-12 m-t-md p-l-r-none text-right">
+                                <form method="POST">
+                                    {{ csrf_field() }}
+                                    <button
+                                        name="delete"
+                                        class="badge badge-pill m-b-sm"
+                                        data-confirm="{{ __('Изтриване на данните?') }}"
+                                    >{{ __('custom.remove') }}</button>
+                                </form>
                             </div>
                         </div>
                     </div>

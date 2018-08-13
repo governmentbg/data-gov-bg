@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-use Elasticsearch\Common\Exceptions\RuntimeException;
-use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 
 class ResourceController extends ApiController
 {
@@ -40,6 +38,7 @@ class ResourceController extends ApiController
      */
     public function addResourceMetadata(Request $request)
     {
+        $errors = [];
         $post = $request->all();
         $requestTypes = Resource::getRequestTypes();
 
@@ -56,10 +55,11 @@ class ResourceController extends ApiController
             $errors = $validator->errors()->messages();
         } else {
             $validator = \Validator::make($post['data'], [
-                'name'                 => 'required',
                 'description'          => 'nullable',
-                'locale'               => 'required|string|max:5',
-                'version'              => 'nullable|string',
+                'locale'               => 'nullable|max:5',
+                'name'                 => 'required_with:locale',
+                'name.*'               => 'required_without:locale|string',
+                'version'              => 'nullable',
                 'schema_description'   => 'nullable|string|required_without:schema_url',
                 'schema_url'           => 'nullable|url|required_without:schema_description',
                 'type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
@@ -73,12 +73,6 @@ class ResourceController extends ApiController
                 'custom_fields.value'  => 'nullable|string',
             ]);
         }
-
-        $validator->after(function ($validator) use ($post) {
-            if (is_array($post['data']['name']) && empty(array_filter($post['data']['name']))) {
-                $validator->errors()->add('name', 'name is required');
-            }
-         });
 
         $validator->sometimes('data.post_data', 'required', function($post) use ($requestTypes) {
             if (
@@ -98,9 +92,9 @@ class ResourceController extends ApiController
 
             $dbData = [
                 'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
-                'name'              => $this->trans($empty, $post['data']['name']),
+                'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
                 'descript'          => isset($post['data']['description'])
-                    ? $this->trans($empty, $post['data']['description'])
+                    ? $this->trans($post['data']['locale'], $post['data']['description'])
                     : null,
                 'uri'               => Uuid::generate(4)->string,
                 'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
@@ -168,14 +162,8 @@ class ResourceController extends ApiController
                 $resource->es_id = $elasticDataSet->id;
                 $resource->save();
 
-                $elasticData = [];
-                $postData = $post['data'];
-                foreach ($postData as $i => $row) {
-                    $elasticData['_'. $i] = $row;
-                }
-
                 \Elasticsearch::index([
-                    'body'  => $elasticData,
+                    'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id,
@@ -184,7 +172,7 @@ class ResourceController extends ApiController
                 DB::commit();
 
                 return $this->successResponse();
-            } catch (RuntimeException $ex) {
+            } catch (\Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -346,15 +334,15 @@ class ResourceController extends ApiController
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
 
-                \Elasticsearch::index([
-                    'body'  => $post['data'],
+                $update = \Elasticsearch::index([
+                    'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id,
                 ]);
 
                 return $this->successResponse();
-            } catch (RuntimeException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -609,18 +597,13 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $elasticData = $resource->elasticDataSet;
 
-                if (!empty($elasticData)) {
-                    $data = \Elasticsearch::get([
-                        'index' => $elasticData->index,
-                        'type'  => $elasticData->index_type,
-                        'id'    => $elasticData->doc,
-                    ]);
-                }
-
-                return $this->successResponse(!empty($data['_source']) ? $data['_source'] : null);
-            } catch (RuntimeException $ex) {
+                return $this->successResponse(
+                    empty($resource->es_id)
+                    ? []
+                    : ElasticDataSet::getElasticData($resource->es_id)
+                );
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -689,7 +672,7 @@ class ResourceController extends ApiController
                 }
 
                 return $this->successResponse(['data' => isset($data['hits']) ? $data['hits'] : []], true);
-            } catch (BadRequest400Exception $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -758,7 +741,7 @@ class ResourceController extends ApiController
                 }
 
                 return $this->successResponse(['data' => $data], true);
-            } catch (BadRequest400Exception $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }

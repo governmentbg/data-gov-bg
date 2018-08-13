@@ -125,6 +125,8 @@ Route::match(['get', 'post'],'/confirmation', 'UserController@confirmation')->na
 Route::match(['get', 'post'],'/mailConfirmation', 'UserController@mailConfirmation')->name('mailConfirmation');
 Route::match(['get', 'post'],'/confirmError', 'UserController@confirmError')->name('confirmError');
 
+Route::match(['get', 'post'], '/delSettings', 'UserController@deleteCustomSettings');
+
 Route::get('/accessibility', function () {
     return view('accessibility', ['class' => 'index']);
 });
@@ -133,12 +135,23 @@ Route::get('/terms', function () {
     return view('terms', ['class' => 'index']);
 });
 
-Route::get('/data', function () {
-    return view('data/list', ['class' => 'data']);
-});
+Route::match(['get', 'post'], '/data', 'DataController@view')->name('dataView');
 
 Route::get('/data/view', function () {
-    return view('data/view', ['class' => 'data']);
+    return view('data/view', [
+        'class' => 'data',
+        'filter' => 'healthcare',
+        'mainCats' => [
+            'healthcare',
+            'innovation',
+            'education',
+            'public_sector',
+            'municipalities',
+            'agriculture',
+            'justice',
+            'economy_business',
+        ],
+    ]);
 });
 
 Route::get('/data/relatedData', function () {
@@ -146,7 +159,20 @@ Route::get('/data/relatedData', function () {
 });
 
 Route::get('/data/reportedList', function () {
-    return view('data/reportedList', ['class' => 'data-attention']);
+    return view('data/reportedList', [
+        'class' => 'data-attention',
+        'filter' => 'healthcare',
+        'mainCats' => [
+            'healthcare',
+            'innovation',
+            'education',
+            'public_sector',
+            'municipalities',
+            'agriculture',
+            'justice',
+            'economy_business',
+        ],
+    ]);
 });
 
 Route::get('/data/reportedView', function () {

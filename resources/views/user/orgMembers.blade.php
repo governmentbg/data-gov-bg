@@ -186,7 +186,7 @@
                                 </div>
                             @endif
                         @else
-                            <div class="m-t-xl text-center">
+                            <div class="m-t-xl no-info">
                                 {{ __('custom.no_info') }}
                             </div>
                         @endif

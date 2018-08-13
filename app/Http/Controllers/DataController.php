@@ -24,8 +24,24 @@ class DataController extends Controller {
 
     }
 
-    public function view() {
+    public function view(Request $request)
+    {
+        $class = 'data';
 
+        $mainCats = [
+            'healthcare',
+            'innovation',
+            'education',
+            'public_sector',
+            'municipalities',
+            'agriculture',
+            'justice',
+            'economy_business',
+        ];
+
+        $filter = $request->offsetGet('filter');
+
+        return view('data/list', compact('class','mainCats', 'filter'));
     }
 
     public function relatedData() {

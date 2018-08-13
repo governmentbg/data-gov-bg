@@ -71,7 +71,10 @@
                                         href="{{ url('/user') }}"
                                     ><img src="{{ asset('img/user.svg') }}"></a>
                                 </span>
-                                <span class="login-link">>
+                                <span class="login-link">
+                                    <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
+                                </span>
+                                <span class="login-link">
                                     <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
                                 </span>
                             @else

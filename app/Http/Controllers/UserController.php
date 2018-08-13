@@ -1439,10 +1439,10 @@ class UserController extends Controller {
      */
     public function resourceView(Request $request, $uri)
     {
-        $resourcesReq = Request::create('/api/listResources', 'POST', ['criteria' => ['resource_uri' => $uri]]);
+        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
-        $resources = $apiResources->listResources($resourcesReq)->getData();
-        $resource = !empty($resources->resources[0]) ? $resources->resources[0] : null;
+        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resource = !empty($resource->resource) ? $resource->resource : null;
         $data = [];
 
         $resource = $this->getModelUsernames($resource);
@@ -1477,6 +1477,32 @@ class UserController extends Controller {
         return redirect('/user/datasets');
     }
 
+    public function resourceDownload(Request $request, $esid, $name)
+    {
+        $convertReq = Request::create('/api/toJSON', 'POST', ['es_id' => $esid]);
+        $apiResources = new ApiConversion($convertReq);
+        $resource = $apiResources->toJSON($convertReq)->getData();
+
+        if (!empty($resource->data)) {
+            $handle = fopen($name, 'w+');
+            $path = stream_get_meta_data($handle)['uri'];
+
+            foreach(json_decode(json_encode($resource->data), true) as $row) {
+                fputcsv($handle, $row);
+            }
+
+            fclose($handle);
+
+            $headers = array(
+                'Content-Type' => 'text/csv',
+            );
+
+            return response()->download($path, $name .'.csv', $headers)->deleteFileAfterSend(true);
+        }
+
+        return back();
+    }
+
     /**
      * Returns model with usernames instead of user ids for record signatures
      *
@@ -1490,12 +1516,12 @@ class UserController extends Controller {
                 $model->updated_by == $model->created_by
                 && !is_null($model->created_by)
             ) {
-                $username = User::find($model->created_by)->value('username');
+                $username = User::find($model->created_by)->username;
                 $model->updated_by = $username;
                 $model->created_by = $username;
             } else {
-                $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->value('username');
-                $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->value('username');
+                $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->username;
+                $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->username;
             }
         }
 

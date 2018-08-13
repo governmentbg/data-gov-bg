@@ -12,7 +12,7 @@
             <form method="GET" action="{{ url('/user/organisations/datasets/search') }}">
                 <input
                     type="text"
-                    class="m-t-lg"
+                    class="m-t-lg input-border-r-12"
                     placeholder="{{ __('custom.search') }}"
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"

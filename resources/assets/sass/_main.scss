@@ -151,18 +151,24 @@ a:active {
         color: black;
 
         img {
-            width: 100%;
+            width: 90%;
             margin-top: 10px;
             margin-bottom: 10px;
         }
+
         h2, h4 {
-            width: 100%;
+            width: 90%;
             line-height: 1.4;
         }
+
         h2 {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
+        }
+
+        .show-more {
+            margin-right: 30px;
         }
     }
 
@@ -241,6 +247,11 @@ ul > li {
 .input-border-r-12, .bootstrap-tagsinput {
     border-radius: 12px;
     padding: 6px 12px;
+
+    @include smMobile() {
+        text-align: left !important;
+        margin-left: 10px;
+    }
 }
 
 .input-long {

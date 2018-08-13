@@ -93,7 +93,7 @@
                 </div>
                 <div class="col-sm-9 cl-xs-12 ">
                     <div class="filter-content tex">
-                        <div class="p-l-r-none m-b-lg col-md-6">
+                        <div class="p-l-r-none m-b-lg m-t-md col-md-6">
                             <form class="js-keywords-form">
                                 @foreach (app('request')->except(['keywords']) as $key => $value)
                                     <input name="{{ $key }}" type="hidden" value="{{ $value }}">
@@ -157,17 +157,19 @@
                                             {{ csrf_field() }}
                                             <input name="org_id" type="hidden" value="{{ $organisation->id }}">
                                             <input name="user_id" type="hidden" value="{{ $member->id }}">
-                                            <select
-                                                class="form-control js-select"
-                                                name="role_id"
-                                            >
-                                                @foreach ($roles as $role)
-                                                    <option
-                                                        value="{{ $role->id }}"
-                                                        {{ $member->role_id == $role->id ? 'selected' : null }}
-                                                    >{{ $role->name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="m-b-sm">
+                                                <select
+                                                    class="form-control js-select"
+                                                    name="role_id"
+                                                >
+                                                    @foreach ($roles as $role)
+                                                        <option
+                                                            value="{{ $role->id }}"
+                                                            {{ $member->role_id == $role->id ? 'selected' : null }}
+                                                        >{{ $role->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             <button
                                                 type="submit"
                                                 class="badge cust-btn badge-pill m-t-sm m-r-md"

@@ -41,7 +41,7 @@
                 </a>
             </div>
             <div class="col-md-6">
-                <a href="{{ url('news') }}" class="updates">
+                <a href="{{ url('data') }}" class="updates">
                     <p>{{ $updates }}</p>
                     <hr>
                     <p>{{ __('custom.updates') }} </p>
@@ -79,7 +79,7 @@
             <div class="picks-box">
                 <a
                     href="{{ route('dataView', [
-                        'filter'    => 'topics',
+                        'filter'    => 'healthcare',
                     ]) }}"
                 >
                     <svg data-name="Layer 4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 77 77"><defs></defs><title> {{ utrans('custom.healthcare') }}</title><path class="cls-1" d="M53.55,23.72V9.45A8.94,8.94,0,0,0,44.64.53H32.36a8.94,8.94,0,0,0-8.91,8.92V23.72H9.17A8.94,8.94,0,0,0,.26,32.64V44.91a8.94,8.94,0,0,0,8.91,8.92H23.45V68.1A8.94,8.94,0,0,0,32.36,77H44.64a8.94,8.94,0,0,0,8.91-8.92V53.83H67.83a8.94,8.94,0,0,0,8.91-8.92V32.64a8.94,8.94,0,0,0-8.91-8.92Z"/></svg>
@@ -103,7 +103,7 @@
                 </a>
                 <a
                     href="{{ route('dataView', [
-                        'filter'    => 'management_and_public',
+                        'filter'    => 'public_sector',
                     ]) }}"
                 >
                     <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 77 77"><defs></defs><title>{{ uctrans('custom.management_and_public') }}</title><g id="_Group_" data-name="&lt;Group&gt;"><rect id="_Path_" data-name="&lt;Path&gt;" class="cls-1" x="0.18" y="67.12" width="76.79" height="7.05"/><rect id="_Path_2" data-name="&lt;Path&gt;" class="cls-1" x="3.7" y="60.82" width="69.74" height="3.9"/><rect id="_Path_3" data-name="&lt;Path&gt;" class="cls-1" x="3.7" y="22.3" width="69.74" height="3.9"/><rect id="_Path_4" data-name="&lt;Path&gt;" class="cls-1" x="10" y="28.34" width="9.32" height="29.96"/><rect id="_Path_5" data-name="&lt;Path&gt;" class="cls-1" x="25.86" y="28.34" width="9.32" height="29.96"/><rect id="_Path_6" data-name="&lt;Path&gt;" class="cls-1" x="41.72" y="28.34" width="9.32" height="29.96"/><rect id="_Path_7" data-name="&lt;Path&gt;" class="cls-1" x="57.58" y="28.34" width="9.32" height="29.96"/><polygon id="_Path_8" data-name="&lt;Path&gt;" class="cls-1" points="5.46 18.27 73.45 18.27 38.57 3.67 5.46 18.27"/></g></svg>

@@ -7,14 +7,14 @@
     <a
         href="{{ url('/') }}"
         style="margin-right: 15px;"
-    ><img src="{{ asset('img/op-logo.png') }}"></a>
+    ><img src="{{ $message->embed('img/op-logo.png') }}"></a>
     <a
         href="https://europa.eu/european-union/index_bg"
-    ><img src="{{ asset('img/eu-logo.png') }}"></a>
+    ><img src="{{ $message->embed('img/eu-logo.png') }}"></a>
     <a
         href="{{ url('/') }}"
         style="margin-left: 8px;"
-    ><img src="{{ asset('img/opdu-logo.png') }}"></a>
+    ><img src="{{ $message->embed('img/opdu-logo.png') }}"></a>
     <br/>
 </div>
 <hr

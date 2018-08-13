@@ -48,29 +48,31 @@
                             </div>
                             <div class="col-xs-12 ch-del-btns">
                                 <div class="row">
-                                    <form
-                                        method="POST"
-                                        action="{{ url('/user/organisations/edit/'. $organisation->uri) }}"
-                                    >
-                                        {{ csrf_field() }}
-                                        <div class="col-xs-6">
-                                            <button type="submit" name="edit">{{ __('custom.edit') }}</button>
-                                        </div>
-                                        <input type="hidden" name="view" value="1">
-                                    </form>
-                                    <form
-                                        method="POST"
-                                        action="{{ url('/user/organisations/delete/'. $organisation->id) }}"
-                                    >
-                                        {{ csrf_field() }}
-                                        <div class="col-xs-6 text-right">
-                                            <button
-                                                type="submit"
-                                                name="delete"
-                                                data-confirm="{{ __('custom.delete_organisation_confirm') }}"
-                                            >{{ __('custom.remove') }}</button>
-                                        </div>
-                                    </form>
+                                    @if (\App\Role::isAdmin($organisation->id))
+                                        <form
+                                            method="POST"
+                                            action="{{ url('/user/organisations/edit/'. $organisation->uri) }}"
+                                        >
+                                            {{ csrf_field() }}
+                                            <div class="col-xs-6">
+                                                <button type="submit" name="edit">{{ __('custom.edit') }}</button>
+                                            </div>
+                                            <input type="hidden" name="view" value="1">
+                                        </form>
+                                        <form
+                                            method="POST"
+                                            action="{{ url('/user/organisations/delete/'. $organisation->id) }}"
+                                        >
+                                            {{ csrf_field() }}
+                                            <div class="col-xs-6 text-right">
+                                                <button
+                                                    type="submit"
+                                                    name="delete"
+                                                    data-confirm="{{ __('custom.delete_organisation_confirm') }}"
+                                                >{{ __('custom.remove') }}</button>
+                                            </div>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>

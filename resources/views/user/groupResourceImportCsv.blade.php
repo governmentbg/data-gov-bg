@@ -3,12 +3,12 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'dataset'])
+    @include('partials.user-nav-bar', ['view' => 'group'])
     <div class="col-xs-12 m-t-lg">
         <form
             class="form-horizontal"
             method="POST"
-            action="{{ route('resourceCreate', ['uri' => $uri]) }}"
+            action="{{ route('groupResourceCreate', ['uri' => $uri]) }}"
         >
             {{ csrf_field() }}
 

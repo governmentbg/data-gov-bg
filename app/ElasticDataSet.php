@@ -29,6 +29,6 @@ class ElasticDataSet extends Model
             ]);
         }
 
-        return !empty($data['_source']) ? $data['_source'] : null;
+        return !empty($data['_source']['rows']) ? $data['_source']['rows'] : [];
     }
 }

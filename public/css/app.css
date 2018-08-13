@@ -11717,6 +11717,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.login-link a {
 
 body #app .navbar .navbar-header > div.nav-controls > span.login-link a:hover {
   font-weight: 800;
+  margin-left: -2px;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.search-input {
@@ -12857,7 +12858,7 @@ a:active {
 
 .sidenav .org img,
 .sidenav-open .org img {
-  width: 100%;
+  width: 90%;
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -12866,7 +12867,7 @@ a:active {
 .sidenav .org h4,
 .sidenav-open .org h2,
 .sidenav-open .org h4 {
-  width: 100%;
+  width: 90%;
   line-height: 1.4;
 }
 
@@ -12875,6 +12876,11 @@ a:active {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+.sidenav .org .show-more,
+.sidenav-open .org .show-more {
+  margin-right: 30px;
 }
 
 @media screen and (max-width: 767px) {
@@ -12959,6 +12965,14 @@ ul > li {
 .bootstrap-tagsinput {
   border-radius: 12px;
   padding: 6px 12px;
+}
+
+@media screen and (max-width: 767px) {
+  .input-border-r-12,
+  .bootstrap-tagsinput {
+    text-align: left !important;
+    margin-left: 10px;
+  }
 }
 
 .input-long {
@@ -13319,8 +13333,8 @@ textarea {
   content: ' ';
   position: absolute;
   display: block;
-  width: 30%;
-  margin: 12px 0;
+  width: 100%;
+  margin-top: 24px;
   border-radius: 4px;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -13829,6 +13843,7 @@ textarea {
 .theme-user .new-data {
   padding: 8px 28px;
   margin-top: 25px;
+  width: 230px;
 }
 
 .theme-user .info-bar li {

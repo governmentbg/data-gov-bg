@@ -14,7 +14,7 @@
                 <form method="GET" action="{{ url('/user/organisations/search') }}">
                     <input
                         type="text"
-                        class="m-t-md"
+                        class="m-t-md input-border-r-12"
                         placeholder="{{ __('custom.search') }}"
                         value="{{ isset($search) ? $search : '' }}"
                         name="q"

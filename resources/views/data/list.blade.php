@@ -38,7 +38,7 @@
             </div>
             <div class="articles">
                 @for ($i = 0; $i < 2; $i++)
-                    <div class="article m-t-md m-b-md">
+                    <div class="article m-t-lg m-b-md">
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
                                 <div class="col-sm-2 col-xs-4 logo">
@@ -111,7 +111,7 @@
                             </div>
                         </div>
                         <div class="col-sm-5 col-xs-12">
-                            <div class="follow p-w-sm pull-right">
+                            <div class="follow pull-right">
                                 <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
                             </div>
                         </div>

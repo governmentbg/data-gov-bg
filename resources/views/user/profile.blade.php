@@ -85,12 +85,6 @@
                     <p>тел. 02/ 940 2445</p><br>
                     <p class="email">Email: {{ $user->email }}</p>
                 </div>
-                <div class="row social-icons">
-                    <span>{{ __('custom.follow_us') }}</span><br>
-                    <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
-                    <a href="#" class="tw"><span class="fa fa-twitter"></span></a>
-                    <a href="#" class="gp"><span class="fa fa-google-plus"></span></a>
-                </div>
             </div>
         </div>
     </div>

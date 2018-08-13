@@ -13841,6 +13841,7 @@ textarea {
 .theme-user .user-orgs .ch-del-btns {
   margin-top: 10px;
   margin-bottom: 35px;
+  min-height: 36px;
 }
 
 .theme-user .user-orgs .ch-del-btns div div button {
@@ -14229,6 +14230,7 @@ textarea {
 .user-group .ch-del-btns {
   margin-top: 10px;
   margin-bottom: 35px;
+  min-height: 36px;
 }
 
 .user-group .ch-del-btns button {

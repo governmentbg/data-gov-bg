@@ -20,22 +20,6 @@ $(function() {
     }
 });
 
-/*$(window).on('load', function() {
-    initScroller();
-});
-function initScroller() {
-    if ($scroll.height() < $scrollContent.height()) {
-        $scrollContent.css('position', 'relative');
-
-        if ($scroll[0].nanoscroller) {
-            $scroll.nanoScroller();
-            $scroll.nanoScroller({ scrollBottom: 0 });
-        } else {
-            $scroll.nanoScroller({ preventPageScrolling: true, scrollBottom: 0 });
-        }
-    }
-}*/
-
 // show hide submenu
 $(function() {
     $('.clicable').on('click', function() {
@@ -201,5 +185,27 @@ $(function() {
             }
         }
 
+    }
+
+    var $tagsInput = $('[data-role="tagsinput"]');
+
+    if ($tagsInput.length) {
+        $tagsInput.each(function() {
+            var $tagInput = $(this);
+
+            $tagInput.siblings('.bootstrap-tagsinput').keydown(function(e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+
+                if (key == 13) {
+                    e.preventDefault();
+
+                    $tagInput.tagsinput('add', $(this).find('input').val());
+
+                    $(this).find('input').val('');
+
+                    $tagInput.tagsinput('refresh');
+                }
+            });
+        });
     }
 });

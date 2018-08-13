@@ -369,6 +369,12 @@ class OrganisationController extends ApiController
             'org_id' => 'required|exists:organisations,id,deleted_at,NULL',
         ]);
 
+        $validator->after(function ($validator) use ($request) {
+            if (!Role::isAdmin($request->org_id)) {
+                $validator->errors()->add('org_id', __('custom.delete_error'));
+            }
+        });
+
         if (
             !$validator->fails()
             && !empty($organisation = Organisation::find($request->org_id))
@@ -1267,6 +1273,12 @@ class OrganisationController extends ApiController
         if (empty($group) || $group->type != Organisation::TYPE_GROUP) {
             return $this->errorResponse('No Group Found.');
         }
+
+        $validator->after(function ($validator) use ($request) {
+            if (!Role::isAdmin($request->group_id)) {
+                $validator->errors()->add('group_id', __('custom.delete_error'));
+            }
+        });
 
         if (!$validator->fails()) {
             try {

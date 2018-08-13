@@ -1149,7 +1149,6 @@ class UserController extends Controller {
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
                 $data = $request->all();
-                $data['locale'] = \LaravelLocalization::getCurrentLocale();
                 $metadata['api_key'] = $apiKey;
                 $metadata['data'] = $data;
 
@@ -1258,7 +1257,6 @@ class UserController extends Controller {
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
                 $data = $request->all();
-                $data['locale'] = \LaravelLocalization::getCurrentLocale();
                 $metadata['api_key'] = $apiKey;
                 $metadata['data'] = $data;
 
@@ -1367,7 +1365,6 @@ class UserController extends Controller {
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
                 $data = $request->all();
-                $data['locale'] = \LaravelLocalization::getCurrentLocale();
                 $metadata['api_key'] = $apiKey;
                 $metadata['data'] = $data;
 

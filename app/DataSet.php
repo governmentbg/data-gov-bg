@@ -25,7 +25,7 @@ class DataSet extends Model implements TranslatableInterface
     const VISIBILITY_PRIVATE = 2;
 
     protected static $translatable = [
-        'name'      => 'label',
+        'name'      => 'text',
         'descript'  => 'text',
         'sla'       => 'text',
     ];

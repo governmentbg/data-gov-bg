@@ -281,4 +281,6 @@ return [
     'terms_req_error' => 'There was a problem with your terms of use request.',
     'file' => 'file',
     'add' => 'Add',
+    'draft' => 'draft',
+    'published' => 'published',
 ];

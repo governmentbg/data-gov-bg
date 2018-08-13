@@ -33,6 +33,11 @@
                                         <a href="{{ route('datasetView', ['uri' => $set->uri]) }}">
                                             <h2 class="m-t-xs">{{ $set->name }}</h2>
                                         </a>
+                                        @if ($set->status == 1)
+                                            <span>({{ __('custom.draft') }})</span>
+                                        @else
+                                            <span>({{ __('custom.published') }})</span>
+                                        @endif
                                         <div class="desc">
                                             {{ $set->descript }}
                                         </div>

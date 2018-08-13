@@ -34,7 +34,7 @@ class OrganisationSeeder extends Seeder
 
             try {
                 $img = \Image::make($logo);
-            } catch (NotReadableException $ex) {}
+            } catch (\Exception $ex) {}
 
             $dbData = [
                 'type'              => $type,

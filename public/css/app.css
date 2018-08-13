@@ -13795,7 +13795,8 @@ textarea {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 10;
+  -webkit-line-clamp: 6;
+  height: 130px;
 }
 
 .theme-user .user-orgs .org-name {
@@ -13806,12 +13807,14 @@ textarea {
   -webkit-line-clamp: 1;
 }
 
-.theme-user .user-orgs .logoimg {
-  height: 200px;
+.theme-user .user-orgs .logo {
+  height: 120px;
+  margin: 0 auto;
 }
 
 .theme-user .user-orgs .show-more {
   margin-top: 10px;
+  padding-right: 7px;
 }
 
 .theme-user .user-orgs .org-col {

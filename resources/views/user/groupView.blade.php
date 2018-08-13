@@ -20,6 +20,32 @@
                                         <h3>{{ $group->name }}</h3>
                                         <p>{{ $group->description }}</p>
                                     </div>
+                                    <div class="col-xs-12 view-btns">
+                                        <div class="row">
+                                            <form
+                                                method="POST"
+                                                class="inline-block"
+                                                action="{{ url('/user/groups/edit/'. $group->uri) }}"
+                                            >
+                                                {{ csrf_field() }}
+                                                <button class="btn btn-primary" type="submit" name="edit">{{ __('custom.edit') }}</button>
+                                                <input type="hidden" name="view" value="1">
+                                            </form>
+                                            <form
+                                                method="POST"
+                                                class="inline-block"
+                                                action="{{ url('/user/groups/delete/'. $id) }}"
+                                            >
+                                                {{ csrf_field() }}
+                                                    <button
+                                                        class="btn del-btn btn-primary"
+                                                        type="submit"
+                                                        name="delete"
+                                                        data-confirm="{{ __('custom.delete_group_confirm') }}"
+                                                    >{{ __('custom.remove') }}</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

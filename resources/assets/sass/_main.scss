@@ -27,6 +27,7 @@ a:active {
     display: inline-block;
 
     .nav {
+
         @include mdMobile() {
             padding-left: 15px;
         }
@@ -147,12 +148,16 @@ a:active {
     }
 
     .org {
+        color: black;
+
         img {
             width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         h2, h4 {
             width: 100%;
-
+            line-height: 1.4;
         }
         h2 {
             white-space: nowrap;

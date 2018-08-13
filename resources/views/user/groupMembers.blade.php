@@ -78,6 +78,9 @@
                         <img src="{{ $group->logo }}">
                         <h2>{{ $group->name }}</h2>
                         <h4>{{ truncate($group->descript, 150) }}</h4>
+                        <p class="text-right show-more">
+                            <a href="{{ url('/user/groups/view/'. $group->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                        </p>
                     </div>
                 </div>
                 <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
@@ -90,7 +93,7 @@
                 </div>
                 <div class="col-sm-9 cl-xs-12">
                     <div class="filter-content tex">
-                        <div class="p-l-r-none m-b-sm col-md-6">
+                        <div class="p-l-r-none m-b-lg col-md-6">
                             <form class="js-keywords-form">
                                 @foreach (app('request')->except(['keywords']) as $key => $value)
                                     <input name="{{ $key }}" type="hidden" value="{{ $value }}">
@@ -127,7 +130,7 @@
                         @if (!empty($members))
                             @foreach ($members as $member)
                                 <div class="col-xs-12 p-l-none">
-                                    <h3>{{
+                                    <h3 class="m-b-md">{{
                                         empty($member->firstname)
                                         ? $member->username
                                         : $member->firstname .' '. $member->lastname
@@ -135,12 +138,12 @@
                                     @if ($isAdmin)
                                         <div class="js-member-admin-controls">
                                             <button
-                                                class="badge badge-pill m-r-md m-b-sm js-member-edit"
+                                                class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
                                             >{{ __('custom.edit') }}</button>
                                             <form method="POST" class="inline-block">
                                                 {{ csrf_field() }}
                                                 <button
-                                                    class="badge badge-pill m-b-sm"
+                                                    class="badge cust-btn badge-pill m-b-sm del-btn"
                                                     type="submit"
                                                     name="delete"
                                                     onclick="return confirm('Изтриване на данните?');"
@@ -167,12 +170,12 @@
                                             </select>
                                             <button
                                                 type="submit"
-                                                class="badge badge-pill m-t-sm m-r-md"
+                                                class="badge cust-btn badge-pill m-t-sm m-r-md"
                                                 name="edit_member"
                                             >{{ __('custom.save') }}</button>
                                             <button
                                                 type="button"
-                                                class="badge badge-pill m-t-sm js-member-cancel"
+                                                class="badge cust-btn badge-pill m-t-sm js-member-cancel del-btn"
                                             >{{ __('custom.cancel') }}</button>
                                         </form>
                                     </div>
@@ -208,7 +211,7 @@
                 <div class="modal-body">
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
-                        <div class="form-group row">
+                        <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ __('custom.name') }}: </label>
                             <div class="col-lg-10">
                                 <select
@@ -224,7 +227,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row m-b-lg m-t-md">
                         <label for="role_exist" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
                                 <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role_exist">
@@ -261,7 +264,7 @@
                 <div class="modal-body">
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
-                        <div class="form-group row">
+                        <div class="form-group row m-b-lg m-t-md">
                             <label for="email" class="col-lg-2 col-form-label">{{ __('custom.email') }}: </label>
                             <div class="col-lg-10">
                                 <input
@@ -272,7 +275,7 @@
                                 >
                             </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
                                 <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role">

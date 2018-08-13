@@ -151,8 +151,7 @@
 
     .org-logo {
         img {
-            width: 228px;
-            height: 128px;
+            height: 140px;
         }
     }
 
@@ -219,6 +218,7 @@
         }
         .org-col {
             margin-bottom: 30px;
+            height: 433px;
         }
     }
 
@@ -664,7 +664,7 @@
     }
 }
 
-.del-modal-btn {
+.del-btn {
     background-color: $error-color !important;
     border-color: $error-color !important;
 
@@ -686,4 +686,27 @@
 .no-info {
     padding: 0;
     font-size: 33px;
+}
+
+.cust-btn {
+    padding-bottom: 10px;
+    padding-top: 10px;
+    margin-right: 10px;
+}
+
+.user-nav {
+    .nav {
+        li:first-child {
+            a {
+                padding-left: 0;
+            }
+        }
+    }
+}
+
+.view-btns {
+    button {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
 }

@@ -1,4 +1,4 @@
-<div class="row m-t-md">
+<div class="row m-t-md user-nav">
     <div class="col-sm-3 col-xs-12 sidenav text-center">
         <span class="my-profile">{{ __('custom.my_profile') }}</span><br>
         <div class="profile-name">{{ \Auth::user()->username }}</div>

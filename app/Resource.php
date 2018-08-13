@@ -33,7 +33,7 @@ class Resource extends Model implements TranslatableInterface
     const HTTP_GET = 2;
 
     protected static $translatable = [
-        'name'      => 'label',
+        'name'      => 'text',
         'descript'  => 'text',
     ];
 

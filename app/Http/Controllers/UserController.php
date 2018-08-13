@@ -354,6 +354,7 @@ class UserController extends Controller {
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+        $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
             ->whereHas('dataSetSubCategory', function($q) use($model) {
@@ -372,7 +373,7 @@ class UserController extends Controller {
             return back();
         }
 
-        if ($request->has('save')) {
+        if ($request->has('save') || $request->has('publish')) {
             $editData = $request->all();
 
             if ($editData['uri'] == $uri) {
@@ -406,6 +407,10 @@ class UserController extends Controller {
                 }
             }
 
+            if ($request->has('publish')) {
+                $editData['status'] = DataSet::STATUS_PUBLISHED;
+            }
+
             $edit = [
                 'api_key'       => Auth::user()->api_key,
                 'dataset_uri'   => $uri,
@@ -436,6 +441,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'hasResources'  => $hasResources,
             'fields'        => self::getDatasetTransFields(),
         ]);
     }
@@ -766,6 +772,7 @@ class UserController extends Controller {
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+        $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
             ->whereHas('dataSetSubCategory', function($q) use($model) {
@@ -784,7 +791,7 @@ class UserController extends Controller {
             return back();
         }
 
-        if ($request->has('save')) {
+        if ($request->has('save') || $request->has('publish')) {
             $editData = $request->all();
 
             if ($editData['uri'] == $uri) {
@@ -818,6 +825,10 @@ class UserController extends Controller {
                 }
             }
 
+            if ($request->has('publish')) {
+                $editData['status'] = DataSet::STATUS_PUBLISHED;
+            }
+
             $edit = [
                 'api_key'       => Auth::user()->api_key,
                 'dataset_uri'   => $uri,
@@ -848,6 +859,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'hasResources'  => $hasResources,
             'fields'        => self::getDatasetTransFields(),
         ]);
     }
@@ -3493,6 +3505,7 @@ class UserController extends Controller {
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+        $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
             ->whereHas('dataSetSubCategory', function($q) use($model) {
@@ -3511,7 +3524,7 @@ class UserController extends Controller {
             return back();
         }
 
-        if ($request->has('save')) {
+        if ($request->has('save') || $request->has('publish')) {
             $editData = $request->all();
 
             if ($editData['uri'] == $uri) {
@@ -3545,6 +3558,10 @@ class UserController extends Controller {
                 }
             }
 
+            if ($request->has('publish')) {
+                $editData['status'] = DataSet::STATUS_PUBLISHED;
+            }
+
             $edit = [
                 'api_key'       => Auth::user()->api_key,
                 'dataset_uri'   => $uri,
@@ -3575,6 +3592,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'hasResources'  => $hasResources,
             'fields'        => self::getDatasetTransFields(),
         ]);
     }

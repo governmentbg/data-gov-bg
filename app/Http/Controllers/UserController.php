@@ -3486,7 +3486,7 @@ class UserController extends Controller {
 
             return redirect('/user/groups/datasets');
         }
-error_log('herreee');
+
         return view(
             'user/groupDatasetView',
             [

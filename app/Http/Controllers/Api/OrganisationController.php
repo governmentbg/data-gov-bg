@@ -1017,12 +1017,6 @@ class OrganisationController extends ApiController
             'custom_fields.*.value' => 'nullable',
         ]);
 
-        $validator->after(function ($validator) use ($post) {
-            if (is_array($post['name']) && empty(array_filter($post['name']))) {
-                $validator->errors()->add('name', 'name is required');
-            }
-         });
-
         if (!$validator->fails()) {
             $newGroup = new Organisation;
 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog"  aria-hidden="true">
+<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">
@@ -96,7 +96,8 @@
                         name="uri"
                         value="{{ old('uri') }}"
                         type="text"
-                        placeholder="Уникален идентификатор">
+                        placeholder="Уникален идентификатор"
+                    >
                     <span class="error">{{ $errors->first('uri') }}</span>
                 </div>
             </div>
@@ -121,18 +122,18 @@
                 </div>
             </div>
 
-            @foreach($fields as $field)
-                @if($field['view'] == 'translation')
+            @foreach ($fields as $field)
+                @if ($field['view'] == 'translation')
                     @include(
                         'components.form_groups.translation_input',
                         ['field' => $field]
                     )
-                @elseif($field['view'] == 'translation_txt')
+                @elseif ($field['view'] == 'translation_txt')
                     @include(
                         'components.form_groups.translation_textarea',
                         ['field' => $field]
                     )
-                @elseif($field['view'] == 'translation_tags')
+                @elseif ($field['view'] == 'translation_tags')
                     @include(
                         'components.form_groups.translation_tags',
                         ['field' => $field]
@@ -149,7 +150,7 @@
                         name="terms_of_use_id"
                         size="5"
                     >
-                        @foreach ($termsOfUse as $id =>$term)
+                        @foreach ($termsOfUse as $id => $term)
                             <option
                                 value="{{ $id }}"
                                 {{ $id == old('terms_of_use_id') ? 'selected' : '' }}
@@ -172,7 +173,7 @@
                         data-placeholder="{{ utrans('custom.select_org') }}"
                     >
                         <option></option>
-                        @foreach ($organisations as $id =>$org)
+                        @foreach ($organisations as $id => $org)
                             <option
                                 value="{{ $id }}"
                                 {{ $id == old('org_id') ? 'selected' : '' }}
@@ -231,7 +232,8 @@
                         name="source"
                         value="{{ old('source') }}"
                         type="text"
-                        placeholder="Източник">
+                        placeholder="Източник"
+                    >
                     <span class="error">{{ $errors->first('source') }}</span>
                 </div>
             </div>
@@ -244,7 +246,8 @@
                         name="version"
                         value="{{ old('version') }}"
                         type="text"
-                        placeholder="Версия">
+                        placeholder="Версия"
+                    >
                     <span class="error">{{ $errors->first('version') }}</span>
                 </div>
             </div>
@@ -257,7 +260,8 @@
                         name="author_name"
                         value="{{ old('author_name') }}"
                         type="text"
-                        placeholder="Автор">
+                        placeholder="Автор"
+                    >
                     <span class="error">{{ $errors->first('author_name') }}</span>
                 </div>
             </div>
@@ -270,7 +274,8 @@
                         name="author_email"
                         value="{{ old('author_email') }}"
                         type="email"
-                        placeholder="E-mail на автора">
+                        placeholder="E-mail на автора"
+                    >
                     <span class="error">{{ $errors->first('author_email') }}</span>
                 </div>
             </div>
@@ -283,7 +288,8 @@
                         name="support_name"
                         value="{{ old('support_name') }}"
                         type="text"
-                        placeholder="Контакт">
+                        placeholder="Контакт"
+                    >
                     <span class="error">{{ $errors->first('support_name') }}</span>
                 </div>
             </div>
@@ -296,21 +302,27 @@
                         name="support_email"
                         value="{{ old('support_email') }}"
                         type="email"
-                        placeholder="E-mail за контакти">
+                        placeholder="E-mail за контакти"
+                    >
                     <span class="error">{{ $errors->first('support_email') }}</span>
                 </div>
             </div>
 
-            @foreach($fields as $field)
-                @if($field['view'] == 'translation_custom')
+            @foreach ($fields as $field)
+                @if ($field['view'] == 'translation_custom')
                     @include(
                         'components.form_groups.translation_custom_fields',
                         ['field' => $field]
                     )
                 @endif
             @endforeach
+
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
+                    <button
+                        class="btn btn-primary"
+                        name="add_resource"
+                    >{{ __('custom.add_resource') }}</button>
                     <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
                     <button type="submit" class="btn btn-primary">{{ __('custom.save') }}</button>
                 </div>

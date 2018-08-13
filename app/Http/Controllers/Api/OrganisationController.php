@@ -963,14 +963,9 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $user = UserToOrgRole::where([
-                    'org_id'    => $post['org_id'],
-                    'user_id'   => $post['user_id'],
-                ])->first();
-
-                $user->role_id = $post['role_id'];
-
-                $user->save();
+                $user = UserToOrgRole::where('org_id', $post['org_id'])
+                    ->where('user_id', $post['user_id'])
+                    ->update(['role_id' => $post['role_id']]);
 
                 return $this->successResponse();
             } catch (QueryException $e) {

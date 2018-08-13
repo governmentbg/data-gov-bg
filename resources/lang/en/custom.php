@@ -280,4 +280,5 @@ return [
     'terms_req_success' => 'Your terms of use request was send',
     'terms_req_error' => 'There was a problem with your terms of use request.',
     'file' => 'file',
+    'add' => 'Add',
 ];

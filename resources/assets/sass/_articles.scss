@@ -64,6 +64,7 @@
 
     .articles {
         .article {
+            display: inline-block;
             float: left;
 
             ul li {
@@ -71,7 +72,7 @@
             }
 
             .art-heading-bar {
-                display: inline-block;
+                width: 100%;
 
                 div, h2, h3 {
                     display: inline-block;

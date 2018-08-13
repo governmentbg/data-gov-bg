@@ -118,6 +118,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addTag', 'Api\CategoryController@addTag');
     Route::post('/editTag', 'Api\CategoryController@editTag');
     Route::post('/deleteTag', 'Api\CategoryController@deleteTag');
+    Route::post('/deleteCustomSetting', 'Api\CustomSettingsController@delete');
 
     Route::post('/addFollow', 'Api\UserFollowController@addFollow');
     Route::post('/unFollow', 'Api\UserFollowController@unFollow');

@@ -46250,6 +46250,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 $(function () {
     $(document).ready(function () {
         $('.js-show-on-load').css('visibility', 'visible');
+
+        if ($('.nano').length) {
+            $('.nano').nanoScroller({});
+        }
     });
 });
 
@@ -46261,6 +46265,22 @@ $(function () {
         });
     }
 });
+
+/*$(window).on('load', function() {
+    initScroller();
+});
+function initScroller() {
+    if ($scroll.height() < $scrollContent.height()) {
+        $scrollContent.css('position', 'relative');
+
+        if ($scroll[0].nanoscroller) {
+            $scroll.nanoScroller();
+            $scroll.nanoScroller({ scrollBottom: 0 });
+        } else {
+            $scroll.nanoScroller({ preventPageScrolling: true, scrollBottom: 0 });
+        }
+    }
+}*/
 
 // show hide submenu
 $(function () {

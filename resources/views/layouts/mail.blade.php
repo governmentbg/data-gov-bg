@@ -28,7 +28,7 @@
     style="
         width: 100%;
         height: 700px;
-        background: url({{ asset('img/watermark.png') }});
+        background: url({{ url('img/watermark-logo.png') }});
         background-repeat: no-repeat;
         background-position: center center;
     "

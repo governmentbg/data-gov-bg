@@ -38,10 +38,10 @@ function initScroller() {
 
 // show hide submenu
 $(function() {
-    $('.clicable').on('click', function(){
-        $this = $(this).closest('.js-show-submenu');
-        $childMenu = $this.children('.sidebar-submenu');
-        $childIcon = $(this).children('i.fa');
+    $('.clicable').on('click', function() {
+        var $this = $(this).closest('.js-show-submenu');
+        var $childMenu = $this.children('.sidebar-submenu');
+        var $childIcon = $(this).children('i.fa');
 
         if ($childMenu.is(':hidden')) {
             $childIcon.toggleClass('fa-angle-up').toggleClass('fa-angle-down');
@@ -52,6 +52,18 @@ $(function() {
             $this.removeClass('remove-after');
             $childMenu.hide();
         }
+    });
+
+    $('.clicable').each(function() {
+        var $this = $(this).closest('.js-show-submenu');
+        var $childMenu = $this.children('.sidebar-submenu');
+
+        $('a', $childMenu).each(function () {
+            if ($(this).hasClass('active')) {
+                $childMenu.show();
+                $this.addClass('remove-after');
+            }
+        });
     });
 });
 
@@ -130,4 +142,64 @@ $(function() {
             e.preventDefault();
         }
     })
+});
+
+$(function() {
+    if ($('.js-add-custom-field').length > 0) {
+
+        $('.js-add-custom-field').on('click', function(e) {
+            e.preventDefault();
+
+            $('.js-custom-fields').append($('.js-custom-field-set').last().clone());
+
+            var $element = $('.js-custom-field-set').last();
+
+            $('.js-delete-custom-field').removeClass('hidden');
+
+            var index = $element.data('index');
+
+            $element.attr('data-index', index + 1);
+            $element.attr('data-id', null);
+
+           $('input', $element).each(function() {
+               $(this).attr('name', $(this).attr('name').replace(/\d/g, index + 1)).val('');
+               $(this).removeAttr('disabled');
+           });
+        });
+
+        $(document).on('click', '.js-delete-custom-field', function() {
+            var $target = $(this).parents('.js-custom-field-set');
+
+            if ($target.data('id')) {
+                $.ajax({
+                    url: '/delSettings',
+                    delay: 1000,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    type: 'POST',
+                    data: {id: $target.data('id')},
+                    success: function(response) {
+                        if (response.success) {
+                            removeSett($target);
+                        }
+                    }
+                });
+            } else {
+                removeSett($target);
+            }
+        });
+
+        function removeSett($target) {
+            if ($('.js-custom-field-set').length > 1) {
+                $target.remove();
+            } else {
+                $('input', $target).each(function() {
+                    $(this).val('');
+                    $(this).removeAttr('disabled');
+                });
+            }
+        }
+
+    }
 });

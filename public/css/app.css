@@ -13175,6 +13175,7 @@ textarea {
 }
 
 .container .articles .article {
+  display: inline-block;
   float: left;
 }
 
@@ -13183,7 +13184,7 @@ textarea {
 }
 
 .container .articles .article .art-heading-bar {
-  display: inline-block;
+  width: 100%;
 }
 
 .container .articles .article .art-heading-bar div,
@@ -13671,6 +13672,13 @@ textarea {
   .theme-data-attention img.img-responsive {
     width: 100%;
   }
+}
+
+.theme-data .follow,
+.theme-data-attention .follow {
+  position: relative;
+  bottom: 0px;
+  right: 0px;
 }
 
 .theme-user .container > .sidenav {
@@ -14286,6 +14294,15 @@ textarea {
   max-width: 310px;
 }
 
+.mng-btns {
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.no-info {
+  font-size: 31px;
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;
@@ -14309,8 +14326,17 @@ textarea {
   height: 200px;
 }
 
+.theme-organisation .chronology > .row .info-icon {
+  border: none !important;
+  position: relative;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  bottom: 10px;
+}
+
 .theme-organisation .chronology > .row .info-icon img {
-  max-height: 60px;
+  max-height: 70px;
 }
 
 .theme-organisation .chronology > .row .info-icon:after {
@@ -14318,15 +14344,15 @@ textarea {
   display: block;
   border: 5px solid #76AE41;
   border-radius: 40px;
-  bottom: -20px;
+  bottom: -15px;
   position: absolute;
-  left: 40px;
+  left: 45px;
 }
 
 @media screen and (max-width: 767px) {
   .theme-organisation .chronology > .row .info-icon img {
     margin-top: 20px;
-    max-width: 40px;
+    max-width: 30px;
   }
 
   .theme-organisation .chronology > .row .info-icon:after {

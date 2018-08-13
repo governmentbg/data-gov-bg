@@ -2151,10 +2151,7 @@ class UserController extends Controller {
             if ($result->success) {
                 session()->flash('alert-success', __('custom.edit_success'));
             } else {
-                session()->flash(
-                    'alert-danger',
-                    isset($result->error) ? $result->error->message : __('custom.edit_error')
-                );
+                session()->flash('alert-danger', __('custom.edit_error'));
             }
 
             return !$result->success
@@ -3227,9 +3224,9 @@ class UserController extends Controller {
                 $result = $api->editGroup($editReq)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно запазени данни!');
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
                 } else {
-                    $request->session()->flash('alert-danger', 'Грешно въведени данни!');
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
                 }
 
                 return back()->withErrors(isset($result->errors) ? $result->errors : []);

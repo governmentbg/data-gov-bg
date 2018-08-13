@@ -228,6 +228,10 @@ class OrganisationController extends ApiController
         }
 
         $validator->after(function ($validator) use ($data) {
+            if (!Role::isAdmin($data['org_id'])) {
+                $validator->errors()->add('org_id', __('custom.edit_error'));
+            }
+
             if (!empty($data['uri'])) {
                 if (Organisation::where('uri', $data['uri'])->where('id', '!=', $data['org_id'])->value('name')) {
                     $validator->errors()->add('uri', __('custom.taken_uri'));
@@ -1148,6 +1152,10 @@ class OrganisationController extends ApiController
         ]);
 
         $validator->after(function ($validator) use ($data) {
+            if (!Role::isAdmin($data['group_id'])) {
+                $validator->errors()->add('group_id', __('custom.edit_error'));
+            }
+
             if (!empty($data['uri'])) {
                 if (Organisation::where('uri', $data['uri'])->where('id', '!=', $data['group_id'])->value('name')) {
                     $validator->errors()->add('uri', __('custom.taken_uri'));

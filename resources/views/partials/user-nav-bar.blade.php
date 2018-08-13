@@ -1,7 +1,7 @@
 <div class="row m-t-md">
     <div class="col-sm-3 col-xs-12 sidenav text-center">
         <span class="my-profile">{{ __('custom.my_profile') }}</span><br>
-        <span class="profile-name">{{ \Auth::user()->username }}</span>
+        <div class="profile-name">{{ \Auth::user()->username }}</div>
     </div>
     <div class="col-sm-9 col-xs-12">
         <div class="filter-content">

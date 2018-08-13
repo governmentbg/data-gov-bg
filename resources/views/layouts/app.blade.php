@@ -66,13 +66,13 @@
                         </div>
                         <div class="nav-controls text-right hidden-xs js-show-on-load">
                             @if (\Auth::check())
+                                <span class="login-link">
+                                    <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
+                                </span>
                                 <span class="user-icon {{ Request::segment(1) == 'user' ? 'active' : '' }}">
                                     <a
                                         href="{{ url('/user') }}"
                                     ><img src="{{ asset('img/user.svg') }}"></a>
-                                </span>
-                                <span class="login-link">
-                                    <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
                                 </span>
                                 <span class="login-link">
                                     <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>

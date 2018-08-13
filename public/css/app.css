@@ -11651,7 +11651,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.trans-link a:hover {
 
 body #app .navbar .navbar-header > div.nav-controls > span.login-link {
   width: auto;
-  padding-right: 18px;
+  padding-right: 10px;
 }
 
 @media screen and (max-width: 991px) {
@@ -11713,13 +11713,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.search-input input:ho
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon {
-  padding-right: 13px;
-}
-
-@media screen and (max-width: 991px) {
-  body #app .navbar .navbar-header > div.nav-controls > span.user-icon {
-    padding-right: 8px;
-  }
+  padding-right: 8px;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon.active a {
@@ -13691,6 +13685,12 @@ textarea {
   }
 }
 
+.theme-user .sidenav .profile-name {
+  margin-top: 20px;
+  font-size: 14pt !important;
+  color: black !important;
+}
+
 .theme-user .sidebar-submenu.open {
   display: block;
 }
@@ -13770,6 +13770,7 @@ textarea {
 
 .theme-user .new-data {
   padding: 8px 28px;
+  margin-top: 25px;
 }
 
 .theme-user .info-bar li {
@@ -14300,7 +14301,8 @@ textarea {
 }
 
 .no-info {
-  font-size: 31px;
+  padding: 0;
+  font-size: 33px;
 }
 
 .theme-organisation .sidebar-submenu .order {

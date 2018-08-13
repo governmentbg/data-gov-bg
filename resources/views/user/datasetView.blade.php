@@ -13,7 +13,7 @@
                     </div>
                     <div class="col-sm-12 pull-left m-t-md p-l-none">
                         <div class="pull-left history">
-                            @foreach($resources as $resource)
+                            @foreach ($resources as $resource)
                                 <div class="{{ $resource->reported ? 'signaled' : '' }}">
                                     <a href="{{ route('resourceView', ['uri' => $resource->uri]) }}">
                                         <span>
@@ -48,7 +48,16 @@
             </div>
             <div class="row">
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
-                    <a type="button" class="badge badge-pill m-b-sm" href="{{ url('/user/dataset/edit/'. $dataset->uri) }}">{{ __('custom.edit') }}</a>
+                    <a
+                       class="badge badge-pill m-b-sm"
+                       href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
+                    >{{ __('custom.add_resource') }}</a>
+                </div>
+                <div class="col-md-2 col-sm-3 text-left m-l-10">
+                    <a
+                        class="badge badge-pill m-b-sm"
+                        href="{{ url('/user/dataset/edit/'. $dataset->uri) }}"
+                    >{{ __('custom.edit') }}</a>
                 </div>
                 <div class="col-md-9 col-sm-8 text-left m-l-10">
                     <form method="POST">
@@ -57,7 +66,7 @@
                             class="badge badge-pill m-b-sm"
                             type="submit"
                             name="delete"
-                            onclick="return confirm('Изтриване на данните?');"
+                            data-confirm="{{ __('Изтриване на данните?') }}"
                         >{{ __('custom.remove') }}</button>
                         <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                     </form>

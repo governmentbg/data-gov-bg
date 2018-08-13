@@ -228,7 +228,7 @@ class DataSetController extends ApiController
                 'terms_of_use_id'          => 'nullable|int',
                 'visibility'               => 'nullable|int',
                 'source'                   => 'nullable|string|max:255',
-                'version'                  => 'nullable|string|max:15',
+                'version'                  => 'nullable|max:15',
                 'author_name'              => 'nullable|string',
                 'author_email'             => 'nullable|email',
                 'support_name'             => 'nullable|string',
@@ -427,8 +427,8 @@ class DataSetController extends ApiController
     {
         $post = $request->all();
         $criteria = !empty($post['criteria']) ? $post['criteria'] : false;
-        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
+        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
 
         if ($criteria) {
             $validator = \Validator::make($post, [
@@ -609,8 +609,8 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             $data = [];
             $criteria = $post['criteria'];
-            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
+            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
+            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
             $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
             $page = !empty($post['page_number']) ? $post['page_number'] : null;
             $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;

@@ -190,6 +190,7 @@ class DataSetController extends ApiController
      * @param string data[description] - optional
      * @param array data[tags] - optional
      * @param integer data[category_id] - required
+     * @param integer data[org_id] - optional
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
      * @param string data[source] - optional
@@ -224,6 +225,7 @@ class DataSetController extends ApiController
                 'name.*'                   => 'required_without:locale|string',
                 'description'              => 'nullable',
                 'category_id'              => 'required|int',
+                'org_id'                   => 'nullable|int',
                 'uri'                      => 'nullable|string|unique:data_sets,uri',
                 'tags.*'                   => 'nullable',
                 'terms_of_use_id'          => 'nullable|int',
@@ -289,6 +291,10 @@ class DataSetController extends ApiController
 
                 if (!empty($post['data']['category_id'])) {
                     $dataSet->category_id = $post['data']['category_id'];
+                }
+
+                if (!empty($post['data']['org_id'])) {
+                    $dataSet->org_id = $post['data']['org_id'];
                 }
 
                 if (!empty($post['data']['uri'])) {

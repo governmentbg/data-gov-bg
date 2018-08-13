@@ -1539,10 +1539,10 @@ class UserController extends Controller {
     {
         $uri = $request->uri;
 
-        $resourcesReq = Request::create('/api/listResources', 'POST', ['criteria' => ['resource_uri' => $uri]]);
+        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
-        $resources = $apiResources->listResources($resourcesReq)->getData();
-        $resource = !empty($resources->resources) ? $resources->resources[0] : null;
+        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resource = !empty($resource->resource) ? $resource->resource : null;
 
         $resource = $this->getModelUsernames($resource);
 
@@ -3581,10 +3581,10 @@ class UserController extends Controller {
 
     public function groupResourceView(Request $request, $uri)
     {
-        $resourcesReq = Request::create('/api/listResources', 'POST', ['criteria' => ['resource_uri' => $uri]]);
+        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
-        $resources = $apiResources->listResources($resourcesReq)->getData();
-        $resource = !empty($resources->resources) ? $resources->resources[0] : null;
+        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resource = !empty($resource->resource) ? $resource->resource : null;
 
         $resource = $this->getModelUsernames($resource);
 

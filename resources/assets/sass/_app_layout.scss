@@ -192,7 +192,7 @@ body {
 
                             &.login-link {
                                 width: auto;
-                                padding-right: 18px;
+                                padding-right: 10px;
 
                                 @include mdMobile() {
                                     padding-right: 8px;
@@ -245,11 +245,7 @@ body {
                             }
 
                             &.user-icon {
-                                padding-right: 13px;
-
-                                @include mdMobile() {
-                                    padding-right: 8px;
-                                }
+                                padding-right: 8px;
 
                                 &.active {
                                     a {

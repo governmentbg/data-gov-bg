@@ -9,6 +9,12 @@
                 padding-left: 0;
             }
         }
+
+        .profile-name {
+            margin-top: 20px;
+            font-size: 14pt !important;
+            color: black !important;
+        }
     }
 
     .sidebar-submenu.open {
@@ -91,6 +97,7 @@
 
     .new-data {
         padding: 8px 28px;
+        margin-top: 25px;
     }
 
     .info-bar {
@@ -675,5 +682,6 @@
 }
 
 .no-info {
-    font-size: 31px;
+    padding: 0;
+    font-size: 33px;
 }

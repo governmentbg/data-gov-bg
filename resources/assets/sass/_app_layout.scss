@@ -8,10 +8,23 @@ body {
 
     #app {
         min-height: 100%;
-        margin-bottom: -$footerHeight;
 
-        @include smMobile {
-            margin-bottom: -$footerMobileHeight;
+        .nano-content {
+            margin-bottom: -$footerHeight;
+
+            @include smMobile {
+                margin-bottom: -$footerMobileHeight;
+            }
+
+            &:after {
+                content: "";
+                display: block;
+                height: $footerHeight;
+
+                @include smMobile {
+                    height: $footerMobileHeight;
+                }
+            }
         }
 
         @include mdMobile() {
@@ -447,16 +460,6 @@ body {
 
             .underline {
                 padding: 15px;
-            }
-        }
-
-        &:after {
-            content: "";
-            display: block;
-            height: $footerHeight;
-
-            @include smMobile {
-                height: $footerMobileHeight;
             }
         }
 

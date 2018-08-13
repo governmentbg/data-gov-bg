@@ -424,3 +424,14 @@ textarea {
         margin-left: 10px;
     }
 }
+
+.navbar-static-top {
+    z-index: 0;
+}
+
+.nano {
+    > .nano-pane {
+        background: transparent !important;
+        width: 10px !important;
+    }
+}

@@ -8,6 +8,11 @@
             <div class="row">
                 <div class="col-sm-12 user-dataset m-l-10">
                     <h2>{{ $dataset->name }}</h2>
+                    @if ($dataset->status == 1)
+                        <p>{{ __('custom.draft') }}</p>
+                    @else
+                        <p>{{ __('custom.published') }}</p>
+                    @endif
                     <div class="desc">
                         {{ $dataset->descript }}
                     </div>

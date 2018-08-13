@@ -48,23 +48,25 @@
                             </div>
                             <div class="col-xs-12 ch-del-btns">
                                 <div class="row">
-                                    <form method="POST" action="{{ url('/user/groups/edit/'. $group->uri) }}">
-                                        {{ csrf_field() }}
-                                        <div class="col-xs-6">
-                                            <button type="submit">{{ __('custom.edit') }}</button>
-                                        </div>
-                                    </form>
-                                    <form method="POST" action="{{ url('/user/groups/delete/'. $group->id) }}">
-                                        {{ csrf_field() }}
-                                        <div class="col-xs-6 text-right">
-                                            <button
-                                                type="submit"
-                                                name="delete"
-                                                data-confirm="{{ __('custom.delete_group_confirm') }}"
-                                            >{{ __('custom.remove') }}</button>
-                                        </div>
-                                        <input class="user-org-del" type="hidden" name="org_id" value="{{ $group->id }}">
-                                    </form>
+                                    @if (\App\Role::isAdmin($group->id))
+                                        <form method="POST" action="{{ url('/user/groups/edit/'. $group->uri) }}">
+                                            {{ csrf_field() }}
+                                            <div class="col-xs-6">
+                                                <button type="submit">{{ __('custom.edit') }}</button>
+                                            </div>
+                                        </form>
+                                        <form method="POST" action="{{ url('/user/groups/delete/'. $group->id) }}">
+                                            {{ csrf_field() }}
+                                            <div class="col-xs-6 text-right">
+                                                <button
+                                                    type="submit"
+                                                    name="delete"
+                                                    data-confirm="{{ __('custom.delete_group_confirm') }}"
+                                                >{{ __('custom.remove') }}</button>
+                                            </div>
+                                            <input class="user-org-del" type="hidden" name="org_id" value="{{ $group->id }}">
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>

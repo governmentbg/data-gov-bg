@@ -945,7 +945,6 @@ class DataSetController extends ApiController
                             $saveField->updated_by = \Auth::user()->id;
                             $saveField->value = $this->trans($locale, $field['value']);
 
-                            error_log(' $saveField[]: '. print_r($saveField['key'], true));
                             if (isset($field['label'])) {
                                 foreach ($field['label'] as $lang => $string) {
                                     $oldVal = Translation::where([
@@ -982,7 +981,6 @@ class DataSetController extends ApiController
             }
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
-            error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
 
             return false;
         }

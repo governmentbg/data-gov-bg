@@ -101,9 +101,7 @@ class DataSetController extends ApiController
                 $post['data']['version'] = 1;
             }
 
-            if (empty($post['data']['status'])) {
-                $post['data']['status'] = DataSet::STATUS_DRAFT;
-            }
+            $post['data']['status'] = DataSet::STATUS_DRAFT;
 
             if (!empty($post['data']['tags']) && !empty(array_filter($post['data']['tags']))) {
                 $tags = $post['data']['tags'];

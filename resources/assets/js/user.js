@@ -36,6 +36,7 @@ $(function() {
 $(function() {
     $('#sendTermOfUseReq').on('submit', function(e) {
         e.preventDefault();
+
         $.ajax({
             url: '/user/sendTermsOfUseReq',
             type: 'POST',

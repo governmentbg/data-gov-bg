@@ -10,6 +10,7 @@ use App\CustomSetting;
 use App\UserToOrgRole;
 use App\DataSetSubCategory;
 use Illuminate\Http\Request;
+use App\Translator\Translation;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -255,11 +256,17 @@ class DataSetController extends ApiController
             }
 
             if (!empty($post['data']['custom_fields'])) {
-                foreach ($post['data']['custom_fields'] as $fieldSet) {
-                    if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                foreach ($post['data']['custom_fields'] as $i => $fieldSet) {
+                    if (!empty(array_filter($fieldSet['value']) && isset($post['data']['sett_id'][$i]))) {
                         $customFields[] = [
-                            'value' => $fieldSet['value'],
-                            'label' => $fieldSet['label'],
+                            'value'     => $fieldSet['value'],
+                            'sett_id'   => $post['data']['sett_id'][$i],
+                            'label'     => isset($fieldSet['label']) ? $fieldSet['label'] : null,
+                        ];
+                    } elseif (!empty(array_filter($fieldSet['value']) && isset($fieldSet['label']) && !empty(array_filter($fieldSet['label'])))) {
+                        $customFields[] = [
+                            'value'     => $fieldSet['value'],
+                            'label'     => $fieldSet['label'],
                         ];
                     }
                 }
@@ -926,41 +933,51 @@ class DataSetController extends ApiController
     public function checkAndCreateCustomSettings($customFields, $datasetId)
     {
         try {
-            if (count($customFields) <= 3) {
-                if ($datasetId) {
-                    DB::beginTransaction();
-                    $deletedRows = CustomSetting::where('org_id', $datasetId)->delete();
+            if ($datasetId) {
+                DB::beginTransaction();
 
-                    foreach ($customFields as $field) {
-                        if (!empty($field['label']) && !empty($field['value'])) {
-                            foreach ($field['label'] as $locale => $label) {
-                                if (
-                                    (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
-                                    || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
-                                ) {
-                                    DB::rollback();
+                foreach ($customFields as $field) {
+                    if (!empty($field['value'])) {
+                        // foreach ($field['value'] as $locale => $string) {
+                        if (!empty($field['sett_id'])) {
+                            $saveField = CustomSetting::find($field['sett_id']);
 
-                                    return false;
+                            $saveField->updated_by = \Auth::user()->id;
+                            $saveField->value = $this->trans($locale, $field['value']);
+
+                            if (isset($field['label'])) {
+                                foreach ($field['label'] as $lang => $string) {
+                                    $oldVal = Translation::where([
+                                        'group_id'  => $saveField['key'],
+                                        'locale'    => $lang,
+                                    ])->first();
+
+                                    $oldVal->label = $string;
+
+                                    $oldVal->save();
                                 }
                             }
 
+                            $saveField->save();
+                        } else {
                             $saveField = new CustomSetting;
                             $saveField->data_set_id = $datasetId;
                             $saveField->created_by = \Auth::user()->id;
-                            $saveField->key = $this->trans($empty, $field['label']);
-                            $saveField->value = $this->trans($empty, $field['value']);
+                            $saveField->key = $this->trans($locale, $field['label']);
+                            $saveField->value = $this->trans($locale, $field['value']);
 
                             $saveField->save();
-                        } else {
-                            DB::rollback();
-
-                            return false;
                         }
-                    }
-                    DB::commit();
 
-                    return true;
+                    } else {
+                        DB::rollback();
+
+                        return false;
+                    }
                 }
+                DB::commit();
+
+                return true;
             }
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());

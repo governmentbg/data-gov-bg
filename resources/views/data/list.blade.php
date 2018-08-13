@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row">
-        @include('partials.sidebar')
+        @include('partials.sidebar', ['filter' => $filter, 'mainCats' => $mainCats])
         <div class="col-sm-9 col-xs-12 p-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">
@@ -28,8 +28,8 @@
                     <div class="m-r-md p-h-xs">
                         <p>{{ __('custom.list_order_by') }}:</p>
                         <ul class="nav sort-by">
-                            <li><a class="p-l-none" href="#">{{ __('custom.relevance') }}</a></li>
-                            <li><a class="active" href="#">{{ __('custom.names_asc') }}</a></li>
+                            <li><a href="#">{{ __('custom.relevance') }}</a></li>
+                            <li><a href="#">{{ __('custom.names_asc') }}</a></li>
                             <li><a href="#">{{ __('custom.names_desc') }}</a></li>
                             <li><a href="#">{{ __('custom.last_change') }}</a></li>
                         </ul>
@@ -39,37 +39,31 @@
             <div class="articles">
                 @for ($i = 0; $i < 2; $i++)
                     <div class="article m-t-md m-b-md">
-                        <div class="art-heading-bar">
+                        <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
-                                <div class="row">
-                                    <div class="col-sm-2 col-xs-4 logo">
-                                        <a href="#">
-                                            <img
-                                                alt="Име на организацията!!!"
-                                                class="img-responsive"
-                                                src="{{ asset('img/test-img/logo-org-1.jpg') }}"
-                                            >
-                                        </a>
-                                    </div>
-                                    <div class="col-sm-10 col-xs-12 m-t-sm art-heading-bar">
-                                        <div class="socialPadding p-w-sm">
-                                            <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                            <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                            <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
-                                        </div>
-                                        <div class="sendMail m-r-sm">
-                                            <span><a href="#"><i class="fa fa-envelope"></i></a></span>
-                                        </div>
-                                        <div class="status p-w-sm">
-                                            <span>{{ __('custom.approved') }} </span>
-                                        </div>
-                                    </div>
+                                <div class="col-sm-2 col-xs-4 logo">
+                                    <a href="#">
+                                        <img
+                                            alt="Име на организацията!!!"
+                                            class="img-responsive"
+                                            src="{{ asset('img/test-img/logo-org-1.jpg') }}"
+                                        >
+                                    </a>
+                                </div>
+                                <div class="socialPadding p-w-sm">
+                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
+                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
+                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
+                                </div>
+                                <div class="sendMail m-r-sm">
+                                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
+                                </div>
+                                <div class="status p-w-sm">
+                                    <span>{{ __('custom.approved') }} </span>
                                 </div>
                             </div>
-                            <div class="col-sm-5 col-xs-12">
-                                <div class="follow p-w-sm pull-right">
-                                    <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
-                                </div>
+                            <div class="follow pull-right">
+                                <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-none">
@@ -103,18 +97,16 @@
                                         >
                                     </a>
                                 </div>
-                                <div class="col-sm-10 col-xs-12 m-t-sm art-heading-bar">
-                                    <div class="socialPadding p-w-sm">
-                                        <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                        <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                        <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
-                                    </div>
-                                    <div class="sendMail m-r-sm">
-                                        <span><a href="#"><i class="fa fa-envelope"></i></a></span>
-                                    </div>
-                                    <div class="status notApproved p-w-sm">
-                                        <span>{{ __('custom.unapproved') }}</span>
-                                    </div>
+                                <div class="socialPadding p-w-sm">
+                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
+                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
+                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
+                                </div>
+                                <div class="sendMail m-r-sm">
+                                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
+                                </div>
+                                <div class="status notApproved p-w-sm">
+                                    <span>{{ __('custom.unapproved') }}</span>
                                 </div>
                             </div>
                         </div>

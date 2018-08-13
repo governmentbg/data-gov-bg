@@ -3,16 +3,19 @@
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.topics') }}</a>
             <ul class="sidebar-submenu">
-                <li><a class="active" href="#">{{ __('custom.healthcare') }}</a></li>
-                <li><a href="#">{{ __('custom.innovation') }}</a></li>
-                <li><a href="#">{{ __('custom.education') }}</a></li>
-                <li><a href="#">{{ __('custom.public_sector') }}</a></li>
-                <li><a href="#">{{ __('custom.municipalities') }}</a></li>
-                <li><a href="#">{{ __('custom.agriculture') }}</a></li>
-                <li><a href="#">{{ __('custom.justice') }}</a></li>
-                <li><a href="#">{{ __('custom.economy_business') }}</a></li>
+                @foreach ($mainCats as $cat)
+                    <li>
+                        <a
+                            class="{{ $filter == $cat ? 'active' : null }}"
+                            href="{{ route('dataView', [
+                                'filter'    => $filter == $cat ? null : $cat,
+                            ]) }}"
+                        >{{ __('custom.'. $cat) }}</a>
+                    </li>
+                @endforeach
             </ul>
         </li>
+
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.format') }}</a>
             <ul class="sidebar-submenu">

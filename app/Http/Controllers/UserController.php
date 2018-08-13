@@ -35,6 +35,7 @@ use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
+use App\Http\Controllers\Api\CustomSettingsController as ApiCustomSettings;
 use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 
 class UserController extends Controller {
@@ -383,19 +384,7 @@ class UserController extends Controller {
 
             $tagList = $request->offsetGet('tags');
 
-            if (!empty($tagList)) {
-                unset($editData['tags']);
-                $tagData = [];
-                foreach ($tagList as $lang => $string) {
-                    $tagData[$lang] = array_values(explode(',', $string));
-                }
-
-                foreach ($tagData as $lang => $tags) {
-                    foreach ($tags as $tag) {
-                        $editData['tags'][] = [$lang => $tag];
-                    }
-                }
-            }
+            $editData = $this->prepareTags($editData);
 
             $groupId = $request->offsetGet('group_id');
 
@@ -587,11 +576,7 @@ class UserController extends Controller {
 
         if ($data) {
             // prepare post data for API request
-            if (isset($data['tags'])) {
-                foreach ($data['tags'] as $locale => $tags) {
-                    $data['tags'][$locale] = explode(',', $tags);
-                }
-            }
+            $data = $this->prepareTags($data);
 
             if (!empty($data['group_id'])) {
                 $groupId = $data['group_id'];
@@ -652,11 +637,7 @@ class UserController extends Controller {
 
         if ($data) {
             // prepare post data for API request
-            if (isset($data['tags'])) {
-                foreach ($data['tags'] as $locale => $tags) {
-                    $data['tags'][$locale] = explode(',', $tags);
-                }
-            }
+            $data = $this->prepareTags($data);
 
             if (!empty($data['group_id'])) {
                 $groupId = $data['group_id'];
@@ -717,11 +698,7 @@ class UserController extends Controller {
 
         if ($data) {
             // prepare post data for API request
-            if (isset($data['tags'])) {
-                foreach ($data['tags'] as $locale => $tags) {
-                    $data['tags'][$locale] = explode(',', $tags);
-                }
-            }
+            $data = $this->prepareTags($data);
 
             if (!empty($data['group_id'])) {
                 $groupId = $data['group_id'];
@@ -819,19 +796,7 @@ class UserController extends Controller {
 
             $tagList = $request->offsetGet('tags');
 
-            if (!empty($tagList)) {
-                unset($editData['tags']);
-                $tagData = [];
-                foreach ($tagList as $lang => $string) {
-                    $tagData[$lang] = array_values(explode(',', $string));
-                }
-
-                foreach ($tagData as $lang => $tags) {
-                    foreach ($tags as $tag) {
-                        $editData['tags'][] = [$lang => $tag];
-                    }
-                }
-            }
+            $editData = $this->prepareTags($editData);
 
             $groupId = $request->offsetGet('group_id');
 
@@ -3538,19 +3503,7 @@ class UserController extends Controller {
 
             $tagList = $request->offsetGet('tags');
 
-            if (!empty($tagList)) {
-                unset($editData['tags']);
-                $tagData = [];
-                foreach ($tagList as $lang => $string) {
-                    $tagData[$lang] = array_values(explode(',', $string));
-                }
-
-                foreach ($tagData as $lang => $tags) {
-                    foreach ($tags as $tag) {
-                        $editData['tags'][] = [$lang => $tag];
-                    }
-                }
-            }
+            $editData = $this->prepareTags($editData);
 
             $groupId = $request->offsetGet('group_id');
 
@@ -3866,5 +3819,41 @@ class UserController extends Controller {
         }
 
         return view('user/addGroupMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'group'));
+    }
+
+    public function prepareTags($data)
+    {
+        if (isset($data['tags'])) {
+            $tagData = [];
+            $editData = [];
+
+            foreach ($data['tags'] as $lang => $string) {
+                $tagData[$lang] = array_values(explode(',', $string));
+            }
+
+            foreach ($tagData as $lang => $tags) {
+                foreach ($tags as $tag) {
+                    $editData[] = [$lang => $tag];
+                }
+            }
+
+            $data['tags'] = $editData;
+        }
+
+        return $data;
+    }
+
+    public function deleteCustomSettings(Request $request)
+    {
+        $id = $request->offsetGet('id');
+
+        $rq = Request::create('/api/deleteCustomSetting', 'POST', [
+            'api_key'   => Auth::user()->api_key,
+            'id'        => $id,
+        ]);
+        $api = new ApiCustomSettings($rq);
+        $result = $api->delete($rq)->getData();
+
+        return ['success' => $result->success];
     }
 }

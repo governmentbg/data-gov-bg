@@ -117,7 +117,7 @@ class UserController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get users list failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_users_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -168,7 +168,7 @@ class UserController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search users failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_users_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -202,7 +202,7 @@ class UserController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get user roles failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_user_role_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -252,7 +252,7 @@ class UserController extends ApiController
             return $this->successResponse(['user' => $result], true);
         }
 
-        return $this->errorResponse('Get user settings failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_user_settings_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -371,7 +371,7 @@ class UserController extends ApiController
             }
         }
 
-        return $this->errorResponse('User registration failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_user_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -416,11 +416,11 @@ class UserController extends ApiController
         );
 
         if ($validator->fails()) {
-            return $this->errorResponse('Edit user failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.edit_user_fail'), $validator->errors()->messages());
         }
 
         if (empty($user = User::find($request->id))) {
-            return $this->errorResponse('Edit user failure');
+            return $this->errorResponse(__('custom.edit_user_fail'));
         }
 
         $newUserData = [];
@@ -446,7 +446,7 @@ class UserController extends ApiController
             Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {
                 $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
                 $m->to($data['email'], $data['firstname']);
-                $m->subject('Смяна на екектронен адрес!');
+                $m->subject(__('custom.email_change_header'));
             });
 
             if (count(Mail::failures()) > 0) {
@@ -472,7 +472,7 @@ class UserController extends ApiController
 
             if ($validator->fails()) {
 
-                return $this->errorResponse('Edit user failure', $validator->errors()->messages());
+                return $this->errorResponse(__('custom.edit_user_fail'), $validator->errors()->messages());
             }
 
             $newUserData['password'] = bcrypt($data['password']);
@@ -504,7 +504,7 @@ class UserController extends ApiController
 
             if ($validator->fails()) {
 
-                return $this->errorResponse('Edit user failure');
+                return $this->errorResponse(__('custom.edit_user_fail'));
             }
 
             $orgAndRoles['role_id'] = (int) $data['role_id'];
@@ -522,7 +522,7 @@ class UserController extends ApiController
         }
 
         if (empty($newUserData) && empty($newSettings) && empty($orgAndRoles)) {
-            return $this->errorResponse('Edit user failure');
+            return $this->errorResponse(__('custom.edit_user_fail'));
         }
 
         if (!empty($newUserData)) {
@@ -533,7 +533,7 @@ class UserController extends ApiController
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
-                return $this->errorResponse('Edit user failure');
+                return $this->errorResponse(__('custom.edit_user_fail'));
             }
         }
 
@@ -543,7 +543,7 @@ class UserController extends ApiController
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
-                return $this->errorResponse('Edit user failure');
+                return $this->errorResponse(__('custom.edit_user_fail'));
             }
         }
 
@@ -553,7 +553,7 @@ class UserController extends ApiController
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
-                return $this->errorResponse('Edit user failure');
+                return $this->errorResponse(__('custom.edit_user_fail'));
             }
         }
 
@@ -581,18 +581,18 @@ class UserController extends ApiController
 
         if ($validator->fails()) {
 
-            return $this->errorResponse('Delete user failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.delete_user_fail'), $validator->errors()->messages());
         }
 
         if (empty($user = User::find($request->id))) {
-            return $this->errorResponse('Delete user failure');
+            return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
         try {
             $user->delete();
         } catch (QueryException $e) {
 
-            return $this->errorResponse('Delete user failure');
+            return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
         try {
@@ -601,7 +601,7 @@ class UserController extends ApiController
         } catch (QueryException $e) {
             Log::error($e->getMessage());
 
-            return $this->errorResponse('Delete user failure');
+            return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
         return $this->successResponse();
@@ -620,11 +620,11 @@ class UserController extends ApiController
         $validator = \Validator::make($request->all(), ['id' => 'required|int']);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Generate API key failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.generate_api_key_fail'), $validator->errors()->messages());
         }
 
         if (empty($user = User::find($request->id))) {
-            return $this->errorResponse('Generate API key failure');
+            return $this->errorResponse(__('custom.generate_api_key_fail'));
         }
 
         try {
@@ -634,7 +634,7 @@ class UserController extends ApiController
         } catch (QueryException $e) {
             Log::error($e->getMessage());
 
-            return $this->errorResponse('Generate API key failure');
+            return $this->errorResponse(__('custom.generate_api_key_fail'));
         }
 
         return $this->successResponse();
@@ -678,7 +678,7 @@ class UserController extends ApiController
         }
 
         if (!empty($errors)) {
-            return $this->errorResponse('Invite user failure', $errors);
+            return $this->errorResponse(__('custom.invite_user_fail'), $errors);
         }
 
         if (!empty($post['data']['generate'])) {
@@ -768,7 +768,7 @@ class UserController extends ApiController
 
                 $validator->errors()->add('email', __('custom.send_mail_failed'));
 
-                return $this->errorResponse('Invite user failure', $validator->errors()->messages());
+                return $this->errorResponse(__('custom.invite_user_fail'), $validator->errors()->messages());
             }
         }
 
@@ -928,7 +928,7 @@ class UserController extends ApiController
             }
         }
 
-        return $this->errorResponse('User registration failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.user_registration_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -992,14 +992,14 @@ class UserController extends ApiController
                         Log::error($e->getMessage());
                     }
                 } else {
-                    return $this->errorResponse(__('custm.email_send_err'));
+                    return $this->errorResponse(__('custоm.email_send_err'));
                 }
 
                 return $this->successResponse();
             }
         }
 
-        return $this->errorResponse('Reset Passoword failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.reset_pass_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1042,7 +1042,7 @@ class UserController extends ApiController
             }
         }
 
-        return $this->errorResponse('custom.pass_change_err', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.pass_change_err'), $validator->errors()->messages());
     }
 
     /**

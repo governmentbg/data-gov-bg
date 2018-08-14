@@ -236,9 +236,9 @@ class UserController extends Controller {
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return back();
@@ -323,9 +323,9 @@ class UserController extends Controller {
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return back();
@@ -471,9 +471,9 @@ class UserController extends Controller {
 
         if ($request->has('delete')) {
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return redirect('/user/datasets');
@@ -525,9 +525,9 @@ class UserController extends Controller {
 
         if ($request->has('delete')) {
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return redirect('/user/organisations/datasets');
@@ -607,7 +607,7 @@ class UserController extends Controller {
                     $api->addDataSetToGroup($addGroup)->getData();
                 }
 
-                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                 if ($request->has('add_resource')) {
                     return redirect()->route('resourceCreate', ['uri' => $save->uri]);
@@ -668,7 +668,7 @@ class UserController extends Controller {
                     $api->addDataSetToGroup($addGroup)->getData();
                 }
 
-                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                 if ($request->has('add_resource')) {
                     return redirect()->route('orgResourceCreate', ['uri' => $save->uri]);
@@ -727,7 +727,7 @@ class UserController extends Controller {
                     $api->addDataSetToGroup($addGroup)->getData();
                 }
 
-                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                 if ($request->has('add_resource')) {
                     return redirect()->route('groupResourceCreate', ['uri' => $save->uri]);
@@ -909,7 +909,7 @@ class UserController extends Controller {
                 ];
 
                 if ($request->offsetGet('email') && $request->offsetGet('email') !== $user['email']) {
-                    $request->session()->flash('alert-warning', 'Електронната поща ще се промени, когато я потвърдите!');
+                    $request->session()->flash('alert-warning', __('custom.email_change_upon_confirm'));
                 }
             }
 
@@ -926,7 +926,7 @@ class UserController extends Controller {
                         ],
                     ];
                 } else {
-                    $request->session()->flash('alert-danger', 'Грешна парола!');
+                    $request->session()->flash('alert-danger', __('custom.wrong_password'));
                 }
             }
 
@@ -941,11 +941,11 @@ class UserController extends Controller {
                 $result = $api->generateAPIKey($newKey)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно генериран АПИ ключ!');
+                    $request->session()->flash('alert-success', __('custom.api_key_success'));
 
                     return back();
                 } else {
-                    $request->session()->flash('alert-danger', 'Възникна грешка при генериране на АПИ ключ!');
+                    $request->session()->flash('alert-danger', __('custom.api_key_failure'));
                 }
             }
 
@@ -960,11 +960,11 @@ class UserController extends Controller {
                 $result = $api->deleteUser($delUser)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно изтрит потребител!');
+                    $request->session()->flash('alert-success', __('custom.user_success_delete'));
 
                     return redirect('/');
                 } else {
-                    $request->session()->flash('alert-danger', 'Възникна грешка при изтриване на потребител!');
+                    $request->session()->flash('alert-danger', __('custom.user_failure_delete'));
                 }
             }
 
@@ -974,11 +974,11 @@ class UserController extends Controller {
                 $result = $api->editUser($editPost)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     return back();
                 } else {
-                    $request->session()->flash('alert-danger', 'Промените не бяха запазени!');
+                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
 
                     $error = $result->errors;
                 }
@@ -1141,7 +1141,7 @@ class UserController extends Controller {
                 $result = $api->addResourceMetadata($savePost)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     $file = $request->file('file');
 
@@ -1210,7 +1210,7 @@ class UserController extends Controller {
                         return redirect()->back()->withInput()->withErrors($resultElastic->errors);
                     }
 
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     return redirect()->route('datasetView', ['uri' => $datasetUri]);
                 }
@@ -1249,7 +1249,7 @@ class UserController extends Controller {
                 $result = $api->addResourceMetadata($savePost)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     $file = $request->file('file');
 
@@ -1318,7 +1318,7 @@ class UserController extends Controller {
                         return redirect()->back()->withInput()->withErrors($resultElastic->errors);
                     }
 
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     return redirect()->route('groupDatasetView', ['uri' => $datasetUri]);
                 }
@@ -1357,7 +1357,7 @@ class UserController extends Controller {
                 $result = $api->addResourceMetadata($savePost)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     $file = $request->file('file');
 
@@ -1425,7 +1425,7 @@ class UserController extends Controller {
                         return redirect()->back()->withInput()->withErrors($resultElastic->errors);
                     }
 
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     return redirect()->route('orgDatasetView', ['uri' => $datasetUri]);
                 }
@@ -1645,13 +1645,13 @@ class UserController extends Controller {
             $result = $api->deleteOrganisation($request)->getData();
 
             if ($result->success) {
-                session()->flash('alert-success', 'Успешно изтриване!');
+                session()->flash('alert-success', __('custom.delete_success'));
 
                 return back();
             }
         }
 
-        session()->flash('alert-danger', 'Неуспешно изтриване!');
+        session()->flash('alert-danger', __('custom.delete_error'));
 
         return back();
     }
@@ -2062,7 +2062,7 @@ class UserController extends Controller {
 
                 try {
                     $user->save();
-                    $request->session()->flash('alert-success', 'Успешно променихте електронната си поща');
+                    $request->session()->flash('alert-success', __('custom.email_change_success'));
 
                     return redirect('login');
                 } catch (QueryException $ex) {
@@ -2081,10 +2081,10 @@ class UserController extends Controller {
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
                     $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
                     $m->to($mailData['mail'], $mailData['user']);
-                    $m->subject('Смяна на екектронен адрес!');
+                    $m->subject(__('custom.mail_change'));
                 });
 
-                $request->session()->flash('alert-warning', 'Мейлът беше изпратен отново!');
+                $request->session()->flash('alert-warning', __('custom.mail_sent_again'));
 
                 return redirect('login');
             }
@@ -2328,7 +2328,7 @@ class UserController extends Controller {
 
                 try {
                     $user->save();
-                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си! Моля попълнете вашите данни.');
+                    $request->session()->flash('alert-success', __('custom.successful_account_activation'));
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
@@ -2336,7 +2336,7 @@ class UserController extends Controller {
                 return redirect()->route('settings');
             }
         } else {
-            $request->session()->flash('alert-danger', 'Грешни параметри на заявка');
+            $request->session()->flash('alert-danger', __('custom.incorrect_request_params'));
 
             return redirect('/');
         }
@@ -2879,7 +2879,7 @@ class UserController extends Controller {
 
                 try {
                     $user->save();
-                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
+                    $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
 
                     return redirect('login');
                 } catch (QueryException $ex) {
@@ -3097,11 +3097,11 @@ class UserController extends Controller {
             $result = $orgApi->addGroup($groupReq)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', 'Успешно създадена група!');
+                $request->session()->flash('alert-success', __('custom.successful_group_creation'));
 
                 return redirect('/user/groups/view/'. Organisation::find($result->id)->value('uri'));
             } else {
-                $request->session()->flash('alert-danger', 'Възникна грешка при създаване на група!');
+                $request->session()->flash('alert-danger', __('custom.failed_group_creation'));
 
                 return back()->withErrors($result->errors)->withInput(Input::all());
             }
@@ -3203,13 +3203,13 @@ class UserController extends Controller {
             $result = $api->deleteGroup($delReq)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', 'Успешно изтриване!');
+                $request->session()->flash('alert-success', __('custom.delete_success'));
 
                 return back();
             }
         }
 
-        $request->session()->flash('alert-danger', 'Неуспешно изтриване!');
+        $request->session()->flash('alert-danger', __('custom.delete_error'));
 
         return back();
     }
@@ -3441,9 +3441,9 @@ class UserController extends Controller {
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return back();
@@ -3475,9 +3475,9 @@ class UserController extends Controller {
 
         if ($request->has('delete')) {
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return redirect('/user/groups/datasets');

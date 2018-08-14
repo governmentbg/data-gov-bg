@@ -139,14 +139,14 @@ class OrganisationController extends ApiController
                             Log::error($ex->getMessage());
                             DB::rollback();
 
-                            return $this->errorResponse('Add Organisation Failure.');
+                            return $this->errorResponse(__('custom.add_org_fail'));
                         }
                     }
 
                     if (!empty($customFields)) {
                         if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
                             DB::rollback();
-                            return $this->errorResponse('Add Organisation Failure.');
+                            return $this->errorResponse(__('custom.add_org_fail'));
                         }
                     }
 
@@ -163,7 +163,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_org_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -338,7 +338,7 @@ class OrganisationController extends ApiController
                         if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
                             DB::rollback();
 
-                            return $this->errorResponse('Edit organisation failure.');
+                            return $this->errorResponse(__('custom.edit_org_fail'));
                         }
                     }
 
@@ -355,7 +355,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_org_fail'), $validator->errors()->messages());
     }
 
 
@@ -399,7 +399,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_org_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -522,7 +522,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('List organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_org_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -635,7 +635,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('List organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_org_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -730,7 +730,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_org_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -797,7 +797,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get Organisation Details Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_org_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -874,7 +874,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get Members Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_members_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -943,7 +943,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete Member Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_member_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -977,7 +977,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit Member Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_member_fail'), $validator->errors()->messages());
     }
 
     /************************   MANAGE GROUPS   ************************/
@@ -1089,7 +1089,7 @@ class OrganisationController extends ApiController
                             if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
                                 DB::rollback();
 
-                                return $this->errorResponse('Add Group Failure.');
+                                return $this->errorResponse(__('custom.add_group_fail'));
                             }
                         }
 
@@ -1105,7 +1105,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add Group Failure.', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_group_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1236,7 +1236,7 @@ class OrganisationController extends ApiController
                             if (!$this->checkAndCreateCustomSettings($customFields, $group->id)) {
                                 DB::rollback();
 
-                                return $this->errorResponse('Add Group Failure.');
+                                return $this->errorResponse(__('custom.add_group_fail'));
                             }
                         }
 
@@ -1254,7 +1254,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit Group Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_group_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1274,7 +1274,7 @@ class OrganisationController extends ApiController
         $group = Organisation::find($request->group_id);
 
         if (empty($group) || $group->type != Organisation::TYPE_GROUP) {
-            return $this->errorResponse('No Group Found.');
+            return $this->errorResponse(__('custom.no_group_found'));
         }
 
         $validator->after(function ($validator) use ($request) {
@@ -1295,7 +1295,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete organisation failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_group_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1403,7 +1403,7 @@ class OrganisationController extends ApiController
             return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
         }
 
-        return $this->errorResponse('No Groups Found.', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.no_groups_found'), $validator->errors()->messages());
     }
 
     /**
@@ -1458,7 +1458,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get Group Details Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_group_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1559,7 +1559,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search groups failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_group_fail'), $validator->errors()->messages());
     }
 
     /**

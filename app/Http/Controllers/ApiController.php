@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
-    const ERROR_GENERAL = 'General';
+    const ERROR_GENERAL = 'custom.general';
     const DEFAULT_RECORDS_PER_PAGE = 50;
     const MAX_RECORDS_PER_PAGE = 100;
 
@@ -63,7 +63,7 @@ class ApiController extends Controller
             'status'    => $code,
             'errors'    => $errors,
             'error'     => [
-                'type'      => $type,
+                'type'      => __($type),
                 'message'   => $message,
             ]
         ];
@@ -187,6 +187,6 @@ class ApiController extends Controller
      */
     protected function getImageSizeError()
     {
-        return 'Image size too big (Max size is '. env('IMAGE_MAX_SIZE', 16777215) .' bytes)';
+        return __('custom.image_size_too_big'). env('IMAGE_MAX_SIZE', 16777215) . __('custom.bytes');
     }
 }

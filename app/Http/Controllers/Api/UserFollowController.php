@@ -87,7 +87,7 @@ class UserFollowController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add follow failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_follow_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -154,7 +154,7 @@ class UserFollowController extends ApiController
             }
         }
 
-        return $this->errorResponse('Unfollow failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.stop_following'), $validator->errors()->messages());
     }
 
     /**
@@ -169,7 +169,7 @@ class UserFollowController extends ApiController
      */
     public function getFollowersCount(Request $request)
     {
-        $data = $request->criteria;
+        $data = $request->get('criteria', []);
 
         $validator = \Validator::make($data, ['id' => 'required|integer']);
 
@@ -181,6 +181,6 @@ class UserFollowController extends ApiController
             return $this->successResponse(['count' => $count, 'followers' => $users], true);
         }
 
-        return $this->errorResponse('Retrieve count failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.retrieve_count_fail'), $validator->errors()->messages());
     }
 }

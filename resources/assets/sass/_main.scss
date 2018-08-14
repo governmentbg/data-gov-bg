@@ -27,7 +27,6 @@ a:active {
     display: inline-block;
 
     .nav {
-
         @include mdMobile() {
             padding-left: 15px;
         }

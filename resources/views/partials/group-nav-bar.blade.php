@@ -11,7 +11,7 @@
                             <a
                                 class="{{ $view == 'view' ? 'active' : null }}"
                                 href="{{ url('/user/groups/view/'. $group->uri) }}"
-                            >{{ ultrans('custom.group') }}</a>
+                            >{{ ultrans('custom.groups') }}</a>
                         </li>
                         <li>
                             <a

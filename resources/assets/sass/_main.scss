@@ -438,9 +438,19 @@ textarea {
         font-size: 12px;
         padding: 2px 5px;
     }
+
+    @include mobile() {
+        margin-left: 40px;
+    }
+
+    @include mobile() {
+        padding-right: 60px;
+    }
+
     @include smMobile() {
         text-align: left !important;
         margin-left: 10px;
+        padding-right: 50px;
     }
 }
 

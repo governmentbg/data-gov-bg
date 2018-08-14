@@ -5,14 +5,14 @@
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => $activeMenu])
     <div class="row">
-        <div class="col-sm-6 col-xs-12 text-left">
+        <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/organisations/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>
         </div>
-        <div class="col-sm-6 col-xs-12 search-field text-right">
+        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
             <form method="GET" action="{{ url('/user/organisations/datasets/search') }}">
                 <input
                     type="text"
-                    class="m-t-lg input-border-r-12"
+                    class="m-t-md input-border-r-12 form-control"
                     placeholder="{{ __('custom.search') }}"
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"

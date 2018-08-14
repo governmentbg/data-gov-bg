@@ -9,7 +9,6 @@ return [
     |
     */
 
-    'group' => 'група',
     'delete_group_confirm' => 'Изтриване на групата?',
     'delete_organisation_confirm' => 'Изтриване на организацията?',
     'register_subject' => 'Акаунтът ви беше успешно създаден!',

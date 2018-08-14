@@ -3237,7 +3237,8 @@ class UserController extends Controller {
 
             if ($request->has('edit')) {
                 $data = $request->all();
-                $data['description'] = $data['descript'];
+
+                $data['description'] = isset($data['descript']) ? $data['descript'] : null;
 
                 if (!empty($data['logo'])) {
                     try {

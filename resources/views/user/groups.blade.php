@@ -34,7 +34,7 @@
                 @if (count($groups))
                     @foreach ($groups as $group)
                         <div class="col-md-4 col-sm-12 org-col">
-                            <div class="col-xs-12">
+                            <div class="col-xs-12 m-t-lg">
                                 <a href="{{ url('/user/groups/view/'. $group->uri) }}">
                                     <img class="img-responsive logo" src="{{ $group->logo }}"/>
                                 </a>

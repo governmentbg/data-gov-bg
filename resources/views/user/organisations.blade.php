@@ -34,7 +34,7 @@
                 @if (count($organisations))
                     @foreach ($organisations as $key => $organisation)
                         <div class="col-md-4 col-sm-12 org-col">
-                            <div class="col-xs-12">
+                            <div class="col-xs-12 m-t-lg">
                                 <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}">
                                     <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
                                 </a>

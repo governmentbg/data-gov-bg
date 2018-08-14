@@ -53,7 +53,7 @@
                     style="
                         width: 100%;
                         height: 800px;
-                        background: url({{ asset('img/watermark.png') }});
+                        background: url({{ asset('img/watermark-logo.png') }});
                         background-repeat: no-repeat;
                         background-position: left top;
                         background-size: 60%;

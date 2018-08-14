@@ -13141,10 +13141,23 @@ textarea {
   padding: 2px 5px;
 }
 
+@media screen and (max-width: 1199px) {
+  .search-field {
+    margin-left: 40px;
+  }
+}
+
+@media screen and (max-width: 1199px) {
+  .search-field {
+    padding-right: 60px;
+  }
+}
+
 @media screen and (max-width: 767px) {
   .search-field {
     text-align: left !important;
     margin-left: 10px;
+    padding-right: 50px;
   }
 }
 
@@ -13674,7 +13687,7 @@ textarea {
 }
 
 .btn {
-  min-width: 75px !important;
+  min-width: 80px !important;
 }
 
 .btn:hover,
@@ -13909,7 +13922,7 @@ textarea {
   background-color: #108f9e;
   color: white;
   border: none;
-  min-width: 75px;
+  min-width: 80px;
 }
 
 .theme-user .user-orgs .org-desc {
@@ -14381,7 +14394,7 @@ textarea {
   padding-bottom: 10px;
   padding-top: 10px;
   margin-right: 10px;
-  min-width: 75px;
+  min-width: 80px;
 }
 
 .user-nav .nav li:first-child a {

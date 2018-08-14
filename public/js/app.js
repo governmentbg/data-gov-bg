@@ -31858,7 +31858,7 @@ module.exports = function spread(callback) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.17
+ * Vue.js v2.5.16
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -36947,7 +36947,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.17';
+Vue.version = '2.5.16';
 
 /*  */
 
@@ -46471,19 +46471,11 @@ function stickyFooter() {
     var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
     var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
     var footerHeight = getInt($footer.css('height'));
-    console.log("header:");console.log(headerHeight);
-    console.log("footerHeight:");console.log(footerHeight);
     var contentHeight = windowHeight - headerHeight - footerHeight;
 
     $content.css('min-height', contentHeight);
 
     $footer.removeClass('hidden');
-    // $('.sidebar').css('height', $('#bg_wrapper').css('height'));
-    // }
-
-    // var windowWidth = $(window).width() > 0 ? $(window).width() : screen.width;
-    // var contentMargins = getInt($('#content').css('margin-left')) + getInt($('#content').css('margin-right'));
-    // $('#content').css('min-width', windowWidth - contentMargins);
 }
 
 function getInt(string) {

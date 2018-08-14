@@ -174,10 +174,18 @@ body {
 
                             &.login-link {
                                 width: auto;
-                                padding-right: 10px;
+                                padding-right: 18px;
 
                                 @include mdMobile() {
                                     padding-right: 8px;
+                                }
+
+                                &.username {
+                                    padding-right: 13px;
+
+                                    @include mdMobile() {
+                                        display: none;
+                                    }
                                 }
 
                                 a {
@@ -186,7 +194,6 @@ body {
 
                                     &:hover {
                                         font-weight: 800;
-                                        margin-left: -2px;
                                     }
                                 }
                             }
@@ -228,7 +235,11 @@ body {
                             }
 
                             &.user-icon {
-                                padding-right: 8px;
+                                padding-right: 13px;
+
+                                @include mdMobile() {
+                                    padding-right: 8px;
+                                }
 
                                 &.active {
                                     a {

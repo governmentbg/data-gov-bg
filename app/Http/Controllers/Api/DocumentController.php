@@ -61,7 +61,7 @@ class DocumentController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add document failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_document_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -131,7 +131,7 @@ class DocumentController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit document failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_document_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -159,10 +159,10 @@ class DocumentController extends ApiController
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
-            return $this->errorResponse('Delete document failure');
+            return $this->errorResponse(__('custom.delete_document_fail'));
         }
 
-        return $this->errorResponse('Delete document failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_document_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -201,7 +201,7 @@ class DocumentController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List document failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.list_document_fail'), $validator->errors()->messages());
         }
 
         $result = [];
@@ -377,6 +377,6 @@ class DocumentController extends ApiController
             ], true);
         }
 
-        return $this->errorResponse('Search document failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_document_fail'), $validator->errors()->messages());
     }
 }

@@ -29,7 +29,7 @@ class SectionController extends ApiController
      */
     public function addSection(Request $request)
     {
-        $data = $request->data;
+        $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
             'name'          => 'required|string',
@@ -62,7 +62,7 @@ class SectionController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add section failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_section_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -125,7 +125,7 @@ class SectionController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit section failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_section_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -148,7 +148,7 @@ class SectionController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete section failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_section_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -174,7 +174,7 @@ class SectionController extends ApiController
             ]);
 
             if ($validator->fails()) {
-                return $this->errorResponse('List sections failure', $validator->errors()->messages());
+                return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
             }
 
             $criteria['locale'] = $request->filled('criteria.locale')
@@ -217,7 +217,7 @@ class SectionController extends ApiController
             ]);
 
             if ($validator->fails()) {
-                return $this->errorResponse('List sections failure', $validator->errors()->messages());
+                return $this->errorResponse(__('custom.list_subsections_fail'), $validator->errors()->messages());
             }
 
             $criteria['locale'] = $request->filled('criteria.locale')

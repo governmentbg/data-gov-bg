@@ -95,7 +95,7 @@ class NewsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add news failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_news_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -230,7 +230,7 @@ class NewsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit news failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_news_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -262,7 +262,7 @@ class NewsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete news failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_news_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -413,7 +413,7 @@ class NewsController extends ApiController
             ], true);
         }
 
-        return $this->errorResponse('List news failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_news_fail'), $validator->errors()->messages());
     }
 
 
@@ -498,7 +498,7 @@ class NewsController extends ApiController
             ], true);
         }
 
-        return $this->errorResponse('Search news failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_news_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -547,6 +547,6 @@ class NewsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search news failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_news_fail'), $validator->errors()->messages());
     }
 }

@@ -23,13 +23,13 @@ class CategoryController extends ApiController
      * @param integer active - optional
      * @param integer ordering - optional
      *
-     * @return json response with id of Data Set or error
+     * @return json response with id of category or error
      */
     public function addMainCategory(Request $request)
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post['data'], [
+        $validator = \Validator::make($request->get('data', []), [
             'name'              => 'required|string',
             'locale'            => 'required|string|max:5',
             'icon'              => 'nullable|string',
@@ -40,7 +40,7 @@ class CategoryController extends ApiController
             'ordering'          => 'nullable|integer',
         ]);
 
-        // add library for image manipulation
+        // add main category
         if (!$validator->fails()) {
             $catData = [
                 'name'              => $post['data']['name'],
@@ -72,7 +72,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add main category failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_main_category'), $validator->errors()->messages());
     }
 
     /**
@@ -145,7 +145,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit main category failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_category_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -161,7 +161,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'category_id'   => 'required|integer',
+            'category_id'   => 'required|integer|exists:categories,id',
         ]);
 
         if (!$validator->fails()) {
@@ -174,7 +174,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete main category failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_category_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -252,7 +252,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('List main categories failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_categories_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -268,7 +268,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'category_id'   => 'required|integer',
+            'category_id'   => 'required|integer|exists:categories,id',
             'locale'        => 'nullable|string|max:5',
         ]);
 
@@ -283,7 +283,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get main category details failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_categories_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -328,7 +328,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add tag failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_tag_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -362,7 +362,7 @@ class CategoryController extends ApiController
             if ($tag) {
                 if (!empty($post['data']['name'])) {
                     if (empty($post['data']['locale'])) {
-                        return $this->errorResponse('Edit tag failure');
+                        return $this->errorResponse(__('custom.edit_tag_fail'));
                     }
 
                     $tag->name = $post['data']['name'];
@@ -386,7 +386,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit tag failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_tag_fail'), $validator->errors()->messages());
     }
 
      /**
@@ -401,7 +401,7 @@ class CategoryController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['tag_id' => 'required|integer']);
+        $validator = \Validator::make($post, ['tag_id' => 'required|integer|exists:categories,id']);
 
         if (!$validator->fails()) {
             try {
@@ -413,7 +413,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete tag failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_tag_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -505,7 +505,7 @@ class CategoryController extends ApiController
             }
         }
 
-        return $this->errorResponse('List tags failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_tags_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -542,6 +542,6 @@ class CategoryController extends ApiController
             return $this->successResponse(['tag' => $data], true);
         }
 
-        return $this->errorResponse('Get tag details failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_tags_fail'), $validator->errors()->messages());
     }
 }

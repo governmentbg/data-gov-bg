@@ -56,7 +56,7 @@ class ActionsHistoryController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List action history failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
         }
 
         $criteria = $request->criteria;
@@ -200,6 +200,6 @@ class ActionsHistoryController extends ApiController
             return $this->successResponse(['modules'=>$result], true);
         }
 
-        return $this->errorResponse('Get data failure');
+        return $this->errorResponse(__('custom.data_failure'));
     }
 }

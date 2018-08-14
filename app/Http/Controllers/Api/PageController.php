@@ -90,7 +90,7 @@ class PageController extends ApiController
             }
         }
 
-        return $this->errorResponse('Page add failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_page_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -180,7 +180,7 @@ class PageController extends ApiController
             }
         }
 
-        return $this->errorResponse('Page edit failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_page_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -211,7 +211,7 @@ class PageController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete page failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_page_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -248,7 +248,7 @@ class PageController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List pages failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.list_pages_fail'), $validator->errors()->messages());
         }
 
         $result = [];

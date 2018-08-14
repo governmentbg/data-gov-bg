@@ -36,6 +36,6 @@ class CustomSettingsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete custom setting failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_custom_fail'), $validator->errors()->messages());
     }
 }

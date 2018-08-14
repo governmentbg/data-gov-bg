@@ -83,7 +83,7 @@ class DataSetController extends ApiController
         }
 
         if (!empty($errors)) {
-            return $this->errorResponse('Add DataSet Failure', $errors);
+            return $this->errorResponse(__('custom.add_dataset_fail'), $errors);
         }
 
         if (!$validator->fails() && !empty($post['data'])) {
@@ -152,7 +152,7 @@ class DataSetController extends ApiController
                         if (!$this->checkAndCreateTags($newDataSet, $tags, $post['data']['category_id'], $locale)) {
                             DB::rollback();
 
-                            return $this->errorResponse('Add DataSet Failure');
+                            return $this->errorResponse(__('custom.add_dataset_fail'));
                         }
                     }
 
@@ -160,7 +160,7 @@ class DataSetController extends ApiController
                         if (!$this->checkAndCreateCustomSettings($customFields, $newDataSet->id)) {
                             DB::rollback();
 
-                            return $this->errorResponse('Add DataSet Failure');
+                            return $this->errorResponse(__('custom.add_dataset_fail'));
                         }
                     }
 
@@ -175,7 +175,7 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add DataSet Failure', $errors);
+        return $this->errorResponse(__('custom.add_dataset_fail'), $errors);
     }
 
     /**
@@ -248,7 +248,7 @@ class DataSetController extends ApiController
         }
 
         if (!empty($errors)) {
-            return $this->errorResponse('Edit dataset failure', $errors);
+            return $this->errorResponse(__('custom.edit_dataset_fail'), $errors);
         } else {
             $dataSet = DataSet::where('uri', $post['dataset_uri'])->first();
             $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
@@ -344,7 +344,7 @@ class DataSetController extends ApiController
                         if (!$this->checkAndCreateCustomSettings($customFields, $dataSet->id)) {
                             DB::rollback();
 
-                            return $this->errorResponse('Edit dataset failure');
+                            return $this->errorResponse(__('custom.edit_dataset_fail'));
                         }
                     }
 
@@ -352,7 +352,7 @@ class DataSetController extends ApiController
                         if (!$this->checkAndCreateTags($dataSet, $tags, $post['data']['category_id'], $locale)) {
                             DB::rollback();
 
-                            return $this->errorResponse('Edit dataset failure');
+                            return $this->errorResponse(__('custom.edit_dataset_fail'));
                         }
                     }
 
@@ -367,7 +367,7 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit dataset failure', $errors);
+        return $this->errorResponse(__('custom.edit_dataset_fail'), $errors);
     }
 
     /**
@@ -385,11 +385,11 @@ class DataSetController extends ApiController
         $validator = \Validator::make($post, ['dataset_uri' => 'required|string']);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Delete dataset failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.delete_dataset_fail'), $validator->errors()->messages());
         }
 
         if (empty($dataset = DataSet::where('uri', $post['dataset_uri'])->first())) {
-            return $this->errorResponse('Delete dataset failure');
+            return $this->errorResponse(__('custom.delete_dataset_fail'));
         }
 
         try {
@@ -397,7 +397,7 @@ class DataSetController extends ApiController
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
-            return $this->errorResponse('Delete dataset failure');
+            return $this->errorResponse(__('custom.delete_dataset_fail'));
         }
 
         try {
@@ -407,7 +407,7 @@ class DataSetController extends ApiController
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
-            return $this->errorResponse('Delete dataset failure');
+            return $this->errorResponse(__('custom.delete_dataset_fail'));
         }
 
         return $this->successResponse();
@@ -554,7 +554,7 @@ class DataSetController extends ApiController
                 }
             }
 
-            return $this->errorResponse('Criteria error', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.criteria_error'), $validator->errors()->messages());
         }
 
         $query = DataSet::where('status', DataSet::STATUS_PUBLISHED);
@@ -689,7 +689,7 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search dataset failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_dataset_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -744,7 +744,7 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get dataset details failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_dataset_fail'), $validator->errors()->messages());
     }
 
 
@@ -789,7 +789,7 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add dataset group failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_datasetgroup_fail'), $validator->errors()->messages());
     }
 
 
@@ -830,7 +830,7 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add dataset group failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.remove_datasetgroup_fail'), $validator->errors()->messages());
     }
 
     private function checkTag($tag, $setId)
@@ -1019,6 +1019,6 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get Users DataSet count failure');
+        return $this->errorResponse(__('custom.get_user_count_fail'), $validator->errors()->messages());
     }
 }

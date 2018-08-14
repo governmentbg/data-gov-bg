@@ -72,7 +72,7 @@ class DataRequestController extends ApiController
             }
         }
 
-        return $this->errorResponse('Send request failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.send_request_fail'), $validator->errors()->messages());
     }
 
      /**
@@ -145,7 +145,7 @@ class DataRequestController extends ApiController
             }
         }
 
-    return $this->errorResponse('Edit data request failure', $validator->errors()->messages());
+    return $this->errorResponse(__('custom.edit_request_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -173,7 +173,7 @@ class DataRequestController extends ApiController
 
             }
         }
-        return $this->errorResponse('Delete data request failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_request_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -213,7 +213,7 @@ class DataRequestController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List data request failure');
+            return $this->errorResponse(__('custom.list_request_fail'), $validator->errors()->messages());
         }
 
         $result = [];

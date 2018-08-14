@@ -35,11 +35,11 @@ class SetLocale
                 }
             }
 
-            if (isset($locale)) {
+            if (isset($locale) && !empty($locale)) {
                 if (Locale::where('locale', $locale)->count()) {
                     \LaravelLocalization::setLocale($locale);
                 } else {
-                    return ApiController::errorResponse('Language `'. $locale .'` does not exist in database');
+                    return ApiController::errorResponse(__('custom.language') . ' ' . "'" . $locale . "'" . ' ' . __('custom.not_exist_database'));
                 }
             }
         } else {

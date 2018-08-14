@@ -124,7 +124,7 @@ class ResourceController extends ApiController
             $errors = $validator->errors()->messages();
         }
 
-        return $this->errorResponse('Add resource metadata failure', $errors);
+        return $this->errorResponse(__('custom.add_resource_meta_fail'), $errors);
     }
 
     /**
@@ -183,7 +183,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_resource_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -306,7 +306,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit resource metadata failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_resource_metadata_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -347,7 +347,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Update resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -378,7 +378,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete resource failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_resource_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -473,9 +473,11 @@ class ResourceController extends ApiController
                     'updated_by'            => $result->updated_by,
                 ];
             }
+
+            return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
         }
 
-        return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
+        return $this->errorResponse(__('custom.list_resources_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -530,7 +532,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get resource metadata failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_metadata_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -557,7 +559,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get resource schema failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_schema_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -579,7 +581,7 @@ class ResourceController extends ApiController
             return $this->successResponse(['view' => 'html'], true);
         }
 
-        return $this->errorResponse('Get resource view failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_view_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -610,7 +612,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -679,7 +681,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_resource_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -748,7 +750,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Linked data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.link_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -808,6 +810,6 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search reported resources failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_reported_fail'), $validator->errors()->messages());
     }
 }

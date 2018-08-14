@@ -22,7 +22,7 @@
 <body class="theme-{{ $class }}">
     <div id="app" class="nano">
         <div class="nano-content">
-            <nav class="navbar navbar-default navbar-static-top">
+            <nav class="navbar navbar-default navbar-static-top js-head">
                 <div class="container">
                     <div class="navbar-header">
                         <div class="nav-logos">
@@ -156,9 +156,11 @@
                 <div class="underline"></div>
             </nav>
 
-            @yield('content')
+            <div class="js-content">
+                @yield('content')
+            </div>
 
-            <footer class="footer">
+            <footer class="footer js-footer hidden">
                 <div class="image-links text-right col-xs-12">
                     <a href="{{ url('/terms') }}">
                         <span class="svg-icons">

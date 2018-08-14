@@ -34,7 +34,7 @@
         .nano {
             > .nano-pane {
                 > .nano-slider {
-                    background: $lighten-primary !important;
+                    background: rgba($primary, .4) !important;
                 }
             }
         }

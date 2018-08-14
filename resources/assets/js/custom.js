@@ -209,3 +209,31 @@ $(function() {
         });
     }
 });
+
+// Sticky footer
+var $head = $('.js-head');
+var $content = $('.js-content');
+var $footer = $('.js-footer');
+
+if ($head && $content && $footer) {
+    $(window).bind('load', function() {
+        stickyFooter();
+
+        $(window).resize(stickyFooter);
+    });
+}
+
+function stickyFooter() {
+    var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
+    var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
+    var footerHeight = getInt($footer.css('height'));
+    var contentHeight = windowHeight - headerHeight - footerHeight;
+
+    $content.css('min-height', contentHeight);
+
+    $footer.removeClass('hidden');
+}
+
+function getInt(string) {
+    return parseInt(string.replace(/[^0-9]/g, ''));
+}

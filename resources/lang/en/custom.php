@@ -283,4 +283,7 @@ return [
     'add' => 'Add',
     'draft' => 'draft',
     'published' => 'published',
+    'register_confirmation' => 'Registration confirmation',
+    'email_change' => 'Email change confirmation',
+    'pass_reset_confirm' => 'Password reset confirmation',
 ];

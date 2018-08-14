@@ -1,7 +1,7 @@
 @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);@charset "UTF-8";
 
 .theme-index .nano > .nano-pane > .nano-slider {
-  background: rgba(192, 46, 84, 0.2) !important;
+  background: rgba(192, 46, 84, 0.4) !important;
 }
 
 .theme-index .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -316,7 +316,7 @@
 }
 
 .theme-data .nano > .nano-pane > .nano-slider {
-  background: rgba(78, 87, 170, 0.2) !important;
+  background: rgba(78, 87, 170, 0.4) !important;
 }
 
 .theme-data .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -631,7 +631,7 @@
 }
 
 .theme-data-attention .nano > .nano-pane > .nano-slider {
-  background: rgba(211, 42, 49, 0.2) !important;
+  background: rgba(211, 42, 49, 0.4) !important;
 }
 
 .theme-data-attention .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -946,7 +946,7 @@
 }
 
 .theme-organisation .nano > .nano-pane > .nano-slider {
-  background: rgba(118, 173, 63, 0.2) !important;
+  background: rgba(118, 173, 63, 0.4) !important;
 }
 
 .theme-organisation .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -1261,7 +1261,7 @@
 }
 
 .theme-request .nano > .nano-pane > .nano-slider {
-  background: rgba(232, 212, 41, 0.2) !important;
+  background: rgba(232, 212, 41, 0.4) !important;
 }
 
 .theme-request .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -1576,7 +1576,7 @@
 }
 
 .theme-visualisations .nano > .nano-pane > .nano-slider {
-  background: rgba(233, 137, 17, 0.2) !important;
+  background: rgba(233, 137, 17, 0.4) !important;
 }
 
 .theme-visualisations .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -1891,7 +1891,7 @@
 }
 
 .theme-news .nano > .nano-pane > .nano-slider {
-  background: rgba(10, 123, 93, 0.2) !important;
+  background: rgba(10, 123, 93, 0.4) !important;
 }
 
 .theme-news .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -2206,7 +2206,7 @@
 }
 
 .theme-documents .nano > .nano-pane > .nano-slider {
-  background: rgba(20, 92, 153, 0.2) !important;
+  background: rgba(20, 92, 153, 0.4) !important;
 }
 
 .theme-documents .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -2521,7 +2521,7 @@
 }
 
 .theme-contact .nano > .nano-pane > .nano-slider {
-  background: rgba(121, 18, 146, 0.2) !important;
+  background: rgba(121, 18, 146, 0.4) !important;
 }
 
 .theme-contact .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -2836,7 +2836,7 @@
 }
 
 .theme-user .nano > .nano-pane > .nano-slider {
-  background: rgba(16, 143, 158, 0.2) !important;
+  background: rgba(16, 143, 158, 0.4) !important;
 }
 
 .theme-user .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
@@ -11510,28 +11510,6 @@ body #app {
   min-height: 100%;
 }
 
-body #app .nano-content {
-  margin-bottom: -50px;
-}
-
-@media screen and (max-width: 767px) {
-  body #app .nano-content {
-    margin-bottom: -140px;
-  }
-}
-
-body #app .nano-content:after {
-  content: "";
-  display: block;
-  height: 50px;
-}
-
-@media screen and (max-width: 767px) {
-  body #app .nano-content:after {
-    height: 140px;
-  }
-}
-
 @media screen and (max-width: 991px) {
   body #app .container {
     width: 100%;
@@ -12997,6 +12975,11 @@ textarea {
 .bootstrap-tagsinput {
   width: 100%;
   border-radius: 12px;
+}
+
+.bootstrap-tagsinput span {
+  margin-bottom: 5px;
+  display: inline-block;
 }
 
 .bootstrap-tagsinput input {

@@ -20,22 +20,6 @@ $(function() {
     }
 });
 
-/*$(window).on('load', function() {
-    initScroller();
-});
-function initScroller() {
-    if ($scroll.height() < $scrollContent.height()) {
-        $scrollContent.css('position', 'relative');
-
-        if ($scroll[0].nanoscroller) {
-            $scroll.nanoScroller();
-            $scroll.nanoScroller({ scrollBottom: 0 });
-        } else {
-            $scroll.nanoScroller({ preventPageScrolling: true, scrollBottom: 0 });
-        }
-    }
-}*/
-
 // show hide submenu
 $(function() {
     $('.clicable').on('click', function() {
@@ -202,4 +186,54 @@ $(function() {
         }
 
     }
+
+    var $tagsInput = $('[data-role="tagsinput"]');
+
+    if ($tagsInput.length) {
+        $tagsInput.each(function() {
+            var $tagInput = $(this);
+
+            $tagInput.siblings('.bootstrap-tagsinput').keydown(function(e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+
+                if (key == 13) {
+                    e.preventDefault();
+
+                    $tagInput.tagsinput('add', $(this).find('input').val());
+
+                    $(this).find('input').val('');
+
+                    $tagInput.tagsinput('refresh');
+                }
+            });
+        });
+    }
 });
+
+// Sticky footer
+var $head = $('.js-head');
+var $content = $('.js-content');
+var $footer = $('.js-footer');
+
+if ($head && $content && $footer) {
+    $(window).bind('load', function() {
+        stickyFooter();
+
+        $(window).resize(stickyFooter);
+    });
+}
+
+function stickyFooter() {
+    var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
+    var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
+    var footerHeight = getInt($footer.css('height'));
+    var contentHeight = windowHeight - headerHeight - footerHeight;
+
+    $content.css('min-height', contentHeight);
+
+    $footer.removeClass('hidden');
+}
+
+function getInt(string) {
+    return parseInt(string.replace(/[^0-9]/g, ''));
+}

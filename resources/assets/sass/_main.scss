@@ -27,7 +27,6 @@ a:active {
     display: inline-block;
 
     .nav {
-
         @include mdMobile() {
             padding-left: 15px;
         }
@@ -275,6 +274,10 @@ textarea {
 .bootstrap-tagsinput {
     width: 100%;
     border-radius: 12px;
+    span {
+        margin-bottom: 5px;
+        display: inline-block;
+    }
 }
 
 .bootstrap-tagsinput input {

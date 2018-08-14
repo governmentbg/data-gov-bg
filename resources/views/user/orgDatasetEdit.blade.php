@@ -240,7 +240,10 @@
                     <div class="row">
                         <button type="button" class="btn btn-primary">{{ __('custom.add_resource') }}</button>
                         <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
-                        <button type="submit" name="save" class="btn btn-primary">{{ __('custom.publish') }}</button>
+                        @if ($hasResources)
+                        <button type="submit" name="publish" class="btn btn-primary">{{ __('custom.publish') }}</button>
+                        @endif
+                        <button type="submit" name="save" class="btn btn-primary">{{ __('custom.save') }}</button>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,11 @@
 @extends('layouts.mail')
 
+@section('title')
+
+<b>{{__('custom.pass_reset_confirm')}}</b>
+
+@endsection
+
 @section('content')
 {{ __('custom.hello') .', '. $user }}
 <br/>{{ __('custom.reset_pass_info') }}

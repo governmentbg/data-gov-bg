@@ -59,7 +59,7 @@ class DataSetController extends ApiController
             $validator = \Validator::make($post['data'], [
                 'locale'                => 'nullable|string|max:5',
                 'name'                  => 'required_with:locale',
-                'name.*'                => 'required_without:locale|string',
+                'name.bg'               => 'required_without:locale|string',
                 'uri'                   => 'nullable|string|unique:data_sets,uri',
                 'description'           => 'nullable',
                 'tags.*'                => 'nullable',
@@ -222,7 +222,7 @@ class DataSetController extends ApiController
             $validator = \Validator::make($post['data'], [
                 'locale'                   => 'nullable|string|max:5',
                 'name'                     => 'required_with:locale',
-                'name.*'                   => 'required_without:locale|string',
+                'name.bg'                  => 'required_without:locale|string',
                 'description'              => 'nullable',
                 'category_id'              => 'required|int',
                 'org_id'                   => 'nullable|int',

@@ -18,7 +18,7 @@
             data-id="{{ isset($model) && count($model) ? $model[$i - 1]->id : null }}"
         >
             @foreach (Lang::getInstance()->getActive() as $key => $active)
-                <div class="col-xs-12">{{ !$key ?  __('custom.additional_field')  : '' }}</div>
+                <div class="col-xs-12">{{ !$key ?  __('custom.additional_field') : '' }}</div>
                 <div class="col-lg-12 form-group">
                     <div class="col-sm-12 col-xs-12 p-r-none">
                         <div class="row">
@@ -37,7 +37,8 @@
                                             >
                                             <input name="sett_id[{{ $i }}]" value="{{ count($model) ? $model[$i - 1]->id : null }}" type="hidden">
                                         @elseif (
-                                            is_array(old($field['name'])[$i]['label'])
+                                            isset(old($field['name'])[$i]))
+                                            && is_array(old($field['name'])[$i]['label'])
                                             && !empty(old($field['name'])[$i]['label'][$active['locale']])
                                         )
                                             <input
@@ -74,6 +75,7 @@
                                                 class="input-border-r-12 form-control"
                                             >
                                         @elseif (
+                                            isset(old($field['name'])[$i]))
                                             is_array(old($field['name'])[$i][$field['val'][1]])
                                             && !empty(old($field['name'])[$i][$field['val'][1]][$active['locale']])
                                         )

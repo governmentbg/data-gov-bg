@@ -195,7 +195,7 @@ return [
         'data.valid_from' => 'valid from',
         'data.valid_to' => 'valid to',
         'data.section_id' => 'section id',
-        'data.schema_description' => 'schema description',
+        'data.schema_description' => 'schema',
         'data.schema_url' => 'schema url',
         'data.type' => 'type',
         'data.resource url' => 'resource url',
@@ -223,6 +223,9 @@ return [
         'data.password' => 'password',
         'data.password_confirm' => 'password confirm',
         'data.add_info' => 'add info',
+        'firstname' => 'name',
+        'lastname' => 'family name',
+        'name.bg' => 'name in Bulgarian',
         'locale' => 'locale',
         'tag_id' => 'tag id',
         'data' => 'data',
@@ -234,9 +237,9 @@ return [
         'source' => 'source',
         'version' => 'version',
         'author_name' => 'author name',
-        'author_email' => 'author email',
+        'author_email' => 'author e-mail',
         'support_name' => 'support name',
-        'support_email' => 'support email',
+        'support_email' => 'contact e-mail',
         'dataset_uri' => 'dataset uri',
         'status' => 'status',
         'data_set_uri' => 'dataset uri',
@@ -272,7 +275,9 @@ return [
         'data_set_id' => 'dataset id',
         'follow_user_id' => 'follow user id',
         'news' => 'news',
-
+        'schema_description' => 'schema',
+        'schema_url' => 'schema url',
+        'category_id' => 'main topic'
     ],
 
 ];

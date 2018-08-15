@@ -527,7 +527,6 @@ class DataSetController extends ApiController
 
                     $data = $query->get();
 
-
                     foreach ($data as $set) {
                         $set['name'] = $set->name;
                         $set['sla'] = $set->sla;

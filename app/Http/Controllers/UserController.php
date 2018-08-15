@@ -310,7 +310,6 @@ class UserController extends Controller {
 
         if (!empty($dataSetIds)) {
             $params['criteria']['dataset_ids'] = $dataSetIds;
-            $params['criteria']['created_by'] = \Auth::user()->id;
             $rq = Request::create('/api/listDataSets', 'POST', $params);
             $api = new ApiDataSet($rq);
             $datasets = $api->listDataSets($rq)->getData();
@@ -3428,7 +3427,6 @@ class UserController extends Controller {
             ];
 
             $params['criteria']['dataset_ids'] = $dataSetIds;
-            $params['criteria']['created_by'] = \Auth::user()->id;
             $dataRq = Request::create('/api/listDataSets', 'POST', $params);
             $dataApi = new ApiDataSet($dataRq);
             $datasets = $dataApi->listDataSets($dataRq)->getData();

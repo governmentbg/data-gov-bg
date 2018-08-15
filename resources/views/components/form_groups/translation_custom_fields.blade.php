@@ -37,7 +37,7 @@
                                             >
                                             <input name="sett_id[{{ $i }}]" value="{{ count($model) ? $model[$i - 1]->id : null }}" type="hidden">
                                         @elseif (
-                                            isset(old($field['name'])[$i]))
+                                            isset(old($field['name'])[$i])
                                             && is_array(old($field['name'])[$i]['label'])
                                             && !empty(old($field['name'])[$i]['label'][$active['locale']])
                                         )
@@ -75,8 +75,8 @@
                                                 class="input-border-r-12 form-control"
                                             >
                                         @elseif (
-                                            isset(old($field['name'])[$i]))
-                                            is_array(old($field['name'])[$i][$field['val'][1]])
+                                            isset(old($field['name'])[$i])
+                                            && is_array(old($field['name'])[$i][$field['val'][1]])
                                             && !empty(old($field['name'])[$i][$field['val'][1]][$active['locale']])
                                         )
                                             <input

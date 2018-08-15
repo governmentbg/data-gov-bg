@@ -436,5 +436,15 @@ return [
     'entered_data_error' => 'Error in entered data!',
     'image_size_too_big' => 'Image size too big (Max size is ',
     'bytes' => ' bytes)',
+    'admin_profile' => 'Administrator profile',
+    'create_profile' => 'create profile',
+    'stats_analytics' => 'statistics and analytics',
+    'topics_categories' => 'topics and categories',
+    'topics_subtopics' => 'topics and subtopics',
+    'languages' => 'languages',
+    'actions_history' => 'actions history',
+    'logins_history' => 'login history',
+    'signals' => 'signals',
+    'manage_roles' => 'manage roles',
 
 ];

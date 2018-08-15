@@ -89,18 +89,6 @@
                                 <a
                                     href="{{ route('lang.switch', $altLang) }}"
                                 >{{ strtoupper($altLang) }}</a>
-                                    href="{{ url('/user') }}"
-                                    class="user-icon"
-                                >
-                                    @if (Auth::user()->is_admin)
-                                        <img src="{{ asset('img/admin.svg') }}">
-                                    @else
-                                        <img src="{{ asset('img/user.svg') }}">
-                                    @endif
-                                </a>
-                            </span>
-                            <span class="login-link">>
-                                <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
                             </span>
                             <span class="social-icons">
                                 <a href="#" class="fb"><span class="fa fa-facebook"></span></a>

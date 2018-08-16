@@ -6,12 +6,14 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use App\TermsOfUse;
+use App\Http\Controllers\ApiController;
 
 class TermsOfUseTest extends TestCase
 {
     use DatabaseTransactions;
     use WithFaker;
 
+    private $locale = 'en';
     /**
      * Test for TermsOfUseController@addTermsOfUse
      */
@@ -44,7 +46,7 @@ class TermsOfUseTest extends TestCase
                     'locale'        => 'en',
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
-                    'ordering'      => $this->faker->numberBetween(0,10),
+                    'ordering'      => $this->faker->numberBetween(0, 10),
                 ]
             ]
         )
@@ -57,11 +59,11 @@ class TermsOfUseTest extends TestCase
     public function testEditTermsOfUse()
     {
         $section = TermsOfUse::create([
-            'name'          => ['en' => $this->faker->word()],
-            'descript'      => ['en' => $this->faker->word()],
+            'name'          => Apicontroller::trans($this->locale, $this->faker->word()),
+            'descript'      => Apicontroller::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'is_default'    => $this->faker->boolean(),
-            'ordering'      => $this->faker->numberBetween(0,10),
+            'ordering'      => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
 
@@ -81,7 +83,7 @@ class TermsOfUseTest extends TestCase
                     'locale'        => 'en',
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
-                    'ordering'      => $this->faker->numberBetween(0,10),
+                    'ordering'      => $this->faker->numberBetween(0, 10),
                 ]
             ]
         )
@@ -112,7 +114,7 @@ class TermsOfUseTest extends TestCase
                     'locale'        => 'en',
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
-                    'ordering'      => $this->faker->numberBetween(0,10),
+                    'ordering'      => $this->faker->numberBetween(0, 10),
                 ]
             ]
         )
@@ -126,11 +128,11 @@ class TermsOfUseTest extends TestCase
     public function testDeleteTermsOfUse()
     {
         $section = TermsOfUse::create([
-            'name'          => ['en' => $this->faker->word()],
-            'descript'      => ['en' => $this->faker->word()],
+            'name'          => Apicontroller::trans($this->locale, $this->faker->word()),
+            'descript'      => Apicontroller::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'is_default'    => $this->faker->boolean(),
-            'ordering'      => $this->faker->numberBetween(0,10),
+            'ordering'      => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
 
@@ -198,11 +200,11 @@ class TermsOfUseTest extends TestCase
     public function testGetTermsOfUseDetails()
     {
         $section = TermsOfUse::create([
-            'name'          => ['en' => $this->faker->word()],
-            'descript'      => $this->faker->word(),
+            'name'          => Apicontroller::trans($this->locale, $this->faker->word()),
+            'descript'      => Apicontroller::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'is_default'    => $this->faker->boolean(),
-            'ordering'      => $this->faker->numberBetween(0,10),
+            'ordering'      => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
         // test missing api_key

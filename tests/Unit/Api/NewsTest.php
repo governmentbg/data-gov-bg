@@ -3,6 +3,7 @@ namespace Tests\Unit\Api;
 
 use App\Page;
 use Tests\TestCase;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -10,6 +11,8 @@ class NewsTest extends TestCase
 {
     use WithFaker;
     use DatabaseTransactions;
+
+    private $locale = 'en';
 
     public function testAddNews()
     {
@@ -54,7 +57,7 @@ class NewsTest extends TestCase
     public function testEditNews()
     {
         $news = Page::create([
-            'title'     => $this->faker->word(),
+            'title'     => ApiController::trans($this->locale, $this->faker->word()),
             'active'    => true,
         ]);
 
@@ -89,7 +92,7 @@ class NewsTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successfull testEdit
+        // test successful test edit
         $this->post(
             url('api/editNews'),
             [
@@ -110,7 +113,7 @@ class NewsTest extends TestCase
     public function testDeleteNews()
     {
         $news = Page::create([
-            'title'     => $this->faker->word(),
+            'title'     => ApiController::trans($this->locale, $this->faker->word()),
             'active'    => true,
         ]);
 
@@ -132,7 +135,7 @@ class NewsTest extends TestCase
 
         $count = Page::all()->count();
 
-        //test successfull telete
+        //test successful delete
         $this->post(
             url('api/deleteNews'),
             [
@@ -169,7 +172,7 @@ class NewsTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        //test successfull search
+        //test successful search
         $this->post(
             url('api/searchNews'),
             [

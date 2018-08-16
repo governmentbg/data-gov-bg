@@ -45,6 +45,7 @@
                     style="
                             font-family: 'Roboto', sans-serif;
                             font-size: 16px;
+                            margin-right: 40%;
                     "
                 >
                     @yield('content')

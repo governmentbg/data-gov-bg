@@ -11,12 +11,12 @@
                             <a
                                 class="{{ $view == 'view' ? 'active' : null }}"
                                 href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"
-                            >{{ ultrans('custom.organisation') }}</a>
+                            >{{ ultrans('custom.organisations') }}</a>
                         </li>
                         <li>
                             <a
                                 class="{{ $view == 'members' ? 'active' : null }}"
-                                href="{{ route('userOrgMembersView', ['uri' => $organisation->uri]) }}"
+                                href="{{ url('/user/organisations/members/'. $organisation->uri) }}"
                             >{{ ultrans('custom.members') }}</a>
                         </li>
                     </ul>

@@ -33,7 +33,7 @@ class Resource extends Model implements TranslatableInterface
     const HTTP_GET = 2;
 
     protected static $translatable = [
-        'name'      => 'label',
+        'name'      => 'text',
         'descript'  => 'text',
     ];
 
@@ -82,7 +82,7 @@ class Resource extends Model implements TranslatableInterface
 
     public function elasticDataSet()
     {
-        return $this->hasOne('App\ElasticDataSet', 'id');
+        return $this->hasOne('App\ElasticDataSet', 'id', 'es_id');
     }
 
     public function dataSet()

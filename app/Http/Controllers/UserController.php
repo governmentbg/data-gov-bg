@@ -2,20 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Role;
 use App\User;
 use App\Locale;
 use App\DataSet;
+use App\Category;
+use App\Resource;
 use App\UserSetting;
+use App\DataSetGroup;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -23,26 +29,17 @@ use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
+use App\Http\Controllers\Api\CustomSettingsController as ApiCustomSettings;
 use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 
 class UserController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-    }
-
     /**
      * Function for getting an array of translatable fields
      *
@@ -107,7 +104,7 @@ class UserController extends Controller {
             ],
             [
                 'label'    => 'custom.description',
-                'name'     => 'description',
+                'name'     => 'descript',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => false,
@@ -170,6 +167,34 @@ class UserController extends Controller {
         ];
     }
 
+    public static function getResourceTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
     /**
      * Show the application dashboard.
      *
@@ -189,31 +214,44 @@ class UserController extends Controller {
      */
     public function datasets(Request $request)
     {
-        $params['api_key'] = \Auth::user()->api_key;
-        $params['criteria']['created_by'] = \Auth::user()->id;
-        $params['records_per_page'] = '10';
-        $params['page_number'] = '1';
+        $perPage = 6;
+        $params = [
+            'api_key'           => \Auth::user()->api_key,
+            'criteria'          => [
+                'created_by'        => \Auth::user()->id,
+            ],
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+        ];
 
         $rq = Request::create('/api/listDataSets', 'POST', $params);
         $api = new ApiDataSet($rq);
-        $datasets = $api->listDataSets($rq)->getData();
+        $result = $api->listDataSets($rq)->getData();
+        $datasets = !empty($result->datasets) ? $result->datasets : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $paginationData = $this->getPaginationData($datasets, $count, [], $perPage);
 
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return back();
         }
 
-        return view('user/datasets', ['class' => 'user', 'datasets' => $datasets->datasets, 'activeMenu' => 'dataset']);
+        return view('user/datasets', [
+            'class'         => 'user',
+            'datasets'      => $paginationData['items'],
+            'pagination'    => $paginationData['paginate'],
+        ]);
     }
 
-     /**
+    /**
      * Displays a list of datasets created by the logged user
      * for the given organisation
      *
@@ -231,10 +269,13 @@ class UserController extends Controller {
 
         $perPage = 6;
         $params = [
-            'api_key'          => \Auth::user()->api_key,
-            'criteria'         => ['keywords' => $search],
-            'records_per_page' => $perPage,
-            'page_number'      => !empty($request->page) ? $request->page : 1,
+            'api_key'           => \Auth::user()->api_key,
+            'criteria'          => [
+                'keywords'          => $search,
+                'created_by'        => \Auth::user()->id,
+            ],
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
         ];
 
         $searchRq = Request::create('/api/searchDataSet', 'POST', $params);
@@ -249,15 +290,12 @@ class UserController extends Controller {
 
         $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
 
-        return view(
-            'user/datasets',
-            [
-                'class'         => 'user',
-                'datasets'      => $paginationData['items'],
-                'pagination'    => $paginationData['paginate'],
-                'search'        => $search
-            ]
-        );
+        return view('user/datasets', [
+            'class'         => 'user',
+            'datasets'      => $paginationData['items'],
+            'pagination'    => $paginationData['paginate'],
+            'search'        => $search,
+        ]);
     }
 
     public function orgDatasets(Request $request) {
@@ -284,9 +322,9 @@ class UserController extends Controller {
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return back();
@@ -303,6 +341,110 @@ class UserController extends Controller {
         );
     }
 
+    public function orgDatasetEdit(Request $request, DataSet $datasetModel, $uri)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $params = ['dataset_uri' => $uri];
+
+        $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+        $hasResources = Resource::where('data_set_id', $model->id)->count();
+        $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
+        $tagModel = Category::where('parent_id', $model->category_id)
+            ->whereHas('dataSetSubCategory', function($q) use($model) {
+                $q->where('data_set_id', $model->id);
+            })
+            ->get()
+            ->loadTranslations();
+
+        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($setRq);
+        $result = $api->getDataSetDetails($setRq)->getData();
+
+        if (!$result->success) {
+            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+
+            return back();
+        }
+
+        if ($request->has('save') || $request->has('publish')) {
+            $editData = $request->all();
+
+            if ($editData['uri'] == $uri) {
+                unset($editData['uri']);
+            }
+
+            if (!empty($editData['descript'])) {
+                $editData['description'] = $editData['descript'];
+            }
+
+            $tagList = $request->offsetGet('tags');
+
+            $editData = $this->prepareTags($editData);
+
+            $groupId = $request->offsetGet('group_id');
+
+            if ($groupId) {
+                $post = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $groupId,
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+            }
+
+            if ($request->has('publish')) {
+                $editData['status'] = DataSet::STATUS_PUBLISHED;
+            }
+
+            $edit = [
+                'api_key'       => Auth::user()->api_key,
+                'dataset_uri'   => $uri,
+                'data'          => $editData,
+            ];
+
+            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
+            $success = $api->editDataSet($editRq)->getData();
+
+            if ($success->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
+
+                return redirect()->back()->withInput()->withErrors($success->errors);
+            }
+        }
+
+        return view('user/orgDatasetEdit', [
+            'class'         => 'user',
+            'dataSet'       => $model,
+            'tagModel'      => $tagModel,
+            'withModel'     => $withModel,
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'hasResources'  => $hasResources,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
     /**
      * Displays detail information for a given dataset
      * created by the given user
@@ -311,25 +453,35 @@ class UserController extends Controller {
      * @return view with dataset information
      *
      */
-    public function datasetView(Request $request)
+    public function datasetView(Request $request, $uri)
     {
-        $params['dataset_uri'] = $request->uri;
+        $params['dataset_uri'] = $uri;
 
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
         // prepera request for resources
         unset($params['dataset_uri']);
-        $params['criteria']['dataset_uri'] = $request->uri;
+        $params['criteria']['dataset_uri'] = $uri;
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        if ($request->has('delete')) {
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return redirect('/user/datasets');
+        }
+
         return view('user/datasetView', [
             'class'     => 'user',
-            'dataset'   => $dataset->data,
-            'resources' => $resources->resources
+            'dataset'   => $this->getModelUsernames($dataset->data),
+            'resources' => $resources->resources,
         ]);
     }
 
@@ -341,15 +493,15 @@ class UserController extends Controller {
      * @return view with dataset information
      *
      */
-    public function orgDatasetView(Request $request)
+    public function orgDatasetView(Request $request, $uri)
     {
-        $params['dataset_uri'] = $request->uri;
+        $params['dataset_uri'] = $uri;
 
         $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDataSetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
-        $params['criteria']['dataset_uri'] = $request->uri;
+        $params['criteria']['dataset_uri'] = $uri;
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -368,6 +520,16 @@ class UserController extends Controller {
                 $dataset->data->updated_by = is_null($dataset->data->updated_by) ? null : User::find($dataset->data->updated_by)->value('username');
                 $dataset->data->created_by = is_null($dataset->data->created_by) ? null : User::find($dataset->data->created_by)->value('username');
             }
+        }
+
+        if ($request->has('delete')) {
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return redirect('/user/organisations/datasets');
         }
 
         return view(
@@ -397,11 +559,7 @@ class UserController extends Controller {
         $api = new ApiDataSet($request);
         $datasets = $api->deleteDataSet($request)->getData();
 
-        if ($datasets->success) {
-            return true;
-        }
-
-        return false;
+        return $datasets->success;
     }
 
     /**
@@ -413,59 +571,53 @@ class UserController extends Controller {
      * @return view with input fields for creation or with created dataset
      *
      */
-    public function datasetCreate(Request $request, DataSet $datasetModel)
+    public function datasetCreate(Request $request)
     {
-        $visibilityOptions = $datasetModel->getVisibility();
+        $visibilityOptions = DataSet::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
-        $errors = [];
         $data = $request->all();
 
         if ($data) {
             // prepare post data for API request
-            $data['locale'] = \LaravelLocalization::getCurrentLocale();
-            if (isset($data['tags'])) {
-                foreach ($data['tags'] as $locale => $tags) {
-                    $data['tags'][$locale] = explode(',', $tags);
-                }
-            }
+            $data = $this->prepareTags($data);
 
             if (!empty($data['group_id'])) {
                 $groupId = $data['group_id'];
             }
 
-            unset($data['group_id']);
+            unset($data['group_id'], $data['add_resource']);
 
             // make request to API
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
+
             $savePost = Request::create('/api/addDataSet', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $result = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataSet($savePost)->getData();
 
-            if ($result->success) {
-                // connect data set to group
+            if ($save->success) {
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
-                    $groupParams['data_set_uri'] = $result->uri;
+                    $groupParams['data_set_uri'] = $save->uri;
                     $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $result = $api->addDataSetToGroup($addGroup)->getData();
+                    $api->addDataSetToGroup($addGroup)->getData();
                 }
 
-                $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
-                return redirect()->route('datasetView', ['uri' => $result->uri]);
-            } else {
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                foreach ($result->errors as $field => $msg) {
-                    $errors[substr($field, strpos($field, ".") + 1)] = $msg[0];
+                if ($request->has('add_resource')) {
+                    return redirect()->route('resourceCreate', ['uri' => $save->uri]);
                 }
 
-                $request->flash();
-                $request->session()->flash('errors', $errors);
-                $request->session()->flash('alert-danger', $result->error->message);
+                return redirect()->route('datasetView', ['uri' => $save->uri]);
             }
+
+            $request->session()->flash('alert-danger', $save->error->message);
+
+            return redirect()->back()->withInput()->withErrors($save->errors);
         }
 
         return view('user/datasetCreate', [
@@ -476,7 +628,127 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'fields'        => self::getDatasetTransFields(),
-        ])->with('errors', $errors);
+        ]);
+    }
+
+    public function orgDatasetCreate(Request $request)
+    {
+        $visibilityOptions = DataSet::getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $data = $request->all();
+        $errors = [];
+
+        if ($data) {
+            // prepare post data for API request
+            $data = $this->prepareTags($data);
+
+            if (!empty($data['group_id'])) {
+                $groupId = $data['group_id'];
+            }
+
+            unset($data['group_id'], $data['add_resource']);
+
+            // make request to API
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['data'] = $data;
+            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $api = new ApiDataSet($savePost);
+            $save = $api->addDataSet($savePost)->getData();
+
+            if ($save->success) {
+                // connect data set to group
+                if (isset($groupId)) {
+                    $groupParams['group_id'] = $groupId;
+                    $groupParams['data_set_uri'] = $save->uri;
+                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+                    $api->addDataSetToGroup($addGroup)->getData();
+                }
+
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                if ($request->has('add_resource')) {
+                    return redirect()->route('orgResourceCreate', ['uri' => $save->uri]);
+                }
+
+                return redirect('/user/organisations/dataset/view/'. $save->uri);
+            } else {
+                $request->session()->flash('alert-danger', $save->error->message);
+
+                return redirect()->back()->withInput()->withErrors($save->errors);
+            }
+        }
+
+        return view('user/orgDatasetCreate', [
+            'class'         => 'user',
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
+    public function groupDatasetCreate(Request $request)
+    {
+        $visibilityOptions = DataSet::getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $data = $request->all();
+        $errors = [];
+
+        if ($data) {
+            // prepare post data for API request
+            $data = $this->prepareTags($data);
+
+            if (!empty($data['group_id'])) {
+                $groupId = $data['group_id'];
+            }
+
+            unset($data['group_id'], $data['add_resource']);
+
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['data'] = $data;
+            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $api = new ApiDataSet($savePost);
+            $save = $api->addDataSet($savePost)->getData();
+
+            if ($save->success) {
+                if (isset($groupId)) {
+                    $groupParams['group_id'] = $groupId;
+                    $groupParams['data_set_uri'] = $save->uri;
+                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+                    $api->addDataSetToGroup($addGroup)->getData();
+                }
+
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                if ($request->has('add_resource')) {
+                    return redirect()->route('groupResourceCreate', ['uri' => $save->uri]);
+                }
+
+                return redirect()->route('groupDatasetView', ['uri' => $save->uri]);
+            }
+
+            $request->session()->flash('alert-danger', $save->error->message);
+
+            return redirect()->back()->withInput()->withErrors($save->errors);
+        }
+
+        return view('user/groupDatasetCreate', [
+            'class'         => 'user',
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
     }
 
     /**
@@ -487,37 +759,108 @@ class UserController extends Controller {
      *
      * @return view for edditing a dataset
      */
-    public function datasetEdit(Request $request, DataSet $datasetModel)
+    public function datasetEdit(Request $request, DataSet $datasetModel, $uri)
     {
         $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
-        $data = $request->all();
+        $params = ['dataset_uri' => $uri];
 
-        $params['dataset_uri'] = $request->uri;
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
-        $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+        $hasResources = Resource::where('data_set_id', $model->id)->count();
+        $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
+        $tagModel = Category::where('parent_id', $model->category_id)
+            ->whereHas('dataSetSubCategory', function($q) use($model) {
+                $q->where('data_set_id', $model->id);
+            })
+            ->get()
+            ->loadTranslations();
 
-        $datasetData = $dataset->data;
+        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($setRq);
+        $result = $api->getDataSetDetails($setRq)->getData();
+
+        if (!$result->success) {
+            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+
+            return back();
+        }
+
+        if ($request->has('save') || $request->has('publish')) {
+            $editData = $request->all();
+
+            if ($editData['uri'] == $uri) {
+                unset($editData['uri']);
+            }
+
+            if (!empty($editData['descript'])) {
+                $editData['description'] = $editData['descript'];
+            }
+
+            $tagList = $request->offsetGet('tags');
+
+            $editData = $this->prepareTags($editData);
+
+            $groupId = $request->offsetGet('group_id');
+
+            if ($groupId) {
+                $post = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $groupId,
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+            }
+
+            if ($request->has('publish')) {
+                $editData['status'] = DataSet::STATUS_PUBLISHED;
+            }
+
+            $edit = [
+                'api_key'       => Auth::user()->api_key,
+                'dataset_uri'   => $uri,
+                'data'          => $editData,
+            ];
+
+            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
+            $success = $api->editDataSet($editRq)->getData();
+
+            if ($success->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
+
+                return redirect()->back()->withInput()->withErrors($success->errors);
+            }
+        }
 
         return view('user/datasetEdit', [
             'class'         => 'user',
-            'fields'        => $dataset,
+            'dataSet'       => $model,
+            'tagModel'      => $tagModel,
+            'withModel'     => $withModel,
             'visibilityOpt' => $visibilityOptions,
             'categories'    => $categories,
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'hasResources'  => $hasResources,
             'fields'        => self::getDatasetTransFields(),
-        ])->with('errors', $errors);
-    }
-
-    public function translate()
-    {
+        ]);
     }
 
     /**
@@ -565,7 +908,7 @@ class UserController extends Controller {
                 ];
 
                 if ($request->offsetGet('email') && $request->offsetGet('email') !== $user['email']) {
-                    $request->session()->flash('alert-warning', 'Електронната поща ще се промени, когато я потвърдите!');
+                    $request->session()->flash('alert-warning', __('custom.email_change_upon_confirm'));
                 }
             }
 
@@ -582,7 +925,7 @@ class UserController extends Controller {
                         ],
                     ];
                 } else {
-                    $request->session()->flash('alert-danger', 'Грешна парола!');
+                    $request->session()->flash('alert-danger', __('custom.wrong_password'));
                 }
             }
 
@@ -597,11 +940,11 @@ class UserController extends Controller {
                 $result = $api->generateAPIKey($newKey)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно генериран АПИ ключ!');
+                    $request->session()->flash('alert-success', __('custom.api_key_success'));
 
                     return back();
                 } else {
-                    $request->session()->flash('alert-danger', 'Възникна грешка при генериране на АПИ ключ!');
+                    $request->session()->flash('alert-danger', __('custom.api_key_failure'));
                 }
             }
 
@@ -616,11 +959,11 @@ class UserController extends Controller {
                 $result = $api->deleteUser($delUser)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно изтрит потребител!');
+                    $request->session()->flash('alert-success', __('custom.user_success_delete'));
 
                     return redirect('/');
                 } else {
-                    $request->session()->flash('alert-danger', 'Възникна грешка при изтриване на потребител!');
+                    $request->session()->flash('alert-danger', __('custom.user_failure_delete'));
                 }
             }
 
@@ -630,11 +973,11 @@ class UserController extends Controller {
                 $result = $api->editUser($editPost)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Промените бяха успешно запазени!');
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     return back();
                 } else {
-                    $request->session()->flash('alert-danger', 'Промените не бяха запазени!');
+                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
 
                     $error = $result->errors;
                 }
@@ -698,7 +1041,6 @@ class UserController extends Controller {
     {
         $class = 'user';
         $params = [];
-        $error = [];
         $username = $request->offsetGet('key');
         $orgTypes = Organisation::getPublicTypes();
 
@@ -711,7 +1053,7 @@ class UserController extends Controller {
                 if (!empty($params['logo'])) {
                     try {
                         $img = \Image::make($params['logo']);
-                    } catch (NotReadableException $ex) {
+                    } catch (\Exception $ex) {
                         Log::error($ex->getMessage());
                     }
 
@@ -725,35 +1067,476 @@ class UserController extends Controller {
                     }
                 }
 
-                $params['locale'] = \LaravelLocalization::getCurrentLocale();
-
-                if (empty($params['type'])) {
-                    $params['type'] = Organisation::TYPE_CIVILIAN;
-                }
-
                 $req = Request::create('/addOrganisation', 'POST', ['api_key' => $apiKey,'data' => $params]);
                 $api = new ApiOrganisation($req);
                 $result = $api->addOrganisation($req)->getData();
 
                 if ($result->success) {
-                    $request->session()->flash('alert-success', 'Успешно създадена организация!');
+                    $userToOrgRole = new UserToOrgRole;
+                    $userToOrgRole->org_id = $result->org_id;
+                    $userToOrgRole->user_id = $user->id;
+                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                    try {
+                        $userToOrgRole->save();
+                        session()->flash('alert-success', __('custom.add_org_success'));
+                    } catch (QueryException $ex) {
+                        Log::error($ex->getMessage());
+                        session()->flash('alert-danger', __('custom.add_org_error'));
+                    }
 
                     return redirect('login');
                 } else {
-                    $error = $result->errors;
+                    session()->flash(
+                        'alert-danger',
+                        isset($result->error) ? $result->error->message : __('custom.add_org_error')
+                    );
+
+                    session()->flash ('_old_input', Input::all());
                 }
             }
         }
 
-        return view('user/orgRegistration', compact('class', 'error', 'orgTypes'));
+        return isset($result)
+            ? view(
+                'user/orgRegistration',
+                [
+                    'class' => 'user',
+                    'fields'=> self::getTransFields(),
+                ]
+            )->withErrors($result->errors)
+            : view(
+                'user/orgRegistration',
+                [
+                    'class' => 'user',
+                    'fields'=> self::getTransFields(),
+                ]
+            );
     }
 
     public function createLicense()
     {
     }
 
-    public function resourceView()
+    public function resourceCreate(Request $request, $datasetUri)
     {
+        $apiKey = \Auth::user()->api_key;
+        $types = Resource::getTypes();
+
+        if (DataSet::where('uri', $datasetUri)->count()) {
+            if ($request->has('ready_metadata')) {
+                $data = $request->all();
+                $metadata['api_key'] = $apiKey;
+                $metadata['data'] = $data;
+
+                if (isset($metadata['data']['file'])) {
+                    unset($metadata['data']['file']);
+                }
+
+                $metadata['dataset_uri'] = $datasetUri;
+
+                $savePost = Request::create('/api/addResourceMetadata', 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $result = $api->addResourceMetadata($savePost)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    $file = $request->file('file');
+
+                    if (
+                        $metadata['data']['type'] == Resource::TYPE_FILE
+                        && isset($file)
+                        && $file->isValid()
+                    ) {
+                        $extension = $file->getClientOriginalExtension();
+
+                        // check uploded file extention and use the corresponding converter
+                        switch ($extension) {
+                            case 'csv':
+                                $convertData = [
+                                    'api_key'   => $apiKey,
+                                    'data'      => file_get_contents($request->file->getRealPath()),
+                                ];
+                                $reqConvert = Request::create('/csv2json', 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->csv2json($reqConvert)->getData();
+                                $csvData = $resultConvert->data;
+                                Session::put('csvData', $csvData);
+
+                                return view('user/resourceImportCsv', [
+                                    'class'         => 'user',
+                                    'uri'           => $datasetUri,
+                                    'csvData'       => $csvData,
+                                    'types'         => $types,
+                                    'resourceUri'   => $result->data->uri,
+                                ]);
+                        }
+                    }
+
+                    return redirect()->route('datasetView', ['uri' => $datasetUri]);
+                }
+
+                return redirect()->back()->withInput()->withErrors($result->errors);
+            } else if ($request->has('ready_data')) {
+                $csvData = Session::get('csvData');
+                Session::forget('csvData');
+
+                $filtered = [];
+                $keepColumns = $request->offsetGet('keepcol');
+
+                if (empty($csvData)) {
+                    return redirect()->back()->withInput();
+                } else {
+                    foreach ($csvData as $row) {
+                        $filtered[] = array_intersect_key($row, $keepColumns);
+                    }
+                }
+
+                if (!empty($filtered)) {
+                    $elasticData = [
+                        'resource_uri'  => $request->offsetGet('resource_uri'),
+                        'data'          => $filtered,
+                    ];
+
+                    $reqElastic = Request::create('/addResourceData', 'POST', $elasticData);
+                    $api = new ApiResource($reqElastic);
+                    $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                    if (!$resultElastic->success) {
+                        $request->session()->flash('alert-danger', $resultElastic->error->message);
+
+                        return redirect()->back()->withInput()->withErrors($resultElastic->errors);
+                    }
+
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect()->route('datasetView', ['uri' => $datasetUri]);
+                }
+            }
+        } else {
+            return redirect('/user/datasets');
+        }
+
+        return view('user/resourceCreate', [
+            'class'     => 'user',
+            'uri'       => $datasetUri,
+            'types'     => $types,
+            'fields'    => self::getResourceTransFields()
+        ]);
+    }
+
+    public function groupResourceCreate(Request $request, $datasetUri)
+    {
+        $apiKey = \Auth::user()->api_key;
+        $types = Resource::getTypes();
+
+        if (DataSet::where('uri', $datasetUri)->count()) {
+            if ($request->has('ready_metadata')) {
+                $data = $request->all();
+                $metadata['api_key'] = $apiKey;
+                $metadata['data'] = $data;
+
+                if (isset($metadata['data']['file'])) {
+                    unset($metadata['data']['file']);
+                }
+
+                $metadata['dataset_uri'] = $datasetUri;
+
+                $savePost = Request::create('/api/addResourceMetadata', 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $result = $api->addResourceMetadata($savePost)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    $file = $request->file('file');
+
+                    if (
+                        $metadata['data']['type'] == Resource::TYPE_FILE
+                        && isset($file)
+                        && $file->isValid()
+                    ) {
+                        $extension = $file->getClientOriginalExtension();
+
+                        // check uploded file extention and use the corresponding converter
+                        switch ($extension) {
+                            case 'csv':
+                                $convertData = [
+                                    'api_key'   => $apiKey,
+                                    'data'      => file_get_contents($request->file->getRealPath()),
+                                ];
+                                $reqConvert = Request::create('/csv2json', 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->csv2json($reqConvert)->getData();
+                                $csvData = $resultConvert->data;
+                                Session::put('csvData', $csvData);
+
+                                return view('user/groupResourceImportCsv', [
+                                    'class'         => 'user',
+                                    'uri'           => $datasetUri,
+                                    'csvData'       => $csvData,
+                                    'types'         => $types,
+                                    'resourceUri'   => $result->data->uri,
+                                ]);
+                        }
+                    }
+
+                    return redirect()->route('groupDatasetView', ['uri' => $datasetUri]);
+                }
+
+                return redirect()->back()->withInput()->withErrors($result->errors);
+            } else if ($request->has('ready_data')) {
+                $csvData = Session::get('csvData');
+                Session::forget('csvData');
+
+                $filtered = [];
+                $keepColumns = $request->offsetGet('keepcol');
+
+                if (empty($csvData)) {
+                    return redirect()->back()->withInput();
+                } else {
+                    foreach ($csvData as $row) {
+                        $filtered[] = array_intersect_key($row, $keepColumns);
+                    }
+                }
+
+                if (!empty($filtered)) {
+                    $elasticData = [
+                        'resource_uri'  => $request->offsetGet('resource_uri'),
+                        'data'          => $filtered,
+                    ];
+
+                    $reqElastic = Request::create('/addResourceData', 'POST', $elasticData);
+                    $api = new ApiResource($reqElastic);
+                    $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                    if (!$resultElastic->success) {
+                        $request->session()->flash('alert-danger', $resultElastic->error->message);
+
+                        return redirect()->back()->withInput()->withErrors($resultElastic->errors);
+                    }
+
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect()->route('groupDatasetView', ['uri' => $datasetUri]);
+                }
+            }
+        } else {
+            return redirect('/user/groups/datasets');
+        }
+
+        return view('user/resourceCreate', [
+            'class'     => 'user',
+            'uri'       => $datasetUri,
+            'types'     => $types,
+            'fields'    => self::getResourceTransFields()
+        ]);
+    }
+
+    public function orgResourceCreate(Request $request, $datasetUri)
+    {
+        $apiKey = \Auth::user()->api_key;
+        $types = Resource::getTypes();
+
+        if (DataSet::where('uri', $datasetUri)->count()) {
+            if ($request->has('ready_metadata')) {
+                $data = $request->all();
+                $metadata['api_key'] = $apiKey;
+                $metadata['data'] = $data;
+
+                if (isset($metadata['data']['file'])) {
+                    unset($metadata['data']['file']);
+                }
+
+                $metadata['dataset_uri'] = $datasetUri;
+
+                $savePost = Request::create('/api/addResourceMetadata', 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $result = $api->addResourceMetadata($savePost)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    $file = $request->file('file');
+
+                    if (
+                        $metadata['data']['type'] == Resource::TYPE_FILE
+                        && isset($file)
+                        && $file->isValid()
+                    ) {
+                        $extension = $file->getClientOriginalExtension();
+
+                        // check uploded file extention and use the corresponding converter
+                        switch ($extension) {
+                            case 'csv':
+                                $convertData = [
+                                    'api_key'   => $apiKey,
+                                    'data'      => file_get_contents($request->file->getRealPath()),
+                                ];
+                                $reqConvert = Request::create('/csv2json', 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->csv2json($reqConvert)->getData();
+                                $csvData = $resultConvert->data;
+                                Session::put('csvData', $csvData);
+
+                                return view('user/orgResourceImportCsv', [
+                                    'class'         => 'user',
+                                    'uri'           => $datasetUri,
+                                    'csvData'       => $csvData,
+                                    'types'         => $types,
+                                    'resourceUri'   => $result->data->uri,
+                                ]);
+                        }
+                    }
+
+                    return redirect()->route('orgDatasetView', ['uri' => $datasetUri]);
+                }
+
+                return redirect()->back()->withInput()->withErrors($result->errors);
+            } else if ($request->has('ready_data')) {
+                $csvData = Session::get('csvData');
+
+                $filtered = [];
+                $keepColumns = $request->offsetGet('keepcol');
+
+                if (empty($csvData)) {
+                    return redirect()->back()->withInput();
+                } else {
+                    foreach ($csvData as $row) {
+                        $filtered[] = array_intersect_key($row, $keepColumns);
+                    }
+                }
+
+                if (!empty($filtered)) {
+                    $elasticData = [
+                        'resource_uri'  => $request->offsetGet('resource_uri'),
+                        'data'          => $filtered,
+                    ];
+
+                    $reqElastic = Request::create('/addResourceData', 'POST', $elasticData);
+                    $api = new ApiResource($reqElastic);
+                    $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                    if (!$resultElastic->success) {
+                        $request->session()->flash('alert-danger', $resultElastic->error->message);
+
+                        return redirect()->back()->withInput()->withErrors($resultElastic->errors);
+                    }
+
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect()->route('orgDatasetView', ['uri' => $datasetUri]);
+                }
+            }
+        } else {
+            return redirect('/user/organisations/datasets');
+        }
+
+        return view('user/resourceCreate', [
+            'class'     => 'user',
+            'uri'       => $datasetUri,
+            'types'     => $types,
+            'fields'    => self::getResourceTransFields()
+        ]);
+    }
+
+    /**
+     * Loads a view for checking out resource details
+     *
+     * @param Request $request
+     *
+     * @return view
+     */
+    public function resourceView(Request $request, $uri)
+    {
+        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $apiResources = new ApiResource($resourcesReq);
+        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resource = !empty($resource->resource) ? $resource->resource : null;
+        $data = [];
+
+        $resource = $this->getModelUsernames($resource);
+
+        if (!empty($resource)) {
+            if ($request->has('delete')) {
+                $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                $api = new ApiResource($rq);
+                $result = $api->deleteResource($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                    return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
+                }
+
+                $request->session()->flash('alert-success', __('custom.delete_error'));
+            }
+
+            $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+            $api = new ApiResource($rq);
+            $response = $api->getResourceData($rq)->getData();
+            $data = !empty($response->data) ? $response->data : [];
+
+            return view('user/resourceView', [
+                'class'         => 'user',
+                'resource'      => $resource,
+                'data'          => $data,
+            ]);
+        }
+
+        return redirect('/user/datasets');
+    }
+
+    public function resourceDownload(Request $request, $esid, $name)
+    {
+        $convertReq = Request::create('/api/toJSON', 'POST', ['es_id' => $esid]);
+        $apiResources = new ApiConversion($convertReq);
+        $resource = $apiResources->toJSON($convertReq)->getData();
+
+        if (!empty($resource->data)) {
+            $handle = fopen('../storage/app/'. $name, 'w+');
+            $path = stream_get_meta_data($handle)['uri'];
+
+            foreach(json_decode(json_encode($resource->data), true) as $row) {
+                fputcsv($handle, $row);
+            }
+
+            fclose($handle);
+
+            $headers = array(
+                'Content-Type' => 'text/csv',
+            );
+
+            return response()->download($path, $name .'.csv', $headers)->deleteFileAfterSend(true);
+        }
+
+        return back();
+    }
+
+    /**
+     * Returns model with usernames instead of user ids for record signatures
+     *
+     * @param Model $model
+     *
+     * @return view
+     */
+    public function getModelUsernames($model) {
+        if (isset($model)) {
+            if (
+                $model->updated_by == $model->created_by
+                && !is_null($model->created_by)
+            ) {
+                $username = User::find($model->created_by)->username;
+                $model->updated_by = $username;
+                $model->created_by = $username;
+            } else {
+                $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->username;
+                $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->username;
+            }
+        }
+
+        return $model;
     }
 
     /**
@@ -767,27 +1550,42 @@ class UserController extends Controller {
     {
         $uri = $request->uri;
 
-        $resourcesReq = Request::create('/api/listResources', 'POST', ['criteria' => ['resource_uri' => $uri]]);
+        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
-        $resources = $apiResources->listResources($resourcesReq)->getData();
-        $resource = !empty($resources->resources) ? $resources->resources[0] : null;
+        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resource = !empty($resource->resource) ? $resource->resource : null;
 
-        if (!is_null($resource) && isset($resource->name)) {
+        $resource = $this->getModelUsernames($resource);
 
-            if (
-                $resource->updated_by == $resource->created_by
-                && !is_null($resource->created_by)
-            ) {
-                $username = User::find($resource->created_by)->value('username');
-                $resource->updated_by = $username;
-                $resource->created_by = $username;
-            } else {
-                $resource->updated_by = is_null($resource->updated_by) ? null : User::find($resource->updated_by)->value('username');
-                $resource->created_by = is_null($resource->created_by) ? null : User::find($resource->created_by)->value('username');
+        if (!empty($resource)) {
+            if ($request->has('delete')) {
+                $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                $api = new ApiResource($rq);
+                $result = $api->deleteResource($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                    return redirect()->route('orgDatasetView', ['uri' => $resource->dataset_uri]);
+                }
+
+                $request->session()->flash('alert-success', __('custom.delete_error'));
             }
+
+            $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+            $api = new ApiResource($rq);
+            $response = $api->getResourceData($rq)->getData();
+            $data = !empty($response->data) ? $response->data : [];
+
+            return view('user/orgResourceView', [
+                'class'         => 'user',
+                'resource'      => $resource,
+                'data'          => $data,
+                'activeMenu'    => 'organisation'
+            ]);
         }
 
-        return view('user/orgResourceView', ['class' => 'user', 'resource' => $resource, 'activeMenu' => 'organisation']);
+        return redirect('/user/organisations');
     }
 
     /**
@@ -829,20 +1627,32 @@ class UserController extends Controller {
      *
      * @return view with a list of organisations and request success message
      */
-    public function deleteOrg(Request $request)
+    public function deleteOrg(Request $request, $id)
     {
-        $params = [
-            'api_key' => \Auth::user()->api_key,
-            'org_id'  => $request->org_id,
-        ];
+        $orgId = Organisation::where('id', $id)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
 
-        $request = Request::create('/api/deleteOrganisation', 'POST', $params);
-        $api = new ApiOrganisation($request);
-        $result = $api->deleteOrganisation($request)->getData();
+        if ($this->checkUserOrg($orgId)) {
+            $params = [
+                'api_key' => \Auth::user()->api_key,
+                'org_id'  => $id,
+            ];
 
-        return !$result->success
-            ? redirect('/user/organisations')->with('result', $result)
-            : redirect('/user/organisations')->with('success', 'Организацията беше изтрита успешно!');
+            $request = Request::create('/api/deleteOrganisation', 'POST', $params);
+            $api = new ApiOrganisation($request);
+            $result = $api->deleteOrganisation($request)->getData();
+
+            if ($result->success) {
+                session()->flash('alert-success', __('custom.delete_success'));
+
+                return back();
+            }
+        }
+
+        session()->flash('alert-danger', __('custom.delete_error'));
+
+        return back();
     }
 
     /**
@@ -968,7 +1778,7 @@ class UserController extends Controller {
                 $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
 
                 unset($post['data']['logo']);
-            } catch (NotReadableException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -979,55 +1789,147 @@ class UserController extends Controller {
         $result = $api->addOrganisation($request)->getData();
 
         if ($result->success) {
-            session()->flash('alert-success', 'Промените бяха запазени успешно!');
+            session()->flash('alert-success', __('custom.add_org_success'));
         } else {
             session()->flash(
                 'alert-danger',
-                isset($result->error) ? $result->error->message : __('Add organisation failure!')
+                isset($result->error) ? $result->error->message : __('custom.add_org_error')
             );
         }
 
+
         return $result->success
-            ? redirect()->route('userOrgView', ['org_id' => $result->org_id])
-            : redirect('user/organisations/register')->withInput(Input::all());
+            ? redirect('user/organisations/view/'. Organisation::find($result->org_id)->value('uri'))
+            : redirect('user/organisations/register')->withInput(Input::all())->withErrors($result->errors);
     }
 
-     /**
+    /**
      * Loads a view for viewing an organisation
      *
      * @param Request $request
      *
      * @return view to view the a registered organisation
      */
-    public function viewOrg(Request $request)
+    public function viewOrg(Request $request, $uri)
     {
-        $uri = $request->offsetGet('uri');
-        $orgId = $request->has('org_id') ? $request->org_id : Organisation::where('uri', $uri)->value('id');
+        $orgId = Organisation::where('uri', $uri)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
 
-        if ($orgId) {
+        if ($this->checkUserOrg($orgId)) {
             $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
             $api = new ApiOrganisation($request);
             $result = $api->getOrganisationDetails($request)->getData();
 
-            return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
+            if ($result->success) {
+                return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
+            }
         }
 
         return redirect('/user/organisations');
     }
 
-    public function viewOrgMembers(Request $request)
+    /**
+     * Checks if the logged user belongs to an organisation
+     *
+     * @param Request $request
+     *
+     * @return true or false
+     */
+    private function checkUserOrg($orgId)
+    {
+        if (UserToOrgRole::where(['user_id' => \Auth::user()->id, 'org_id' => $orgId])->count()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function viewOrgMembers(Request $request, $uri)
     {
         $perPage = 6;
-        $uri = $request->offsetGet('uri');
         $filter = $request->offsetGet('filter');
         $userId = $request->offsetGet('user_id');
         $roleId = $request->offsetGet('role_id');
         $keywords = $request->offsetGet('keywords');
-        $org = $request->has('org_id')
-            ? Organisation::find($request->org_id)
-            : Organisation::where('uri', $uri)->first();
+        $org = Organisation::where('uri', $uri)->first();
+        $isAdmin = Role::isAdmin($org->id);
 
         if ($org) {
+            if ($request->has('edit_member')) {
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('delete')) {
+                if ($this->delMember($userId, $org->id)) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite_existing')) {
+                $newUser = $request->offsetGet('user');
+                $newRole = $request->offsetGet('role');
+
+                $rq = Request::create('/api/addMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $newUser,
+                    'role_id'   => $newRole,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->addMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite')) {
+                $email = $request->offsetGet('email');
+                $role = $request->offsetGet('role');
+
+                $rq = Request::create('/inviteUser', 'POST', [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'email'     => $email,
+                        'org_id'    => $org->id,
+                        'role_id'   => $role,
+                        'generate'  => true,
+                    ],
+                ]);
+                $api = new ApiUser($rq);
+                $result = $api->inviteUser($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
             $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
 
             $criteria = ['org_id' => $org->id];
@@ -1062,22 +1964,6 @@ class UserController extends Controller {
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
 
-            if ($request->has('edit_member')) {
-                $rq = Request::create('/api/editMember', 'POST', [
-                    'org_id'    => $org->id,
-                    'user_id'   => $userId,
-                    'role_id'   => $roleId,
-                ]);
-                $api = new ApiOrganisation($rq);
-                $result = $api->editMember($rq)->getData();
-
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.edit_success'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.edit_error'));
-                }
-            }
-
             return view('user/orgMembers', [
                 'class'         => 'user',
                 'members'       => $paginationData['items'],
@@ -1086,75 +1972,70 @@ class UserController extends Controller {
                 'roles'         => $roles,
                 'filter'        => $filter,
                 'keywords'      => $keywords,
+                'isAdmin'       => $isAdmin
             ]);
         }
 
         return redirect('/user/organisations');
     }
 
-    public function addOrgMembersNew(Request $request)
+    public function addOrgMembersNew(Request $request, $uri)
     {
-        $uri = $request->offsetGet('uri');
-        $org = $request->has('org_id')
-            ? Organisation::find($request->org_id)
-            : Organisation::where('uri', $uri)->first();
+        $organisation = Organisation::where('uri', $uri)->first();
+        $class = 'user';
 
-        if ($org && $request->isMethod('post')) {
-            $post = $request->all();
-
-            $rq = Request::create('/register', 'POST', ['data' => $post]);
-            $api = new ApiUser($rq);
-            $result = $api->register($rq)->getData();
-
-            if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
-
-                return redirect()->route('userOrgMembersView', ['uri' => $org->uri]);
-            } else {
-                $error = $result->errors;
-            }
-
+        if ($organisation) {
             $rq = Request::create('/api/listRoles', 'POST');
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
+            $digestFreq = UserSetting::getDigestFreq();
 
-            return view('user/registration', compact('class', 'error', 'digestFreq', 'invMail', 'roles'));
-        }
+            if ($request->has('save')) {
+                $post = [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'firstname'         => $request->offsetGet('firstname'),
+                        'lastname'          => $request->offsetGet('lastname'),
+                        'username'          => $request->offsetGet('username'),
+                        'email'             => $request->offsetGet('email'),
+                        'password'          => $request->offsetGet('password'),
+                        'password_confirm'  => $request->offsetGet('password_confirm'),
+                        'role_id'           => $request->offsetGet('role_id'),
+                        'org_id'            => $organisation->id,
+                    ],
+                ];
 
-        return redirect('/user/organisations');
-    }
+                $rq = Request::create('/api/addUser', 'POST', $post);
+                $api = new ApiUser($rq);
+                $result = $api->register($rq)->getData();
 
-    public function delOrgMember(Request $request)
-    {
-        $id = $request->offsetGet('id');
-        $uri = $request->offsetGet('uri');
-        $org = $request->has('org_id')
-            ? Organisation::find($request->org_id)
-            : Organisation::where('uri', $uri)->first();
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
 
-        if (Auth::check() && $org && $id) {
-            $rq = Request::create('/api/delMember', 'POST', [
-                'api_key'   => Auth::user()->api_key,
-                'org_id'    => $org->id,
-                'user_id'   => $id,
-            ]);
-            $api = new ApiOrganisation($rq);
-            $result = $api->delMember($rq)->getData();
+                    return redirect('/user/organisations/members/'. $uri);
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
 
-            if (!empty($result->success)) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
-            } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
+                    return redirect()->back()->withInput()->withErrors($result->errors);
+                }
             }
         }
 
-        return redirect()->action('UserController@viewOrgMembers', ['uri' => $uri]);
+        return view('user/addOrgMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'organisation'));
     }
 
-    public function addOrgMembersByMail(Request $request)
+    public function delMember($id, $orgId)
     {
+        $rq = Request::create('/api/delMember', 'POST', [
+            'api_key'   => Auth::user()->api_key,
+            'org_id'    => $orgId,
+            'user_id'   => $id,
+        ]);
+        $api = new ApiOrganisation($rq);
+        $result = $api->delMember($rq)->getData();
 
+        return $result->success;
     }
 
     /**
@@ -1167,20 +2048,20 @@ class UserController extends Controller {
     public function mailConfirmation(Request $request)
     {
         Auth::logout();
-        \Session::flush();
         $class = 'user';
         $hash = $request->offsetGet('hash');
         $mail = $request->offsetGet('mail');
+        $id = $request->offsetGet('id');
 
         if ($hash && $mail) {
-            $user = User::where('hash_id', $request->offsetGet('hash'))->first();
+            $user = User::find($id);
 
-            if ($user) {
+            if ($user->hash_id == $hash) {
                 $user->email = $request->offsetGet('mail');
 
                 try {
                     $user->save();
-                    $request->session()->flash('alert-success', 'Успешно променихте електронната си поща');
+                    $request->session()->flash('alert-success', __('custom.email_change_success'));
 
                     return redirect('login');
                 } catch (QueryException $ex) {
@@ -1192,14 +2073,19 @@ class UserController extends Controller {
                 $mailData = [
                     'user'  => $user->firstname,
                     'hash'  => $user->hash_id,
-                    'mail'  => $mail
+                    'mail'  => $mail,
+                    'id'    => $id,
                 ];
 
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
                     $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
                     $m->to($mailData['mail'], $mailData['user']);
-                    $m->subject('Смяна на екектронен адрес!');
+                    $m->subject(__('custom.mail_change'));
                 });
+
+                $request->session()->flash('alert-warning', __('custom.mail_sent_again'));
+
+                return redirect('login');
             }
         }
 
@@ -1212,8 +2098,22 @@ class UserController extends Controller {
      * @return view login on success or error on fail
      */
     public function showOrgRegisterForm() {
+        $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
-        return view('user/orgRegister', ['class' => 'user', 'fields' => self::getTransFields()]);
+        $query->whereHas('userToOrgRole', function($q) {
+            $q->where('user_id', \Auth::user()->id);
+        });
+
+        $parentOrgs = $query->get();
+
+        return view(
+            'user/orgRegister',
+            [
+                'class'      => 'user',
+                'fields'     => self::getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ]
+        );
     }
 
     /**
@@ -1221,85 +2121,100 @@ class UserController extends Controller {
      *
      * @param Request $request
      *
-     * @return view for editing  org details
+     * @return view for editing org details
      */
-    public function editOrg(Request $request)
+    public function editOrg(Request $request, $uri)
     {
-        if (isset($request->view)) {
-            $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
+        $orgId = Organisation::where('uri', $uri)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
+
+        if ($this->checkUserOrg($orgId)) {
+            $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
+
+            $query->whereHas('userToOrgRole', function($q) {
+                $q->where('user_id', \Auth::user()->id);
+            });
+
+            $parentOrgs = $query->get();
+
+            if (isset($request->view)) {
+                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+                return view(
+                    'user/orgEdit',
+                    [
+                        'class'      => 'user',
+                        'model'      => $orgModel,
+                        'withModel'  => $customModel,
+                        'fields'     => self::getTransFields(),
+                        'parentOrgs' => $parentOrgs
+                    ]
+                );
+            }
+
+            $post = [
+                'data'          => $request->all(),
+                'org_id'        => $orgId,
+                'parentOrgs'    => $parentOrgs,
+            ];
+
+            if (!empty($post['data']['logo'])) {
+                try {
+                    $img = \Image::make($post['data']['logo']);
+
+                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                    $post['data']['logo_mimetype'] = $img->mime();
+                    $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
+
+                    unset($post['data']['logo']);
+                } catch (\Exception $ex) {
+                    Log::error($ex->getMessage());
+                }
+            }
+
+            $post['data']['description'] = $post['data']['descript'];
+            $request = Request::create('/api/editOrganisation', 'POST', $post);
+            $api = new ApiOrganisation($request);
+            $result = $api->editOrganisation($request)->getData();
+            $errors = !empty($result->errors) ? $result->errors : [];
+
+            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            return view(
-                'user/orgEdit',
-                [
-                    'class'     => 'user',
-                    'model'     => $orgModel,
-                    'withModel' => $customModel,
-                    'fields'    => self::getTransFields()
-                ]
-            );
-        }
-
-        $post = [
-            'data'   => $request->all(),
-            'org_id' => $request->org_id
-        ];
-
-        if (!empty($post['data']['logo'])) {
-            try {
-                $img = \Image::make($post['data']['logo']);
-
-                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                $post['data']['logo_mimetype'] = $img->mime();
-                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-                unset($post['data']['logo']);
-            } catch (NotReadableException $ex) {
-                Log::error($ex->getMessage());
+            if ($result->success) {
+                session()->flash('alert-success', __('custom.edit_success'));
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
             }
+
+            return !$result->success
+                ? view(
+                    'user/orgEdit',
+                    [
+                        'class'      => 'user',
+                        'model'      => $orgModel,
+                        'withModel'  => $customModel,
+                        'fields'     => self::getTransFields(),
+                        'parentOrgs' => $parentOrgs
+                    ]
+                )->withErrors($result->errors)
+                : view(
+                    'user/orgEdit',
+                    [
+                        'class'      => 'user',
+                        'model'      => $orgModel,
+                        'withModel'  => $customModel,
+                        'fields'     => self::getTransFields(),
+                        'parentOrgs' => $parentOrgs
+                    ]
+                );
         }
 
-        $post['data']['locale'] = \LaravelLocalization::getCurrentLocale();
-        $post['data']['description'] = $post['data']['descript'];
-        $request = Request::create('/api/editOrganisation', 'POST', $post);
-        $api = new ApiOrganisation($request);
-        $result = $api->editOrganisation($request)->getData();
-        $errors = !empty($result->errors) ? $result->errors : [];
-
-        $orgModel = Organisation::with('CustomSetting')->find($request->org_id)->loadTranslations();
-        $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-        $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
-
-        if ($result->success) {
-            session()->flash('alert-success', 'Промените бяха запазени успешно!');
-        } else {
-            session()->flash(
-                'alert-danger',
-                isset($result->error) ? $result->error->message : __('Add organisation failure!')
-            );
-        }
-
-        return !$result->success
-            ? view(
-                'user/orgEdit',
-                [
-                    'class'     => 'user',
-                    'model'     => $orgModel,
-                    'withModel' => $customModel,
-                    'fields'    => self::getTransFields(),
-                    'result'    => $result
-                ]
-            )
-            : view(
-                'user/orgEdit',
-                [
-                    'class'     => 'user',
-                    'model'     => $orgModel,
-                    'withModel' => $customModel,
-                    'fields'    => self::getTransFields()
-                ]
-            );
+        return redirect('/user/organisations');
     }
 
     /**
@@ -1385,59 +2300,6 @@ class UserController extends Controller {
     }
 
     /**
-     * Generates an email with user credential for an invited user or
-     * sends an invite email
-     *
-     * @param Request $request
-     *
-     * @return view on success or fail with corresponding messages
-     */
-    public function inviteUser(Request $request)
-    {
-        $class = 'user';
-        $invData = $request->all();
-        $apiKey = Auth::user()->api_key;
-        $roleReqData = [
-            'api_key'   => $apiKey,
-            'criteria'  => [
-                'active'    => 1,
-            ],
-        ];
-
-        $roleReq = Request::create('/api/listRoles', 'POST', $roleReqData);
-        $roleApi = new ApiRole($roleReq);
-        $roleResult = $roleApi->listRoles($roleReq)->getData();
-        $roleList = isset($roleResult->roles) ? $roleResult->roles : [];
-
-        if ($request->has('generate') || $request->has('send')) {
-            $post = $request->all();
-
-            $validator = Validator::make($request->all(), ['email' => 'required|email']);
-
-            $invData['api_key'] = $apiKey;
-            $invData['generate'] = $request->has('generate');
-
-            $invRequest = Request::create('/api/inviteUser', 'POST', ['data' => $invData]);
-            $api = new ApiUser($invRequest);
-            $result = $api->inviteUser($invRequest)->getData();
-
-            if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.invite_success'));
-            } else {
-                $errors = $result->errors;
-            }
-        }
-
-        if (!empty($errors)) {
-            foreach ($errors as $msg) {
-                $request->session()->flash('alert-danger', $msg[0]);
-            }
-        }
-
-        return view('/user/invite', compact('class', 'roleList'));
-    }
-
-    /**
      * Checks if pregenerated credentials are correct
      *
      * @param Request $request
@@ -1459,12 +2321,21 @@ class UserController extends Controller {
             ];
 
             if (Auth::attempt($cred)) {
-                $request->session()->flash('alert-success', 'Моля попълнете вашите данни');
+                $user = User::find(Auth::user()->id);
+
+                $user->active = true;
+
+                try {
+                    $user->save();
+                    $request->session()->flash('alert-success', __('custom.successful_account_activation'));
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
 
                 return redirect()->route('settings');
             }
         } else {
-            $request->session()->flash('alert-danger', 'Грешни параметри на заявка');
+            $request->session()->flash('alert-danger', __('custom.incorrect_request_params'));
 
             return redirect('/');
         }
@@ -2007,25 +2878,12 @@ class UserController extends Controller {
 
                 try {
                     $user->save();
-                    $request->session()->flash('alert-success', 'Успешно активирахте акаунта си!');
+                    $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
 
                     return redirect('login');
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
-            }
-
-            if ($request->has('generate')) {
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject('Акаунтът ви беше успешно създаден!');
-                });
             }
         }
 
@@ -2223,7 +3081,7 @@ class UserController extends Controller {
                     $data['logo_data'] = file_get_contents($data['logo']);
 
                     unset($data['logo']);
-                } catch (NotReadableException $ex) {
+                } catch (\Exception $ex) {
                     Log::error($ex->getMessage());
                 }
             }
@@ -2238,14 +3096,13 @@ class UserController extends Controller {
             $result = $orgApi->addGroup($groupReq)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', 'Успешно създадена група!');
+                $request->session()->flash('alert-success', __('custom.successful_group_creation'));
 
-                return redirect('/user/groupView/'. $result->id);
+                return redirect('/user/groups/view/'. Organisation::find($result->id)->value('uri'));
             } else {
-                $request->session()->flash('alert-danger', 'Възникна грешла при създаване на група!');
-                $request->session()->flash('result', $result);
+                $request->session()->flash('alert-danger', __('custom.failed_group_creation'));
 
-                return back();
+                return back()->withErrors($result->errors)->withInput(Input::all());
             }
         }
 
@@ -2259,27 +3116,26 @@ class UserController extends Controller {
      *
      * @return view with list of groups
      */
-    public function userGroups(Request $request)
+    public function groups(Request $request)
     {
         $class = 'user';
         $groups = [];
         $perPage = 6;
         $params = [
             'api_key'          => \Auth::user()->api_key,
+            'criteria'         => [
+                'user_id'           => \Auth::user()->id,
+            ],
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $orgReq = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($orgReq);
-        $result = $api->getUserOrganisations($orgReq)->getData();
+        $result = $api->listGroups($orgReq)->getData();
 
-        if ($result->success) {
-            foreach ($result->organisations as $org) {
-                if ($org->type == Organisation::TYPE_GROUP) {
-                    $groups[] = $org;
-                }
-            }
+        if (!empty($result->groups)) {
+            $groups = $result->groups;
         }
 
         $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
@@ -2299,25 +3155,26 @@ class UserController extends Controller {
      *
      * @return view on success on failure redirect to homepage
      */
-    public function groupView(Request $request, $id)
+    public function viewGroup(Request $request, $uri)
     {
-        $class = 'user';
+        $orgId = Organisation::where('uri', $uri)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
 
-        $params = ['group_id' => $id];
+        if ($this->checkUserOrg($orgId)) {
+            $request = Request::create('/api/getGroupDetails', 'POST', [
+                'group_id'  => $orgId,
+                'locale'    => \LaravelLocalization::getCurrentLocale(),
+            ]);
+            $api = new ApiOrganisation($request);
+            $result = $api->getGroupDetails($request)->getData();
 
-        $grpReq = Request::create('/api/getGroupDetails', 'POST', $params);
-        $api = new ApiOrganisation($grpReq);
-        $result = $api->getGroupDetails($grpReq)->getData();
-
-        if ($result->success) {
-            $group = $result->data;
-
-            return view('user/groupView', compact('class', 'group'));
-        } else {
-            $request->session()->flash('alert-danger', 'Не беше намерена група!');
-
-            return redirect('/');
+            if ($result->success) {
+                return view('user/groupView', ['class' => 'user', 'group' => $result->data, 'id' => $orgId]);
+            }
         }
+
+        return redirect('/user/groups');
     }
 
     /**
@@ -2330,24 +3187,30 @@ class UserController extends Controller {
      */
     public function deleteGroup(Request $request, $id)
     {
-        $delArr = [
-            'api_key'   => Auth::user()->api_key,
-            'group_id'  => $id,
-        ];
+        $orgId = Organisation::where('id', $id)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
 
-        $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
-        $api = new ApiOrganisation($delReq);
-        $delRes = $api->deleteGroup($delReq)->getData();
+        if ($this->checkUserOrg($orgId)) {
+            $delArr = [
+                'api_key'   => Auth::user()->api_key,
+                'group_id'  => $id,
+            ];
 
-        if ($delRes->success) {
-            $request->session()->flash('alert-success', 'Успешно изтрита група!');
+            $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
+            $api = new ApiOrganisation($delReq);
+            $result = $api->deleteGroup($delReq)->getData();
 
-            return back();
-        } else {
-            $request->session()->flash('alert-danger', 'Неуспешно изтриване на група!');
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.delete_success'));
 
-            return back();
+                return back();
+            }
         }
+
+        $request->session()->flash('alert-danger', __('custom.delete_error'));
+
+        return back();
     }
 
     /**
@@ -2357,42 +3220,60 @@ class UserController extends Controller {
      * @param integer $id
      * @return view on success with messages
      */
-    public function editGroup(Request $request, $id)
+    public function editGroup(Request $request, $uri)
     {
-        $class = 'user';
-        $fields = self::getGroupTransFields();
+        $orgId = Organisation::where('uri', $uri)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
 
-        $model = Organisation::find($id)->loadTranslations();
-        $withModel = CustomSetting::where('org_id', $id)->get()->loadTranslations();
-        $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
+        if ($this->checkUserOrg($orgId)) {
+            $class = 'user';
+            $fields = self::getGroupTransFields();
 
-        if ($request->has('edit')) {
-            $data = $request->all();
-            $data['locale'] = \LaravelLocalization::getCurrentLocale();
-            $data['description'] = $data['descript'];
+            $model = Organisation::find($orgId)->loadTranslations();
+            $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
+            $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
-            $params = [
-                'api_key'   => Auth::user()->api_key,
-                'group_id'  => $id,
-                'data'      => $data,
-            ];
+            if ($request->has('edit')) {
+                $data = $request->all();
 
-            $editReq = Request::create('/api/editGroup', 'POST', $params);
-            $api = new ApiOrganisation($editReq);
-            $result = $api->editGroup($editReq)->getData();
+                $data['description'] = isset($data['descript']) ? $data['descript'] : null;
 
-            if ($result->success) {
-                $request->session()->flash('alert-success', 'Успешно запазени данни!');
+                if (!empty($data['logo'])) {
+                    try {
+                        $img = \Image::make($data['logo']);
 
-                return back();
-            } else {
-                $request->session()->flash('alert-danger', 'Грешно въведени данни!');
+                        $data['logo_file_name'] = $data['logo']->getClientOriginalName();
+                        $data['logo_mime_type'] = $img->mime();
+                        $data['logo_data'] = file_get_contents($data['logo']);
 
-                return back();
+                        unset($data['logo']);
+                    } catch (\Exception $ex) {}
+                }
+
+                $params = [
+                    'api_key'   => Auth::user()->api_key,
+                    'group_id'  => $orgId,
+                    'data'      => $data,
+                ];
+
+                $editReq = Request::create('/api/editGroup', 'POST', $params);
+                $api = new ApiOrganisation($editReq);
+                $result = $api->editGroup($editReq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return back()->withErrors(isset($result->errors) ? $result->errors : []);
             }
+
+            return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
         }
 
-        return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
+        return redirect('/user/groups');
     }
 
     /**
@@ -2471,7 +3352,7 @@ class UserController extends Controller {
                 return redirect('login');
             } else {
                 foreach ($result->errors as $field => $msg) {
-                    $errors[substr($field, strpos($field, ".") )] = $msg[0];
+                    $errors[substr($field, strpos($field, '.') )] = $msg[0];
                 }
             }
         }
@@ -2517,57 +3398,241 @@ class UserController extends Controller {
         $actMenu = 'group';
         $groups = [];
         $perPage = 6;
-
         $params = [
             'api_key'          => \Auth::user()->api_key,
+            'criteria'         => [
+                'user_id'           => \Auth::user()->id,
+            ],
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgReq = Request::create('/api/getUserOrganisations', 'POST', $params);
+        $orgReq = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($orgReq);
-        $result = $api->getUserOrganisations($orgReq)->getData();
+        $result = $api->listGroups($orgReq)->getData();
 
         if ($result->success) {
-            foreach ($result->organisations as $org) {
-                if ($org->type == Organisation::TYPE_GROUP) {
-                    $groups[] = $org->id;
-                }
+            foreach ($result->groups as $group) {
+                $groups[] = $group->id;
             }
         }
 
-        $dataSetIds = DataSet::whereIn('org_id', $groups)->pluck('id')->toArray();
+        $dataSetIds = DataSetGroup::whereIn('group_id', $groups)->pluck('data_set_id')->toArray();
 
         if (!empty($dataSetIds)) {
+            $params = [
+                'api_key'          => \Auth::user()->api_key,
+                'records_per_page' => $perPage,
+                'page_number'      => !empty($request->page) ? $request->page : 1,
+            ];
+
             $params['criteria']['dataset_ids'] = $dataSetIds;
             $dataRq = Request::create('/api/listDataSets', 'POST', $params);
             $dataApi = new ApiDataSet($dataRq);
             $datasets = $dataApi->listDataSets($dataRq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
-            $request->session()->flash('alert-danger', 'Вашите групи, нямат свързани набори от данни!');
-
-            return back();
+            $paginationData = $this->getPaginationData([], 0, [], $perPage);
         }
 
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', 'Наборът беше успешно изтрит!');
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', 'Неуспешно изтриване на набор от данни!');
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
             return back();
         }
 
-        return view('user/datasets', [
+        return view('user/groupDatasets', [
                 'class'         => 'user',
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => $actMenu,
         ]);
+    }
+
+    public function groupDatasetView(Request $request, $uri)
+    {
+        $params['dataset_uri'] = $uri;
+
+        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($detailsReq);
+        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        unset($params['dataset_uri']);
+        $params['criteria']['dataset_uri'] = $uri;
+
+        $resourcesReq = Request::create('/api/listResources', 'POST', $params);
+        $apiResources = new ApiResource($resourcesReq);
+        $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        $dataset->data = $this->getModelUsernames($dataset->data);
+
+        if ($request->has('delete')) {
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return redirect('/user/groups/datasets');
+        }
+
+        return view(
+            'user/groupDatasetView',
+            [
+                'class'      => 'user',
+                'dataset'    => $dataset->data,
+                'resources'  => $resources->resources,
+                'activeMenu' => 'group'
+            ]
+        );
+    }
+
+    public function groupDatasetEdit(Request $request, DataSet $datasetModel, $uri)
+    {
+        $visibilityOptions = $datasetModel->getVisibility();
+        $mainCategories = $datasetModel->getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->prepareOrganisations();
+        $groups = $this->prepareGroups();
+        $errors = [];
+        $params = ['dataset_uri' => $uri];
+
+        $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+        $hasResources = Resource::where('data_set_id', $model->id)->count();
+        $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
+        $tagModel = Category::where('parent_id', $model->category_id)
+            ->whereHas('dataSetSubCategory', function($q) use($model) {
+                $q->where('data_set_id', $model->id);
+            })
+            ->get()
+            ->loadTranslations();
+
+        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($setRq);
+        $result = $api->getDataSetDetails($setRq)->getData();
+
+        if (!$result->success) {
+            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+
+            return back();
+        }
+
+        if ($request->has('save') || $request->has('publish')) {
+            $editData = $request->all();
+
+            if ($editData['uri'] == $uri) {
+                unset($editData['uri']);
+            }
+
+            if (!empty($editData['descript'])) {
+                $editData['description'] = $editData['descript'];
+            }
+
+            $tagList = $request->offsetGet('tags');
+
+            $editData = $this->prepareTags($editData);
+
+            $groupId = $request->offsetGet('group_id');
+
+            if ($groupId) {
+                $post = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $groupId,
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+            }
+
+            if ($request->has('publish')) {
+                $editData['status'] = DataSet::STATUS_PUBLISHED;
+            }
+
+            $edit = [
+                'api_key'       => Auth::user()->api_key,
+                'dataset_uri'   => $uri,
+                'data'          => $editData,
+            ];
+
+            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
+            $success = $api->editDataSet($editRq)->getData();
+
+            if ($success->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
+
+                return redirect()->back()->withInput()->withErrors($success->errors);
+            }
+        }
+
+        return view('user/groupDatasetEdit', [
+            'class'         => 'user',
+            'dataSet'       => $model,
+            'tagModel'      => $tagModel,
+            'withModel'     => $withModel,
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'hasResources'  => $hasResources,
+            'fields'        => self::getDatasetTransFields(),
+        ]);
+    }
+
+    public function groupResourceView(Request $request, $uri)
+    {
+        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $apiResources = new ApiResource($resourcesReq);
+        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resource = !empty($resource->resource) ? $resource->resource : null;
+
+        $resource = $this->getModelUsernames($resource);
+
+        if (!empty($resource)) {
+            if ($request->has('delete')) {
+                $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                $api = new ApiResource($rq);
+                $result = $api->deleteResource($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                    return redirect()->route('groupDatasetView', ['uri' => $resource->dataset_uri]);
+                }
+
+                $request->session()->flash('alert-success', __('custom.delete_error'));
+            }
+
+            $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+            $api = new ApiResource($rq);
+            $response = $api->getResourceData($rq)->getData();
+            $data = !empty($response->data) ? $response->data : [];
+
+            return view('user/groupResourceView', [
+                'class'         => 'user',
+                'resource'      => $resource,
+                'data'          => $data,
+            ]);
+        }
+
+        return redirect('/user/groups');
     }
 
     /**
@@ -2580,10 +3645,10 @@ class UserController extends Controller {
     public function searchGroups(Request $request)
     {
         $perPage = 6;
-        $search = $request->offsetGet('search');
+        $search = $request->offsetGet('q');
 
         if (empty($search)) {
-            return redirect('user/userGroups');
+            return redirect('user/groups');
         }
 
         $params = [
@@ -2612,5 +3677,221 @@ class UserController extends Controller {
             'groups'        => $paginationData['items'],
             'pagination'    => $paginationData['paginate']
         ]);
+    }
+
+    public function viewGroupMembers(Request $request, $uri)
+    {
+        $perPage = 6;
+        $filter = $request->offsetGet('filter');
+        $userId = $request->offsetGet('user_id');
+        $roleId = $request->offsetGet('role_id');
+        $keywords = $request->offsetGet('keywords');
+        $group = Organisation::where('uri', $uri)->first();
+        $isAdmin = Role::isAdmin($group->id);
+
+        if ($group) {
+            if ($request->has('edit_member')) {
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $group->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('delete')) {
+                if ($this->delMember($userId, $group->id)) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite_existing')) {
+                $newUser = $request->offsetGet('user');
+                $newRole = $request->offsetGet('role');
+
+                $rq = Request::create('/api/addMember', 'POST', [
+                    'org_id'    => $group->id,
+                    'user_id'   => $newUser,
+                    'role_id'   => $newRole,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->addMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite')) {
+                $email = $request->offsetGet('email');
+                $role = $request->offsetGet('role');
+
+                $rq = Request::create('/inviteUser', 'POST', [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'email'     => $email,
+                        'org_id'    => $group->id,
+                        'role_id'   => $role,
+                        'generate'  => true,
+                    ],
+                ]);
+                $api = new ApiUser($rq);
+                $result = $api->inviteUser($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type);
+
+            $criteria = ['org_id' => $group->id];
+
+            if ($filter == 'for_approval') {
+                $criteria['for_approval'] = true;
+            }
+
+            if (is_numeric($filter)) {
+                $criteria['role_id'] = $filter;
+            }
+
+            if (!empty($keywords)) {
+                $criteria['keywords'] = $keywords;
+            }
+
+            $criteria['records_per_page'] = $perPage;
+            $criteria['page_number'] = $request->offsetGet('page', 1);
+
+            $rq = Request::create('/api/getMembers', 'POST', $criteria);
+            $api = new ApiOrganisation($rq);
+            $result = $api->getMembers($rq)->getData();
+            $paginationData = $this->getPaginationData(
+                $result->members,
+                $result->total_records,
+                $request->except('page'),
+                $perPage
+            );
+
+            $rq = Request::create('/api/listRoles', 'POST');
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+
+            return view('user/groupMembers', [
+                'class'         => 'user',
+                'members'       => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'group'         => $group,
+                'roles'         => $roles,
+                'filter'        => $filter,
+                'keywords'      => $keywords,
+                'isAdmin'       => $isAdmin
+            ]);
+        }
+
+        return redirect('/user/groups');
+    }
+
+    public function addGroupMembersNew(Request $request, $uri)
+    {
+        $group = Organisation::where('uri', $uri)->first();
+        $class = 'user';
+
+        if ($group) {
+            $rq = Request::create('/api/listRoles', 'POST');
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+            $digestFreq = UserSetting::getDigestFreq();
+
+            if ($request->has('save')) {
+                $post = [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'firstname'         => $request->offsetGet('firstname'),
+                        'lastname'          => $request->offsetGet('lastname'),
+                        'username'          => $request->offsetGet('username'),
+                        'email'             => $request->offsetGet('email'),
+                        'password'          => $request->offsetGet('password'),
+                        'password_confirm'  => $request->offsetGet('password_confirm'),
+                        'role_id'           => $request->offsetGet('role_id'),
+                        'org_id'            => $group->id,
+                    ],
+                ];
+
+                $rq = Request::create('/api/addUser', 'POST', $post);
+                $api = new ApiUser($rq);
+                $result = $api->register($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+
+                    return redirect('/user/groups/members/'. $uri);
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                    return redirect()->back()->withInput()->withErrors($result->errors);
+                }
+            }
+        }
+
+        return view('user/addGroupMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'group'));
+    }
+
+    public function prepareTags($data)
+    {
+        if (isset($data['tags'])) {
+            $tagData = [];
+            $editData = [];
+
+            foreach ($data['tags'] as $lang => $string) {
+                $tagData[$lang] = array_values(explode(',', $string));
+            }
+
+            foreach ($tagData as $lang => $tags) {
+                foreach ($tags as $tag) {
+                    $editData[] = [$lang => $tag];
+                }
+            }
+
+            $data['tags'] = $editData;
+        }
+
+        return $data;
+    }
+
+    public function deleteCustomSettings(Request $request)
+    {
+        $id = $request->offsetGet('id');
+
+        $rq = Request::create('/api/deleteCustomSetting', 'POST', [
+            'api_key'   => Auth::user()->api_key,
+            'id'        => $id,
+        ]);
+        $api = new ApiCustomSettings($rq);
+        $result = $api->delete($rq)->getData();
+
+        return ['success' => $result->success];
     }
 }

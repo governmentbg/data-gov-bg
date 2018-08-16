@@ -20,7 +20,7 @@ class TermsOfUseController extends ApiController
      */
     public function addTermsOfUse(Request $request)
     {
-        $data = $request->data;
+        $data = $request->get('data', []);
         //validate request data
         $validator = \validator::make($data, [
             'name'          => 'required|string|max:100',
@@ -32,7 +32,7 @@ class TermsOfUseController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Add terms of use failure');
+            return $this->errorResponse(__('custom.add_terms_fail'), $validator->errors()->messages());
         }
 
         // set default values to optional fields
@@ -56,7 +56,7 @@ class TermsOfUseController extends ApiController
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
-            return $this->errorResponse('Add terms of use failure');
+            return $this->errorResponse(__('custom.add_terms_fail'));
         }
 
         return $this->successResponse(['id' => $newTerms->id], true);
@@ -84,7 +84,7 @@ class TermsOfUseController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Edit terms of use failure');
+            return $this->errorResponse(__('custom.edit_terms_fail'), $validator->errors()->messages());
         }
 
         $data = $request->data;
@@ -99,7 +99,7 @@ class TermsOfUseController extends ApiController
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
-            return $this->errorResponse('Edit terms of use failure');
+            return $this->errorResponse(__('custom.edit_terms_fail'));
         }
 
         return $this->successResponse();
@@ -120,11 +120,11 @@ class TermsOfUseController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Delete terms of use failure');
+            return $this->errorResponse(__('custom.delete_terms_fail'), $validator->errors()->messages());
         }
 
         if (empty($terms = TermsOfUse::find($post['terms_id']))) {
-            return $this->errorResponse('Delete terms of use failure');
+            return $this->errorResponse(__('custom.delete_terms_fail'));
         }
 
         try {
@@ -132,7 +132,7 @@ class TermsOfUseController extends ApiController
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
-            return $this->errorResponse('Delete terms of use failure');
+            return $this->errorResponse(__('custom.delete_terms_fail'));
         }
 
         return $this->successResponse();
@@ -156,7 +156,7 @@ class TermsOfUseController extends ApiController
             ]);
 
             if ($validator->fails()) {
-                return $this->errorResponse('List terms of use failure');
+                return $this->errorResponse(__('custom.list_terms_fail'), $validator->errors()->messages());
             }
 
             $query = TermsOfUse::select();
@@ -191,11 +191,11 @@ class TermsOfUseController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Get terms of use details failure');
+            return $this->errorResponse(__('custom.get_terms_fail'), $validator->errors()->messages());
         }
 
         if (empty($terms = TermsOfUse::find($post['terms_id']))) {
-            return $this->errorResponse('Get terms of use details failure');
+            return $this->errorResponse(__('custom.get_terms_fail'));
         }
 
         $terms['name'] = $terms->name;

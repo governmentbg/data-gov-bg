@@ -20,16 +20,10 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
-                        @if (isset(session('result')->errors->logo))
-                            <span class="error">{{ session('result')->errors->logo[0] }}</span>
+                        @if (isset($errors) && $errors->has('logo'))
+                            <span class="error">{{ $errors->first('logo') }}</span>
                         @endif
                     </div>
-                </div>
-            </div>
-            <div class="form-group row required">
-                <label for="name" class="col-sm-3 col-xs-12 col-form-label"> {{ __('custom.label_name') }}:</label>
-                <div class="col-sm-9">
-                    <input type="text" class="input-border-r-12 form-control" id="name" placeholder="Тест ЕООД">
                 </div>
             </div>
             <div class="form-group row {{ isset(session('result')->errors->uri) ? 'has-error' : '' }}">
@@ -41,8 +35,8 @@
                         name="uri"
                         value="{{ old('uri') }}"
                     >
-                    @if (isset(session('result')->errors->uri))
-                        <span class="error">{{ session('result')->errors->uri[0] }}</span>
+                    @if (isset($errors) && $errors->has('uri'))
+                        <span class="error">{{ $errors->first('uri') }}</span>
                     @endif
                 </div>
             </div>

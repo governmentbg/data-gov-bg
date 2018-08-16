@@ -29,7 +29,7 @@ class Organisation extends Model implements TranslatableInterface
         'name'          => 'label',
         'descript'      => 'text',
         'activity_info' => 'text',
-        'contacts'      => 'label',
+        'contacts'      => 'text',
     ];
 
     public static function getTypes()

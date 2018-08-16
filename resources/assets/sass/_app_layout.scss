@@ -8,11 +8,6 @@ body {
 
     #app {
         min-height: 100%;
-        margin-bottom: -$footerHeight;
-
-        @include smMobile {
-            margin-bottom: -$footerMobileHeight;
-        }
 
         @include mdMobile() {
             .container {
@@ -183,6 +178,14 @@ body {
 
                                 @include mdMobile() {
                                     padding-right: 8px;
+                                }
+
+                                &.username {
+                                    padding-right: 13px;
+
+                                    @include mdMobile() {
+                                        display: none;
+                                    }
                                 }
 
                                 a {
@@ -447,16 +450,6 @@ body {
 
             .underline {
                 padding: 15px;
-            }
-        }
-
-        &:after {
-            content: "";
-            display: block;
-            height: $footerHeight;
-
-            @include smMobile {
-                height: $footerMobileHeight;
             }
         }
 

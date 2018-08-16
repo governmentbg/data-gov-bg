@@ -131,7 +131,7 @@
             <div class="col-xs-12">
                 <button
                     type="button"
-                    class="col-xs-12 btn btn-primary del-modal-btn"
+                    class="col-xs-12 btn btn-primary del-btn"
                     data-toggle="modal"
                     data-target="#delete-confirm"
                     >{{ __('custom.delete_profile') }}</button>
@@ -225,7 +225,7 @@
                         id="confirm"
                         type="submit"
                         name="continue"
-                        class="m-l-md btn btn-custom pull-right conf del-modal-btn"
+                        class="m-l-md btn btn-custom pull-right conf del-btn"
                         data-toggle="modal"
                         data-target="#delete"
                     >{{ __('custom.continue') }}</button>
@@ -257,7 +257,7 @@
                                 <button
                                     type="submit"
                                     name="delete"
-                                    class="m-l-md btn btn-custom pull-right del-modal-btn"
+                                    class="m-l-md btn btn-custom pull-right del-btn"
                                 >{{ __('custom.delete') }}</button>
                         </div>
                     </form>

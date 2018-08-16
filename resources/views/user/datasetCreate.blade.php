@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog"  aria-hidden="true">
+<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">
@@ -14,13 +14,13 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Вашата заявка за лиценз беше приета.</p>
+                        <p>{{ __('custom.terms_req_success') }}</p>
                     </div>
                     <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Имаше проблем с вашата заявка за лиценз.</p>
+                        <p>{{ __('custom.terms_req_error') }}</p>
                     </div>
                     <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
                         {{ csrf_field() }}
@@ -87,7 +87,7 @@
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST" action="{{ url('/user/dataset/create') }}">
             {{ csrf_field() }}
-            <div class="form-group row {{ isset($errors['uri']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -97,20 +97,19 @@
                         value="{{ old('uri') }}"
                         type="text"
                         placeholder="Уникален идентификатор">
-                    @if (isset($errors['uri']))
-                        <span class="error">{{ $errors['uri'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('uri') }}</span>
                 </div>
             </div>
-            <div class="form-group row required {{ isset($errors['category_id']) ? 'has-error' : '' }}">
+            <div class="form-group row required">
                 <label for="theme" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_topic') }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="theme"
-                        class="input-border-r-12 form-control"
+                        class="js-select form-control"
                         name="category_id"
+                        data-placeholder="{{ __('custom.select_main_topic') }}"
                     >
-                        <option value="">{{ __('custom.select_main_topic') }}</option>
+                        <option></option>
                         @foreach ($categories as $id => $category)
                             <option
                                 value="{{ $id }}"
@@ -118,32 +117,30 @@
                             >{{ $category }}</option>
                         @endforeach
                     </select>
-                    @if (isset($errors['category_id']))
-                        <span class="error">{{ $errors['category_id'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('category_id') }}</span>
                 </div>
             </div>
 
-            @foreach($fields as $field)
-                @if($field['view'] == 'translation')
+            @foreach ($fields as $field)
+                @if ($field['view'] == 'translation')
                     @include(
                         'components.form_groups.translation_input',
-                        ['field' => $field, 'result' => session('result')]
+                        ['field' => $field]
                     )
-                @elseif($field['view'] == 'translation_txt')
+                @elseif ($field['view'] == 'translation_txt')
                     @include(
                         'components.form_groups.translation_textarea',
-                        ['field' => $field, 'result' => session('result')]
+                        ['field' => $field]
                     )
-                @elseif($field['view'] == 'translation_tags')
+                @elseif ($field['view'] == 'translation_tags')
                     @include(
                         'components.form_groups.translation_tags',
-                        ['field' => $field, 'result' => session('result')]
+                        ['field' => $field]
                     )
                 @endif
             @endforeach
 
-            <div class="form-group row {{ isset($errors['terms_of_use_id']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.terms_and_conditions') }}:</label>
                 <div class="col-sm-6">
                     <select
@@ -159,23 +156,22 @@
                             >{{ $term }}</option>
                         @endforeach
                     </select>
-                    @if (isset($errors['terms_of_use_id']))
-                        <span class="error">{{ $errors['terms_of_use_id'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('terms_of_use_id') }}</span>
                 </div>
                 <div class="col-sm-3 text-right add-terms">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">{{ __('custom.new_terms_and_conditions') }}</button>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['org_id']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="organisation" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.organisations', 1) }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="organisation"
-                        class="input-border-r-12 form-control"
+                        class="js-select form-control"
                         name="org_id"
+                        data-placeholder="{{ utrans('custom.select_org') }}"
                     >
-                        <option value=""> {{ utrans('custom.select_org') }}</option>
+                        <option></option>
                         @foreach ($organisations as $id =>$org)
                             <option
                                 value="{{ $id }}"
@@ -183,20 +179,19 @@
                             >{{ $org }}</option>
                         @endforeach
                     </select>
-                    @if (isset($errors['org_id']))
-                        <span class="error">{{ $errors['org_id'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('org_id') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['group_id']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="group" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.groups', 1) }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="group"
-                        class="input-border-r-12 form-control"
+                        class="js-select form-control"
                         name="group_id"
+                        data-placeholder="{{ utrans('custom.groups', 1) }}"
                     >
-                        <option value="">{{ utrans('custom.groups', 1) }} </option>
+                        <option></option>
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"
@@ -204,20 +199,19 @@
                             >{{ $group }}</option>
                         @endforeach
                     </select>
-                    @if (isset($errors['group_id']))
-                        <span class="error">{{ $errors['group_id'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('group_id') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['visibility']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="visibility" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.visibility') }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="visibility"
-                        class="input-border-r-12 form-control"
+                        class="js-select form-control"
                         name="visibility"
+                        data-placeholder="{{ utrans('custom.select_visibility') }}"
                     >
-                        <option value="">{{ utrans('custom.select_visibility') }}</option>
+                        <option></option>
                         @foreach ($visibilityOpt as $id => $visOpt)
                             <option
                                 value="{{ $id }}"
@@ -225,12 +219,10 @@
                             >{{ $visOpt }}</option>
                         @endforeach
                     </select>
-                    @if (isset($errors['visibility']))
-                        <span class="error">{{ $errors['visibility'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('visibility') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['source']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="source" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.source') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -239,13 +231,12 @@
                         name="source"
                         value="{{ old('source') }}"
                         type="text"
-                        placeholder="Източник">
-                    @if (isset($errors['source']))
-                        <span class="error">{{ $errors['source'] }}</span>
-                    @endif
+                        placeholder="Източник"
+                    >
+                    <span class="error">{{ $errors->first('source') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['version']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="version" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.version') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -254,13 +245,12 @@
                         name="version"
                         value="{{ old('version') }}"
                         type="text"
-                        placeholder="Версия">
-                    @if (isset($errors['version']))
-                        <span class="error">{{ $errors['version'] }}</span>
-                    @endif
+                        placeholder="Версия"
+                    >
+                    <span class="error">{{ $errors->first('version') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['author_name']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="author" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.author') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -270,12 +260,10 @@
                         value="{{ old('author_name') }}"
                         type="text"
                         placeholder="Автор">
-                    @if (isset($errors['author_name']))
-                        <span class="error">{{ $errors['author_name'] }}</span>
-                    @endif
+                    <span class="error">{{ $errors->first('author_name') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['author_email']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="author-email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.author_email') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -284,13 +272,12 @@
                         name="author_email"
                         value="{{ old('author_email') }}"
                         type="email"
-                        placeholder="E-mail на автора">
-                    @if (isset($errors['author_email']))
-                        <span class="error">{{ $errors['author_email'] }}</span>
-                    @endif
+                        placeholder="E-mail на автора"
+                    >
+                    <span class="error">{{ $errors->first('author_email') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['support_name']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="support" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.contacts') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -299,13 +286,12 @@
                         name="support_name"
                         value="{{ old('support_name') }}"
                         type="text"
-                        placeholder="Контакт">
-                    @if (isset($errors['support_name']))
-                        <span class="error">{{ $errors['support_name'] }}</span>
-                    @endif
+                        placeholder="Контакт"
+                    >
+                    <span class="error">{{ $errors->first('support_name') }}</span>
                 </div>
             </div>
-            <div class="form-group row {{ isset($errors['support_email']) ? 'has-error' : '' }}">
+            <div class="form-group row">
                 <label for="support-email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.contact_email') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -314,23 +300,26 @@
                         name="support_email"
                         value="{{ old('support_email') }}"
                         type="email"
-                        placeholder="E-mail за контакти">
-                    @if (isset($errors['support_email']))
-                        <span class="error">{{ $errors['support_email'] }}</span>
-                    @endif
+                        placeholder="E-mail за контакти"
+                    >
+                    <span class="error">{{ $errors->first('support_email') }}</span>
                 </div>
             </div>
 
-            @foreach($fields as $field)
-                @if($field['view'] == 'translation_custom')
+            @foreach ($fields as $field)
+                @if ($field['view'] == 'translation_custom')
                     @include(
                         'components.form_groups.translation_custom_fields',
-                        ['field' => $field, 'result' => session('result')]
+                        ['field' => $field]
                     )
                 @endif
             @endforeach
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
+                    <button
+                        class="btn btn-primary"
+                        name="add_resource"
+                    >{{ __('custom.add_resource') }}</button>
                     <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
                     <button type="submit" class="btn btn-primary">{{ __('custom.save') }}</button>
                 </div>

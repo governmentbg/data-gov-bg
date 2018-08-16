@@ -34,4 +34,10 @@ class Category extends Model implements TranslatableInterface
     {
         return $this->belongsToMany('App\DataSet', 'data_set_sub_categories', 'sub_cat_id', 'data_set_id');
     }
+
+    public function tags()
+    {
+        return $this->hasMany('App\Category', 'parent_id');
+    }
+
 }

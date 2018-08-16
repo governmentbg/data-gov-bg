@@ -45,11 +45,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($array);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid xml syntax!');
+                $validator->errors()->add('data', __('custom.invalid_xml'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -72,11 +72,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid json syntax!');
+                $validator->errors()->add('data', __('custom.invalid_json'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -118,11 +118,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($array);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid csv syntax!');
+                $validator->errors()->add('data', __('custom.invalid_csv'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -145,11 +145,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid json syntax!');
+                $validator->errors()->add('data', __('custom.invalid_json'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -174,11 +174,11 @@ class ConversionController extends ApiController
                     return $this->successResponse(json_decode($geo->out('json'), true));
                 }
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid kml syntax!');
+                $validator->errors()->add('data', __('custom.invalid_kml'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -201,11 +201,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid json kml syntax!');
+                $validator->errors()->add('data', __('custom.invalid_kml_json'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -230,11 +230,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse(json_decode($easyRdf->serialise('json')));
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid rdf syntax!');
+                $validator->errors()->add('data', __('custom.invalid_rdf'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -257,11 +257,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid json syntax!');
+                $validator->errors()->add('data', __('custom.invalid_json'));
             }
         }
 
-        return $this->errorResponse('Conversion failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -288,7 +288,7 @@ class ConversionController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.data_failure'), $validator->errors()->messages());
     }
 
     /**
@@ -316,7 +316,7 @@ class ConversionController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.data_failure'), $validator->errors()->messages());
     }
 
     /**
@@ -360,7 +360,7 @@ class ConversionController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.data_failure'), $validator->errors()->messages());
     }
 
     /**
@@ -410,11 +410,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid json kml syntax!');
+                $validator->errors()->add('data', __('custom.invalid_json_kml'));
             }
         }
 
-        return $this->errorResponse('Get data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.data_failure'), $validator->errors()->messages());
     }
 
     /**
@@ -452,11 +452,11 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
-                $validator->errors()->add('data', 'Invalid json rdf syntax!');
+                $validator->errors()->add('data', __('custom.invlid_json_rdf'));
             }
         }
 
-        return $this->errorResponse('Get data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.data_failure'), $validator->errors()->messages());
     }
 
     /**

@@ -31858,7 +31858,7 @@ module.exports = function spread(callback) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.16
+ * Vue.js v2.5.17
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -36947,7 +36947,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.16';
+Vue.version = '2.5.17';
 
 /*  */
 
@@ -46250,6 +46250,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 $(function () {
     $(document).ready(function () {
         $('.js-show-on-load').css('visibility', 'visible');
+
+        if ($('.nano').length) {
+            $('.nano').nanoScroller({});
+        }
     });
 });
 
@@ -46265,9 +46269,9 @@ $(function () {
 // show hide submenu
 $(function () {
     $('.clicable').on('click', function () {
-        $this = $(this).closest('.js-show-submenu');
-        $childMenu = $this.children('.sidebar-submenu');
-        $childIcon = $(this).children('i.fa');
+        var $this = $(this).closest('.js-show-submenu');
+        var $childMenu = $this.children('.sidebar-submenu');
+        var $childIcon = $(this).children('i.fa');
 
         if ($childMenu.is(':hidden')) {
             $childIcon.toggleClass('fa-angle-up').toggleClass('fa-angle-down');
@@ -46278,6 +46282,18 @@ $(function () {
             $this.removeClass('remove-after');
             $childMenu.hide();
         }
+    });
+
+    $('.clicable').each(function () {
+        var $this = $(this).closest('.js-show-submenu');
+        var $childMenu = $this.children('.sidebar-submenu');
+
+        $('a', $childMenu).each(function () {
+            if ($(this).hasClass('active')) {
+                $childMenu.show();
+                $this.addClass('remove-after');
+            }
+        });
     });
 });
 
@@ -46358,6 +46374,114 @@ $(function () {
     });
 });
 
+$(function () {
+    if ($('.js-add-custom-field').length > 0) {
+        var removeSett = function removeSett($target) {
+            if ($('.js-custom-field-set').length > 1) {
+                $target.remove();
+            } else {
+                $('input', $target).each(function () {
+                    $(this).val('');
+                    $(this).removeAttr('disabled');
+                });
+            }
+        };
+
+        $('.js-add-custom-field').on('click', function (e) {
+            e.preventDefault();
+
+            $('.js-custom-fields').append($('.js-custom-field-set').last().clone());
+
+            var $element = $('.js-custom-field-set').last();
+
+            $('.js-delete-custom-field').removeClass('hidden');
+
+            var index = $element.data('index');
+
+            $element.attr('data-index', index + 1);
+            $element.attr('data-id', null);
+
+            $('input', $element).each(function () {
+                $(this).attr('name', $(this).attr('name').replace(/\d/g, index + 1)).val('');
+                $(this).removeAttr('disabled');
+            });
+        });
+
+        $(document).on('click', '.js-delete-custom-field', function () {
+            var $target = $(this).parents('.js-custom-field-set');
+
+            if ($target.data('id')) {
+                $.ajax({
+                    url: '/delSettings',
+                    delay: 1000,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    type: 'POST',
+                    data: { id: $target.data('id') },
+                    success: function success(response) {
+                        if (response.success) {
+                            removeSett($target);
+                        }
+                    }
+                });
+            } else {
+                removeSett($target);
+            }
+        });
+    }
+
+    var $tagsInput = $('[data-role="tagsinput"]');
+
+    if ($tagsInput.length) {
+        $tagsInput.each(function () {
+            var $tagInput = $(this);
+
+            $tagInput.siblings('.bootstrap-tagsinput').keydown(function (e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+
+                if (key == 13) {
+                    e.preventDefault();
+
+                    $tagInput.tagsinput('add', $(this).find('input').val());
+
+                    $(this).find('input').val('');
+
+                    $tagInput.tagsinput('refresh');
+                }
+            });
+        });
+    }
+});
+
+// Sticky footer
+var $head = $('.js-head');
+var $content = $('.js-content');
+var $footer = $('.js-footer');
+
+if ($head && $content && $footer) {
+    $(window).bind('load', function () {
+        stickyFooter();
+
+        $(window).resize(stickyFooter);
+    });
+}
+
+function stickyFooter() {
+    var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
+    var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
+    var footerHeight = getInt($footer.css('height'));
+    var contentHeight = windowHeight - headerHeight - footerHeight;
+
+    $content.css('min-height', contentHeight);
+
+    $footer.removeClass('hidden');
+}
+
+function getInt(string) {
+    return parseInt(string.replace(/[^0-9]/g, ''));
+}
+
 /***/ }),
 /* 48 */
 /***/ (function(module, exports) {
@@ -46395,31 +46519,12 @@ $(function () {
             $('#delete-confirm').modal('toggle');
         });
     }
-
-    if ($('.js-select').length) {
-        $('.js-select').select2({ minimumResultsForSearch: -1 });
-    }
-
-    if ($('.js-autocomplete').length) {
-        $('.js-autocomplete').select2({
-            matcher: function matcher(params, data) {
-                if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
-                    return data;
-                }
-
-                if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
-                    return data;
-                } else {
-                    return false;
-                }
-            }
-        });
-    }
 });
 
 $(function () {
     $('#sendTermOfUseReq').on('submit', function (e) {
         e.preventDefault();
+
         $.ajax({
             url: '/user/sendTermsOfUseReq',
             type: 'POST',
@@ -46454,10 +46559,123 @@ $(function () {
  */
 function initSelect2() {
     if ($('.js-select').length) {
-        $('.js-select').select2({ minimumResultsForSearch: -1 });
+        $('.js-select').each(function () {
+            $(this).select2({
+                placeholder: $(this).data('placeholder'),
+                minimumResultsForSearch: -1
+            });
+        });
+    }
+
+    if ($('.js-autocomplete').length) {
+        $('.js-autocomplete').each(function () {
+            var options = {
+                placeholder: $(this).data('placeholder'),
+                matcher: function matcher(params, data) {
+                    if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
+                        return data;
+                    }
+
+                    if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                        return data;
+                    }
+
+                    return false;
+                }
+            };
+
+            $(this).select2(options);
+        });
+    }
+
+    if ($('.js-ajax-autocomplete').length) {
+        $('.js-ajax-autocomplete').each(function () {
+            var options = {
+                placeholder: $(this).data('placeholder'),
+                minimumInputLength: 3,
+                dropdownParent: $($(this).data('parent')),
+                ajax: {
+                    url: $(this).data('url'),
+                    type: 'POST',
+                    delay: 1000,
+                    data: function data(params) {
+                        var queryParams = {
+                            criteria: {
+                                keywords: params.term
+                            }
+                        };
+                        var finalParams = $.extend({}, queryParams, $(this).data('post'));
+
+                        return finalParams;
+                    },
+                    processResults: function processResults(data) {
+                        return {
+                            results: $.map(data.users, function (item) {
+                                return {
+                                    text: item.firstname + ' ' + item.lastname,
+                                    id: item.id
+                                };
+                            })
+                        };
+                    }
+                },
+                matcher: function matcher(params, data) {
+                    if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
+                        return data;
+                    }
+
+                    if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                        return data;
+                    }
+
+                    return false;
+                }
+            };
+
+            options = addSelect2Translations(options);
+
+            $(this).select2(options);
+        });
     }
 };
 initSelect2();
+
+function addSelect2Translations(options) {
+    if ($('#app').data('lang') == 'bg') {
+        options = $.extend({}, options, {
+            language: {
+                errorLoading: function errorLoading() {
+                    return 'Резултатите не могат да бъдат заредени';
+                },
+                inputTooLong: function inputTooLong(a) {
+                    var b = a.input.length - a.maximum,
+                        c = 'Моля изтрийте ' + b + ' символа';
+
+                    return 1 != b && (c += 's'), c;
+                },
+                inputTooShort: function inputTooShort(a) {
+                    return 'Моля въведете ' + (a.minimum - a.input.length) + ' или повече символа';
+                },
+                loadingMore: function loadingMore() {
+                    return 'Зареждане на резултати…';
+                },
+                maximumSelected: function maximumSelected(a) {
+                    var b = 'Може да изберете само ' + a.maximum + ' елемент';
+
+                    return 1 != a.maximum && (b += 'а'), b;
+                },
+                noResults: function noResults() {
+                    return 'Няма намерени резултати';
+                },
+                searching: function searching() {
+                    return 'Търсене…';
+                }
+            }
+        });
+    }
+
+    return options;
+}
 
 $(function () {
     $('.js-member-edit').on('click', function (e) {
@@ -46471,6 +46689,20 @@ $(function () {
         var $controls = $(this).closest('.js-member-edit-controls');
         $controls.siblings('.js-member-admin-controls').removeClass('hidden');
         $controls.addClass('hidden');
+    });
+});
+
+$(function () {
+    $('#invite-existing').on('show.bs.modal', function (e) {
+        setTimeout(function () {
+            initSelect2();
+        }, 200);
+    });
+
+    $('#invite').on('show.bs.modal', function (e) {
+        setTimeout(function () {
+            initSelect2();
+        }, 200);
     });
 });
 

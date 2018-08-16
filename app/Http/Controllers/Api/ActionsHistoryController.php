@@ -41,7 +41,7 @@ class ActionsHistoryController extends ApiController
             'criteria.period_to'     => 'nullable|date',
             'criteria.username'      => 'nullable|string',
             'criteria.user_id'       => 'nullable|integer',
-            'criteria.module'        => 'nullable|string',
+            'criteria.module'        => 'nullable',
             'criteria.action'        => 'nullable|integer',
             'criteria.category_ids'  => 'nullable|array',
             'criteria.tag_ids'       => 'nullable|array',
@@ -56,7 +56,7 @@ class ActionsHistoryController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List action history failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
         }
 
         $criteria = $request->criteria;
@@ -90,7 +90,11 @@ class ActionsHistoryController extends ApiController
         }
 
         if (isset($criteria['module'])) {
-            $history->where('module_name', $criteria['module']);
+            if (is_array($criteria['module'])){
+                $history->whereIn('module_name', $criteria['module']);
+            } else {
+                $history->where('module_name', $criteria['module']);
+            }
         }
 
         if (isset($criteria['ip_address'])) {
@@ -196,6 +200,6 @@ class ActionsHistoryController extends ApiController
             return $this->successResponse(['modules'=>$result], true);
         }
 
-        return $this->errorResponse('Get data failure');
+        return $this->errorResponse(__('custom.data_failure'));
     }
 }

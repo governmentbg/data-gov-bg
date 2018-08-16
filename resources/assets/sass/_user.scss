@@ -9,6 +9,12 @@
                 padding-left: 0;
             }
         }
+
+        .profile-name {
+            margin-top: 20px;
+            font-size: 14pt !important;
+            color: black !important;
+        }
     }
 
     .sidebar-submenu.open {
@@ -91,6 +97,8 @@
 
     .new-data {
         padding: 8px 28px;
+        margin-top: 25px;
+        width: 230px;
     }
 
     .info-bar {
@@ -144,8 +152,7 @@
 
     .org-logo {
         img {
-            width: 228px;
-            height: 128px;
+            height: 140px;
         }
     }
 
@@ -174,6 +181,7 @@
         .ch-del-btns {
             margin-top: 10px;
             margin-bottom: 35px;
+            min-height: 36px;
             div {
                 div {
                     button {
@@ -182,6 +190,7 @@
                         background-color: #108f9e;
                         color: white;
                         border: none;
+                        min-width: 80px;
                     }
                 }
             }
@@ -191,8 +200,8 @@
             text-overflow: ellipsis;
             display: -webkit-box;
              -webkit-box-orient: vertical;
-             -webkit-line-clamp: 10;
-            //max-height: 150px;
+             -webkit-line-clamp: 6;
+            height: 130px;
         }
         .org-name {
             overflow: hidden;
@@ -202,15 +211,24 @@
             -webkit-line-clamp: 1;
         }
         .logo {
-            &img {
-                height: 200px;
-            }
+            height: 120px;
+            margin: 0 auto;
         }
         .show-more {
             margin-top: 10px;
+            padding-right: 7px;
         }
+
         .org-col {
-            margin-bottom: 30px;
+            margin: 10px;
+            height: 450px;
+            width: 310px;
+            border: 1px #888888;
+            box-shadow: 0px 0px 6px 0px #888888;
+
+            &:hover {
+                box-shadow: 0px 0px 18px 0px #108f9e;
+            }
         }
     }
 
@@ -604,6 +622,7 @@
     .ch-del-btns {
         margin-top: 10px;
         margin-bottom: 35px;
+        min-height: 36px;
 
         button {
             border-radius: 10px;
@@ -655,7 +674,7 @@
     }
 }
 
-.del-modal-btn {
+.del-btn {
     background-color: $error-color !important;
     border-color: $error-color !important;
 
@@ -667,4 +686,38 @@
 
 .member-edit-form {
     max-width: 310px;
+}
+
+.mng-btns {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.no-info {
+    padding: 0;
+    font-size: 33px;
+}
+
+.cust-btn {
+    padding-bottom: 10px;
+    padding-top: 10px;
+    margin-right: 10px;
+    min-width: 80px;
+}
+
+.user-nav {
+    .nav {
+        li:first-child {
+            a {
+                padding-left: 0;
+            }
+        }
+    }
+}
+
+.view-btns {
+    button {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
 }

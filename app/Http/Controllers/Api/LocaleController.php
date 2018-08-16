@@ -46,7 +46,7 @@ class LocaleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add locale failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_locale_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -83,7 +83,7 @@ class LocaleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit locale failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_locale_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -110,11 +110,11 @@ class LocaleController extends ApiController
 
                 return $this->successResponse();
             } catch (QueryException $e) {
-                return $this->errorResponse('Locale add failure');
+                return $this->errorResponse(__('custom.delete_locale_fail'));
             }
         }
 
-        return $this->errorResponse('Delete locale failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_locale_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -162,7 +162,7 @@ class LocaleController extends ApiController
             return $this->successResponse(['locale_list' => $results], true);
         }
 
-        return $this->errorResponse('List locale failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_locale_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -196,6 +196,6 @@ class LocaleController extends ApiController
             ]], true);
         }
 
-        return $this->errorResponse('Get locale details failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_locale_fail'), $validator->errors()->messages());
     }
 }

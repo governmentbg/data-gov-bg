@@ -42,7 +42,7 @@ class RoleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add role failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_role_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -79,7 +79,7 @@ class RoleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit role failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_role_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -106,7 +106,7 @@ class RoleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete role failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_role_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -149,7 +149,7 @@ class RoleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get role data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.list_role_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -184,7 +184,7 @@ class RoleController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get role rights failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_role_right_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -218,7 +218,7 @@ class RoleController extends ApiController
             || !Role::where('id', $id)->get()->count()
             || $validator->fails()
         ) {
-            $response = $this->errorResponse('No role found', $validator->errors()->messages());
+            $response = $this->errorResponse(__('custom.no_role_found'), $validator->errors()->messages());
         } else {
             $role = Role::where('id', $id)->first();
             $rights = $role->rights;
@@ -242,7 +242,7 @@ class RoleController extends ApiController
                         $module
                     );
 
-                    $response = $newRight ? $this->successResponse() : $this->errorResponse('No role found');
+                    $response = $newRight ? $this->successResponse() : $this->errorResponse(__('custom.no_role_found'));
 
                     if (empty($newRight)) {
                         break;

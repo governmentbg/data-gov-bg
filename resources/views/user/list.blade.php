@@ -6,7 +6,7 @@
         <div class="row">
             <div class="flash-message">
                 @foreach (['danger', 'warning', 'success', 'info'] as $msg)
-                    @if(Session::has('alert-' . $msg))
+                    @if (Session::has('alert-' . $msg))
                         <p class="alert alert-{{ $msg }}">
                             {{ Session::get('alert-' . $msg) }}
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -26,7 +26,7 @@
                                     <ul class="nav filter-type right-border">
                                         <li><a class="active" href="{{ url('/users/list') }}">{{trans_choice(__('custom.users'), 2) }}</a></li>
                                         <li><a href="{{ url('/user/profile/'. Auth::user()->id) }}">{{ trans_choice(__('custom.users'), 1) }}</a></li>
-                                        <li><a href="{{ url('/user/userGroups') }}">{{trans_choice(__('custom.groups'), 2) }}</a></li>
+                                        <li><a href="{{ url('/user/groups') }}">{{trans_choice(__('custom.groups'), 2) }}</a></li>
                                         <li><a href="{{ url('/user/organisations') }}">{{trans_choice(__('custom.organisations'), 2) }}</a></li>
                                         <li><a href="{{ url('/user/invite') }}">{{ __('custom.invite') }}</a></li>
                                     </ul>

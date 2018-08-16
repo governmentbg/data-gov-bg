@@ -1,6 +1,7 @@
-<div class="row m-t-md">
-    <div class="col-sm-3 col-xs-12 sidenav">
-        <span class="my-profile">{{ __('custom.my_profile') }}</span>
+<div class="row m-t-md user-nav">
+    <div class="col-sm-3 col-xs-12 sidenav text-center">
+        <span class="my-profile">{{ __('custom.my_profile') }}</span><br>
+        <div class="profile-name">{{ \Auth::user()->username }}</div>
     </div>
     <div class="col-sm-9 col-xs-12">
         <div class="filter-content">
@@ -28,7 +29,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'group' ? 'active' : '' }}"
-                                href="{{ url('/user/userGroups') }}"
+                                href="{{ url('/user/groups') }}"
                             >{{ trans_choice(__('custom.groups'), 2) }}</a>
                         </li>
                         <li>

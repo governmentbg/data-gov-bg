@@ -254,6 +254,7 @@
 }
 
 .btn {
+    min-width: 80px !important;
     &:hover, &:active, &:focus {
         color: white !important;
     }

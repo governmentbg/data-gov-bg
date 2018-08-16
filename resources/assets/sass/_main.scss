@@ -147,17 +147,27 @@ a:active {
     }
 
     .org {
-        img {
-            width: 100%;
-        }
-        h2, h4 {
-            width: 100%;
+        color: black;
 
+        img {
+            width: 90%;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
+
+        h2, h4 {
+            width: 90%;
+            line-height: 1.4;
+        }
+
         h2 {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
+        }
+
+        .show-more {
+            margin-right: 30px;
         }
     }
 
@@ -236,6 +246,11 @@ ul > li {
 .input-border-r-12, .bootstrap-tagsinput {
     border-radius: 12px;
     padding: 6px 12px;
+
+    @include smMobile() {
+        text-align: left !important;
+        margin-left: 10px;
+    }
 }
 
 .input-long {
@@ -259,6 +274,10 @@ textarea {
 .bootstrap-tagsinput {
     width: 100%;
     border-radius: 12px;
+    span {
+        margin-bottom: 5px;
+        display: inline-block;
+    }
 }
 
 .bootstrap-tagsinput input {
@@ -419,8 +438,29 @@ textarea {
         font-size: 12px;
         padding: 2px 5px;
     }
+
+    @include mobile() {
+        margin-left: 40px;
+    }
+
+    @include mobile() {
+        padding-right: 60px;
+    }
+
     @include smMobile() {
         text-align: left !important;
         margin-left: 10px;
+        padding-right: 50px;
+    }
+}
+
+.navbar-static-top {
+    z-index: 0;
+}
+
+.nano {
+    > .nano-pane {
+        background: transparent !important;
+        width: 10px !important;
     }
 }

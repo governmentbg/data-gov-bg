@@ -62,7 +62,7 @@ class SignalsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Send signal failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.send_signal_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -131,7 +131,7 @@ class SignalsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Signal edit failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_signal_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -160,7 +160,7 @@ class SignalsController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete signal failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_signal_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -197,7 +197,7 @@ class SignalsController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('List signal failure', $validator->errors()->messages());
+            return $this->errorResponse(__('custom.list_signals_fail'), $validator->errors()->messages());
         }
 
         $result = [];

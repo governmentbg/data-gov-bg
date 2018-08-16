@@ -23,7 +23,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a href="{{ url('/users/list') }}">{{ trans_choice(__('custom.users'), 2) }}</a></li>
                                     <li><a class="active" href="#">{{ trans_choice(__('custom.users'), 1) }}</a></li>
-                                    <li><a href="{{ url('/user/userGroups') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/user/groups') }}">{{ __('custom.data') }}</a></li>
                                     <li><a href="{{ url('/user/organisations') }}">{{ __('custom.chronology') }}</a></li>
                                     <li><a href="{{ url('/user/invite') }}">{{ __('custom.members') }}</a></li>
                                 </ul>
@@ -84,12 +84,6 @@
                     <p>Иван Иванов<br>Дирекция Български пощи</p><br>
                     <p>тел. 02/ 940 2445</p><br>
                     <p class="email">Email: {{ $user->email }}</p>
-                </div>
-                <div class="row social-icons">
-                    <span>{{ __('custom.follow_us') }}</span><br>
-                    <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
-                    <a href="#" class="tw"><span class="fa fa-twitter"></span></a>
-                    <a href="#" class="gp"><span class="fa fa-google-plus"></span></a>
                 </div>
             </div>
         </div>

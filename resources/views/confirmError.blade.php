@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="confirm-error container text-center">
-        <form method="post">
+        <form method="POST">
             {{ csrf_field() }}
             <div class="m-b-lg">
                 <img class="responsive logo-error" src="{{ asset('img/opendata-logo-color.svg') }}">

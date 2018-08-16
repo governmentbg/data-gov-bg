@@ -3,13 +3,13 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'group'])
+    @include('partials.user-nav-bar', ['view' => 'organisation'])
     <div class="col-xs-12 m-t-lg">
         <div>
             <h2>{{ __('custom.edit_org') }}</h2>
             <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
         </div>
-        <form method="POST" action="{{ url('/user/organisations/edit') }}" class="m-t-lg" enctype="multipart/form-data">
+        <form method="POST" class="m-t-lg" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="form-group row">
                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>
@@ -24,8 +24,8 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo" value="">
-                        @if (isset($result->errors->logo))
-                            <span class="error">{{ $result->errors->logo[0] }}</span>
+                        @if (isset($errors) && $errors->has('logo'))
+                            <span class="error">{{ $errors->first('logo') }}</span>
                         @endif
                     </div>
                 </div>
@@ -33,14 +33,31 @@
             <div class="form-group row {{ !empty($errors->parent_org_id) ? 'has-error' : '' }}">
                 <label for="baseOrg" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_organisation') }}:</label>
                 <div class="col-sm-9">
-                    <input
-                        type="text"
-                        class="input-border-r-12 form-control"
+                    <select
+                        class="input-border-r-12 form-control js-autocomplete"
                         name="parent_org_id"
-                        value="{{ !empty($model['parent_org_id']) ? $model['parent_org_id'] : '' }}"
+                        id="filter"
+                        data-live-search="true"
                     >
-                    @if (isset($result->errors->parent_org_id))
-                        <span class="error">{{ $result->errors->parent_org_id[0] }}</span>
+                        @if (isset($parentOrgs[0]))
+                            <option value="">&nbsp;</option>
+                            @foreach ($parentOrgs as $parent)
+                                @if (!isset($model['name']) || $model['id'] != $parent->id)
+                                    <option
+                                        value="{{ $parent->id }}"
+                                        {{ !empty($model['parent_org_id']) && $parent->id == $model['parent_org_id']
+                                            ? ' selected'
+                                            : ''
+                                        }}
+                                    >{{ $parent->name }}</option>
+                                @endif
+                            @endforeach
+                        @else
+                            <option value="" selected >{{ __('custom.no_info') }}</option>
+                        @endif
+                    </select>
+                    @if (isset($errors) && $errors->has('parent_org_id'))
+                        <span class="error">{{ $errors->first('parent_org_id') }}</span>
                     @endif
                 </div>
             </div>
@@ -53,8 +70,8 @@
                         name="uri"
                         value="{{ !empty($model['uri']) ? $model['uri'] : '' }}"
                     >
-                    @if (isset($result->errors->uri))
-                        <span class="error">{{ $result->errors->uri[0] }}</span>
+                    @if (isset($errors) && $errors->has('uri'))
+                        <span class="error">{{ $errors->first('uri') }}</span>
                     @endif
                 </div>
             </div>
@@ -84,8 +101,12 @@
                         </label>
                     </div>
                 @endforeach
-                @if (isset($result->errors->type))
-                    <span class="error">{{ $result->errors->type[0] }}</span>
+                @if (isset($errors) && $errors->has('type'))
+                    <div class="row m-l-md">
+                        <div class="col-xs-12 m-l-md">
+                            <span class="error">{{ $errors->first('type') }}</span>
+                        </div>
+                    </div>
                 @endif
             </div>
             <div class="form-group row">

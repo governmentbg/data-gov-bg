@@ -55,9 +55,7 @@ class ResourceTest extends TestCase
                     'http_headers'      => $this->faker->text(),
                 ]
             ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+        )->assertStatus(500)->assertJson(['success' => false]);
 
         // test successfull creation
         $this->post(
@@ -81,9 +79,7 @@ class ResourceTest extends TestCase
                     'http_headers'      => $this->faker->text(),
                 ]
             ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        )->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testAddResourceData()
@@ -145,16 +141,145 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => false]);
 
         // test successfull edit
+        $data = [
+            [
+                'album'                 => 'The White Stripes',
+                'year'                  => '1999',
+                'US_peak_chart_post'    => '-',
+            ],
+            [
+                'album'                 => 'De Stijl',
+                'year'                  => '2000',
+                'US_peak_chart_post'    => '-',
+            ],
+            [
+                'album'                 => 'White Blood Cells',
+                'year'                  => '2001',
+                'US_peak_chart_post'    => '61',
+            ],
+            [
+                'album'                 => 'Elephant',
+                'year'                  => '2003',
+                'US_peak_chart_post'    => '6',
+            ],
+            [
+                'album'                 => 'Get Behind Me Satan',
+                'year'                  => '2005',
+                'US_peak_chart_post'    => '3',
+            ],
+            [
+                'album'                 => 'Icky Thump',
+                'year'                  => '2007',
+                'US_peak_chart_post'    => '2',
+            ],
+            [
+                'album'                 => 'Under Great White Northern Lights',
+                'year'                  => '2010',
+                'US_peak_chart_post'    => '11',
+            ],
+            [
+                'album'                 => 'Live in Mississippi',
+                'year'                  => '2011',
+                'US_peak_chart_post'    => '-',
+            ],
+            [
+                'album'                 => 'Live at the Gold Dollar',
+                'year'                  => '2012',
+                'US_peak_chart_post'    => '-',
+            ],
+            [
+                'album'                 => 'Nine Miles from the White City',
+                'year'                  => '2013',
+                'US_peak_chart_post'    => '-',
+            ],
+        ];
+
+        // alternative format
+        $data2 = [
+            [
+                'album',
+                'year',
+                'US_peak_chart_post',
+            ],
+            [
+                'De Stijl',
+                '2000',
+                '-',
+            ],
+            [
+                'White Blood Cells',
+                '2001',
+                '61',
+            ],
+            [
+                'Elephant',
+                '2003',
+                '6',
+            ],
+            [
+                'Get Behind Me Satan',
+                '2005',
+                '3',
+            ],
+            [
+                'Icky Thump',
+                '2007',
+                '2',
+            ],
+            [
+                'Under Great White Northern Lights',
+                '2010',
+                '11',
+            ],
+            [
+                'Live in Mississippi',
+                '2011',
+                '-',
+            ],
+            [
+                'Live at the Gold Dollar',
+                '2012',
+                '-',
+            ],
+            [
+                'Nine Miles from the White City',
+                '2013',
+                '-',
+            ],
+        ];
+
         $this->post(
             url('api/addResourceData'),
             [
                 'api_key'           => $this->getApiKey(),
                 'resource_uri'      => $resource->uri,
-                'data'              => ['test elastic' => 'data array'],
+                'data'              => $data2,
             ]
-        )
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+        )->assertStatus(200)->assertJson(['success' => true]);
+
+        sleep(1);
+
+        // test successful request
+        $this->post(
+            url('api/getResourceData'),
+            ['resource_uri' => $resource->uri]
+        )->assertStatus(200)->assertJson(['success' => true]);
+
+        // test successfull data update
+        $this->post(
+            url('api/updateResourceData'),
+            [
+                'api_key'           => $this->getApiKey(),
+                'resource_uri'      => $resource->uri,
+                'data'              => $data2,
+            ]
+        )->assertStatus(200)->assertJson(['success' => true]);
+
+        // test successful request
+        $this->post(
+            url('api/getResourceData'),
+            ['resource_uri' => $resource->uri]
+        )->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testEditResourceMetadata()

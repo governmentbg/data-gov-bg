@@ -26,7 +26,7 @@ class TermsOfUseRequestController extends ApiController
      */
     public function sendTermsOfUseRequest(Request $request)
     {
-        $data = $request->offsetGet('data');
+        $data = $request->get('data', []);
         //validate request data
         $validator = \validator::make($data, [
             'description'   => 'required|string',
@@ -57,7 +57,7 @@ class TermsOfUseRequestController extends ApiController
             return $this->successResponse(['id' => $newTerms->id], true);
         }
 
-        return $this->errorResponse('Send terms of use request failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.send_terms_request_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -104,7 +104,7 @@ class TermsOfUseRequestController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit terms of use request failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_terms_request_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -124,11 +124,11 @@ class TermsOfUseRequestController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse('Delete terms of use failure');
+            return $this->errorResponse(__('custom.delete_terms_request_fail'), $validator->errors()->messages());
         }
 
         if (empty($terms = TermsOfUseRequest::find($post['request_id']))) {
-            return $this->errorResponse('Delete terms of use request failure');
+            return $this->errorResponse(__('custom.delete_terms_request_fail'));
         }
 
         try {
@@ -136,7 +136,7 @@ class TermsOfUseRequestController extends ApiController
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
-            return $this->errorResponse('Delete terms of use request failure');
+            return $this->errorResponse(__('custom.delete_terms_request_fail'));
         }
 
         return $this->successResponse();
@@ -227,7 +227,7 @@ class TermsOfUseRequestController extends ApiController
                 'terms_of_use_requests' => $result
             ], true);
         }
-        return $this->errorResponse('List terms of use failure');
+        return $this->errorResponse(__('custom.list_terms_request_fail'), $validator->errors()->messages());
     }
 
     /**

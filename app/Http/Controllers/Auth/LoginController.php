@@ -55,6 +55,18 @@ class LoginController extends Controller
                 'remember_me'   => 'nullable|boolean'
             ]);
 
+            $validator->after(function ($validator) use ($request) {
+                $user = \App\User::where('username', $request->username)->first();
+
+                if (is_null($user)) {
+                    $validator->errors()->add('username', __('custom.not_existing_profile'));
+                }
+
+                if (isset($user->active) && !$user->active) {
+                    $validator->errors()->add('username', __('custom.inactive_profile'));
+                }
+            });
+
             if (!$validator->fails()) {
                 $request->merge([$field => $loginData['username']]);
                 $credentials = $request->only($field, 'password');

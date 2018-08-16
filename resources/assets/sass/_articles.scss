@@ -64,6 +64,7 @@
 
     .articles {
         .article {
+            display: inline-block;
             float: left;
 
             ul li {
@@ -71,7 +72,7 @@
             }
 
             .art-heading-bar {
-                display: inline-block;
+                width: 100%;
 
                 div, h2, h3 {
                     display: inline-block;
@@ -143,8 +144,8 @@
                 content:' ';
                 position: absolute;
                 display:block;
-                width: 30%;
-                margin: 12px 0;
+                width: 100%;
+                margin-top: 24px;
                 border-radius:4px;
                 -webkit-border-radius:4px;
                 -moz-border-radius:4px;

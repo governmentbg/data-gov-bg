@@ -35,6 +35,12 @@
             </div>
             @if (isset($result->errors->{ $field['name'] }))
                 <span class="error">{{ $result->errors->{ $field['name'] }[0] }}</span>
+            @elseif (isset($errors) && $errors->has($field['name'] .'.'. $active['locale']))
+                <span class="error">{{ $errors->first($field['name'] .'.'. $active['locale']) }}</span>
+            @elseif (isset($errors) && $errors->has('data.'. $field['name'] .'.'. $active['locale']))
+                <span class="error">{{ $errors->first('data.'. $field['name'] .'.'. $active['locale']) }}</span>
+            @elseif (isset($errors) && $errors->has($field['name']))
+                <span class="error">{{ $errors->first($field['name']) }}</span>
             @endif
         </div>
     </div>

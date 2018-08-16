@@ -46,7 +46,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('editPage', 'Api\PageController@editPage');
     Route::post('deletePage', 'Api\PageController@deletePage');
     Route::post('listPages', 'Api\PageController@listPages');
-    Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
     Route::post('/listModules', 'Api\ActionsHistoryController@listModules');
 
     Route::post('/listRights', 'Api\RightController@listRights');
@@ -119,6 +118,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/addTag', 'Api\CategoryController@addTag');
     Route::post('/editTag', 'Api\CategoryController@editTag');
     Route::post('/deleteTag', 'Api\CategoryController@deleteTag');
+    Route::post('/deleteCustomSetting', 'Api\CustomSettingsController@delete');
 
     Route::post('/addFollow', 'Api\UserFollowController@addFollow');
     Route::post('/unFollow', 'Api\UserFollowController@unFollow');
@@ -146,6 +146,9 @@ Route::post('/listNews', 'Api\NewsController@listNews');
 
 Route::post('/listDataSets', 'Api\DataSetController@listDataSets');
 Route::post('/searchDataSet', 'Api\DataSetController@searchDataSet');
+
+Route::post('/listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+Route::post('/userCount', 'Api\UserController@userCount');
 
 Route::post('/listResources', 'Api\ResourceController@listResources');
 Route::post('/getResourceMetadata', 'Api\ResourceController@getResourceMetadata');

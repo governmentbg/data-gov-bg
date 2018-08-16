@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
-use Elasticsearch\Common\Exceptions\RuntimeException;
-use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 
 class ResourceController extends ApiController
 {
@@ -40,6 +38,7 @@ class ResourceController extends ApiController
      */
     public function addResourceMetadata(Request $request)
     {
+        $errors = [];
         $post = $request->all();
         $requestTypes = Resource::getRequestTypes();
 
@@ -50,22 +49,30 @@ class ResourceController extends ApiController
         $validator = \Validator::make($post, [
             'dataset_uri'               => 'required|string|exists:data_sets,uri,deleted_at,NULL',
             'data'                      => 'required|array',
-            'data.name'                 => 'required|string',
-            'data.description'          => 'nullable|string',
-            'data.locale'               => 'required|string|max:5',
-            'data.version'              => 'nullable|string',
-            'data.schema_description'   => 'nullable|string|required_without:data.schema_url',
-            'data.schema_url'           => 'nullable|url|required_without:data.schema_description',
-            'data.type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
-            'data.resource_url'         => 'nullable|url|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
-            'data.http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-            'data.authentication'       => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
-            'data.http_headers'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
-            'data.post_data'            => 'nullable|string',
-            'data.custom_fields'        => 'nullable|array',
-            'data.custom_fields.label'  => 'nullable|string',
-            'data.custom_fields.value'  => 'nullable|string',
         ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->messages();
+        } else {
+            $validator = \Validator::make($post['data'], [
+                'description'          => 'nullable',
+                'locale'               => 'nullable|max:5',
+                'name'                 => 'required_with:locale',
+                'name.bg'              => 'required_without:locale|string',
+                'version'              => 'nullable',
+                'schema_description'   => 'nullable|string|required_without:schema_url',
+                'schema_url'           => 'nullable|url|required_without:schema_description',
+                'type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
+                'resource_url'         => 'nullable|url|required_if:type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'http_rq_type'         => 'nullable|string|required_if:type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+                'authentication'       => 'nullable|string|required_if:type,'. Resource::TYPE_API,
+                'http_headers'         => 'nullable|string|required_if:type,'. Resource::TYPE_API,
+                'post_data'            => 'nullable|string',
+                'custom_fields'        => 'nullable|array',
+                'custom_fields.label'  => 'nullable|string',
+                'custom_fields.value'  => 'nullable|string',
+            ]);
+        }
 
         $validator->sometimes('data.post_data', 'required', function($post) use ($requestTypes) {
             if (
@@ -113,9 +120,11 @@ class ResourceController extends ApiController
 
                 Log::error($ex->getMessage());
             }
+        } else {
+            $errors = $validator->errors()->messages();
         }
 
-        return $this->errorResponse('Add resource metadata failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_resource_meta_fail'), $errors);
     }
 
     /**
@@ -154,7 +163,7 @@ class ResourceController extends ApiController
                 $resource->save();
 
                 \Elasticsearch::index([
-                    'body'  => $post['data'],
+                    'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id,
@@ -163,7 +172,7 @@ class ResourceController extends ApiController
                 DB::commit();
 
                 return $this->successResponse();
-            } catch (RuntimeException $ex) {
+            } catch (\Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -174,7 +183,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Add resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_resource_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -297,7 +306,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Edit resource metadata failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_resource_metadata_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -325,20 +334,20 @@ class ResourceController extends ApiController
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
 
-                \Elasticsearch::index([
-                    'body'  => $post['data'],
+                $update = \Elasticsearch::index([
+                    'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id,
                 ]);
 
                 return $this->successResponse();
-            } catch (RuntimeException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Update resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -369,7 +378,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Delete resource failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.delete_resource_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -452,10 +461,11 @@ class ResourceController extends ApiController
                     'schema_url'            => $result->schema_url,
                     'type'                  => $types[$result->resource_type],
                     'resource_url'          => $result->resource_url,
-                    'http_rq_type'          => $rqTypes[$result->http_rq_type],
+                    'http_rq_type'          => isset($result->http_rq_type) ? $rqTypes[$result->http_rq_type] : null,
                     'authentication'        => $result->authentication,
                     'custom_fields'         => [], // TODO
-                    'file_format'           => $fileFormats[$result->file_format],
+                    'file_format'           => isset($result->file_format) ? $fileFormats[$result->file_format] : null,
+                    'es_id'                 => isset($resource->es_id) ? $resource->es_id : null,
                     'reported'              => $result->is_reported,
                     'created_at'            => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                     'updated_at'            => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
@@ -463,9 +473,11 @@ class ResourceController extends ApiController
                     'updated_by'            => $result->updated_by,
                 ];
             }
+
+            return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
         }
 
-        return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
+        return $this->errorResponse(__('custom.list_resources_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -504,10 +516,11 @@ class ResourceController extends ApiController
                     'schema_url'            => $resource->schema_url,
                     'type'                  => $types[$resource->resource_type],
                     'resource_url'          => $resource->resource_url,
-                    'http_rq_type'          => $rqTypes[$resource->http_rq_type],
+                    'http_rq_type'          => isset($resource->http_rq_type) ? $rqTypes[$resource->http_rq_type] : null,
                     'authentication'        => $resource->authentication,
                     'http_headers'          => $resource->http_headers,
-                    'file_format'           => $fileFormats[$resource->file_format],
+                    'file_format'           => isset($resource->file_format) ? $fileFormats[$resource->file_format] : null,
+                    'es_id'                 => isset($resource->es_id) ? $resource->es_id : null,
                     'reported'              => $resource->is_reported,
                     'created_at'            => isset($resource->created_at) ? $resource->created_at->toDateTimeString() : null,
                     'created_by'            => $resource->created_by,
@@ -519,7 +532,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get resource metadata failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_metadata_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -546,7 +559,7 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Get resource schema failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_schema_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -568,7 +581,7 @@ class ResourceController extends ApiController
             return $this->successResponse(['view' => 'html'], true);
         }
 
-        return $this->errorResponse('Get resource view failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_view_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -588,23 +601,18 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $elasticData = $resource->elasticDataSet;
 
-                if (!empty($elasticData)) {
-                    $data = \Elasticsearch::get([
-                        'index' => $elasticData->index,
-                        'type'  => $elasticData->index_type,
-                        'id'    => $elasticData->doc,
-                    ]);
-                }
-
-                return $this->successResponse(!empty($data['_source']) ? $data['_source'] : null);
-            } catch (RuntimeException $ex) {
+                return $this->successResponse(
+                    empty($resource->es_id)
+                    ? []
+                    : ElasticDataSet::getElasticData($resource->es_id)
+                );
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Get resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.get_resource_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -668,12 +676,12 @@ class ResourceController extends ApiController
                 }
 
                 return $this->successResponse(['data' => isset($data['hits']) ? $data['hits'] : []], true);
-            } catch (BadRequest400Exception $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Search resource data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_resource_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -737,12 +745,12 @@ class ResourceController extends ApiController
                 }
 
                 return $this->successResponse(['data' => $data], true);
-            } catch (BadRequest400Exception $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
 
-        return $this->errorResponse('Linked data failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.link_data_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -802,6 +810,6 @@ class ResourceController extends ApiController
             }
         }
 
-        return $this->errorResponse('Search reported resources failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.search_reported_fail'), $validator->errors()->messages());
     }
 }

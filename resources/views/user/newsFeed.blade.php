@@ -4,7 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'newsfeed'])
-    <div class="col-xs-12 m-t-md">
+    <div class="col-xs-12">
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-12 sidenav">
                 <ul class="nav">
@@ -120,7 +120,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="col-sm-9 m-t-xl text-center">
+                    <div class="col-sm-9 m-t-xl no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

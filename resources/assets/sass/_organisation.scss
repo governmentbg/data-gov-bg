@@ -22,8 +22,15 @@
 
     .chronology > .row{
         .info-icon {
+            border: none !important;
+            position: relative;
+            min-height: 1px;
+            padding-left: 15px;
+            padding-right: 15px;
+            bottom: 10px;
+
             img {
-                max-height: 60px;
+                max-height: 70px;
             }
 
             &:after {
@@ -31,15 +38,15 @@
                 display: block;
                 border: 5px solid #76AE41;
                 border-radius: 40px;
-                bottom: -20px;
+                bottom: -15px;
                 position: absolute;
-                left: 40px;
+                left: 45px;
             }
 
             @include smMobile() {
                 img {
                     margin-top: 20px;
-                    max-width: 40px;
+                    max-width: 30px;
                 }
                 &:after {
                     left: 30px;

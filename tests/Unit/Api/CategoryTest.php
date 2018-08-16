@@ -4,6 +4,7 @@ namespace Tests\Unit\Api;
 
 use App\Category;
 use Tests\TestCase;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -12,6 +13,8 @@ class CategoryTest extends TestCase
 {
     use WithFaker;
     use DatabaseTransactions;
+
+    private $locale = 'en';
     /**
      * A basic test example.
      *
@@ -52,7 +55,7 @@ class CategoryTest extends TestCase
 
     public function testEditMainCategory() {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -111,7 +114,7 @@ class CategoryTest extends TestCase
     public function testDeleteMainCategory()
     {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -167,7 +170,7 @@ class CategoryTest extends TestCase
     public function testGetMainCategoryDetails()
     {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -195,7 +198,7 @@ class CategoryTest extends TestCase
     public function testAddTag()
     {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -298,7 +301,7 @@ class CategoryTest extends TestCase
     public function testEditTag()
     {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -307,7 +310,7 @@ class CategoryTest extends TestCase
         ]);
 
         $tag = Category::create([
-            'name'      => $this->faker->name(),
+            'name'      => ApiController::trans($this->locale, $this->faker->name()),
             'parent_id' => $category->id,
             'active'    => true,
             'ordering'  => Category::ORDERING_ASC,
@@ -345,7 +348,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successfull edit
+        // test successful edit
         $this->post(
             url('api/editTag'),
             [
@@ -364,7 +367,7 @@ class CategoryTest extends TestCase
     public function testDeleteTag()
     {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -373,7 +376,7 @@ class CategoryTest extends TestCase
         ]);
 
         $tag = Category::create([
-            'name'      => $this->faker->name(),
+            'name'      => ApiController::trans($this->locale, $this->faker->name()),
             'parent_id' => $category->id,
             'active'    => true,
             'ordering'  => Category::ORDERING_ASC,
@@ -396,7 +399,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successfull delete
+        // test successful delete
         $this->post(
             url('api/editTag'),
             [
@@ -429,7 +432,7 @@ class CategoryTest extends TestCase
     public function testGetTagDetails()
     {
         $category = Category::create([
-            'name'              => $this->faker->name(),
+            'name'              => ApiController::trans($this->locale, $this->faker->name()),
             'icon_file_name'    => $this->faker->name(),
             'icon_mime_type'    => $this->faker->mimeType(),
             'icon_data'         => $this->faker->name(),
@@ -438,7 +441,7 @@ class CategoryTest extends TestCase
         ]);
 
         $tag = Category::create([
-            'name'      => $this->faker->name(),
+            'name'      => ApiController::trans($this->locale, $this->faker->name()),
             'parent_id' => $category->id,
             'active'    => true,
             'ordering'  => Category::ORDERING_ASC,

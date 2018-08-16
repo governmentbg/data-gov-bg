@@ -146,8 +146,8 @@ class DataRequestTest extends TestCase
         //test missing api key
         $this->post(url('api/deleteDataRequest'),
             [
-                'api_key' => null,
-                'request_id' => $request->id
+                'api_key'       => null,
+                'request_id'    => $request->id
             ]
         )
             ->assertStatus(403)
@@ -157,7 +157,7 @@ class DataRequestTest extends TestCase
         $this->post(
             url('api/deleteDataRequest'),
             [
-                'api_key'     => $this->getApiKey(),
+                'api_key'      => $this->getApiKey(),
                 'request_id'   => null,
             ]
         )
@@ -170,7 +170,7 @@ class DataRequestTest extends TestCase
         $this->post(
             url('api/deleteDataRequest'),
             [
-                'api_key'   => $this->getApiKey(),
+                'api_key'      => $this->getApiKey(),
                 'request_id'   => $request->id,
             ]
         )

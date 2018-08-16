@@ -6,6 +6,7 @@ use App\DataSet;
 use Tests\TestCase;
 use App\DataSetGroup;
 use App\Organisation;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -15,6 +16,7 @@ class DataSetTest extends TestCase
     use WithFaker;
     use DatabaseTransactions;
 
+    private $locale = 'en';
     /**
      * Test DataSet creation
      *
@@ -50,7 +52,7 @@ class DataSetTest extends TestCase
     public function testEditDataSet()
     {
         $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1, 3),
             'visibility'    => $this->faker->numberBetween(1, 2),
@@ -105,7 +107,7 @@ class DataSetTest extends TestCase
     public function testDeleteDataSet()
     {
         $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1, 3),
             'visibility'    => $this->faker->numberBetween(1, 2),
@@ -181,7 +183,7 @@ class DataSetTest extends TestCase
     public function testGetDataSetDetails()
     {
         $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1,3),
             'visibility'    => $this->faker->numberBetween(1,2),
@@ -209,7 +211,7 @@ class DataSetTest extends TestCase
     public function testAddDataSetToGroup()
     {
         $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1, 3),
             'visibility'    => $this->faker->numberBetween(1, 2),
@@ -218,7 +220,7 @@ class DataSetTest extends TestCase
         ]);
 
         $organisation = Organisation::create([
-            'name'          => $this->faker->word(),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'uri'           => $this->faker->uuid(),
             'type'          => Organisation::TYPE_GROUP,
             'descript'      => $this->faker->text(),
@@ -233,16 +235,16 @@ class DataSetTest extends TestCase
 
         // test missing group_id
         $this->post(url('api/addDataSetToGroup'), [
-            'api_key'       => $this->getApiKey(),
+            'api_key'        => $this->getApiKey(),
             'data_set_uri'   => $dataSet->uri,
-            'group_id'      => null,
+            'group_id'       => null,
         ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test missing dataset_uri
         $this->post(url('api/addDataSetToGroup'), [
-            'api_key'       => $this->getApiKey(),
+            'api_key'        => $this->getApiKey(),
             'data_set_uri'   => null,
-            'group_id'      => $organisation->id,
+            'group_id'       => $organisation->id,
         ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful request
@@ -256,7 +258,7 @@ class DataSetTest extends TestCase
     public function testRemoveDataSetFromGroup()
     {
         $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
             'uri'           => $this->faker->uuid(),
             'category_id'   => $this->faker->numberBetween(1,3),
             'visibility'    => $this->faker->numberBetween(1,2),

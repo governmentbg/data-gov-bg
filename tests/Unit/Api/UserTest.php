@@ -216,7 +216,7 @@ class UserTest extends TestCase
 
         $this->post(url('api/inviteUser'), [
             'api_key' => $this->getApiKey(),
-            'id' => $this->getUserId(),
+            'id'      => $this->getUserId(),
             'data'    => [
                 'email' => 'dimitar@finite-soft.com',
             ]

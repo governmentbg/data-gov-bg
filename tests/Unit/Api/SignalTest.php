@@ -75,9 +75,9 @@ class SignalTest extends TestCase
         $this->post(
             url('api/editSignal'),
             [
-                'api_key'   => $this->getApiKey(),
+                'api_key'     => $this->getApiKey(),
                 'signal_id'   => null,
-                'data'      => [
+                'data'        => [
                     'resource_id'   => $this->faker->randomElement($resources)['id'],
                     'descript'      => $this->faker->sentence(4),
                     'firstname'     => $this->faker->firstname(),
@@ -102,7 +102,7 @@ class SignalTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful testEdit
+        // test successful test еdit
         $this->post(
             url('api/editSignal'),
             [
@@ -137,7 +137,7 @@ class SignalTest extends TestCase
         //test missing api key
         $this->post(url('api/deleteSignal'),
             [
-                'api_key' => null,
+                'api_key'   => null,
                 'signal_id' => $signal->id
             ]
         )
@@ -157,11 +157,11 @@ class SignalTest extends TestCase
 
         $count = Signal::all()->count();
 
-        //test successfull delete
+        //test successful delete
         $this->post(
             url('api/deleteSignal'),
             [
-                'api_key'   => $this->getApiKey(),
+                'api_key'     => $this->getApiKey(),
                 'signal_id'   => $signal->id,
             ]
         )

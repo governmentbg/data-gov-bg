@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="schema_url" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.schema_url') }}:</label>
+                <label for="schema_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_url') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="schema_url"

@@ -58,7 +58,7 @@ class ResourceController extends ApiController
                 'description'          => 'nullable',
                 'locale'               => 'nullable|max:5',
                 'name'                 => 'required_with:locale',
-                'name.*'               => 'required_without:locale|string',
+                'name.bg'              => 'required_without:locale|string',
                 'version'              => 'nullable',
                 'schema_description'   => 'nullable|string|required_without:schema_url',
                 'schema_url'           => 'nullable|url|required_without:schema_description',

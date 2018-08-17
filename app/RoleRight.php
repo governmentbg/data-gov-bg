@@ -18,18 +18,18 @@ class RoleRight extends Model
     public static function getRights()
     {
         return [
-            self::RIGHT_VIEW    => 'View',
-            self::RIGHT_EDIT    => 'Edit',
-            self::RIGHT_ALL     => 'All',
+            self::RIGHT_VIEW    => __('custom.view_right'),
+            self::RIGHT_EDIT    => __('custom.edit_right'),
+            self::RIGHT_ALL     => __('custom.all_right'),
         ];
     }
 
     public static function getRightsDescription()
     {
         return [
-            self::RIGHT_VIEW    => 'View',
-            self::RIGHT_EDIT    => 'View and edit',
-            self::RIGHT_ALL     => 'View, edit and delete',
+            self::RIGHT_VIEW    => __('custom.view_right_desc'),
+            self::RIGHT_EDIT    => __('custom.edit_right_desc'),
+            self::RIGHT_ALL     => __('custom.all_right_desc'),
         ];
     }
 

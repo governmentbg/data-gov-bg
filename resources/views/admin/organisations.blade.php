@@ -26,7 +26,7 @@
             <div class="col-sm-3 sidenav p-l-r-none hidden-xs">
                 <ul class="nav">
                     <li class="js-show-submenu">
-                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;Одобрени</a>
+                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.approved_side') }}</a>
                         <ul class="sidebar-submenu">
                             <li>
                                 <a
@@ -39,7 +39,7 @@
                                             )
                                         )
                                     }}"
-                                >Покажи одобрени</a>
+                                >{{ __('custom.show_approved') }}</a>
                             </li>
                             <li>
                                 <a
@@ -52,7 +52,7 @@
                                             )
                                         )
                                     }}"
-                                >Скрий одобрени</a>
+                                >{{ __('custom.hide_approved') }}</a>
                             </li>
                             <li>
                                 <a
@@ -65,14 +65,14 @@
                                             )
                                         )
                                     }}"
-                                >Покажи всички</a>
+                                >{{ __('custom.show_all') }}</a>
                             </li>
                         </ul>
                     </li>
                 </ul>
                 <ul class="nav">
                     <li class="js-show-submenu">
-                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;Активни</a>
+                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.active_side') }}</a>
                         <ul class="sidebar-submenu m-b-md">
                             <li>
                                 <a
@@ -85,7 +85,7 @@
                                             )
                                         )
                                     }}"
-                                >Покажи активни</a>
+                                >{{ __('custom.show_active') }}</a>
                             </li>
                             <li>
                                 <a
@@ -98,7 +98,7 @@
                                             )
                                         )
                                     }}"
-                                >Скрий активни</a>
+                                >{{ __('custom.hide_active') }}</a>
                             </li>
                             <li>
                                 <a
@@ -108,7 +108,7 @@
                                             array_except(app('request')->input(), ['active', 'q'])
                                         )
                                     }}"
-                                >Покажи всички</a>
+                                >{{ __('custom.show_all') }}</a>
                             </li>
                         </ul>
                     </li>
@@ -131,7 +131,7 @@
                                         class="js-ajax-autocomplete-org form-control js-parent-org-filter"
                                         data-url="{{ url('/api/searchOrganisations') }}"
                                         data-post="{{ json_encode(['api_key' => \Auth::user()->api_key]) }}"
-                                        data-placeholder="Главна организация"
+                                        data-placeholder="{{__('custom.main_org')}}"
                                         name="parent"
                                     >
                                         <option></option>

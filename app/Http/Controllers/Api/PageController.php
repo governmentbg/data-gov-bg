@@ -114,7 +114,7 @@ class PageController extends ApiController
         $editData = $request->all();
 
         if (sizeof($editData['data']) < 1) {
-            return $this->errorResponse('Edit Page failure');
+            return $this->errorResponse(__('custom.edit_page_fail'));
         }
 
         $validator = Validator::make($editData, [

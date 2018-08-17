@@ -224,7 +224,7 @@ class OrganisationController extends ApiController
             isset($organisation->type)
             && !in_array($organisation->type, array_keys(Organisation::getPublicTypes()))
         ) {
-            return $this->errorResponse('No organisation found.');
+            return $this->errorResponse(__('custom.no_org_found'));
         }
 
         $validator->after(function ($validator) use ($data) {
@@ -385,7 +385,7 @@ class OrganisationController extends ApiController
         ) {
 
             if (!in_array($organisation->type, array_keys(Organisation::getPublicTypes()))) {
-                return $this->errorResponse('No organisation found.');
+                return $this->errorResponse(__('custom.no_org_found'));
             }
 
             try {
@@ -1166,7 +1166,7 @@ class OrganisationController extends ApiController
         $group = Organisation::find($id);
 
         if ($group->type != Organisation::TYPE_GROUP) {
-            return $this->errorResponse('No Group Found.');
+            return $this->errorResponse(__('custom.no_group_found'));
         }
 
         if (!$validator->fails()) {
@@ -1432,7 +1432,7 @@ class OrganisationController extends ApiController
 
                 if ($group) {
                     if ($group->type != Organisation::TYPE_GROUP) {
-                        return $this->errorResponse('No Group Found.');
+                        return $this->errorResponse(__('custom.no_group_found'));
                     }
 
                     foreach ($group->customSetting()->get() as $setting) {

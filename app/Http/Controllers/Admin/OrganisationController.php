@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Organisation;
 use App\CustomSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;

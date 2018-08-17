@@ -100,7 +100,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'manageRoles' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/roles') }}"
                             >{{ __('custom.manage_roles') }}</a>
                         </li>
                     </ul>

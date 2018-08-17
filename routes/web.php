@@ -28,6 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
     Route::post('/admin/organisations/delete/{id}', 'Admin\OrganisationController@delete');
 
+    Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
+    Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
+    Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');
+
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 

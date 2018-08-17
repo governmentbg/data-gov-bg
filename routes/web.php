@@ -28,6 +28,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
     Route::post('/admin/organisations/delete/{id}', 'Admin\OrganisationController@delete');
 
+    Route::match(['get', 'post'], '/admin/groups', 'Admin\GroupController@list');
+    Route::match(['get', 'post'], '/admin/groups/register', 'Admin\GroupController@register');
+    Route::match(['get', 'post'], '/admin/groups/view/{uri}', 'Admin\GroupController@view');
+    Route::post('/admin/groups/delete/{id}', 'Admin\GroupController@delete');
+    Route::match(['get', 'post'], '/admin/groups/edit/{uri}', 'Admin\GroupController@edit');
+    Route::get('/admin/groups/search', 'Admin\GroupController@search');
+
     Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
     Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
     Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');

@@ -12668,6 +12668,10 @@ body #app .navbar .navbar-header > div.nav-controls > span.user-icon.active a im
   border-radius: 13px;
 }
 
+body #app .navbar .navbar-header > div.nav-controls > span.user-icon.active a img.admin {
+  border-radius: 3px;
+}
+
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon a {
   border-radius: 5px;
   display: inline-block;

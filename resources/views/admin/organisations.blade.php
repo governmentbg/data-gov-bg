@@ -172,15 +172,15 @@
                         @foreach ($organisations as $key => $organisation)
                             <div class="col-md-4 col-sm-12 org-col">
                                 <div class="col-xs-12 m-t-lg">
-                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}">
+                                    <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}">
                                         <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
+                                    <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
                                     <div class="org-desc">{{ $organisation->description }}</div>
                                     <p class="text-right show-more">
-                                        <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                                        <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                                     </p>
                                 </div>
                                 <div class="col-xs-12 ch-del-btns">

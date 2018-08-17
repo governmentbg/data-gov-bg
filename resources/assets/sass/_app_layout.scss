@@ -247,6 +247,9 @@ body {
 
                                         img {
                                             border-radius: 13px;
+                                            &.admin {
+                                                border-radius: 3px;
+                                            }
                                         }
                                     }
                                 }

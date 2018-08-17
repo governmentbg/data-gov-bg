@@ -31858,7 +31858,7 @@ module.exports = function spread(callback) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.17
+ * Vue.js v2.5.16
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -36947,7 +36947,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.17';
+Vue.version = '2.5.16';
 
 /*  */
 
@@ -46254,6 +46254,10 @@ $(function () {
         if ($('.nano').length) {
             $('.nano').nanoScroller({});
         }
+
+        $('.js-parent-org-filter').change(function () {
+            this.form.submit();
+        });
     });
 });
 
@@ -46614,6 +46618,60 @@ function initSelect2() {
                                 return {
                                     text: item.firstname + ' ' + item.lastname,
                                     id: item.id
+                                };
+                            })
+                        };
+                    }
+                },
+                matcher: function matcher(params, data) {
+                    if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
+                        return data;
+                    }
+
+                    if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                        return data;
+                    }
+
+                    return false;
+                }
+            };
+
+            options = addSelect2Translations(options);
+
+            $(this).select2(options);
+        });
+    }
+
+    if ($('.js-ajax-autocomplete-org').length) {
+        $('.js-ajax-autocomplete-org').each(function () {
+            var options = {
+                placeholder: $(this).data('placeholder'),
+                minimumInputLength: 3,
+                ajax: {
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    url: $(this).data('url'),
+                    type: 'POST',
+                    delay: 1000,
+                    data: function data(params) {
+
+                        var queryParams = {
+                            criteria: {
+                                keywords: params.term
+                            }
+                        };
+                        var finalParams = $.extend({}, queryParams, $(this).data('post'));
+
+                        return finalParams;
+                    },
+                    processResults: function processResults(data) {
+
+                        return {
+                            results: $.map(data.organisations, function (item) {
+                                return {
+                                    text: item.name,
+                                    id: item.uri
                                 };
                             })
                         };

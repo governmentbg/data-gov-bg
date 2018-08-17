@@ -436,7 +436,7 @@ return [
     'entered_data_error' => 'Грешно въведени данни!',
     'image_size_too_big' => 'Размерът на изображението е твърде голям(Максималният размер е ',
     'bytes' => ' байта)',
-    'admin_profile' => 'Администраторски профил',
+    'admin_profile' => 'Админ профил',
     'create_profile' => 'създаване на профил',
     'stats_analytics' => 'статистика и анализ',
     'topics_categories' => 'теми и категории',

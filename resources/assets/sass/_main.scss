@@ -441,16 +441,34 @@ textarea {
 
     @include mobile() {
         margin-left: 40px;
+        &.admin {
+            margin-left: 0px;
+            input {
+                margin-left: 0px;
+            }
+        }
     }
 
     @include mobile() {
         padding-right: 60px;
+        &.admin {
+            margin-left: 0px;
+            input {
+                margin-left: 0px;
+            }
+        }
     }
 
     @include smMobile() {
         text-align: left !important;
         margin-left: 10px;
         padding-right: 50px;
+        &.admin {
+            margin-left: 0px;
+            input {
+                margin-left: 0px;
+            }
+        }
     }
 }
 

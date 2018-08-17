@@ -20,6 +20,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
     Route::match(['get', 'post'], '/user/resource/download/{esid}/{name}', 'UserController@resourceDownload')->name('resourceDownload');
 
+    Route::match(['get', 'post'], '/admin/organisations', 'Admin\OrganisationController@list');
+    Route::match(['get', 'post'], '/admin/organisations/search', 'Admin\OrganisationController@search');
+    Route::post('/admin/organisations/register', 'Admin\OrganisationController@register');
+    Route::get('/admin/organisations/register', 'Admin\OrganisationController@showOrgRegisterForm');
+    Route::get('/admin/organisations/view/{uri}', 'Admin\OrganisationController@view')->name('adminOrgView');
+    Route::post('/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
+    Route::post('/admin/organisations/delete/{id}', 'Admin\OrganisationController@delete');
+
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
@@ -71,7 +79,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete/{id}', 'UserController@deleteOrg');
-        Route::get('/user/organisations/search', 'UserController@searchOrg');
+        Route::match(['get', 'post'], '/user/organisations/search', 'UserController@searchOrg');
         Route::get('/user/organisations/view/{uri}', 'UserController@viewOrg')->name('userOrgView');
         Route::post('/user/organisations/edit/{uri}', 'UserController@editOrg');
         Route::match(['get', 'post'], '/user/organisations/datasets/edit/{uri}', 'UserController@orgDatasetEdit');

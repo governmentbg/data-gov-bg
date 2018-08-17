@@ -3,7 +3,11 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'newsfeed'])
+    @if (Auth::user()->is_admin)
+        @include('partials.admin-nav-bar', ['view' => 'newsfeed'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'newsfeed'])
+    @endif
     <div class="col-xs-12">
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-12 sidenav">

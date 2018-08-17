@@ -4,10 +4,12 @@ $(function() {
         $('.js-show-on-load').css('visibility', 'visible');
 
         if ($('.nano').length) {
-            $('.nano').nanoScroller({
-
-            });
+            $('.nano').nanoScroller({});
         }
+
+        $('.js-parent-org-filter').change(function() {
+            this.form.submit();
+        });
     });
 });
 

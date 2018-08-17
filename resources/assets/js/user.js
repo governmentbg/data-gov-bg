@@ -149,6 +149,60 @@ function initSelect2() {
             $(this).select2(options);
         });
     }
+
+    if ($('.js-ajax-autocomplete-org').length) {
+        $('.js-ajax-autocomplete-org').each(function() {
+            var options = {
+                placeholder: $(this).data('placeholder'),
+                minimumInputLength: 3,
+                ajax: {
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    url: $(this).data('url'),
+                    type: 'POST',
+                    delay: 1000,
+                    data: function (params) {
+
+                        var queryParams = {
+                            criteria: {
+                                keywords: params.term
+                            }
+                        };
+                        var finalParams = $.extend({}, queryParams, $(this).data('post'));
+
+                        return finalParams;
+                    },
+                    processResults: function (data) {
+
+                        return {
+                            results: $.map(data.organisations, function (item) {
+                                return {
+                                    text: item.name,
+                                    id: item.uri
+                                }
+                            })
+                        };
+                    }
+                },
+                matcher: function(params, data) {
+                    if ($.trim(params.term) == '' || typeof params.term == 'undefined') {
+                        return data;
+                    }
+
+                    if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+                        return data;
+                    }
+
+                    return false;
+                }
+            };
+
+            options = addSelect2Translations(options);
+
+            $(this).select2(options);
+        });
+    }
 };
 initSelect2();
 

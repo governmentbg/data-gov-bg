@@ -34,7 +34,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'organisation' ? 'active' : '' }}"
-                                href="{{ url('/user/organisations') }}"
+                                href="{{ url('/admin/organisations') }}"
                             >{{ trans_choice(__('custom.organisations'), 2) }}</a>
                         </li>
                         <li>

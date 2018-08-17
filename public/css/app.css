@@ -13160,11 +13160,27 @@ textarea {
   .search-field {
     margin-left: 40px;
   }
+
+  .search-field.admin {
+    margin-left: 0px;
+  }
+
+  .search-field.admin input {
+    margin-left: 0px;
+  }
 }
 
 @media screen and (max-width: 1199px) {
   .search-field {
     padding-right: 60px;
+  }
+
+  .search-field.admin {
+    margin-left: 0px;
+  }
+
+  .search-field.admin input {
+    margin-left: 0px;
   }
 }
 
@@ -13173,6 +13189,14 @@ textarea {
     text-align: left !important;
     margin-left: 10px;
     padding-right: 50px;
+  }
+
+  .search-field.admin {
+    margin-left: 0px;
+  }
+
+  .search-field.admin input {
+    margin-left: 0px;
   }
 }
 

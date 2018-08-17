@@ -313,7 +313,7 @@ class OrganisationController extends ApiController
                     $orgData['parent_org_id'] = null;
                 }
 
-                if (isset($data['active'])) {
+                if (!empty($data['active'])) {
                     $orgData['active'] = $data['active'];
                 } else {
                     $orgData['active'] = 0;

@@ -1,0 +1,23 @@
+.role {
+    .add {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .frame-wrap {
+        width: 800px;
+        margin: 0 auto;
+
+        @include mobile() {
+            width: 100%;
+        }
+
+        .frame {
+            padding-left: 40px !important;
+            padding-right: 40px !important;
+
+            h3 {
+                margin-bottom: 40px;
+            }
+        }
+    }
+}

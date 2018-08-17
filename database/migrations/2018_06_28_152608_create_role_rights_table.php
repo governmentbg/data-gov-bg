@@ -16,7 +16,7 @@ class CreateRoleRightsTable extends Migration
         Schema::create('role_rights', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('role_id')->unsigned();
-            $table->foreign('role_id')->references('id')->on('roles');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->string('module_name');
             $table->unsignedTinyInteger('right');
             $table->boolean('limit_to_own_data');

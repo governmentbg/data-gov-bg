@@ -450,7 +450,7 @@ class UserController extends ApiController
             });
 
             if (count(Mail::failures()) > 0) {
-                return $this->errorResponse('Failed to send mail');
+                return $this->errorResponse(__('custom.failed_send_mail'));
             }
         }
 

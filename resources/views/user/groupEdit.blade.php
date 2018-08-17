@@ -24,10 +24,8 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo" value="">
-                        @if (isset($errors) && $errors->has('logo'))
-                            <span class="error">{{ $errors->first('logo') }}</span>
-                        @endif
                     </div>
+                    <div class="error">{{ $errors->first('logo') }}</div>
                 </div>
             </div>
             <div class="form-group row {{ !empty($errors->uri) ? 'has-error' : '' }}">

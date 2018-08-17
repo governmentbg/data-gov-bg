@@ -39,6 +39,11 @@
                                             )
                                         )
                                     }}"
+                                    class="{{
+                                        isset(app('request')->input()['approved']) && app('request')->input()['approved']
+                                            ? 'active'
+                                            : ''
+                                    }}"
                                 >Покажи одобрени</a>
                             </li>
                             <li>
@@ -51,6 +56,11 @@
                                                 array_except(app('request')->input(), ['approved', 'q'])
                                             )
                                         )
+                                    }}"
+                                    class="{{
+                                        isset(app('request')->input()['approved']) && !app('request')->input()['approved']
+                                            ? 'active'
+                                            : ''
                                     }}"
                                 >Скрий одобрени</a>
                             </li>
@@ -85,6 +95,11 @@
                                             )
                                         )
                                     }}"
+                                    class="{{
+                                        isset(app('request')->input()['active']) && app('request')->input()['active']
+                                            ? 'active'
+                                            : ''
+                                    }}"
                                 >Покажи активни</a>
                             </li>
                             <li>
@@ -97,6 +112,11 @@
                                                 array_except(app('request')->input(), ['active', 'q'])
                                             )
                                         )
+                                    }}"
+                                    class="{{
+                                        isset(app('request')->input()['active']) && !app('request')->input()['active']
+                                            ? 'active'
+                                            : ''
                                     }}"
                                 >Скрий активни</a>
                             </li>
@@ -118,12 +138,7 @@
                         <form
                             method="GET"
                             class="form-horisontal"
-                            action="{{
-                                action(
-                                    'Admin\OrganisationController@list',
-                                    array_except(app('request')->input(), ['q'])
-                                )
-                            }}"
+                            action="{{ action('Admin\OrganisationController@list', []) }}"
                         >
                             <div class="form-group row m-b-lg m-t-md">
                                 <div class="col-lg-10">
@@ -141,6 +156,12 @@
                                     </select>
                                 </div>
                             </div>
+                            @if (isset(app('request')->input()['active']))
+                                <input type="hidden" name="active" value="{{ app('request')->input()['active'] }}">
+                            @endif
+                            @if (isset(app('request')->input()['approved']))
+                                <input type="hidden" name="approved" value="{{ app('request')->input()['approved'] }}">
+                            @endif
                         </form>
                     </div>
                 </div>

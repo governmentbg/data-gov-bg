@@ -66,104 +66,117 @@ class OrganisationController extends ApiController
             'custom_fields.*.value' => 'nullable',
         ]);
 
-        if (!$validator->fails()) {
-            $organisation = new Organisation;
+        $organisation = new Organisation;
+        $imageError = false;
 
-            $organisation->type = $data['type'];
+        if (!empty($data['logo'])) {
+            try {
+                error_log('data[logo]: '. print_r($data['logo'], true));
+                $img = \Image::make($data['logo']);
+error_log('img: '. print_r($img, true));
+                $organisation->logo_file_name = empty($data['logo_filename'])
+                    ? basename($data['logo'])
+                    : $data['logo_filename'];
+                $organisation->logo_mime_type = $img->mime();
 
-            DB::beginTransaction();
+                $temp = tmpfile();
+                $path = stream_get_meta_data($temp)['uri'];
+                $img->save($path);
+                $organisation->logo_data = file_get_contents($path);
 
-            if (!empty($data['logo'])) {
-                try {
-                    $img = \Image::make($data['logo']);
-                } catch (\Exception $ex) {}
+                fclose($temp);
+            } catch (\Exception $ex) {
+                error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
+                $imageError = true;
 
-                if (!empty($img)) {
-                    $organisation->logo_file_name = basename($data['logo']);
-                    $organisation->logo_mime_type = $img->mime();
+                $validator->errors()->add('logo', $this->getImageTypeError());
+            }
 
-                    $temp = tmpfile();
-                    $path = stream_get_meta_data($temp)['uri'];
-                    $img->save($path);
-                    $organisation->logo_data = file_get_contents($path);
-
-                    fclose($temp);
-                }
-            } elseif (isset($data['logo_filename']) && isset($data['logo_mimetype']) && isset($data['logo_data'])) {
+            if (isset($data['logo_filename']) && isset($data['logo_mimetype']) && isset($data['logo_data'])) {
                 $organisation->logo_file_name = $data['logo_filename'];
                 $organisation->logo_mime_type = $data['logo_mimetype'];
                 $organisation->logo_data = $data['logo_data'];
             }
 
-            if (!isset($organisation->logo_data) || $this->checkImageSize($organisation->logo_data)) {
-                try {
-                    $organisation->name = $this->trans($data['locale'], $data['name']);
-                    $organisation->descript = !empty($data['description'])
-                        ? $this->trans($data['locale'], $data['description'])
-                        : null;
+            if (isset($organisation->logo_data) && !$this->checkImageSize($organisation->logo_data)) {
+                $imageError = true;
 
-                    $organisation->uri = !empty($request->data['uri'])
-                        ? $request->data['uri']
-                        : $this->generateOrgUri();
-
-                    $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($data['locale'], $data['activity_info']) : null;
-                    $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
-                    $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
-                    $organisation->active = isset($data['active']) ? $data['active'] : 0;
-                    $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
-                        ? $data['approved']
-                        : 0;
-
-                    if (!empty($data['custom_fields'])) {
-                        foreach ($data['custom_fields'] as $fieldSet) {
-                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                                $customFields[] = [
-                                    'value' => $fieldSet['value'],
-                                    'label' => $fieldSet['label'],
-                                ];
-                            }
-                        }
-                    }
-
-                    $organisation->save();
-
-                    if (\Auth::user()) {
-                        $userToOrgRole = new UserToOrgRole;
-                        $userToOrgRole->org_id = $organisation->id;
-                        $userToOrgRole->user_id = \Auth::user()->id;
-                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
-
-                        try {
-                            $userToOrgRole->save();
-                        } catch (QueryException $ex) {
-                            Log::error($ex->getMessage());
-                            DB::rollback();
-
-                            return $this->errorResponse(__('custom.add_org_fail'));
-                        }
-                    }
-
-                    if (!empty($customFields)) {
-                        if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
-                            DB::rollback();
-                            return $this->errorResponse(__('custom.add_org_fail'));
-                        }
-                    }
-
-                    DB::commit();
-
-                    return $this->successResponse(['org_id' => $organisation->id], true);
-                } catch (QueryException $ex) {
-                    DB::rollback();
-
-                    Log::error($ex->getMessage());
-                }
-            } else {
                 $validator->errors()->add('logo', $this->getImageSizeError());
             }
         }
+error_log('organisation: '. print_r($organisation, true));
+        $errors = $validator->errors()->messages();
 
-        return $this->errorResponse(__('custom.add_org_fail'), $validator->errors()->messages());
+        if ($validator->passes() && !$imageError) {
+            $organisation->type = $data['type'];
+
+            DB::beginTransaction();
+
+            try {
+                $organisation->name = $this->trans($data['locale'], $data['name']);
+                $organisation->descript = !empty($data['description'])
+                    ? $this->trans($data['locale'], $data['description'])
+                    : null;
+
+                $organisation->uri = !empty($request->data['uri'])
+                    ? $request->data['uri']
+                    : $this->generateOrgUri();
+
+                $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($data['locale'], $data['activity_info']) : null;
+                $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
+                $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
+                $organisation->active = isset($data['active']) ? $data['active'] : 0;
+                $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
+                    ? $data['approved']
+                    : 0;
+
+                if (!empty($data['custom_fields'])) {
+                    foreach ($data['custom_fields'] as $fieldSet) {
+                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            $customFields[] = [
+                                'value' => $fieldSet['value'],
+                                'label' => $fieldSet['label'],
+                            ];
+                        }
+                    }
+                }
+
+                $organisation->save();
+
+                if (\Auth::user()) {
+                    $userToOrgRole = new UserToOrgRole;
+                    $userToOrgRole->org_id = $organisation->id;
+                    $userToOrgRole->user_id = \Auth::user()->id;
+                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                    try {
+                        $userToOrgRole->save();
+                    } catch (QueryException $ex) {
+                        Log::error($ex->getMessage());
+                        DB::rollback();
+
+                        return $this->errorResponse(__('custom.add_org_fail'));
+                    }
+                }
+
+                if (!empty($customFields)) {
+                    if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
+                        DB::rollback();
+                        return $this->errorResponse(__('custom.add_org_fail'));
+                    }
+                }
+
+                DB::commit();
+
+                return $this->successResponse(['org_id' => $organisation->id], true);
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.add_org_fail'), $errors);
     }
 
     /**
@@ -1025,7 +1038,7 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             $newGroup = new Organisation;
 
-            $newGroup->name = $this->trans($empty, $post['name']);
+            $newGroup->name = $this->trans($post['locale'], $post['name']);
             $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
             $newGroup->uri = !empty($post['uri'])
                 ? $post['uri']

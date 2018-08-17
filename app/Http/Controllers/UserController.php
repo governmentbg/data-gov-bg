@@ -1767,31 +1767,16 @@ class UserController extends Controller {
     {
         $post = ['data' => $request->all()];
 
-        // if (!empty($post['data']['logo'])) {
-        //     try {
-        //         $img = \Image::make($post['data']['logo']);
-
-        //         $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-        //         $post['data']['logo_mimetype'] = $img->mime();
-        //         $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-        //         unset($post['data']['logo']);
-        //     } catch (\Exception $ex) {
-        //         Log::error($ex->getMessage());
-        //     }
-        // }
-        error_log('postl: '. print_r($post['data']['logo']->getPathName(), true));
         if (!empty($post['data']['logo'])) {
             $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
             $post['data']['logo'] = $post['data']['logo']->getPathName();
         }
-        error_log('post: '. print_r($post, true));
 
         $post['data']['description'] = $post['data']['descript'];
         $request = Request::create('/api/addOrganisation', 'POST', $post);
         $api = new ApiOrganisation($request);
         $result = $api->addOrganisation($request)->getData();
-error_log('result: '. print_r($result, true));
+
         if ($result->success) {
             session()->flash('alert-success', __('custom.add_org_success'));
         } else {

@@ -71,9 +71,8 @@ class OrganisationController extends ApiController
 
         if (!empty($data['logo'])) {
             try {
-                error_log('data[logo]: '. print_r($data['logo'], true));
                 $img = \Image::make($data['logo']);
-error_log('img: '. print_r($img, true));
+
                 $organisation->logo_file_name = empty($data['logo_filename'])
                     ? basename($data['logo'])
                     : $data['logo_filename'];
@@ -86,7 +85,6 @@ error_log('img: '. print_r($img, true));
 
                 fclose($temp);
             } catch (\Exception $ex) {
-                error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
                 $imageError = true;
 
                 $validator->errors()->add('logo', $this->getImageTypeError());
@@ -104,7 +102,7 @@ error_log('img: '. print_r($img, true));
                 $validator->errors()->add('logo', $this->getImageSizeError());
             }
         }
-error_log('organisation: '. print_r($organisation, true));
+
         $errors = $validator->errors()->messages();
 
         if ($validator->passes() && !$imageError) {

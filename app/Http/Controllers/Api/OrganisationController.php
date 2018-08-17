@@ -109,10 +109,10 @@ class OrganisationController extends ApiController
                     $organisation->activity_info = !empty($data['activity_info']) ? $this->trans($data['locale'], $data['activity_info']) : null;
                     $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
                     $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
-                    $organisation->active = isset($data['active']) ? $data['active'] : 0;
+                    $organisation->active = !empty($data['active']) ? $data['active'] : Organisation::ACTIVE_FALSE;
                     $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
                         ? $data['approved']
-                        : 0;
+                        : Organisation::APPROVED_FALSE;
 
                     if (!empty($data['custom_fields'])) {
                         foreach ($data['custom_fields'] as $fieldSet) {
@@ -316,13 +316,13 @@ class OrganisationController extends ApiController
                 if (!empty($data['active'])) {
                     $orgData['active'] = $data['active'];
                 } else {
-                    $orgData['active'] = 0;
+                    $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
                 if (!empty($data['approved'])) {
                     $orgData['approved'] = $data['approved'];
                 } else {
-                    $orgData['approved'] = 0;
+                    $orgData['approved'] = Organisation::APPROVED_FALSE;
                 }
 
                 if (!empty($data['custom_fields'])) {
@@ -1329,6 +1329,8 @@ class OrganisationController extends ApiController
         $groups = [];
         $result = [];
 
+        $query = Organisation::where('type', Organisation::TYPE_GROUP);
+
         if ($criteria) {
             $validator = \Validator::make($post, [
                 'criteria.group_ids'    => 'nullable|array',
@@ -1342,8 +1344,6 @@ class OrganisationController extends ApiController
             ]);
 
             if (!$validator->fails()) {
-                $query = Organisation::where('type', Organisation::TYPE_GROUP);
-
                 if (!empty($criteria['group_ids'])) {
                     $query->whereIn('id', $criteria['group_ids']);
                 }

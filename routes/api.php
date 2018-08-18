@@ -72,6 +72,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('/listDataRequests', 'Api\DataRequestController@listDataRequests');
 
     Route::post('/addDocument', 'Api\DocumentController@addDocument');
+    Route::post('/appendDocumentData', 'Api\DocumentController@appendDocumentData');
     Route::post('/editDocument', 'Api\DocumentController@editDocument');
     Route::post('/deleteDocument', 'Api\DocumentController@deleteDocument');
     Route::post('/listDocuments', 'Api\DocumentController@listDocuments');

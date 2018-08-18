@@ -25,8 +25,6 @@ class CreateDocumentsTable extends Migration
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
         });
-
-        DB::statement("ALTER TABLE documents ADD data LONGBLOB NOT NULL");
     }
 
     /**

@@ -325,6 +325,7 @@ return [
     'remove_datasetgroup_fail' => 'Remove dataset group failure',
     'get_user_count_fail' => 'Get user dataset count failure',
     'add_document_fail' => 'Add document failure',
+    'append_document_fail' => 'Append document data failure',
     'edit_document_fail' => 'Edit document failure',
     'delete_document_fail' => 'Delete document failure',
     'list_document_fail' => 'List document failure',

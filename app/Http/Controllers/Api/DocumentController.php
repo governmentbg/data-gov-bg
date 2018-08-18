@@ -12,6 +12,17 @@ use Illuminate\Database\QueryException;
 
 class DocumentController extends ApiController
 {
+    private $path;
+
+    public function __construct()
+    {
+        $this->path = storage_path('docs') .'/';
+
+        if (!is_dir($this->path)) {
+            mkdir($this->path);
+        }
+    }
+
     /**
      * Add a document with provided data
      *
@@ -27,34 +38,39 @@ class DocumentController extends ApiController
      */
     public function addDocument(Request $request)
     {
-        $post = $request->all();
+        $data = $request->offsetGet('data', []);
 
-        $validator = Validator::make($post, [
-            'data'              => 'required|array',
-            'data.name'         => 'required',
-            'data.description'  => 'required',
-            'data.locale'       => 'nullable|string|max:5',
-            'data.filename'     => 'required|string',
-            'data.mimetype'     => 'required|string',
-            'data.data'         => 'required|string',
+        $validator = Validator::make($data, [
+            'name'         => 'required',
+            'description'  => 'required',
+            'locale'       => 'nullable|string|max:5',
+            'filename'     => 'required|string',
+            'mimetype'     => 'required|string',
+            'data'         => 'required|string',
         ]);
 
         if (!$validator->fails()) {
             try {
                 DB::beginTransaction();
 
-                $newDocument = new Document;
-                $newDocument->name = $this->trans($post['data']['locale'], $post['data']['name']);
-                $newDocument->descript = $this->trans($post['data']['locale'], $post['data']['description']);
-                $newDocument->file_name = $post['data']['filename'];
-                $newDocument->mime_type = $post['data']['mimetype'];
-                $newDocument->data = $post['data']['data'];
-                $newDocument->save();
+                $doc = new Document;
+                $doc->name = $this->trans($data['locale'], $data['name']);
+                $doc->descript = $this->trans($data['locale'], $data['description']);
+                $doc->file_name = $data['filename'];
+                $doc->mime_type = $data['mimetype'];
 
-                DB::commit();
+                if ($this->checkFileSize($data['data'])) {
+                    $doc->save();
 
-                return $this->successResponse(['doc_id' => $newDocument->id]);
-            } catch (QueryException $ex) {
+                    file_put_contents($this->path . $doc->id, $data['data']);
+
+                    DB::commit();
+                } else {
+                    $validator->errors()->add('logo', $this->getFileSizeError());
+                }
+
+                return $this->successResponse(['doc_id' => $doc->id]);
+            } catch (\Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -62,6 +78,37 @@ class DocumentController extends ApiController
         }
 
         return $this->errorResponse(__('custom.add_document_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Append provided data to a document
+     *
+     * @param array data - required
+     * @param int data[doc_id] - required
+     * @param string data[data] - required
+     *
+     * @return json response with doc id or error message
+     */
+    public function appendDocumentData(Request $request)
+    {
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
+            'doc_id'    => 'required|int|exists:documents,id',
+            'data'      => 'required|string',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                file_put_contents($this->path . $data['doc_id'], $data['data'], FILE_APPEND);
+
+                return $this->successResponse();
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.append_document_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -81,57 +128,68 @@ class DocumentController extends ApiController
     public function editDocument(Request $request)
     {
         $post = $request->all();
+        $errors = [];
 
-        $validator = Validator::make($post, [
-            'doc_id'            => 'required|integer|exists:documents,id',
-            'data'              => 'required|array',
-            'data.name'         => 'nullable',
-            'data.description'  => 'nullable',
-            'data.locale'       => 'nullable|string|max:5',
-            'data.filename'     => 'nullable|string',
-            'data.mimetype'     => 'nullable|string',
-            'data.data'         => 'nullable|string',
+        $validator = \Validator::make($post, [
+            'doc_id'    => 'required|int|exists:documents,id',
+            'data'      => 'required|array',
         ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->messages();
+        } else {
+            $data = $post['data'];
+            $validator = \Validator::make($data, [
+                'name'         => 'nullable',
+                'description'  => 'nullable',
+                'locale'       => 'nullable|string|max:5',
+                'filename'     => 'nullable|string',
+                'mimetype'     => 'nullable|string',
+                'data'         => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {
-                $editDocument = Document::find($post['doc_id']);
+                $doc = Document::find($post['doc_id']);
 
                 DB::beginTransaction();
 
-                if (isset($post['data']['name'])) {
-                    $editDocument->name = $this->trans($post['data']['locale'], $post['data']['name'], true);
+                if (isset($data['name'])) {
+                    $doc->name = $this->trans($data['locale'], $data['name'], true);
                 }
 
-                if (isset($post['data']['description'])) {
-                    $editDocument->descript = $this->trans($post['data']['locale'], $post['data']['description'], true);
+                if (isset($data['description'])) {
+                    $doc->descript = $this->trans($data['locale'], $data['description'], true);
                 }
 
-                if (isset($post['data']['filename'])) {
-                    $editDocument->file_name = $post['data']['filename'];
+                if (isset($data['filename'])) {
+                    $doc->file_name = $data['filename'];
                 }
 
-                if (isset($post['data']['mimetype'])) {
-                    $editDocument->mime_type = $post['data']['mimetype'];
+                if (isset($data['mimetype'])) {
+                    $doc->mime_type = $data['mimetype'];
                 }
 
-                if (isset($post['data']['data'])) {
-                    $editDocument->data = $post['data']['data'];
+                if (isset($data['data'])) {
+                    file_put_contents($this->path . $doc->id, $data['data']);
                 }
 
-                $editDocument->save();
+                $doc->save();
 
                 DB::commit();
 
                 return $this->successResponse();
-            } catch (QueryException $e) {
+            } catch (\Exception $e) {
                 DB::rollback();
 
                 Log::error($e->getMessage());
             }
+        } else {
+            $errors = $validator->errors()->messages();
         }
 
-        return $this->errorResponse(__('custom.edit_document_fail'), $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_document_fail'), $errors);
     }
 
     /**
@@ -146,7 +204,7 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'doc_id' => 'required|integer|exists:documents,id',
+            'doc_id' => 'required|int|exists:documents,id',
         ]);
 
         if (!$validator->fails()) {
@@ -155,8 +213,10 @@ class DocumentController extends ApiController
             try {
                 $deleteDocument->delete();
 
+                unlink($this->path . $post['doc_id']);
+
                 return $this->successResponse();
-            } catch (QueryException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
             return $this->errorResponse(__('custom.delete_document_fail'));
@@ -188,7 +248,7 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'criteria.doc_id'       => 'nullable|integer',
+            'criteria.doc_id'       => 'nullable|int',
             'criteria.date_from'    => 'nullable|date',
             'criteria.date_to'      => 'nullable|date',
             'criteria.locale'       => 'nullable|string|max:5',
@@ -196,8 +256,8 @@ class DocumentController extends ApiController
             'criteria.order'        => 'nullable|array',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
 
         if ($validator->fails()) {
@@ -213,7 +273,6 @@ class DocumentController extends ApiController
             'descript',
             'file_name',
             'mime_type',
-            'data',
             'created_at',
             'updated_at',
             'created_by',
@@ -274,7 +333,7 @@ class DocumentController extends ApiController
                 'description'   => $result->descript,
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
-                'data'          => $result->data,
+                'data'          => file_get_contents($this->path . $result->id),
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
                 'created_by'    => $result->created_by,
@@ -311,8 +370,8 @@ class DocumentController extends ApiController
             'criteria.order'        => 'nullable|array',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -327,7 +386,6 @@ class DocumentController extends ApiController
                 'descript',
                 'file_name',
                 'mime_type',
-                'data',
                 'created_at',
                 'updated_at',
                 'created_by',
@@ -363,7 +421,7 @@ class DocumentController extends ApiController
                     'description'   => $result->descript,
                     'filename'      => $result->file_name,
                     'mimetype'      => $result->mime_type,
-                    'data'          => $result->data,
+                    'data'          => file_get_contents($this->path . $result->id),
                     'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                     'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
                     'created_by'    => $result->created_by,

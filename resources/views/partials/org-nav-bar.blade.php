@@ -8,16 +8,30 @@
                 <div class="col-md-12">
                     <ul class="nav filter-type right-border">
                         <li>
-                            <a
-                                class="{{ $view == 'view' ? 'active' : null }}"
-                                href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"
-                            >{{ ultrans('custom.organisations') }}</a>
+                            @if (\App\Role::isAdmin())
+                                <a
+                                    class="{{ $view == 'view' ? 'active' : null }}"
+                                    href="{{ route('adminOrgView', ['uri' => $organisation->uri]) }}"
+                                >{{ ultrans('custom.organisations') }}</a>
+                            @else
+                                <a
+                                    class="{{ $view == 'view' ? 'active' : null }}"
+                                    href="{{ route('userOrgView', ['uri' => $organisation->uri]) }}"
+                                >{{ ultrans('custom.organisations') }}</a>
+                            @endif
                         </li>
                         <li>
-                            <a
-                                class="{{ $view == 'members' ? 'active' : null }}"
-                                href="{{ url('/user/organisations/members/'. $organisation->uri) }}"
-                            >{{ ultrans('custom.members') }}</a>
+                            @if (\App\Role::isAdmin())
+                                <a
+                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    href="{{ url('/admin/organisations/members/'. $organisation->uri) }}"
+                                >{{ ultrans('custom.members') }}</a>
+                            @else
+                                <a
+                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    href="{{ url('/user/organisations/members/'. $organisation->uri) }}"
+                                >{{ ultrans('custom.members') }}</a>
+                            @endif
                         </li>
                     </ul>
                 </div>

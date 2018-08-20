@@ -7,6 +7,7 @@ use App\UserSetting;
 use App\Organisation;
 use App\CustomSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
@@ -104,17 +105,8 @@ class GroupController extends AdminController
                 $data['description'] = $data['descript'];
 
                 if (!empty($data['logo'])) {
-                    try {
-                        $img = \Image::make($data['logo']);
-
-                        $data['logo_filename'] = $data['logo']->getClientOriginalName();
-                        $data['logo_mimetype'] = $img->mime();
-                        $data['logo_data'] = file_get_contents($data['logo']);
-
-                        unset($data['logo']);
-                    } catch (\Exception $ex) {
-                        Log::error($ex->getMessage());
-                    }
+                    $data['logo_filename'] = $data['logo']->getClientOriginalName();
+                    $data['logo'] = $data['logo']->getPathName();
                 }
 
                 $params = [
@@ -241,15 +233,8 @@ class GroupController extends AdminController
                 $data['description'] = isset($data['descript']) ? $data['descript'] : null;
 
                 if (!empty($data['logo'])) {
-                    try {
-                        $img = \Image::make($data['logo']);
-
-                        $data['logo_file_name'] = $data['logo']->getClientOriginalName();
-                        $data['logo_mime_type'] = $img->mime();
-                        $data['logo_data'] = file_get_contents($data['logo']);
-
-                        unset($data['logo']);
-                    } catch (\Exception $ex) {}
+                    $data['logo_filename'] = $data['logo']->getClientOriginalName();
+                    $data['logo'] = $data['logo']->getPathName();
                 }
 
                 $params = [

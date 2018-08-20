@@ -27,6 +27,50 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/organisations/view/{uri}', 'Admin\OrganisationController@view')->name('adminOrgView');
     Route::post('/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
     Route::post('/admin/organisations/delete/{id}', 'Admin\OrganisationController@delete');
+    Route::match(
+        ['get', 'post'],
+        '/admin/organisations/members/{uri}',
+        'Admin\OrganisationController@viewMembers'
+    )->name('adminOrgMembersView');
+
+    Route::get(
+        '/admin/organisations/members/addByMail',
+        'Admin\OrganisationController@addMembersByMail'
+    )->name('adminAddOrgMembersByMail');
+    Route::match(
+        ['get', 'post'],
+        '/admin/organisations/members/addNew/{uri}',
+        'Admin\OrganisationController@addMembersNew'
+    )->name('adminAddOrgMembersNew');
+    Route::get(
+        '/admin/organisations/members/addExisting',
+        'Admin\OrganisationController@addMembersExisting'
+    )->name('adminAddOrgMembersExisting');
+    Route::get(
+        '/admin/organisations/members/delete',
+        'Admin\OrganisationController@delMember'
+    )->name('adminDelOrgMember');
+
+    Route::match(['get', 'post'], '/admin/groups', 'Admin\GroupController@list');
+    Route::match(['get', 'post'], '/admin/groups/register', 'Admin\GroupController@register');
+    Route::match(['get', 'post'], '/admin/groups/view/{uri}', 'Admin\GroupController@view');
+    Route::post('/admin/groups/delete/{id}', 'Admin\GroupController@delete');
+    Route::match(['get', 'post'], '/admin/groups/edit/{uri}', 'Admin\GroupController@edit');
+    Route::get('/admin/groups/search', 'Admin\GroupController@search');
+    Route::match(
+        ['get', 'post'],
+        '/admin/groups/members/{uri}',
+        'Admin\GroupController@viewMembers'
+    )->name('adminGroupMembersView');
+    Route::match(
+        ['get', 'post'],
+        '/admin/groups/members/addNew/{uri}',
+        'Admin\GroupController@addMembersNew'
+    )->name('adminAddGroupMembersNew');
+
+    Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
+    Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
+    Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');
 
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');

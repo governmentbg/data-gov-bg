@@ -447,5 +447,12 @@ return [
     'logins_history' => 'login history',
     'signals' => 'signals',
     'manage_roles' => 'manage roles',
-
+    'role_name' => 'Role name',
+    'by_default' => 'Defaults',
+    'action' => 'Action',
+    'active' => 'active',
+    'not_active' => 'not active',
+    'role_list' => 'Roles list',
+    'add_role' => 'Add new role',
+    'edit_role' => 'Edit role',
 ];

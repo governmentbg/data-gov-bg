@@ -14754,6 +14754,21 @@ textarea {
   margin-bottom: 40px;
 }
 
+.add-terms {
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.add-terms .body {
+  padding: 20px 40px;
+}
+
+@media screen and (max-width: 1199px) {
+  .add-terms .body {
+    padding: 20px;
+  }
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;

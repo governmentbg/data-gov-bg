@@ -76,7 +76,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'termsConditions' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/terms-of-use/list') }}"
                             >{{ ultrans('custom.terms_and_conditions') }}</a>
                         </li>
                         <li>

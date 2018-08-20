@@ -189,4 +189,14 @@ class ApiController extends Controller
     {
         return __('custom.image_size_too_big'). env('IMAGE_MAX_SIZE', 16777215) . __('custom.bytes');
     }
+
+    /**
+     * Get image type error message
+     *
+     * @return string $text
+     */
+    protected function getImageTypeError()
+    {
+        return __('custom.image_type_error') .' (JPEG, PNG, GIF, WebP)';
+    }
 }

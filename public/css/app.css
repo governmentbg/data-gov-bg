@@ -289,7 +289,8 @@
 }
 
 .theme-index .input-border-r-12,
-.theme-index .bootstrap-tagsinput {
+.theme-index .bootstrap-tagsinput,
+.theme-index .form-control {
   border: 1px solid #c02e54;
 }
 
@@ -623,7 +624,8 @@
 }
 
 .theme-data .input-border-r-12,
-.theme-data .bootstrap-tagsinput {
+.theme-data .bootstrap-tagsinput,
+.theme-data .form-control {
   border: 1px solid #4e57aa;
 }
 
@@ -957,7 +959,8 @@
 }
 
 .theme-data-attention .input-border-r-12,
-.theme-data-attention .bootstrap-tagsinput {
+.theme-data-attention .bootstrap-tagsinput,
+.theme-data-attention .form-control {
   border: 1px solid #d32a31;
 }
 
@@ -1291,7 +1294,8 @@
 }
 
 .theme-organisation .input-border-r-12,
-.theme-organisation .bootstrap-tagsinput {
+.theme-organisation .bootstrap-tagsinput,
+.theme-organisation .form-control {
   border: 1px solid #76ad3f;
 }
 
@@ -1625,7 +1629,8 @@
 }
 
 .theme-request .input-border-r-12,
-.theme-request .bootstrap-tagsinput {
+.theme-request .bootstrap-tagsinput,
+.theme-request .form-control {
   border: 1px solid #e8d429;
 }
 
@@ -1959,7 +1964,8 @@
 }
 
 .theme-visualisations .input-border-r-12,
-.theme-visualisations .bootstrap-tagsinput {
+.theme-visualisations .bootstrap-tagsinput,
+.theme-visualisations .form-control {
   border: 1px solid #e98911;
 }
 
@@ -2293,7 +2299,8 @@
 }
 
 .theme-news .input-border-r-12,
-.theme-news .bootstrap-tagsinput {
+.theme-news .bootstrap-tagsinput,
+.theme-news .form-control {
   border: 1px solid #0a7b5d;
 }
 
@@ -2627,7 +2634,8 @@
 }
 
 .theme-documents .input-border-r-12,
-.theme-documents .bootstrap-tagsinput {
+.theme-documents .bootstrap-tagsinput,
+.theme-documents .form-control {
   border: 1px solid #145c99;
 }
 
@@ -2961,7 +2969,8 @@
 }
 
 .theme-contact .input-border-r-12,
-.theme-contact .bootstrap-tagsinput {
+.theme-contact .bootstrap-tagsinput,
+.theme-contact .form-control {
   border: 1px solid #791292;
 }
 
@@ -3295,7 +3304,8 @@
 }
 
 .theme-user .input-border-r-12,
-.theme-user .bootstrap-tagsinput {
+.theme-user .bootstrap-tagsinput,
+.theme-user .form-control {
   border: 1px solid #108f9e;
 }
 
@@ -13149,15 +13159,22 @@ ul > li {
 }
 
 .input-border-r-12,
-.bootstrap-tagsinput {
+.bootstrap-tagsinput,
+.form-control {
   border-radius: 12px;
   padding: 6px 12px;
 }
 
 @media screen and (max-width: 767px) {
   .input-border-r-12,
-  .bootstrap-tagsinput {
+  .bootstrap-tagsinput,
+  .form-control {
     text-align: left !important;
+  }
+
+  .input-border-r-12:not(.form-control),
+  .bootstrap-tagsinput:not(.form-control),
+  .form-control:not(.form-control) {
     margin-left: 10px;
   }
 }
@@ -14422,6 +14439,13 @@ textarea {
   border-radius: 10px;
 }
 
+@media screen and (max-width: 479px) {
+  .frame {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}
+
 .blue-highlight {
   background-color: #EAF5F7;
   width: 100%;
@@ -14746,8 +14770,8 @@ textarea {
 }
 
 .admin .frame-wrap .frame {
-  padding-left: 40px !important;
-  padding-right: 40px !important;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
 }
 
 .admin .frame-wrap .frame h3 {

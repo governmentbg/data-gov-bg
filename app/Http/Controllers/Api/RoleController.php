@@ -18,25 +18,29 @@ class RoleController extends ApiController
      * @param array data - required
      * @param string data[name] - required
      * @param boolean data[active] - required
+     * @param boolean data[default_user] - optional
+     * @param boolean data[default_group_admin] - optional
+     * @param boolean data[default_org_admin] - optional
      *
      * @return json with success and role id or error
      */
     public function addRole(Request $request)
     {
-        $post = $request->all();
+        $post = $request->get('data', []);
 
-        $validator = \Validator::make($post['data'], [
-            'name'      => 'required|max:255',
-            'active'    => 'required|boolean',
+        $validator = \Validator::make($post, [
+            'name'                  => 'required|max:255',
+            'active'                => 'required|bool',
+            'default_user'          => 'nullable|bool',
+            'default_group_admin'   => 'nullable|bool',
+            'default_org_admin'     => 'nullable|bool',
         ]);
 
         if (!$validator->fails()) {
             try {
-                $newRole = Role::create($post['data']);
+                $newRole = Role::create($post);
 
-                if ($newRole) {
-                    return $this->successResponse(['id' => $newRole->id], true);
-                }
+                return $this->successResponse(['id' => $newRole->id], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -53,6 +57,9 @@ class RoleController extends ApiController
      * @param array data - required
      * @param string data[name] - required
      * @param boolean data[active] - required
+     * @param boolean data[default_user] - optional
+     * @param boolean data[default_group_admin] - optional
+     * @param boolean data[default_org_admin] - optional
      *
      * @return json with success or error
      */
@@ -60,22 +67,25 @@ class RoleController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['id' => 'required|int']);
+        $validator = \Validator::make($post, [
+            'id'    => 'required|int|exists:roles,id',
+            'data'  => 'required|array',
+        ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'      => 'required|max:255',
-                'active'    => 'required|boolean',
+                'name'                  => 'required|max:255',
+                'active'                => 'required|bool',
+                'default_user'          => 'nullable|bool',
+                'default_group_admin'   => 'nullable|bool',
+                'default_org_admin'     => 'nullable|bool',
             ]);
 
-            if (
-                !$validator->fails()
-                && Role::where('id', $post['id'])->get()->count()
-            ) {
+            if (!$validator->fails()) {
                 try {
-                    if (Role::where('id', $post['id'])->update($post['data'])) {
-                        return $this->successResponse();
-                    }
+                    Role::where('id', $post['id'])->update($post['data']);
+
+                    return $this->successResponse();
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
@@ -95,15 +105,15 @@ class RoleController extends ApiController
      */
     public function deleteRole(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id']);
 
-        $id = $request->offsetGet('id');
+        $id = $request->get('id');
 
         if (!$validator->fails()) {
             try {
-                if (Role::find($id)->delete()) {
-                    return $this->successResponse();
-                }
+                Role::find($id)->delete();
+
+                return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -118,33 +128,39 @@ class RoleController extends ApiController
      * @param string api_key - required
      * @param array criteria - optional
      * @param boolean active - optional | 1 = active 0 = inactive
+     * @param boolean data[default_user] - optional
+     * @param boolean data[default_group_admin] - optional
+     * @param boolean data[default_org_admin] - optional
      *
      * @return json with list of roles or error
      */
     public function listRoles(Request $request)
     {
-        $post = $request->all();
-
+        $post = $request->get('criteria', []);
+error_log('post: '. print_r($post, true));
         $validator = \Validator::make($post, [
-            'criteria.role_id'  => 'nullable|int',
-            'criteria.active'   => 'nullable|boolean',
-            'criteria.org_id'   => 'nullable|int|exists:organisations,id,deleted_at,NULL',
+            'role_id'               => 'nullable|int',
+            'active'                => 'nullable|bool',
+            'org_id'                => 'nullable|int|exists:organisations,id,deleted_at,NULL',
+            'default_user'          => 'nullable|bool',
+            'default_group_admin'   => 'nullable|bool',
+            'default_org_admin'     => 'nullable|bool',
         ]);
 
         if (!$validator->fails()) {
             $query = Role::select();
 
-            if (isset($post['criteria']['role_id'])) {
-                $query->where('id', $post['criteria']['role_id']);
+            if (isset($post['role_id'])) {
+                $query->where('id', $post['role_id']);
             }
 
-            if (isset($post['criteria']['active'])) {
-                $query->where('active', $post['criteria']['active']);
+            if (isset($post['active'])) {
+                $query->where('active', $post['active']);
             }
 
-            if (isset($post['criteria']['org_id'])) {
+            if (isset($post['org_id'])) {
                 $query->whereHas('userToOrg', function($q) use ($post) {
-                    $q->where('org_id', $post['criteria']['org_id']);
+                    $q->where('org_id', $post['org_id']);
                 });
             }
 
@@ -170,7 +186,7 @@ class RoleController extends ApiController
      */
     public function getRoleRights(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id']);
 
         if (!$validator->fails()) {
             $id = $request->get('id');
@@ -179,14 +195,12 @@ class RoleController extends ApiController
                 $role = Role::find($id);
                 $rights = RoleRight::getRightsDescription();
 
-                if ($role) {
-                    foreach ($role->rights as $right) {
-                        $right['right_id'] = $right->right;
-                        $right['right'] = $rights[$right->right];
-                    }
-
-                    return $this->successResponse(['rights' => $role->rights], true);
+                foreach ($role->rights as $right) {
+                    $right['right_id'] = $right->right;
+                    $right['right'] = $rights[$right->right];
                 }
+
+                return $this->successResponse(['rights' => $role->rights], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -217,8 +231,8 @@ class RoleController extends ApiController
         $validator = \Validator::make($post, [
             'data.*.module_name'       => 'required|string|max:255',
             'data.*.right'             => 'required|integer',
-            'data.*.limit_to_own_data' => 'required|boolean',
-            'data.*.api'               => 'required|boolean',
+            'data.*.limit_to_own_data' => 'required|bool',
+            'data.*.api'               => 'required|bool',
         ]);
 
         if (

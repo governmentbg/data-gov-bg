@@ -20,9 +20,9 @@ class Role extends Model
     public static function getBaseRoles()
     {
         return [
-            self::ROLE_ADMIN        => __('custom.admin'),
-            self::ROLE_MODERATOR    => __('custom.moderator'),
-            self::ROLE_MEMBER       => __('custom.member'),
+            self::ROLE_ADMIN        => 'Admin',
+            self::ROLE_MODERATOR    => 'Moderator',
+            self::ROLE_MEMBER       => 'Member',
         ];
     }
 

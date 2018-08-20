@@ -243,13 +243,16 @@ ul > li {
     background: #fff url("/img/data-sets.png") no-repeat left top;
 }
 
-.input-border-r-12, .bootstrap-tagsinput {
+.input-border-r-12, .bootstrap-tagsinput, .form-control {
     border-radius: 12px;
     padding: 6px 12px;
 
     @include smMobile() {
         text-align: left !important;
-        margin-left: 10px;
+
+        &:not(.form-control) {
+            margin-left: 10px;
+        }
     }
 }
 

@@ -1765,22 +1765,11 @@ class UserController extends Controller {
      */
     public function registerOrg(Request $request)
     {
-        $post = [
-            'data' => $request->all()
-        ];
+        $post = ['data' => $request->all()];
 
         if (!empty($post['data']['logo'])) {
-            try {
-                $img = \Image::make($post['data']['logo']);
-
-                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                $post['data']['logo_mimetype'] = $img->mime();
-                $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-                unset($post['data']['logo']);
-            } catch (\Exception $ex) {
-                Log::error($ex->getMessage());
-            }
+            $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+            $post['data']['logo'] = $post['data']['logo']->getPathName();
         }
 
         $post['data']['description'] = $post['data']['descript'];
@@ -1797,9 +1786,8 @@ class UserController extends Controller {
             );
         }
 
-
         return $result->success
-            ? redirect('user/organisations/view/'. Organisation::find($result->org_id)->value('uri'))
+            ? redirect('user/organisations/view/'. Organisation::find($result->org_id)->uri)
             : redirect('user/organisations/register')->withInput(Input::all())->withErrors($result->errors);
     }
 
@@ -2162,20 +2150,14 @@ class UserController extends Controller {
             ];
 
             if (!empty($post['data']['logo'])) {
-                try {
-                    $img = \Image::make($post['data']['logo']);
-
-                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                    $post['data']['logo_mimetype'] = $img->mime();
-                    $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-                    unset($post['data']['logo']);
-                } catch (\Exception $ex) {
-                    Log::error($ex->getMessage());
-                }
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo'] = $post['data']['logo']->getPathName();
             }
 
-            $post['data']['description'] = $post['data']['descript'];
+            if (isset($post['data']['descript'])) {
+                $post['data']['description'] = $post['data']['descript'];
+            }
+
             $request = Request::create('/api/editOrganisation', 'POST', $post);
             $api = new ApiOrganisation($request);
             $result = $api->editOrganisation($request)->getData();
@@ -3073,17 +3055,8 @@ class UserController extends Controller {
             $data['description'] = $data['descript'];
 
             if (!empty($data['logo'])) {
-                try {
-                    $img = \Image::make($data['logo']);
-
-                    $data['logo_filename'] = $data['logo']->getClientOriginalName();
-                    $data['logo_mimetype'] = $img->mime();
-                    $data['logo_data'] = file_get_contents($data['logo']);
-
-                    unset($data['logo']);
-                } catch (\Exception $ex) {
-                    Log::error($ex->getMessage());
-                }
+                $data['logo_filename'] = $data['logo']->getClientOriginalName();
+                $data['logo'] = $data['logo']->getPathName();
             }
 
             $params = [
@@ -3240,15 +3213,8 @@ class UserController extends Controller {
                 $data['description'] = isset($data['descript']) ? $data['descript'] : null;
 
                 if (!empty($data['logo'])) {
-                    try {
-                        $img = \Image::make($data['logo']);
-
-                        $data['logo_file_name'] = $data['logo']->getClientOriginalName();
-                        $data['logo_mime_type'] = $img->mime();
-                        $data['logo_data'] = file_get_contents($data['logo']);
-
-                        unset($data['logo']);
-                    } catch (\Exception $ex) {}
+                    $data['logo_filename'] = $data['logo']->getClientOriginalName();
+                    $data['logo'] = $data['logo']->getPathName();
                 }
 
                 $params = [

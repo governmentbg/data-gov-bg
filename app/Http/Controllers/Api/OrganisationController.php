@@ -278,8 +278,8 @@ class OrganisationController extends ApiController
             }
         });
 
-        if(isset($organisation->logo_data)){
-            if(!$this->checkImageSize($organisation->logo_data)) {
+        if (isset($organisation->logo_data)) {
+            if (!$this->checkImageSize($organisation->logo_data)) {
                 $validator->errors()->add('logo', $this->getImageSizeError());
             }
         }
@@ -1060,14 +1060,14 @@ class OrganisationController extends ApiController
             }
         }
 
-        if(isset($post['logo_filename']) && isset ($post['logo_mimetype']) && isset($post['logo_data'])){
+        if (isset($post['logo_filename']) && isset ($post['logo_mimetype']) && isset($post['logo_data'])) {
             $newGroup->logo_file_name = $post['logo_filename'];
             $newGroup->logo_mime_type = $post['logo_mimetype'];
             $newGroup->logo_data = $post['logo_data'];
         }
 
-        if(isset($newGroup->logo_data)){
-            if(!$this->checkImageSize($newGroup->logo_data)){
+        if (isset($newGroup->logo_data)) {
+            if (!$this->checkImageSize($newGroup->logo_data)) {
                 $imageError = true;
                 $validator->errors()->add('logo', $this->getImageSizeError());
             }
@@ -1207,8 +1207,8 @@ class OrganisationController extends ApiController
             $newGroupData['logo_data'] = $data['logo_data'];
         }
 
-        if(isset($group->logo_data)){
-            if(!$this->checkImageSize($group->logo_data)) {
+        if (isset($group->logo_data)) {
+            if (!$this->checkImageSize($group->logo_data)) {
                 $validator->errors()->add('logo', $this->getImageSizeError());
             }
         }

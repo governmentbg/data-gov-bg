@@ -502,9 +502,11 @@ return [
     'language_list' => 'Списък с езици',
     'add_language' => 'Добавяне на език',
     'edit_language' => 'Промяна на език',
-    'language' => 'Език',
     'select' => 'Моля избери...',
     'default_locale_error' => 'Не можете да променяте или триете Езика по подразбиране',
     'export' => 'Експорт',
-    'import' => 'Инпорт',
+    'import' => 'Импорт',
+    'access_denied_page' => 'Нямате права за достъп до тази страница',
+    'org_approved' => 'Одобрена',
+
 ];

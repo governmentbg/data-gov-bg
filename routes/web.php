@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/organisations/register', 'Admin\OrganisationController@register');
     Route::get('/admin/organisations/register', 'Admin\OrganisationController@showOrgRegisterForm');
     Route::get('/admin/organisations/view/{uri}', 'Admin\OrganisationController@view')->name('adminOrgView');
-    Route::post('/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
+    Route::match(['post', 'get'], '/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
     Route::post('/admin/organisations/delete/{id}', 'Admin\OrganisationController@delete');
     Route::match(
         ['get', 'post'],

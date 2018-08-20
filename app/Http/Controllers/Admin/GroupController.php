@@ -83,7 +83,7 @@ class GroupController extends AdminController
             ]);
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -140,7 +140,7 @@ class GroupController extends AdminController
             return view('/admin/groupRegistration', compact('class', 'fields'));
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -172,7 +172,7 @@ class GroupController extends AdminController
             return redirect('/admin/groups');
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -211,7 +211,7 @@ class GroupController extends AdminController
             return back();
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -274,7 +274,7 @@ class GroupController extends AdminController
             return view('admin/groupEdit', compact('class', 'fields', 'model', 'withModel'));
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -322,7 +322,7 @@ class GroupController extends AdminController
             ]);
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     public function viewMembers(Request $request, $uri)
@@ -460,7 +460,7 @@ class GroupController extends AdminController
             return redirect('/admin/groups');
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     public function addMembersNew(Request $request, $uri)
@@ -506,7 +506,7 @@ class GroupController extends AdminController
                     }
                 }
             } else {
-                return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+                return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
             }
         }
 

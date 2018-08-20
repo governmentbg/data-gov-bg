@@ -330,12 +330,16 @@ class OrganisationController extends ApiController
                     $orgData['parent_org_id'] = null;
                 }
 
-                if (isset($data['active'])) {
+                if (!empty($data['active'])) {
                     $orgData['active'] = $data['active'];
+                } else {
+                    $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-                if (isset($data['approved'])) {
+                if (!empty($data['approved'])) {
                     $orgData['approved'] = $data['approved'];
+                } else {
+                    $orgData['approved'] = Organisation::APPROVED_FALSE;
                 }
 
                 if (!empty($data['custom_fields'])) {
@@ -1353,6 +1357,8 @@ class OrganisationController extends ApiController
         $groups = [];
         $result = [];
 
+        $query = Organisation::where('type', Organisation::TYPE_GROUP);
+
         if ($criteria) {
             $validator = \Validator::make($post, [
                 'criteria.group_ids'    => 'nullable|array',
@@ -1366,8 +1372,6 @@ class OrganisationController extends ApiController
             ]);
 
             if (!$validator->fails()) {
-                $query = Organisation::where('type', Organisation::TYPE_GROUP);
-
                 if (!empty($criteria['group_ids'])) {
                     $query->whereIn('id', $criteria['group_ids']);
                 }

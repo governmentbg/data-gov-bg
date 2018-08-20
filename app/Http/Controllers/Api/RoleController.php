@@ -25,14 +25,14 @@ class RoleController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, [
+        $validator = \Validator::make($post['data'], [
             'name'      => 'required|max:255',
             'active'    => 'required|boolean',
         ]);
 
         if (!$validator->fails()) {
             try {
-                $newRole = Role::create($post);
+                $newRole = Role::create($post['data']);
 
                 if ($newRole) {
                     return $this->successResponse(['id' => $newRole->id], true);
@@ -60,22 +60,25 @@ class RoleController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, [
-            'id'        => 'required|max:255',
-            'name'      => 'required|max:255',
-            'active'    => 'required|boolean',
-        ]);
+        $validator = \Validator::make($post, ['id' => 'required|int']);
 
-        if (
-            !$validator->fails()
-            && Role::where('id', $post['id'])->get()->count()
-        ) {
-            try {
-                if (Role::where('id', $post['id'])->update($post)) {
-                    return $this->successResponse();
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'name'      => 'required|max:255',
+                'active'    => 'required|boolean',
+            ]);
+
+            if (
+                !$validator->fails()
+                && Role::where('id', $post['id'])->get()->count()
+            ) {
+                try {
+                    if (Role::where('id', $post['id'])->update($post['data'])) {
+                        return $this->successResponse();
+                    }
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
                 }
-            } catch (QueryException $ex) {
-                Log::error($ex->getMessage());
             }
         }
 
@@ -123,12 +126,17 @@ class RoleController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.active' => 'nullable|boolean',
-            'criteria.org_id' => 'nullable|int|exists:organisations,id,deleted_at,NULL',
+            'criteria.role_id'  => 'nullable|int',
+            'criteria.active'   => 'nullable|boolean',
+            'criteria.org_id'   => 'nullable|int|exists:organisations,id,deleted_at,NULL',
         ]);
 
         if (!$validator->fails()) {
             $query = Role::select();
+
+            if (isset($post['criteria']['role_id'])) {
+                $query->where('id', $post['criteria']['role_id']);
+            }
 
             if (isset($post['criteria']['active'])) {
                 $query->where('active', $post['criteria']['active']);

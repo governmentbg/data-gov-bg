@@ -33,10 +33,10 @@ class ActionsHistory extends Model
     public static function getTypes()
     {
         return [
-            self::TYPE_SEE     => 'See',
-            self::TYPE_ADD     => 'Add',
-            self::TYPE_MOD     => 'Modify',
-            self::TYPE_DEL     => 'Delete',
+            self::TYPE_SEE     => __('custom.see'),
+            self::TYPE_ADD     => __('custom.add'),
+            self::TYPE_MOD     => __('custom.modify'),
+            self::TYPE_DEL     => __('custom.delete'),
         ];
     }
 

@@ -33,16 +33,16 @@ class DataSet extends Model implements TranslatableInterface
     public static function getStatus()
     {
         return [
-            self::STATUS_DRAFT      => 'Draft',
-            self::STATUS_PUBLISHED  => 'Published',
+            self::STATUS_DRAFT      => uctrans('custom.draft'),
+            self::STATUS_PUBLISHED  => uctrans('custom.published'),
         ];
     }
 
     public static function getVisibility()
     {
         return [
-            self::VISIBILITY_PUBLIC     => 'Public',
-            self::VISIBILITY_PRIVATE    => 'Private',
+            self::VISIBILITY_PUBLIC     => __('custom.public'),
+            self::VISIBILITY_PRIVATE    => __('custom.private'),
         ];
     }
 

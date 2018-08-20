@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container role">
+<div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'manageRoles'])
 

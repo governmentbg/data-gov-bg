@@ -511,5 +511,10 @@ return [
     'edit_role' => 'Edit role',
     'access_denied_page' => 'You are not allowed to access this page',
     'org_approved' => 'Approved',
-
+    'edit_terms' => 'Edit Terms Of Use',
+    'active' => 'active',
+    'terms_preview' => 'Preview Terms Of Use',
+    'name' => 'name',
+    'yes' => 'yes',
+    'no' => 'no',
 ];

@@ -39,8 +39,8 @@ class TermsOfUseController extends AdminController
         ];
     }
 
-    public function add(Request $request) {
-
+    public function add(Request $request)
+    {
         if ($request->has('create')) {
             $rq = Request::create('/api/addTermsOfUse', 'POST', [
                 'data' => [
@@ -78,7 +78,6 @@ class TermsOfUseController extends AdminController
      */
     public function view(Request $request, $id)
     {
-
         if (Role::isAdmin()) {
             $request = Request::create('/api/getTermsOfUseDetails', 'POST', [
                 'terms_id'  => $id,
@@ -94,7 +93,7 @@ class TermsOfUseController extends AdminController
             return redirect('/admin/terms-of-use/list');
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -106,7 +105,6 @@ class TermsOfUseController extends AdminController
      */
     public function edit(Request $request, $id)
     {
-
         if (Role::isAdmin()) {
             $class = 'user';
             $fields = self::getTransFields();
@@ -143,7 +141,7 @@ class TermsOfUseController extends AdminController
             return view('admin/termsOfUseEdit', compact('class', 'fields', 'model'));
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -171,7 +169,7 @@ class TermsOfUseController extends AdminController
             );
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -184,22 +182,22 @@ class TermsOfUseController extends AdminController
     */
    public function delete(Request $request, $id)
    {
-    if (Role::isAdmin()) {
-        $rq = Request::create('/api/deleteTermsOfUse', 'POST', [
-            'terms_id'  => $id,
-        ]);
-        $api = new ApiTermsOfUse($rq);
-        $result = $api->deleteTermsOfUse($rq)->getData();
+        if (Role::isAdmin()) {
+            $rq = Request::create('/api/deleteTermsOfUse', 'POST', [
+                'terms_id'  => $id,
+            ]);
+            $api = new ApiTermsOfUse($rq);
+            $result = $api->deleteTermsOfUse($rq)->getData();
 
-        if ($result->success) {
-            $request->session()->flash('alert-success', __('custom.delete_success'));
-        } else {
-            $request->session()->flash('alert-danger', __('custom.delete_error'));
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.delete_success'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.delete_error'));
+            }
+
+            return back();
         }
 
-        return back();
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
-
-    return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
-   }
 }

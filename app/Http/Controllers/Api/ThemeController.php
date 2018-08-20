@@ -22,16 +22,16 @@ class ThemeController extends ApiController
     public static function getThemes()
     {
         return [
-            self::THEME_RED         => 'Red',
-            self::THEME_DARK_RED    => 'Dark Red',
-            self::THEME_LIGHT_BLUE  => 'Light Blue',
-            self::THEME_BLUE        => 'Blue',
-            self::THEME_DARK_BLUE   => 'Dark Red',
-            self::THEME_LIGHT_GREEN => 'Light Green',
-            self::THEME_GREEN       => 'Green',
-            self::THEME_YELLOW      => 'Yellow',
-            self::THEME_ORANGE      => 'Orange',
-            self::THEME_PURPLE      => 'Purple',
+            self::THEME_RED         => __('custom.red'),
+            self::THEME_DARK_RED    => __('custom.dark_red'),
+            self::THEME_LIGHT_BLUE  => __('custom.light_blue'),
+            self::THEME_BLUE        => __('custom.blue'),
+            self::THEME_DARK_BLUE   => __('custom.dark_blue'),
+            self::THEME_LIGHT_GREEN => __('custom.light_green'),
+            self::THEME_GREEN       => __('custom.green'),
+            self::THEME_YELLOW      => __('custom.yellow'),
+            self::THEME_ORANGE      => __('custom.orange'),
+            self::THEME_PURPLE      => __('custom.purple'),
         ];
     }
 

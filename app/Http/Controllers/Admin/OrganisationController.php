@@ -7,6 +7,7 @@ use App\UserSetting;
 use App\Organisation;
 use App\CustomSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;

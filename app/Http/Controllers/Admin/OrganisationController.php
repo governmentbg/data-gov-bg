@@ -120,7 +120,7 @@ class OrganisationController extends AdminController
             );
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -176,7 +176,7 @@ class OrganisationController extends AdminController
             );
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -227,7 +227,7 @@ class OrganisationController extends AdminController
                 : redirect('admin/organisations/register')->withInput(Input::all())->withErrors($result->errors);
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -256,7 +256,7 @@ class OrganisationController extends AdminController
             );
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -284,7 +284,7 @@ class OrganisationController extends AdminController
             return redirect('/admin/organisations');
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -305,10 +305,11 @@ class OrganisationController extends AdminController
 
             $parentOrgs = $query->get();
 
+            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+            $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+            $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
             if (isset($request->view)) {
-                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
-                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
                 return view(
                     'admin/orgEdit',
@@ -342,48 +343,63 @@ class OrganisationController extends AdminController
                 }
             }
 
-            $post['data']['description'] = $post['data']['descript'];
-            $request = Request::create('/api/editOrganisation', 'POST', $post);
-            $api = new ApiOrganisation($request);
-            $result = $api->editOrganisation($request)->getData();
-            $errors = !empty($result->errors) ? $result->errors : [];
-
-            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
-            $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-            $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
-
-            if ($result->success) {
-                session()->flash('alert-success', __('custom.edit_success'));
-            } else {
-                session()->flash('alert-danger', __('custom.edit_error'));
+            if(isset($post['data']['descript'])){
+                $post['data']['description'] = $post['data']['descript'];
             }
 
-            return !$result->success
-                ? view(
-                    'admin/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                )->withErrors($result->errors)
-                : view(
-                    'admin/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                );
+            if ($request->has('save')) {
+                $request = Request::create('/api/editOrganisation', 'POST', $post);
+                $api = new ApiOrganisation($request);
+                $result = $api->editOrganisation($request)->getData();
+                $errors = !empty($result->errors) ? $result->errors : [];
 
-            return redirect('/admin/organisations');
+                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
+                if ($result->success) {
+                    session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return !$result->success
+                    ? view(
+                        'admin/orgEdit',
+                        [
+                            'class'      => 'user',
+                            'model'      => $orgModel,
+                            'withModel'  => $customModel,
+                            'fields'     => self::getTransFields(),
+                            'parentOrgs' => $parentOrgs
+                        ]
+                    )->withErrors($result->errors)
+                    : view(
+                        'admin/orgEdit',
+                        [
+                            'class'      => 'user',
+                            'model'      => $orgModel,
+                            'withModel'  => $customModel,
+                            'fields'     => self::getTransFields(),
+                            'parentOrgs' => $parentOrgs
+                        ]
+                    );
+
+                return redirect('/admin/organisations');
+            }
+            return view(
+                'admin/orgEdit',
+                [
+                    'class'      => 'user',
+                    'model'      => $orgModel,
+                    'withModel'  => $customModel,
+                    'fields'     => self::getTransFields(),
+                    'parentOrgs' => $parentOrgs
+                ]);
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**
@@ -420,7 +436,7 @@ class OrganisationController extends AdminController
             return back();
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     public function viewMembers(Request $request, $uri)
@@ -558,7 +574,7 @@ class OrganisationController extends AdminController
             return redirect('/admin/organisations');
         }
 
-        return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     public function addMembersNew(Request $request, $uri)
@@ -604,7 +620,7 @@ class OrganisationController extends AdminController
                     }
                 }
             } else {
-                return redirect()->back()->with('alert-danger', 'Нямате права за достъп до тази страница');
+                return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
             }
         }
 

@@ -122,7 +122,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
-                    <button type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
+                    <button type="submit" name="save" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                 </div>
             </div>
             <input type="hidden" name="org_id" value="{{ !empty($model['id']) ? $model['id'] : '' }}">

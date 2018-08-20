@@ -502,9 +502,14 @@ return [
     'language_list' => 'Languages List',
     'add_language' => 'Add Language',
     'edit_language' => 'Change Language',
-    'language' => 'Language',
     'select' => 'Please select...',
-    'default_locale_error' => 'You cant edit or delete default language',
+    'default_locale_error' => 'You cannot edit or delete default language',
     'export' => 'Export',
     'import' => 'Import',
+    'role_list' => 'Roles list',
+    'add_role' => 'Add new role',
+    'edit_role' => 'Edit role',
+    'access_denied_page' => 'You are not allowed to access this page',
+    'org_approved' => 'Approved',
+
 ];

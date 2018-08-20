@@ -1177,6 +1177,8 @@ class UserController extends Controller {
                     return redirect()->route('datasetView', ['uri' => $datasetUri]);
                 }
 
+                $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+
                 return redirect()->back()->withInput()->withErrors($result->errors);
             } else if ($request->has('ready_data')) {
                 $csvData = Session::get('csvData');
@@ -2126,10 +2128,11 @@ class UserController extends Controller {
 
             $parentOrgs = $query->get();
 
+            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+            $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+            $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+
             if (isset($request->view)) {
-                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
-                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
                 return view(
                     'user/orgEdit',
@@ -2158,42 +2161,54 @@ class UserController extends Controller {
                 $post['data']['description'] = $post['data']['descript'];
             }
 
-            $request = Request::create('/api/editOrganisation', 'POST', $post);
-            $api = new ApiOrganisation($request);
-            $result = $api->editOrganisation($request)->getData();
-            $errors = !empty($result->errors) ? $result->errors : [];
+            if ($request->has('save')) {
+                $request = Request::create('/api/editOrganisation', 'POST', $post);
+                $api = new ApiOrganisation($request);
+                $result = $api->editOrganisation($request)->getData();
+                $errors = !empty($result->errors) ? $result->errors : [];
 
-            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
-            $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-            $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            if ($result->success) {
-                session()->flash('alert-success', __('custom.edit_success'));
-            } else {
-                session()->flash('alert-danger', __('custom.edit_error'));
+                if ($result->success) {
+                    session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return !$result->success
+                    ? view(
+                        'user/orgEdit',
+                        [
+                            'class'      => 'user',
+                            'model'      => $orgModel,
+                            'withModel'  => $customModel,
+                            'fields'     => self::getTransFields(),
+                            'parentOrgs' => $parentOrgs
+                        ]
+                    )->withErrors($result->errors)
+                    : view(
+                        'user/orgEdit',
+                        [
+                            'class'      => 'user',
+                            'model'      => $orgModel,
+                            'withModel'  => $customModel,
+                            'fields'     => self::getTransFields(),
+                            'parentOrgs' => $parentOrgs
+                        ]
+                    );
             }
 
-            return !$result->success
-                ? view(
-                    'user/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                )->withErrors($result->errors)
-                : view(
-                    'user/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                );
+            return view(
+                'user/orgEdit',
+                [
+                    'class'      => 'user',
+                    'model'      => $orgModel,
+                    'withModel'  => $customModel,
+                    'fields'     => self::getTransFields(),
+                    'parentOrgs' => $parentOrgs
+                ]);
         }
 
         return redirect('/user/organisations');

@@ -20,10 +20,8 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
-                        @if (isset($errors) && $errors->has('logo'))
-                            <span class="error">{{ $errors->first('logo') }}</span>
-                        @endif
                     </div>
+                    <div class="error">{{ $errors->first('logo') }}</div>
                 </div>
             </div>
             <div class="form-group row {{ isset(session('result')->errors->parent_org_id) ? 'has-error' : '' }}">
@@ -113,7 +111,7 @@
                 @endif
             </div>
             <div class="form-group row">
-                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.active') }}:</label>
+                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                     <div class="js-check">
                         <input

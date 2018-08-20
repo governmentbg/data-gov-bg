@@ -21,11 +21,11 @@ class UserSetting extends Model
     public static function getDigestFreq()
     {
         return [
-            self::DIGEST_FREQ_NONE          => 'Не желая',
-            self::DIGEST_FREQ_ON_POST       => 'При публикуване',
-            self::DIGEST_FREQ_ONCE_DAY      => 'Веднъж дневно',
-            self::DIGEST_FREQ_ONCE_WEEK     => 'Веднъж седмично',
-            self::DIGEST_FREQ_ONCE_MONTH    => 'Веднъж месечно',
+            self::DIGEST_FREQ_NONE          => __('custom.digest_freq_no'),
+            self::DIGEST_FREQ_ON_POST       => __('custom.digest_freq_on_post'),
+            self::DIGEST_FREQ_ONCE_DAY      => __('custom.digest_freq_once_day'),
+            self::DIGEST_FREQ_ONCE_WEEK     => __('custom.digest_freq_once_week'),
+            self::DIGEST_FREQ_ONCE_MONTH    => __('custom.digest_freq_once_month'),
         ];
     }
 

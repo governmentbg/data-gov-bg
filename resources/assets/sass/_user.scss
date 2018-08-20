@@ -379,6 +379,7 @@
                 }
             }
         }
+
         .search {
             input {
                 border-radius: 15px;
@@ -386,6 +387,7 @@
                 font-size: 12px;
                 padding: 2px 5px;
             }
+
             padding-top: 9px;
         }
     }
@@ -394,6 +396,11 @@
 .frame {
     margin: 20px;
     border-radius: 10px;
+
+    @include xsMobile() {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
 }
 
 .blue-highlight {

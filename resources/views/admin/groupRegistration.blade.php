@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'group'])
+    @include('partials.admin-nav-bar', ['view' => 'group'])
     <div class="col-xs-12 m-t-md">
         <div>
             <h2>{{ __('custom.group_registration') }}</h2>
@@ -20,8 +20,10 @@
                     <div class="inline-block">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
+                        @if (isset($errors) && $errors->has('logo'))
+                            <span class="error">{{ $errors->first('logo') }}</span>
+                        @endif
                     </div>
-                    <div class="error">{{ $errors->first('logo') }}</div>
                 </div>
             </div>
             <div class="form-group row {{ isset(session('result')->errors->uri) ? 'has-error' : '' }}">

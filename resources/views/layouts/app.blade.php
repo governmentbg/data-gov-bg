@@ -74,7 +74,7 @@
                                         href="{{ url('/user') }}"
                                     >
                                         @if (Auth::user()->is_admin)
-                                            <img src="{{ asset('img/admin.svg') }}">
+                                            <img class="admin" src="{{ asset('img/admin.svg') }}">
                                         @else
                                             <img src="{{ asset('img/user.svg') }}">
                                         @endif

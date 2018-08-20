@@ -46666,6 +46666,7 @@ function initSelect2() {
                         return finalParams;
                     },
                     processResults: function processResults(data) {
+                        data.organisations = $.merge([{ uri: 0, name: 'Главна организация' }], data.organisations);
 
                         return {
                             results: $.map(data.organisations, function (item) {
@@ -46685,7 +46686,6 @@ function initSelect2() {
                     if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
                         return data;
                     }
-
                     return false;
                 }
             };

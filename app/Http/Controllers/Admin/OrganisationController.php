@@ -195,9 +195,9 @@ class OrganisationController extends AdminController
             ];
 
             if (!empty($post['data']['logo'])) {
-                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
                 $post['data']['logo'] = $post['data']['logo']->getPathName();
-                }
+            }
 
             $post['data']['description'] = $post['data']['descript'];
             $request = Request::create('/api/addOrganisation', 'POST', $post);
@@ -321,7 +321,7 @@ class OrganisationController extends AdminController
             ];
 
             if (!empty($post['data']['logo'])) {
-                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
                 $post['data']['logo'] = $post['data']['logo']->getPathName();
             }
 

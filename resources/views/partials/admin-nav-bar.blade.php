@@ -70,7 +70,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'languages' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/languages') }}"
                             >{{ __('custom.languages') }}</a>
                         </li>
                         <li>

@@ -13453,8 +13453,8 @@ textarea {
   white-space: nowrap;
 }
 
-.opn-tbl table tbody tr td.buttons > button,
-.opn-tbl table tbody tr td.buttons > a {
+.opn-tbl table tbody tr td.buttons button,
+.opn-tbl table tbody tr td.buttons a {
   background: none !important;
   color: inherit;
   border: none;
@@ -13465,13 +13465,13 @@ textarea {
   display: inline-block;
 }
 
-.opn-tbl table tbody tr td.buttons > button:hover,
-.opn-tbl table tbody tr td.buttons > a:hover {
+.opn-tbl table tbody tr td.buttons button:hover,
+.opn-tbl table tbody tr td.buttons a:hover {
   color: inherit;
 }
 
-.opn-tbl table tbody tr td.buttons > button:after,
-.opn-tbl table tbody tr td.buttons > a:after {
+.opn-tbl table tbody tr td.buttons button:after,
+.opn-tbl table tbody tr td.buttons a:after {
   content: '';
   position: absolute;
   left: 0;
@@ -13484,10 +13484,10 @@ textarea {
   display: none;
 }
 
-.opn-tbl table tbody tr td.buttons > button:hover:after,
-.opn-tbl table tbody tr td.buttons > button.active:after,
-.opn-tbl table tbody tr td.buttons > a:hover:after,
-.opn-tbl table tbody tr td.buttons > a.active:after {
+.opn-tbl table tbody tr td.buttons button:hover:after,
+.opn-tbl table tbody tr td.buttons button.active:after,
+.opn-tbl table tbody tr td.buttons a:hover:after,
+.opn-tbl table tbody tr td.buttons a.active:after {
   -webkit-transition: 0.3s ease-out;
   transition: 0.3s ease-out;
   display: block;
@@ -14729,28 +14729,28 @@ textarea {
   margin-right: 5px;
 }
 
-.role .add {
+.admin .add {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-.role .frame-wrap {
+.admin .frame-wrap {
   width: 800px;
   margin: 0 auto;
 }
 
 @media screen and (max-width: 1199px) {
-  .role .frame-wrap {
+  .admin .frame-wrap {
     width: 100%;
   }
 }
 
-.role .frame-wrap .frame {
+.admin .frame-wrap .frame {
   padding-left: 40px !important;
   padding-right: 40px !important;
 }
 
-.role .frame-wrap .frame h3 {
+.admin .frame-wrap .frame h3 {
   margin-bottom: 40px;
 }
 

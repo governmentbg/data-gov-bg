@@ -69,8 +69,14 @@ Route::middleware('auth')->group(function () {
     )->name('adminAddGroupMembersNew');
 
     Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
-    Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
     Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');
+    Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
+    Route::match(['get', 'post'], '/admin/roles/delete/{id}', 'Admin\RoleController@deleteRole');
+
+    Route::match(['get', 'post'], '/admin/languages', 'Admin\LangController@list');
+    Route::match(['get', 'post'], '/admin/languages/add', 'Admin\LangController@addLang');
+    Route::match(['get', 'post'], '/admin/languages/edit/{id}', 'Admin\LangController@editLang');
+    Route::match(['get', 'post'], '/admin/languages/delete/{id}', 'Admin\LangController@deleteLocale');
 
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');

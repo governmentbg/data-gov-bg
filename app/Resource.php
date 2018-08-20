@@ -40,9 +40,9 @@ class Resource extends Model implements TranslatableInterface
     public static function getTypes()
     {
         return [
-            self::TYPE_FILE         => 'File',
-            self::TYPE_HYPERLINK    => 'Hyperlink',
-            self::TYPE_API          => 'Api',
+            self::TYPE_FILE         => uctrans('custom.file'),
+            self::TYPE_HYPERLINK    => __('custom.hyperlink'),
+            self::TYPE_API          => __('custom.api'),
         ];
     }
 

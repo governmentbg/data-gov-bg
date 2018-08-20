@@ -195,17 +195,8 @@ class OrganisationController extends AdminController
             ];
 
             if (!empty($post['data']['logo'])) {
-                try {
-                    $img = \Image::make($post['data']['logo']);
-
-                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                    $post['data']['logo_mimetype'] = $img->mime();
-                    $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-                    unset($post['data']['logo']);
-                } catch (\Exception $ex) {
-                    Log::error($ex->getMessage());
-                }
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo'] = $post['data']['logo']->getPathName();
             }
 
             $post['data']['description'] = $post['data']['descript'];
@@ -330,17 +321,8 @@ class OrganisationController extends AdminController
             ];
 
             if (!empty($post['data']['logo'])) {
-                try {
-                    $img = \Image::make($post['data']['logo']);
-
-                    $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                    $post['data']['logo_mimetype'] = $img->mime();
-                    $post['data']['logo_data'] = file_get_contents($post['data']['logo']);
-
-                    unset($post['data']['logo']);
-                } catch (\Exception $ex) {
-                    Log::error($ex->getMessage());
-                }
+                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+                $post['data']['logo'] = $post['data']['logo']->getPathName();
             }
 
             if(isset($post['data']['descript'])){

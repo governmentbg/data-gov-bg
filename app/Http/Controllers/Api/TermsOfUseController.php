@@ -23,13 +23,21 @@ class TermsOfUseController extends ApiController
         $data = $request->get('data', []);
         //validate request data
         $validator = \validator::make($data, [
-            'name'          => 'required|string|max:100',
-            'description'   => 'required|string',
-            'locale'        => 'required|string|max:5',
-            'active'        => 'required|boolean',
-            'is_default'    => 'boolean',
-            'ordering'      => 'integer',
+            'name'           => 'required_with:locale',
+            'name.bg'        => 'required_without:locale|string',
+            'description'    => 'required_with:locale',
+            'description.bg' => 'required_without:locale|string',
+            'locale'         => 'nullable|string|max:5',
+            'active'         => 'required|boolean',
+            'is_default'     => 'nullable|boolean',
+            'ordering'       => 'nullable|integer',
         ]);
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('description.bg')) {
+                $validator->errors()->add('descript.bg', $validator->errors()->first('description.bg'));
+            }
+        });
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.add_terms_fail'), $validator->errors()->messages());
@@ -72,26 +80,48 @@ class TermsOfUseController extends ApiController
     public function editTermsOfUse(Request $request)
     {
         $post = $request->all();
+        $data = $request->data;
+
+        if (isset($post['terms_id'])) {
+            $data['terms_id'] = $post['terms_id'];
+        }
+
+        // set default values to optional fields
+        if (!isset($data['is_default'])) {
+            $data['is_default'] = 0;
+        }
+
+        if (!isset($data['ordering'])) {
+            $data['ordering'] = 1;
+        }
+
         //validate request data
-        $validator = \validator::make($post, [
-            'terms_id'          => 'required||numeric|exists:terms_of_use,id',
-            'data.name'         => 'required|string|max:100',
-            'data.description'  => 'required|string',
-            'data.locale'       => 'required|string|max:5',
-            'data.active'       => 'required|boolean',
-            'data.is_default'   => 'boolean',
-            'data.ordering'     => 'numeric',
+        $validator = \validator::make($data, [
+            'terms_id'        => 'required|numeric|exists:terms_of_use,id',
+            'name'            => 'required_with:locale',
+            'name.bg'         => 'required_without:locale|string',
+            'description'     => 'required_with:locale',
+            'description.bg'  => 'required_without:locale|string',
+            'locale'          => 'nullable|string|max:5',
+            'active'          => 'required|boolean',
+            'is_default'      => 'nullable|boolean',
+            'ordering'        => 'nullable|numeric',
         ]);
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('description.bg')) {
+                $validator->errors()->add('descript.bg', $validator->errors()->first('description.bg'));
+            }
+        });
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.edit_terms_fail'), $validator->errors()->messages());
         }
 
-        $data = $request->data;
         $terms = TermsOfUse::find($post['terms_id']);
         $terms->name = $data['name'];
         $terms->descript = $data['description'];
-        unset($data['locale'], $data['name'], $data['description']);
+        unset($data['locale'], $data['name'], $data['description'], $data['terms_id']);
         $terms->fill($data);
 
         try {
@@ -170,7 +200,7 @@ class TermsOfUseController extends ApiController
             $terms = TermsOfUse::all();
         }
 
-        $response['terms_of_use'] = $this->prepareTerms($terms);
+        $response = $this->prepareTerms($terms);
 
         return $this->successResponse($response, true);
     }
@@ -214,7 +244,7 @@ class TermsOfUseController extends ApiController
         $results = [];
 
         foreach ($terms as $term) {
-            $results['term_of_use'] = [
+            $results['terms_of_use'][] = [
                     'id'            => $term->id,
                     'name'          => $term->name,
                     'description'   => $term->descript,

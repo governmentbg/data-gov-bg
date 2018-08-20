@@ -436,6 +436,7 @@ return [
     'data_save_success' => 'Data saved successfully!',
     'entered_data_error' => 'Error in entered data!',
     'image_size_too_big' => 'Image size too big (Max size is ',
+    'file_size_too_big' => 'File size too big (Max size is ',
     'bytes' => ' bytes)',
     'admin_profile' => 'Administrator profile',
     'create_profile' => 'create profile',

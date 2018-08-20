@@ -463,15 +463,11 @@ class UserController extends ApiController
         }
 
         if (!empty($data['password'])) {
-            $validator = \Validator::make(
-                $request->all(),
-                [
-                    'data.password_confirm'  => 'required|same:data.password',
-                ]
-            );
+            $validator = \Validator::make($request->all(), [
+                'data.password_confirm'  => 'required|same:data.password',
+            ]);
 
             if ($validator->fails()) {
-
                 return $this->errorResponse(__('custom.edit_user_fail'), $validator->errors()->messages());
             }
 
@@ -493,7 +489,6 @@ class UserController extends ApiController
         $orgAndRoles = [];
 
         if (isset($data['role_id']) || isset($data['org_id'])) {
-
             $validator = \Validator::make(
                 $request->all(),
                 [

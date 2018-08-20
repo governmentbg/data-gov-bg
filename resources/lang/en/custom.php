@@ -436,6 +436,7 @@ return [
     'data_save_success' => 'Data saved successfully!',
     'entered_data_error' => 'Error in entered data!',
     'image_size_too_big' => 'Image size too big (Max size is ',
+    'image_type_error' => 'Image type must be one of the following',
     'bytes' => ' bytes)',
     'admin_profile' => 'Admin profile',
     'create_profile' => 'create profile',
@@ -489,5 +490,12 @@ return [
     'show_active' => 'Show active',
     'hide_active' => 'Hide active',
     'main_org' => 'Main organisation',
-
+    'role_name' => 'Role name',
+    'by_default' => 'Defaults',
+    'action' => 'Action',
+    'active' => 'active',
+    'not_active' => 'not active',
+    'role_list' => 'Roles list',
+    'add_role' => 'Add new role',
+    'edit_role' => 'Edit role',
 ];

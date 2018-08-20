@@ -373,6 +373,102 @@
             }
         }
     }
+
+    .opn-tbl {
+        margin: 0 auto;
+        width: 100%;
+        border-left: 1px solid $primary;
+        border-right: 1px solid $primary;
+        border-bottom: 1px solid $primary;
+        border-radius: 15px;
+        // border-top-right-radius: 15px;
+
+        .link-action {
+            background:none!important;
+            color:inherit;
+            border:none;
+            padding:0!important;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            thead {
+                padding-left: 10px;
+                background-color: $primary;
+
+                th {
+                    color: white;
+                    text-align: center;
+                    border-bottom: none !important;
+
+                    &:first-child() {
+                        border-top-left-radius: 15px;
+                        border-bottom-left-radius: 15px;
+                    }
+
+                    &:last-child() {
+                        border-top-right-radius: 15px;
+                        border-bottom-right-radius: 15px;
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    &:first-child() {
+                        td {
+                            border-top: none !important;
+                        }
+                    }
+
+                    &:last-child() {
+                        td {
+                            padding-top: 17px;
+                            padding-bottom: 0px;
+                        }
+                    }
+
+                    td {
+                        border-color: $primary;
+                        padding-top: 15px;
+                        padding-bottom: 15px;
+
+                        .link-action {
+                            color: #000;
+                            background-color: transparent !important;
+                            padding: 5px;
+
+                            &:after {
+                                content: '';
+                                display: block;
+                                position: relative;
+                                bottom: 0;
+                                width: 40px;
+                                margin: 0 auto;
+                                transition: 0.1s ease-in;
+                            }
+
+                            &:hover, &.active {
+                                a {
+                                    color: $primary;
+                                    margin-top: 0;
+                                    margin-bottom: 0;
+                                }
+
+                                &:after {
+                                    background: $primary;
+                                    transition: 0.3s ease-out;
+                                    height: 8px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 $themes: (

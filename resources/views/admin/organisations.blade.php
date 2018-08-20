@@ -39,6 +39,11 @@
                                             )
                                         )
                                     }}"
+                                    class="{{
+                                        isset(app('request')->input()['approved']) && app('request')->input()['approved']
+                                            ? 'active'
+                                            : ''
+                                    }}"
                                 >{{ __('custom.show_approved') }}</a>
                             </li>
                             <li>
@@ -51,6 +56,11 @@
                                                 array_except(app('request')->input(), ['approved', 'q'])
                                             )
                                         )
+                                    }}"
+                                    class="{{
+                                        isset(app('request')->input()['approved']) && !app('request')->input()['approved']
+                                            ? 'active'
+                                            : ''
                                     }}"
                                 >{{ __('custom.hide_approved') }}</a>
                             </li>
@@ -85,6 +95,11 @@
                                             )
                                         )
                                     }}"
+                                    class="{{
+                                        isset(app('request')->input()['active']) && app('request')->input()['active']
+                                            ? 'active'
+                                            : ''
+                                    }}"
                                 >{{ __('custom.show_active') }}</a>
                             </li>
                             <li>
@@ -97,6 +112,11 @@
                                                 array_except(app('request')->input(), ['active', 'q'])
                                             )
                                         )
+                                    }}"
+                                    class="{{
+                                        isset(app('request')->input()['active']) && !app('request')->input()['active']
+                                            ? 'active'
+                                            : ''
                                     }}"
                                 >{{ __('custom.hide_active') }}</a>
                             </li>
@@ -118,12 +138,7 @@
                         <form
                             method="GET"
                             class="form-horisontal"
-                            action="{{
-                                action(
-                                    'Admin\OrganisationController@list',
-                                    array_except(app('request')->input(), ['q'])
-                                )
-                            }}"
+                            action="{{ action('Admin\OrganisationController@list', []) }}"
                         >
                             <div class="form-group row m-b-lg m-t-md">
                                 <div class="col-lg-10">
@@ -141,6 +156,12 @@
                                     </select>
                                 </div>
                             </div>
+                            @if (isset(app('request')->input()['active']))
+                                <input type="hidden" name="active" value="{{ app('request')->input()['active'] }}">
+                            @endif
+                            @if (isset(app('request')->input()['approved']))
+                                <input type="hidden" name="approved" value="{{ app('request')->input()['approved'] }}">
+                            @endif
                         </form>
                     </div>
                 </div>
@@ -151,15 +172,15 @@
                         @foreach ($organisations as $key => $organisation)
                             <div class="col-md-4 col-sm-12 org-col">
                                 <div class="col-xs-12 m-t-lg">
-                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}">
+                                    <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}">
                                         <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
+                                    <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
                                     <div class="org-desc">{{ $organisation->description }}</div>
                                     <p class="text-right show-more">
-                                        <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                                        <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                                     </p>
                                 </div>
                                 <div class="col-xs-12 ch-del-btns">

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 
-class RoleController extends Controller {
+class RoleController extends AdminController {
 
     /**
      * Create a new controller instance.
@@ -30,16 +30,6 @@ class RoleController extends Controller {
         $api = new ApiRole($rq);
         $result = $api->listRoles($rq)->getData();
         $roles = isset($result->roles) ? $result->roles : [];
-
-        if ($request->has('delete')) {
-            if ($this->deleteRole($request->offsetGet('id'))) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
-            } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
-            }
-
-            return back();
-        }
 
         return view('admin/roleList', compact('class', 'roles'));
     }
@@ -101,7 +91,7 @@ class RoleController extends Controller {
                 'id'        => $id,
                 'data'      => [
                     'name'      => $request->offsetGet('name'),
-                    'active'    => $request->offsetGet('active'),
+                    'active'    => $request->offsetGet('active') ? $request->offsetGet('active') : false,
                 ],
             ]);
             $api = new ApiRole($rq);
@@ -122,7 +112,7 @@ class RoleController extends Controller {
         return view('admin/roleEdit', compact('class', 'role'));
     }
 
-    public function deleteRole($id)
+    public function deleteRole(Request $request, $id)
     {
         $rq = Request::create('/api/deleteRole', 'POST', [
             'api_key'   => Auth::user()->api_key,
@@ -131,7 +121,15 @@ class RoleController extends Controller {
         $api = new ApiRole($rq);
         $result = $api->deleteRole($rq)->getData();
 
-        return $result->success;
+        if ($result->success) {
+            $request->session()->flash('alert-success', __('custom.delete_success'));
+
+            return redirect(url('admin/roles'));
+        }
+
+        $request->session()->flash('alert-danger', __('custom.delete_error'));
+
+        return redirect(url('admin/roles'));
     }
 
 }

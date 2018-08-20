@@ -25,10 +25,9 @@ class LocaleController extends ApiController
     {
         $post = $request->all();
 
-        $validator = Validator::make($post, [
-            'data'          => 'required|array',
-            'data.locale'   => 'required|string|max:5|unique:locale,locale',
-            'data.active'   => 'required|bool',
+        $validator = Validator::make($post['data'], [
+            'locale'   => 'required|string|max:5|unique:locale,locale',
+            'active'   => 'required|bool',
         ]);
 
         if (!$validator->fails()) {
@@ -72,6 +71,10 @@ class LocaleController extends ApiController
         if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
 
+            if ($locale->locale == \LaravelLocalization::getDefaultLocale()) {
+                return $this->errorResponse(__('custom.default_locale_error'));
+            }
+
             $locale->active = $post['data']['active'];
 
             try {
@@ -105,12 +108,16 @@ class LocaleController extends ApiController
         if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
 
+            if ($locale->locale == \LaravelLocalization::getDefaultLocale()) {
+                return $this->errorResponse(__('custom.default_locale_error'));
+            }
+
             try {
                 $locale->delete();
 
                 return $this->successResponse();
             } catch (QueryException $e) {
-                return $this->errorResponse(__('custom.delete_locale_fail'));
+                Log::error($e->getMessage());
             }
         }
 

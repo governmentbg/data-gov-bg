@@ -482,3 +482,95 @@ textarea {
         width: 10px !important;
     }
 }
+
+.opn-tbl {
+    margin: 0 auto;
+    width: 100%;
+    border-radius: 10px;
+
+    table {
+        width: 100%;
+        margin: 0px;
+
+        thead {
+            padding-left: 10px;
+
+            th {
+                color: white;
+                text-align: center;
+                border-bottom: none !important;
+
+                &:first-child() {
+                    border-top-left-radius: 8px;
+                    border-bottom-left-radius: 8px;
+                }
+
+                &:last-child() {
+                    border-top-right-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                &:first-child() {
+                    td {
+                        border-top: none !important;
+                    }
+                }
+
+                &:last-child() {
+                    td {
+                        padding-top: 17px;
+                        padding-bottom: 0px;
+                    }
+                }
+
+                td {
+                    padding-top: 10px;
+                    padding-bottom: 10px;
+
+                    &.buttons {
+                        width: 1%;
+                        white-space: nowrap;
+
+                        > button, > a {
+                            background: none !important;
+                            color: inherit;
+                            border: none;
+                            padding: 0 10px 0 10px !important;
+                            font: inherit;
+                            cursor: pointer;
+                            position: relative;
+                            display: inline-block;
+
+                            &:hover {
+                                color: inherit;
+                            }
+
+                            &:after {
+                                content: '';
+                                position: absolute;
+                                left: 0;
+                                bottom: -10px;
+                                height: 8px;
+                                width: 100%;
+                                border-radius: 2px;
+                                transition: 0.1s ease-in;
+                                display: none;
+                            }
+
+                            &:hover, &.active {
+                                &:after {
+                                    transition: 0.3s ease-out;
+                                    display: block;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

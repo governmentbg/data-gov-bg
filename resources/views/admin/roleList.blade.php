@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container role">
+<div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'manageRoles'])
     <h3>{{ __('custom.role_list') }}</h3>
@@ -28,12 +28,11 @@
                                     <td>{{ $role->active ? __('custom.active') : __('custom.not_active') }}</td>
                                     <td></td>
                                     <td class="buttons">
-                                        <button
+                                        <a
                                             class="link-action"
-                                            type="submit"
-                                            name="delete"
+                                            href="{{ url('/admin/roles/delete/'. $role->id) }}"
                                             data-confirm="Изтриване на данните?"
-                                        >{{ __('custom.delete') }}</button>
+                                        >{{ __('custom.delete') }}</a>
                                         <a
                                             class="link-action"
                                             href="{{ url('/admin/roles/edit/'. $role->id) }}"
@@ -41,7 +40,7 @@
                                         <button
                                             class="link-action"
                                             href="#"
-                                        >{{ utrans('custom.preview') }}</a>
+                                        >{{ utrans('custom.preview') }}</button>
                                     </td>
                                 </tr>
                                 <input type="hidden" name="id" value="{{ $role->id }}">

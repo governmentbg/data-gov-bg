@@ -16,7 +16,7 @@
                 <div class="table-responsive opn-tbl text-center">
                     <table class="table">
                         <thead>
-                            <th>Наименование</th>
+                            <th>{{ utrans('custom.name') }}</th>
                             <th>{{ __('custom.activity') }}</th>
                             <th>{{ __('custom.by_default') }}</th>
                             <th>{{ __('custom.action') }}</th>
@@ -26,7 +26,7 @@
                                 <tr>
                                     <td>{{ $term->name }}</td>
                                     <td>{{ $term->active ? __('custom.active') : __('custom.not_active') }}</td>
-                                    <td>{{ $term->is_default ? 'Да' : 'Не' }}</td>
+                                    <td>{{ $term->is_default ? utrans('custom.yes') : utrans('custom.no') }}</td>
                                     <td class="buttons">
                                         <a
                                             class="link-action"

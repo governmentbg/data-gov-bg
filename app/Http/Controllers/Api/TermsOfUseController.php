@@ -25,6 +25,7 @@ class TermsOfUseController extends ApiController
         $validator = \validator::make($data, [
             'name'           => 'required_with:locale',
             'name.bg'        => 'required_without:locale|string',
+            'name.*'         => 'max:255',
             'description'    => 'required_with:locale',
             'description.bg' => 'required_without:locale|string',
             'locale'         => 'nullable|string|max:5',
@@ -100,6 +101,7 @@ class TermsOfUseController extends ApiController
             'terms_id'        => 'required|numeric|exists:terms_of_use,id',
             'name'            => 'required_with:locale',
             'name.bg'         => 'required_without:locale|string',
+            'name.*'          => 'max:255',
             'description'     => 'required_with:locale',
             'description.bg'  => 'required_without:locale|string',
             'locale'          => 'nullable|string|max:5',

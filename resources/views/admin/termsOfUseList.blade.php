@@ -14,7 +14,7 @@
             </div>
             <div class="col-lg-12">
                 <div class="table-responsive opn-tbl text-center">
-                    <table class="table">
+                    <table class="table admin-col-border">
                         <thead>
                             <th>{{ utrans('custom.name') }}</th>
                             <th>{{ __('custom.activity') }}</th>
@@ -24,7 +24,7 @@
                         <tbody>
                             @foreach ($terms as $term)
                                 <tr>
-                                    <td>{{ $term->name }}</td>
+                                    <td class="name">{{ $term->name }}</td>
                                     <td>{{ $term->active ? __('custom.active') : __('custom.not_active') }}</td>
                                     <td>{{ $term->is_default ? utrans('custom.yes') : utrans('custom.no') }}</td>
                                     <td class="buttons">

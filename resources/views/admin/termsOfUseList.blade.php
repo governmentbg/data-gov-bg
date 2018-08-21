@@ -14,7 +14,7 @@
             </div>
             <div class="col-lg-12">
                 <div class="table-responsive opn-tbl text-center">
-                    <table class="table admin-col-border">
+                    <table class="table">
                         <thead>
                             <th>{{ utrans('custom.name') }}</th>
                             <th>{{ __('custom.activity') }}</th>

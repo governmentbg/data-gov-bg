@@ -19,7 +19,7 @@ class CreateTranslationsTable extends Migration
             $table->foreign('locale')->references('locale')->on('locale');
             $table->integer('group_id');
             $table->text('text')->nullable();
-            $table->string('label', 100)->nullable();
+            $table->string('label')->nullable();
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

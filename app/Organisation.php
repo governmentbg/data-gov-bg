@@ -21,7 +21,9 @@ class Organisation extends Model implements TranslatableInterface
     const TYPE_GROUP = 3;
 
     const ACTIVE_FALSE = 0;
+    const ACTIVE_TRUE = 1;
     const APPROVED_FALSE = 0;
+    const APPROVED_TRUE = 1;
 
     protected $guarded = ['id'];
 

@@ -131,6 +131,18 @@ $(function() {
 });
 
 $(function() {
+    $('.js-org-type').on('ifChecked', function(event) {
+        if (typeof $('.js-org-approved') != 'undefined') {
+            if ($(this).hasClass('show-approved')) {
+                $('.js-org-approved').removeClass('hidden');
+            } else {
+                $('.js-org-approved').addClass('hidden');
+            }
+        }
+    });
+});
+
+$(function() {
     if ($('.js-add-custom-field').length > 0) {
 
         $('.js-add-custom-field').on('click', function(e) {

@@ -495,6 +495,10 @@ textarea {
         width: 100%;
         margin: 0px;
 
+        td + td {
+            border-left:1px solid #108f9e;
+        }
+
         thead {
             padding-left: 10px;
 
@@ -526,13 +530,18 @@ textarea {
                 &:last-child() {
                     td {
                         padding-top: 17px;
-                        padding-bottom: 0px;
                     }
                 }
 
                 td {
                     padding-top: 10px;
                     padding-bottom: 10px;
+                    &.name {
+                        max-width: 150px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
 
                     &.buttons {
                         width: 1%;

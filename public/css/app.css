@@ -13431,6 +13431,10 @@ textarea {
   margin: 0px;
 }
 
+.opn-tbl table td + td {
+  border-left: 1px solid #108f9e;
+}
+
 .opn-tbl table thead {
   padding-left: 10px;
 }
@@ -13457,12 +13461,18 @@ textarea {
 
 .opn-tbl table tbody tr:last-child td {
   padding-top: 17px;
-  padding-bottom: 0px;
 }
 
 .opn-tbl table tbody tr td {
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.opn-tbl table tbody tr td.name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .opn-tbl table tbody tr td.buttons {

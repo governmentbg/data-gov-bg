@@ -24,7 +24,7 @@
                         <tbody>
                             @foreach ($terms as $term)
                                 <tr>
-                                    <td>{{ $term->name }}</td>
+                                    <td class="name">{{ $term->name }}</td>
                                     <td>{{ $term->active ? __('custom.active') : __('custom.not_active') }}</td>
                                     <td>{{ $term->is_default ? utrans('custom.yes') : utrans('custom.no') }}</td>
                                     <td class="buttons">

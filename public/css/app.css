@@ -13431,7 +13431,7 @@ textarea {
   margin: 0px;
 }
 
-.opn-tbl table.admin-col-border td + td {
+.opn-tbl table td + td {
   border-left: 1px solid #108f9e;
 }
 

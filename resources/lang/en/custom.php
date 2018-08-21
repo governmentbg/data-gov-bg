@@ -520,4 +520,7 @@ return [
     'name' => 'name',
     'yes' => 'yes',
     'no' => 'no',
+    'order_by_name' => 'order by name',
+    'order_asc' => 'ascending',
+    'order_desc' => 'descending',
 ];

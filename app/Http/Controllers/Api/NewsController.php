@@ -38,57 +38,62 @@ class NewsController extends ApiController
 
         $validator = Validator::make($newsData, [
             'data'                  => 'required|array',
-            'data.locale'           => 'required|string',
-            'data.title'            => 'required|string',
-            'data.abstract'         => 'required|string',
-            'data.body'             => 'required|string',
-            'data.head_title'       => 'nullable|string',
-            'data.meta_description' => 'nullable|string',
-            'data.meta_keywords'    => 'nullable|string',
-            'data.forum_link'       => 'nullable|string',
-            'data.active'           => 'required|integer',
-            'data.valid_from'       => 'nullable|date',
-            'data.valid_to'         => 'nullable|date',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($newsData['data'], [
+                'locale'           => 'required|string',
+                'title'            => 'required|string',
+                'abstract'         => 'required|string',
+                'body'             => 'required|string',
+                'head_title'       => 'nullable|string',
+                'meta_description' => 'nullable|string',
+                'meta_keywords'    => 'nullable|string',
+                'forum_link'       => 'nullable|string',
+                'active'           => 'required|integer',
+                'valid_from'       => 'nullable|date',
+                'valid_to'         => 'nullable|date',
+            ]);
+        }
+
+        if (!$validator->fails()) {
             try {
-            DB::beginTransaction();
-            $newNews = new Page;
-            $locale = $newsData['data']['locale'];
-            $newNews->title = $this->trans($locale, $newsData['data']['title']);
-            $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
-            $newNews->body = $this->trans($locale, $newsData['data']['body']);
+                DB::beginTransaction();
+                $newNews = new Page;
+                $locale = $newsData['data']['locale'];
+                $newNews->title = $this->trans($locale, $newsData['data']['title']);
+                $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
+                $newNews->body = $this->trans($locale, $newsData['data']['body']);
 
-            if (isset($newsData['data']['head_title'])) {
-                $newNews->head_title = $this->trans($locale, $newsData['data']['head_title']);
-            }
+                if (isset($newsData['data']['head_title'])) {
+                    $newNews->head_title = $this->trans($locale, $newsData['data']['head_title']);
+                }
 
-            if (isset($newsData['data']['meta_description'])) {
-                $newNews->meta_descript = $this->trans($locale, $newsData['data']['meta_description']);
-            }
+                if (isset($newsData['data']['meta_description'])) {
+                    $newNews->meta_descript = $this->trans($locale, $newsData['data']['meta_description']);
+                }
 
-            if (isset($newsData['data']['meta_key_words'])) {
-                $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_key_words']);
-            }
+                if (isset($newsData['data']['meta_key_words'])) {
+                    $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_key_words']);
+                }
 
-            if (isset($newsData['data']['forum_link'])) {
-                $newNews->forum_link = $newsData['data']['forum_link'];
-            }
+                if (isset($newsData['data']['forum_link'])) {
+                    $newNews->forum_link = $newsData['data']['forum_link'];
+                }
 
-            if (isset($newsData['data']['valid_from'])) {
-                $newNews->valid_from = $newsData['data']['valid_from'];
-            }
+                if (isset($newsData['data']['valid_from'])) {
+                    $newNews->valid_from = $newsData['data']['valid_from'];
+                }
 
-            if (isset($newsData['data']['valid_to'])) {
-                $newNews->valid_to = $newsData['data']['valid_to'];
-            }
+                if (isset($newsData['data']['valid_to'])) {
+                    $newNews->valid_to = $newsData['data']['valid_to'];
+                }
 
-            $newNews->active = $newsData['data']['active'];
+                $newNews->active = $newsData['data']['active'];
 
-                $newNews->save();
-                DB::commit();
-                return $this->successResponse(['news_id' => $newNews->id], true);
+                    $newNews->save();
+                    DB::commit();
+                    return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
                 DB::rollback();
                 Log::error($e->getMessage());
@@ -126,51 +131,56 @@ class NewsController extends ApiController
         $validator = Validator::make($editData, [
             'news_id'               => 'required|integer|exists:pages,id',
             'data'                  => 'required|array',
-            'data.locale'           => 'nullable|string',
-            'data.title'            => 'nullable|string',
-            'data.abstract'         => 'nullable|string',
-            'data.body'             => 'nullable|string',
-            'data.head_title'       => 'nullable|string',
-            'data.meta_description' => 'nullable|string',
-            'data.meta_key_words'   => 'nullable|string',
-            'data.forum_link'       => 'nullable|string',
-            'data.active'           => 'nullable|integer',
-            'data.valid_from'       => 'nullable|date',
-            'data.valid_to'         => 'nullable|date',
         ]);
 
+        if (!$validator->fails()) {
+            $validator = Validator::make($editData['data'], [
+                'locale'           => 'nullable|string',
+                'title'            => 'nullable|string',
+                'abstract'         => 'nullable|string',
+                'body'             => 'nullable|string',
+                'head_title'       => 'nullable|string',
+                'meta_description' => 'nullable|string',
+                'meta_key_words'   => 'nullable|string',
+                'forum_link'       => 'nullable|string',
+                'active'           => 'nullable|integer',
+                'valid_from'       => 'nullable|date',
+                'valid_to'         => 'nullable|date',
+            ]);
+        }
+
         if (isset($editData['data']['title'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
+            $validator->sometimes('locale', 'required', function ($editData) {
                 return $editData['data']['title'] != '';
             });
         }
 
         if (isset($editData['data']['abstract'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
+            $validator->sometimes('locale', 'required', function ($editData) {
                 return $editData['data']['abstract'] != '';
             });
         }
 
         if (isset($editData['data']['body'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
+            $validator->sometimes('locale', 'required', function ($editData) {
                 return $editData['data']['body'] != '';
             });
         }
 
         if (isset($editData['data']['head_title'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
+            $validator->sometimes('locale', 'required', function ($editData) {
                 return $editData['data']['head_title'] != '';
             });
         }
 
         if (isset($editData['data']['meta_description'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
+            $validator->sometimes('locale', 'required', function ($editData) {
                 return $editData['data']['meta_description'] != '';
             });
         }
 
         if (isset($editData['data']['meta_key_words'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
+            $validator->sometimes('locale', 'required', function ($editData) {
                 return $editData['data']['meta_key_words'] != '';
             });
         }
@@ -291,17 +301,31 @@ class NewsController extends ApiController
         $validator = Validator::make($newsListData, [
             'locale'                => 'nullable|string',
             'criteria'              => 'nullable|array',
-            'criteria.active'       => 'nullable|integer',
-            'criteria.valid'        => 'nullable|integer',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.date_type'    => 'nullable|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
         ]);
+
+        $criteria = isset($newsListData['criteria']) ? $newsListData['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'active'       => 'nullable|integer',
+                'valid'        => 'nullable|integer',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'date_type'    => 'nullable|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $result = [];
@@ -438,13 +462,27 @@ class NewsController extends ApiController
         $validator = Validator::make($newsSearchData, [
             'locale'                => 'nullable|string',
             'criteria'              => 'required|array',
-            'criteria.keywords'     => 'required|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
         ]);
+
+        $criteria = isset($newsSearchData['criteria']) ? $newsSearchData['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'keywords'     => 'required|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         $locale = \LaravelLocalization::getCurrentLocale();
 

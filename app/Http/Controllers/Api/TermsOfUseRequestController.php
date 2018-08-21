@@ -81,12 +81,18 @@ class TermsOfUseRequestController extends ApiController
 
         $validator = \Validator::make($post, [
             'request_id'        => 'required|numeric|exists:terms_of_use_requests,id',
-            'data.description'  => 'required|string',
-            'data.firstname'    => 'required|string|max:100',
-            'data.lastname'     => 'required|string|max:100',
-            'data.email'        => 'required|email|string|max:191',
-            'data.status'       => 'integer|min:1'
+            'data'              => 'required|array'
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post, [
+                'description'  => 'required|string',
+                'firstname'    => 'required|string|max:100',
+                'lastname'     => 'required|string|max:100',
+                'email'        => 'required|email|string|max:191',
+                'status'       => 'integer|min:1'
+            ]);
+        }
 
         if (!$validator->fails()) {
             $data = $post['data'];
@@ -163,19 +169,35 @@ class TermsOfUseRequestController extends ApiController
      */
     public function listTermsOfUseRequests(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $data = $request->all();
+
+        $validator = \Validator::make($data, [
             'criteria'              => 'nullable|array',
-            'criteria.request_id'   => 'nullable|integer|exists:terms_of_use_requests,id',
-            'criteria.status'       => 'nullable|integer',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.search'       => 'nullable|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string|in:asc,desc',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
         ]);
+
+        $criteria = isset($data['criteria']) ? $data['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'request_id'   => 'nullable|integer|exists:terms_of_use_requests,id',
+                'status'       => 'nullable|integer',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'search'       => 'nullable|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|in:asc,desc',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $filterColumn = 'created_at';

@@ -30,14 +30,19 @@ class DataRequestController extends ApiController
         $requestData = $request->all();
         $validator = Validator::make($requestData, [
             'data'                  => 'required|array',
-            'data.org_id'           => 'required|integer',
-            'data.description'      => 'required|string',
-            'data.published_url'    => 'nullable|string',
-            'data.contact_name'     => 'nullable|string',
-            'data.email'            => 'required|email',
-            'data.notes'            => 'nullable|string',
-            'data.status'           => 'nullable|integer',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($requestData['data'], [
+                'org_id'           => 'required|integer',
+                'description'      => 'required|string',
+                'published_url'    => 'nullable|string',
+                'contact_name'     => 'nullable|string',
+                'email'            => 'required|email',
+                'notes'            => 'nullable|string',
+                'status'           => 'nullable|integer',
+            ]);
+        }
 
         if (!$validator->fails()) {
 
@@ -96,14 +101,19 @@ class DataRequestController extends ApiController
         $validator = Validator::make($editRequestData, [
             'request_id'            => 'required|integer|exists:data_requests,id',
             'data'                  => 'required|array',
-            'data.org_id'           => 'nullable|integer',
-            'data.description'      => 'nullable|string',
-            'data.published_url'    => 'nullable|string',
-            'data.contact_name'     => 'nullable|string',
-            'data.email'            => 'nullable|email',
-            'data.notes'            => 'nullable|string',
-            'data.status'           => 'nullable|integer',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($editRequestData['data'], [
+                'org_id'           => 'nullable|integer',
+                'description'      => 'nullable|string',
+                'published_url'    => 'nullable|string',
+                'contact_name'     => 'nullable|string',
+                'email'            => 'nullable|email',
+                'notes'            => 'nullable|string',
+                'status'           => 'nullable|integer',
+            ]);
+        }
 
         if (!$validator->fails()) {
 
@@ -199,25 +209,36 @@ class DataRequestController extends ApiController
         $listRequestData = $request->all();
         $validator = Validator::make($listRequestData, [
             'criteria'                => 'nullable|array',
-            'criteria.request_id'     => 'nullable|integer',
-            'criteria.org_id'         => 'nullable|integer',
-            'criteria.status'         => 'nullable|integer',
-            'criteria.date_from'      => 'nullable|date',
-            'criteria.date_to'        => 'nullable|date',
-            'criteria.search'         => 'nullable|string',
-            'criteria.order'          => 'nullable|array',
-            'criteria.order.type'     => 'nullable|string',
-            'criteria.order.field'    => 'nullable|string',
             'records_per_page'        => 'nullable|integer',
             'page_number'             => 'nullable|integer',
         ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($listRequestData['criteria']) ? $listRequestData['criteria'] : [];
+            $validator = Validator::make($criteria, [
+                'request_id'              => 'nullable|integer',
+                'org_id'                  => 'nullable|integer',
+                'status'                  => 'nullable|integer',
+                'date_from'               => 'nullable|date',
+                'date_to'                 => 'nullable|date',
+                'search'                  => 'nullable|string',
+                'order'                   => 'nullable|array',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $order = isset($criteria['order']) ? $criteria['order'] : [];
+            $validator = Validator::make($order, [
+                'type'     => 'nullable|string',
+                'field'    => 'nullable|string',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_request_fail'), $validator->errors()->messages());
         }
 
         $result = [];
-        $criteria = $request->json('criteria');
 
         $dataRequestList = DataRequest::select('*');
 

@@ -222,23 +222,35 @@ class ResourceController extends ApiController
         $validator = \Validator::make($post, [
             'resource_uri'              => 'required|string|exists:resources,uri,deleted_at,NULL',
             'data'                      => 'required|array',
-            'data.resource_uri'         => 'nullable|string|unique:resources,uri',
-            'data.name'                 => 'nullable|string',
-            'data.description'          => 'nullable|string',
-            'data.locale'               => 'nullable|string|required_with:data.name,data.description|max:5',
-            'data.version'              => 'nullable|string',
-            'data.schema_description'   => 'nullable|string',
-            'data.schema_url'           => 'nullable|url',
-            'data.type'                 => 'nullable|int|in:'. implode(',', array_keys(Resource::getTypes())),
-            'data.resource_url'         => 'nullable|url|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
-            'data.http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-            'data.authentication'       => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
-            'data.http_headers'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
-            'data.post_data'            => 'nullable|string',
-            'data.custom_fields'        => 'nullable|array',
-            'data.custom_fields.label'  => 'nullable|string',
-            'data.custom_fields.value'  => 'nullable|string',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'resource_uri'         => 'nullable|string|unique:resources,uri',
+                'name'                 => 'nullable|string',
+                'description'          => 'nullable|string',
+                'locale'               => 'nullable|string|required_with:data.name,data.description|max:5',
+                'version'              => 'nullable|string',
+                'schema_description'   => 'nullable|string',
+                'schema_url'           => 'nullable|url',
+                'type'                 => 'nullable|int|in:'. implode(',', array_keys(Resource::getTypes())),
+                'resource_url'         => 'nullable|url|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+                'authentication'       => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
+                'http_headers'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
+                'post_data'            => 'nullable|string',
+                'custom_fields'        => 'nullable|array',
+            ]);
+        }
+
+        $custom = isset($post['data']['custom_fields']) ? $post['data']['custom_fields'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($custom, [
+                'label'  => 'nullable|string',
+                'value'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             DB::beginTransaction();
@@ -405,16 +417,28 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.resource_uri' => 'nullable|string|exists:resources,uri,deleted_at,NULL',
-            'criteria.dataset_uri'  => 'nullable|string|exists:data_sets,uri,deleted_at,NULL',
-            'criteria.reported'     => 'nullable|boolean',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['criteria'], [
+                'locale'       => 'nullable|string|max:5',
+                'resource_uri' => 'nullable|string|exists:resources,uri,deleted_at,NULL',
+                'dataset_uri'  => 'nullable|string|exists:data_sets,uri,deleted_at,NULL',
+                'reported'     => 'nullable|boolean',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($post['criteria']['order']) ? $post['criteria']['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $query = Resource::with('DataSet');
@@ -633,12 +657,26 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.keywords'     => 'required|string',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
+            'criteria'              => 'required|array',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['criteria'], [
+                'keywords'     => 'required|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($post['criteria']['order']) ? $post['criteria']['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $pageNumber = !empty($post['page_number']) ? $post['page_number'] : 1;

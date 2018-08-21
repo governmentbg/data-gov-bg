@@ -31,13 +31,18 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'data'              => 'required|array',
-            'data.name'         => 'required',
-            'data.description'  => 'required',
-            'data.locale'       => 'nullable|string|max:5',
-            'data.filename'     => 'required|string',
-            'data.mimetype'     => 'required|string',
-            'data.data'         => 'required|string',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($post['data'], [
+                'name'         => 'required',
+                'description'  => 'required',
+                'locale'       => 'nullable|string|max:5',
+                'filename'     => 'required|string',
+                'mimetype'     => 'required|string',
+                'data'         => 'required|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {
@@ -85,13 +90,18 @@ class DocumentController extends ApiController
         $validator = Validator::make($post, [
             'doc_id'            => 'required|integer|exists:documents,id',
             'data'              => 'required|array',
-            'data.name'         => 'nullable',
-            'data.description'  => 'nullable',
-            'data.locale'       => 'nullable|string|max:5',
-            'data.filename'     => 'nullable|string',
-            'data.mimetype'     => 'nullable|string',
-            'data.data'         => 'nullable|string',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($post['data'], [
+                'name'         => 'nullable',
+                'description'  => 'nullable',
+                'locale'       => 'nullable|string|max:5',
+                'filename'     => 'nullable|string',
+                'mimetype'     => 'nullable|string',
+                'data'         => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {
@@ -188,17 +198,30 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'criteria.doc_id'       => 'nullable|integer',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.date_type'    => 'nullable|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'doc_id'       => 'nullable|integer',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'locale'       => 'nullable|string|max:5',
+                'date_type'    => 'nullable|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_document_fail'), $validator->errors()->messages());
@@ -307,13 +330,27 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'required|array',
-            'criteria.search'       => 'required|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
         ]);
+
+        $criteria = $post['criteria'];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'search'       => 'required|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $data = [];

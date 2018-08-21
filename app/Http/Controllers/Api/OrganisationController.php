@@ -451,20 +451,37 @@ class OrganisationController extends ApiController
         $criteria = [];
         $count = 0;
 
-        $validator = \Validator::make($request->all(), [
-            'criteria.org_ids'      => 'nullable|array',
-            'criteria.org_ids.*'    => 'int',
-            'criteria.locale'       => 'nullable|string',
-            'criteria.active'       => 'nullable|bool',
-            'criteria.approved'     => 'nullable|bool',
-            'criteria.org_id'       => 'nullable|int',
-            'criteria.user_id'      => 'nullable|int|exists:users,id',
-            'criteria.keywords'     => 'nullable|string',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'org_ids'      => 'nullable|array',
+                'org_ids.*'    => 'int',
+                'locale'       => 'nullable|string',
+                'active'       => 'nullable|bool',
+                'approved'     => 'nullable|bool',
+                'org_id'       => 'nullable|int',
+                'user_id'      => 'nullable|int|exists:users,id',
+                'order'        => 'nullable|array'
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             if (isset($request->criteria['active'])) {
@@ -551,6 +568,7 @@ class OrganisationController extends ApiController
                 }
 
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
+
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -582,14 +600,30 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.active'       => 'nullable|bool',
-            'criteria.approved'     => 'nullable|bool',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
+            'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'locale'       => 'nullable|string|max:5',
+                'active'       => 'nullable|bool',
+                'approved'     => 'nullable|bool',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             if (isset($post->criteria['active'])) {
@@ -689,16 +723,34 @@ class OrganisationController extends ApiController
     {
         $results = [];
         $count = 0;
-        $validator = \Validator::make($request->all(), [
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.keywords'     => 'required|string',
-            'criteria.user_id'      => 'nullable|string',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.user_id'      => 'nullable|integer|exists:users,id',
-            'criteria.order.field'  => 'nullable|string',
+
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'locale'       => 'nullable|string|max:5',
+                'keywords'     => 'required|string',
+                'user_id'      => 'nullable|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {
@@ -1374,17 +1426,32 @@ class OrganisationController extends ApiController
 
         $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
-        if ($criteria) {
             $validator = \Validator::make($post, [
-                'criteria.group_ids'    => 'nullable|array',
-                'criteria.locale'       => 'nullable|string|max:5',
-                'criteria.dataset_id'   => 'nullable|int',
-                'criteria.user_id'      => 'nullable|int|exists:users,id',
-                'criteria.order.type'   => 'nullable|string',
-                'criteria.order.field'  => 'nullable|string',
+            'criteria'              => 'nullable|array',
                 'records_per_page'      => 'nullable|int',
                 'page_number'           => 'nullable|int',
             ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'group_ids'    => 'nullable|array',
+                'locale'       => 'nullable|string|max:5',
+                'dataset_id'   => 'nullable|int',
+                'user_id'      => 'nullable|int|exists:users,id',
+                'order'        => 'nullable|array'
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
             if (!$validator->fails()) {
                 if (!empty($criteria['group_ids'])) {
@@ -1402,11 +1469,35 @@ class OrganisationController extends ApiController
                         $q->where('user_id', $criteria['user_id']);
                     });
                 }
+
+            $orderColumns = [
+                'id',
+                'type',
+                'name',
+                'descript',
+                'activity_info',
+                'contacts',
+                'active',
+                'approved',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    unset($criteria['order']['field']);
             }
         }
 
-        if (!empty($order)) {
-            $query->orderBy($order['field'], $order['type']);
+            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
+                if (strtolower($criteria['order']['type']) == 'desc') {
+                    $query->orderBy($criteria['order']['field'], 'desc');
+                }
+                if (strtolower($criteria['order']['type']) == 'asc') {
+                    $query->orderBy($criteria['order']['field'], 'asc');
+                }
         }
 
         $count = $query->count();
@@ -1452,6 +1543,7 @@ class OrganisationController extends ApiController
 
         return $this->errorResponse(__('custom.no_groups_found'), $validator->errors()->messages());
     }
+}
 
     /**
      * Get group details
@@ -1537,15 +1629,31 @@ class OrganisationController extends ApiController
         $result = [];
         $customFields = [];
 
-        $validator = \Validator::make($request->all(), [
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.keywords'     => 'required|string',
-            'criteria.user_id'      => 'nullable|integer|exists:users,id',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'locale'       => 'nullable|string|max:5',
+                'keywords'     => 'required|string',
+                'user_id'      => 'nullable|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {

@@ -65,8 +65,13 @@ class LocaleController extends ApiController
         $validator = Validator::make($post, [
             'locale'        => 'required|string|max:5|exists:locale,locale',
             'data'          => 'required|array',
-            'data.active'   => 'required|bool',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($post['data'], [
+                'active'   => 'required|bool',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
@@ -138,9 +143,16 @@ class LocaleController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'criteria'        => 'nullable|array',
-            'criteria.active' => 'nullable|bool',
+            'criteria'    => 'nullable|array',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($post, [
+                'active'    => 'nullable|bool',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $locales = new Locale;

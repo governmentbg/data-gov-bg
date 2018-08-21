@@ -95,8 +95,13 @@
                                 <input
                                     type="radio"
                                     name="type"
+                                    class="js-org-type {{ $id == \App\Organisation::TYPE_COUNTRY ? 'show-approved' : '' }}"
                                     value="{{ $id }}"
-                                    {{ !empty(old('type')) && old('type') == $id ? 'checked' : '' }}
+                                    @if (!empty(old('type')) && old('type') == $id)
+                                        {{ 'checked' }}
+                                    @elseif (empty(old('type')) && $id == \App\Organisation::TYPE_CIVILIAN)
+                                        {{ 'checked' }}
+                                    @endif
                                 >
                             </div>
                         </label>
@@ -119,6 +124,31 @@
                             name="active"
                             value="{{ old('active') != null ? old('active') : '1' }}"
                             {{ !empty(old('active')) ? 'checked' : '' }}
+                        >
+                    </div>
+                </div>
+            </div>
+            <div
+                class="
+                    form-group
+                    row
+                    js-org-approved
+                    {{
+                        old('type') === null
+                        || old('type') == \App\Organisation::TYPE_CIVILIAN
+                            ? 'hidden'
+                            : ''
+                    }}
+                "
+            >
+                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.org_approved') }}:</label>
+                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                    <div class="js-check">
+                        <input
+                            type="checkbox"
+                            name="approved"
+                            value="1"
+                            {{ !empty(old('approved')) ? 'checked' : '' }}
                         >
                     </div>
                 </div>

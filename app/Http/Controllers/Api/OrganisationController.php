@@ -124,9 +124,14 @@ class OrganisationController extends ApiController
                 $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
                 $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
                 $organisation->active = isset($data['active']) ? $data['active'] : 0;
-                $organisation->approved = isset($data['approved']) && $data['type'] == Organisation::TYPE_CIVILIAN
-                    ? $data['approved']
-                    : 0;
+
+                if ($data['type'] == Organisation::TYPE_CIVILIAN) {
+                    $organisation->approved = Organisation::APPROVED_TRUE;
+                } elseif (isset($data['approved']) && $data['type'] == Organisation::TYPE_COUNTRY) {
+                    $organisation->approved = $data['approved'];
+                } else {
+                    $organisation->approved = Organisation::APPROVED_FALSE;
+                }
 
                 if (!empty($data['custom_fields'])) {
                     foreach ($data['custom_fields'] as $fieldSet) {
@@ -336,7 +341,9 @@ class OrganisationController extends ApiController
                     $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-                if (!empty($data['approved'])) {
+                if ($data['type'] == Organisation::TYPE_CIVILIAN) {
+                    $orgData['approved'] = Organisation::APPROVED_TRUE;
+                } elseif (isset($data['approved']) && $data['type'] == Organisation::TYPE_COUNTRY) {
                     $orgData['approved'] = $data['approved'];
                 } else {
                     $orgData['approved'] = Organisation::APPROVED_FALSE;

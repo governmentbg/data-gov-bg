@@ -96,7 +96,11 @@
                                     type="radio"
                                     name="type"
                                     value="{{ $id }}"
-                                    {{ !empty(old('type')) && old('type') == $id ? 'checked' : '' }}
+                                    @if (!empty(old('type')) && old('type') == $id)
+                                        {{ 'checked' }}
+                                    @elseif (empty(old('type')) && $id == \App\Organisation::TYPE_CIVILIAN)
+                                        {{ 'checked' }}
+                                    @endif
                                 >
                             </div>
                         </label>

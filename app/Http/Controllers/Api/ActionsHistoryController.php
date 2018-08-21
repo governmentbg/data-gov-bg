@@ -35,31 +35,37 @@ class ActionsHistoryController extends ApiController
      */
     public function listActionHistory(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
             'criteria'               => 'nullable|array',
-            'criteria.period_from'   => 'nullable|date',
-            'criteria.period_to'     => 'nullable|date',
-            'criteria.username'      => 'nullable|string',
-            'criteria.user_id'       => 'nullable|integer',
-            'criteria.module'        => 'nullable',
-            'criteria.action'        => 'nullable|integer',
-            'criteria.category_ids'  => 'nullable|array',
-            'criteria.tag_ids'       => 'nullable|array',
-            'criteria.org_ids'       => 'nullable|array',
-            'criteria.group_ids'     => 'nullable|array',
-            'criteria.user_ids'      => 'nullable|array',
-            'criteria.dataset_ids'   => 'nullable|array',
-            'criteria.resource_uris' => 'nullable|array',
-            'criteria.ip_adress'     => 'nullable|string',
             'records_per_page'       => 'nullable|integer',
             'page_number'            => 'nullable|integer',
         ]);
 
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = Validator::make($criteria, [
+                'period_from'   => 'nullable|date',
+                'period_to'     => 'nullable|date',
+                'username'      => 'nullable|string',
+                'user_id'       => 'nullable|integer',
+                'module'        => 'nullable',
+                'action'        => 'nullable|integer',
+                'category_ids'  => 'nullable|array',
+                'tag_ids'       => 'nullable|array',
+                'org_ids'       => 'nullable|array',
+                'group_ids'     => 'nullable|array',
+                'user_ids'      => 'nullable|array',
+                'dataset_ids'   => 'nullable|array',
+                'resource_uris' => 'nullable|array',
+                'ip_adress'     => 'nullable|string',
+            ]);
+        }
+
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
         }
-
-        $criteria = $request->criteria;
 
         $history = ActionsHistory::select(
             'id',

@@ -245,13 +245,9 @@ Route::get('/data/reportedView', function () {
     return view('data/reportedView', ['class' => 'data-attention']);
 });
 
-Route::get('/organisation', function () {
-    return view('organisation/list', ['class' => 'organisation']);
-});
-
-Route::get('/organisation/profile', function () {
-    return view('organisation/profile', ['class' => 'organisation']);
-});
+Route::match(['get', 'post'], '/organisation', 'OrganisationController@list')->name('orgList');
+Route::match(['get', 'post'], '/organisation/search', 'OrganisationController@search');
+Route::match(['get', 'post'], '/organisation/profile/{uri}', 'OrganisationController@view');
 
 Route::get('/organisation/datasets', function () {
     return view('organisation/datasets', ['class' => 'organisation']);

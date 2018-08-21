@@ -435,8 +435,9 @@ class OrganisationController extends ApiController
      * @param array criteria[org_ids] - optional
      * @param string criteria[locale] - optional
      * @param integer criteria[org_id] - optional
-     * @param integer criteria[active] - optional
-     * @param integer criteria[approved] - optional
+     * @param boolean criteria[active] - optional
+     * @param boolean criteria[approved] - optional
+     * @param string criteria[keywords] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
      * @param integer records_per_page - optional
@@ -452,11 +453,13 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($request->all(), [
             'criteria.org_ids'      => 'nullable|array',
+            'criteria.org_ids.*'    => 'int',
             'criteria.locale'       => 'nullable|string',
             'criteria.active'       => 'nullable|bool',
             'criteria.approved'     => 'nullable|bool',
             'criteria.org_id'       => 'nullable|int',
             'criteria.user_id'      => 'nullable|int|exists:users,id',
+            'criteria.keywords'     => 'nullable|string',
             'criteria.order.type'   => 'nullable|string',
             'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|int',
@@ -485,6 +488,11 @@ class OrganisationController extends ApiController
 
                 if (!empty($request->criteria['org_ids'])) {
                     $query->whereIn('id', $request->criteria['org_ids']);
+                }
+
+                if (!empty($request->criteria['keywords'])) {
+                    $ids = Organisation::search($request->criteria['keywords'])->get()->pluck('id');
+                    $query = Organisation::whereIn('id', $ids);
                 }
 
                 if (!empty($criteria['user_id'])) {

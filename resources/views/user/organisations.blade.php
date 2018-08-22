@@ -55,7 +55,7 @@
                                         >
                                             {{ csrf_field() }}
                                             <div class="col-xs-6">
-                                                <button type="submit" name="edit">{{ __('custom.edit') }}</button>
+                                                <button type="submit" name="edit">{{ uctrans('custom.edit') }}</button>
                                             </div>
                                             <input type="hidden" name="view" value="1">
                                         </form>
@@ -68,8 +68,9 @@
                                                 <button
                                                     type="submit"
                                                     name="delete"
+                                                    class="del-btn"
                                                     data-confirm="{{ __('custom.delete_organisation_confirm') }}"
-                                                >{{ __('custom.remove') }}</button>
+                                                >{{ uctrans('custom.remove') }}</button>
                                             </div>
                                         </form>
                                     @endif

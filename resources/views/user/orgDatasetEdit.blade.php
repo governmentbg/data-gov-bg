@@ -238,12 +238,12 @@
             <div class="form-group row">
                 <div class="col-sm-12 pull right text-right">
                     <div class="row">
-                        <button type="button" class="btn btn-primary">{{ __('custom.add_resource') }}</button>
-                        <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
+                        <button type="button" class="btn btn-primary">{{ uctrans('custom.add_resource') }}</button>
+                        <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
                         @if ($hasResources)
-                        <button type="submit" name="publish" class="btn btn-primary">{{ __('custom.publish') }}</button>
+                        <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
                         @endif
-                        <button type="submit" name="save" class="btn btn-primary">{{ __('custom.save') }}</button>
+                        <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                     </div>
                 </div>
             </div>
@@ -264,18 +264,18 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Вашата заявка за лиценз беше приета.</p>
+                        <p>{{ __('custom.terms_req_success') }}</p>
                     </div>
                     <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Имаше проблем с вашата заявка за лиценз.</p>
+                        <p>{{ __('custom.terms_req_error') }}</p>
                     </div>
                     <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
                         {{ csrf_field() }}
                         <div class="form-group row required">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                             <div class="col-sm-9">
                                 <input
                                     id="fname"
@@ -319,8 +319,8 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">Close</button>
-                                <button type="submit" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
+                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
+                                <button type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
                             </div>
                         </div>
                     </form>

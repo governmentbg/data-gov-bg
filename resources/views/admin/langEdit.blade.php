@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <button type="submit" name="edit" class="btn btn-primary pull-right">{{ __('custom.save') }}</button>
+                    <button type="submit" name="edit" class="btn btn-primary pull-right">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </div>

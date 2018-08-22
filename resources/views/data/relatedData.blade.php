@@ -60,7 +60,7 @@
                 <div class="row m-t-md">
                     <div class="col-md-4 col-sm-5">
                         <p>
-                            <span>{{ __('custom.format') }} *</span>&nbsp;
+                            <span>{{ uctrans('custom.format') }} *</span>&nbsp;
                             <input class="input-border-r-12" name="format">
                         </p>
                     </div>

@@ -46318,13 +46318,18 @@ $('.tagsEN input').attr('placeholder', 'Enter new tag...');
 $(function () {
     var lang = document.cookie.replace(/(?:(?:^|.*;\s*)language\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-    $('.datepicker').datepicker({
-        language: 'bg',
-        weekStart: 1,
-        todayHighlight: true,
-        format: 'dd-mm-yyyy',
-        autoclose: true
-    }).datepicker("setDate", "0");
+    $('.datepicker').each(function () {
+        $(this).attr('autocomplete', false);
+
+        $(this).datepicker({
+            language: 'bg',
+            weekStart: 1,
+            todayHighlight: true,
+            format: 'dd-mm-yyyy',
+            autoclose: true,
+            setDate: ''
+        });
+    });
 });
 
 //close navbar menu on mobile version
@@ -46387,6 +46392,35 @@ $(function () {
                 $('.js-org-approved').addClass('hidden');
             }
         }
+    });
+});
+
+$(function () {
+    $('.js-terms-req-preview, .js-terms-req-close').on('click', function (event) {
+        var index = $(this).data('index');
+        var action = $(this).data('action');
+        var $content = $('.js-terms-req-cont-' + index);
+        var $btns = $('.js-terms-req-btns-' + index);
+
+        switch (action) {
+            case 'show':
+                $content.removeClass('hidden');
+                $btns.removeClass('hidden');
+                $(this).addClass('hidden');
+                break;
+            case 'close':
+                $content.addClass('hidden');
+                $btns.addClass('hidden');
+                $('.js-terms-req-preview[data-index="' + index + '"]').removeClass('hidden');
+                break;
+        }
+    });
+});
+
+$(function () {
+    $('.js-from-filter, .js-to-filter').on('change', function (event) {
+        var $form = $(this).closest('form');
+        $form.submit();
     });
 });
 

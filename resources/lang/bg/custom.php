@@ -164,7 +164,7 @@ return [
     'source' => 'Източник',
     'author_email' => 'E-mail на автора',
     'contact_email' => 'E-mail за контакти',
-    'save' => 'готово',
+    'save' => 'запази',
     'label_bg' => 'Етикет BG',
     'label_en' => 'Етикет EN',
     'sla_agreement' => 'Споразумение за ниво на обслужване',

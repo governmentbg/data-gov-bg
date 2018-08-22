@@ -40,7 +40,7 @@
                                             <div class="pull-left row">
                                                 <div class="col-xs-6">
                                                     <span class="badge badge-pill m-r-md m-b-sm">
-                                                        <a href="{{ url('/user/groups/dataset/edit/'. $set->uri) }}">{{ __('custom.edit') }}</a>
+                                                        <a href="{{ url('/user/groups/dataset/edit/'. $set->uri) }}">{{ uctrans('custom.edit') }}</a>
                                                     </span>
                                                 </div>
                                                 <div class="col-xs-6">
@@ -52,7 +52,7 @@
                                                                 type="submit"
                                                                 name="delete"
                                                                 onclick="return confirm('Изтриване на данните?');"
-                                                            >{{ __('custom.remove') }}</button>
+                                                            >{{ uctrans('custom.remove') }}</button>
                                                         </div>
                                                         <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
                                                     </form>

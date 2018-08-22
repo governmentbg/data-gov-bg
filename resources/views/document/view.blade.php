@@ -24,8 +24,8 @@
                                     justo eget magna fermentum iaculis eu.
                                 </p>
                                 <div class="col-xs-12 m-t-sm p-l-none text-right">
-                                    <span class="badge badge-pill"><a href="#">{{ __('custom.comment') }}</a></span>
-                                    <span class="badge badge-pill"><a href="#">{{ __('custom.download') }}</a></span>
+                                    <span class="badge badge-pill"><a href="#">{{ uctrans('custom.comment') }}</a></span>
+                                    <span class="badge badge-pill"><a href="#">{{ uctrans('custom.download') }}</a></span>
                                 </div>
                             </div>
                         </div>

@@ -55,24 +55,24 @@
                     <a
                        class="badge badge-pill m-b-sm"
                        href="{{ route('groupResourceCreate', ['uri' => $dataset->uri]) }}"
-                    >{{ __('custom.add_resource') }}</a>
+                    >{{ uctrans('custom.add_resource') }}</a>
                 </div>
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a
                         type="button"
                         class="badge badge-pill m-b-sm"
                         href="{{ url('/user/groups/dataset/edit/'. $dataset->uri) }}"
-                    >{{ __('custom.edit') }}</a>
+                    >{{ uctrans('custom.edit') }}</a>
                 </div>
                 <div class="col-md-9 col-sm-8 text-left m-l-10">
                     <form method="POST">
                         {{ csrf_field() }}
                         <button
-                            class="badge badge-pill m-b-sm"
+                            class="badge badge-pill m-b-sm del-btn"
                             type="submit"
                             name="delete"
                             data-confirm="{{ __('Изтриване на данните?') }}"
-                        >{{ __('custom.remove') }}</button>
+                        >{{ uctrans('custom.remove') }}</button>
                         <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                     </form>
                 </div>

@@ -52,7 +52,7 @@
                                         <form method="POST" action="{{ url('/user/groups/edit/'. $group->uri) }}">
                                             {{ csrf_field() }}
                                             <div class="col-xs-6">
-                                                <button type="submit">{{ __('custom.edit') }}</button>
+                                                <button type="submit">{{ uctrans('custom.edit') }}</button>
                                             </div>
                                         </form>
                                         <form method="POST" action="{{ url('/user/groups/delete/'. $group->id) }}">
@@ -61,8 +61,9 @@
                                                 <button
                                                     type="submit"
                                                     name="delete"
+                                                    class="del-btn"
                                                     data-confirm="{{ __('custom.delete_group_confirm') }}"
-                                                >{{ __('custom.remove') }}</button>
+                                                >{{ uctrans('custom.remove') }}</button>
                                             </div>
                                             <input class="user-org-del" type="hidden" name="org_id" value="{{ $group->id }}">
                                         </form>

@@ -29,7 +29,7 @@
                                                     action="{{ url('/admin/organisations/edit/'. $organisation->uri) }}"
                                                 >
                                                     {{ csrf_field() }}
-                                                    <button class="btn btn-primary" type="submit" name="edit">{{ __('custom.edit') }}</button>
+                                                    <button class="btn btn-primary" type="submit" name="edit">{{ uctrans('custom.edit') }}</button>
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
                                                 <form
@@ -42,8 +42,9 @@
                                                             class="btn del-btn btn-primary"
                                                             type="submit"
                                                             name="delete"
+                                                            class="del-btn"
                                                             data-confirm="{{ __('custom.delete_organisation_confirm') }}"
-                                                        >{{ __('custom.remove') }}</button>
+                                                        >{{ uctrans('custom.remove') }}</button>
                                                 </form>
                                             </div>
                                         </div>

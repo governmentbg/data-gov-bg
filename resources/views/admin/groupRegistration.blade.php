@@ -18,7 +18,7 @@
                         <img class="preview js-preview hidden" src="#" alt="organisation logo" />
                     </div>
                     <div class="inline-block">
-                        <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
+                        <span class="badge badge-pill"><label class="js-logo" for="logo">{{ uctrans('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
                     </div>
                     <div class="error">{{ $errors->first('logo') }}</div>
@@ -58,7 +58,7 @@
             @endforeach
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
-                    <button type="submit" name="create" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
+                    <button type="submit" name="create" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             <div class="follow pull-right">
-                                <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
+                                <span class="badge badge-pill"><a href="#">{{ uctrans('custom.follow') }}</a></span>
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-none">
@@ -112,7 +112,7 @@
                         </div>
                         <div class="col-sm-5 col-xs-12">
                             <div class="follow pull-right">
-                                <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
+                                <span class="badge badge-pill"><a href="#">{{ uctrans('custom.follow') }}</a></span>
                             </div>
                         </div>
                     </div>

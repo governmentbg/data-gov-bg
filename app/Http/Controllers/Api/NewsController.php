@@ -93,6 +93,7 @@ class NewsController extends ApiController
 
                 $newNews->save();
                 DB::commit();
+
                 return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
                 DB::rollback();

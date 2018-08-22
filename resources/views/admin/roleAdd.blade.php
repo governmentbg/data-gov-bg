@@ -101,7 +101,7 @@
                     </div>
                 </div>
                 <div class="form-group col-lg-12 text-right">
-                    <button type="submit" name="save" class="btn btn-primary">{{ __('custom.save') }}</button>
+                    <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </div>

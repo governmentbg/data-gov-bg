@@ -89,7 +89,7 @@
                             <div class="col-xs-12 pull-left m-t-md p-l-r-none">
                                 <div class="col-md-6 col-xs-12 text-left p-l-r-none m-b-md">
                                     <div class="badge-info m-r-md pull-left">
-                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ __('custom.information') }}</span>
+                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ uctrans('custom.information') }}</span>
                                         <div class="info-box">
                                             <p>
                                             {{ utrans('custom.row') }}<br>
@@ -102,7 +102,7 @@
                                         </div>
                                     </div>
                                     <div class="badge-info m-r-md">
-                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ __('custom.show_as') }}</span>
+                                        <span class="badge badge-pill js-toggle-info-box m-b-sm">{{ uctrans('custom.show_as') }}</span>
                                         <div class="info-box">
                                             <p>lorem ipsum</p>
                                             <p>lorem ipsum</p>
@@ -111,9 +111,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-xs-12 text-right p-l-r-none m-b-md group-three">
-                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.download') }}</a></span>
-                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.signal') }}</a></span>
-                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ __('custom.comment') }}</a></span>
+                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ uctrans('custom.download') }}</a></span>
+                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ uctrans('custom.signal') }}</a></span>
+                                    <span class="badge badge-pill m-b-sm"><a href="#">{{ uctrans('custom.comment') }}</a></span>
                                 </div>
                             </div>
                             <!-- IF there are old versions of this article -->

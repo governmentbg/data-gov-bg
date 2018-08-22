@@ -481,7 +481,7 @@ class CategoryController extends ApiController
             ]);
         }
 
-         if (!$validator->fails()) {
+        if (!$validator->fails()) {
             $order = isset($request['criteria']['order']) ? $request['criteria']['order'] : [];
             $validator = \Validator::make($order, [
                 'type'    => 'nullable|string',

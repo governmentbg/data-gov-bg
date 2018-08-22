@@ -200,8 +200,10 @@ class SignalsController extends ApiController
             'page_number'           => 'nullable|integer'
         ]);
 
+        $criteria = isset($data['criteria']) ? $data['criteria'] : [];
+
         if (!$validator->fails()) {
-            $validator = Validator::make($data['criteria'], [
+            $validator = Validator::make($criteria, [
                 'signal_id'    => 'nullable|integer',
                 'status'       => 'nullable|integer',
                 'date_from'    => 'nullable|date',

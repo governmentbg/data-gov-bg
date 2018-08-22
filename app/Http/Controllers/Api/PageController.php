@@ -34,12 +34,12 @@ class PageController extends ApiController
         $pageData = $request->all();
 
         $validator = Validator::make($pageData, [
-            'data'                  => 'required|array',
+            'data'      => 'required|array',
+            'locale'    => 'required|string',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($pageData['data'], [
-                'locale'           => 'required|string',
                 'section_id'       => 'nullable|integer',
                 'title'            => 'required|string',
                 'body'             => 'required|string',
@@ -128,14 +128,13 @@ class PageController extends ApiController
             'page_id'    => 'required|integer|exists:pages,id',
             'data'       => 'required|array',
             'locale'     => 'required|string',
-
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
                 'section_id'       => 'nullable|integer',
-                'title'            => 'required|string',
-                'body'             => 'required|string',
+                'title'            => 'nullable|string',
+                'body'             => 'nullable|string',
                 'head_title'       => 'nullable|string',
                 'meta_description' => 'nullable|string',
                 'meta_keywords'    => 'nullable|string',

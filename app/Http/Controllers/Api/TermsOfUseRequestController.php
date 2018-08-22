@@ -85,7 +85,7 @@ class TermsOfUseRequestController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            $validator = \Validator::make($post, [
+            $validator = \Validator::make($post['data'], [
                 'description'  => 'required|string',
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',

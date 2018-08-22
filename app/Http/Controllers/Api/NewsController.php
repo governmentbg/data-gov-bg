@@ -91,9 +91,9 @@ class NewsController extends ApiController
 
                 $newNews->active = $newsData['data']['active'];
 
-                    $newNews->save();
-                    DB::commit();
-                    return $this->successResponse(['news_id' => $newNews->id], true);
+                $newNews->save();
+                DB::commit();
+                return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
                 DB::rollback();
                 Log::error($e->getMessage());

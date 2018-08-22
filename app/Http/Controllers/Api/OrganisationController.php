@@ -1426,11 +1426,11 @@ class OrganisationController extends ApiController
 
         $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
-            $validator = \Validator::make($post, [
-            'criteria'              => 'nullable|array',
-                'records_per_page'      => 'nullable|int',
-                'page_number'           => 'nullable|int',
-            ]);
+        $validator = \Validator::make($post, [
+        'criteria'              => 'nullable|array',
+            'records_per_page'      => 'nullable|int',
+            'page_number'           => 'nullable|int',
+        ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
 
@@ -1453,22 +1453,22 @@ class OrganisationController extends ApiController
             ]);
         }
 
-            if (!$validator->fails()) {
-                if (!empty($criteria['group_ids'])) {
-                    $query->whereIn('id', $criteria['group_ids']);
-                }
+        if (!$validator->fails()) {
+            if (!empty($criteria['group_ids'])) {
+                $query->whereIn('id', $criteria['group_ids']);
+            }
 
-                if (!empty($criteria['dataset_id'])) {
-                    $query->whereHas('dataSet', function($q) use ($criteria) {
-                        $q->where('id', $criteria['dataset_id']);
-                    });
-                }
+            if (!empty($criteria['dataset_id'])) {
+                $query->whereHas('dataSet', function($q) use ($criteria) {
+                    $q->where('id', $criteria['dataset_id']);
+                });
+            }
 
-                if (!empty($criteria['user_id'])) {
-                    $query->whereHas('userToOrgRole', function($q) use ($criteria) {
-                        $q->where('user_id', $criteria['user_id']);
-                    });
-                }
+            if (!empty($criteria['user_id'])) {
+                $query->whereHas('userToOrgRole', function($q) use ($criteria) {
+                    $q->where('user_id', $criteria['user_id']);
+                });
+            }
 
             $orderColumns = [
                 'id',
@@ -1486,10 +1486,10 @@ class OrganisationController extends ApiController
             ];
 
             if (isset($criteria['order']['field'])) {
-                if (!in_array($criteria['order']['field'], $orderColumns)) {
-                    unset($criteria['order']['field']);
+              if (!in_array($criteria['order']['field'], $orderColumns)) {
+                  unset($criteria['order']['field']);
+              }
             }
-        }
 
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 if (strtolower($criteria['order']['type']) == 'desc') {
@@ -1498,52 +1498,52 @@ class OrganisationController extends ApiController
                 if (strtolower($criteria['order']['type']) == 'asc') {
                     $query->orderBy($criteria['order']['field'], 'asc');
                 }
-        }
+            }
 
-        $count = $query->count();
+            $count = $query->count();
 
-        $query->forPage(
-            $request->offsetGet('page_number'),
-            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-        );
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
 
-        $groups = $query->get();
+            $groups = $query->get();
 
-        if (!empty($groups)) {
-            foreach ($groups as $group) {
-                $customFields = [];
+            if (!empty($groups)) {
+                foreach ($groups as $group) {
+                    $customFields = [];
 
-                //get custom fields
-                foreach ($group->customSetting()->get() as $setting) {
-                    $customFields[] = [
-                        'key'    =>$setting->key,
-                        'value'  =>$setting->value
+                    //get custom fields
+                    foreach ($group->customSetting()->get() as $setting) {
+                        $customFields[] = [
+                            'key'    =>$setting->key,
+                            'value'  =>$setting->value
+                        ];
+                    }
+
+                    $result[] = [
+                        'id'                => $group->id,
+                        'name'              => $group->name,
+                        'description'       => $group->descript,
+                        'locale'            => $locale,
+                        'uri'               => $group->uri,
+                        'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
+                        'custom_fields'     => $customFields,
+                        'datasets_count'    => $group->dataSet()->count(),
+                        'followers_count'   => $group->userFollow()->count(),
+                        'created_at'        => $group->created,
+                        'updated_at'        => $group->updated_at,
+                        'created_by'        => $group->created_by,
+                        'updated_by'        => $group->updated_by,
                     ];
                 }
 
-                $result[] = [
-                    'id'                => $group->id,
-                    'name'              => $group->name,
-                    'description'       => $group->descript,
-                    'locale'            => $locale,
-                    'uri'               => $group->uri,
-                    'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
-                    'custom_fields'     => $customFields,
-                    'datasets_count'    => $group->dataSet()->count(),
-                    'followers_count'   => $group->userFollow()->count(),
-                    'created_at'        => $group->created,
-                    'updated_at'        => $group->updated_at,
-                    'created_by'        => $group->created_by,
-                    'updated_by'        => $group->updated_by,
-                ];
+                return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
             }
 
-            return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
+            return $this->errorResponse(__('custom.no_groups_found'), $validator->errors()->messages());
         }
-
-        return $this->errorResponse(__('custom.no_groups_found'), $validator->errors()->messages());
     }
-}
 
     /**
      * Get group details

@@ -13,9 +13,9 @@
                             <div class="col-md-6 text-center p-l-none">
                                 <div>
                                     <ul class="nav filter-type right-border">
-                                        <li><a class="active p-l-none" href="{{ url('/organisation/profile') }}">{{ __('custom.profile') }}</a></li>
-                                        <li><a href="{{ url('/organisation/datasets') }}">{{ __('custom.data') }}</a></li>
-                                        <li><a href="{{ url('/organisation/chronology') }}">{{ __('custom.chronology') }}</a></li>
+                                        <li><a class="active p-l-none" href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ __('custom.profile') }}</a></li>
+                                        <li><a href="{{ url('/organisation/'. $organisation->uri .'/datasets') }}">{{ __('custom.data') }}</a></li>
+                                        <li><a href="{{ url('/organisation/'. $organisation->uri .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -28,13 +28,19 @@
             <div class="col-sm-12">
                 <div class="row">
                     <div class="col-md-3 col-sm-6 col-xs-12">
-                        <img class="img-responsive" src="{{ asset('img/test-img/logo-org-4.jpg') }}"/>
+                        @if (isset($parentOrg))
+                            <a href="{{ url('/organisation/profile/'. $parentOrg->uri) }}">
+                                <img class="img-responsive" src="{{ $parentOrg->logo }}"/>
+                            </a>
+                        @else
+                            <img class="img-responsive" src="{{ $organisation->logo }}"/>
+                        @endif
                     </div>
                     <div class="col-md-9 col-sm-6 col-xs-12 info-box">
                         <div class="row">
                             <div class="col-lg-4 col-md-5 col-xs-12">
                                 <a href="#" class="followers">
-                                    <p>86</p>
+                                    <p>{{ $organisation->followers_count }}</p>
                                     <hr>
                                     <p>{{ __('custom.followers') }} </p>
                                     <img src="{{ asset('/img/followers.svg') }}">
@@ -42,7 +48,7 @@
                             </div>
                             <div class="col-lg-4 col-md-5 col-xs-12">
                                 <a href="#" class="data-sets">
-                                    <p>120</p>
+                                    <p>{{ $organisation->datasets_count }}</p>
                                     <hr>
                                     <p>{{ __('custom.data_sets') }}</p>
                                     <img src="{{ asset('/img/data-sets.svg') }}">
@@ -52,39 +58,61 @@
                     </div>
                 </div>
 
+                @if (isset($parentOrg))
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <br/>
+                            <h3>
+                                {{ __('custom.main_org') }}:
+                                <a href="{{ url('/organisation/profile/'. $parentOrg->uri) }}">{{ $parentOrg->name }}</a>
+                            </h3>
+
+                        </div>
+                    </div>
+                @endif
+
                 <div class="m-t-lg">
                     <div class="m-b-md">
+                        @if (isset($parentOrg))
+                            <div class="col-md-2 col-sm-6 col-xs-12">
+                                <img class="img-responsive" src="{{ $organisation->logo }}"/>
+                            </div>
+                        @endif
                         <div>
                             <div class="col-xs-12 p-l-none">
                                 <div>
-                                    <h3>{{ __('custom.organization_name') }} </h3>
-                                    <p>
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Turpis tincidunt id aliquet risus feugiat in ante metus dictum. Arcu non odio euismod lacinia at quis risus sed vulputate. Elit ut aliquam purus sit. Augue mauris augue neque gravida in fermentum et sollicitudin. Blandit libero volutpat sed cras ornare arcu dui. Odio euismod lacinia at quis. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Mattis molestie a iaculis at erat pellentesque. Auctor eu augue ut lectus arcu bibendum at varius vel. Id venenatis a condimentum vitae sapien pellentesque habitant. Proin sed libero enim sed.
-                                    </p>
+                                    <h3>{{ $organisation->name }} </h3><br/>
+                                    <p>{{ $organisation->description }}</p><br/>
                                 </div>
                             </div>
                             <div class="col-xs-12 p-l-r-none articles">
                                 <div class="col-sm-8 col-xs-12 p-l-none article pull-left">
-                                    <span>За контакт</span></br>
-                                    <span>Иван Иванов</span></br>
-                                    <span>дирекция Български пощи</span></br></br>
-                                    <span>тел. 02/940 2445</span></br>
-                                    <span>e-mail: ivanov@bgpost.org</span></br></br>
-                                    <span>{{ __('custom.follow_us') }}</span>
-                                    <div class="col-xs-12 p-l-none art-heading-bar m-t-sm">
-                                        <div class="socialPadding">
-                                            <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                            <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                            <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
-                                        </div>
-                                    </div>
+                                    <span>{{ __('custom.contact_person') }}</span><br/><br/>
+                                    <p>{{ $organisation->contacts }}</p><br/>
                                 </div>
                                 <div class="col-sm-4 col-xs-12 pull-right text-right">
-                                    <div class="follow m-t-md m-b-sm p-w-sm">
-                                        <span class="badge badge-pill"><a href="#">{{ __('custom.follow') }}</a></span>
-                                        <!-- if it is already followed -->
-                                        <!--<span class="badge badge-pill"><a href="#">{{ __('custom.stop_follow') }}</a></span>-->
-                                    </div>
+                                    @auth
+                                        <form method="post">
+                                            {{ csrf_field() }}
+                                            @if (!$followed)
+                                                <div class="row">
+                                                    <button
+                                                        class="btn btn-primary pull-right"
+                                                        type="submit"
+                                                        name="follow"
+                                                    >{{ utrans('custom.follow') }}</button>
+                                                </div>
+                                            @else
+                                                <div class="row">
+                                                    <button
+                                                        class="btn btn-primary pull-right"
+                                                        type="submit"
+                                                        name="unfollow"
+                                                    >{{ uctrans('custom.stop_follow') }}</button>
+                                                </div>
+                                            @endif
+                                        </form>
+                                    @endauth
                                 </div>
                             </div>
                         </div>
@@ -92,6 +120,22 @@
                 </div>
             </div>
         </div>
+
+        @if (count($childOrgs) > 0)
+            <div class="row">
+                <div class="col-sm-12">
+                    <hr>
+                </div>
+            </div>
+            <h3>{{ __('custom.child_orgs') }}</h3><br/>
+            @foreach ($childOrgs as $childOrg)
+                <div class="row">
+                    <div class="col-sm-12">
+                        <a href="{{ url('/organisation/profile/'. $childOrg->uri) }}">{{ $childOrg->name }}</a>
+                    </div>
+                </div>
+            @endforeach
+        @endif
     </div>
 </div>
 @endsection

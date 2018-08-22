@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
+use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 
 class OrganisationController extends Controller {
 
@@ -34,6 +36,19 @@ class OrganisationController extends Controller {
      */
     public function list(Request $request)
     {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $rq = Request::create('/api/listOrganisationTypes', 'GET', ['locale' => $locale]);
+        $api = new ApiOrganisation($rq);
+        $result = $api->listOrganisationTypes($rq)->getData();
+        $orgTypes = $result->success ? $result->types : [];
+
+        if ($request->filled('type')) {
+            $type = $request->type;
+        } else {
+            $type = !empty($orgTypes) ? array_first($orgTypes)->id : '';
+        }
+
         $perPage = 6;
         $params = [
             'records_per_page' => $perPage,
@@ -41,20 +56,21 @@ class OrganisationController extends Controller {
             'criteria'         => [
                 'active'   => true,
                 'approved' => true,
-                'locale'    => \LaravelLocalization::getCurrentLocale()
+                'type'     => $type,
+                'locale'   => $locale
             ]
         ];
 
-        if (isset($request->sort)) {
+        if ($request->has('sort')) {
             $params['criteria']['order']['field'] = $request->sort;
-            if (isset($request->order)) {
+            if ($request->has('order')) {
                 $params['criteria']['order']['type'] = $request->order;
             }
         }
 
-        $request = Request::create('/api/listOrganisations', 'POST', $params);
-        $api = new ApiOrganisation($request);
-        $result = $api->listOrganisations($request)->getData();
+        $rq = Request::create('/api/listOrganisations', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->listOrganisations($rq)->getData();
 
         $paginationData = $this->getPaginationData(
             $result->success ? $result->organisations : [],
@@ -68,7 +84,9 @@ class OrganisationController extends Controller {
             [
                 'class'         => 'organisation',
                 'organisations' => $paginationData['items'],
-                'pagination'    => $paginationData['paginate']
+                'pagination'    => $paginationData['paginate'],
+                'orgTypes'      => $orgTypes,
+                'type'          => $type
             ]
         );
     }
@@ -89,6 +107,19 @@ class OrganisationController extends Controller {
             return redirect()->route('orgList', array_except(app('request')->query(), ['q']));
         }
 
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $rq = Request::create('/api/listOrganisationTypes', 'GET', ['locale' => $locale]);
+        $api = new ApiOrganisation($rq);
+        $result = $api->listOrganisationTypes($rq)->getData();
+        $orgTypes = $result->success ? $result->types : [];
+
+        if ($request->filled('type')) {
+            $type = $request->type;
+        } else {
+            $type = !empty($orgTypes) ? array_first($orgTypes)->id : '';
+        }
+
         $perPage = 6;
         $params = [
             'records_per_page' => $perPage,
@@ -96,7 +127,9 @@ class OrganisationController extends Controller {
             'criteria'         => [
                 'active'   => true,
                 'approved' => true,
-                'keywords' => $search
+                'type'     => $type,
+                'keywords' => $search,
+                'locale'   => $locale
             ]
         ];
 
@@ -107,18 +140,18 @@ class OrganisationController extends Controller {
             }
         }
 
-        $request = Request::create('/api/searchOrganisations', 'POST', $params);
-        $api = new ApiOrganisation($request);
-        $result = $api->listOrganisations($request)->getData();
+        $rq = Request::create('/api/searchOrganisations', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->listOrganisations($rq)->getData();
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
-        $getParams = ['q' => $search];
+        $getParams = ['q' => $search, 'type' => $type];
         if ($request->has('sort')) {
             $getParams['sort'] = $request->sort;
         }
         if ($request->has('order')) {
-            $getParams['sort'] = $request->order;
+            $getParams['order'] = $request->order;
         }
 
         $paginationData = $this->getPaginationData(
@@ -134,13 +167,143 @@ class OrganisationController extends Controller {
                 'class'         => 'organisation',
                 'organisations' => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
-                'search'        => $search
+                'search'        => $search,
+                'orgTypes'      => $orgTypes,
+                'type'          => $type
             ]
         );
     }
 
-    public function view() {
-        return view('organisation/profile', ['class' => 'organisation']);
+    public function view(Request $request, $uri)
+    {
+        $params = [
+            'org_uri' => $uri,
+            'locale'  => \LaravelLocalization::getCurrentLocale()
+        ];
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data) && $result->data->active && $result->data->approved) {
+            $params = [
+                'criteria'     => [
+                    'org_id'   => $result->data->id,
+                    'active'   => true,
+                    'approved' => true,
+                    'locale'   => \LaravelLocalization::getCurrentLocale()
+                ]
+            ];
+            $rq = Request::create('/api/listOrganisations', 'POST', $params);
+            $api = new ApiOrganisation($rq);
+            $res = $api->listOrganisations($rq)->getData();
+            $childOrgs = $res->success ? $res->organisations : [];
+
+            $parentOrg = null;
+            if (isset($result->data->parent_org_id)) {
+                $params = [
+                    'org_id' => $result->data->parent_org_id,
+                    'locale'    => \LaravelLocalization::getCurrentLocale()
+                ];
+                $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+                $api = new ApiOrganisation($rq);
+                $res = $api->getOrganisationDetails($rq)->getData();
+                if ($res->success) {
+                    $parentOrg = $res->data;
+                }
+            }
+
+            $followed = false;
+            if ($user = \Auth::user()) {
+                $params = [
+                    'api_key' => $user->api_key,
+                    'id'      => $user->id
+                ];
+                $rq = Request::create('/api/getUserSettings', 'POST', $params);
+                $api = new ApiUser($rq);
+                $res = $api->getUserSettings($rq)->getData();
+                if (!empty($res->user) && !empty($res->user->follows)) {
+                    $followedOgrs = array_where(array_pluck($res->user->follows, 'org_id'), function ($value, $key) {
+                        return !is_null($value);
+                    });
+                    if (in_array($result->data->id, $followedOgrs)) {
+                        $followed = true;
+                    }
+                }
+            }
+
+            if (!$followed) {
+                if ($request->has('follow')) {
+                    $followRq = Request::create('api/addFollow', 'POST', [
+                        'api_key' => $user->api_key,
+                        'user_id' => $user->id,
+                        'org_id'  => $result->data->id,
+                    ]);
+                    $apiFollow = new ApiFollow($followRq);
+                    $followResult = $apiFollow->addFollow($followRq)->getData();
+                    if ($followResult->success) {
+                        return back();
+                    }
+                }
+            } else {
+                if ($request->has('unfollow')) {
+                    $followRq = Request::create('api/unFollow', 'POST', [
+                        'api_key' => $user->api_key,
+                        'user_id' => $user->id,
+                        'org_id'  => $result->data->id,
+                    ]);
+                    $apiFollow = new ApiFollow($followRq);
+                    $followResult = $apiFollow->unFollow($followRq)->getData();
+                    if ($followResult->success) {
+                        return back();
+                    }
+                }
+            }
+
+            return view(
+                'organisation/profile',
+                [
+                    'class'        => 'organisation',
+                    'organisation' => $result->data,
+                    'childOrgs'    => $childOrgs,
+                    'parentOrg'    => $parentOrg,
+                    'followed'     => $followed
+                ]
+            );
+        }
+
+        return redirect('organisation.list');
+    }
+
+    public function follow(Request $request, $uri)
+    {
+        if ($user = \Auth::user()) {
+            $params = [
+                'org_uri' => $uri,
+                'locale'    => \LaravelLocalization::getCurrentLocale()
+            ];
+            $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+            $api = new ApiOrganisation($rq);
+            $result = $api->getOrganisationDetails($rq)->getData();
+
+            if ($result->success && !empty($result->data) && $result->data->active && $result->data->approved) {
+                if ($request->has('follow')) {
+                    $follow = Request::create('api/addFollow', 'POST', [
+                        'api_key' => $user->api_key,
+                        'user_id' => $user->id,
+                        'org_id'  => $result->data->id,
+                    ]);
+
+                    $followResult = $apiFollow->addFollow($follow)->getData();
+
+                    if ($followResult->success) {
+
+                        return back();
+                    }
+                }
+            }
+        }
+
+        return redirect()->back()->withInput($request-all());
     }
 
     public function datasets() {

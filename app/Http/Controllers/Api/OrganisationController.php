@@ -1427,7 +1427,7 @@ class OrganisationController extends ApiController
         $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
         $validator = \Validator::make($post, [
-        'criteria'              => 'nullable|array',
+            'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
@@ -1486,9 +1486,9 @@ class OrganisationController extends ApiController
             ];
 
             if (isset($criteria['order']['field'])) {
-              if (!in_array($criteria['order']['field'], $orderColumns)) {
-                  unset($criteria['order']['field']);
-              }
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    unset($criteria['order']['field']);
+                }
             }
 
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {

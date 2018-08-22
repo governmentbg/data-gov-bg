@@ -14,7 +14,7 @@
                         {{ csrf_field() }}
 
                         <div class="form-group row required">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                             <div class="col-sm-9">
                                 <input
                                     type="text"

@@ -30,7 +30,7 @@
                             </p>
                             <div class="col-sm-12 p-l-none m-t-md">
                                 <div class="pull-right">
-                                    <span class="badge badge-pill"><a href="{{ url('/organisation/viewDataset') }}">{{ __('custom.preview') }}</a></span>
+                                    <span class="badge badge-pill"><a href="{{ url('/organisation/viewDataset') }}">{{ uctrans('custom.preview') }}</a></span>
                                 </div>
                             </div>
                         </div>

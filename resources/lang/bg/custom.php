@@ -42,7 +42,7 @@ return [
     'register' => 'Регистриране',
     'name' => 'Име',
     'additional_field' => 'Допълнително поле',
-    'new_profile' => 'нов профил',
+    'new_profile' => 'регистрация',
     'user_name' => 'Потребителско име',
     'registered_users' => 'Регистрирани потребители',
     'organisations' => 'организация|организации',
@@ -521,4 +521,7 @@ return [
     'order_by_name' => 'подреди по име',
     'order_asc' => 'възходящ ред',
     'order_desc' => 'низходящ ред',
+    'remove_data' => 'Изтриване на данните?',
+    'ordering' => 'Поле за подредба',
+    'add_terms_of_use' => 'Добавяне на условия за ползване',
 ];

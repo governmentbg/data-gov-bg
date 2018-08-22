@@ -65,7 +65,7 @@
                                         <a
                                            class="badge badge-pill pull-right"
                                            href="{{ url('/user/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
-                                        >{{ __('custom.download') }}</a>
+                                        >{{ uctrans('custom.download') }}</a>
                                     @endif
                                 </div>
                             </div>
@@ -76,7 +76,7 @@
                                         name="delete"
                                         class="badge badge-pill m-b-sm"
                                         data-confirm="{{ __('Изтриване на данните?') }}"
-                                    >{{ __('custom.remove') }}</button>
+                                    >{{ uctrans('custom.remove') }}</button>
                                 </form>
                             </div>
                         </div>

@@ -45,7 +45,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-xs-12">
-                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ __('custom.login') }}</button>
+                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ uctrans('custom.login') }}</button>
                 </div>
             </div>
         </form>
@@ -54,12 +54,12 @@
                  <a
                     href="{{ url('/password/forgotten') }}"
                     class="col-xs-12 btn btn-primary"
-                >{{ __('custom.forgotten_password') }}</a>
+                >{{ uctrans('custom.forgotten_password') }}</a>
             </div>
         </div>
         <div class="form-group row text-center">
             <div class="col-xs-12">
-                <a href="{{ url('/registration') }}"><h3>{{ __('custom.new_profile') }}</h3></a>
+                <a href="{{ url('/registration') }}"><h3>{{ uctrans('custom.new_profile') }}</h3></a>
             </div>
         </div>
     </div>

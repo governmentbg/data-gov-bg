@@ -38,7 +38,7 @@
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
-                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
+                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

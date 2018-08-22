@@ -44,23 +44,37 @@ class UserController extends ApiController
     public function listUsers(Request $request)
     {
         $result = [];
-        $criteria = $request->offsetGet('criteria');
+        $data = $request->all();
 
-        $validator = \Validator::make($request->all(), [
+        $validator = \Validator::make($data, [
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
             'criteria'              => 'nullable|array',
-            'criteria.active'       => 'nullable|boolean',
-            'criteria.approved'     => 'nullable|boolean',
-            'criteria.is_admin'     => 'nullable|int',
-            'criteria.role_id'      => 'nullable|int',
-            'criteria.org_id'       => 'nullable|int',
-            'criteria.id'           => 'nullable|int',
-            'criteria.user_ids'     => 'nullable|array',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
         ]);
+
+        $criteria = isset($data['criteria']) ? $data['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'active'       => 'nullable|boolean',
+                'approved'     => 'nullable|boolean',
+                'is_admin'     => 'nullable|int',
+                'role_id'      => 'nullable|int',
+                'org_id'       => 'nullable|int',
+                'id'           => 'nullable|int',
+                'user_ids'     => 'nullable|array',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $query = User::select();
@@ -141,11 +155,23 @@ class UserController extends ApiController
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
             'criteria'              => 'required|array',
-            'criteria.keywords'     => 'required|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($search['criteria'], [
+                'keywords'     => 'required|string',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($search['criteria']['order']) ? $search['criteria']['order'] :[];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
@@ -399,21 +425,24 @@ class UserController extends ApiController
     {
         $data = $request->data;
         $id = $request->id;
+        $post = $request->all();
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'id'                    => 'required|int',
-                'data'                  => 'required|array',
-                'data.firstname'        => 'nullable|string',
-                'data.lastname'         => 'nullable|string',
-                'data.email'            => 'nullable|email',
-                'data.add_info'         => 'nullable|string',
-                'data.password'         => 'nullable|string',
-                'data.is_admin'         => 'nullable|int',
-                'data.password_confirm' => 'nullable|string|same:data.password',
-            ]
-        );
+        $validator = \Validator::make($post, [
+            'id'                    => 'required|int',
+            'data'                  => 'required|array',
+        ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'firstname'        => 'nullable|string',
+                'lastname'         => 'nullable|string',
+                'email'            => 'nullable|email',
+                'add_info'         => 'nullable|string',
+                'password'         => 'nullable|string',
+                'is_admin'         => 'nullable|int',
+                'password_confirm' => 'nullable|string|same:password',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.edit_user_fail'), $validator->errors()->messages());

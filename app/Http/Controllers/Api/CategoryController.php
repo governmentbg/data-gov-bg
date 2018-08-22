@@ -98,15 +98,21 @@ class CategoryController extends ApiController
 
         $validator = \Validator::make($post, [
             'category_id'           => 'required|integer',
-            'data.name'             => 'required|string',
-            'data.locale'           => 'required|string|max:5',
-            'data.icon'             => 'nullable|string',
-            'data.icon_filename'    => 'nullable|string',
-            'data.icon_mimetype'    => 'nullable|string',
-            'data.icon_data'        => 'nullable|string',
-            'data.active'           => 'nullable|integer',
-            'data.ordering'         => 'nullable|integer',
+            'data'                  => 'required|array',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'name'             => 'required|string',
+                'locale'           => 'required|string|max:5',
+                'icon'             => 'nullable|string',
+                'icon_filename'    => 'nullable|string',
+                'icon_mimetype'    => 'nullable|string',
+                'icon_data'        => 'nullable|string',
+                'active'           => 'nullable|integer',
+                'ordering'         => 'nullable|integer',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $category = Category::find($post['category_id']);
@@ -197,14 +203,29 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'criteria.category_ids'  => 'nullable|array',
-            'criteria.locale'        => 'nullable|string|max:5',
-            'criteria.active'        => 'nullable|integer',
-            'criteria.order.type'    => 'nullable|string',
-            'criteria.order.field'   => 'nullable|string',
+            'criteria'               => 'nullable|array',
             'records_per_page'       => 'nullable|integer',
             'page_number'            => 'nullable|integer',
         ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = \Validator::make($criteria, [
+                'category_ids'  => 'nullable|array',
+                'locale'        => 'nullable|string|max:5',
+                'active'        => 'nullable|integer',
+                'order.type'    => 'nullable|string',
+                'order.field'   => 'nullable|string',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $order = isset($post['order']) ? $post['order'] : [];
+            $validator = \Validator::make($order, [
+                'type'    => 'nullable|string',
+                'field'   => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $criteria = empty($post['criteria']) ? false : $post['criteria'];
@@ -350,11 +371,18 @@ class CategoryController extends ApiController
 
         $validator = \Validator::make($post, [
             'tag_id'            => 'required|int|exists:categories,id',
-            'data.name'         => 'nullable|string',
-            'data.locale'       => 'nullable|string',
-            'data.category_id'  => 'nullable|integer',
-            'data.active'       => 'nullable|integer'
+            'data'              => 'nullable|array',
         ]);
+
+        if (!$validator->fails()) {
+            $post['data'] = isset($post['data']) ? $post['data'] : [] ;
+            $validator = \Validator::make($post['data'], [
+                'name'         => 'nullable|string',
+                'locale'       => 'nullable|string',
+                'category_id'  => 'nullable|integer',
+                'active'       => 'nullable|integer'
+        ]);
+        }
 
         if (!$validator->fails()) {
             $tag = Category::find($post['tag_id']);
@@ -439,13 +467,27 @@ class CategoryController extends ApiController
         $validator = \Validator::make($post, [
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer',
-            'criteria.tag_ids'      => 'nullable|array',
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.category_id'  => 'nullable|integer',
-            'criteria.active'       => 'nullable|integer',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
+            'criteria'              => 'nullable|array'
         ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = \Validator::make($criteria, [
+                'tag_ids'      => 'nullable|array',
+                'locale'       => 'nullable|string|max:5',
+                'category_id'  => 'nullable|integer',
+                'active'       => 'nullable|integer',
+                'order'        => 'nullable|array'
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $order = isset($request['criteria']['order']) ? $request['criteria']['order'] : [];
+            $validator = \Validator::make($order, [
+                'type'    => 'nullable|string',
+                'field'   => 'nullable|string'
+            ]);
+        }
 
         if (!$validator->fails()) {
             $criteria = empty($post['criteria']) ? false : $post['criteria'];
@@ -489,16 +531,16 @@ class CategoryController extends ApiController
                         'category_id'   => $record->parent_id,
                         'locale'        => \LaravelLocalization::getCurrentLocale(),
                         'active'        => $record->active,
-                        'created_at'    => $record->created_at,
+                        'created_at'    => date($record->created_at),
                         'created_by'    => $record->created_by,
-                        'updated_at'    => $record->updated_at,
+                        'updated_at'    => date($record->updated_at),
                         'updated_by'    => $record->updated_by,
                     ];
                 }
 
                 return $this->successResponse([
-                    'tags' => $tags,
                     'total_records' => $count,
+                    'tags'          => $tags
                 ], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());

@@ -87,15 +87,21 @@ class SectionController extends ApiController
 
         $validator = \Validator::make($post, [
             'id'                => 'required|numeric|exists:sections,id',
-            'data.name'         => 'required|string',
-            'data.locale'       => 'required|string|max:5',
-            'data.active'       => 'required|boolean',
-            'data.parent_id'    => 'nullable|integer|exists:sections,id',
-            'data.ordering'     => 'nullable|integer',
-            'data.read_only'    => 'nullable|boolean',
-            'data.theme'        => 'nullable|integer',
-            'data.forum_link'   => 'nullable|string',
+            'data'              => 'required|array'
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'name'         => 'required|string',
+                'locale'       => 'required|string|max:5',
+                'active'       => 'required|boolean',
+                'parent_id'    => 'nullable|integer|exists:sections,id',
+                'ordering'     => 'nullable|integer',
+                'read_only'    => 'nullable|boolean',
+                'theme'        => 'nullable|integer',
+                'forum_link'   => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $data = $request->data;
@@ -168,10 +174,16 @@ class SectionController extends ApiController
 
         if (!empty($post)) {
             $validator = \Validator::make($request->all(), [
-                'criteria.id'       => 'nullable|integer',
-                'criteria.active'   => 'nullable|boolean',
-                'criteria.locale'   => 'nullable|string|max:5',
+                'criteria'          => 'nullable|array'
             ]);
+
+            if (!$validator->fails()) {
+                $validator = \Validator::make($request['criteria'], [
+                    'id'       => 'nullable|integer',
+                    'active'   => 'nullable|boolean',
+                    'locale'   => 'nullable|string|max:5',
+                ]);
+            }
 
             if ($validator->fails()) {
                 return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
@@ -211,10 +223,16 @@ class SectionController extends ApiController
 
         if (!empty($post)) {
             $validator = \Validator::make($request->all(), [
-                'criteria.section_id'   => 'nullable|integer',
-                'criteria.active'       => 'nullable|boolean',
-                'criteria.locale'       => 'nullable|string|max:5',
+                'criteria'   => 'nullable|array',
             ]);
+
+            if (!$validator->fails()) {
+                $validator = \Validator::make($post, [
+                    'section_id'   => 'nullable|integer',
+                    'active'       => 'nullable|boolean',
+                    'locale'       => 'nullable|string|max:5',
+                ]);
+            }
 
             if ($validator->fails()) {
                 return $this->errorResponse(__('custom.list_subsections_fail'), $validator->errors()->messages());

@@ -445,21 +445,33 @@ class DataSetController extends ApiController
 
         if ($criteria) {
             $validator = \Validator::make($post, [
-                'criteria.dataset_ids'       => 'nullable|array',
-                'criteria.locale'            => 'nullable|string|max:5',
-                'criteria.org_id'            => 'nullable|int',
-                'criteria.group_id'          => 'nullable|int',
-                'criteria.category_id'       => 'nullable|int',
-                'criteria.tag_id'            => 'nullable|int',
-                'criteria.format'            => 'nullable|string',
-                'criteria.terms_of_use_id'   => 'nullable|int',
-                'criteria.reported'          => 'nullable|int',
-                'criteria.created_by'        => 'nullable|int',
-                'criteria.order.type'        => 'nullable|string',
-                'criteria.order.field'       => 'nullable|string',
+                'criteria'                   => 'nullable|array',
                 'records_per_page'           => 'nullable|int',
                 'page_number'                => 'nullable|int',
             ]);
+
+            if (!$validator->fails()) {
+                $validator = \Validator::make($criteria, [
+                    'dataset_ids'       => 'nullable|array',
+                    'locale'            => 'nullable|string|max:5',
+                    'org_id'            => 'nullable|int',
+                    'group_id'          => 'nullable|int',
+                    'category_id'       => 'nullable|int',
+                    'tag_id'            => 'nullable|int',
+                    'format'            => 'nullable|string',
+                    'terms_of_use_id'   => 'nullable|int',
+                    'reported'          => 'nullable|int',
+                    'created_by'        => 'nullable|int',
+                    'order'             => 'nullable|array',
+                ]);
+            }
+
+            if (!$validator->fails()) {
+                $validator = \Validator::make($order, [
+                    'type'        => 'nullable|string',
+                    'field'       => 'nullable|string',
+                ]);
+            }
 
             if (!$validator->fails()) {
                 $data = [];
@@ -609,14 +621,27 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.keywords'     => 'required|string',
-            'criteria.user_id'      => 'nullable|integer',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
             'records_per_page'      => 'nullable|int',
             'page_number'           => 'nullable|int',
         ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = \Validator::make($criteria, [
+                'locale'       => 'nullable|string|max:5',
+                'keywords'     => 'required|string',
+                'user_id'      => 'nullable|integer',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $order = isset($criteria['order']) ? $criteria['order'] : [];
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $data = [];

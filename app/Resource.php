@@ -46,6 +46,27 @@ class Resource extends Model implements TranslatableInterface
         ];
     }
 
+    public static function getFormatsCode($format)
+    {
+        switch (strtoupper($format)) {
+
+            case 'CSV':
+                return self::FORMAT_CSV;
+            case 'JSON':
+                return self::FORMAT_JSON;
+            case 'KML':
+                return self::FORMAT_KML;
+            case 'RDF':
+                return self::FORMAT_RDF;
+            case 'WMS':
+                return self::FORMAT_WMS;
+            case 'XML':
+                return self::FORMAT_XML;
+            default :
+                return null;
+        }
+    }
+
     public static function getFormats()
     {
         return [

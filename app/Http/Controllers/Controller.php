@@ -59,4 +59,18 @@ class Controller extends BaseController
 
         return 'data:'. $mime .';base64,'. base64_encode($data);
     }
+
+    protected function checkIsValidXML($xmlstr)
+    {
+        libxml_use_internal_errors(true);
+
+        $doc = simplexml_load_string($xmlstr);
+        $xml = explode("\n", $xmlstr);
+
+        if (!$doc) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

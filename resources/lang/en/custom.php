@@ -360,6 +360,7 @@ return [
     'delete_group_fail' => 'Delete group failure',
     'get_group_fail' => 'Get group details failure',
     'search_group_fail' => 'Search groups failure',
+    'list_org_types_fail' => 'List organisation types failure',
     'add_page_fail' => 'Page add failure',
     'edit_page_fail' => 'Page edit failure',
     'delete_page_fail' => 'Delete page failure',
@@ -523,4 +524,7 @@ return [
     'order_by_name' => 'order by name',
     'order_asc' => 'ascending',
     'order_desc' => 'descending',
+    'child_orgs' => 'Child organisations',
+    'civilians' => 'Civilian',
+    'municipals' => 'Municipal',
 ];

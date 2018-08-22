@@ -435,8 +435,10 @@ class OrganisationController extends ApiController
      * @param array criteria[org_ids] - optional
      * @param string criteria[locale] - optional
      * @param integer criteria[org_id] - optional
+     * @param integer criteria[user_id] - optional
      * @param boolean criteria[active] - optional
      * @param boolean criteria[approved] - optional
+     * @param int criteria[type] - optional
      * @param string criteria[keywords] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -470,6 +472,8 @@ class OrganisationController extends ApiController
                 'approved'     => 'nullable|bool',
                 'org_id'       => 'nullable|int',
                 'user_id'      => 'nullable|int|exists:users,id',
+                'type'         => 'nullable|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+                'keywords'     => 'nullable|string',
                 'order'        => 'nullable|array'
             ]);
         }
@@ -484,6 +488,7 @@ class OrganisationController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $criteria = [];
             if (isset($request->criteria['active'])) {
                 $criteria['active'] = $request->criteria['active'];
             }
@@ -501,7 +506,12 @@ class OrganisationController extends ApiController
             }
 
             try {
-                $query = Organisation::with('CustomSetting')->where('type', '!=', Organisation::TYPE_GROUP);
+                $query = Organisation::with('CustomSetting');
+                if (isset($request->criteria['type'])) {
+                    $query->where('type', $request->criteria['type']);
+                } else {
+                    $query->where('type', '!=', Organisation::TYPE_GROUP);
+                }
 
                 if (!empty($request->criteria['org_ids'])) {
                     $query->whereIn('id', $request->criteria['org_ids']);
@@ -509,7 +519,7 @@ class OrganisationController extends ApiController
 
                 if (!empty($request->criteria['keywords'])) {
                     $ids = Organisation::search($request->criteria['keywords'])->get()->pluck('id');
-                    $query = Organisation::whereIn('id', $ids);
+                    $query->whereIn('id', $ids);
                 }
 
                 if (!empty($criteria['user_id'])) {
@@ -822,8 +832,9 @@ class OrganisationController extends ApiController
     /**
      * Get organisation details
      *
-     * @param string locale - required
-     * @param integer org_id - required
+     * @param string locale - optional
+     * @param integer org_id - required without org_uri
+     * @param string org_uri - required without org_id
      *
      * @return json with organisation details or error
      */
@@ -832,7 +843,8 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'   => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'org_id'   => 'required_without:org_uri|nullable|int|exists:organisations,id,deleted_at,NULL',
+            'org_uri'  => 'required_without:org_id|nullable|string|exists:organisations,uri,deleted_at,NULL',
             'locale'   => 'nullable|string',
         ]);
 
@@ -840,7 +852,14 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $org = Organisation::where('id', $post['org_id'])
+                if (isset($post['org_id'])) {
+                    $orgKey = 'id';
+                    $orgVal = $post['org_id'];
+                } else {
+                    $orgKey = 'uri';
+                    $orgVal = $post['org_uri'];
+                }
+                $org = Organisation::where($orgKey, $orgVal)
                     ->where('type', '!=', Organisation::TYPE_GROUP)
                     ->first();
 
@@ -1781,5 +1800,50 @@ class OrganisationController extends ApiController
 
             return false;
         }
+    }
+
+    /**
+     * List organisation types
+     *
+     * @param string locale - optional
+     * @return json list with organisation types or error
+     */
+    public function listOrganisationTypes(Request $request)
+    {
+        $results = [];
+
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'locale' => 'nullable|string|exists:locale,locale,active,1',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                if (isset($post['locale'])) {
+                    $locale = $post['locale'];
+                } else {
+                    $locale = \LaravelLocalization::getCurrentLocale();
+                }
+
+                $orgTypes = Organisation::getPublicTypes();
+                krsort($orgTypes);
+
+                foreach ($orgTypes as $typeId => $typeName) {
+                    $results[] = [
+                        'id'     => $typeId,
+                        'name'   => __(str_plural($typeName), [], $locale),
+                        'locale' => $locale,
+                    ];
+                }
+
+                return $this->successResponse(['types' => $results], true);
+
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.list_org_types_fail'), $validator->errors()->messages());
     }
 }

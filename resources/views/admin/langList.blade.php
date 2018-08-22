@@ -37,10 +37,9 @@
                                             href="#"
                                         >{{ utrans('custom.preview') }}</button>
                                         <a
-                                            class="link-action"
+                                            class="link-action red"
                                             href="{{ url('/admin/languages/delete/'. $lang->locale) }}"
                                             data-confirm="{{ __('custom.remove_data') }}"
-                                            style="color:red"
                                         >{{ __('custom.delete') }}</a>
                                     </td>
                                 </tr>

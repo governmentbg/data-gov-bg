@@ -37,10 +37,9 @@
                                             href="{{ url('/admin/terms-of-use/view/'. $term->id) }}"
                                         >{{ utrans('custom.preview') }}</a>
                                         <a
-                                            class="link-action"
+                                            class="link-action red"
                                             href="{{ url('/admin/terms-of-use/delete/'. $term->id) }}"
                                             data-confirm="{{ __('custom.remove_data') }}"
-                                            style="color:red"
                                         >{{ __('custom.delete') }}</a>
                                     </td>
                                 </tr>

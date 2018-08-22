@@ -12771,6 +12771,10 @@ button:focus {
   border-radius: 24px;
 }
 
+.red {
+  color: red !important;
+}
+
 .bootstrap-tagsinput {
   background-color: #fff;
   border: 1px solid #ccc;

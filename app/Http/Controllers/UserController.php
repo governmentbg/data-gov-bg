@@ -1517,31 +1517,6 @@ class UserController extends Controller {
     }
 
     /**
-     * Returns model with usernames instead of user ids for record signatures
-     *
-     * @param Model $model
-     *
-     * @return view
-     */
-    public function getModelUsernames($model) {
-        if (isset($model)) {
-            if (
-                $model->updated_by == $model->created_by
-                && !is_null($model->created_by)
-            ) {
-                $username = User::find($model->created_by)->username;
-                $model->updated_by = $username;
-                $model->created_by = $username;
-            } else {
-                $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->username;
-                $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->username;
-            }
-        }
-
-        return $model;
-    }
-
-    /**
      * Loads a view for browsing organisational resources
      *
      * @param Request $request

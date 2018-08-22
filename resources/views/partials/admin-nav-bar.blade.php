@@ -81,6 +81,12 @@
                         </li>
                         <li>
                             <a
+                                class="{{ $view == 'termsConditionsReq' ? 'active' : '' }}"
+                                href="{{ url('/admin/terms-of-use-request/list') }}"
+                            >{{ ultrans('custom.terms_and_conditions_req') }}</a>
+                        </li>
+                        <li>
+                            <a
                                 class="{{ $view == 'actionsHistory' ? 'active' : '' }}"
                                 href="#"
                             >{{ __('custom.actions_history') }}</a>

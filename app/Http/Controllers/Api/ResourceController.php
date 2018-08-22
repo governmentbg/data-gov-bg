@@ -60,8 +60,9 @@ class ResourceController extends ApiController
                 'name'                 => 'required_with:locale',
                 'name.bg'              => 'required_without:locale|string',
                 'version'              => 'nullable',
-                'schema_description'   => 'nullable|string|required_without:schema_url',
-                'schema_url'           => 'nullable|url|required_without:schema_description',
+                'file_format'          => 'nullable|string',
+                'schema_description'   => 'nullable|string',
+                'schema_url'           => 'nullable|url',
                 'type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
                 'resource_url'         => 'nullable|url|required_if:type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'nullable|string|required_if:type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
@@ -104,8 +105,10 @@ class ResourceController extends ApiController
                 'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
                 'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
                 'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
+                'file_format'       => isset($post['data']['file_format']) ? Resource::getFormatsCode($post['data']['file_format']) : null,
                 'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
                 'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
+                'is_reported'       => 0,
             ];
 
             try {
@@ -229,6 +232,7 @@ class ResourceController extends ApiController
                 'resource_uri'         => 'nullable|string|unique:resources,uri',
                 'name'                 => 'nullable|string',
                 'description'          => 'nullable|string',
+                'file_format'          => 'nullable|string',
                 'locale'               => 'nullable|string|required_with:data.name,data.description|max:5',
                 'version'              => 'nullable|string',
                 'schema_description'   => 'nullable|string',
@@ -295,6 +299,10 @@ class ResourceController extends ApiController
 
             if (isset($post['data']['http_headers'])) {
                 $resource->http_headers = $post['data']['http_headers'];
+            }
+
+            if (isset($post['data']['file_format'])) {
+                $resource->file_format = Resource::getFormatsCode($post['data']['file_format']);
             }
 
             if (isset($post['data']['schema_description'])) {

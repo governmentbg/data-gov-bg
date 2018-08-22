@@ -521,4 +521,13 @@ return [
     'order_by_name' => 'подреди по име',
     'order_asc' => 'възходящ ред',
     'order_desc' => 'низходящ ред',
+    'url' => 'връзка',
+    'request_type' => 'тип на заявката',
+    'request' => 'заявка',
+    'headers' => 'HTTP хедъри',
+    'authentication' => 'автентикация',
+    'response_format' => 'формат на отговора',
+    'resource_no_visualization' => 'визуализация не е налична',
+    'confirm_resource_import' => 'потвърдете запазването на качените данни',
+    'cancel_resource_import' => 'каченето на данни е прекратено',
 ];

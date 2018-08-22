@@ -1272,7 +1272,7 @@ class OrganisationController extends ApiController
             }
         }
 
-        if (isset(($data['logo_file_name'])) && isset($data['logo_mime_type']) && isset($data['logo_data'])) {
+        if (isset($data['logo_file_name']) && isset($data['logo_mime_type']) && isset($data['logo_data'])) {
             $newGroupData['logo_file_name'] = $data['logo_file_name'];
             $newGroupData['logo_mime_type'] = $data['logo_mime_type'];
             $newGroupData['logo_data'] = $data['logo_data'];

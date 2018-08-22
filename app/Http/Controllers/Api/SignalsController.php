@@ -30,13 +30,18 @@ class SignalsController extends ApiController
 
         $validator = Validator::make($signalData, [
             'data'              => 'required|array',
-            'data.resource_id'  => 'required|integer',
-            'data.description'  => 'required|string',
-            'data.firstname'    => 'required|string',
-            'data.lastname'     => 'required|string',
-            'data.email'        => 'required|email',
-            'data.status'       => 'nullable|integer',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($signalData['data'], [
+                'resource_id'  => 'required|integer',
+                'description'  => 'required|string',
+                'firstname'    => 'required|string',
+                'lastname'     => 'required|string',
+                'email'        => 'required|email',
+                'status'       => 'nullable|integer',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {
@@ -86,13 +91,18 @@ class SignalsController extends ApiController
         $validator = Validator::make($editSignalData, [
             'signal_id'         => 'required|integer|exists:signals,id',
             'data'              => 'required|array',
-            'data.resource_id'  => 'nullable|integer',
-            'data.description'  => 'nullable|string',
-            'data.firstname'    => 'nullable|string',
-            'data.lastname'     => 'nullable|string',
-            'data.email'        => 'nullable|email',
-            'data.status'       => 'nullable|integer',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($editSignalData['data'], [
+                'resource_id'  => 'nullable|integer',
+                'description'  => 'nullable|string',
+                'firstname'    => 'nullable|string',
+                'lastname'     => 'nullable|string',
+                'email'        => 'nullable|email',
+                'status'       => 'nullable|integer',
+            ]);
+        }
 
         if (!$validator->fails()) {
             try {
@@ -182,19 +192,35 @@ class SignalsController extends ApiController
      */
     public function listSignals(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
             'criteria'              => 'nullable|array',
-            'criteria.signal_id'    => 'nullable|integer',
-            'criteria.status'       => 'nullable|integer',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
-            'criteria.search'       => 'nullable|string',
             'records_per_page'      => 'nullable|integer',
             'page_number'           => 'nullable|integer'
         ]);
+
+        $criteria = isset($data['criteria']) ? $data['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'signal_id'    => 'nullable|integer',
+                'status'       => 'nullable|integer',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'order'        => 'nullable|array',
+                'search'       => 'nullable|string',
+            ]);
+        }
+
+        $order = isset($data['criteria']['order']) ? $data['criteria']['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_signals_fail'), $validator->errors()->messages());

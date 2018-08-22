@@ -325,7 +325,7 @@ class OrganisationController extends AdminController
                 $post['data']['logo'] = $post['data']['logo']->getPathName();
             }
 
-            if(isset($post['data']['descript'])){
+            if (isset($post['data']['descript'])) {
                 $post['data']['description'] = $post['data']['descript'];
             }
 

@@ -55,7 +55,7 @@ class HomeController extends Controller {
             'records_per_page'  => 1,
             'page_number'       => 1,
             'criteria'          => [
-                'reported'          => false,
+                'active'          => true,
             ],
         ]);
         $api = new ApiOrganisation($rq);

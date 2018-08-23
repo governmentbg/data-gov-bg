@@ -517,6 +517,7 @@ return [
     'access_denied_page' => 'You are not allowed to access this page',
     'org_approved' => 'Approved',
     'edit_terms' => 'Edit Terms Of Use',
+    'edit_terms_req' => 'Edit Terms Of Use Request',
     'active' => 'active',
     'terms_preview' => 'Preview Terms Of Use',
     'name' => 'name',
@@ -540,4 +541,5 @@ return [
     'processed' => 'processed',
     'all' => 'all',
     'request' => 'request',
+    'lastname' => 'last name'
 ];

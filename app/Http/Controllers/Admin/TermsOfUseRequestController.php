@@ -89,4 +89,99 @@ class TermsOfUseRequestController extends AdminController
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
+
+    /**
+     * Edit a terms of use request based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return view on success with messages
+     */
+    public function edit(Request $request, $id)
+    {
+        if (Role::isAdmin()) {
+            $class = 'user';
+            $termsRequest = TermsOfUseRequest::where('id', $id)->first();
+            $statuses = TermsOfUseRequest::getStatuses();
+
+            if (!is_null($termsRequest)) {
+                $termsRequest->description = $termsRequest->descript;
+                $termsRequest = $this->getModelUsernames($termsRequest);
+
+                if ($request->has('edit')) {
+                    $rq = Request::create('/api/editTermsOfUseRequest', 'POST', [
+                        'request_id' => $id,
+                        'data' => [
+                            'email'       => $request->offsetGet('email'),
+                            'description' => $request->offsetGet('description'),
+                            'firstname'   => $request->offsetGet('firstname'),
+                            'lastname'    => $request->offsetGet('lastname'),
+                            'status'      => !is_null($request->offsetGet('status'))
+                                ? $request->offsetGet('status')
+                                : TermsOfUseRequest::STATUS_NEW,
+                        ]
+                    ]);
+
+                    $api = new ApiTermsOfUseRequest($rq);
+                    $result = $api->editTermsOfUseRequest($rq)->getData();
+
+                    if ($result->success) {
+                        $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                        return back()->withInput(Input::all());
+                    } else {
+                        $request->session()->flash('alert-danger', __('custom.edit_error'));
+
+                        return back()->withErrors(isset($result->errors) ? $result->errors : []);
+                    }
+
+                }
+            } else {
+                $request->session()->flash('alert-danger', __('custom.edit_error'));
+            }
+
+            return view(
+                'admin/termsOfUseRequestEdit',
+                ['class' => $class, 'termsRequest' => $termsRequest, 'statuses' => $statuses]
+            );
+        }
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+    }
+
+    /**
+    * Deletes terms of use request
+    *
+    * @param Request $request
+    * @param integer $id
+    *
+    * @return view to previous page
+    */
+   public function delete(Request $request, $id)
+   {
+        if (Role::isAdmin()) {
+            $termsRequest = TermsOfUseRequest::where('id', $id)->first();
+            if (!is_null($termsRequest)) {
+                $rq = Request::create('/api/deleteTermsOfUseRequest', 'POST', [
+                    'request_id'  => $id,
+                ]);
+                $api = new ApiTermsOfUseRequest($rq);
+                $result = $api->deleteTermsOfUseRequest($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
+                return back();
+            } else {
+                $request->session()->flash('alert-danger', __('custom.delete_error'));
+
+                return back();
+            }
+        }
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+    }
 }

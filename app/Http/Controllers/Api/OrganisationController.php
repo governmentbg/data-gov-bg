@@ -48,18 +48,18 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($data, [
             'locale'                => 'nullable|string|max:5',
-            'name'                  => 'required_with:locale',
-            'name.bg'               => 'required_without:locale|string',
-            'type'                  => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
-            'description'           => 'nullable',
-            'uri'                   => 'nullable|string|unique:organisations,uri',
-            'logo'                  => 'nullable|string',
-            'logo_filename'         => 'nullable|string',
-            'logo_mimetype'         => 'nullable|string',
-            'logo_data'             => 'nullable',
-            'activity_info'         => 'nullable',
-            'contacts'              => 'nullable',
-            'parent_org_id'         => 'nullable|int',
+            'name'                  => 'required_with:locale|max:191',
+            'name.bg'               => 'required_without:locale|string|max:191',
+            'type'                  => 'required|int|max:191|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+            'description'           => 'nullable|max:8000',
+            'uri'                   => 'nullable|string|unique:organisations,uri|max:191',
+            'logo'                  => 'nullable|string|max:191',
+            'logo_filename'         => 'nullable|string|max:191',
+            'logo_mimetype'         => 'nullable|string|max:191',
+            'logo_data'             => 'nullable|max:16777215',
+            'activity_info'         => 'nullable|max:8000',
+            'contacts'              => 'nullable|max:8000',
+            'parent_org_id'         => 'nullable|int|max:10',
             'active'                => 'nullable|bool',
             'approved'              => 'nullable|bool',
             'custom_fields.*.label' => 'nullable',
@@ -212,20 +212,20 @@ class OrganisationController extends ApiController
         $data['org_id'] = $request->org_id ? $request->org_id : null;
 
         $validator = \Validator::make($data, [
-            'org_id'                   => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'org_id'                   => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
             'locale'                   => 'nullable|string|max:5',
-            'name'                     => 'required_with:locale',
-            'name.bg'                  => 'required_without:locale|string',
+            'name'                     => 'required_with:locale|max:191',
+            'name.bg'                  => 'required_without:locale|string|max:191',
             'type'                     => 'required|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
-            'description'              => 'nullable',
-            'uri'                      => 'nullable|string',
-            'logo'                     => 'nullable|string',
-            'logo_filename'            => 'nullable|string',
-            'logo_mimetype'            => 'nullable|string',
-            'logo_data'                => 'nullable|string',
-            'activity_info'            => 'nullable',
-            'contacts'                 => 'nullable',
-            'parent_org_id'            => 'nullable|int',
+            'description'              => 'nullable|max:8000',
+            'uri'                      => 'nullable|string|max:191',
+            'logo'                     => 'nullable|string|max:191',
+            'logo_filename'            => 'nullable|string|max:191',
+            'logo_mimetype'            => 'nullable|string|max:191',
+            'logo_data'                => 'nullable|string|max:16777215',
+            'activity_info'            => 'nullable|max:8000',
+            'contacts'                 => 'nullable|max:8000',
+            'parent_org_id'            => 'nullable|int|max:10',
             'active'                   => 'nullable|bool',
             'approved'                 => 'nullable|bool',
             'custom_fields.*.label'    => 'nullable',
@@ -391,7 +391,7 @@ class OrganisationController extends ApiController
     public function deleteOrganisation(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'org_id' => 'required|exists:organisations,id,deleted_at,NULL',
+            'org_id' => 'required|exists:organisations,id,deleted_at,NULL|max:110',
         ]);
 
         $validator->after(function ($validator) use ($request) {
@@ -451,8 +451,8 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:191',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
@@ -460,14 +460,14 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
                 'org_ids'      => 'nullable|array',
-                'org_ids.*'    => 'int',
-                'locale'       => 'nullable|string',
+                'org_ids.*'    => 'int|max:10',
+                'locale'       => 'nullable|string|max:5',
                 'active'       => 'nullable|bool',
                 'approved'     => 'nullable|bool',
-                'org_id'       => 'nullable|int',
-                'user_id'      => 'nullable|int|exists:users,id',
-                'type'         => 'nullable|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
-                'keywords'     => 'nullable|string',
+                'org_id'       => 'nullable|int|max:10',
+                'user_id'      => 'nullable|int|exists:users,id|max:10',
+                'type'         => 'nullable|int|max:191|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+                'keywords'     => 'nullable|string|max:191',
                 'order'        => 'nullable|array'
             ]);
         }
@@ -476,8 +476,8 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -607,8 +607,8 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
@@ -626,8 +626,8 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -734,8 +734,8 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
@@ -743,8 +743,8 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
                 'locale'       => 'nullable|string|max:5',
-                'keywords'     => 'required|string',
-                'user_id'      => 'nullable|string',
+                'keywords'     => 'required|string|max:191',
+                'user_id'      => 'nullable|integer|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -753,8 +753,8 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -839,9 +839,9 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'   => 'required_without:org_uri|nullable|int|exists:organisations,id,deleted_at,NULL',
-            'org_uri'  => 'required_without:org_id|nullable|string|exists:organisations,uri,deleted_at,NULL',
-            'locale'   => 'nullable|string',
+            'org_id'   => 'required_without:org_uri|nullable|int|exists:organisations,id,deleted_at,NULL|max:10',
+            'org_uri'  => 'required_without:org_id|nullable|string|exists:organisations,uri,deleted_at,NULL|max:10',
+            'locale'   => 'nullable|string|max:5',
         ]);
 
         $locale = \LaravelLocalization::getCurrentLocale();
@@ -915,12 +915,12 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'            => 'required|int|exists:organisations,id,deleted_at,NULL',
-            'role_id'           => 'nullable|int|exists:roles,id',
-            'keywords'          => 'nullable|string',
+            'org_id'            => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
+            'role_id'           => 'nullable|int|exists:roles,id|max:10',
+            'keywords'          => 'nullable|string|max:191',
             'for_approval'      => 'nullable|bool',
-            'records_per_page'  => 'nullable|int',
-            'page_number'       => 'nullable|int',
+            'records_per_page'  => 'nullable|int|max:10',
+            'page_number'       => 'nullable|int|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -991,9 +991,9 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
-            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
-            'role_id'       => 'nullable|int|exists:roles,id',
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|max:10',
+            'role_id'       => 'nullable|int|exists:roles,id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -1027,8 +1027,8 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
-            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -1061,9 +1061,9 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL',
-            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL',
-            'role_id'       => 'nullable|int|exists:roles,id',
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|max:10',
+            'role_id'       => 'nullable|int|exists:roles,id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -1109,15 +1109,15 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'locale'                => 'nullable|string|max:5',
-            'name'                  => 'required_with:locale',
-            'name.bg'               => 'required_without:locale|string',
-            'description'           => 'nullable',
-            'uri'                   => 'nullable|string|unique:organisations,uri',
-            'logo'                  => 'nullable|string',
-            'logo_filename'         => 'nullable|string',
-            'logo_mimetype'         => 'nullable|string',
-            'logo_data'             => 'nullable|string',
-            'activity_info'         => 'nullable|string',
+            'name'                  => 'required_with:locale|max:191',
+            'name.bg'               => 'required_without:locale|string|max:191',
+            'description'           => 'nullable|max:8000',
+            'uri'                   => 'nullable|string|unique:organisations,uri|max:191',
+            'logo'                  => 'nullable|string|max:191',
+            'logo_filename'         => 'nullable|string|max:191',
+            'logo_mimetype'         => 'nullable|string|max:191',
+            'logo_data'             => 'nullable|string|max:16777215 ',
+            'activity_info'         => 'nullable|string|max:8000',
             'active'                => 'nullable|bool',
             'custom_fields.*.label' => 'nullable|max:191',
             'custom_fields.*.value' => 'nullable',
@@ -1249,17 +1249,17 @@ class OrganisationController extends ApiController
         $data['group_id'] = $request->group_id ? $request->group_id : null;
 
         $validator = \Validator::make($data,[
-            'group_id'              => 'required|int|exists:organisations,id,deleted_at,NULL',
+            'group_id'              => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
             'locale'                => 'nullable|string|max:5',
-            'name'                  => 'required_with:locale',
-            'name.bg'               => 'required_without:locale|string',
-            'description'           => 'nullable',
-            'uri'                   => 'nullable|string',
-            'logo'                  => 'nullable|string',
-            'logo_filename'         => 'nullable|string',
-            'logo_mimetype'         => 'nullable|string',
-            'logo_data'             => 'nullable|string',
-            'custom_fields.*.label' => 'nullable',
+            'name'                  => 'required_with:locale|max:191',
+            'name.bg'               => 'required_without:locale|string|max:191',
+            'description'           => 'nullable|max:8000',
+            'uri'                   => 'nullable|string|max:191',
+            'logo'                  => 'nullable|string|max:191',
+            'logo_filename'         => 'nullable|string|max:191',
+            'logo_mimetype'         => 'nullable|string|max:191',
+            'logo_data'             => 'nullable|string|max:191',
+            'custom_fields.*.label' => 'nullable|max:191',
             'custom_fields.*.value' => 'nullable',
         ]);
 
@@ -1382,7 +1382,7 @@ class OrganisationController extends ApiController
     public function deleteGroup(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'group_id' => 'required|int',
+            'group_id' => 'required|int|max:10',
         ]);
 
         $group = Organisation::find($request->group_id);
@@ -1443,8 +1443,8 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
@@ -1453,8 +1453,8 @@ class OrganisationController extends ApiController
             $validator = \Validator::make($criteria, [
                 'group_ids'    => 'nullable|array',
                 'locale'       => 'nullable|string|max:5',
-                'dataset_id'   => 'nullable|int',
-                'user_id'      => 'nullable|int|exists:users,id',
+                'dataset_id'   => 'nullable|int|max:10',
+                'user_id'      => 'nullable|int|exists:users,id|max:10',
                 'order'        => 'nullable|array'
             ]);
         }
@@ -1463,8 +1463,8 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -1573,8 +1573,8 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'group_id'   => 'required|int',
-            'locale'     => 'nullable|string',
+            'group_id'   => 'required|int|max:10',
+            'locale'     => 'nullable|string|max:5',
         ]);
 
         $locale = \LaravelLocalization::getCurrentLocale();
@@ -1646,8 +1646,8 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
@@ -1655,8 +1655,8 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
                 'locale'       => 'nullable|string|max:5',
-                'keywords'     => 'required|string',
-                'user_id'      => 'nullable|string',
+                'keywords'     => 'required|string|max:191',
+                'user_id'      => 'nullable|int|max:10',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -1665,8 +1665,8 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -1812,7 +1812,7 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'locale' => 'nullable|string|exists:locale,locale,active,1',
+            'locale' => 'nullable|string|max:5|exists:locale,locale,active,1',
         ]);
 
         if (!$validator->fails()) {

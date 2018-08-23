@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/admin/terms-of-use/delete/{id}', 'Admin\TermsOfUseController@delete');
 
     Route::match(['get', 'post'], '/admin/terms-of-use-request/list', 'Admin\TermsOfUseRequestController@list');
+    Route::match(['get', 'post'], '/admin/terms-of-use-request/edit/{id}', 'Admin\TermsOfUseRequestController@edit');
+    Route::match(['get', 'post'], '/admin/terms-of-use-request/delete/{id}', 'Admin\TermsOfUseRequestController@delete');
 
     Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
     Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');

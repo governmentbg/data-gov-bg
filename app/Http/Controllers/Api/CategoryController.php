@@ -214,8 +214,7 @@ class CategoryController extends ApiController
                 'category_ids'  => 'nullable|array',
                 'locale'        => 'nullable|string|max:5',
                 'active'        => 'nullable|integer',
-                'order.type'    => 'nullable|string',
-                'order.field'   => 'nullable|string',
+                'order'         => 'nullable|array',
             ]);
         }
 

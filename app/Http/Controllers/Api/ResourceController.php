@@ -90,25 +90,25 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             DB::beginTransaction();
 
-            $dbData = [
-                'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
-                'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
-                'descript'          => isset($post['data']['description'])
-                    ? $this->trans($post['data']['locale'], $post['data']['description'])
-                    : null,
-                'uri'               => Uuid::generate(4)->string,
-                'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
-                'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
-                'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
-                'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
-                'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
-                'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
-                'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
-                'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
-                'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
-            ];
-
             try {
+                $dbData = [
+                    'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
+                    'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
+                    'descript'          => isset($post['data']['description'])
+                        ? $this->trans($post['data']['locale'], $post['data']['description'])
+                        : null,
+                    'uri'               => Uuid::generate(4)->string,
+                    'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
+                    'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
+                    'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
+                    'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
+                    'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
+                    'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
+                    'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
+                    'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
+                    'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
+                ];
+
                 $resource = Resource::create($dbData);
                 $resource->searchable();
 
@@ -261,14 +261,6 @@ class ResourceController extends ApiController
                 $resource->uri = $post['data']['resource_uri'];
             }
 
-            if (isset($post['data']['name'])) {
-                $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
-            }
-
-            if (isset($post['data']['description'])) {
-                $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
-            }
-
             if (isset($post['data']['version'])) {
                 $resource->version = $post['data']['version'];
             }
@@ -306,6 +298,14 @@ class ResourceController extends ApiController
             }
 
             try {
+                if (isset($post['data']['name'])) {
+                    $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
+                }
+
+                if (isset($post['data']['description'])) {
+                    $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
+                }
+
                 $resource->save();
 
                 DB::commit();

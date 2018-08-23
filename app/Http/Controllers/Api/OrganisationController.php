@@ -297,34 +297,12 @@ class OrganisationController extends ApiController
 
                 $orgData = [];
 
-                if (!empty($data['name'])) {
-                    $orgData['name'] = $this->trans($data['locale'], $data['name']);
-                }
-
-                if (!empty($data['description'])) {
-                    $orgData['descript'] = $this->trans($data['locale'], $data['description']);
-                } else {
-                    $orgData['descript'] = null;
-                }
-
                 if (!empty($data['uri'])) {
                     $orgData['uri'] = $data['uri'];
                 }
 
                 if (!empty($data['type'])) {
                     $orgData['type'] = $data['type'];
-                }
-
-                if (!empty($data['activity_info'])) {
-                    $orgData['activity_info'] = $this->trans($data['locale'], $data['activity_info']);
-                } else {
-                    $orgData['activity_info'] = null;
-                }
-
-                if (!empty($data['contacts'])) {
-                    $orgData['contacts'] = $this->trans($data['locale'], $data['contacts']);
-                } else {
-                    $orgData['contacts'] = null;
                 }
 
                 if (!empty($data['parent_org_id'])) {
@@ -339,7 +317,6 @@ class OrganisationController extends ApiController
                     $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-
                 if (!empty($data['approved'])) {
                     $orgData['approved'] = $data['approved'];
                 } else {
@@ -351,6 +328,28 @@ class OrganisationController extends ApiController
                 }
 
                 try {
+                    if (!empty($data['name'])) {
+                        $orgData['name'] = $this->trans($data['locale'], $data['name']);
+                    }
+
+                    if (!empty($data['description'])) {
+                        $orgData['descript'] = $this->trans($data['locale'], $data['description']);
+                    } else {
+                        $orgData['descript'] = null;
+                    }
+
+                    if (!empty($data['activity_info'])) {
+                        $orgData['activity_info'] = $this->trans($data['locale'], $data['activity_info']);
+                    } else {
+                        $orgData['activity_info'] = null;
+                    }
+
+                    if (!empty($data['contacts'])) {
+                        $orgData['contacts'] = $this->trans($data['locale'], $data['contacts']);
+                    } else {
+                        $orgData['contacts'] = null;
+                    }
+
                     if (!empty($orgData)) {
                         foreach ($orgData as $prop => $val) {
                             $organisation->$prop = $val;
@@ -1120,7 +1119,7 @@ class OrganisationController extends ApiController
             'logo_data'             => 'nullable|string',
             'activity_info'         => 'nullable|string',
             'active'                => 'nullable|bool',
-            'custom_fields.*.label' => 'nullable',
+            'custom_fields.*.label' => 'nullable|max:191',
             'custom_fields.*.value' => 'nullable',
         ]);
 
@@ -1164,54 +1163,54 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
 
-            $newGroup->name = $this->trans($post['locale'], $post['name']);
-            $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
-            $newGroup->uri = !empty($post['uri'])
-                ? $post['uri']
-                : $this->generateOrgUri();
-
-            $newGroup->type = Organisation::TYPE_GROUP;
-            $newGroup->active = Organisation::ACTIVE_FALSE;
-            $newGroup->approved = Organisation::APPROVED_FALSE;
-            $newGroup->parent_org_id = null;
-
-            if (!empty($post['custom_fields'])) {
-                foreach ($post['custom_fields'] as $fieldSet) {
-                    if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                        $customFields[] = [
-                            'value' => $fieldSet['value'],
-                            'label' => $fieldSet['label'],
-                        ];
-                    }
-                }
-            }
-
             if (isset($newGroup->logo_data) && !$imageError) {
                 DB::beginTransaction();
 
                 try {
-                    $newGroup->save();
+                        $newGroup->name = $this->trans($post['locale'], $post['name']);
+                        $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
+                        $newGroup->uri = !empty($post['uri'])
+                            ? $post['uri']
+                            : $this->generateOrgUri();
 
-                    if ($newGroup) {
-                        $userToOrgRole = new UserToOrgRole;
-                        $userToOrgRole->org_id = $newGroup->id;
-                        $userToOrgRole->user_id = \Auth::user()->id;
-                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+                        $newGroup->type = Organisation::TYPE_GROUP;
+                        $newGroup->active = Organisation::ACTIVE_FALSE;
+                        $newGroup->approved = Organisation::APPROVED_FALSE;
+                        $newGroup->parent_org_id = null;
 
-                        $userToOrgRole->save();
-
-                        if (!empty($customFields)) {
-                            if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
-                                DB::rollback();
-
-                                return $this->errorResponse(__('custom.add_group_fail'));
+                        if (!empty($post['custom_fields'])) {
+                            foreach ($post['custom_fields'] as $fieldSet) {
+                                if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                    $customFields[] = [
+                                        'value' => $fieldSet['value'],
+                                        'label' => $fieldSet['label'],
+                                    ];
+                                }
                             }
                         }
 
-                        DB::commit();
+                        $newGroup->save();
 
-                        return $this->successResponse(['id' => $newGroup->id], true);
-                    }
+                        if ($newGroup) {
+                            $userToOrgRole = new UserToOrgRole;
+                            $userToOrgRole->org_id = $newGroup->id;
+                            $userToOrgRole->user_id = \Auth::user()->id;
+                            $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                            $userToOrgRole->save();
+
+                            if (!empty($customFields)) {
+                                if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
+                                    DB::rollback();
+
+                                    return $this->errorResponse(__('custom.add_group_fail'));
+                                }
+                            }
+
+                            DB::commit();
+
+                            return $this->successResponse(['id' => $newGroup->id], true);
+                        }
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
@@ -1320,14 +1319,6 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
 
-            if (!empty($data['name'])) {
-                $newGroupData['name'] = $this->trans($data['locale'], $data['name']);
-            }
-
-            if (!empty($data['description'])) {
-                $newGroupData['descript'] = $this->trans($data['locale'], $data['description']);
-            }
-
             if (!empty($data['uri'])) {
                 $newGroupData['uri'] = $data['uri'];
             }
@@ -1343,6 +1334,14 @@ class OrganisationController extends ApiController
                     DB::beginTransaction();
 
                     try {
+                        if (!empty($data['name'])) {
+                            $newGroupData['name'] = $this->trans($data['locale'], $data['name']);
+                        }
+
+                        if (!empty($data['description'])) {
+                            $newGroupData['descript'] = $this->trans($data['locale'], $data['description']);
+                        }
+
                         foreach ($newGroupData as $prop => $val) {
                             $group->$prop = $val;
                         }

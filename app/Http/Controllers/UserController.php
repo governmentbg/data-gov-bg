@@ -2859,6 +2859,27 @@ class UserController extends Controller {
             }
         }
 
+        if ($request->has('generate')) {
+            $user = User::where('id', $request->offsetGet('id'))->first();
+
+            $mailData = [
+                'user'  => $user->firstname,
+                'hash'  => $user->hash_id,
+                'mail'  => $user->email,
+                'id'    => $user->id,
+            ];
+
+            Mail::send('mail/confirmationMail', $mailData, function ($m) use ($mailData) {
+                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                $m->to($mailData['mail'], $mailData['user']);
+                $m->subject(__('custom.register_confirmation'));
+            });
+
+            $request->session()->flash('alert-warning', __('custom.mail_sent_again'));
+
+            return redirect('login');
+        }
+
         return view('confirmError', compact('class'));
     }
 

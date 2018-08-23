@@ -388,7 +388,6 @@ class DocumentController extends ApiController
 
             $query->orderBy($order['field'], $order['type']);
 
-
             $locale = \LaravelLocalization::getCurrentLocale();
             $results = [];
 

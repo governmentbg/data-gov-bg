@@ -2385,7 +2385,7 @@ class UserController extends Controller {
                     $res = $api->listOrganisations($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->organisations)) {
-                        $objType = ActionsHistory::MODULE_NAMES[2];
+                        $objType = Role::MODULE_NAMES[2];
                         $actObjData[$objType] = [];
 
                         foreach ($res->organisations as $org) {
@@ -2430,7 +2430,7 @@ class UserController extends Controller {
                     $res = $api->listGroups($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->groups)) {
-                        $objType = ActionsHistory::MODULE_NAMES[3];
+                        $objType = Role::MODULE_NAMES[3];
                         $actObjData[$objType] = [];
 
                         foreach ($res->groups as $group) {
@@ -2474,7 +2474,7 @@ class UserController extends Controller {
                     $res = $api->listMainCategories($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->categories)) {
-                        $objType = ActionsHistory::MODULE_NAMES[0];
+                        $objType = Role::MODULE_NAMES[0];
                         $actObjData[$objType] = [];
 
                         foreach ($res->categories as $category) {
@@ -2518,7 +2518,7 @@ class UserController extends Controller {
                     $res = $api->listTags($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->tags)) {
-                        $objType = ActionsHistory::MODULE_NAMES[1];
+                        $objType = Role::MODULE_NAMES[1];
                         $actObjData[$objType] = [];
 
                         foreach ($res->tags as $tag) {
@@ -2564,7 +2564,7 @@ class UserController extends Controller {
                     $res = $api->listUsers($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->users)) {
-                        $objType = ActionsHistory::MODULE_NAMES[4];
+                        $objType = Role::MODULE_NAMES[4];
                         $actObjData[$objType] = [];
 
                         foreach ($res->users as $followUser) {
@@ -2613,7 +2613,7 @@ class UserController extends Controller {
 
             // user profile actions
             if (!isset($filters[$filter])) {
-                $objType = ActionsHistory::MODULE_NAMES[4];
+                $objType = Role::MODULE_NAMES[4];
 
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
@@ -2678,7 +2678,7 @@ class UserController extends Controller {
         $res = $api->listDataSets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
-            $objType = ActionsHistory::MODULE_NAMES[5];
+            $objType = Role::MODULE_NAMES[5];
 
             if (!isset($actObjData[$objType])) {
                 $actObjData[$objType] = [];
@@ -2744,7 +2744,7 @@ class UserController extends Controller {
                     $criteria['dataset_ids'][] = $dataset->id;
 
                     if (!empty($dataset->resource)) {
-                        $objTypeRes = ActionsHistory::MODULE_NAMES[6];
+                        $objTypeRes = Role::MODULE_NAMES[6];
 
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [

@@ -154,18 +154,6 @@ $(function() {
 });
 
 $(function() {
-    $('.js-org-type').on('ifChecked', function(event) {
-        if (typeof $('.js-org-approved') != 'undefined') {
-            if ($(this).hasClass('show-approved')) {
-                $('.js-org-approved').removeClass('hidden');
-            } else {
-                $('.js-org-approved').addClass('hidden');
-            }
-        }
-    });
-});
-
-$(function() {
     $('.js-terms-req-preview, .js-terms-req-close').on('click', function(event) {
         var index = $(this).data('index');
         var action = $(this).data('action');

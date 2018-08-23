@@ -92,7 +92,6 @@
                                 <input
                                     type="radio"
                                     name="type"
-                                    class="js-org-type {{ $id == \App\Organisation::TYPE_COUNTRY ? 'show-approved' : '' }}"
                                     value="{{ $id }}"
                                     {{ isset($model['type']) && $model['type'] == $id ? 'checked' : '' }}
                                 >
@@ -121,14 +120,7 @@
                     </div>
                 </div>
             </div>
-            <div
-                class="
-                    form-group
-                    row
-                    js-org-approved
-                    {{ isset($model['type']) && $model['type'] == \App\Organisation::TYPE_CIVILIAN ? 'hidden' : '' }}
-                "
-            >
+            <div class="form-group row">
                 <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.org_approved') }}:</label>
                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                     <div class="js-check">

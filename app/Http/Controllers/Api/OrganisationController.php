@@ -125,9 +125,7 @@ class OrganisationController extends ApiController
                 $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
                 $organisation->active = isset($data['active']) ? $data['active'] : 0;
 
-                if ($data['type'] == Organisation::TYPE_CIVILIAN) {
-                    $organisation->approved = Organisation::APPROVED_TRUE;
-                } elseif (isset($data['approved']) && $data['type'] == Organisation::TYPE_COUNTRY) {
+                if (!empty($data['approved'])) {
                     $organisation->approved = $data['approved'];
                 } else {
                     $organisation->approved = Organisation::APPROVED_FALSE;
@@ -341,9 +339,8 @@ class OrganisationController extends ApiController
                     $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-                if ($data['type'] == Organisation::TYPE_CIVILIAN) {
-                    $orgData['approved'] = Organisation::APPROVED_TRUE;
-                } elseif (isset($data['approved']) && $data['type'] == Organisation::TYPE_COUNTRY) {
+
+                if (!empty($data['approved'])) {
                     $orgData['approved'] = $data['approved'];
                 } else {
                     $orgData['approved'] = Organisation::APPROVED_FALSE;

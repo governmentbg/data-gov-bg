@@ -872,6 +872,8 @@ class UserController extends ApiController
                 $mailData = [
                     'user'  => $user->firstname,
                     'hash'  => $user->hash_id,
+                    'id'    => $user->id,
+                    'mail'  => $user->email
                 ];
 
                 Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {

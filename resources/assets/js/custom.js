@@ -13,11 +13,29 @@ $(function() {
     });
 });
 
-$(function() {
-    if ($('.js-check').length) {
-        $('.js-check').iCheck({
-            checkboxClass: 'icheckbox_square-green',
-            radioClass: 'iradio_square-green',
+$(function () {
+    var $checkboxes = $('.js-check');
+
+    if ($checkboxes.length) {
+        $checkboxes.each(function () {
+            var $checkbox = $(this);
+
+            $checkbox.iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green'
+            });
+
+            $checkbox.on('ifClicked', function () {
+                if ($(this).hasClass('js-uncheck')) {
+                    if ($('input', $(this)).prop('checked')) {
+                        $(this).iCheck('uncheck');
+                    }
+                }
+
+                if ($(this).hasClass('js-submit')) {
+                    $(this).parents('form').submit();
+                }
+            });
         });
     }
 });

@@ -195,6 +195,76 @@ button:focus {
     margin-left: -40px;
 }
 
+.m-l-r-none {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.m-l-r-xs {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.m-l-r-sm {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.m-l-r {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.m-l-r-md {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.m-l-r-lg {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.m-l-r-xl {
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.m-l-r-n-xxs {
+    margin-left: -1px;
+    margin-right: -1px;
+}
+
+.m-l-r-n-xs {
+    margin-left: -5px;
+    margin-right: -5px;
+}
+
+.m-l-r-n-sm {
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.m-l-r-n {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.m-l-r-n-md {
+    margin-left: -20px;
+    margin-right: -20px;
+}
+
+.m-l-r-n-lg {
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
+.m-l-r-n-xl {
+    margin-left: -40px;
+    margin-right: -40px;
+}
+
 .m-t-none {
     margin-top: 0;
 }
@@ -389,6 +459,11 @@ button:focus {
 
 .space-30 {
     margin: 30px 0;
+}
+
+.shrink {
+    width: 1px;
+    white-space: nowrap;
 }
 
 .img-sm {

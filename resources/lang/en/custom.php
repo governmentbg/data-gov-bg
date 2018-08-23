@@ -385,6 +385,7 @@ return [
     'delete_role_fail' => 'Delete role failure',
     'list_role_fail' => 'List roles data failure',
     'get_role_right_fail' => 'Get role rights failure',
+    'modify_role_right_fail' => 'Modify role rights failure',
     'no_role_found' => 'No role found',
     'add_section_fail' => 'Add section failure',
     'edit_section_fail' => 'Edit section failure',
@@ -504,6 +505,9 @@ return [
     'add_role' => 'Add new Role',
     'edit_role' => 'Edit Role',
     'view_role' => 'View Role',
+    'edit_rights' => 'Enter rights',
+    'rights' => 'Rights',
+    'about' => 'About',
     'code' => 'Code',
     'language_list' => 'Languages List',
     'add_language' => 'Add Language',
@@ -541,5 +545,7 @@ return [
     'processed' => 'processed',
     'all' => 'all',
     'request' => 'request',
+    'for_own_records' => 'for own records',
+    'for_api' => 'for api',
     'lastname' => 'last name'
 ];

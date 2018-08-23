@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
     Route::match(['get', 'post'], '/admin/roles/view/{id}', 'Admin\RoleController@viewRole');
     Route::match(['get', 'post'], '/admin/roles/delete/{id}', 'Admin\RoleController@deleteRole');
+    Route::match(['get', 'post'], '/admin/roles/rights/{id}', 'Admin\RoleController@roleRights');
 
     Route::match(['get', 'post'], '/admin/languages', 'Admin\LangController@list');
     Route::match(['get', 'post'], '/admin/languages/add', 'Admin\LangController@addLang');

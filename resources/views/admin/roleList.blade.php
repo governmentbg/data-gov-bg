@@ -55,10 +55,14 @@
                                             href="{{ url('/admin/roles/view/'. $role->id) }}"
                                         >{{ utrans('custom.preview') }}</a>
                                         <a
+                                            class="link-action"
+                                            href="{{ url('/admin/roles/rights/'. $role->id) }}"
+                                        >{{ utrans('custom.rights') }}</a>
+                                        <a
                                             class="link-action red"
                                             href="{{ url('/admin/roles/delete/'. $role->id) }}"
                                             data-confirm="{{ __('custom.remove_data') }}"
-                                        >{{ __('custom.delete') }}</a>
+                                        >{{ utrans('custom.delete') }}</a>
                                     </td>
                                 </tr>
                                 <input type="hidden" name="id" value="{{ $role->id }}">

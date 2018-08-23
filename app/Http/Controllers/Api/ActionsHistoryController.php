@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\ApiController;
-use Illuminate\Http\Request;
-use \App\ActionsHistory;
-use \App\DataSet;
+use App\Role;
 use \App\User;
 use \Validator;
+use \App\DataSet;
+use \App\ActionsHistory;
+use Illuminate\Http\Request;
+use App\Http\Controllers\ApiController;
 
 class ActionsHistoryController extends ApiController
 {
@@ -113,31 +114,31 @@ class ActionsHistoryController extends ApiController
 
         $actObjCriteria = [];
         if (isset($criteria['category_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[0]] = $criteria['category_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[0]] = $criteria['category_ids'];
         }
 
         if (isset($criteria['tag_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[1]] = $criteria['tag_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[1]] = $criteria['tag_ids'];
         }
 
         if (isset($criteria['org_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[2]] = $criteria['org_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[2]] = $criteria['org_ids'];
         }
 
         if (isset($criteria['group_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[3]] = $criteria['group_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[3]] = $criteria['group_ids'];
         }
 
         if (isset($criteria['user_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[4]] = $criteria['user_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[4]] = $criteria['user_ids'];
         }
 
         if (isset($criteria['dataset_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[5]] = $criteria['dataset_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[5]] = $criteria['dataset_ids'];
         }
 
         if (isset($criteria['resource_uris'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[6]] = $criteria['resource_uris'];
+            $actObjCriteria[Role::MODULE_NAMES[6]] = $criteria['resource_uris'];
         }
 
         if (!empty($actObjCriteria)) {
@@ -196,7 +197,7 @@ class ActionsHistoryController extends ApiController
      */
     public function listModules(Request $request)
     {
-        $modules = ActionsHistory::getModuleNames();
+        $modules = Role::getModuleNames();
 
         if (!empty($modules)) {
             foreach ($modules as $module) {

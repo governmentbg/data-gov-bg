@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use App\Http\Controllers\ApiController;
-use Illuminate\Support\Facades\Log;
 use App\Role;
 use App\RoleRight;
+use App\ActionsHistory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 
 class RoleController extends ApiController
 {
@@ -137,7 +139,7 @@ class RoleController extends ApiController
     public function listRoles(Request $request)
     {
         $post = $request->get('criteria', []);
-error_log('post: '. print_r($post, true));
+
         $validator = \Validator::make($post, [
             'role_id'               => 'nullable|int',
             'active'                => 'nullable|bool',
@@ -193,14 +195,17 @@ error_log('post: '. print_r($post, true));
 
             try {
                 $role = Role::find($id);
-                $rights = RoleRight::getRightsDescription();
+                $rights = Role::getRightsDescription();
+                $result = [];
 
                 foreach ($role->rights as $right) {
                     $right['right_id'] = $right->right;
-                    $right['right'] = $rights[$right->right];
+                    $right['right'] = $rights[$right['right_id']];
+
+                    $result[] = $right->toArray();
                 }
 
-                return $this->successResponse(['rights' => $role->rights], true);
+                return $this->successResponse(['rights' => $result], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -226,25 +231,24 @@ error_log('post: '. print_r($post, true));
     public function modifyRoleRights(Request $request)
     {
         $post = $request->all();
-        $id = $request->get('id');
+        $modules = Role::getModuleNames();
+        $rights = Role::getRights();
 
         $validator = \Validator::make($post, [
-            'data.*.module_name'       => 'required|string|max:255',
-            'data.*.right'             => 'required|integer',
-            'data.*.limit_to_own_data' => 'required|bool',
-            'data.*.api'               => 'required|bool',
+            'id'                        => 'required|int|exists:roles,id',
+            'data.*.module_name'        => 'required|string|in:'. implode(',', $modules),
+            'data.*.right'              => 'required|int|in:'. implode(',', array_flip($rights)),
+            'data.*.limit_to_own_data'  => 'required|bool',
+            'data.*.api'                => 'required|bool',
         ]);
 
-        if (
-            empty($id)
-            || !Role::where('id', $id)->get()->count()
-            || $validator->fails()
-        ) {
-            $response = $this->errorResponse(__('custom.no_role_found'), $validator->errors()->messages());
-        } else {
-            $role = Role::where('id', $id)->first();
+        if (!$validator->fails()) {
+            $role = Role::where('id', $post['id'])->first();
             $rights = $role->rights;
             $names = $request->input('data.*.module_name');
+            $success = true;
+
+            DB::beginTransaction();
 
             try {
                 foreach ($rights as $right) {
@@ -254,27 +258,32 @@ error_log('post: '. print_r($post, true));
                 }
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
-                return $this->errorResponse();
+
+                $success = false;
             }
 
             try {
                 foreach ($post['data'] as $module) {
-                    $newRight = RoleRight::updateOrCreate(
-                        ['role_id' => $id, 'module_name' => $module['module_name']],
-                        $module
-                    );
-
-                    $response = $newRight ? $this->successResponse() : $this->errorResponse(__('custom.no_role_found'));
-
-                    if (empty($newRight)) {
-                        break;
-                    }
+                    $newRight = RoleRight::updateOrCreate([
+                        'role_id'       => $post['id'],
+                        'module_name'   => $module['module_name']
+                    ], $module);
                 }
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
+
+                $success = false;
             }
+
+            if ($success) {
+                DB::commit();
+
+                return $this->successResponse();
+            }
+
+            DB::rollback();
         }
 
-        return $response;
+        return $this->errorResponse(__('custom.modify_role_right_fail'), $validator->errors()->messages());
     }
 }

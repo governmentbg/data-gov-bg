@@ -384,7 +384,6 @@ class OrganisationController extends ApiController
         return $this->errorResponse(__('custom.edit_org_fail'), $errors);
     }
 
-
     /**
      * Delete organisation record
      *
@@ -450,7 +449,6 @@ class OrganisationController extends ApiController
     public function listOrganisations(Request $request)
     {
         $results = [];
-        $criteria = [];
         $count = 0;
 
         $post = $request->all();
@@ -489,6 +487,7 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $criteria = [];
+
             if (isset($request->criteria['active'])) {
                 $criteria['active'] = $request->criteria['active'];
             }
@@ -507,6 +506,7 @@ class OrganisationController extends ApiController
 
             try {
                 $query = Organisation::with('CustomSetting');
+
                 if (isset($request->criteria['type'])) {
                     $query->where('type', $request->criteria['type']);
                 } else {
@@ -1790,6 +1790,7 @@ class OrganisationController extends ApiController
                             return false;
                         }
                     }
+
                     DB::commit();
 
                     return true;

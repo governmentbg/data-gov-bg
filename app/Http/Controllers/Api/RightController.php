@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
-use App\RoleRight;
+use App\Role;
 
 class RightController extends ApiController
 {
@@ -17,7 +17,7 @@ class RightController extends ApiController
      */
     public function listRights(Request $request)
     {
-        $rights = RoleRight::getRights();
+        $rights = Role::getRights();
 
         if (!empty($rights)) {
             foreach ($rights as $id => $right) {

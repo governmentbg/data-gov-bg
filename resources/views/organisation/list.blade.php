@@ -14,20 +14,20 @@
                                 <div>
                                     <ul class="nav filter-type right-border">
                                         @foreach ($orgTypes as $orgType)
-                                        <li>
-                                            <a
-                                                href="{{
-                                                    action(
-                                                        'OrganisationController@list',
-                                                        array_merge(
-                                                            ['type' => $orgType->id],
-                                                            array_except(app('request')->input(), ['type', 'page', 'q'])
+                                            <li>
+                                                <a
+                                                    href="{{
+                                                        action(
+                                                            'OrganisationController@list',
+                                                            array_merge(
+                                                                ['type' => $orgType->id],
+                                                                array_except(app('request')->input(), ['type', 'page', 'q'])
+                                                            )
                                                         )
-                                                    )
-                                                }}"
-                                                class="{{ ($type == $orgType->id) ? 'active' : '' }}"
-                                            >{{ $orgType->name }}</a>
-                                        </li>
+                                                    }}"
+                                                    class="{{ ($type == $orgType->id) ? 'active' : '' }}"
+                                                >{{ $orgType->name }}</a>
+                                            </li>
                                         @endforeach
                                     </ul>
                                 </div>

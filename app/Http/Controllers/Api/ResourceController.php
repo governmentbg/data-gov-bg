@@ -55,27 +55,27 @@ class ResourceController extends ApiController
             $errors = $validator->errors()->messages();
         } else {
             $validator = \Validator::make($post['data'], [
-                'description'          => 'nullable',
+                'description'          => 'nullable|max:8000',
                 'locale'               => 'nullable|max:5',
-                'name'                 => 'required_with:locale',
-                'name.bg'              => 'required_without:locale|string',
-                'version'              => 'nullable',
+                'name'                 => 'required_with:locale|max:191',
+                'name.bg'              => 'required_without:locale|string|max:191',
+                'version'              => 'nullable|max:15',
                 'file_format'          => 'nullable|string',
-                'schema_description'   => 'nullable|string',
-                'schema_url'           => 'nullable|url',
-                'type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
-                'resource_url'         => 'nullable|url|required_if:type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'schema_description'   => 'nullable|string|max:8000',
+                'schema_url'           => 'nullable|url|max:191',
+                'type'                 => 'required|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'resource_url'         => 'nullable|url|max:191|required_if:type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'nullable|string|required_if:type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-                'authentication'       => 'nullable|string|required_if:type,'. Resource::TYPE_API,
-                'http_headers'         => 'nullable|string|required_if:type,'. Resource::TYPE_API,
-                'post_data'            => 'nullable|string',
+                'authentication'       => 'nullable|string|max:191|required_if:type,'. Resource::TYPE_API,
+                'http_headers'         => 'nullable|string|max:8000|required_if:type,'. Resource::TYPE_API,
+                'post_data'            => 'nullable|string|max:8000',
                 'custom_fields'        => 'nullable|array',
-                'custom_fields.label'  => 'nullable|string',
-                'custom_fields.value'  => 'nullable|string',
+                'custom_fields.label'  => 'nullable|string|max:191',
+                'custom_fields.value'  => 'nullable|string|max:8000',
             ]);
         }
 
-        $validator->sometimes('data.post_data', 'required', function($post) use ($requestTypes) {
+        $validator->sometimes('post_data', 'required', function($post) use ($requestTypes) {
             if (
                 isset($post['data']['type'])
                 && $post['data']['type'] == Resource::TYPE_API
@@ -91,27 +91,27 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             DB::beginTransaction();
 
-            $dbData = [
-                'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
-                'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
-                'descript'          => isset($post['data']['description'])
-                    ? $this->trans($post['data']['locale'], $post['data']['description'])
-                    : null,
-                'uri'               => Uuid::generate(4)->string,
-                'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
-                'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
-                'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
-                'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
-                'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
-                'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
-                'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
-                'file_format'       => isset($post['data']['file_format']) ? Resource::getFormatsCode($post['data']['file_format']) : null,
-                'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
-                'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
-                'is_reported'       => 0,
-            ];
-
             try {
+                $dbData = [
+                    'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
+                    'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
+                    'descript'          => isset($post['data']['description'])
+                        ? $this->trans($post['data']['locale'], $post['data']['description'])
+                        : null,
+                    'uri'               => Uuid::generate(4)->string,
+                    'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
+                    'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
+                    'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
+                    'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
+                    'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
+                    'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
+                    'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
+                    'file_format'       => isset($post['data']['file_format']) ? Resource::getFormatsCode($post['data']['file_format']) : null,
+                    'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
+                    'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
+                    'is_reported'       => 0,
+                ];
+
                 $resource = Resource::create($dbData);
                 $resource->searchable();
 
@@ -144,7 +144,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'data'          => 'required|array',
         ]);
 
@@ -230,19 +230,19 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
                 'resource_uri'         => 'nullable|string|unique:resources,uri',
-                'name'                 => 'nullable|string',
-                'description'          => 'nullable|string',
-                'file_format'          => 'nullable|string',
+                'name'                 => 'nullable|string|max:191',
+                'description'          => 'nullable|string|max:8000',
+                'file_format'          => 'nullable|string|max:191',
                 'locale'               => 'nullable|string|required_with:data.name,data.description|max:5',
-                'version'              => 'nullable|string',
-                'schema_description'   => 'nullable|string',
-                'schema_url'           => 'nullable|url',
-                'type'                 => 'nullable|int|in:'. implode(',', array_keys(Resource::getTypes())),
-                'resource_url'         => 'nullable|url|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'version'              => 'nullable|string|max:15',
+                'schema_description'   => 'nullable|string|max:8000',
+                'schema_url'           => 'nullable|url|max:191',
+                'type'                 => 'nullable|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'resource_url'         => 'nullable|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-                'authentication'       => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
-                'http_headers'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API,
-                'post_data'            => 'nullable|string',
+                'authentication'       => 'nullable|string|max:191|required_if:data.type,'. Resource::TYPE_API,
+                'http_headers'         => 'nullable|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
+                'post_data'            => 'nullable|string|max:8000',
                 'custom_fields'        => 'nullable|array',
             ]);
         }
@@ -263,14 +263,6 @@ class ResourceController extends ApiController
 
             if (isset($post['data']['resource_uri'])) {
                 $resource->uri = $post['data']['resource_uri'];
-            }
-
-            if (isset($post['data']['name'])) {
-                $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
-            }
-
-            if (isset($post['data']['description'])) {
-                $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
             }
 
             if (isset($post['data']['version'])) {
@@ -314,6 +306,14 @@ class ResourceController extends ApiController
             }
 
             try {
+                if (isset($post['data']['name'])) {
+                    $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
+                }
+
+                if (isset($post['data']['description'])) {
+                    $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
+                }
+
                 $resource->save();
 
                 DB::commit();
@@ -343,7 +343,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'data'          => 'required|array',
         ]);
 
@@ -383,7 +383,7 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
 
         if (!$validator->fails()) {
             try {
@@ -425,15 +425,15 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['criteria'], [
                 'locale'       => 'nullable|string|max:5',
-                'resource_uri' => 'nullable|string|exists:resources,uri,deleted_at,NULL',
-                'dataset_uri'  => 'nullable|string|exists:data_sets,uri,deleted_at,NULL',
+                'resource_uri' => 'nullable|string|exists:resources,uri,deleted_at,NULL|max:191',
+                'dataset_uri'  => 'nullable|string|exists:data_sets,uri,deleted_at,NULL|max:191',
                 'reported'     => 'nullable|boolean',
                 'order'        => 'nullable|array',
             ]);
@@ -443,8 +443,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -526,7 +526,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'locale'        => 'nullable|string|max:5',
         ]);
 
@@ -579,7 +579,7 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
 
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
@@ -606,7 +606,7 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
 
         if (!$validator->fails()) {
             // TODO tool
@@ -628,7 +628,7 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL']);
+        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
 
         if (!$validator->fails()) {
             try {
@@ -666,13 +666,13 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['criteria'], [
-                'keywords'     => 'required|string',
+                'keywords'     => 'required|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -681,8 +681,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -749,13 +749,13 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'namespaces'        => 'required|string',
-            'query'             => 'required',
-            'order.type'        => 'nullable|string',
-            'order.field'       => 'nullable|string',
-            'format'            => 'nullable|string',
-            'records_per_page'  => 'nullable|int',
-            'page_number'       => 'nullable|int',
+            'namespaces'        => 'required|string|max:191',
+            'query'             => 'required|max:8000',
+            'order.type'        => 'nullable|string|max:191',
+            'order.field'       => 'nullable|string|max:191',
+            'format'            => 'nullable|string|max:191',
+            'records_per_page'  => 'nullable|int|digits_between:1,10',
+            'page_number'       => 'nullable|int|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -842,7 +842,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'user_id'   => 'required|int|exists:users,id',
+            'user_id'   => 'required|int|exists:users,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {

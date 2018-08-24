@@ -13,7 +13,7 @@
                 <a
                     class="btn btn-primary add"
                     href="{{ url('/admin/roles/add') }}"
-                >{{ ultrans('custom.add') }}</a><br>
+                >{{ uctrans('custom.add') }}</a><br>
             </div>
             <div class="col-lg-12">
                 <div class="table-responsive opn-tbl text-center">
@@ -48,17 +48,21 @@
                                     <td class="buttons">
                                         <a
                                             class="link-action"
-                                            href="{{ url('/admin/roles/delete/'. $role->id) }}"
-                                            data-confirm="Изтриване на данните?"
-                                        >{{ __('custom.delete') }}</a>
-                                        <a
-                                            class="link-action"
                                             href="{{ url('/admin/roles/edit/'. $role->id) }}"
                                         >{{ utrans('custom.edit') }}</a>
                                         <a
                                             class="link-action"
                                             href="{{ url('/admin/roles/view/'. $role->id) }}"
                                         >{{ utrans('custom.preview') }}</a>
+                                        <a
+                                            class="link-action"
+                                            href="{{ url('/admin/roles/rights/'. $role->id) }}"
+                                        >{{ utrans('custom.rights') }}</a>
+                                        <a
+                                            class="link-action red"
+                                            href="{{ url('/admin/roles/delete/'. $role->id) }}"
+                                            data-confirm="{{ __('custom.remove_data') }}"
+                                        >{{ utrans('custom.delete') }}</a>
                                     </td>
                                 </tr>
                                 <input type="hidden" name="id" value="{{ $role->id }}">

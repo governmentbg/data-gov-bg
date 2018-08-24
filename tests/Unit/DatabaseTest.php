@@ -224,7 +224,7 @@ class DatabaseTest extends TestCase
      */
     private function roleRights()
     {
-        $rights = array_keys(RoleRight::getRights());
+        $rights = array_keys(Role::getRights());
         $roles = Role::limit(self::ROLES_RECORDS)->get()->toArray();
         // Test creation
         foreach ($roles as $role) {
@@ -587,7 +587,7 @@ class DatabaseTest extends TestCase
     {
         $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
         $types = array_keys(ActionsHistory::getTypes());
-        $modules = ActionsHistory::MODULE_NAMES;
+        $modules = Role::MODULE_NAMES;
 
         // Test creation
         foreach (range(1, self::ACTIONS_HISTORY_RECORDS) as $i) {

@@ -29,7 +29,7 @@ class TermsOfUseRequestController extends ApiController
         $data = $request->get('data', []);
         //validate request data
         $validator = \validator::make($data, [
-            'description'   => 'required|string',
+            'description'   => 'required|string|max:8000',
             'firstname'     => 'required|string|max:100',
             'lastname'      => 'required|string|max:100',
             'email'         => 'required|email|string|max:191',
@@ -86,7 +86,7 @@ class TermsOfUseRequestController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'description'  => 'required|string',
+                'description'  => 'required|string|max:8000',
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
                 'email'        => 'required|email|string|max:191',
@@ -126,7 +126,7 @@ class TermsOfUseRequestController extends ApiController
     {
         $post = $request->all();
         $validator = \Validator::make($post, [
-            'request_id'  => 'required|exists:terms_of_use_requests,id'
+            'request_id'  => 'required|exists:terms_of_use_requests,id|digits_between:1,10'
         ]);
 
         if ($validator->fails()) {
@@ -173,19 +173,19 @@ class TermsOfUseRequestController extends ApiController
 
         $validator = \Validator::make($data, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = isset($data['criteria']) ? $data['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
-                'request_id'   => 'nullable|integer|exists:terms_of_use_requests,id',
-                'status'       => 'nullable|integer',
+                'request_id'   => 'nullable|integer|exists:terms_of_use_requests,id|digits_between:1,10',
+                'status'       => 'nullable|integer|digits_between:1,3',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
-                'search'       => 'nullable|string',
+                'search'       => 'nullable|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -194,8 +194,8 @@ class TermsOfUseRequestController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string|in:asc,desc',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|in:asc,desc|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 

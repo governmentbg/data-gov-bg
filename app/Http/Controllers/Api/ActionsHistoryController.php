@@ -2,15 +2,67 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\ApiController;
-use Illuminate\Http\Request;
-use \App\ActionsHistory;
-use \App\DataSet;
-use \App\User;
+use App\Role;
 use \Validator;
+use \App\ActionsHistory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApiController;
 
 class ActionsHistoryController extends ApiController
 {
+    /**
+     * Add actions history record
+     *
+     * @param integer user_id - required
+     * @param string module_name - required
+     * @param string action - required
+     * @param integer action_object - required
+     * @param string action_msg - required
+     * @param integer ip_address - required
+     * @param array user_agent - required
+     *
+     * @return json response with success or failure
+     */
+    public function addActionHistory(Request $request)
+    {
+        $post = $request->all();
+        $modules = Role::getModuleNames();
+        $actions = ActionsHistory::getTypes();
+
+        $validator = Validator::make($post, [
+            'module_name'   => 'required|string|max:191|in:'. implode(',', $modules),
+            'action'        => 'required|int|digits_between:1,3|in:'. implode(',', array_flip($actions)),
+            'action_object' => 'required|max:191',
+            'action_msg'    => 'required|string|max:191',
+            'ip_address'    => 'required|string|max:15',
+            'user_agent'    => 'required|string|max:191',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $dbData = [
+                    'user_id'       => Auth::user()->id,
+                    'module_name'   => $post['module_name'],
+                    'action'        => $post['action'],
+                    'action_object' => $post['action_object'],
+                    'action_msg'    => $post['action_msg'],
+                    'ip_address'    => $post['ip_address'],
+                    'user_agent'    => $post['user_agent'],
+                    'occurrence'    => date('Y-m-d H:i:s'),
+                ];
+
+                $newRecord = ActionsHistory::create($dbData);
+
+                return $this->successResponse(['id' => $newRecord->id], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.add_action_fail'), $validator->errors()->messages());
+    }
+
     /**
      * Lists actions based on request input
      *
@@ -20,7 +72,7 @@ class ActionsHistoryController extends ApiController
      * @param string criteria[username] - optional
      * @param integer criteria[user_id] - optional
      * @param string criteria[module] - optional
-     * @param integer criteria[action] - optional
+     * @param array criteria[actions] - optional
      * @param array criteria[category_ids] - optional
      * @param array criteria[tag_ids] - optional
      * @param array criteria[org_ids] - optional
@@ -46,20 +98,28 @@ class ActionsHistoryController extends ApiController
         if (!$validator->fails()) {
             $criteria = isset($post['criteria']) ? $post['criteria'] : [];
             $validator = Validator::make($criteria, [
-                'period_from'   => 'nullable|date',
-                'period_to'     => 'nullable|date',
-                'username'      => 'nullable|string',
-                'user_id'       => 'nullable|integer',
-                'module'        => 'nullable',
-                'action'        => 'nullable|integer',
-                'category_ids'  => 'nullable|array',
-                'tag_ids'       => 'nullable|array',
-                'org_ids'       => 'nullable|array',
-                'group_ids'     => 'nullable|array',
-                'user_ids'      => 'nullable|array',
-                'dataset_ids'   => 'nullable|array',
-                'resource_uris' => 'nullable|array',
-                'ip_adress'     => 'nullable|string',
+                'period_from'     => 'nullable|date',
+                'period_to'       => 'nullable|date',
+                'username'        => 'nullable|string',
+                'user_id'         => 'nullable|integer',
+                'module'          => 'nullable',
+                'actions'         => 'nullable|array',
+                'actions.*'       => 'int|in:'. implode(',', array_keys(ActionsHistory::getTypes())),
+                'category_ids'    => 'nullable|array',
+                'category_ids.*'  => 'int',
+                'tag_ids'         => 'nullable|array',
+                'tag_ids.*'       => 'int',
+                'org_ids'         => 'nullable|array',
+                'org_ids.*'       => 'int',
+                'group_ids'       => 'nullable|array',
+                'group_ids.*'     => 'int',
+                'user_ids'        => 'nullable|array',
+                'user_ids.*'      => 'int',
+                'dataset_ids'     => 'nullable|array',
+                'dataset_ids.*'   => 'int',
+                'resource_uris'   => 'nullable|array',
+                'resource_uris.*' => 'string',
+                'ip_adress'       => 'nullable|string',
             ]);
         }
 
@@ -107,37 +167,37 @@ class ActionsHistoryController extends ApiController
             $history->where('ip_address', $criteria['ip_address']);
         }
 
-        if (isset($criteria['action'])) {
-            $history->where('action', $criteria['action']);
+        if (isset($criteria['actions'])) {
+            $history->whereIn('action', $criteria['actions']);
         }
 
         $actObjCriteria = [];
         if (isset($criteria['category_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[0]] = $criteria['category_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[0]] = $criteria['category_ids'];
         }
 
         if (isset($criteria['tag_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[1]] = $criteria['tag_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[1]] = $criteria['tag_ids'];
         }
 
         if (isset($criteria['org_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[2]] = $criteria['org_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[2]] = $criteria['org_ids'];
         }
 
         if (isset($criteria['group_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[3]] = $criteria['group_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[3]] = $criteria['group_ids'];
         }
 
         if (isset($criteria['user_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[4]] = $criteria['user_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[4]] = $criteria['user_ids'];
         }
 
         if (isset($criteria['dataset_ids'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[5]] = $criteria['dataset_ids'];
+            $actObjCriteria[Role::MODULE_NAMES[5]] = $criteria['dataset_ids'];
         }
 
         if (isset($criteria['resource_uris'])) {
-            $actObjCriteria[ActionsHistory::MODULE_NAMES[6]] = $criteria['resource_uris'];
+            $actObjCriteria[Role::MODULE_NAMES[6]] = $criteria['resource_uris'];
         }
 
         if (!empty($actObjCriteria)) {
@@ -196,16 +256,66 @@ class ActionsHistoryController extends ApiController
      */
     public function listModules(Request $request)
     {
-        $modules = ActionsHistory::getModuleNames();
+        $modules = Role::getModuleNames();
 
         if (!empty($modules)) {
             foreach ($modules as $module) {
                 $result[] = ['name' => $module];
             }
 
-            return $this->successResponse(['modules'=>$result], true);
+            return $this->successResponse(['modules' => $result], true);
         }
 
         return $this->errorResponse(__('custom.data_failure'));
+    }
+
+    /**
+     * List action types
+     *
+     * @param string locale - optional
+     * @param boolean publicOnly - optional
+     * @return json list with organisation types or error
+     */
+    public function listActionTypes(Request $request)
+    {
+        $results = [];
+
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'locale'     => 'nullable|string|exists:locale,locale,active,1',
+            'publicOnly' => 'nullable|bool',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                if (isset($post['locale'])) {
+                    $locale = $post['locale'];
+                } else {
+                    $locale = \LaravelLocalization::getCurrentLocale();
+                }
+
+                if (isset($post['publicOnly']) && $post['publicOnly']) {
+                    $actTypes = ActionsHistory::getPublicTypes();
+                } else {
+                    $actTypes = ActionsHistory::getTypes();
+                }
+
+                foreach ($actTypes as $typeId => $typeName) {
+                    $results[] = [
+                        'id'     => $typeId,
+                        'name'   => __($typeName, [], $locale),
+                        'locale' => $locale,
+                    ];
+                }
+
+                return $this->successResponse(['types' => $results], true);
+
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.list_act_types_fail'), $validator->errors()->messages());
     }
 }

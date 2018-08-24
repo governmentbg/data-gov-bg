@@ -39,8 +39,13 @@
                         </li>
                         <li>
                             <a
+                                class="{{ $view == 'users' ? 'active' : '' }}"
+                                href="{{ url('/admin/users') }}"
+                            >{{ trans_choice(__('custom.users'), 2) }}</a>
+                        <li>
+                            <a
                                 class="{{ $view == 'createProfile' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/users/create') }}"
                             >{{ __('custom.create_profile') }}</a>
                         </li>
                         <li>
@@ -78,6 +83,12 @@
                                 class="{{ $view == 'termsConditions' ? 'active' : '' }}"
                                 href="{{ url('/admin/terms-of-use/list') }}"
                             >{{ ultrans('custom.terms_and_conditions') }}</a>
+                        </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'termsConditionsReq' ? 'active' : '' }}"
+                                href="{{ url('/admin/terms-of-use-request/list') }}"
+                            >{{ ultrans('custom.terms_and_conditions_req') }}</a>
                         </li>
                         <li>
                             <a

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller as BaseController;
@@ -58,6 +59,78 @@ class Controller extends BaseController
         }
 
         return 'data:'. $mime .';base64,'. base64_encode($data);
+    }
+
+    /**
+     * Returns model with usernames instead of user ids for record signatures
+     *
+     * @param Model $model
+     *
+     * @return view
+     */
+    public function getModelUsernames($model) {
+        if (isset($model)) {
+            if (is_object($model)) {
+                if (
+                    $model->updated_by == $model->created_by
+                    && !is_null($model->created_by)
+                ) {
+                    $username = User::find($model->created_by)->username;
+                    $model->updated_by = $username;
+                    $model->created_by = $username;
+                } else {
+                    $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->username;
+                    $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->username;
+                }
+            } elseif (is_array($model)) {
+                $storage = [];
+
+                foreach ($model as $key => $item) {
+                    $createdId = $item->created_by;
+                    $updatedId = $item->updated_by;
+
+                    if (
+                        $item->updated_by == $item->created_by
+                        && !is_null($item->created_by)
+                    ) {
+                        if (!empty($storage[$item->created_by])) {
+                            $model[$key]->updated_by = $storage[$item->created_by];
+                            $model[$key]->created_by = $storage[$item->created_by];
+                        } else {
+                            $username = User::find($item->created_by)->username;
+                            $model[$key]->updated_by = $username;
+                            $model[$key]->created_by = $username;
+                            $storage[$createdId] = $username;
+                        }
+
+                    } else {
+                        if (!empty($storage[$item->created_by])) {
+                            $model[$key]->created_by = $storage[$item->created_by];
+                        } else {
+                            $username = is_null($item->created_by) ? null : User::find($item->created_by)->username;
+                            $model[$key]->created_by = $username;
+
+                            if (!is_null($username)) {
+                                $storage[$createdId] = $username;
+                            }
+                        }
+
+                        if (!empty($storage[$item->updated_by])) {
+                            $model[$key]->updated_by = $storage[$item->updated_by];
+                        } else {
+                            $username = is_null($item->updated_by) ? null : User::find($item->updated_by)->username;
+                            $model[$key]->updated_by = $username;
+
+                            if (!is_null($username)) {
+                                $storage[$updatedId] = $username;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $model;
     }
 
     protected function checkIsValidXML($xmlstr)

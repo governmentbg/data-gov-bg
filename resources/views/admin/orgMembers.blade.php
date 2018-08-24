@@ -139,15 +139,15 @@
                                         <div class="js-member-admin-controls">
                                             <button
                                                 class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
-                                            >{{ __('custom.edit') }}</button>
+                                            >{{ uctrans('custom.edit') }}</button>
                                             <form method="POST" class="inline-block">
                                                 {{ csrf_field() }}
                                                 <button
                                                     class="badge cust-btn badge-pill m-b-sm del-btn"
                                                     type="submit"
                                                     name="delete"
-                                                    onclick="return confirm('Изтриване на данните?');"
-                                                >{{ __('custom.remove') }}</button>
+                                                    data-confirm="{{ __('custom.remove_data') }}"
+                                                >{{ uctrans('custom.remove') }}</button>
                                                 <input name="user_id" type="hidden" value="{{ $member->id }}">
                                             </form>
                                         </div>
@@ -174,11 +174,11 @@
                                                 type="submit"
                                                 class="badge cust-btn badge-pill m-t-sm m-r-md"
                                                 name="edit_member"
-                                            >{{ __('custom.save') }}</button>
+                                            >{{ uctrans('custom.save') }}</button>
                                             <button
                                                 type="button"
                                                 class="badge cust-btn badge-pill m-t-sm js-member-cancel del-btn"
-                                            >{{ __('custom.cancel') }}</button>
+                                            >{{ uctrans('custom.cancel') }}</button>
                                         </form>
                                     </div>
                                 </div>
@@ -214,7 +214,7 @@
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="role" class="col-lg-2 col-form-label">{{ __('custom.name') }}: </label>
+                            <label for="role" class="col-lg-2 col-form-label">{{ uctrans('custom.name') }}: </label>
                             <div class="col-lg-10">
                                 <select
                                     class="js-ajax-autocomplete form-control"
@@ -249,8 +249,8 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ __('custom.close') }}</button>
-                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
+                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
+                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
                             </div>
                         </div>
                     </form>
@@ -265,7 +265,7 @@
         <div class="modal-content">
             <div class="frame">
                 <div class="p-w-md">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ __('custom.close') }}</span></button>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ uctrans('custom.close') }}</span></button>
                     <h2>{{ __('custom.add_user') }}</h2>
                 </div>
                 <div class="modal-body">
@@ -297,8 +297,8 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ __('custom.close') }}</button>
-                                <button type="submit" name="invite" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
+                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
+                                <button type="submit" name="invite" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
                             </div>
                         </div>
                     </form>

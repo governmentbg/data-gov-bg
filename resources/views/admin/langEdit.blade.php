@@ -10,7 +10,7 @@
         <div class="frame-wrap">
             <div class="frame">
                 <div class="row">
-                    <h3>{{ __('custom.edit_language') }}</h3>
+                    <h3 class="col-lg-12">{{ __('custom.edit_language') }}</h3>
                 </div>
                 <div class="form-group row">
                     <label for="lang" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.language') }}:</label>
@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <button type="submit" name="edit" class="btn btn-primary pull-right">{{ __('custom.save') }}</button>
+                    <button type="submit" name="edit" class="btn btn-primary pull-right">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </div>

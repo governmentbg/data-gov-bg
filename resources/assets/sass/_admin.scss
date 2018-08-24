@@ -21,6 +21,18 @@
             }
         }
     }
+
+    .adm-filter {
+        label {
+            font-size: 15pt;
+            font-weight: 100;
+        }
+
+        div {
+            margin-top: 3px;
+            padding-left: 17px;
+        }
+    }
 }
 
 .add-terms {
@@ -30,6 +42,37 @@
         padding: 20px 40px;
         @include mobile() {
             padding: 20px;
+        }
+    }
+}
+
+.terms-hr {
+    hr {
+        border-top: 1px solid #108f9e;
+    }
+}
+
+.from-to {
+    font-size: 22px;
+}
+
+.order-terms-req {
+    a {
+        &.active {
+            color: #108f9e;
+        }
+
+        padding-bottom: 10px;
+        padding-top: 10px;
+
+        &:first-child() {
+            border-right: 1px solid #108f9e;
+            height: 20px;
+            padding-right: 10px;
+        }
+
+        &:last-child() {
+            padding-left: 10px;
         }
     }
 }

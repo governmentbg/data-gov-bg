@@ -35,12 +35,12 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($post['data'], [
-                'name'         => 'required',
-                'description'  => 'required',
+                'name'         => 'required|max:191',
+                'description'  => 'required|max:8000',
                 'locale'       => 'nullable|string|max:5',
-                'filename'     => 'required|string',
-                'mimetype'     => 'required|string',
-                'data'         => 'required|string',
+                'filename'     => 'required|string|max:191',
+                'mimetype'     => 'required|string|max:191',
+                'data'         => 'required|string|max:4294967295',
             ]);
         }
 
@@ -88,18 +88,18 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'doc_id'            => 'required|integer|exists:documents,id',
+            'doc_id'            => 'required|integer|exists:documents,id|digits_between:1,10',
             'data'              => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($post['data'], [
-                'name'         => 'nullable',
-                'description'  => 'nullable',
+                'name'         => 'nullable|max:191',
+                'description'  => 'nullable|max:8000',
                 'locale'       => 'nullable|string|max:5',
-                'filename'     => 'nullable|string',
-                'mimetype'     => 'nullable|string',
-                'data'         => 'nullable|string',
+                'filename'     => 'nullable|string|max:191',
+                'mimetype'     => 'nullable|string|max:191',
+                'data'         => 'nullable|string|max:4294967295',
             ]);
         }
 
@@ -156,7 +156,7 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'doc_id' => 'required|integer|exists:documents,id',
+            'doc_id' => 'required|integer|exists:documents,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -198,18 +198,18 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'doc_id'       => 'nullable|integer',
+                'doc_id'       => 'nullable|integer|digits_between:1,10',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
                 'locale'       => 'nullable|string|max:5',
-                'date_type'    => 'nullable|string',
+                'date_type'    => 'nullable|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -218,8 +218,8 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -330,15 +330,15 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = $post['criteria'];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'search'       => 'required|string',
+                'search'       => 'required|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -347,8 +347,8 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -387,7 +387,6 @@ class DocumentController extends ApiController
             );
 
             $query->orderBy($order['field'], $order['type']);
-
 
             $locale = \LaravelLocalization::getCurrentLocale();
             $results = [];

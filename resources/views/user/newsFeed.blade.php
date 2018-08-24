@@ -19,7 +19,7 @@
                             <li><a class="{{ ($filter == 'groups') ? 'active' : '' }}" href="{{ url('/user/newsFeed/groups') }}">{{ utrans('custom.groups', 2) }}</a></li>
                             <li><a class="{{ ($filter == 'datasets') ? 'active' : '' }}" href="{{ url('/user/newsFeed/datasets') }}">{{ __('custom.data_sets') }}</a></li>
                             <li><a class="{{ ($filter == 'categories') ? 'active' : '' }}" href="{{ url('/user/newsFeed/categories') }}">{{ __('custom.main_topic') }}</a></li>
-                            <li><a class="{{ ($filter == 'tags') ? 'active' : '' }}" href="{{ url('/user/newsFeed/tags') }}">{{ __('custom.labels') }}</a></li>
+                            <li><a class="{{ ($filter == 'tags') ? 'active' : '' }}" href="{{ url('/user/newsFeed/tags') }}">{{ utrans('custom.tags', 2) }}</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -62,12 +62,17 @@
                                     $objOwnerLogo = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_logo'];
                                 } else {
                                     $objOwnerId = $actionHistory->user_id;
-                                    $objOwnerName = $actionHistory->user_firstname .' '. $actionHistory->user_lastname;
-                                    $objOwnerView = '/user/profile';
+                                    if ($actionHistory->user_firstname || $actionHistory->user_lastname) {
+                                        $objOwnerName = trim($actionHistory->user_firstname .' '. $actionHistory->user_lastname);
+                                    } else {
+                                        $objOwnerName = $actionHistory->user;
+                                    }
+                                    $objOwnerView = '/user/profile/'. $actionHistory->user_id;
                                     $objOwnerLogo = null;
                                 }
                                 $objId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_id'];
                                 $objName = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_name'];
+                                $objModule = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_module'];
                                 $objType = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_type'];
                                 $objView = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_view'];
                                 $parentObjId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_id'];
@@ -79,24 +84,27 @@
                                 <div class="col-xs-11 p-h-sm">
                                     <div class="col-md-1 col-xs-2 logo-img">
                                     @if (isset($objOwnerLogo))
-                                        <img class="img-responsive" src="{{ $objOwnerLogo }}"/>
-
+                                        <a href="{{ url($objOwnerView) }}">
+                                            <img class="img-responsive" src="{{ $objOwnerLogo }}"/>
+                                        </a>
                                     @endif
                                     </div>
                                     <div class="col-md-10 col-xs-10">
                                         <div>{{ __('custom.date_added') }}: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
-                                        <h3><a href="{{ url($objOwnerView. '/'. $objOwnerId) }}">{{ $objOwnerName }}</a></h3>
+                                        <h3><a href="{{ url($objOwnerView) }}">{{ $objOwnerName }}</a></h3>
                                         <p>
-                                            {{ strtolower($actionTypes[$actionHistory->action]) .' '. strtolower($actionHistory->module) }}
+                                            {{ $actionTypes[$actionHistory->action]['name'] .' '. $objModule }}
                                             @if ($objView != '')
-                                                <a href="{{ url($objView .'/'. $objId) }}"><b>{{ $objName }}</b></a>
+                                                <a href="{{ url($objView) }}"><b>{{ $objName }}</b></a>
                                             @else
                                                 <b>{{ $objName }}</b>
                                             @endif
                                             @if ($parentObjId != '')
-                                                 към {{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_type'] }}
-                                                 <a href="{{ url($actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_view']) .'/'. $parentObjId}}">
-                                                    <b>{{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_name'] }}</b></a>
+                                                {{ $actionTypes[$actionHistory->action]['linkWord'] }}
+                                                {{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_module'] }}
+                                                <a href="{{ url($actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_view']) }}">
+                                                    <b>{{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_name'] }}</b>
+                                                </a>
                                             @endif
                                             -
                                             @if ($hours == 24)

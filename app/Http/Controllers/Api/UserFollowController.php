@@ -33,13 +33,13 @@ class UserFollowController extends ApiController
         $data = $request->all();
 
         $validator = \Validator::make($data, [
-            'user_id'           => 'required|integer',
-            'org_id'            => 'nullable|integer',
-            'group_id'          => 'nullable|integer',
-            'data_set_id'       => 'nullable|integer',
-            'category_id'       => 'nullable|integer',
-            'tag_id'            => 'nullable|integer',
-            'follow_user_id'    => 'nullable|integer',
+            'user_id'           => 'required|integer|digits_between:1,10',
+            'org_id'            => 'nullable|integer|digits_between:1,10',
+            'group_id'          => 'nullable|integer|digits_between:1,10',
+            'data_set_id'       => 'nullable|integer|digits_between:1,10',
+            'category_id'       => 'nullable|integer|digits_between:1,10',
+            'tag_id'            => 'nullable|integer|digits_between:1,10',
+            'follow_user_id'    => 'nullable|integer|digits_between:1,10',
             'news'              => 'nullable|boolean',
         ]);
 
@@ -109,13 +109,13 @@ class UserFollowController extends ApiController
         $data = $request->all();
 
         $validator = \Validator::make($data, [
-            'user_id'           => 'required|integer',
-            'org_id'            => 'nullable|integer',
-            'group_id'          => 'nullable|integer',
-            'data_set_id'       => 'nullable|integer',
-            'category_id'       => 'nullable|integer',
-            'tag_id'            => 'nullable|integer',
-            'follow_user_id'    => 'nullable|integer',
+            'user_id'           => 'required|integer|digits_between:1,10',
+            'org_id'            => 'nullable|integer|digits_between:1,10',
+            'group_id'          => 'nullable|integer|digits_between:1,10',
+            'data_set_id'       => 'nullable|integer|digits_between:1,10',
+            'category_id'       => 'nullable|integer|digits_between:1,10',
+            'tag_id'            => 'nullable|integer|digits_between:1,10',
+            'follow_user_id'    => 'nullable|integer|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -171,7 +171,7 @@ class UserFollowController extends ApiController
     {
         $data = $request->get('criteria', []);
 
-        $validator = \Validator::make($data, ['id' => 'required|integer']);
+        $validator = \Validator::make($data, ['id' => 'required|integer|digits_between:1,10']);
 
         if (!$validator->fails()) {
             $query = UserFollow::where('follow_user_id', $data['id']);

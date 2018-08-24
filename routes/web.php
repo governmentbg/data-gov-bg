@@ -74,11 +74,21 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/admin/terms-of-use/edit/{id}', 'Admin\TermsOfUseController@edit');
     Route::match(['get', 'post'], '/admin/terms-of-use/delete/{id}', 'Admin\TermsOfUseController@delete');
 
+    Route::match(['get', 'post'], '/admin/terms-of-use-request/list', 'Admin\TermsOfUseRequestController@list');
+    Route::match(['get', 'post'], '/admin/terms-of-use-request/edit/{id}', 'Admin\TermsOfUseRequestController@edit');
+    Route::match(['get', 'post'], '/admin/terms-of-use-request/delete/{id}', 'Admin\TermsOfUseRequestController@delete');
+
+    Route::match(['get', 'post'], '/admin/users', 'Admin\UserController@list');
+    Route::match(['get', 'post'], '/admin/users/search', 'Admin\UserController@search');
+    Route::match(['get', 'post'], '/admin/users/create', 'Admin\UserController@create');
+    Route::match(['get', 'post'], '/admin/users/edit/{id}', 'Admin\UserController@edit');
+
     Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
     Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');
     Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
     Route::match(['get', 'post'], '/admin/roles/view/{id}', 'Admin\RoleController@viewRole');
     Route::match(['get', 'post'], '/admin/roles/delete/{id}', 'Admin\RoleController@deleteRole');
+    Route::match(['get', 'post'], '/admin/roles/rights/{id}', 'Admin\RoleController@roleRights');
 
     Route::match(['get', 'post'], '/admin/languages', 'Admin\LangController@list');
     Route::match(['get', 'post'], '/admin/languages/add', 'Admin\LangController@addLang');
@@ -207,7 +217,24 @@ Route::get('/terms', function () {
 
 Route::match(['get', 'post'], '/data', 'DataController@view')->name('dataView');
 
-Route::get('/data/view', function () {
+Route::get('/data/view/{uri?}', function () {
+    return view('data/view', [
+        'class' => 'data',
+        'filter' => 'healthcare',
+        'mainCats' => [
+            'healthcare',
+            'innovation',
+            'education',
+            'public_sector',
+            'municipalities',
+            'agriculture',
+            'justice',
+            'economy_business',
+        ],
+    ]);
+});
+
+Route::get('/data/resourceView/{uri}', function () {
     return view('data/view', [
         'class' => 'data',
         'filter' => 'healthcare',
@@ -253,17 +280,13 @@ Route::match(['get', 'post'], '/organisation', 'OrganisationController@list')->n
 Route::match(['get', 'post'], '/organisation/search', 'OrganisationController@search');
 Route::match(['get', 'post'], '/organisation/profile/{uri}', 'OrganisationController@view');
 
-Route::get('/organisation/datasets', function () {
-    return view('organisation/datasets', ['class' => 'organisation']);
-});
+Route::match(['get', 'post'], '/organisation/{uri}/datasets', 'OrganisationController@datasets');
 
 Route::get('/organisation/viewDataset', function () {
     return view('organisation/viewDataset', ['class' => 'organisation']);
 });
 
-Route::get('/organisation/chronology', function () {
-    return view('organisation/chronology', ['class' => 'organisation']);
-});
+Route::match(['get', 'post'], '/organisation/{uri}/chronology', 'OrganisationController@chronology');
 
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');

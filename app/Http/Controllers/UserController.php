@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -1665,31 +1666,6 @@ class UserController extends Controller {
     }
 
     /**
-     * Returns model with usernames instead of user ids for record signatures
-     *
-     * @param Model $model
-     *
-     * @return view
-     */
-    public function getModelUsernames($model) {
-        if (isset($model)) {
-            if (
-                $model->updated_by == $model->created_by
-                && !is_null($model->created_by)
-            ) {
-                $username = User::find($model->created_by)->username;
-                $model->updated_by = $username;
-                $model->created_by = $username;
-            } else {
-                $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->username;
-                $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->username;
-            }
-        }
-
-        return $model;
-    }
-
-    /**
      * Loads a view for browsing organisational resources
      *
      * @param Request $request
@@ -2505,6 +2481,8 @@ class UserController extends Controller {
             $criteria = [];
             $actObjData = [];
 
+            $locale = \LaravelLocalization::getCurrentLocale();
+
             $params = [
                 'api_key' => $user->api_key,
                 'id'      => $user->id
@@ -2543,8 +2521,6 @@ class UserController extends Controller {
                     }
                 }
 
-                $locale = \LaravelLocalization::getCurrentLocale();
-
                 if (!empty($userFollows['org_id'])) {
                     $params = [
                         'criteria' => [
@@ -2558,7 +2534,7 @@ class UserController extends Controller {
                     $res = $api->listOrganisations($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->organisations)) {
-                        $objType = ActionsHistory::MODULE_NAMES[2];
+                        $objType = Role::MODULE_NAMES[2];
                         $actObjData[$objType] = [];
 
                         foreach ($res->organisations as $org) {
@@ -2577,8 +2553,9 @@ class UserController extends Controller {
                             $actObjData[$objType][$org->id] = $this->getActObjectData(
                                 $org->id,
                                 $org->name,
+                                Str::lower(utrans('custom.organisations')),
                                 'org',
-                                '/organisation/profile'
+                                '/organisation/profile/'. $org->uri
                             );
 
                             $params = [
@@ -2603,7 +2580,7 @@ class UserController extends Controller {
                     $res = $api->listGroups($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->groups)) {
-                        $objType = ActionsHistory::MODULE_NAMES[3];
+                        $objType = Role::MODULE_NAMES[3];
                         $actObjData[$objType] = [];
 
                         foreach ($res->groups as $group) {
@@ -2621,8 +2598,9 @@ class UserController extends Controller {
                             $actObjData[$objType][$group->id] = $this->getActObjectData(
                                 $group->id,
                                 $group->name,
+                                Str::lower(utrans('custom.groups')),
                                 'group',
-                                '/group/profile'
+                                '/groups/view/'. $group->uri
                             );
 
                             $params = [
@@ -2647,7 +2625,7 @@ class UserController extends Controller {
                     $res = $api->listMainCategories($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->categories)) {
-                        $objType = ActionsHistory::MODULE_NAMES[0];
+                        $objType = Role::MODULE_NAMES[0];
                         $actObjData[$objType] = [];
 
                         foreach ($res->categories as $category) {
@@ -2666,6 +2644,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$category->id] = $this->getActObjectData(
                                 $category->id,
                                 $category->name,
+                                Str::lower(__('custom.main_topic')),
                                 'category'
                             );
 
@@ -2691,7 +2670,7 @@ class UserController extends Controller {
                     $res = $api->listTags($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->tags)) {
-                        $objType = ActionsHistory::MODULE_NAMES[1];
+                        $objType = Role::MODULE_NAMES[1];
                         $actObjData[$objType] = [];
 
                         foreach ($res->tags as $tag) {
@@ -2710,6 +2689,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$tag->id] = $this->getActObjectData(
                                 $tag->id,
                                 $tag->name,
+                                Str::lower(utrans('custom.tags')),
                                 'tag'
                             );
 
@@ -2737,7 +2717,7 @@ class UserController extends Controller {
                     $res = $api->listUsers($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->users)) {
-                        $objType = ActionsHistory::MODULE_NAMES[4];
+                        $objType = Role::MODULE_NAMES[4];
                         $actObjData[$objType] = [];
 
                         foreach ($res->users as $followUser) {
@@ -2756,8 +2736,9 @@ class UserController extends Controller {
                             $actObjData[$objType][$followUser->id] = $this->getActObjectData(
                                 $followUser->id,
                                 $followUser->firstname .' '. $followUser->lastname,
+                                Str::lower(utrans('custom.users')),
                                 'user',
-                                '/user/profile'
+                                '/user/profile/'. $followUser->id
                             );
 
                             $params = [
@@ -2786,34 +2767,50 @@ class UserController extends Controller {
 
             // user profile actions
             if (!isset($filters[$filter])) {
-                $objType = ActionsHistory::MODULE_NAMES[4];
+                $objType = Role::MODULE_NAMES[4];
 
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
                     $user->firstname .' '. $user->lastname,
+                    Str::lower(utrans('custom.users')),
                     'user',
-                    '/user/profile'
+                    '/user/profile/'. $user->id
                 );
 
                 $criteria['user_ids'][] = $user->id;
             }
 
             $paginationData = [];
+            $actTypes = [];
 
             if (!empty($criteria)) {
-                $perPage = 5;
-                $params = [
-                    'api_key'          => $user->api_key,
-                    'criteria'         => $criteria,
-                    'records_per_page' => $perPage,
-                    'page_number'      => !empty($request->page) ? $request->page : 1,
-                ];
-
-                $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
                 $api = new ApiActionsHistory($rq);
-                $result = $api->listActionHistory($rq)->getData();
-                $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
-                $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+                $res = $api->listActionTypes($rq)->getData();
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 5;
+                    $params = [
+                        'api_key'          => $user->api_key,
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $result = $api->listActionHistory($rq)->getData();
+                    $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
+                    $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+                }
             }
 
             return view(
@@ -2821,9 +2818,9 @@ class UserController extends Controller {
                 [
                     'class'          => 'user',
                     'actionsHistory' => !empty($paginationData) ? $paginationData['items'] : [],
-                    'actionObjData'  => $actObjData,
-                    'actionTypes'    => ActionsHistory::getTypes(),
                     'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
                     'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
                     'filter'         => $filter,
                     'objIdFilter'    => $objIdFilter
@@ -2851,7 +2848,7 @@ class UserController extends Controller {
         $res = $api->listDataSets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
-            $objType = ActionsHistory::MODULE_NAMES[5];
+            $objType = Role::MODULE_NAMES[5];
 
             if (!isset($actObjData[$objType])) {
                 $actObjData[$objType] = [];
@@ -2872,7 +2869,7 @@ class UserController extends Controller {
                             'id' => (isset($res->data) && isset($res->data->id)) ? $res->data->id : '',
                             'name' => (isset($res->data) && isset($res->data->name)) ? $res->data->name : '',
                             'logo' => (isset($res->data) && isset($res->data->logo)) ? $res->data->logo : '',
-                            'view' => '/organisation/profile'
+                            'view' => '/organisation/profile/'. (isset($res->data) && isset($res->data->uri) ? $res->data->uri : '')
                         ];
                     } else {
                         $params = [
@@ -2885,13 +2882,15 @@ class UserController extends Controller {
                         $rq = Request::create('/api/listUsers', 'POST', $params);
                         $api = new ApiUser($rq);
                         $res = $api->listUsers($rq)->getData();
-                        $user = isset($res->users) ? array_first($res->users) : [];
+                        $user = isset($res->users) ? array_first($res->users) : null;
 
                         $objOwner = [
-                            'id' => isset($user->id) ? $user->id : '',
-                            'name' => (isset($user->firstname) && isset($user->lastname)) ? $user->firstname .' '. $user->lastname : '',
+                            'id' => isset($user) ? $user->id : '',
+                            'name' => isset($user)
+                                        ? ($user->firstname || $user->lastname ? trim($user->firstname .' '. $user->lastname) : $user->username)
+                                        : '',
                             'logo' => null,
-                            'view' => '/user/profile'
+                            'view' => '/user/profile/'. (isset($user) ? $user->id : '')
                         ];
                     }
                     if ($filter == 'datasets') {
@@ -2905,8 +2904,9 @@ class UserController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
+                        'obj_module'     => Str::lower(__('custom.dataset')),
                         'obj_type'       => 'dataset',
-                        'obj_view'       => '/data/view',
+                        'obj_view'       => '/data/view/'. $dataset->uri,
                         'parent_obj_id'  => '',
                         'obj_owner_id'   => $objOwner['id'],
                         'obj_owner_name' => $objOwner['name'],
@@ -2917,22 +2917,24 @@ class UserController extends Controller {
                     $criteria['dataset_ids'][] = $dataset->id;
 
                     if (!empty($dataset->resource)) {
-                        $objTypeRes = ActionsHistory::MODULE_NAMES[6];
+                        $objTypeRes = Role::MODULE_NAMES[6];
 
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
-                                'obj_id'          => $resource->uri,
-                                'obj_name'        => $resource->name,
-                                'obj_type'        => 'resource',
-                                'obj_view'        => '/data/resourceView',
-                                'parent_obj_id'   => $dataset->uri,
-                                'parent_obj_name' => $dataset->name,
-                                'parent_obj_type' => 'dataset',
-                                'parent_obj_view' => '/data/view',
-                                'obj_owner_id'    => $objOwner['id'],
-                                'obj_owner_name'  => $objOwner['name'],
-                                'obj_owner_logo'  => $objOwner['logo'],
-                                'obj_owner_view'  => $objOwner['view']
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri,
+                                'obj_owner_id'      => $objOwner['id'],
+                                'obj_owner_name'    => $objOwner['name'],
+                                'obj_owner_logo'    => $objOwner['logo'],
+                                'obj_owner_view'    => $objOwner['view']
                             ];
 
                             $criteria['resource_uris'][] = $resource->uri;
@@ -2994,10 +2996,11 @@ class UserController extends Controller {
      *
      * @return array
      */
-    private function getActObjectData($id, $name, $type, $view = null, $parentObjId = null) {
+    private function getActObjectData($id, $name, $module, $type, $view = null, $parentObjId = null) {
         return [
             'obj_id'        => $id,
             'obj_name'      => $name,
+            'obj_module'    => $module,
             'obj_type'      => $type,
             'obj_view'      => $view,
             'parent_obj_id' => $parentObjId
@@ -3030,6 +3033,27 @@ class UserController extends Controller {
                     Log::error($ex->getMessage());
                 }
             }
+        }
+
+        if ($request->has('generate')) {
+            $user = User::where('id', $request->offsetGet('id'))->first();
+
+            $mailData = [
+                'user'  => $user->firstname,
+                'hash'  => $user->hash_id,
+                'mail'  => $user->email,
+                'id'    => $user->id,
+            ];
+
+            Mail::send('mail/confirmationMail', $mailData, function ($m) use ($mailData) {
+                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                $m->to($mailData['mail'], $mailData['user']);
+                $m->subject(__('custom.register_confirmation'));
+            });
+
+            $request->session()->flash('alert-warning', __('custom.mail_sent_again'));
+
+            return redirect('login');
         }
 
         return view('confirmError', compact('class'));

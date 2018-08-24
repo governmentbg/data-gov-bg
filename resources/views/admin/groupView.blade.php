@@ -29,7 +29,7 @@
                                                     action="{{ url('/admin/groups/edit/'. $group->uri) }}"
                                                 >
                                                     {{ csrf_field() }}
-                                                    <button class="btn btn-primary" type="submit">{{ __('custom.edit') }}</button>
+                                                    <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
                                                 <form
@@ -39,11 +39,11 @@
                                                 >
                                                     {{ csrf_field() }}
                                                         <button
-                                                            class="btn del-btn btn-primary"
+                                                            class="btn del-btn btn-primary del-btn"
                                                             type="submit"
                                                             name="delete"
                                                             data-confirm="{{ __('custom.delete_group_confirm') }}"
-                                                        >{{ __('custom.remove') }}</button>
+                                                        >{{ uctrans('custom.remove') }}</button>
                                                 </form>
                                             </div>
                                         </div>

@@ -69,7 +69,7 @@
                                             'filter'    => $filter == 'for_approval' ? null : 'for_approval',
                                             'keywords'  => $keywords,
                                         ]) }}"
-                                    >{{ __('custom.for_approval') }}</a>
+                                    >{{ uctrans('custom.for_approval') }}</a>
                                 </li>
                             </ul>
                         </li>
@@ -139,15 +139,15 @@
                                         <div class="js-member-admin-controls">
                                             <button
                                                 class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
-                                            >{{ __('custom.edit') }}</button>
+                                            >{{ uctrans('custom.edit') }}</button>
                                             <form method="POST" class="inline-block">
                                                 {{ csrf_field() }}
                                                 <button
                                                     class="badge cust-btn badge-pill m-b-sm del-btn"
                                                     type="submit"
                                                     name="delete"
-                                                    onclick="return confirm('Изтриване на данните?');"
-                                                >{{ __('custom.remove') }}</button>
+                                                    data-confirm="{{ __('custom.remove_data') }}"
+                                                >{{ uctrans('custom.remove') }}</button>
                                                 <input name="user_id" type="hidden" value="{{ $member->id }}">
                                             </form>
                                         </div>
@@ -174,11 +174,11 @@
                                                 type="submit"
                                                 class="badge cust-btn badge-pill m-t-sm m-r-md"
                                                 name="edit_member"
-                                            >{{ __('custom.save') }}</button>
+                                            >{{ uctrans('custom.save') }}</button>
                                             <button
                                                 type="button"
                                                 class="badge cust-btn badge-pill m-t-sm js-member-cancel del-btn"
-                                            >{{ __('custom.cancel') }}</button>
+                                            >{{ uctrans('custom.cancel') }}</button>
                                         </form>
                                     </div>
                                 </div>

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -2332,6 +2333,8 @@ class UserController extends Controller {
             $criteria = [];
             $actObjData = [];
 
+            $locale = \LaravelLocalization::getCurrentLocale();
+
             $params = [
                 'api_key' => $user->api_key,
                 'id'      => $user->id
@@ -2370,8 +2373,6 @@ class UserController extends Controller {
                     }
                 }
 
-                $locale = \LaravelLocalization::getCurrentLocale();
-
                 if (!empty($userFollows['org_id'])) {
                     $params = [
                         'criteria' => [
@@ -2404,8 +2405,9 @@ class UserController extends Controller {
                             $actObjData[$objType][$org->id] = $this->getActObjectData(
                                 $org->id,
                                 $org->name,
+                                Str::lower(utrans('custom.organisations')),
                                 'org',
-                                '/organisation/profile'
+                                '/organisation/profile/'. $org->uri
                             );
 
                             $params = [
@@ -2448,8 +2450,9 @@ class UserController extends Controller {
                             $actObjData[$objType][$group->id] = $this->getActObjectData(
                                 $group->id,
                                 $group->name,
+                                Str::lower(utrans('custom.groups')),
                                 'group',
-                                '/group/profile'
+                                '/groups/view/'. $group->uri
                             );
 
                             $params = [
@@ -2493,6 +2496,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$category->id] = $this->getActObjectData(
                                 $category->id,
                                 $category->name,
+                                Str::lower(__('custom.main_topic')),
                                 'category'
                             );
 
@@ -2537,6 +2541,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$tag->id] = $this->getActObjectData(
                                 $tag->id,
                                 $tag->name,
+                                Str::lower(utrans('custom.tags')),
                                 'tag'
                             );
 
@@ -2583,8 +2588,9 @@ class UserController extends Controller {
                             $actObjData[$objType][$followUser->id] = $this->getActObjectData(
                                 $followUser->id,
                                 $followUser->firstname .' '. $followUser->lastname,
+                                Str::lower(utrans('custom.users')),
                                 'user',
-                                '/user/profile'
+                                '/user/profile/'. $followUser->id
                             );
 
                             $params = [
@@ -2618,29 +2624,45 @@ class UserController extends Controller {
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
                     $user->firstname .' '. $user->lastname,
+                    Str::lower(utrans('custom.users')),
                     'user',
-                    '/user/profile'
+                    '/user/profile/'. $user->id
                 );
 
                 $criteria['user_ids'][] = $user->id;
             }
 
             $paginationData = [];
+            $actTypes = [];
 
             if (!empty($criteria)) {
-                $perPage = 5;
-                $params = [
-                    'api_key'          => $user->api_key,
-                    'criteria'         => $criteria,
-                    'records_per_page' => $perPage,
-                    'page_number'      => !empty($request->page) ? $request->page : 1,
-                ];
-
-                $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
                 $api = new ApiActionsHistory($rq);
-                $result = $api->listActionHistory($rq)->getData();
-                $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
-                $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+                $res = $api->listActionTypes($rq)->getData();
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 5;
+                    $params = [
+                        'api_key'          => $user->api_key,
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $result = $api->listActionHistory($rq)->getData();
+                    $result->actions_history = isset($result->actions_history) ? $result->actions_history : [];
+                    $paginationData = $this->getPaginationData($result->actions_history, $result->total_records, [], $perPage);
+                }
             }
 
             return view(
@@ -2648,9 +2670,9 @@ class UserController extends Controller {
                 [
                     'class'          => 'user',
                     'actionsHistory' => !empty($paginationData) ? $paginationData['items'] : [],
-                    'actionObjData'  => $actObjData,
-                    'actionTypes'    => ActionsHistory::getTypes(),
                     'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
                     'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
                     'filter'         => $filter,
                     'objIdFilter'    => $objIdFilter
@@ -2699,7 +2721,7 @@ class UserController extends Controller {
                             'id' => (isset($res->data) && isset($res->data->id)) ? $res->data->id : '',
                             'name' => (isset($res->data) && isset($res->data->name)) ? $res->data->name : '',
                             'logo' => (isset($res->data) && isset($res->data->logo)) ? $res->data->logo : '',
-                            'view' => '/organisation/profile'
+                            'view' => '/organisation/profile/'. (isset($res->data) && isset($res->data->uri) ? $res->data->uri : '')
                         ];
                     } else {
                         $params = [
@@ -2712,13 +2734,15 @@ class UserController extends Controller {
                         $rq = Request::create('/api/listUsers', 'POST', $params);
                         $api = new ApiUser($rq);
                         $res = $api->listUsers($rq)->getData();
-                        $user = isset($res->users) ? array_first($res->users) : [];
+                        $user = isset($res->users) ? array_first($res->users) : null;
 
                         $objOwner = [
-                            'id' => isset($user->id) ? $user->id : '',
-                            'name' => (isset($user->firstname) && isset($user->lastname)) ? $user->firstname .' '. $user->lastname : '',
+                            'id' => isset($user) ? $user->id : '',
+                            'name' => isset($user)
+                                        ? ($user->firstname || $user->lastname ? trim($user->firstname .' '. $user->lastname) : $user->username)
+                                        : '',
                             'logo' => null,
-                            'view' => '/user/profile'
+                            'view' => '/user/profile/'. (isset($user) ? $user->id : '')
                         ];
                     }
                     if ($filter == 'datasets') {
@@ -2732,8 +2756,9 @@ class UserController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
+                        'obj_module'     => Str::lower(__('custom.dataset')),
                         'obj_type'       => 'dataset',
-                        'obj_view'       => '/data/view',
+                        'obj_view'       => '/data/view/'. $dataset->uri,
                         'parent_obj_id'  => '',
                         'obj_owner_id'   => $objOwner['id'],
                         'obj_owner_name' => $objOwner['name'],
@@ -2748,18 +2773,20 @@ class UserController extends Controller {
 
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
-                                'obj_id'          => $resource->uri,
-                                'obj_name'        => $resource->name,
-                                'obj_type'        => 'resource',
-                                'obj_view'        => '/data/resourceView',
-                                'parent_obj_id'   => $dataset->uri,
-                                'parent_obj_name' => $dataset->name,
-                                'parent_obj_type' => 'dataset',
-                                'parent_obj_view' => '/data/view',
-                                'obj_owner_id'    => $objOwner['id'],
-                                'obj_owner_name'  => $objOwner['name'],
-                                'obj_owner_logo'  => $objOwner['logo'],
-                                'obj_owner_view'  => $objOwner['view']
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri,
+                                'obj_owner_id'      => $objOwner['id'],
+                                'obj_owner_name'    => $objOwner['name'],
+                                'obj_owner_logo'    => $objOwner['logo'],
+                                'obj_owner_view'    => $objOwner['view']
                             ];
 
                             $criteria['resource_uris'][] = $resource->uri;
@@ -2821,10 +2848,11 @@ class UserController extends Controller {
      *
      * @return array
      */
-    private function getActObjectData($id, $name, $type, $view = null, $parentObjId = null) {
+    private function getActObjectData($id, $name, $module, $type, $view = null, $parentObjId = null) {
         return [
             'obj_id'        => $id,
             'obj_name'      => $name,
+            'obj_module'    => $module,
             'obj_type'      => $type,
             'obj_view'      => $view,
             'parent_obj_id' => $parentObjId

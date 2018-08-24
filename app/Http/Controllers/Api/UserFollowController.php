@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\User;
 use App\UserFollow;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -81,6 +83,18 @@ class UserFollowController extends ApiController
             try {
                 $follow->save();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $follow->id,
+                    'action_msg'       => 'User followed',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -148,6 +162,17 @@ class UserFollowController extends ApiController
             try {
                 $query->delete();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_msg'       => 'User unfollowed',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -178,6 +203,17 @@ class UserFollowController extends ApiController
             $count = $query->count();
             $users = $query->select('user_id')->get()->toArray();
 
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::USERS),
+                'action'           => ActionsHistory::TYPE_DEL,
+                'user_id'          => \Auth::user()->id,
+                'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                'action_object'    => $data['id'],
+                'action_msg'       => 'Got user followers count',
+            ];
+
+            Module::add($logData);
             return $this->successResponse(['count' => $count, 'followers' => $users], true);
         }
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 use Uuid;
 use App\DataSet;
 use App\Resource;
+use App\Module;
+use App\ActionsHistory;
 use App\ElasticDataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -114,6 +116,18 @@ class ResourceController extends ApiController
 
                 DB::commit();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::RESOURCES),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $resource->uri,
+                    'action_msg'       => 'Added resource metadata',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['uri' => $resource->uri]);
             } catch (QueryException $ex) {
                 DB::rollback();
@@ -170,6 +184,18 @@ class ResourceController extends ApiController
                 ]);
 
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::RESOURCES),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $elasticDataSet->id,
+                    'action_msg'       => 'Added resource data',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (\Exception $ex) {
@@ -310,6 +336,18 @@ class ResourceController extends ApiController
 
                 DB::commit();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::RESOURCES),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $resource->id,
+                    'action_msg'       => 'Edit resource metadata',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
                 DB::rollback();
@@ -353,6 +391,18 @@ class ResourceController extends ApiController
                     'id'    => $id,
                 ]);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::RESOURCES),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $resource->id,
+                    'action_msg'       => 'Update resource data',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
@@ -383,6 +433,18 @@ class ResourceController extends ApiController
                 $resource->deleted_by = \Auth::id();
                 $resource->save();
                 $resource->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::RESOURCES),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $post['resource_uri'],
+                    'action_msg'       => 'Deleted resource',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -819,6 +881,17 @@ class ResourceController extends ApiController
                 ];
             }
 
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::RESOURCES),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'user_id'          => \Auth::user()->id,
+                'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                'action_msg'       => 'Listed data formats',
+            ];
+
+            Module::add($logData);
+
             return $this->successResponse(['data_formats' => $result], true);
         }
     }
@@ -841,6 +914,17 @@ class ResourceController extends ApiController
             try {
                 $hasReported = Resource::where('created_by', $post['user_id'])
                         ->where('is_reported', 1)->count();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::RESOURCES),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_msg'       => 'Checked if user has reported resource',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['flag' => ($hasReported) ? true : false], true);
             } catch (Exception $ex) {

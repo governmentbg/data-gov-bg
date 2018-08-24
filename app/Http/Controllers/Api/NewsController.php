@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Page;
 use \Validator;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -93,6 +95,18 @@ class NewsController extends ApiController
 
                 $newNews->save();
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $newNews->id,
+                    'action_msg'       => 'Added news',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
@@ -234,6 +248,19 @@ class NewsController extends ApiController
 
                 $newsToEdit->save();
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $newsToEdit->id,
+                    'action_msg'       => 'Edited news',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 DB::rollback();
@@ -266,6 +293,18 @@ class NewsController extends ApiController
                 $deleteNews = Page::find($newsDeleteData['news_id']);
 
                 $deleteNews->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $newsDeleteData['news_id'],
+                    'action_msg'       => 'Deleted news',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -579,6 +618,18 @@ class NewsController extends ApiController
                     'valid_from'        => date($singleNews->valid_from),
                     'valid_to'          => date($singleNews->valid_to),
                 ];
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $singleNews->id,
+                    'action_msg'       => 'Got news details',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse([
                     'news' => $result,

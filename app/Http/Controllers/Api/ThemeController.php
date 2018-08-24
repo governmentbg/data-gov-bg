@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
+use App\ActionsHistory;
+use App\Module;
 
 class ThemeController extends ApiController
 {
@@ -67,6 +69,17 @@ class ThemeController extends ApiController
                 'name'  => $themeName,
             ];
         }
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::THEMES),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_msg'       => 'Listed themes',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse($themes);
     }
 }

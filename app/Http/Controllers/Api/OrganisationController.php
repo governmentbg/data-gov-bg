@@ -636,10 +636,6 @@ class OrganisationController extends ApiController
                 $criteria['active'] = $post->criteria['active'];
             }
 
-            if (isset($post->criteria['active'])) {
-                $criteria['active'] = $post->criteria['active'];
-            }
-
             if (isset($post->criteria['approved'])) {
                 $criteria['approved'] = $post->criteria['approved'];
             }
@@ -649,6 +645,10 @@ class OrganisationController extends ApiController
                 $query = $query->whereIn('type', array_flip(Organisation::getPublicTypes()));
 
                 $userId = \Auth::user()->id;
+
+                if (!empty($post->criteria['id'])) {
+                    $userId = $post->criteria['id'];
+                }
 
                 $query->whereHas('UserToOrgRole', function($q) use ($userId) {
                     $q->where('user_id', $userId);
@@ -1027,8 +1027,8 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
-            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|max:10',
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {

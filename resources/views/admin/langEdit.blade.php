@@ -10,7 +10,7 @@
         <div class="frame-wrap">
             <div class="frame">
                 <div class="row">
-                    <h3>{{ __('custom.edit_language') }}</h3>
+                    <h3 class="col-lg-12">{{ __('custom.edit_language') }}</h3>
                 </div>
                 <div class="form-group row">
                     <label for="lang" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.language') }}:</label>

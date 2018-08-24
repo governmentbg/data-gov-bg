@@ -578,6 +578,7 @@ class DataSetController extends ApiController
             $query->paginate($pagination, ['*'], 'page', $page);
         }
 
+        $count = $query->count();
         $dataSets = $query->get();
 
         foreach ($dataSets as $set) {
@@ -598,7 +599,10 @@ class DataSetController extends ApiController
             }
         }
 
-        return $this->successResponse($dataSets);
+        return $this->successResponse([
+            'datasets'      => $dataSets,
+            'total_records' => $count
+        ], true);
     }
 
 

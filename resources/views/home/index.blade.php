@@ -34,7 +34,7 @@
         <div class="row">
             <div class="col-md-6">
                 <a href="{{ url('data') }}" class="data-sets">
-                    <p>{{ $datasets }}1</p>
+                    <p>{{ $datasets }}</p>
                     <hr>
                     <p>{{ __('custom.data_sets') }}</p>
                     <img src="{{ asset('/img/data-sets.svg') }}">

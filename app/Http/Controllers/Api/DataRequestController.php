@@ -219,8 +219,8 @@ class DataRequestController extends ApiController
                 'request_id'              => 'nullable|integer|max:10',
                 'org_id'                  => 'nullable|integer|max:10',
                 'status'                  => 'nullable|integer|max:3',
-                'date_from'               => 'nullable|date|max:19',
-                'date_to'                 => 'nullable|date|max:19',
+                'date_from'               => 'nullable|date',
+                'date_to'                 => 'nullable|date',
                 'search'                  => 'nullable|string|max:191',
                 'order'                   => 'nullable|array',
             ]);

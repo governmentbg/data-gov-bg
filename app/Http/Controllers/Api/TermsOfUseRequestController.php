@@ -183,8 +183,8 @@ class TermsOfUseRequestController extends ApiController
             $validator = \Validator::make($criteria, [
                 'request_id'   => 'nullable|integer|exists:terms_of_use_requests,id|max:10',
                 'status'       => 'nullable|integer|max:3',
-                'date_from'    => 'nullable|date|max:19',
-                'date_to'      => 'nullable|date|max:19',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
                 'search'       => 'nullable|string|max:191',
                 'order'        => 'nullable|array',
             ]);

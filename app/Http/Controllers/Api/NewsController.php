@@ -51,8 +51,8 @@ class NewsController extends ApiController
                 'meta_keywords'    => 'nullable|string|max:191',
                 'forum_link'       => 'nullable|string|max:191',
                 'active'           => 'required|boolean',
-                'valid_from'       => 'nullable|date|max:19',
-                'valid_to'         => 'nullable|date|max:19',
+                'valid_from'       => 'nullable|date',
+                'valid_to'         => 'nullable|date',
             ]);
         }
 
@@ -145,8 +145,8 @@ class NewsController extends ApiController
                 'meta_key_words'   => 'nullable|string|max:191',
                 'forum_link'       => 'nullable|string|max:191',
                 'active'           => 'nullable|boolean',
-                'valid_from'       => 'nullable|date|max:19',
-                'valid_to'         => 'nullable|date|max:19',
+                'valid_from'       => 'nullable|date',
+                'valid_to'         => 'nullable|date',
             ]);
         }
 
@@ -312,8 +312,8 @@ class NewsController extends ApiController
             $validator = Validator::make($criteria, [
                 'active'       => 'nullable|boolean',
                 'valid'        => 'nullable|integer|max:10',
-                'date_from'    => 'nullable|date|max:19',
-                'date_to'      => 'nullable|date|max:19',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
                 'date_type'    => 'nullable|string|max:191',
                 'order'        => 'nullable|array',
             ]);

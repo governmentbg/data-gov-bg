@@ -206,8 +206,8 @@ class DocumentController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
                 'doc_id'       => 'nullable|integer|max:10',
-                'date_from'    => 'nullable|date|max:19',
-                'date_to'      => 'nullable|date|max:19',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
                 'locale'       => 'nullable|string|max:5',
                 'date_type'    => 'nullable|string|max:191',
                 'order'        => 'nullable|array',

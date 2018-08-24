@@ -206,8 +206,8 @@ class SignalsController extends ApiController
             $validator = Validator::make($criteria, [
                 'signal_id'    => 'nullable|integer|max:10',
                 'status'       => 'nullable|integer|max:3',
-                'date_from'    => 'nullable|date|max:19',
-                'date_to'      => 'nullable|date|max:19',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
                 'order'        => 'nullable|array',
                 'search'       => 'nullable|string|max:191',
             ]);

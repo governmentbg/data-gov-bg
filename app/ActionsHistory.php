@@ -90,10 +90,33 @@ class ActionsHistory extends Model
     public static function getTypes()
     {
         return [
-            self::TYPE_SEE     => __('custom.see'),
-            self::TYPE_ADD     => __('custom.add'),
-            self::TYPE_MOD     => __('custom.modify'),
-            self::TYPE_DEL     => __('custom.delete'),
+            self::TYPE_SEE     => __('custom.saw'),
+            self::TYPE_ADD     => __('custom.added'),
+            self::TYPE_MOD     => __('custom.modified'),
+            self::TYPE_DEL     => __('custom.deleted'),
+        ];
+    }
+
+    /**
+     * Gives back the available public user action types.
+     *
+     * @return Array with user action types as key-value pairs
+     */
+    public static function getPublicTypes()
+    {
+        return [
+            self::TYPE_ADD     => __('custom.added'),
+            self::TYPE_MOD     => __('custom.modified'),
+            self::TYPE_DEL     => __('custom.deleted'),
+        ];
+    }
+
+    public static function getTypesLinkWords()
+    {
+        return [
+            self::TYPE_ADD     => __('custom.into'),
+            self::TYPE_MOD     => __('custom.in'),
+            self::TYPE_DEL     => __('custom.from'),
         ];
     }
 

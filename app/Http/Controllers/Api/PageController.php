@@ -41,13 +41,13 @@ class PageController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($pageData['data'], [
                 'section_id'       => 'nullable|integer',
-                'title'            => 'required|string',
-                'body'             => 'required|string',
-                'head_title'       => 'nullable|string',
-                'meta_description' => 'nullable|string',
-                'meta_keywords'    => 'nullable|string',
-                'forum_link'       => 'nullable|string',
-                'active'           => 'required|integer',
+                'title'            => 'required|string|max:191',
+                'body'             => 'required|string|max:8000',
+                'head_title'       => 'nullable|string|max:191',
+                'meta_description' => 'nullable|string|max:8000',
+                'meta_keywords'    => 'nullable|string|max:191',
+                'forum_link'       => 'nullable|string|max:191',
+                'active'           => 'required|boolean',
                 'valid_from'       => 'nullable|date',
                 'valid_to'         => 'nullable|date',
             ]);
@@ -125,21 +125,21 @@ class PageController extends ApiController
         }
 
         $validator = Validator::make($editData, [
-            'page_id'    => 'required|integer|exists:pages,id',
+            'page_id'    => 'required|integer|exists:pages,id|max:10',
             'data'       => 'required|array',
-            'locale'     => 'required|string',
+            'locale'     => 'required|string|max:5',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
-                'section_id'       => 'nullable|integer',
-                'title'            => 'nullable|string',
-                'body'             => 'nullable|string',
-                'head_title'       => 'nullable|string',
-                'meta_description' => 'nullable|string',
-                'meta_keywords'    => 'nullable|string',
-                'forum_link'       => 'nullable|string',
-                'active'           => 'required|integer',
+                'section_id'       => 'nullable|integer|max:10',
+                'title'            => 'nullable|string|max:191',
+                'body'             => 'nullable|string|max:8000',
+                'head_title'       => 'nullable|string|max:191',
+                'meta_description' => 'nullable|string|max:8000',
+                'meta_keywords'    => 'nullable|string|max:191',
+                'forum_link'       => 'nullable|string|max:191',
+                'active'           => 'required|boolean',
                 'valid_from'       => 'nullable|date',
                 'valid_to'         => 'nullable|date',
             ]);
@@ -211,7 +211,7 @@ class PageController extends ApiController
         $deleteData = $request->all();
 
         $validator = Validator::make($deleteData, [
-            'page_id' => 'required|integer|exists:pages,id',
+            'page_id' => 'required|integer|exists:pages,id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -252,18 +252,18 @@ class PageController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'                => 'nullable|array',
-            'locale'                  => 'nullable|string',
-            'records_per_page'        => 'nullable|integer',
-            'page_number'             => 'nullable|integer',
+            'locale'                  => 'nullable|string|max:5',
+            'records_per_page'        => 'nullable|integer|max:10',
+            'page_number'             => 'nullable|integer|max:10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'page_id'        => 'nullable|integer',
-                'active'         => 'nullable|integer',
-                'section_id '    => 'nullable|integer',
+                'page_id'        => 'nullable|integer|max:10',
+                'active'         => 'nullable|boolean',
+                'section_id '    => 'nullable|integer|max:10',
                 'order'          => 'nullable|array',
             ]);
         }
@@ -272,8 +272,8 @@ class PageController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'     => 'nullable|string',
-                'field'    => 'nullable|string',
+                'type'     => 'nullable|string|max:191',
+                'field'    => 'nullable|string|max:191',
             ]);
         }
 

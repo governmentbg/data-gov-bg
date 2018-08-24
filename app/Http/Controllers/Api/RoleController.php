@@ -141,9 +141,9 @@ class RoleController extends ApiController
         $post = $request->get('criteria', []);
 
         $validator = \Validator::make($post, [
-            'role_id'               => 'nullable|int',
+            'role_id'               => 'nullable|int|max:10',
             'active'                => 'nullable|bool',
-            'org_id'                => 'nullable|int|exists:organisations,id,deleted_at,NULL',
+            'org_id'                => 'nullable|int|exists:organisations,id,deleted_at,NULL|max:10',
             'default_user'          => 'nullable|bool',
             'default_group_admin'   => 'nullable|bool',
             'default_org_admin'     => 'nullable|bool',
@@ -188,7 +188,7 @@ class RoleController extends ApiController
      */
     public function getRoleRights(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id|max:10']);
 
         if (!$validator->fails()) {
             $id = $request->get('id');
@@ -235,9 +235,9 @@ class RoleController extends ApiController
         $rights = Role::getRights();
 
         $validator = \Validator::make($post, [
-            'id'                        => 'required|int|exists:roles,id',
-            'data.*.module_name'        => 'required|string|in:'. implode(',', $modules),
-            'data.*.right'              => 'required|int|in:'. implode(',', array_flip($rights)),
+            'id'                        => 'required|int|exists:roles,id|max:10',
+            'data.*.module_name'        => 'required|string|max:191|in:'. implode(',', $modules),
+            'data.*.right'              => 'required|int|max:10|in:'. implode(',', array_flip($rights)),
             'data.*.limit_to_own_data'  => 'required|bool',
             'data.*.api'                => 'required|bool',
         ]);

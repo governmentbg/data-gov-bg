@@ -22,7 +22,7 @@ class CustomSettingsController extends ApiController
     public function delete(Request $request)
     {
         $data = $request->all();
-        $validator = \Validator::make($data, ['id' => 'required|int|exists:custom_settings,id']);
+        $validator = \Validator::make($data, ['id' => 'required|int|exists:custom_settings,id|max:10']);
 
         if (!$validator->fails()) {
             $query = CustomSetting::find($data['id']);

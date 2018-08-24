@@ -4,6 +4,40 @@
     <div class="container">
         @include('partials.alerts-bar')
         <div class="row">
+            <div class="col-sm-3 sidenav p-l-r-none">
+            </div>
+            <div class="col-sm-9 col-xs-12 p-l-r-none">
+                <div class="filter-content">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-6 text-center p-l-none">
+                                <div>
+                                    <ul class="nav filter-type right-border">
+                                        @foreach ($orgTypes as $orgType)
+                                            <li>
+                                                <a
+                                                    href="{{
+                                                        action(
+                                                            'OrganisationController@list',
+                                                            array_merge(
+                                                                ['type' => $orgType->id],
+                                                                array_except(app('request')->input(), ['type', 'page', 'q'])
+                                                            )
+                                                        )
+                                                    }}"
+                                                    class="{{ ($type == $orgType->id) ? 'active' : '' }}"
+                                                >{{ $orgType->name }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 col-xs-offset-3 p-w-xl search-field">
                 <form method="GET" action="{{ url('/organisation/search') }}">
                     <input

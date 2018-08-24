@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
@@ -23,17 +24,8 @@ class RoleController extends AdminController {
      *
      * @return view with list and actions
      */
-    public function list(Request $request) {
-        if ($request->has('delete')) {
-            if ($this->deleteRole($request->offsetGet('id'))) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
-            } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
-            }
-
-            return back();
-        }
-
+    public function list(Request $request)
+    {
         $class = 'user';
 
         $rq = Request::create('/api/listRoles', 'POST');
@@ -49,7 +41,8 @@ class RoleController extends AdminController {
      *
      * @return view with inpits
      */
-    public function addRole(Request $request) {
+    public function addRole(Request $request)
+    {
         $class = 'user';
         $errors = [];
 
@@ -91,7 +84,6 @@ class RoleController extends AdminController {
     {
         $class = 'user';
         $errors = [];
-
         $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['role_id' => $id]]);
         $api = new ApiRole($rq);
         $result = $api->listRoles($rq)->getData();
@@ -130,7 +122,7 @@ class RoleController extends AdminController {
     /**
      * Show view role.
      *
-     * @return view with inpits
+     * @return view
      */
     public function viewRole(Request $request, $id)
     {
@@ -147,7 +139,7 @@ class RoleController extends AdminController {
     /**
      * Delete role.
      *
-     * @return view with inpits
+     * @return view
      */
     public function deleteRole(Request $request, $id)
     {
@@ -169,4 +161,73 @@ class RoleController extends AdminController {
         return redirect(url('admin/roles'));
     }
 
+    /**
+     * Modify role rights.
+     *
+     * @return view with inpits
+     */
+    public function roleRights(Request $request, $id)
+    {
+        $class = 'user';
+        $errors = [];
+
+        $rq = Request::create('/api/getRoleRights', 'POST', ['id' => $id]);
+        $api = new ApiRole($rq);
+        $result = $api->getRoleRights($rq)->getData();
+        $rights = isset($result->rights) ? $result->rights : [];
+        $modules = Role::getModuleNames();
+        $moduleKeys = array_flip($modules);
+        $rightTypes = Role::getRights();
+
+        if (!empty($rights)) {
+            $formatted = [];
+
+            foreach ($rights as $right) {
+                $formatted[$moduleKeys[$right->module_name]] = [
+                    'right'             => $right->right_id,
+                    'limit_to_own_data' => $right->limit_to_own_data,
+                    'api'               => $right->api,
+                ];
+            }
+
+            $rights = $formatted;
+        }
+
+        if ($request->has('edit')) {
+            $post = $request->get('rights', []);
+            $data = [];
+
+            foreach ($post as $key => $record) {
+                if (!empty($record['right'])) {
+                    $data[] = [
+                        'module_name'       => $modules[$key],
+                        'right'             => $record['right'],
+                        'limit_to_own_data' => isset($record['limit_to_own_data']) ? $record['limit_to_own_data'] : 0,
+                        'api'               => isset($record['api']) ? $record['api'] : 0,
+                    ];
+                }
+            }
+
+            $rq = Request::create('/api/modifyRoleRights', 'POST', [
+                'api_key'   => Auth::user()->api_key,
+                'id'        => $id,
+                'data'      => $data,
+            ]);
+            $api = new ApiRole($rq);
+            $result = $api->modifyRoleRights($rq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                return back();
+            } else {
+                $errors = $result->errors;
+                $request->session()->flash('alert-danger', __('custom.edit_error'));
+            }
+
+            return back()->withInput()->withErrors($errors);
+        }
+
+        return view('admin/roleRights', compact('class', 'rights', 'modules', 'rightTypes'));
+    }
 }

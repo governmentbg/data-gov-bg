@@ -25,7 +25,7 @@
                     <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
                         {{ csrf_field() }}
                         <div class="form-group row required">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                             <div class="col-sm-9">
                                 <input
                                     id="fname"
@@ -69,8 +69,8 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">Close</button>
-                                <button type="submit" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
+                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
+                                <button type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
                             </div>
                         </div>
                     </form>
@@ -319,9 +319,9 @@
                     <button
                         class="btn btn-primary"
                         name="add_resource"
-                    >{{ __('custom.add_resource') }}</button>
-                    <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('custom.save') }}</button>
+                    >{{ uctrans('custom.add_resource') }}</button>
+                    <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

@@ -10,7 +10,7 @@
             <div class="col-md-8 col-sm-10">
                 <div class="frame add-terms">
                     <div class="p-w-md text-center m-b-lg m-t-lg">
-                        <h2>Добавяне на условия за ползване</h2>
+                        <h2>{{ __('custom.add_terms_of_use') }}</h2>
                     </div>
                     <div class="body">
                         <form method="POST" class="form-horisontal">
@@ -31,7 +31,7 @@
                             @endforeach
 
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">Активна</label>
+                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <div class="js-check">
                                         <input
@@ -45,7 +45,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="default" class="col-sm-3 col-xs-12 col-form-label">По подразбиране</label>
+                                <label for="default" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.by_default') }}</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <div class="js-check">
                                         <input
@@ -59,7 +59,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="order" class="col-lg-3 col-form-label">Поле за подредба</label>
+                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}</label>
                                 <div class="col-lg-2">
                                     <input
                                         id="order"
@@ -74,7 +74,7 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="submit" name="create" value="1" class="m-l-md btn btn-custom">Добави</button>
+                                    <button type="submit" name="create" value="1" class="m-l-md btn btn-custom">{{ __('custom.add') }}</button>
                                 </div>
                             </div>
                         </form>

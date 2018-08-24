@@ -55,25 +55,17 @@ class HomeController extends Controller {
             'records_per_page'  => 1,
             'page_number'       => 1,
             'criteria'          => [
-                'active'          => true,
+                'active'            => true,
             ],
         ]);
         $api = new ApiOrganisation($rq);
         $result = $api->listOrganisations($rq)->getData();
         $organisations = $result->total_records;
 
-        $rq = Request::create('/api/listDataSets', 'POST', [
-            'records_per_page'  => 1,
-            'page_number'       => 1,
-            'criteria'          => [
-                'active'            => true,
-                'approved'          => true,
-            ],
-        ]);
+        $rq = Request::create('/api/listDataSets', 'POST');
         $api = new ApiDataSet($rq);
-        $result = $api->listDataSets($rq)->getData();
-        $datasets = $result->total_records;
-
+        $sets = $api->listDataSets($rq)->getData();
+        $datasets = $sets->total_records;
 
         return view('/home/index', compact('class', 'updates', 'users', 'organisations', 'datasets'));
     }

@@ -11,6 +11,6 @@
 {{ __('custom.greetings') }}, {{ $user }}!<br>
 {{ __('custom.register_success') }}.<br>
 {{ __('custom.to_activate') }}:<br/>
-<a href="{{ route('confirmation', ['hash' => $hash]) }}"> {{ __('custom.confirm') }}</a>
+<a href="{{ route('confirmation', ['hash' => $hash, 'id' => $id]) }}"> {{ __('custom.confirm') }}</a>
 
 @endsection

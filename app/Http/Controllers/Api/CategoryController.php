@@ -30,14 +30,14 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($request->get('data', []), [
-            'name'              => 'required|string',
+            'name'              => 'required|string|max:191',
             'locale'            => 'required|string|max:5',
-            'icon'              => 'nullable|string',
-            'icon_filename'     => 'nullable|string',
-            'icon_mimetype'     => 'nullable|string',
-            'icon_data'         => 'nullable|string',
-            'active'            => 'nullable|integer',
-            'ordering'          => 'nullable|integer',
+            'icon'              => 'nullable|string|max:191',
+            'icon_filename'     => 'nullable|string|max:191',
+            'icon_mimetype'     => 'nullable|string|max:191',
+            'icon_data'         => 'nullable|string|max:16777215',
+            'active'            => 'nullable|boolean',
+            'ordering'          => 'nullable|integer|digits_between:1,3',
         ]);
 
         // add main category
@@ -97,20 +97,20 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'category_id'           => 'required|integer',
+            'category_id'           => 'required|integer|digits_between:1,10',
             'data'                  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'             => 'required|string',
+                'name'             => 'required|string|max:191',
                 'locale'           => 'required|string|max:5',
-                'icon'             => 'nullable|string',
-                'icon_filename'    => 'nullable|string',
-                'icon_mimetype'    => 'nullable|string',
-                'icon_data'        => 'nullable|string',
-                'active'           => 'nullable|integer',
-                'ordering'         => 'nullable|integer',
+                'icon'             => 'nullable|string|max:191',
+                'icon_filename'    => 'nullable|string|max:191',
+                'icon_mimetype'    => 'nullable|string|max:191',
+                'icon_data'        => 'nullable|string|max:16777215',
+                'active'           => 'nullable|boolean',
+                'ordering'         => 'nullable|integer|digits_between:1,3',
             ]);
         }
 
@@ -167,7 +167,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'category_id'   => 'required|integer|exists:categories,id',
+            'category_id'   => 'required|integer|exists:categories,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -204,8 +204,8 @@ class CategoryController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'               => 'nullable|array',
-            'records_per_page'       => 'nullable|integer',
-            'page_number'            => 'nullable|integer',
+            'records_per_page'       => 'nullable|integer|digits_between:1,10',
+            'page_number'            => 'nullable|integer|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -213,17 +213,16 @@ class CategoryController extends ApiController
             $validator = \Validator::make($criteria, [
                 'category_ids'  => 'nullable|array',
                 'locale'        => 'nullable|string|max:5',
-                'active'        => 'nullable|integer',
-                'order.type'    => 'nullable|string',
-                'order.field'   => 'nullable|string',
+                'active'        => 'nullable|boolean',
+                'order'         => 'nullable|array',
             ]);
         }
 
         if (!$validator->fails()) {
             $order = isset($post['order']) ? $post['order'] : [];
             $validator = \Validator::make($order, [
-                'type'    => 'nullable|string',
-                'field'   => 'nullable|string',
+                'type'    => 'nullable|string|max:191',
+                'field'   => 'nullable|string|max:191',
             ]);
         }
 
@@ -289,7 +288,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'category_id'   => 'required|integer|exists:categories,id',
+            'category_id'   => 'required|integer|exists:categories,id|digits_between:1,10',
             'locale'        => 'nullable|string|max:5',
         ]);
 
@@ -323,10 +322,10 @@ class CategoryController extends ApiController
         $post = $request->data;
 
         $validator = \Validator::make($post, [
-            'name'          => 'required|string',
-            'category_id'   => 'required|integer',
+            'name'          => 'required|string|max:191',
+            'category_id'   => 'required|integer|digits_between:1,10',
             'locale'        => 'required|string|max:5',
-            'active'        => 'nullable|integer',
+            'active'        => 'nullable|boolean',
         ]);
 
         if (!$validator->fails()) {
@@ -370,17 +369,17 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'tag_id'            => 'required|int|exists:categories,id',
+            'tag_id'            => 'required|int|exists:categories,id|digits_between:1,10',
             'data'              => 'nullable|array',
         ]);
 
         if (!$validator->fails()) {
             $post['data'] = isset($post['data']) ? $post['data'] : [] ;
             $validator = \Validator::make($post['data'], [
-                'name'         => 'nullable|string',
-                'locale'       => 'nullable|string',
-                'category_id'  => 'nullable|integer',
-                'active'       => 'nullable|integer'
+                'name'         => 'nullable|string|max:191',
+                'locale'       => 'nullable|string|max:5',
+                'category_id'  => 'nullable|integer|digits_between:1,10',
+                'active'       => 'nullable|boolean'
         ]);
         }
 
@@ -429,7 +428,7 @@ class CategoryController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['tag_id' => 'required|integer|exists:categories,id']);
+        $validator = \Validator::make($post, ['tag_id' => 'required|integer|exists:categories,id|digits_between:1,10']);
 
         if (!$validator->fails()) {
             try {
@@ -465,8 +464,8 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
             'criteria'              => 'nullable|array'
         ]);
 
@@ -475,8 +474,8 @@ class CategoryController extends ApiController
             $validator = \Validator::make($criteria, [
                 'tag_ids'      => 'nullable|array',
                 'locale'       => 'nullable|string|max:5',
-                'category_id'  => 'nullable|integer',
-                'active'       => 'nullable|integer',
+                'category_id'  => 'nullable|integer|digits_between:1,10',
+                'active'       => 'nullable|boolean',
                 'order'        => 'nullable|array'
             ]);
         }
@@ -484,8 +483,8 @@ class CategoryController extends ApiController
         if (!$validator->fails()) {
             $order = isset($request['criteria']['order']) ? $request['criteria']['order'] : [];
             $validator = \Validator::make($order, [
-                'type'    => 'nullable|string',
-                'field'   => 'nullable|string'
+                'type'    => 'nullable|string|max:191',
+                'field'   => 'nullable|string|max:191'
             ]);
         }
 
@@ -563,7 +562,7 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'tag_id' => 'required|int|exists:categories,id',
+            'tag_id' => 'required|int|exists:categories,id|digits_between:1,10',
             'locale' => 'nullable|string|max:5',
         ]);
 

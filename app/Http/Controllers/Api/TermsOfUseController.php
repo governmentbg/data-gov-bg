@@ -23,15 +23,15 @@ class TermsOfUseController extends ApiController
         $data = $request->get('data', []);
         //validate request data
         $validator = \validator::make($data, [
-            'name'           => 'required_with:locale',
-            'name.bg'        => 'required_without:locale|string',
+            'name'           => 'required_with:locale|max:191',
+            'name.bg'        => 'required_without:locale|string|max:191',
             'name.*'         => 'max:191',
-            'description'    => 'required_with:locale',
-            'description.bg' => 'required_without:locale|string',
+            'description'    => 'required_with:locale|max:8000',
+            'description.bg' => 'required_without:locale|string|max:8000',
             'locale'         => 'nullable|string|max:5',
             'active'         => 'required|boolean',
             'is_default'     => 'nullable|boolean',
-            'ordering'       => 'nullable|integer',
+            'ordering'       => 'nullable|integer|digits_between:1,3',
         ]);
 
         $validator->after(function ($validator) {
@@ -98,16 +98,16 @@ class TermsOfUseController extends ApiController
 
         //validate request data
         $validator = \validator::make($data, [
-            'terms_id'        => 'required|numeric|exists:terms_of_use,id',
-            'name'            => 'required_with:locale',
-            'name.bg'         => 'required_without:locale|string',
+            'terms_id'        => 'required|numeric|exists:terms_of_use,id|digits_between:1,10',
+            'name'            => 'required_with:locale|max:191',
+            'name.bg'         => 'required_without:locale|string|max:191',
             'name.*'          => 'max:191',
-            'description'     => 'required_with:locale',
-            'description.bg'  => 'required_without:locale|string',
+            'description'     => 'required_with:locale|max:8000',
+            'description.bg'  => 'required_without:locale|string|max:8000',
             'locale'          => 'nullable|string|max:5',
             'active'          => 'required|boolean',
             'is_default'      => 'nullable|boolean',
-            'ordering'        => 'nullable|numeric',
+            'ordering'        => 'nullable|numeric|digits_between:1,3',
         ]);
 
         $validator->after(function ($validator) {
@@ -148,7 +148,7 @@ class TermsOfUseController extends ApiController
     {
         $post = $request->all();
         $validator = \Validator::make($post, [
-            'terms_id'  => 'required|exists:terms_of_use,id'
+            'terms_id'  => 'required|exists:terms_of_use,id|digits_between:1,10'
         ]);
 
         if ($validator->fails()) {
@@ -218,7 +218,7 @@ class TermsOfUseController extends ApiController
     {
         $post = $request->all();
         $validator = \Validator::make($post, [
-            'terms_id'  => 'required|exists:terms_of_use,id',
+            'terms_id'  => 'required|exists:terms_of_use,id|digits_between:1,10',
             'locale'    => 'string|max:5',
         ]);
 

@@ -74,9 +74,9 @@
                                     {{ csrf_field() }}
                                     <button
                                         name="delete"
-                                        class="badge badge-pill m-b-sm"
-                                        data-confirm="{{ __('Изтриване на данните?') }}"
-                                    >{{ __('custom.remove') }}</button>
+                                        class="badge badge-pill m-b-sm del-btn"
+                                        data-confirm="{{ __('custom.remove_data') }}"
+                                    >{{ uctrans('custom.remove') }}</button>
                                 </form>
                             </div>
                         </div>

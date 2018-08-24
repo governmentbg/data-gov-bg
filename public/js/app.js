@@ -31858,7 +31858,7 @@ module.exports = function spread(callback) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.16
+ * Vue.js v2.5.17
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -36947,7 +36947,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.16';
+Vue.version = '2.5.17';
 
 /*  */
 
@@ -46262,10 +46262,32 @@ $(function () {
 });
 
 $(function () {
-    if ($('.js-check').length) {
-        $('.js-check').iCheck({
-            checkboxClass: 'icheckbox_square-green',
-            radioClass: 'iradio_square-green'
+    var $checkboxes = $('.js-check');
+
+    if ($checkboxes.length) {
+        $checkboxes.each(function () {
+            var $checkbox = $(this);
+
+            $checkbox.iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green'
+            });
+
+            $checkbox.on('ifClicked', function () {
+                $this = $(this);
+
+                if ($(this).hasClass('js-uncheck')) {
+                    if ($('input', $(this)).prop('checked')) {
+                        $(this).iCheck('uncheck');
+                    }
+                }
+
+                if ($(this).hasClass('js-submit')) {
+                    setTimeout(function () {
+                        $this.parents('form').submit();
+                    }, 100);
+                }
+            });
         });
     }
 });
@@ -46318,13 +46340,18 @@ $('.tagsEN input').attr('placeholder', 'Enter new tag...');
 $(function () {
     var lang = document.cookie.replace(/(?:(?:^|.*;\s*)language\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-    $('.datepicker').datepicker({
-        language: 'bg',
-        weekStart: 1,
-        todayHighlight: true,
-        format: 'dd-mm-yyyy',
-        autoclose: true
-    }).datepicker("setDate", "0");
+    $('.datepicker').each(function () {
+        $(this).attr('autocomplete', false);
+
+        $(this).datepicker({
+            language: 'bg',
+            weekStart: 1,
+            todayHighlight: true,
+            format: 'dd-mm-yyyy',
+            autoclose: true,
+            setDate: ''
+        });
+    });
 });
 
 //close navbar menu on mobile version
@@ -46379,14 +46406,31 @@ $(function () {
 });
 
 $(function () {
-    $('.js-org-type').on('ifChecked', function (event) {
-        if (typeof $('.js-org-approved') != 'undefined') {
-            if ($(this).hasClass('show-approved')) {
-                $('.js-org-approved').removeClass('hidden');
-            } else {
-                $('.js-org-approved').addClass('hidden');
-            }
+    $('.js-terms-req-preview, .js-terms-req-close').on('click', function (event) {
+        var index = $(this).data('index');
+        var action = $(this).data('action');
+        var $content = $('.js-terms-req-cont-' + index);
+        var $btns = $('.js-terms-req-btns-' + index);
+
+        switch (action) {
+            case 'show':
+                $content.removeClass('hidden');
+                $btns.removeClass('hidden');
+                $(this).addClass('hidden');
+                break;
+            case 'close':
+                $content.addClass('hidden');
+                $btns.addClass('hidden');
+                $('.js-terms-req-preview[data-index="' + index + '"]').removeClass('hidden');
+                break;
         }
+    });
+});
+
+$(function () {
+    $('.js-from-filter, .js-to-filter').on('change', function (event) {
+        var $form = $(this).closest('form');
+        $form.submit();
     });
 });
 

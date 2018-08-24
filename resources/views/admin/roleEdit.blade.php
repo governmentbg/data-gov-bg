@@ -100,8 +100,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-lg-12">
-                    <button type="submit" name="edit" class="btn btn-primary pull-right">{{ __('custom.save') }}</button>
+                <div class="form-group row">
+                    <div class="col-lg-12 text-right">
+                        <button type="submit" name="edit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
+                    </div>
                 </div>
             </div>
         </div>

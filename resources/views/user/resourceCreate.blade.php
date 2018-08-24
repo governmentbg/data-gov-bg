@@ -168,7 +168,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
-                    <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ __('custom.save') }}</button>
+                    <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

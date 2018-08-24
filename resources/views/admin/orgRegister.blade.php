@@ -18,7 +18,7 @@
                         <img class="preview js-preview hidden" src="#" alt="organisation logo" />
                     </div>
                     <div class="inline-block">
-                        <span class="badge badge-pill"><label class="js-logo" for="logo">{{ __('custom.select_image') }}</label></span>
+                        <span class="badge badge-pill"><label class="js-logo" for="logo">{{ uctrans('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
                     </div>
                     <div class="error">{{ $errors->first('logo') }}</div>
@@ -95,7 +95,6 @@
                                 <input
                                     type="radio"
                                     name="type"
-                                    class="js-org-type {{ $id == \App\Organisation::TYPE_COUNTRY ? 'show-approved' : '' }}"
                                     value="{{ $id }}"
                                     @if (!empty(old('type')) && old('type') == $id)
                                         {{ 'checked' }}
@@ -128,19 +127,7 @@
                     </div>
                 </div>
             </div>
-            <div
-                class="
-                    form-group
-                    row
-                    js-org-approved
-                    {{
-                        old('type') === null
-                        || old('type') == \App\Organisation::TYPE_CIVILIAN
-                            ? 'hidden'
-                            : ''
-                    }}
-                "
-            >
+            <div class="form-group row">
                 <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.org_approved') }}:</label>
                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                     <div class="js-check">
@@ -155,7 +142,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
-                    <button type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
+                    <button type="submit" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

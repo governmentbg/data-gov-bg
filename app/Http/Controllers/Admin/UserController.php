@@ -235,6 +235,7 @@ class UserController extends AdminController {
 
             if ($request->has('remove_role')) {
                 $params = [
+                    'api_key'   => Auth::user()->api_key,
                     'org_id'    => $request->offsetGet('org_id'),
                     'user_id'   => $id,
                 ];

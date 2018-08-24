@@ -245,7 +245,6 @@
                                     class="badge cust-btn badge-pill m-b-sm"
                                     href="{{ url('/admin/users/edit/'. $member->id) }}"
                                 >{{ utrans('custom.edit') }}</a>
-                                <input name="user_id" type="hidden" value="{{ $member->id }}">
                             </div>
                         @endif
                     </div>
@@ -280,7 +279,7 @@
                 <div class="modal-body">
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
-                        <div class="form-group row m-b-lg m-t-md">
+                        <div class="form-group row m-b-md m-t-md">
                             <label for="email" class="col-lg-2 col-form-label">{{ __('custom.email') }}: </label>
                             <div class="col-lg-10">
                                 <input
@@ -288,6 +287,18 @@
                                     name="email"
                                     type="email"
                                     class="input-border-r-12 form-control"
+                                >
+                            </div>
+                        </div>
+                        <div class="form-group row m-b-md m-t-md">
+                            <label for="approved" class="col-lg-3 col-sm-8 col-xs-12">{{ utrans('custom.approved') }}:</label>
+                            <div class="col-lg-9 col-sm-4 col-xs-12 text-right">
+                                <input
+                                    type="checkbox"
+                                    class="js-check form-control"
+                                    id="approved"
+                                    name="approved"
+                                    value="1"
                                 >
                             </div>
                         </div>

@@ -443,13 +443,15 @@ class UserController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'firstname'        => 'nullable|string|max:100',
-                'lastname'         => 'nullable|string|max:100',
-                'email'            => 'nullable|email|max:191',
-                'add_info'         => 'nullable|string|max:8000',
-                'password'         => 'nullable|string',
-                'is_admin'         => 'nullable|int|digits_between:1,10',
-                'password_confirm' => 'nullable|string|same:password',
+                'firstname'         => 'nullable|string|max:100',
+                'lastname'          => 'nullable|string|max:100',
+                'email'             => 'nullable|email|max:191',
+                'add_info'          => 'nullable|string|max:8000',
+                'password'          => 'nullable|string',
+                'is_admin'          => 'nullable|bool',
+                'active'            => 'nullable|bool',
+                'aproved'           => 'nullable|bool',
+                'password_confirm'  => 'nullable|string|same:password',
             ]);
         }
 
@@ -744,7 +746,7 @@ class UserController extends ApiController
                 ? (int) $request->data['is_admin']
                 : 0;
             $user->active = 0;
-            $user->approved = 0;
+            $user->approved = !empty($post['data']['approved']) ? $post['data']['approved'] : 0;
             $user->api_key = Uuid::generate(4)->string;
             $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
             $user->remember_token = null;

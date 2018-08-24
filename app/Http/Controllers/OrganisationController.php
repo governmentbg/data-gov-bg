@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Role;
+use App\ActionsHistory;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
+use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class OrganisationController extends Controller {
 
@@ -176,9 +181,11 @@ class OrganisationController extends Controller {
 
     public function view(Request $request, $uri)
     {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
         $params = [
             'org_uri' => $uri,
-            'locale'  => \LaravelLocalization::getCurrentLocale()
+            'locale'  => $locale
         ];
         $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
         $api = new ApiOrganisation($rq);
@@ -190,7 +197,7 @@ class OrganisationController extends Controller {
                     'org_id'   => $result->data->id,
                     'active'   => true,
                     'approved' => true,
-                    'locale'   => \LaravelLocalization::getCurrentLocale()
+                    'locale'   => $locale
                 ]
             ];
             $rq = Request::create('/api/listOrganisations', 'POST', $params);
@@ -202,7 +209,7 @@ class OrganisationController extends Controller {
             if (isset($result->data->parent_org_id)) {
                 $params = [
                     'org_id' => $result->data->parent_org_id,
-                    'locale'    => \LaravelLocalization::getCurrentLocale()
+                    'locale' => $locale
                 ];
                 $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
                 $api = new ApiOrganisation($rq);
@@ -271,50 +278,143 @@ class OrganisationController extends Controller {
             );
         }
 
-        return redirect('organisation.list');
+        return redirect('organisation');
     }
 
-    public function follow(Request $request, $uri)
+    public function datasets(Request $request, $uri)
     {
-        if ($user = \Auth::user()) {
+        return view(
+            'organisation/datasets',
+            [
+                'class' => 'organisation',
+                'uri'   => $uri
+            ]
+        );
+
+    }
+
+    public function viewDataset()
+    {
+
+    }
+
+    public function chronology(Request $request, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'org_uri' => $uri,
+            'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if (isset($result->success) && $result->success && !empty($result->data) &&
+            $result->data->active && $result->data->approved) {
+
             $params = [
-                'org_uri' => $uri,
-                'locale'    => \LaravelLocalization::getCurrentLocale()
+                'criteria' => [
+                    'org_id' => $result->data->id,
+                    'locale' => $locale
+                ]
             ];
-            $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
-            $api = new ApiOrganisation($rq);
-            $result = $api->getOrganisationDetails($rq)->getData();
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
 
-            if ($result->success && !empty($result->data) && $result->data->active && $result->data->approved) {
-                if ($request->has('follow')) {
-                    $follow = Request::create('api/addFollow', 'POST', [
-                        'api_key' => $user->api_key,
-                        'user_id' => $user->id,
-                        'org_id'  => $result->data->id,
-                    ]);
-
-                    $followResult = $apiFollow->addFollow($follow)->getData();
-
-                    if ($followResult->success) {
-
-                        return back();
+            $criteria = [
+                'org_ids' => [$result->data->id]
+            ];
+            $objType = Role::MODULE_NAMES[2];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Role::MODULE_NAMES[5];
+                $objTypeRes = Role::MODULE_NAMES[6];
+                $actObjData[$objType] = [];
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
                     }
                 }
             }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 10;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'organisation/chronology',
+                [
+                    'class'          => 'organisation',
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
         }
 
-        return redirect()->back()->withInput($request-all());
-    }
-
-    public function datasets() {
-
-    }
-
-    public function viewDataset() {
-
-    }
-
-    public function chronology() {
-
+        return redirect('organisation');
     }
 }

@@ -11,9 +11,9 @@
                         <div class="col-xs-12 p-l-r-none">
                             <div>
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="p-l-none" href="{{ url('/organisation/profile') }}">{{ __('custom.profile') }}</a></li>
-                                    <li><a class="active" href="{{ url('/organisation/datasets') }}">{{ __('custom.data') }}</a></li>
-                                    <li><a href="{{ url('/organisation/chronology') }}">{{ __('custom.chronology') }}</a></li>
+                                    <li><a class="p-l-none" href="{{ url('/organisation/profile/'. $uri) }}">{{ __('custom.profile') }}</a></li>
+                                    <li><a class="active" href="{{ url('/organisation/'. $uri .'/datasets') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/organisation/'. $uri .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
                         </div>

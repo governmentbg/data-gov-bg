@@ -62,8 +62,8 @@ class OrganisationController extends ApiController
             'parent_org_id'         => 'nullable|int|max:10',
             'active'                => 'nullable|bool',
             'approved'              => 'nullable|bool',
-            'custom_fields.*.label' => 'nullable',
-            'custom_fields.*.value' => 'nullable',
+            'custom_fields.*.label' => 'nullable|max:191',
+            'custom_fields.*.value' => 'nullable|max:8000',
         ]);
 
         $organisation = new Organisation;
@@ -228,8 +228,8 @@ class OrganisationController extends ApiController
             'parent_org_id'            => 'nullable|int|max:10',
             'active'                   => 'nullable|bool',
             'approved'                 => 'nullable|bool',
-            'custom_fields.*.label'    => 'nullable',
-            'custom_fields.*.value'    => 'nullable',
+            'custom_fields.*.label'    => 'nullable|max:191',
+            'custom_fields.*.value'    => 'nullable|max:8000',
         ]);
 
         $organisation = Organisation::find($data['org_id']);
@@ -1120,7 +1120,7 @@ class OrganisationController extends ApiController
             'activity_info'         => 'nullable|string|max:8000',
             'active'                => 'nullable|bool',
             'custom_fields.*.label' => 'nullable|max:191',
-            'custom_fields.*.value' => 'nullable',
+            'custom_fields.*.value' => 'nullable|max:8000',
         ]);
 
         $newGroup = new Organisation;
@@ -1167,50 +1167,50 @@ class OrganisationController extends ApiController
                 DB::beginTransaction();
 
                 try {
-                        $newGroup->name = $this->trans($post['locale'], $post['name']);
-                        $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
-                        $newGroup->uri = !empty($post['uri'])
-                            ? $post['uri']
-                            : $this->generateOrgUri();
+                    $newGroup->name = $this->trans($post['locale'], $post['name']);
+                    $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
+                    $newGroup->uri = !empty($post['uri'])
+                        ? $post['uri']
+                        : $this->generateOrgUri();
 
-                        $newGroup->type = Organisation::TYPE_GROUP;
-                        $newGroup->active = Organisation::ACTIVE_FALSE;
-                        $newGroup->approved = Organisation::APPROVED_FALSE;
-                        $newGroup->parent_org_id = null;
+                    $newGroup->type = Organisation::TYPE_GROUP;
+                    $newGroup->active = Organisation::ACTIVE_FALSE;
+                    $newGroup->approved = Organisation::APPROVED_FALSE;
+                    $newGroup->parent_org_id = null;
 
-                        if (!empty($post['custom_fields'])) {
-                            foreach ($post['custom_fields'] as $fieldSet) {
-                                if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                                    $customFields[] = [
-                                        'value' => $fieldSet['value'],
-                                        'label' => $fieldSet['label'],
-                                    ];
-                                }
+                    if (!empty($post['custom_fields'])) {
+                        foreach ($post['custom_fields'] as $fieldSet) {
+                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                $customFields[] = [
+                                    'value' => $fieldSet['value'],
+                                    'label' => $fieldSet['label'],
+                                ];
+                            }
+                        }
+                    }
+
+                    $newGroup->save();
+
+                    if ($newGroup) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->org_id = $newGroup->id;
+                        $userToOrgRole->user_id = \Auth::user()->id;
+                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                        $userToOrgRole->save();
+
+                        if (!empty($customFields)) {
+                            if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
+                                DB::rollback();
+
+                                return $this->errorResponse(__('custom.add_group_fail'));
                             }
                         }
 
-                        $newGroup->save();
+                        DB::commit();
 
-                        if ($newGroup) {
-                            $userToOrgRole = new UserToOrgRole;
-                            $userToOrgRole->org_id = $newGroup->id;
-                            $userToOrgRole->user_id = \Auth::user()->id;
-                            $userToOrgRole->role_id = Role::ROLE_ADMIN;
-
-                            $userToOrgRole->save();
-
-                            if (!empty($customFields)) {
-                                if (!$this->checkAndCreateCustomSettings($customFields, $newGroup->id)) {
-                                    DB::rollback();
-
-                                    return $this->errorResponse(__('custom.add_group_fail'));
-                                }
-                            }
-
-                            DB::commit();
-
-                            return $this->successResponse(['id' => $newGroup->id], true);
-                        }
+                        return $this->successResponse(['id' => $newGroup->id], true);
+                    }
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
@@ -1260,7 +1260,7 @@ class OrganisationController extends ApiController
             'logo_mimetype'         => 'nullable|string|max:191',
             'logo_data'             => 'nullable|string|max:191',
             'custom_fields.*.label' => 'nullable|max:191',
-            'custom_fields.*.value' => 'nullable',
+            'custom_fields.*.value' => 'nullable|max:8000',
         ]);
 
         $group = Organisation::find($id);

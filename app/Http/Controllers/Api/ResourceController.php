@@ -70,7 +70,7 @@ class ResourceController extends ApiController
                 'post_data'            => 'nullable|string|max:8000',
                 'custom_fields'        => 'nullable|array',
                 'custom_fields.label'  => 'nullable|string|max:191',
-                'custom_fields.value'  => 'nullable|string',
+                'custom_fields.value'  => 'nullable|string|max:8000',
             ]);
         }
 

@@ -72,9 +72,9 @@ class DataSetController extends ApiController
                 'author_email'          => 'nullable|email|max:191',
                 'support_name'          => 'nullable|string|max:191',
                 'support_email'         => 'nullable|email|max:191',
-                'sla'                   => 'nullable|max:10',
-                'custom_fields.*.label' => 'nullable',
-                'custom_fields.*.value' => 'nullable',
+                'sla'                   => 'nullable|max:8000',
+                'custom_fields.*.label' => 'nullable|max:191',
+                'custom_fields.*.value' => 'nullable|max:8000',
             ]);
 
             if ($validator->fails()) {
@@ -236,10 +236,10 @@ class DataSetController extends ApiController
                 'author_email'             => 'nullable|email|max:191',
                 'support_name'             => 'nullable|string|max:191',
                 'support_email'            => 'nullable|email|max:191',
-                'sla'                      => 'nullable|max:10',
+                'sla'                      => 'nullable|max:8000',
                 'status'                   => 'nullable|int|max:3',
-                'custom_fields.*.label'    => 'nullable',
-                'custom_fields.*.value'    => 'nullable',
+                'custom_fields.*.label'    => 'nullable|max:191',
+                'custom_fields.*.value'    => 'nullable|max:8000',
             ]);
 
             if ($validator->fails()) {

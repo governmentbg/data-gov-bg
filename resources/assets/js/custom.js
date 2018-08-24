@@ -26,15 +26,15 @@ $(function () {
             });
 
             $checkbox.on('ifClicked', function () {
-                $this = $(this);
+                var $this = $(this);
 
-                if ($(this).hasClass('js-uncheck')) {
-                    if ($('input', $(this)).prop('checked')) {
-                        $(this).iCheck('uncheck');
+                if ($this.hasClass('js-uncheck')) {
+                    if ($('input', $this).prop('checked')) {
+                        $this.iCheck('uncheck');
                     }
                 }
 
-                if ($(this).hasClass('js-submit')) {
+                if ($this.hasClass('js-submit')) {
                     setTimeout(function() {
                         $this.parents('form').submit();
                     }, 100);

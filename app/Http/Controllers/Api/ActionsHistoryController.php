@@ -3,15 +3,66 @@
 namespace App\Http\Controllers\Api;
 
 use App\Role;
-use \App\User;
 use \Validator;
-use \App\DataSet;
 use \App\ActionsHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
 
 class ActionsHistoryController extends ApiController
 {
+    /**
+     * Add actions history record
+     *
+     * @param integer user_id - required
+     * @param string module_name - required
+     * @param string action - required
+     * @param integer action_object - required
+     * @param string action_msg - required
+     * @param integer ip_address - required
+     * @param array user_agent - required
+     *
+     * @return json response with success or failure
+     */
+    public function addActionHistory(Request $request)
+    {
+        $post = $request->all();
+        $modules = Role::getModuleNames();
+        $actions = ActionsHistory::getTypes();
+
+        $validator = Validator::make($post, [
+            'module_name'   => 'required|string|max:191|in:'. implode(',', $modules),
+            'action'        => 'required|int|max:3|in:'. implode(',', array_flip($actions)),
+            'action_object' => 'required|max:191',
+            'action_msg'    => 'required|string|max:191',
+            'ip_address'    => 'required|string|max:15',
+            'user_agent'    => 'required|string|max:191',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $dbData = [
+                    'user_id'       => Auth::user()->id,
+                    'module_name'   => $post['module_name'],
+                    'action'        => $post['action'],
+                    'action_object' => $post['action_object'],
+                    'action_msg'    => $post['action_msg'],
+                    'ip_address'    => $post['ip_address'],
+                    'user_agent'    => $post['user_agent'],
+                    'occurrence'    => date('Y-m-d H:i:s'),
+                ];
+
+                $newRecord = ActionsHistory::create($dbData);
+
+                return $this->successResponse(['id' => $newRecord->id], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.add_action_fail'), $validator->errors()->messages());
+    }
+
     /**
      * Lists actions based on request input
      *
@@ -204,7 +255,7 @@ class ActionsHistoryController extends ApiController
                 $result[] = ['name' => $module];
             }
 
-            return $this->successResponse(['modules'=>$result], true);
+            return $this->successResponse(['modules' => $result], true);
         }
 
         return $this->errorResponse(__('custom.data_failure'));

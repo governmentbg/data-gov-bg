@@ -292,6 +292,7 @@ return [
     'email_change' => 'Email change confirmation',
     'pass_reset_confirm' => 'Password reset confirmation',
     'list_action_fail' => 'List action history failure',
+    'add_action_fail' => 'Add action history failure',
     'general' => 'General',
     'data_failure' => 'Get data failure',
     'access_denied' => 'Access denied',

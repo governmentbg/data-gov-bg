@@ -315,6 +315,7 @@ class OrganisationController extends AdminController
             }
 
             $post = [
+                'api_key'       => Auth::user()->api_key,
                 'data'          => $request->all(),
                 'org_id'        => $orgId,
                 'parentOrgs'    => $parentOrgs,

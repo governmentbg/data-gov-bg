@@ -32,7 +32,7 @@ class ActionsHistoryController extends ApiController
 
         $validator = Validator::make($post, [
             'module_name'   => 'required|string|max:191|in:'. implode(',', $modules),
-            'action'        => 'required|int|max:3|in:'. implode(',', array_flip($actions)),
+            'action'        => 'required|int|digits_between:1,3|in:'. implode(',', array_flip($actions)),
             'action_object' => 'required|max:191',
             'action_msg'    => 'required|string|max:191',
             'ip_address'    => 'required|string|max:15',

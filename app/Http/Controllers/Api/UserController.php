@@ -77,7 +77,7 @@ class UserController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $query = User::select();
+            $query = User::select()->with('userToOrgRole');
 
             if (isset($criteria['active'])) {
                 $query->where('active', $criteria['active']);
@@ -175,7 +175,7 @@ class UserController extends ApiController
 
         if (!$validator->fails()) {
             $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
-            $query = User::whereIn('id', $ids);
+            $query = User::whereIn('id', $ids)->with('userToOrgRole');
 
             $query->where('username', '!=', 'system');
             $count = $query->count();
@@ -305,14 +305,17 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'firstname'         => 'required|string|max:100',
-            'lastname'          => 'required|string|max:100',
-            'username'          => 'nullable|string|unique:users,username,NULL,id,deleted_at,NULL|max:100',
-            'email'             => 'required|email|max:191',
+            'firstname'         => 'required|string',
+            'lastname'          => 'required|string',
+            'username'          => 'nullable|string|unique:users,username,NULL,id,deleted_at,NULL',
+            'email'             => 'required|email',
+            'is_admin'          => 'nullable|bool',
+            'active'            => 'nullable|bool',
+            'approved'          => 'nullable|bool',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
-            'role_id'           => 'nullable|int|required_with:org_id|max:10',
-            'org_id'            => 'nullable|int|required_with:role_id|max:10',
+            'role_id'           => 'nullable',
+            'org_id'            => 'nullable',
         ]);
 
         if (!$validator->fails()) {
@@ -332,34 +335,40 @@ class UserController extends ApiController
                 $user->add_info = !empty($request->data['add_info'])
                     ? $request->data['add_info']
                     : null;
-                $user->is_admin = 0;
-                $user->active = 0;
-                $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
+                $user->is_admin = !empty($request->data['is_admin']) && Role::isAdmin()
+                    ? $request->data['is_admin']
+                    : false;
+                $user->active = !empty($request->data['active']) ? $request->data['active'] : false;
+                $user->approved = !empty($request->data['invite']) ? 1 : false;
                 $user->api_key = $apiKey;
                 $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
                 $user->remember_token = null;
 
                 $registered = $user->save();
 
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
+                if (!$user->active) {
+                    $mailData = [
+                        'user'  => $user->firstname,
+                        'hash'  => $user->hash_id,
+                        'id'    => $user->id,
+                    ];
 
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject(__('custom.register_subject'));
-                });
+                    Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                        $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                        $m->to($user->email, $user->firstname);
+                        $m->subject(__('custom.register_subject'));
+                    });
+                }
 
                 if (isset($data['role_id']) || isset($data['org_id'])) {
-                    $userToOrgRole = new UserToOrgRole;
+                    foreach ($data['role_id'] as $role) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->user_id = $user->id;
+                        $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
+                        $userToOrgRole->role_id = $role;
 
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = (int) $data['role_id'];
-                    $userToOrgRole->org_id = (int) $data['org_id'];
-
-                    $userToOrgRole->save();
+                        $userToOrgRole->save();
+                    }
                 }
 
                 $userSettings = new UserSetting;
@@ -516,25 +525,6 @@ class UserController extends ApiController
         }
 
         $orgAndRoles = [];
-
-        if (isset($data['role_id']) || isset($data['org_id'])) {
-            $validator = \Validator::make(
-                $request->all(),
-                [
-                    'data.role_id' => 'required',
-                    'data.org_id'  => 'required',
-                ]
-            );
-
-            if ($validator->fails()) {
-
-                return $this->errorResponse(__('custom.edit_user_fail'));
-            }
-
-            $orgAndRoles['role_id'] = (int) $data['role_id'];
-            $orgAndRoles['org_id'] = (int) $data['org_id'];
-        }
-
         $newSettings = [];
 
         if (isset($data['user_settings']['locale'])) {
@@ -561,9 +551,34 @@ class UserController extends ApiController
             }
         }
 
-        if (!empty($orgAndRoles)) {
+        if (isset($data['role_id']) || isset($data['org_id'])) {
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'data.role_id' => 'required',
+                    'data.org_id'  => 'nullable',
+                ]
+            );
+
+            if ($validator->fails()) {
+
+                return $this->errorResponse(__('custom.edit_user_fail'));
+            }
+
             try {
-                UserToOrgRole::where('user_id', $request->id)->update($orgAndRoles);
+                UserToOrgRole::where('user_id', $request->id)->delete();
+
+                foreach ($data['role_id'] as $org => $role) {
+                    if (!empty($role)) {
+                        foreach ($role as $id) {
+                            $orgAndRoles['user_id'] = $request->id;
+                            $orgAndRoles['org_id'] = $org != 0 ? $org : null;
+                            $orgAndRoles['role_id'] = $id;
+
+                            UserToOrgRole::create($orgAndRoles);
+                        }
+                    }
+                }
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
@@ -839,8 +854,8 @@ class UserController extends ApiController
             'email'             => 'required|email|max:191',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
-            'role_id'           => 'nullable|int|required_with:org_id|max:10',
-            'org_id'            => 'nullable|int|required_with:role_id|max:10',
+            'role_id'           => 'nullable',
+            'org_id'            => 'nullable',
         ]);
 
         if (!$validator->fails()) {
@@ -887,7 +902,7 @@ class UserController extends ApiController
 
                     $userToOrgRole->user_id = $user->id;
                     $userToOrgRole->role_id = (int) $data['role_id'];
-                    $userToOrgRole->org_id = (int) $data['org_id'];
+                    $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
 
                     $userToOrgRole->save();
                 }

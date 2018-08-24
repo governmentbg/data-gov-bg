@@ -39,8 +39,13 @@
                         </li>
                         <li>
                             <a
+                                class="{{ $view == 'users' ? 'active' : '' }}"
+                                href="{{ url('/admin/users') }}"
+                            >{{ trans_choice(__('custom.users'), 2) }}</a>
+                        <li>
+                            <a
                                 class="{{ $view == 'createProfile' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/users/create') }}"
                             >{{ __('custom.create_profile') }}</a>
                         </li>
                         <li>

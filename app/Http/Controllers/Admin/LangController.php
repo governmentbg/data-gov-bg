@@ -23,7 +23,8 @@ class LangController extends AdminController {
      *
      * @return view with list and actions
      */
-    public function list(Request $request) {
+    public function list(Request $request)
+    {
         $class = 'user';
 
         $rq = Request::create('/api/listLocale', 'POST');
@@ -49,7 +50,8 @@ class LangController extends AdminController {
      *
      * @return view with inpits
      */
-    public function addLang(Request $request) {
+    public function addLang(Request $request)
+    {
         $class = 'user';
         $locales = \LaravelLocalization::getSupportedLocales();
         $errors = [];

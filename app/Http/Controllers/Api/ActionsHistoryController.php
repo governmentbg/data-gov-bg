@@ -283,7 +283,7 @@ class ActionsHistoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'locale' => 'nullable|string|exists:locale,locale,active,1',
+            'locale'     => 'nullable|string|exists:locale,locale,active,1',
             'publicOnly' => 'nullable|bool',
         ]);
 

@@ -1051,6 +1051,10 @@ class UserController extends Controller {
                 $params = $request->all();
                 $apiKey = $user->api_key;
 
+                if (Auth::uset()->approved) {
+                    $params['approved'] = true;
+                }
+
                 if (!empty($params['logo'])) {
                     try {
                         $img = \Image::make($params['logo']);

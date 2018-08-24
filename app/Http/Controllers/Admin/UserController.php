@@ -32,7 +32,6 @@ class UserController extends AdminController {
     {
         $class = 'user';
         $search = '';
-        $userId = $request->offsetGet('user_id');
         $roleId = $request->offsetGet('role_id');
         $adminFilter = $request->offsetGet('is_admin', false);
         $organisations = $this->getOrgDropdown();
@@ -112,12 +111,14 @@ class UserController extends AdminController {
 
         if ($request->has('invite')) {
             $email = $request->offsetGet('email');
+            $approved = $request->offsetGet('approved');
 
             $rq = Request::create('/inviteUser', 'POST', [
                 'api_key'   => Auth::user()->api_key,
                 'data'      => [
                     'email'     => $email,
                     'generate'  => true,
+                    'approved'  => $approved,
                 ],
             ]);
             $api = new ApiUser($rq);
@@ -185,7 +186,7 @@ class UserController extends AdminController {
     }
 
     /**
-     * Show edit role.
+     * Show edit user.
      *
      * @return view with inpits
      */
@@ -264,6 +265,9 @@ class UserController extends AdminController {
                         'lastname'      => $request->offsetGet('lastname'),
                         'username'      => $request->offsetGet('username'),
                         'email'         => $request->offsetGet('email'),
+                        'is_admin'      => $request->offsetGet('is_admin') ? $request->offsetGet('is_admin') : false,
+                        'approved'      => $request->offsetGet('invite') ? $request->offsetGet('invite') : false,
+                        'active'        => $request->offsetGet('active') ? $request->offsetGet('active') : false,
                         'add_info'      => $request->offsetGet('add_info'),
                         'role_id'       => $rolesPost,
                         'org_id'        => $request->offsetGet('org_id'),

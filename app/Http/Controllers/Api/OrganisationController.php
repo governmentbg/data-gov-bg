@@ -1163,7 +1163,7 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
 
-            if (isset($newGroup->logo_data) && !$imageError) {
+            if (!isset($newGroup->logo_data) || !$imageError) {
                 DB::beginTransaction();
 
                 try {

@@ -72,7 +72,7 @@ class ActionsHistoryController extends ApiController
      * @param string criteria[username] - optional
      * @param integer criteria[user_id] - optional
      * @param string criteria[module] - optional
-     * @param integer criteria[action] - optional
+     * @param array criteria[actions] - optional
      * @param array criteria[category_ids] - optional
      * @param array criteria[tag_ids] - optional
      * @param array criteria[org_ids] - optional
@@ -98,20 +98,28 @@ class ActionsHistoryController extends ApiController
         if (!$validator->fails()) {
             $criteria = isset($post['criteria']) ? $post['criteria'] : [];
             $validator = Validator::make($criteria, [
-                'period_from'   => 'nullable|date',
-                'period_to'     => 'nullable|date',
-                'username'      => 'nullable|string',
-                'user_id'       => 'nullable|integer',
-                'module'        => 'nullable',
-                'action'        => 'nullable|integer',
-                'category_ids'  => 'nullable|array',
-                'tag_ids'       => 'nullable|array',
-                'org_ids'       => 'nullable|array',
-                'group_ids'     => 'nullable|array',
-                'user_ids'      => 'nullable|array',
-                'dataset_ids'   => 'nullable|array',
-                'resource_uris' => 'nullable|array',
-                'ip_adress'     => 'nullable|string',
+                'period_from'     => 'nullable|date',
+                'period_to'       => 'nullable|date',
+                'username'        => 'nullable|string',
+                'user_id'         => 'nullable|integer',
+                'module'          => 'nullable',
+                'actions'         => 'nullable|array',
+                'actions.*'       => 'int|in:'. implode(',', array_keys(ActionsHistory::getTypes())),
+                'category_ids'    => 'nullable|array',
+                'category_ids.*'  => 'int',
+                'tag_ids'         => 'nullable|array',
+                'tag_ids.*'       => 'int',
+                'org_ids'         => 'nullable|array',
+                'org_ids.*'       => 'int',
+                'group_ids'       => 'nullable|array',
+                'group_ids.*'     => 'int',
+                'user_ids'        => 'nullable|array',
+                'user_ids.*'      => 'int',
+                'dataset_ids'     => 'nullable|array',
+                'dataset_ids.*'   => 'int',
+                'resource_uris'   => 'nullable|array',
+                'resource_uris.*' => 'string',
+                'ip_adress'       => 'nullable|string',
             ]);
         }
 
@@ -159,8 +167,8 @@ class ActionsHistoryController extends ApiController
             $history->where('ip_address', $criteria['ip_address']);
         }
 
-        if (isset($criteria['action'])) {
-            $history->where('action', $criteria['action']);
+        if (isset($criteria['actions'])) {
+            $history->whereIn('action', $criteria['actions']);
         }
 
         $actObjCriteria = [];
@@ -259,5 +267,55 @@ class ActionsHistoryController extends ApiController
         }
 
         return $this->errorResponse(__('custom.data_failure'));
+    }
+
+    /**
+     * List action types
+     *
+     * @param string locale - optional
+     * @param boolean publicOnly - optional
+     * @return json list with organisation types or error
+     */
+    public function listActionTypes(Request $request)
+    {
+        $results = [];
+
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'locale' => 'nullable|string|exists:locale,locale,active,1',
+            'publicOnly' => 'nullable|bool',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                if (isset($post['locale'])) {
+                    $locale = $post['locale'];
+                } else {
+                    $locale = \LaravelLocalization::getCurrentLocale();
+                }
+
+                if (isset($post['publicOnly']) && $post['publicOnly']) {
+                    $actTypes = ActionsHistory::getPublicTypes();
+                } else {
+                    $actTypes = ActionsHistory::getTypes();
+                }
+
+                foreach ($actTypes as $typeId => $typeName) {
+                    $results[] = [
+                        'id'     => $typeId,
+                        'name'   => __($typeName, [], $locale),
+                        'locale' => $locale,
+                    ];
+                }
+
+                return $this->successResponse(['types' => $results], true);
+
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.list_act_types_fail'), $validator->errors()->messages());
     }
 }

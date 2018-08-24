@@ -213,7 +213,24 @@ Route::get('/terms', function () {
 
 Route::match(['get', 'post'], '/data', 'DataController@view')->name('dataView');
 
-Route::get('/data/view', function () {
+Route::get('/data/view/{uri?}', function () {
+    return view('data/view', [
+        'class' => 'data',
+        'filter' => 'healthcare',
+        'mainCats' => [
+            'healthcare',
+            'innovation',
+            'education',
+            'public_sector',
+            'municipalities',
+            'agriculture',
+            'justice',
+            'economy_business',
+        ],
+    ]);
+});
+
+Route::get('/data/resourceView/{uri}', function () {
     return view('data/view', [
         'class' => 'data',
         'filter' => 'healthcare',
@@ -259,17 +276,13 @@ Route::match(['get', 'post'], '/organisation', 'OrganisationController@list')->n
 Route::match(['get', 'post'], '/organisation/search', 'OrganisationController@search');
 Route::match(['get', 'post'], '/organisation/profile/{uri}', 'OrganisationController@view');
 
-Route::get('/organisation/datasets', function () {
-    return view('organisation/datasets', ['class' => 'organisation']);
-});
+Route::match(['get', 'post'], '/organisation/{uri}/datasets', 'OrganisationController@datasets');
 
 Route::get('/organisation/viewDataset', function () {
     return view('organisation/viewDataset', ['class' => 'organisation']);
 });
 
-Route::get('/organisation/chronology', function () {
-    return view('organisation/chronology', ['class' => 'organisation']);
-});
+Route::match(['get', 'post'], '/organisation/{uri}/chronology', 'OrganisationController@chronology');
 
 Route::get('/user', 'UserController@index');
 Route::post('/user', 'UserController@index');

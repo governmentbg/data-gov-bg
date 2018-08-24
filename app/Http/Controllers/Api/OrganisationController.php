@@ -840,7 +840,7 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'org_id'   => 'required_without:org_uri|nullable|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
-            'org_uri'  => 'required_without:org_id|nullable|string|exists:organisations,uri,deleted_at,NULL|digits_between:1,10',
+            'org_uri'  => 'required_without:org_id|nullable|string|exists:organisations,uri,deleted_at,NULL|max:191',
             'locale'   => 'nullable|string|max:5',
         ]);
 
@@ -1829,7 +1829,7 @@ class OrganisationController extends ApiController
                 foreach ($orgTypes as $typeId => $typeName) {
                     $results[] = [
                         'id'     => $typeId,
-                        'name'   => __(str_plural($typeName), [], $locale),
+                        'name'   => utrans($typeName, 2, [], $locale),
                         'locale' => $locale,
                     ];
                 }

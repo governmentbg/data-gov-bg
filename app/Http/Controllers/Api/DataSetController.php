@@ -49,7 +49,7 @@ class DataSetController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'    => 'nullable|int|max:10',
+            'org_id'    => 'nullable|int|digits_between:1,10',
             'data'      => 'required|array',
         ]);
 
@@ -63,9 +63,9 @@ class DataSetController extends ApiController
                 'uri'                   => 'nullable|string|unique:data_sets,uri|max:191',
                 'description'           => 'nullable|max:8000',
                 'tags.*'                => 'nullable',
-                'category_id'           => 'required|int|max:10',
-                'terms_of_use_id'       => 'nullable|int|max:10',
-                'visibility'            => 'nullable|int|max:3',
+                'category_id'           => 'required|int|digits_between:1,10',
+                'terms_of_use_id'       => 'nullable|int|digits_between:1,10',
+                'visibility'            => 'nullable|int|digits_between:1,10',
                 'source'                => 'nullable|string|max:255',
                 'version'               => 'nullable|max:15',
                 'author_name'           => 'nullable|string|max:191',
@@ -224,12 +224,12 @@ class DataSetController extends ApiController
                 'name'                     => 'required_with:locale|max:8000',
                 'name.bg'                  => 'required_without:locale|string|max:8000',
                 'description'              => 'nullable|max:8000',
-                'category_id'              => 'required|int|max:10',
-                'org_id'                   => 'nullable|int|max:10',
+                'category_id'              => 'required|int|digits_between:1,10',
+                'org_id'                   => 'nullable|int|digits_between:1,10',
                 'uri'                      => 'nullable|string|unique:data_sets,uri',
                 'tags.*'                   => 'nullable',
-                'terms_of_use_id'          => 'nullable|int|max:10',
-                'visibility'               => 'nullable|int|max:10',
+                'terms_of_use_id'          => 'nullable|int|digits_between:1,10',
+                'visibility'               => 'nullable|int|digits_between:1,10',
                 'source'                   => 'nullable|string|max:255',
                 'version'                  => 'nullable|max:15',
                 'author_name'              => 'nullable|string|max:191',
@@ -237,7 +237,7 @@ class DataSetController extends ApiController
                 'support_name'             => 'nullable|string|max:191',
                 'support_email'            => 'nullable|email|max:191',
                 'sla'                      => 'nullable|max:8000',
-                'status'                   => 'nullable|int|max:3',
+                'status'                   => 'nullable|int|digits_between:1,10',
                 'custom_fields.*.label'    => 'nullable|max:191',
                 'custom_fields.*.value'    => 'nullable|max:8000',
             ]);
@@ -446,22 +446,22 @@ class DataSetController extends ApiController
         if ($criteria) {
             $validator = \Validator::make($post, [
                 'criteria'                   => 'nullable|array',
-                'records_per_page'           => 'nullable|int|max:10',
-                'page_number'                => 'nullable|int|max:10',
+                'records_per_page'           => 'nullable|int|digits_between:1,10',
+                'page_number'                => 'nullable|int|digits_between:1,10',
             ]);
 
             if (!$validator->fails()) {
                 $validator = \Validator::make($criteria, [
                     'dataset_ids'       => 'nullable|array',
                     'locale'            => 'nullable|string|max:5',
-                    'org_id'            => 'nullable|int|max:10',
-                    'group_id'          => 'nullable|int|max:10',
-                    'category_id'       => 'nullable|int|max:10',
-                    'tag_id'            => 'nullable|int|max:10',
+                    'org_id'            => 'nullable|int|digits_between:1,10',
+                    'group_id'          => 'nullable|int|digits_between:1,10',
+                    'category_id'       => 'nullable|int|digits_between:1,10',
+                    'tag_id'            => 'nullable|int|digits_between:1,10',
                     'format'            => 'nullable|string|max:191',
-                    'terms_of_use_id'   => 'nullable|int|max:10',
-                    'reported'          => 'nullable|int|max:10',
-                    'created_by'        => 'nullable|int|max:10',
+                    'terms_of_use_id'   => 'nullable|int|digits_between:1,10',
+                    'reported'          => 'nullable|int|digits_between:1,10',
+                    'created_by'        => 'nullable|int|digits_between:1,10',
                     'order'             => 'nullable|array',
                 ]);
             }
@@ -625,8 +625,8 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|int|max:10',
-            'page_number'           => 'nullable|int|max:10',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -634,7 +634,7 @@ class DataSetController extends ApiController
             $validator = \Validator::make($criteria, [
                 'locale'       => 'nullable|string|max:5',
                 'keywords'     => 'required|string|max:191',
-                'user_id'      => 'nullable|integer|max:10',
+                'user_id'      => 'nullable|integer|digits_between:1,10',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -835,7 +835,7 @@ class DataSetController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'group_id'      => 'required|int|max:10',
+            'group_id'      => 'required|int|digits_between:1,10',
             'data_set_uri'  => 'required|string|max:191',
         ]);
 
@@ -1033,7 +1033,7 @@ class DataSetController extends ApiController
     {
         $data = $request->criteria;
 
-        $validator = \Validator::make($data, ['id' => 'required|int|max:10']);
+        $validator = \Validator::make($data, ['id' => 'required|int|digits_between:1,10']);
 
         if (!$validator->fails()) {
             $sets = DataSet::where('created_by', $data['id']);

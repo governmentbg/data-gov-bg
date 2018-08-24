@@ -125,14 +125,14 @@ class PageController extends ApiController
         }
 
         $validator = Validator::make($editData, [
-            'page_id'    => 'required|integer|exists:pages,id|max:10',
+            'page_id'    => 'required|integer|exists:pages,id|digits_between:1,10',
             'data'       => 'required|array',
             'locale'     => 'required|string|max:5',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
-                'section_id'       => 'nullable|integer|max:10',
+                'section_id'       => 'nullable|integer|digits_between:1,10',
                 'title'            => 'nullable|string|max:191',
                 'body'             => 'nullable|string|max:8000',
                 'head_title'       => 'nullable|string|max:191',
@@ -211,7 +211,7 @@ class PageController extends ApiController
         $deleteData = $request->all();
 
         $validator = Validator::make($deleteData, [
-            'page_id' => 'required|integer|exists:pages,id|max:10',
+            'page_id' => 'required|integer|exists:pages,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -253,17 +253,17 @@ class PageController extends ApiController
         $validator = Validator::make($post, [
             'criteria'                => 'nullable|array',
             'locale'                  => 'nullable|string|max:5',
-            'records_per_page'        => 'nullable|integer|max:10',
-            'page_number'             => 'nullable|integer|max:10',
+            'records_per_page'        => 'nullable|integer|digits_between:1,10',
+            'page_number'             => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'page_id'        => 'nullable|integer|max:10',
+                'page_id'        => 'nullable|integer|digits_between:1,10',
                 'active'         => 'nullable|boolean',
-                'section_id '    => 'nullable|integer|max:10',
+                'section_id '    => 'nullable|integer|digits_between:1,10',
                 'order'          => 'nullable|array',
             ]);
         }

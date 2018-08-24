@@ -47,8 +47,8 @@ class UserController extends ApiController
         $data = $request->all();
 
         $validator = \Validator::make($data, [
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
             'criteria'              => 'nullable|array',
         ]);
 
@@ -58,10 +58,10 @@ class UserController extends ApiController
             $validator = \Validator::make($criteria, [
                 'active'       => 'nullable|boolean',
                 'approved'     => 'nullable|boolean',
-                'is_admin'     => 'nullable|int',
-                'role_id'      => 'nullable|int',
-                'org_id'       => 'nullable|int',
-                'id'           => 'nullable|int',
+                'is_admin'     => 'nullable|int|max:10',
+                'role_id'      => 'nullable|int|max:10',
+                'org_id'       => 'nullable|int|max:10',
+                'id'           => 'nullable|int|max:10',
                 'user_ids'     => 'nullable|array',
                 'order'        => 'nullable|array',
             ]);
@@ -71,8 +71,8 @@ class UserController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -152,14 +152,14 @@ class UserController extends ApiController
         $search = $request->all();
 
         $validator = \Validator::make($search, [
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
             'criteria'              => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($search['criteria'], [
-                'keywords'     => 'required|string',
+                'keywords'     => 'required|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -168,8 +168,8 @@ class UserController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -209,7 +209,7 @@ class UserController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['id' => 'required|int']);
+        $validator = \Validator::make($post, ['id' => 'required|int|max:10']);
 
         if (!$validator->fails()) {
             $user = User::find($post['id']);
@@ -243,7 +243,7 @@ class UserController extends ApiController
     {
         $result = [];
 
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|max:10']);
 
         if (!$validator->fails()) {
             $user = User::with('userSetting', 'follow')->find($request->id);
@@ -305,14 +305,14 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'firstname'         => 'required|string',
-            'lastname'          => 'required|string',
-            'username'          => 'nullable|string|unique:users,username,NULL,id,deleted_at,NULL',
-            'email'             => 'required|email',
+            'firstname'         => 'required|string|max:100',
+            'lastname'          => 'required|string|max:100',
+            'username'          => 'nullable|string|unique:users,username,NULL,id,deleted_at,NULL|max:100',
+            'email'             => 'required|email|max:191',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
-            'role_id'           => 'nullable|int|required_with:org_id',
-            'org_id'            => 'nullable|int|required_with:role_id',
+            'role_id'           => 'nullable|int|required_with:org_id|max:10',
+            'org_id'            => 'nullable|int|required_with:role_id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -428,18 +428,18 @@ class UserController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'id'                    => 'required|int',
+            'id'                    => 'required|int|max:10',
             'data'                  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'firstname'        => 'nullable|string',
-                'lastname'         => 'nullable|string',
-                'email'            => 'nullable|email',
-                'add_info'         => 'nullable|string',
+                'firstname'        => 'nullable|string|max:100',
+                'lastname'         => 'nullable|string|max:100',
+                'email'            => 'nullable|email|max:191',
+                'add_info'         => 'nullable|string|max:8000',
                 'password'         => 'nullable|string',
-                'is_admin'         => 'nullable|int',
+                'is_admin'         => 'nullable|int|max:10',
                 'password_confirm' => 'nullable|string|same:password',
             ]);
         }
@@ -599,7 +599,7 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'id' => 'required',
+                'id' => 'required|max:10',
             ]
         );
 
@@ -641,7 +641,7 @@ class UserController extends ApiController
      */
     public function generateAPIKey(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|max:10']);
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.generate_api_key_fail'), $validator->errors()->messages());
@@ -688,11 +688,11 @@ class UserController extends ApiController
             $errors = $validator->errors()->messages();
         } else {
             $validator = \Validator::make($post['data'], [
-                'email'    => 'required|email',
-                'is_admin' => 'nullable|int',
-                'approved' => 'nullable|int',
-                'role_id'  => 'nullable|int|required_with:org_id',
-                'org_id'   => 'nullable|int|required_with:role_id',
+                'email'    => 'required|email|max:191',
+                'is_admin' => 'nullable|int|max:10',
+                'approved' => 'nullable|int|max:10',
+                'role_id'  => 'nullable|int|required_with:org_id|max:10',
+                'org_id'   => 'nullable|int|required_with:role_id|max:10',
                 'generate' => 'nullable|boolean',
             ]);
 
@@ -833,14 +833,14 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'firstname'         => 'required|string',
-            'lastname'          => 'required|string',
-            'username'          => 'required|string|unique:users,username,NULL,id,deleted_at,NULL',
-            'email'             => 'required|email',
+            'firstname'         => 'required|string|max:100',
+            'lastname'          => 'required|string|max:100',
+            'username'          => 'required|string|unique:users,username,NULL,id,deleted_at,NULL|max:100',
+            'email'             => 'required|email|max:191',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
-            'role_id'           => 'nullable|int|required_with:org_id',
-            'org_id'            => 'nullable|int|required_with:role_id',
+            'role_id'           => 'nullable|int|required_with:org_id|max:10',
+            'org_id'            => 'nullable|int|required_with:role_id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -989,7 +989,7 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'username' => 'required|string|exists:users,username,deleted_at,NULL'
+            'username' => 'required|string|exists:users,username,deleted_at,NULL|max:10'
         ]);
 
         if (!$validator->fails()) {

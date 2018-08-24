@@ -42,15 +42,15 @@ class NewsController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($newsData['data'], [
-                'locale'           => 'required|string',
-                'title'            => 'required|string',
-                'abstract'         => 'required|string',
-                'body'             => 'required|string',
-                'head_title'       => 'nullable|string',
-                'meta_description' => 'nullable|string',
-                'meta_keywords'    => 'nullable|string',
-                'forum_link'       => 'nullable|string',
-                'active'           => 'required|integer',
+                'locale'           => 'required|string|max:5',
+                'title'            => 'required|string|max:191',
+                'abstract'         => 'required|string|max:8000',
+                'body'             => 'required|string|max:8000',
+                'head_title'       => 'nullable|string|max:191',
+                'meta_description' => 'nullable|string|max:8000',
+                'meta_keywords'    => 'nullable|string|max:191',
+                'forum_link'       => 'nullable|string|max:191',
+                'active'           => 'required|boolean',
                 'valid_from'       => 'nullable|date',
                 'valid_to'         => 'nullable|date',
             ]);
@@ -130,21 +130,21 @@ class NewsController extends ApiController
         $editData = $request->all();
 
         $validator = Validator::make($editData, [
-            'news_id'               => 'required|integer|exists:pages,id',
+            'news_id'               => 'required|integer|exists:pages,id|max:10',
             'data'                  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
-                'locale'           => 'nullable|string',
-                'title'            => 'nullable|string',
-                'abstract'         => 'nullable|string',
-                'body'             => 'nullable|string',
-                'head_title'       => 'nullable|string',
-                'meta_description' => 'nullable|string',
-                'meta_key_words'   => 'nullable|string',
-                'forum_link'       => 'nullable|string',
-                'active'           => 'nullable|integer',
+                'locale'           => 'nullable|string|max:5',
+                'title'            => 'nullable|string|max:191',
+                'abstract'         => 'nullable|string|max:8000',
+                'body'             => 'nullable|string|max:8000',
+                'head_title'       => 'nullable|string|max:191',
+                'meta_description' => 'nullable|string|max:8000',
+                'meta_key_words'   => 'nullable|string|max:191',
+                'forum_link'       => 'nullable|string|max:191',
+                'active'           => 'nullable|boolean',
                 'valid_from'       => 'nullable|date',
                 'valid_to'         => 'nullable|date',
             ]);
@@ -258,7 +258,7 @@ class NewsController extends ApiController
     {
         $newsDeleteData = $request->all();
         $validator = Validator::make($newsDeleteData, [
-            'news_id' => 'required|integer|exists:pages,id',
+            'news_id' => 'required|integer|exists:pages,id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -300,21 +300,21 @@ class NewsController extends ApiController
         $newsListData = $request->all();
 
         $validator = Validator::make($newsListData, [
-            'locale'                => 'nullable|string',
+            'locale'                => 'nullable|string|max:5',
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|max:10',
+            'page_number'           => 'nullable|integer|max:10',
         ]);
 
         $criteria = isset($newsListData['criteria']) ? $newsListData['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'active'       => 'nullable|integer',
-                'valid'        => 'nullable|integer',
+                'active'       => 'nullable|boolean',
+                'valid'        => 'nullable|integer|max:10',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
-                'date_type'    => 'nullable|string',
+                'date_type'    => 'nullable|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -323,8 +323,8 @@ class NewsController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -461,17 +461,17 @@ class NewsController extends ApiController
         $newsSearchData = $request->all();
 
         $validator = Validator::make($newsSearchData, [
-            'locale'                => 'nullable|string',
+            'locale'                => 'nullable|string|max:5',
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|max:10',
+            'page_number'           => 'nullable|integer|max:10',
         ]);
 
         $criteria = isset($newsSearchData['criteria']) ? $newsSearchData['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'keywords'     => 'required|string',
+                'keywords'     => 'required|string|max:191',
                 'order'        => 'nullable|array',
             ]);
         }
@@ -480,8 +480,8 @@ class NewsController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'   => 'nullable|string',
-                'field'  => 'nullable|string',
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
             ]);
         }
 
@@ -553,8 +553,8 @@ class NewsController extends ApiController
         $newsSearchData = $request->all();
 
         $validator = Validator::make($newsSearchData, [
-            'locale' => 'string',
-            'news_id' => 'integer|required|exists:pages,id',
+            'locale' => 'string|max:5',
+            'news_id' => 'integer|required|exists:pages,id|max:10',
         ]);
         $locale = \LaravelLocalization::getCurrentLocale();
         if (!$validator->fails()) {

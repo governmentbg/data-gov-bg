@@ -75,7 +75,7 @@ class LoginController extends Controller
                 if (Auth::attempt($credentials, $rememberMe)) {
                     return redirect('/');
                 } else {
-                    $error['password'][0] = 'Wrong password given.';
+                    $error['password'][0] = __('custom.wrong_password');
                 }
             } else {
                 $error = $validator->errors()->messages();

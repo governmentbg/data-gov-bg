@@ -88,7 +88,7 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'doc_id'            => 'required|integer|exists:documents,id|max:10',
+            'doc_id'            => 'required|integer|exists:documents,id|digits_between:1,10',
             'data'              => 'required|array',
         ]);
 
@@ -156,7 +156,7 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'doc_id' => 'required|integer|exists:documents,id|max:10',
+            'doc_id' => 'required|integer|exists:documents,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -198,14 +198,14 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|integer|max:10',
-            'page_number'           => 'nullable|integer|max:10',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'doc_id'       => 'nullable|integer|max:10',
+                'doc_id'       => 'nullable|integer|digits_between:1,10',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
                 'locale'       => 'nullable|string|max:5',
@@ -330,8 +330,8 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|integer|max:10',
-            'page_number'           => 'nullable|integer|max:10',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = $post['criteria'];

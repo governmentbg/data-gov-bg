@@ -34,13 +34,13 @@ class DataRequestController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($requestData['data'], [
-                'org_id'           => 'required|integer|digits_between:1,10',
+                'org_id'           => 'required|integer|max:10',
                 'description'      => 'required|string|max:191',
                 'published_url'    => 'nullable|string|max:191',
                 'contact_name'     => 'nullable|string|max:191',
                 'email'            => 'required|email|max:191',
                 'notes'            => 'nullable|string|max:8000',
-                'status'           => 'nullable|integer|digits_between:1,10',
+                'status'           => 'nullable|integer|max:3',
             ]);
         }
 
@@ -99,19 +99,19 @@ class DataRequestController extends ApiController
     {
         $editRequestData = $request->all();
         $validator = Validator::make($editRequestData, [
-            'request_id'            => 'required|integer|exists:data_requests,id|digits_between:1,10',
+            'request_id'            => 'required|integer|exists:data_requests,id|max:10',
             'data'                  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editRequestData['data'], [
-                'org_id'           => 'nullable|integer|digits_between:1,10',
+                'org_id'           => 'nullable|integer|max:10',
                 'description'      => 'nullable|string|max:191',
                 'published_url'    => 'nullable|string|max:191',
                 'contact_name'     => 'nullable|string|max:191',
                 'email'            => 'nullable|email|max:191',
                 'notes'            => 'nullable|string|max:8000',
-                'status'           => 'nullable|integer|digits_between:1,10',
+                'status'           => 'nullable|integer|max:3',
             ]);
         }
 
@@ -169,7 +169,7 @@ class DataRequestController extends ApiController
     {
         $deleteRequestData = $request->all();
         $validator = Validator::make($deleteRequestData, [
-            'request_id' => 'required|integer|exists:data_requests,id|digits_between:1,10',
+            'request_id' => 'required|integer|exists:data_requests,id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -209,16 +209,16 @@ class DataRequestController extends ApiController
         $listRequestData = $request->all();
         $validator = Validator::make($listRequestData, [
             'criteria'                => 'nullable|array',
-            'records_per_page'        => 'nullable|integer|digits_between:1,10',
-            'page_number'             => 'nullable|integer|digits_between:1,10',
+            'records_per_page'        => 'nullable|integer|max:10',
+            'page_number'             => 'nullable|integer|max:10',
         ]);
 
         if (!$validator->fails()) {
             $criteria = isset($listRequestData['criteria']) ? $listRequestData['criteria'] : [];
             $validator = Validator::make($criteria, [
-                'request_id'              => 'nullable|integer|digits_between:1,10',
-                'org_id'                  => 'nullable|integer|digits_between:1,10',
-                'status'                  => 'nullable|integer|digits_between:1,10',
+                'request_id'              => 'nullable|integer|max:10',
+                'org_id'                  => 'nullable|integer|max:10',
+                'status'                  => 'nullable|integer|max:3',
                 'date_from'               => 'nullable|date',
                 'date_to'                 => 'nullable|date',
                 'search'                  => 'nullable|string|max:191',

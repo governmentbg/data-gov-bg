@@ -130,7 +130,7 @@ class NewsController extends ApiController
         $editData = $request->all();
 
         $validator = Validator::make($editData, [
-            'news_id'               => 'required|integer|exists:pages,id|digits_between:1,10',
+            'news_id'               => 'required|integer|exists:pages,id|max:10',
             'data'                  => 'required|array',
         ]);
 
@@ -258,7 +258,7 @@ class NewsController extends ApiController
     {
         $newsDeleteData = $request->all();
         $validator = Validator::make($newsDeleteData, [
-            'news_id' => 'required|integer|exists:pages,id|digits_between:1,10',
+            'news_id' => 'required|integer|exists:pages,id|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -302,8 +302,8 @@ class NewsController extends ApiController
         $validator = Validator::make($newsListData, [
             'locale'                => 'nullable|string|max:5',
             'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|integer|digits_between:1,10',
-            'page_number'           => 'nullable|integer|digits_between:1,10',
+            'records_per_page'      => 'nullable|integer|max:10',
+            'page_number'           => 'nullable|integer|max:10',
         ]);
 
         $criteria = isset($newsListData['criteria']) ? $newsListData['criteria'] : [];
@@ -311,7 +311,7 @@ class NewsController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
                 'active'       => 'nullable|boolean',
-                'valid'        => 'nullable|integer|digits_between:1,10',
+                'valid'        => 'nullable|integer|max:10',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
                 'date_type'    => 'nullable|string|max:191',
@@ -463,8 +463,8 @@ class NewsController extends ApiController
         $validator = Validator::make($newsSearchData, [
             'locale'                => 'nullable|string|max:5',
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|integer|digits_between:1,10',
-            'page_number'           => 'nullable|integer|digits_between:1,10',
+            'records_per_page'      => 'nullable|integer|max:10',
+            'page_number'           => 'nullable|integer|max:10',
         ]);
 
         $criteria = isset($newsSearchData['criteria']) ? $newsSearchData['criteria'] : [];
@@ -554,7 +554,7 @@ class NewsController extends ApiController
 
         $validator = Validator::make($newsSearchData, [
             'locale' => 'string|max:5',
-            'news_id' => 'integer|required|exists:pages,id|digits_between:1,10',
+            'news_id' => 'integer|required|exists:pages,id|max:10',
         ]);
         $locale = \LaravelLocalization::getCurrentLocale();
         if (!$validator->fails()) {

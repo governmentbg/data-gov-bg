@@ -31,7 +31,7 @@ class TermsOfUseController extends ApiController
             'locale'         => 'nullable|string|max:5',
             'active'         => 'required|boolean',
             'is_default'     => 'nullable|boolean',
-            'ordering'       => 'nullable|integer|digits_between:1,10',
+            'ordering'       => 'nullable|integer|max:3',
         ]);
 
         $validator->after(function ($validator) {
@@ -98,7 +98,7 @@ class TermsOfUseController extends ApiController
 
         //validate request data
         $validator = \validator::make($data, [
-            'terms_id'        => 'required|numeric|exists:terms_of_use,id|digits_between:1,10',
+            'terms_id'        => 'required|numeric|exists:terms_of_use,id|max:10',
             'name'            => 'required_with:locale|max:191',
             'name.bg'         => 'required_without:locale|string|max:191',
             'name.*'          => 'max:191',
@@ -107,7 +107,7 @@ class TermsOfUseController extends ApiController
             'locale'          => 'nullable|string|max:5',
             'active'          => 'required|boolean',
             'is_default'      => 'nullable|boolean',
-            'ordering'        => 'nullable|numeric|digits_between:1,10',
+            'ordering'        => 'nullable|numeric|max:3',
         ]);
 
         $validator->after(function ($validator) {
@@ -148,7 +148,7 @@ class TermsOfUseController extends ApiController
     {
         $post = $request->all();
         $validator = \Validator::make($post, [
-            'terms_id'  => 'required|exists:terms_of_use,id|digits_between:1,10'
+            'terms_id'  => 'required|exists:terms_of_use,id|max:10'
         ]);
 
         if ($validator->fails()) {
@@ -218,7 +218,7 @@ class TermsOfUseController extends ApiController
     {
         $post = $request->all();
         $validator = \Validator::make($post, [
-            'terms_id'  => 'required|exists:terms_of_use,id|digits_between:1,10',
+            'terms_id'  => 'required|exists:terms_of_use,id|max:10',
             'locale'    => 'string|max:5',
         ]);
 

@@ -1027,8 +1027,8 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|max:10',
-            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|max:10',
+            'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
+            'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {

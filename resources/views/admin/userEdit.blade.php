@@ -182,10 +182,45 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-sm-5 col-xs-4 text-right">
+            </div>
+            <div class="form-group row">
+                    <label for="is_admin" class="col-lg-2 col-sm-3 col-xs-12 col-form-label">{{ __('custom.admin') }}:</label>
+                    <div class="col-lg-2 col-md-9 col-sm-9 col-xs-12">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="is_admin"
+                                value="{{ $user->is_admin != null ? $user->is_admin : '1' }}"
+                                {{ $user->is_admin ? 'checked' : '' }}
+                            >
+                        </div>
+                    </div>
+                    <label for="invite" class="col-lg-2 col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.approved') }}:</label>
+                    <div class="col-lg-2 col-md-9 col-sm-9 col-xs-12">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="invite"
+                                value="{{ $user->approved != null ? $user->approved : '1' }}"
+                                {{ $user->approved ? 'checked' : '' }}
+                            >
+                        </div>
+                    </div>
+                    <label for="active" class="col-lg-2 col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
+                    <div class="col-lg-2 col-md-9 col-sm-9 col-xs-12">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="active"
+                                value="{{ $user->active != null ? $user->active : '1' }}"
+                                {{ $user->active ? 'checked' : '' }}
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row text-right">
                     <button type="submit" name="save" class="btn btn-primary">{{ __('custom.save') }}</button>
                 </div>
-            </div>
         </form>
         <div class="form-group row p-h-lg">
             <div class="col-xs-12">

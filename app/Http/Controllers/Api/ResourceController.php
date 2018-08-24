@@ -62,7 +62,7 @@ class ResourceController extends ApiController
                 'version'              => 'nullable|max:15',
                 'schema_description'   => 'nullable|string|required_without:schema_url|max:8000',
                 'schema_url'           => 'nullable|url|required_without:schema_description|max:191',
-                'type'                 => 'required|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'type'                 => 'required|int|max:10|in:'. implode(',', array_keys(Resource::getTypes())),
                 'resource_url'         => 'nullable|url|max:191|required_if:type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'nullable|string|required_if:type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
                 'authentication'       => 'nullable|string|max:191|required_if:type,'. Resource::TYPE_API,
@@ -233,7 +233,7 @@ class ResourceController extends ApiController
                 'version'              => 'nullable|string|max:15',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
-                'type'                 => 'nullable|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'type'                 => 'nullable|int|max:10|in:'. implode(',', array_keys(Resource::getTypes())),
                 'resource_url'         => 'nullable|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
                 'authentication'       => 'nullable|string|max:191|required_if:data.type,'. Resource::TYPE_API,
@@ -417,8 +417,8 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|int|digits_between:1,10',
-            'page_number'           => 'nullable|int|digits_between:1,10',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -658,8 +658,8 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|int|digits_between:1,10',
-            'page_number'           => 'nullable|int|digits_between:1,10',
+            'records_per_page'      => 'nullable|int|max:10',
+            'page_number'           => 'nullable|int|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -746,8 +746,8 @@ class ResourceController extends ApiController
             'order.type'        => 'nullable|string|max:191',
             'order.field'       => 'nullable|string|max:191',
             'format'            => 'nullable|string|max:191',
-            'records_per_page'  => 'nullable|int|digits_between:1,10',
-            'page_number'       => 'nullable|int|digits_between:1,10',
+            'records_per_page'  => 'nullable|int|max:10',
+            'page_number'       => 'nullable|int|max:10',
         ]);
 
         if (!$validator->fails()) {
@@ -834,7 +834,7 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'user_id'   => 'required|int|exists:users,id|digits_between:1,10',
+            'user_id'   => 'required|int|exists:users,id|max:10',
         ]);
 
         if (!$validator->fails()) {

@@ -74,8 +74,9 @@ class GroupController extends AdminController
             $result = $api->listGroups($orgReq)->getData();
 
             $groups = !empty($result->groups) ? $result->groups : [];
+            $count = !empty($result->total_records) ? $result->total_records : 0;
 
-            $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
+            $paginationData = $this->getPaginationData($groups, $count, [], $perPage);
 
             return view('/admin/groups', [
                 'class'         => 'user',

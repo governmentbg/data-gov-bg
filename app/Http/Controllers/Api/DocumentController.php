@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use \Validator;
 use App\Document;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -57,6 +59,18 @@ class DocumentController extends ApiController
                 $newDocument->save();
 
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $newDocument->id,
+                    'action_msg'       => 'Added new document',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['doc_id' => $newDocument->id]);
             } catch (QueryException $ex) {
@@ -133,6 +147,18 @@ class DocumentController extends ApiController
 
                 DB::commit();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $editDocument->id,
+                    'action_msg'       => 'Edited a document',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 DB::rollback();
@@ -164,6 +190,18 @@ class DocumentController extends ApiController
 
             try {
                 $deleteDocument->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $post['doc_id'],
+                    'action_msg'       => 'Deleted document',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -305,6 +343,17 @@ class DocumentController extends ApiController
             ];
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_msg'       => 'Listed documents',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse([
             'total_records' => $count,
             'documents'     => $results,
@@ -406,6 +455,17 @@ class DocumentController extends ApiController
                     'updated_by'    => $result->updated_by,
                 ];
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'user_id'          => \Auth::user()->id,
+                'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                'action_msg'       => 'Searched documents',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse([
                 'documents'     => $results,

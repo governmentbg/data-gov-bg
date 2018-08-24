@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
@@ -27,6 +29,16 @@ class RightController extends ApiController
                 ];
             }
 
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::RIGHTS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'user_id'          => \Auth::user()->id,
+                'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                'action_msg'       => 'Listed rights',
+            ];
+
+            Module::add($logData);
             return $this->successResponse(['rights' => $result], true);
         }
 

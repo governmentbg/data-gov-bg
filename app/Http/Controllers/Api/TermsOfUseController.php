@@ -7,6 +7,8 @@ use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Log;
 use App\TermsOfUse;
+use App\ActionsHistory;
+use App\Module;
 
 
 class TermsOfUseController extends ApiController
@@ -67,6 +69,18 @@ class TermsOfUseController extends ApiController
 
             return $this->errorResponse(__('custom.add_terms_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_ADD,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_object'    => $newTerms->id,
+            'action_msg'       => 'Added terms of use',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse(['id' => $newTerms->id], true);
     }
@@ -134,6 +148,18 @@ class TermsOfUseController extends ApiController
             return $this->errorResponse(__('custom.edit_terms_fail'));
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_MOD,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_object'    => $terms->id,
+            'action_msg'       => 'Edited terms of use',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse();
     }
 
@@ -166,6 +192,18 @@ class TermsOfUseController extends ApiController
 
             return $this->errorResponse(__('custom.delete_terms_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_DEL,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_object'    => $post['terms_id'],
+            'action_msg'       => 'Deleted terms of use',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }
@@ -203,6 +241,17 @@ class TermsOfUseController extends ApiController
         }
 
         $response = $this->prepareTerms($terms);
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_msg'       => 'Listed terms of use',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse($response, true);
     }

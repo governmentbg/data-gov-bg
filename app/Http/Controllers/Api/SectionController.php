@@ -8,6 +8,8 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Log;
 use App\Section;
 use App\Locale;
+use App\Module;
+use App\ActionsHistory;
 
 class SectionController extends ApiController
 {
@@ -55,6 +57,18 @@ class SectionController extends ApiController
 
             try {
                 $newSection->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SECTIONS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $newSection->id,
+                    'action_msg'       => 'Added section',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['id' => $newSection->id], true);
             } catch (QueryException $ex) {
@@ -124,6 +138,18 @@ class SectionController extends ApiController
                 try {
                     $section->save();
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::SECTIONS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $section->id,
+                        'action_msg'       => 'Edited section',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse();
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
@@ -150,6 +176,18 @@ class SectionController extends ApiController
 
         if (!$validator->fails()) {
             if (Section::find($post['id'])->delete()) {
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SECTIONS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'user_id'          => \Auth::user()->id,
+                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                    'action_object'    => $post['id'],
+                    'action_msg'       => 'Deleted section',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             }
         }
@@ -202,6 +240,17 @@ class SectionController extends ApiController
 
         $sections = $sectionModel->listSections($criteria);
         $response = $this->prepareSections($sections);
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::SECTIONS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_msg'       => 'Listed sections',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse($response);
     }
@@ -257,6 +306,17 @@ class SectionController extends ApiController
         }
 
         $response = $this->prepareSections($sections);
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::SECTIONS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'user_id'          => \Auth::user()->id,
+            'ip_address'       => $_SERVER['REMOTE_ADDR'],
+            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+            'action_msg'       => 'Listed sub section',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse($response);
     }

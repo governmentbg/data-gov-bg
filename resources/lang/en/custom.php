@@ -556,5 +556,11 @@ return [
     'request' => 'request',
     'for_own_records' => 'for own records',
     'for_api' => 'for api',
-    'lastname' => 'last name'
+    'lastname' => 'last name',
+    'add_member_fail' => 'Add Member Failure',
+    'edit_member' => 'Edit member',
+    'del_member' => 'Delete member',
+    'edit_group' => 'Edit group',
+    'del_group' => 'Delete group',
+    'add_group' => 'Add group'
 ];

@@ -54,13 +54,13 @@
                     action="{{ action('Admin\TermsOfUseRequestController@list', []) }}"
                 >
                     <div class="row m-b-sm">
-                        <div class="col-xs-3 p-l-lg from-to">{{ __('custom.from') }}:</div>
+                        <div class="col-xs-3 p-l-lg from-to">{{ uctrans('custom.from') }}:</div>
                         <div class="col-md-7 col-sm-8 text-left search-field admin">
                             <input class="js-from-filter datepicker input-border-r-12 form-control" name="from" value="{{ $range['from'] }}">
                         </div>
                     </div>
                     <div class="row m-b-sm">
-                        <div class="col-xs-3 p-l-lg from-to">{{ __('custom.to') }}:</div>
+                        <div class="col-xs-3 p-l-lg from-to">{{ uctrans('custom.to') }}:</div>
                         <div class="col-md-7 col-sm-8 text-left search-field admin">
                             <input class="js-to-filter datepicker input-border-r-12 form-control" name="to" value="{{ $range['to'] }}">
                         </div>
@@ -77,7 +77,7 @@
                 </form>
                 <ul class="nav">
                     <li class="js-show-submenu">
-                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.status') }}</a>
+                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.status') }}</a>
                         <ul class="sidebar-submenu m-b-md">
                             @foreach ($statuses as $key => $status)
                                 <li>
@@ -97,7 +97,7 @@
                                                 ? 'active'
                                                 : ''
                                         }}"
-                                    >{{ __('custom.'. $status) }}</a>
+                                    >{{ uctrans('custom.'. $status) }}</a>
                                 </li>
                             @endforeach
                             <li>
@@ -108,7 +108,7 @@
                                             array_except(app('request')->input(), ['status'])
                                         )
                                     }}"
-                                >{{ __('custom.all') }}</a>
+                                >{{ uctrans('custom.all') }}</a>
                             </li>
                         </ul>
                     </li>
@@ -153,7 +153,7 @@
                                     data-index="{{ $index }}"
                                     data-action="show"
                                 >
-                                    <span class="badge badge-pill m-b-sm">{{ __('custom.preview') }}</span>
+                                    <span class="badge badge-pill m-b-sm">{{ uctrans('custom.preview') }}</span>
                                 </div>
                                 <div class="hidden {{ 'js-terms-req-cont-'. $index }}">
                                     <div class="col-xs-12">{{ $request->firstname .' '. $request->lastname }}</div>
@@ -175,7 +175,7 @@
                                 <span class="badge badge-pill m-r-md m-b-sm">
                                     <a
                                         href="{{ url('/admin/terms-of-use-request/edit/'. $request->id) }}"
-                                    >{{ __('custom.edit') }}</a>
+                                    >{{ uctrans('custom.edit') }}</a>
                                 </span>
                                 <span class="badge del-btn badge-pill m-r-md m-b-sm">
                                     <a

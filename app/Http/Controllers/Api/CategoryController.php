@@ -1,7 +1,9 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use App\Module;
 use App\Category;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -65,6 +67,18 @@ class CategoryController extends ApiController
                 $category = Category::create($catData);
 
                 if ($category) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $category->id,
+                        'action_msg'       => 'Added main category',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse(['category_id' => $category->id], true);
                 }
             } catch (QueryException $ex) {
@@ -143,6 +157,17 @@ class CategoryController extends ApiController
 
                 try {
                     $category->save();
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $category->id,
+                        'action_msg'       => 'Edited main category',
+                    ];
+
+                    Module::add($logData);
 
                     return $this->successResponse();
                 } catch (QueryException $ex) {
@@ -173,6 +198,18 @@ class CategoryController extends ApiController
         if (!$validator->fails()) {
             try {
                 if (Category::find($post['category_id'])->delete()) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
+                        'action'           => ActionsHistory::TYPE_DEL,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $post['category_id'],
+                        'action_msg'       => 'Deleted main category',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {
@@ -341,6 +378,18 @@ class CategoryController extends ApiController
                 $tag = Category::create($data);
 
                 if ($tag) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::TAGS),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $tag->id,
+                        'action_msg'       => 'Added tag',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse(['tag_id' => $tag->id], true);
                 }
             } catch (QueryException $ex) {
@@ -406,6 +455,18 @@ class CategoryController extends ApiController
                 try {
                     $tag->save();
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::TAGS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $tag->id,
+                        'action_msg'       => 'Edited tag',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse();
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
@@ -433,6 +494,17 @@ class CategoryController extends ApiController
         if (!$validator->fails()) {
             try {
                 if (Category::find($post['tag_id'])->delete()) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::TAGS),
+                        'action'           => ActionsHistory::TYPE_DEL,
+                        'user_id'          => \Auth::user()->id,
+                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
+                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
+                        'action_object'    => $post['tag_id'],
+                        'action_msg'       => 'Deleted tag',
+                    ];
+
+                    Module::add($logData);
                     return $this->successResponse();
                 }
             } catch (QueryException $ex) {

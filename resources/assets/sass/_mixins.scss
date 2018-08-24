@@ -52,14 +52,20 @@
         }
 
         .select2-container--default {
-            .select2-selection--single {
+            .select2-selection--single, .select2-selection--multiple {
                 border: 1px solid $primary;
                 border-color: $primary;
                 border-radius: 15px;
             }
         }
 
-        .select2-selection .select2-selection--single {
+        .select2-selection--multiple{
+            .select2-search__field {
+                padding-top: 3px;
+            }
+        }
+
+        .select2-selection .select2-selection--single , .select2-selection--multiple {
             border-color: $primary !important;
         }
 

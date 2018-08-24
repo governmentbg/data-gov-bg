@@ -24,17 +24,8 @@ class RoleController extends AdminController {
      *
      * @return view with list and actions
      */
-    public function list(Request $request) {
-        if ($request->has('delete')) {
-            if ($this->deleteRole($request->offsetGet('id'))) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
-            } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
-            }
-
-            return back();
-        }
-
+    public function list(Request $request)
+    {
         $class = 'user';
 
         $rq = Request::create('/api/listRoles', 'POST');
@@ -50,7 +41,8 @@ class RoleController extends AdminController {
      *
      * @return view with inpits
      */
-    public function addRole(Request $request) {
+    public function addRole(Request $request)
+    {
         $class = 'user';
         $errors = [];
 

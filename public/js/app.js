@@ -46274,6 +46274,8 @@ $(function () {
             });
 
             $checkbox.on('ifClicked', function () {
+                $this = $(this);
+
                 if ($(this).hasClass('js-uncheck')) {
                     if ($('input', $(this)).prop('checked')) {
                         $(this).iCheck('uncheck');
@@ -46281,7 +46283,9 @@ $(function () {
                 }
 
                 if ($(this).hasClass('js-submit')) {
-                    $(this).parents('form').submit();
+                    setTimeout(function () {
+                        $this.parents('form').submit();
+                    }, 100);
                 }
             });
         });

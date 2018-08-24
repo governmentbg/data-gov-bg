@@ -26,14 +26,18 @@ $(function () {
             });
 
             $checkbox.on('ifClicked', function () {
-                if ($(this).hasClass('js-uncheck')) {
-                    if ($('input', $(this)).prop('checked')) {
-                        $(this).iCheck('uncheck');
+                var $this = $(this);
+
+                if ($this.hasClass('js-uncheck')) {
+                    if ($('input', $this).prop('checked')) {
+                        $this.iCheck('uncheck');
                     }
                 }
 
-                if ($(this).hasClass('js-submit')) {
-                    $(this).parents('form').submit();
+                if ($this.hasClass('js-submit')) {
+                    setTimeout(function() {
+                        $this.parents('form').submit();
+                    }, 100);
                 }
             });
         });

@@ -73,7 +73,6 @@
 
                         <form method="POST" action="{{ url('/user/resource/download') }}">
                             {{ csrf_field() }}
-<<<<<<< HEAD
                             <input
                                 hidden
                                 name="es_id"
@@ -97,7 +96,7 @@
                             name="download"
                             type="submit"
                             class="badge badge-pill pull-right"
-                        >{{ __('custom.download') }}</button>
+                        >{{ uctrans('custom.download') }}</button>
 
                         </form>
                     @endif

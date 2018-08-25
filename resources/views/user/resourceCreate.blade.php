@@ -66,57 +66,44 @@
                         class="input-border-r-12 form-control"
                         name="resource_url"
                         type="text"
-                        value="{{ old('url') }}"
+                        value="{{ old('resource_url') }}"
                     >
-                    <span class="error">{{ $errors->first('url') }}</span>
+                    <span class="error">{{ $errors->first('resource_url') }}</span>
                 </div>
             </div>
 
-            <div class="js-ress-api" hidden>
-                <div class="form-group row required">
+            <div class="js-ress-api " hidden>
+                <div class="js-ress-api form-group row required">
                     <label for="rqtype" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.request_type') }}:</label>
                     <div class="col-sm-9">
                         <select
                             id="rqtype"
                             class="js-select input-border-r-12 form-control"
-                            name="rqtype"
+                            name="http_rq_type"
                         >
                             <option value=""> {{ uctrans('custom.request_type') }}</option>
                             @foreach ($reqTypes as $id => $rqtype)
                                 <option
-                                    value="{{ $id }}"
-                                    {{ $id == old('rqtype') ? 'selected' : '' }}
+                                    value="{{ $rqtype }}"
+                                    {{ $rqtype == old('http_rq_type') ? 'selected' : '' }}
                                 >{{ $rqtype }}</option>
                             @endforeach
                         </select>
-                        <span class="error">{{ $errors->first('rqtype') }}</span>
+                        <span class="error">{{ $errors->first('http_rq_type') }}</span>
                     </div>
                 </div>
-                <div class="form-group row required">
+                <div class="js-ress-api form-group row">
                     <label for="headers" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.headers') }}:</label>
                     <div class="col-sm-9">
                         <textarea
                             id="headers"
                             class="input-border-r-12 form-control"
-                            name="headers"
-                        >{{ old('headers') }}</textarea>
-                        <span class="error">{{ $errors->first('headers') }}</span>
+                            name="http_headers"
+                        >{{ old('http_headers') }}</textarea>
+                        <span class="error">{{ $errors->first('http_headers') }}</span>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="response_format" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.response_format') }}:</label>
-                    <div class="col-sm-9">
-                        <input
-                            id="response_format"
-                            class="input-border-r-12 form-control"
-                            name="response_format"
-                            type="text"
-                            value="{{ old('response_format') }}"
-                        >
-                        <span class="error">{{ $errors->first('authentication') }}</span>
-                    </div>
-                </div>
-                <div class="form-group row required">
+                <!--<div class="js-ress-api form-group row">
                     <label for="authentication" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.authentication') }}:</label>
                     <div class="col-sm-9">
                         <input
@@ -128,16 +115,16 @@
                         >
                         <span class="error">{{ $errors->first('authentication') }}</span>
                     </div>
-                </div>
-                <div class="form-group row">
+                </div>-->
+                <div class="js-ress-api form-group row">
                     <label for="request" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.request') }}:</label>
                     <div class="col-sm-9">
                         <textarea
                             id="request"
                             class="input-border-r-12 form-control"
-                            name="headers"
+                            name="post_data"
                         >{{ old('headers') }}</textarea>
-                        <span class="error">{{ $errors->first('request') }}</span>
+                        <span class="error">{{ $errors->first('post_data') }}</span>
                     </div>
                 </div>
             </div>

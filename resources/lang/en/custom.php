@@ -556,7 +556,7 @@ return [
     'request' => 'request',
     'for_own_records' => 'for own records',
     'for_api' => 'for api',
-    'lastname' => 'last name'
+    'lastname' => 'last name',
     'url' => 'url',
     'request_type' => 'request type',
     'request' => 'request',
@@ -566,4 +566,5 @@ return [
     'resource_no_visualization' => 'visualization is not available',
     'confirm_resource_import' => 'confirm imported data',
     'cancel_resource_import' => 'data import canceled',
+    'cant_connect_api' => 'cant connect to API',
 ];

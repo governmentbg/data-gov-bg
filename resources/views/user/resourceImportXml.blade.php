@@ -9,7 +9,7 @@
         <form
             class="form-horizontal"
             method="POST"
-            action="{{ url('/user/importXML') }}"
+            action="{{ url('/user/importElastic') }}"
         >
             {{ csrf_field() }}
             <textarea class="js-xml-prev col-xs-12 m-b-md" data-xml-data="{{ $xmlData }}" rows="20"></textarea>

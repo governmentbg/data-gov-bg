@@ -70,9 +70,6 @@ class CategoryController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
                         'action'           => ActionsHistory::TYPE_ADD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $category->id,
                         'action_msg'       => 'Added main category',
                     ];
@@ -160,9 +157,6 @@ class CategoryController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
                         'action'           => ActionsHistory::TYPE_MOD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $category->id,
                         'action_msg'       => 'Edited main category',
                     ];
@@ -201,9 +195,6 @@ class CategoryController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
                         'action'           => ActionsHistory::TYPE_DEL,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $post['category_id'],
                         'action_msg'       => 'Deleted main category',
                     ];
@@ -381,9 +372,6 @@ class CategoryController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::TAGS),
                         'action'           => ActionsHistory::TYPE_ADD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $tag->id,
                         'action_msg'       => 'Added tag',
                     ];
@@ -458,9 +446,6 @@ class CategoryController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::TAGS),
                         'action'           => ActionsHistory::TYPE_MOD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $tag->id,
                         'action_msg'       => 'Edited tag',
                     ];
@@ -497,9 +482,6 @@ class CategoryController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::TAGS),
                         'action'           => ActionsHistory::TYPE_DEL,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $post['tag_id'],
                         'action_msg'       => 'Deleted tag',
                     ];

@@ -95,9 +95,6 @@ class PageController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::PAGES),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $newPage->id,
                     'action_msg'       => 'Added page',
                 ];
@@ -205,9 +202,6 @@ class PageController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::PAGES),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $pageToEdit->id,
                     'action_msg'       => 'Edited page',
                 ];
@@ -250,9 +244,6 @@ class PageController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::PAGES),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $deleteData['page_id'],
                     'action_msg'       => 'Deleted page',
                 ];
@@ -399,9 +390,6 @@ class PageController extends ApiController
             $logData = [
                 'module_name'      => Module::getModuleName(Module::PAGES),
                 'action'           => ActionsHistory::TYPE_SEE,
-                'user_id'          => \Auth::user()->id,
-                'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                 'action_msg'       => 'Listed pages',
             ];
 

@@ -174,9 +174,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $organisation->id,
                     'action_msg'       => 'Added organisation',
                 ];
@@ -385,9 +382,6 @@ class OrganisationController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                         'action'           => ActionsHistory::TYPE_MOD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $organisation->id,
                         'action_msg'       => 'Edited organisation',
                     ];
@@ -443,9 +437,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $request->org_id,
                     'action_msg'       => 'Deleted organisation',
                 ];
@@ -744,9 +735,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_msg'       => 'Got user organisations',
                 ];
 
@@ -1059,9 +1047,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_ADD_MEMBER,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $request->org_id,
                     'action_msg'       => 'Added member '. $username->username . ' (' . $post['user_id'].') to organisation ',
                 ];
@@ -1106,9 +1091,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_DEL_MEMBER,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['org_id'],
                     'action_msg'       => 'Deleted member '. $username->username . ' (' . $post['user_id'].') from organisation ',
                 ];
@@ -1154,9 +1136,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_EDIT_MEMBER,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['org_id'],
                     'action_msg'       => 'Edited member '. $username->username . ' (' . $post['user_id'].') for organisation ',
                 ];
@@ -1303,9 +1282,6 @@ class OrganisationController extends ApiController
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::GROUPS),
                             'action'           => ActionsHistory::TYPE_ADD_GROUP,
-                            'user_id'          => \Auth::user()->id,
-                            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                             'action_object'    => $newGroup->id,
                             'action_msg'       => 'Added group',
                         ];
@@ -1464,9 +1440,6 @@ class OrganisationController extends ApiController
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::GROUPS),
                             'action'           => ActionsHistory::TYPE_EDIT_GROUP,
-                            'user_id'          => \Auth::user()->id,
-                            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                             'action_object'    => $group->id,
                             'action_msg'       => 'Edited group',
                         ];
@@ -1521,9 +1494,6 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::GROUPS),
                     'action'           => ActionsHistory::TYPE_DEL_GROUP,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $group->id,
                     'action_msg'       => 'Deleted group',
                 ];

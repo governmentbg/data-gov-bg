@@ -46,9 +46,6 @@ class RoleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ROLES),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $newRole->id,
                     'action_msg'       => 'Added role',
                 ];
@@ -103,9 +100,6 @@ class RoleController extends ApiController
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::ROLES),
                             'action'           => ActionsHistory::TYPE_MOD,
-                            'user_id'          => \Auth::user()->id,
-                            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                             'action_object'    => $post['id'],
                             'action_msg'       => 'Edited role',
                         ];
@@ -145,9 +139,6 @@ class RoleController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::ROLES),
                         'action'           => ActionsHistory::TYPE_DEL,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $id,
                         'action_msg'       => 'Deleted role',
                     ];
@@ -212,9 +203,6 @@ class RoleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ROLES),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_msg'       => 'Listed roles',
                 ];
 
@@ -259,9 +247,6 @@ class RoleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ROLES),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $id,
                     'action_msg'       => 'Got role rights',
                 ];
@@ -344,9 +329,6 @@ class RoleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ROLES),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['id'],
                     'action_msg'       => 'Modified role rights',
                 ];

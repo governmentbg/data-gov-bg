@@ -44,9 +44,6 @@ class LocaleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::LOCALE),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['data']['locale'],
                     'action_msg'       => 'Added locale',
                 ];
@@ -102,9 +99,6 @@ class LocaleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::LOCALE),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['locale'],
                     'action_msg'       => 'Edited locale',
                 ];
@@ -149,9 +143,6 @@ class LocaleController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::LOCALE),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['locale'],
                     'action_msg'       => 'Deleted locale',
                 ];

@@ -66,9 +66,6 @@ class SignalsController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $newSignal->id,
                     'action_msg'       => 'Sent signal',
                 ];
@@ -153,9 +150,6 @@ class SignalsController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $signalToEdit->id,
                     'action_msg'       => 'Edited signal',
                 ];
@@ -194,9 +188,6 @@ class SignalsController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $deleteData['signal_id'],
                     'action_msg'       => 'Deleted signal',
                 ];
@@ -355,9 +346,6 @@ class SignalsController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::SIGNALS),
             'action'           => ActionsHistory::TYPE_SEE,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_msg'       => 'Listed signals',
         ];
 

@@ -306,15 +306,21 @@ class UserController extends Controller {
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
-        $userOrgIds = UserToOrgRole::where('user_id', \Auth::user()->id)->pluck('org_id')->toArray();
-        $dataSetIds = DataSet::whereIn('org_id', $userOrgIds)->pluck('id')->toArray();
 
-        if (!empty($dataSetIds)) {
-            $params['criteria']['dataset_ids'] = $dataSetIds;
-            $rq = Request::create('/api/listDataSets', 'POST', $params);
-            $api = new ApiDataSet($rq);
-            $datasets = $api->listDataSets($rq)->getData();
-            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+        $orgId = Organisation::where('uri', $request->uri)->value('id');
+        $dataSetIds = DataSet::where('org_id', $orgId)->pluck('id')->toArray();
+        $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
+
+        if (!is_null($orgId) && $hasRole) {
+            if (!empty($dataSetIds)) {
+                $params['criteria']['dataset_ids'] = $dataSetIds;
+                $rq = Request::create('/api/listDataSets', 'POST', $params);
+                $api = new ApiDataSet($rq);
+                $datasets = $api->listDataSets($rq)->getData();
+                $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+            } else {
+                $paginationData = $this->getPaginationData([], 0, [], $perPage);
+            }
         } else {
             $paginationData = $this->getPaginationData([], 0, [], $perPage);
         }
@@ -2454,8 +2460,10 @@ class UserController extends Controller {
         $result = $api->listTermsOfUse($request)->getData();
         $termsOfUse = [];
 
-        foreach ($result->terms_of_use as $row) {
-            $termsOfUse[$row->id] = $row->name;
+        if (isset($result->terms_of_use)) {
+            foreach ($result->terms_of_use as $row) {
+                $termsOfUse[$row->id] = $row->name;
+            }
         }
 
         return $termsOfUse;

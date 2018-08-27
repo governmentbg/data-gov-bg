@@ -61,11 +61,12 @@ class UserController extends ApiController
                 'active'       => 'nullable|boolean',
                 'approved'     => 'nullable|boolean',
                 'is_admin'     => 'nullable|int|digits_between:1,10',
-                'role_id'      => 'nullable|int|digits_between:1,10',
-                'org_id'       => 'nullable|int|digits_between:1,10',
+                'role_id'      => 'nullable',
+                'org_id'       => 'nullable',
                 'id'           => 'nullable|int|digits_between:1,10',
                 'user_ids'     => 'nullable|array',
                 'order'        => 'nullable|array',
+                'keywords'     => 'nullable|string|max:191'
             ]);
         }
 
@@ -81,6 +82,11 @@ class UserController extends ApiController
         if (!$validator->fails()) {
             $query = User::select()->with('userToOrgRole');
 
+            if (isset($criteria['keywords'])) {
+                $ids = User::search($criteria['keywords'])->get()->pluck('id');
+                $query = User::whereIn('id', $ids)->with('userToOrgRole');
+            }
+
             if (isset($criteria['active'])) {
                 $query->where('active', $criteria['active']);
             }
@@ -93,15 +99,23 @@ class UserController extends ApiController
                 $query->where('is_admin', $criteria['is_admin']);
             }
 
-            if (!empty($criteria['role_id'])) {
+            if (!empty($criteria['role_ids'])) {
                 $query->whereHas('userToOrgRole', function($q) use($criteria) {
-                    $q->where('role_id', $criteria['role_id']);
+                    if (is_array($criteria['role_ids'])) {
+                        $q->whereIn('role_id', $criteria['role_ids']);
+                    } else {
+                        $q->where('role_id', $criteria['role_ids']);
+                    }
                 });
             }
 
-            if (!empty($criteria['org_id'])) {
+            if (!empty($criteria['org_ids'])) {
                 $query->whereHas('userToOrgRole', function($q) use($criteria) {
-                    $q->where('org_id', $criteria['org_id']);
+                    if (is_array($criteria['org_ids'])) {
+                        $q->whereIn('org_id', $criteria['org_ids']);
+                    } else {
+                        $q->where('org_id', $criteria['org_ids']);
+                    }
                 });
             }
 

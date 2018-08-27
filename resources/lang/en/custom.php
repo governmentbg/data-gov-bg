@@ -583,4 +583,5 @@ return [
     'creation' => 'creation',
     'edit_date' => 'edit',
     'order_by_c' => 'Order by',
+    'clear_filter' => 'Clear the filter',
 ];

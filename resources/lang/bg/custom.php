@@ -581,4 +581,5 @@ return [
     'creation' => 'създаване',
     'edit_date' => 'корекция',
     'order_by_c' => 'Подреди по',
+    'clear_filter' => 'Изчисти филтър',
 ];

@@ -168,6 +168,7 @@ Route::post('listOrganisations', 'Api\OrganisationController@listOrganisations')
 Route::post('searchOrganisations', 'Api\OrganisationController@searchOrganisations');
 Route::post('getOrganisationDetails', 'Api\OrganisationController@getOrganisationDetails');
 Route::post('getMembers', 'Api\OrganisationController@getMembers');
+Route::post('addMember', 'Api\OrganisationController@addMember');
 
 Route::post('listGroups', 'Api\OrganisationController@listGroups');
 Route::post('searchGroups', 'Api\OrganisationController@searchGroups');

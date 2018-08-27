@@ -132,4 +132,18 @@ class Controller extends BaseController
 
         return $model;
     }
+
+    protected function checkIsValidXML($xmlstr)
+    {
+        libxml_use_internal_errors(true);
+
+        $doc = simplexml_load_string($xmlstr);
+        $xml = explode("\n", $xmlstr);
+
+        if (!$doc) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

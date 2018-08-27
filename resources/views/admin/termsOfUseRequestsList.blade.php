@@ -48,7 +48,7 @@
             </div>
         </div>
         <div class="row m-b-lg">
-            <div class="col-sm-3 sidenav p-l-r-none col-xs-12 m-t-md">
+            <div class="col-sm-3 sidenav col-xs-12 m-t-md">
                  <form
                     method="GET"
                     action="{{ action('Admin\TermsOfUseRequestController@list', []) }}"

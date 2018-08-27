@@ -6,7 +6,7 @@
         @include('partials.admin-nav-bar', ['view' => 'organisation'])
         <div class="row">
             <div class="col-sm-3 col-xs-12 text-left">
-                <span class="badge badge-pill m-t-md new-data">
+                <span class="badge badge-pill m-t-md new-data user-add-btn">
                     <a href="{{ url('/admin/organisations/register') }}">{{ __('custom.add_new_organisation') }}</a>
                 </span>
             </div>
@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-3 sidenav p-l-r-none hidden-xs">
+            <div class="col-sm-3 sidenav hidden-xs">
                 <ul class="nav">
                     <li class="js-show-submenu">
                         <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.approved_side') }}</a>

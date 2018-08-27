@@ -93,7 +93,7 @@ $(function() {
     var lang = document.cookie.replace(/(?:(?:^|.*;\s*)language\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     $('.datepicker').each(function() {
-        $(this).attr('autocomplete', false);
+        $(this).attr('autocomplete', 'off');
 
         $(this).datepicker({
             language: 'bg',
@@ -154,6 +154,13 @@ $(function() {
         if (!confirm($(this).data('confirm'))) {
             e.preventDefault();
         }
+    })
+});
+
+$(function() {
+    $('.js-doc-btn').on('click', function(e) {
+        e.preventDefault();
+        $('.js-doc-input').trigger('click');
     })
 });
 

@@ -1123,23 +1123,126 @@ class UserController extends Controller {
     {
     }
 
+    /**
+     * Adds resource metadata and prepares the resource elasticsearch data
+     * @param Request $request - resource metadata, file with resource data
+     * @param int $datasetUri - associated dataset uri
+     * @return type
+     */
     public function resourceCreate(Request $request, $datasetUri)
     {
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
+        $content = '';
 
+        // check if the resource have valid dataset
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
+                // prepare resource metadata
                 $data = $request->all();
                 $metadata['api_key'] = $apiKey;
+                $metadata['dataset_uri'] = $datasetUri;
                 $metadata['data'] = $data;
 
                 if (isset($metadata['data']['file'])) {
                     unset($metadata['data']['file']);
                 }
 
-                $metadata['dataset_uri'] = $datasetUri;
+                $file = $request->file('file');
+                // validate file and get extension
+                if (
+                    $metadata['data']['type'] == Resource::TYPE_FILE
+                    && isset($file)
+                    && $file->isValid()
+                ) {
+                    $extension = $request->file('file')->getClientOriginalExtension();
+                    if (!empty($extension)) {
+                        $metadata['data']['file_format'] = $extension;
+                        $content = file_get_contents($request->file->getRealPath());
+                    }
+                }
 
+                if (
+                    $metadata['data']['type'] == Resource::TYPE_API
+                    && isset($data['resource_url'])
+                ) {
+                    $reqHeaders = [];
+                    // Get curl resource
+                    $ch = curl_init();
+                    // Set curl options
+                    curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
+                    if (isset($data['http_headers'])) {
+                        $reqHeaders = preg_split('/\r\n|\r|\n/', $data['http_headers']);
+                    }
+
+                    // by default curl uses GET
+                    if ($data['http_rq_type'] == 'POST') {
+                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+
+                        if (!empty($data['post_data'])) {
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $data['post_data']);
+                            $lenght = 'Content-Length: ' . strlen($data['post_data']);
+                            array_push($reqHeaders, $lenght);
+                        }
+                    }
+
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, $reqHeaders);
+                    curl_setopt_array($ch, array(
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_TIMEOUT => 60,
+                        CURLOPT_URL => $data['resource_url'],
+                    ));
+                    $responseHeaders = [];
+                    // this function is called by curl for each header received
+                    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders) {
+                        $len = strlen($header);
+                        $header = explode(':', $header, 2);
+
+                        // ignore invalid headers
+                        if (count($header) < 2)  {
+                            return $len;
+                        }
+
+                        $name = strtolower(trim($header[0]));
+
+                        if (!array_key_exists($name, $responseHeaders)) {
+                            $responseHeaders[$name] = [trim($header[1])];
+
+                        } else {
+                            $responseHeaders[$name][] = trim($header[1]);
+                        }
+
+                        return $len;
+                    });
+
+                    // Send the request & save response to $resp
+                    $resp = curl_exec($ch);
+                    // Close request to clear up some resources
+                    $extension = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+
+                    curl_close($ch);
+
+                    if ($resp) {
+                        $content = $resp;
+                    } else {
+                        $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+
+                        return redirect()->back()->withInput();
+                    }
+
+                    $extension = substr($extension, strpos($extension, '/') + 1);
+
+                    if (strpos($extension, ';')) {
+                        $extension = substr($extension, 0, strpos($extension, ';'));
+                    }
+
+                    if (!empty($extension)) {
+                         $metadata['data']['file_format'] = $extension;
+                    }
+                }
+
+                // save resource metadata
                 $savePost = Request::create('/api/addResourceMetadata', 'POST', $metadata);
                 $api = new ApiResource($savePost);
                 $result = $api->addResourceMetadata($savePost)->getData();
@@ -1147,37 +1250,65 @@ class UserController extends Controller {
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    $file = $request->file('file');
+                    $convertData = [
+                        'api_key'   => $apiKey,
+                        'data'      => $content,
+                    ];
 
-                    if (
-                        $metadata['data']['type'] == Resource::TYPE_FILE
-                        && isset($file)
-                        && $file->isValid()
-                    ) {
-                        $extension = $file->getClientOriginalExtension();
-
+                    $importViewData = [
+                        'class'         => 'user',
+                        'types'         => $types,
+                        'resourceUri'   => $result->data->uri,
+                    ];
                         // check uploded file extention and use the corresponding converter
                         switch ($extension) {
+                            case 'json':
+                                Session::put('elasticData', json_decode($content, true));
+
+                                return view('user/resourceImport', $importViewData);
                             case 'csv':
-                                $convertData = [
-                                    'api_key'   => $apiKey,
-                                    'data'      => file_get_contents($request->file->getRealPath()),
-                                ];
                                 $reqConvert = Request::create('/csv2json', 'POST', $convertData);
                                 $api = new ApiConversion($reqConvert);
                                 $resultConvert = $api->csv2json($reqConvert)->getData();
-                                $csvData = $resultConvert->data;
-                                Session::put('csvData', $csvData);
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $importViewData['csvData'] = $elasticData;
 
-                                return view('user/resourceImportCsv', [
-                                    'class'         => 'user',
-                                    'uri'           => $datasetUri,
-                                    'csvData'       => $csvData,
-                                    'types'         => $types,
-                                    'resourceUri'   => $result->data->uri,
-                                ]);
+                                return view('user/resourceImportCsv', $importViewData);
+                            case 'xml':
+                                if (($pos = strpos($content, "?>")) !== false) {
+                                    $trimContent = substr($content, $pos + 2);
+                                    $convertData['data'] = trim($trimContent);
+                                }
+
+                                $reqConvert = Request::create('/xml2json', 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->xml2json($reqConvert)->getData(true);
+                                $elasticData = $resultConvert['data'];
+                                Session::put('elasticData', $elasticData);
+                                $importViewData['xmlData'] = $content;
+
+                                return view('user/resourceImportXml', $importViewData);
+                            case 'kml':
+                                $method = $extension .'2json';
+                                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->$method($reqConvert)->getData(true);
+                                $elasticData = $resultConvert['data'];
+                                Session::put('elasticData', $elasticData);
+
+                                return view('user/resourceImport', $importViewData);
+                            case 'rdf':
+                                $method = $extension .'2json';
+                                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                                $api = new ApiConversion($reqConvert);
+                                $resultConvert = $api->$method($reqConvert)->getData(true);
+                                $elasticData = $resultConvert['data'];
+                                Session::put('elasticData', $elasticData);
+                                $importViewData['xmlData'] = $content;
+
+                                return view('user/resourceImportXml', $importViewData);
                         }
-                    }
 
                     return redirect()->route('datasetView', ['uri' => $datasetUri]);
                 }
@@ -1185,41 +1316,6 @@ class UserController extends Controller {
                 $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
 
                 return redirect()->back()->withInput()->withErrors($result->errors);
-            } else if ($request->has('ready_data')) {
-                $csvData = Session::get('csvData');
-                Session::forget('csvData');
-
-                $filtered = [];
-                $keepColumns = $request->offsetGet('keepcol');
-
-                if (empty($csvData)) {
-                    return redirect()->back()->withInput();
-                } else {
-                    foreach ($csvData as $row) {
-                        $filtered[] = array_intersect_key($row, $keepColumns);
-                    }
-                }
-
-                if (!empty($filtered)) {
-                    $elasticData = [
-                        'resource_uri'  => $request->offsetGet('resource_uri'),
-                        'data'          => $filtered,
-                    ];
-
-                    $reqElastic = Request::create('/addResourceData', 'POST', $elasticData);
-                    $api = new ApiResource($reqElastic);
-                    $resultElastic = $api->addResourceData($reqElastic)->getData();
-
-                    if (!$resultElastic->success) {
-                        $request->session()->flash('alert-danger', $resultElastic->error->message);
-
-                        return redirect()->back()->withInput()->withErrors($resultElastic->errors);
-                    }
-
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
-                    return redirect()->route('datasetView', ['uri' => $datasetUri]);
-                }
             }
         } else {
             return redirect('/user/datasets');
@@ -1229,8 +1325,112 @@ class UserController extends Controller {
             'class'     => 'user',
             'uri'       => $datasetUri,
             'types'     => $types,
+            'reqTypes'  => $reqTypes,
             'fields'    => self::getResourceTransFields()
         ]);
+    }
+
+    /**
+     * Imports elastic search data for CSV format
+     * @param Request $request - resource uri
+     * @return redirect to resource view page
+     */
+    public function importCsvData(Request $request)
+    {
+        if ($request->has('ready_data') && $request->has('resource_uri')) {
+            $uri = $request->offsetGet('resource_uri');
+            $elasticData = Session::get('elasticData');
+            Session::forget('elasticData');
+            $filtered = [];
+
+            if ($request->has('keepcol')) {
+                $keepColumns = $request->offsetGet('keepcol');
+
+                if (empty($elasticData)) {
+                    return redirect()->back()->withInput();
+                } else {
+                    foreach ($elasticData as $row) {
+                        $filtered[] = array_intersect_key($row, $keepColumns);
+                    }
+                }
+            }
+
+            if (!empty($filtered)) {
+                $saveData = [
+                    'resource_uri'  => $uri,
+                    'data'          => $filtered,
+                ];
+                $reqElastic = Request::create('/addResourceData', 'POST', $saveData);
+                $api = new ApiResource($reqElastic);
+                $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                if ($resultElastic->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect()->route('resourceView', ['uri' => $uri]);
+                }
+
+                $request->session()->flash('alert-danger', $resultElastic->error->message);
+            }
+
+            // delete resource metadata record
+            $resource = Resource::where('uri', $uri)->first();
+            $resource->forceDelete();
+        }
+
+        $request->session()->flash('alert-danger', __('custom.add_error'));
+
+        return redirect()->back()->withInput()->withErrors($resultElastic->errors);
+    }
+
+    /**
+     * Imports elastic search data for JSON, XML, RDF, KML formats
+     * @param Request $request - resource uri
+     * @return redirect to resource view page
+     */
+    public function importElasticData(Request $request)
+    {
+        if ($request->has('ready_data') && $request->has('resource_uri')) {
+            $uri = $request->offsetGet('resource_uri');
+            $elasticData = Session::get('elasticData');
+            Session::forget('elasticData');
+
+            if (!empty($elasticData)) {
+                $saveData = [
+                    'resource_uri'  => $uri,
+                    'data'          => $elasticData,
+                ];
+                $reqElastic = Request::create('/addResourceData', 'POST', $saveData);
+                $api = new ApiResource($reqElastic);
+                $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                if ($resultElastic->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect()->route('resourceView', ['uri' => $uri]);
+                }
+
+                $request->session()->flash('alert-danger', $resultElastic->error->message);
+            }
+
+            // delete resource metadata record
+            $resource = Resource::where('uri', $uri)->first();
+            $resource->forceDelete();
+        }
+
+        $request->session()->flash('alert-danger', __('custom.add_error'));
+
+        return redirect()->back()->withInput()->withErrors($resultElastic->errors);
+    }
+
+    public function resourceCancelImport(Request $request, $uri)
+    {
+        // delete resource metadata record
+        $resource = Resource::where('uri', $uri)->first();
+        $resource->forceDelete();
+        $request->session()->flash('alert-danger', uctrans('custom.cancel_resource_import'));
+
+        return redirect('/user/datasets');
     }
 
     public function groupResourceCreate(Request $request, $datasetUri)
@@ -1457,19 +1657,20 @@ class UserController extends Controller {
      */
     public function resourceView(Request $request, $uri)
     {
-        $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
-        $apiResources = new ApiResource($resourcesReq);
-        $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $apiMetadata = new ApiResource($reqMetadata);
+        $resource = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
         $resource = !empty($resource->resource) ? $resource->resource : null;
+        $resource->format_code = Resource::getFormatsCode($resource->file_format);
         $data = [];
 
         $resource = $this->getModelUsernames($resource);
 
         if (!empty($resource)) {
             if ($request->has('delete')) {
-                $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
-                $api = new ApiResource($rq);
-                $result = $api->deleteResource($rq)->getData();
+                $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                $apiDelete = new ApiResource($reqDelete);
+                $result = $apiDelete->deleteResource($reqDelete)->getData();
 
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.delete_success'));
@@ -1480,10 +1681,22 @@ class UserController extends Controller {
                 $request->session()->flash('alert-success', __('custom.delete_error'));
             }
 
-            $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
-            $api = new ApiResource($rq);
-            $response = $api->getResourceData($rq)->getData();
+            $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+            $apiEsData = new ApiResource($reqEsData);
+            $response = $apiEsData->getResourceData($reqEsData)->getData();
+
             $data = !empty($response->data) ? $response->data : [];
+
+            if ($resource->format_code == Resource::FORMAT_XML) {
+                $convertData = [
+                    'api_key'   => \Auth::user()->api_key,
+                    'data'      => $data,
+                ];
+                $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+                $apiConvert = new ApiConversion($reqConvert);
+                $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                $data = $resultConvert->data;
+            }
 
             return view('user/resourceView', [
                 'class'         => 'user',
@@ -1495,27 +1708,39 @@ class UserController extends Controller {
         return redirect('/user/datasets');
     }
 
-    public function resourceDownload(Request $request, $esid, $name)
+    /**
+     * Transforms resource data to donwloadable file
+     * @param Request $request - file name, file format and id for resource elastic search data
+     * @return downlodable file
+     */
+    public function resourceDownload(Request $request)
     {
-        $convertReq = Request::create('/api/toJSON', 'POST', ['es_id' => $esid]);
+        $fileName = $request->offsetGet('name');
+        $esid = $request->offsetGet('es_id');
+        $format = $request->offsetGet('format');
+        $method = 'to'. $format;
+        $convertReq = Request::create('/api/'. $method, 'POST', ['es_id' => $esid]);
         $apiResources = new ApiConversion($convertReq);
-        $resource = $apiResources->toJSON($convertReq)->getData();
+        $resource = $apiResources->$method($convertReq)->getData();
+        if (strtolower($format) == 'json') {
+            $fileData = json_encode($resource->data);
+        } else {
+            $fileData = $resource->data;
+        }
 
         if (!empty($resource->data)) {
-            $handle = fopen('../storage/app/'. $name, 'w+');
+            $handle = fopen('../storage/app/'. $fileName, 'w+');
             $path = stream_get_meta_data($handle)['uri'];
 
-            foreach(json_decode(json_encode($resource->data), true) as $row) {
-                fputcsv($handle, $row);
-            }
+            fwrite($handle, $fileData);
 
             fclose($handle);
 
             $headers = array(
-                'Content-Type' => 'text/csv',
+                'Content-Type' => 'text/'. strtolower($method),
             );
 
-            return response()->download($path, $name .'.csv', $headers)->deleteFileAfterSend(true);
+            return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
         }
 
         return back();

@@ -114,6 +114,7 @@
                                     <option></option>
                                     @foreach ($roles as $role)
                                         <option
+                                            {{ $role->id == old('role_id') ? 'selected' : '' }}
                                             value="{{ $role->id }}"
                                         >{{ $role->name }}</option>
                                     @endforeach

@@ -250,7 +250,7 @@
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
                                 <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
-                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
+                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.add') }}</button>
                             </div>
                         </div>
                     </form>

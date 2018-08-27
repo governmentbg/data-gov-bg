@@ -102,7 +102,7 @@
             @endif
             @if (!empty($orgRoles))
                 @foreach ($orgRoles as $org => $orgRole)
-                    @if ($org != 0)
+                    @if ($org != 0 && isset($organisations[$org]))
                         <div class="form-group row">
                                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
                                 <span class="col-sm-3 col-xs-12">{{ $organisations[$org] }} </span>

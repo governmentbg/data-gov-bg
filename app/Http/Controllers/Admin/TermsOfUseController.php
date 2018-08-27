@@ -154,17 +154,29 @@ class TermsOfUseController extends AdminController
     public function list(Request $request)
     {
         if (Role::isAdmin()) {
-            $request = Request::create('/api/listTermsOfUse', 'POST', [
-                'criteria' => [],
-            ]);
+            $perPage = 10;
+            $params = [
+                'records_per_page' => $perPage,
+                'page_number'      => !empty($request->page) ? $request->page : 1,
+                'criteria' => []
+            ];
+            $request = Request::create('/api/listTermsOfUse', 'POST', $params);
             $api = new ApiTermsOfUse($request);
             $result = $api->listTermsOfUse($request)->getData();
+
+            $paginationData = $this->getPaginationData(
+                isset($result->terms_of_use) ? $result->terms_of_use : [],
+                isset($result->total_records) ? $result->total_records : 0,
+                [],
+                $perPage
+            );
 
             return view(
                 'admin/termsOfUseList',
                 [
-                    'class' => 'user',
-                    'terms' => isset($result->terms_of_use) ? $result->terms_of_use : []
+                    'class'      => 'user',
+                    'terms'      => $paginationData['items'],
+                    'pagination' => $paginationData['paginate'],
                 ]
             );
         }

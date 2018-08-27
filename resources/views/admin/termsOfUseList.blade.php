@@ -4,15 +4,17 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'termsConditions'])
-    <h3>{{ __('custom.terms_and_conditions') }}</h3>
+    <div class="col-xs-12 sidenav m-t-lg">
+        <span class="my-profile m-l-sm">{{ __('custom.terms_and_conditions') }}</span>
+    </div>
 
-    <div class="row">
+    <div class="row m-b-lg">
         <form method="POST" class="form-horizontal">
             {{ csrf_field() }}
             <div class="col-lg-12">
                 <a class="btn btn-primary pull-right add" href="{{ url('/admin/terms-of-use/add') }}">{{ uctrans('custom.add') }}</a>
             </div>
-            <div class="col-lg-12">
+            <div class="col-lg-12 m-l-sm">
                 <div class="table-responsive opn-tbl text-center">
                     <table class="table">
                         <thead>
@@ -50,5 +52,12 @@
             </div>
         </form>
     </div>
+    @if (isset($pagination))
+        <div class="row">
+            <div class="col-xs-12 text-center">
+                {{ $pagination->render() }}
+            </div>
+        </div>
+    @endif
 </div>
 @endsection

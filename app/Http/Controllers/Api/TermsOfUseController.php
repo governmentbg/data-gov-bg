@@ -197,14 +197,32 @@ class TermsOfUseController extends ApiController
                 $query->where('active', '=', $request->input('criteria.active'));
             }
 
+            $total_records = $query->count();
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
+
             $terms = $query->get();
         } else {
-            $terms = TermsOfUse::all();
+            $terms = TermsOfUse::all()->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
+
+            $total_records = TermsOfUse::all()->count();
         }
 
         $response = $this->prepareTerms($terms);
 
-        return $this->successResponse($response, true);
+        return $this->successResponse(
+            array_merge(
+                ['total_records' => $total_records],
+                $response
+            ),
+            true
+        );
     }
 
     /**

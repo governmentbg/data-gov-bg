@@ -567,4 +567,12 @@ return [
     'confirm_resource_import' => 'confirm imported data',
     'cancel_resource_import' => 'data import canceled',
     'cant_connect_api' => 'cant connect to API',
+    'add_doc' => 'add document',
+    'date_created' => 'Creation date',
+    'date_updated' => 'Edit date',
+    'document_list' => 'Documents list',
+    'date_of' => 'Date of',
+    'creation' => 'creation',
+    'edit_date' => 'edit',
+    'order_by_c' => 'Order by',
 ];

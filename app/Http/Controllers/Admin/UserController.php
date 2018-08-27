@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Role;
 use App\UserSetting;
+use App\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
@@ -32,9 +33,13 @@ class UserController extends AdminController {
     {
         $class = 'user';
         $search = '';
+        $orgDropCount = $request->offsetGet('orgs_count') ? $request->offsetGet('orgs_count') : Organisation::INIT_FILTER;
+        $selectedOrgs = $request->offsetGet('org') ? $request->offsetGet('org') : [];
+        $selectedRoles = $request->offsetGet('role') ? $request->offsetGet('role') : [];
+        $search = $request->offsetGet('q');
         $roleId = $request->offsetGet('role_id');
         $adminFilter = $request->offsetGet('is_admin', false);
-        $organisations = $this->getOrgDropdown();
+        $organisations = $this->getOrgDropdown(null, $orgDropCount);
         $perPage = 6;
 
         $rq = Request::create('/api/listRoles', 'POST');
@@ -47,16 +52,22 @@ class UserController extends AdminController {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
+        if ($search) {
+            $params['criteria']['keywords'] = $search;
+        }
+
         if ($adminFilter) {
             $params['criteria']['is_admin'] = $adminFilter;
         }
 
-        if (isset($request->org)) {
-            $params['criteria']['org_id'] = $request->org;
+        if (isset($selectedOrgs)) {
+            $selectedOrgs = array_unique($selectedOrgs);
+            $params['criteria']['org_ids'] = $selectedOrgs;
         }
 
-        if (isset($request->role)) {
-            $params['criteria']['role_id'] = $request->role;
+        if (isset($selectedRoles)) {
+            $selectedRoles = array_unique($selectedRoles);
+            $params['criteria']['role_ids'] = $request->role;
         }
 
         if (isset($request->active)) {
@@ -71,43 +82,13 @@ class UserController extends AdminController {
         $api = new ApiUser($rq);
         $result = $api->listUsers($rq)->getData();
 
+
         $paginationData = $this->getPaginationData(
             $result->users,
             $result->total_records,
-            array_except(app('request')->input(), ['q', 'page']),
+            app('request')->input(),
             $perPage
         );
-
-        if ($request->has('q')) {
-            $search = $request->q;
-
-            if (empty(trim($search))) {
-                return redirect(url('admin/users'));
-            }
-
-            $params = [
-                'api_key'           => Auth::user()->api_key,
-                'records_per_page'  => $perPage,
-                'page_number'       => !empty($request->page) ? $request->page : 1,
-                'criteria'          => [
-                    'keywords'          => $search,
-                ],
-            ];
-
-            $searchReq = Request::create('/api/searchUsers', 'POST', $params);
-            $api = new ApiUser($searchReq);
-            $result = $api->searchUsers($searchReq)->getData();
-
-            $users = !empty($result->users) ? $result->users : [];
-            $count = !empty($result->total_records) ? $result->total_records : 0;
-
-            $paginationData = $this->getPaginationData(
-                $users,
-                $count,
-                array_except(app('request')->input(), ['q', 'page']),
-                $perPage
-            );
-        }
 
         if ($request->has('invite')) {
             $email = $request->offsetGet('email');
@@ -142,6 +123,9 @@ class UserController extends AdminController {
             'organisations' => $organisations,
             'search'        => $search,
             'adminFilter'   => $adminFilter,
+            'orgDropCount'  => count($this->getOrgDropdown()),
+            'selectedOrgs'  => $selectedOrgs,
+            'selectedRoles' => $selectedRoles,
         ]);
     }
 

@@ -16,6 +16,8 @@ class Organisation extends Model implements TranslatableInterface
     use RecordSignature;
     use Searchable;
 
+    const INIT_FILTER = 10;
+
     const TYPE_CIVILIAN = 1;
     const TYPE_COUNTRY = 2;
     const TYPE_GROUP = 3;

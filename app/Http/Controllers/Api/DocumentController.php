@@ -37,12 +37,15 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($post['data'], [
-                'name'         => 'required|max:191',
-                'description'  => 'required|max:8000',
-                'locale'       => 'nullable|string|max:5',
-                'filename'     => 'required|string|max:191',
-                'mimetype'     => 'required|string|max:191',
-                'data'         => 'required|string|max:4294967295',
+                'name'           => 'required_with:locale|max:191',
+                'name.bg'        => 'required_without:locale|string|max:191',
+                'name.*'         => 'max:191',
+                'description'    => 'required_with:locale|max:8000',
+                'description.bg' => 'required_without:locale|string|max:8000',
+                'locale'         => 'nullable|string|max:5',
+                'filename'       => 'required|string|max:191',
+                'mimetype'       => 'required|string|max:191',
+                'data'           => 'required|string|max:4294967295',
             ]);
         }
 
@@ -257,7 +260,6 @@ class DocumentController extends ApiController
         }
 
         $result = [];
-        $criteria = $request->json('criteria');
 
         $columns = [
             'id',
@@ -342,10 +344,13 @@ class DocumentController extends ApiController
 
         Module::add($logData);
 
-        return $this->successResponse([
-            'total_records' => $count,
-            'documents'     => $results,
-        ], true);
+        return $this->successResponse(
+            [
+                'total_records' => $count,
+                'documents'     => $results
+            ],
+            true
+        );
     }
 
     /**

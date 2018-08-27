@@ -1119,8 +1119,7 @@
 
 .theme-organisation .container a:hover,
 .theme-organisation .container a:focus,
-.theme-organisation .container a:active,
-.theme-organisation .container a.active {
+.theme-organisation .container a:active {
   color: #76ad3f;
 }
 
@@ -12407,6 +12406,10 @@ body .footer .copiright {
   margin: 0;
 }
 
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
 html,
 body {
   height: 100%;
@@ -13665,6 +13668,10 @@ textarea {
   display: block;
 }
 
+.doc-upload-input::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
 .container .filter-content .filter-type,
 .container .filter-content .sort-by {
   display: inline-block;
@@ -13880,6 +13887,14 @@ textarea {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.container .article-underline .text-elipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 @media screen and (max-width: 479px) {
@@ -14985,6 +15000,37 @@ textarea {
   padding-left: 10px;
 }
 
+.order-documents a {
+  padding-bottom: 10px;
+  padding-top: 10px;
+  border-right: 1px solid #108f9e;
+  height: 20px;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.order-documents a.active {
+  color: #108f9e;
+}
+
+.order-documents a:last-child {
+  border-right: none;
+}
+
+.order-documents a:first-child {
+  padding-left: 0px;
+}
+
+.doc-badge {
+  padding: 5px 40px;
+}
+
+@media screen and (max-width: 767px) {
+  .doc-badge {
+    margin-top: 30px;
+  }
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;
@@ -15006,66 +15052,6 @@ textarea {
 
 .theme-organisation .list-orgs img {
   height: 200px;
-}
-
-.theme-organisation .list-orgs {
-  padding: 50px;
-}
-
-.theme-organisation .list-orgs .ch-del-btns {
-  margin-top: 10px;
-  margin-bottom: 35px;
-  min-height: 36px;
-}
-
-.theme-organisation .list-orgs .ch-del-btns div div button {
-  border-radius: 10px;
-  padding: 7px;
-  background-color: #108f9e;
-  color: white;
-  border: none;
-  min-width: 80px;
-}
-
-.theme-organisation .list-orgs .org-desc {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 6;
-  height: 130px;
-}
-
-.theme-organisation .list-orgs .org-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.theme-organisation .list-orgs .logo {
-  height: 120px;
-  margin: 0 auto;
-}
-
-.theme-organisation .list-orgs .show-more {
-  margin-top: 10px;
-  padding-right: 7px;
-}
-
-.theme-organisation .list-orgs .org-col {
-  margin: 10px;
-  height: 450px;
-  width: 310px;
-  border: 1px #888888;
-  -webkit-box-shadow: 0px 0px 6px 0px #888888;
-          box-shadow: 0px 0px 6px 0px #888888;
-}
-
-.theme-organisation .list-orgs .org-col:hover {
-  -webkit-box-shadow: 0px 0px 18px 0px #108f9e;
-          box-shadow: 0px 0px 18px 0px #108f9e;
 }
 
 .theme-organisation .chronology > .row .info-icon {

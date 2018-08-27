@@ -267,3 +267,41 @@ $(function() {
         setTimeout(function() {initSelect2();}, 200);
     });
 });
+
+$(function() {
+    if ($('.js-ress-type').length) {
+        $('.js-ress-type').on('change', function() {
+            var type = $(".js-ress-type option:selected").val();
+            switch (parseInt(type)) {
+                case 1:
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').hide();
+                    $('.js-ress-file').show();
+                    break;
+                case 2:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-api').hide();
+                    $('.js-ress-url').show();
+                    break;
+                case 3:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').show();
+                    break;
+                default:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').hide();
+            }
+        })
+    }
+});
+
+$(function() {
+    if ($('.js-xml-prev').length) {
+        var format = require('prettify-xml');
+        var xmlData = $(".js-xml-prev").data('xml-data');
+        var formattedXml = format(xmlData.trim());
+        $('.js-xml-prev').html(formattedXml);
+    }
+});

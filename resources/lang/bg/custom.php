@@ -554,5 +554,15 @@ return [
     'request' => 'заявка',
     'for_own_records' => 'за собствени данни',
     'for_api' => 'важи за апи',
-    'lastname' => 'фамилия'
+    'lastname' => 'фамилия',
+    'url' => 'връзка',
+    'request_type' => 'тип на заявката',
+    'request' => 'заявка',
+    'headers' => 'HTTP хедъри',
+    'authentication' => 'автентикация',
+    'response_format' => 'формат на отговора',
+    'resource_no_visualization' => 'визуализация не е налична',
+    'confirm_resource_import' => 'потвърдете запазването на качените данни',
+    'cancel_resource_import' => 'каченето на данни е прекратено',
+    'cant_connect_api' => 'не може да се установи връзка с API-то',
 ];

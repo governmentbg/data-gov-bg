@@ -83,6 +83,10 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/admin/users/create', 'Admin\UserController@create');
     Route::match(['get', 'post'], '/admin/users/edit/{id}', 'Admin\UserController@edit');
 
+    Route::match(['get', 'post'], '/admin/documents/list', 'Admin\DocumentController@list');
+    Route::match(['get', 'post'], '/admin/documents/search', 'Admin\DocumentController@search');
+    Route::match(['get', 'post'], '/admin/documents/add', 'Admin\DocumentController@add');
+
     Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
     Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');
     Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');

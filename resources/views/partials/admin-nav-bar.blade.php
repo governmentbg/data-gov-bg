@@ -1,8 +1,8 @@
 <div class="row m-t-md">
-    <div class="col-sm-3 col-xs-12 sidenav">
+    <div class="col-xs-12 sidenav m-b-lg">
         <span class="my-profile m-b-lg m-l-sm">{{ __('custom.admin_profile') }}</span>
     </div>
-    <div class="col-sm-9 col-xs-12">
+    <div class="col-xs-12">
         <div class="filter-content">
             <div class="col-md-12">
                 <div class="row">
@@ -114,9 +114,22 @@
                                 href="{{ url('/admin/roles') }}"
                             >{{ __('custom.manage_roles') }}</a>
                         </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'documents' ? 'active' : '' }}"
+                                href="{{ url('/admin/documents/list') }}"
+                            >{{ ultrans('custom.documents') }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
+@if (isset($pagination))
+    <div class="row m-t-md">
+        <div class="col-xs-12 text-center">
+            {{ $pagination->render() }}
+        </div>
+    </div>
+@endif

@@ -587,3 +587,7 @@ textarea {
         }
     }
 }
+
+.doc-upload-input::-webkit-file-upload-button {
+    visibility: hidden;
+}

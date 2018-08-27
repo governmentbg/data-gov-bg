@@ -73,9 +73,6 @@ class TermsOfUseController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
             'action'           => ActionsHistory::TYPE_ADD,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $newTerms->id,
             'action_msg'       => 'Added terms of use',
         ];
@@ -151,9 +148,6 @@ class TermsOfUseController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
             'action'           => ActionsHistory::TYPE_MOD,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $terms->id,
             'action_msg'       => 'Edited terms of use',
         ];
@@ -196,9 +190,6 @@ class TermsOfUseController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
             'action'           => ActionsHistory::TYPE_DEL,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $post['terms_id'],
             'action_msg'       => 'Deleted terms of use',
         ];
@@ -245,9 +236,6 @@ class TermsOfUseController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
             'action'           => ActionsHistory::TYPE_SEE,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_msg'       => 'Listed terms of use',
         ];
 

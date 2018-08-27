@@ -94,9 +94,6 @@ class UserFollowController extends ApiController
                 $logData = [
                     'module_name'      => $moduleName,
                     'action'           => ActionsHistory::TYPE_FOLLOW,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $follow->id,
                     'action_msg'       => 'User followed',
                 ];
@@ -187,9 +184,6 @@ class UserFollowController extends ApiController
                 $logData = [
                     'module_name'      => $moduleName,
                     'action'           => ActionsHistory::TYPE_UNFOLLOW,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $unfollowObject,
                     'action_msg'       => 'User unfollowed',
                 ];
@@ -229,9 +223,6 @@ class UserFollowController extends ApiController
             $logData = [
                 'module_name'      => Module::getModuleName(Module::USERS),
                 'action'           => ActionsHistory::TYPE_SEE,
-                'user_id'          => \Auth::user()->id,
-                'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                 'action_object'    => $data['id'],
                 'action_msg'       => 'Got user followers count',
             ];

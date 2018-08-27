@@ -130,9 +130,6 @@ class UserController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_msg'       => 'Listed users',
                 ];
 
@@ -204,9 +201,6 @@ class UserController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_msg'       => 'Searched users',
                 ];
 
@@ -251,9 +245,6 @@ class UserController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['id'],
                     'action_msg'       => 'Got user roles',
                 ];
@@ -314,9 +305,6 @@ class UserController extends ApiController
             $logData = [
                 'module_name'      => Module::getModuleName(Module::USERS),
                 'action'           => ActionsHistory::TYPE_SEE,
-                'user_id'          => \Auth::user()->id,
-                'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                 'action_object'    => $request->id,
                 'action_msg'       => 'Got user settings',
             ];
@@ -443,9 +431,6 @@ class UserController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $user->id,
                     'action_msg'       => 'Added user',
                 ];
@@ -661,9 +646,6 @@ class UserController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::USERS),
             'action'           => ActionsHistory::TYPE_MOD,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $user->id,
             'action_msg'       => 'Edited user',
         ];
@@ -720,9 +702,6 @@ class UserController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::USERS),
             'action'           => ActionsHistory::TYPE_DEL,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $id,
             'action_msg'       => 'Deleted user',
         ];
@@ -765,9 +744,6 @@ class UserController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::USERS),
             'action'           => ActionsHistory::TYPE_MOD,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $request->id,
             'action_msg'       => 'Generated API key',
         ];
@@ -912,9 +888,6 @@ class UserController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::USERS),
             'action'           => ActionsHistory::TYPE_ADD,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_object'    => $user->id,
             'action_msg'       => 'Invited user',
         ];

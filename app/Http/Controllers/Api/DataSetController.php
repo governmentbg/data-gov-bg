@@ -171,9 +171,6 @@ class DataSetController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::DATA_SETS),
                         'action'           => ActionsHistory::TYPE_ADD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $newDataSet->uri,
                         'action_msg'       => 'Added dataset',
                     ];
@@ -375,9 +372,6 @@ class DataSetController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::DATA_SETS),
                         'action'           => ActionsHistory::TYPE_MOD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $dataSet->uri,
                         'action_msg'       => 'Edited dataset',
                     ];
@@ -424,9 +418,6 @@ class DataSetController extends ApiController
             $logData = [
                 'module_name'      => Module::getModuleName(Module::DATA_SETS),
                 'action'           => ActionsHistory::TYPE_DEL,
-                'user_id'          => \Auth::user()->id,
-                'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                 'action_object'    => $post['dataset_uri'],
                 'action_msg'       => 'Deleted dataset',
             ];
@@ -807,9 +798,6 @@ class DataSetController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::DATA_SETS),
                         'action'           => ActionsHistory::TYPE_SEE,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    =>  $post['dataset_uri'],
                         'action_msg'       => 'Got dataset details',
                     ];
@@ -863,9 +851,6 @@ class DataSetController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::DATA_SETS),
                         'action'           => ActionsHistory::TYPE_MOD,
-                        'user_id'          => \Auth::user()->id,
-                        'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                        'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                         'action_object'    => $post['data_set_uri'],
                         'action_msg'       => 'Added dataset to group',
                     ];
@@ -914,9 +899,6 @@ class DataSetController extends ApiController
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::DATA_SETS),
                             'action'           => ActionsHistory::TYPE_MOD,
-                            'user_id'          => \Auth::user()->id,
-                            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                             'action_object'    => $post['data_set_uri'],
                             'action_msg'       => 'Removed dataset from group',
                         ];
@@ -1117,9 +1099,6 @@ class DataSetController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DATA_SETS),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $data['id'],
                     'action_msg'       => 'Got user dataset count',
                 ];

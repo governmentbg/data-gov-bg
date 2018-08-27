@@ -63,9 +63,6 @@ class DocumentController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DOCUMENTS),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $newDocument->id,
                     'action_msg'       => 'Added new document',
                 ];
@@ -150,9 +147,6 @@ class DocumentController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DOCUMENTS),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $editDocument->id,
                     'action_msg'       => 'Edited a document',
                 ];
@@ -194,9 +188,6 @@ class DocumentController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DOCUMENTS),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['doc_id'],
                     'action_msg'       => 'Deleted document',
                 ];
@@ -346,9 +337,6 @@ class DocumentController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::DOCUMENTS),
             'action'           => ActionsHistory::TYPE_SEE,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_msg'       => 'Listed documents',
         ];
 
@@ -459,9 +447,6 @@ class DocumentController extends ApiController
             $logData = [
                 'module_name'      => Module::getModuleName(Module::DOCUMENTS),
                 'action'           => ActionsHistory::TYPE_SEE,
-                'user_id'          => \Auth::user()->id,
-                'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                 'action_msg'       => 'Searched documents',
             ];
 

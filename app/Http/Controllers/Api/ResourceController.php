@@ -119,9 +119,6 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $resource->uri,
                     'action_msg'       => 'Added resource metadata',
                 ];
@@ -188,9 +185,6 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $elasticDataSet->id,
                     'action_msg'       => 'Added resource data',
                 ];
@@ -339,9 +333,6 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $resource->id,
                     'action_msg'       => 'Edit resource metadata',
                 ];
@@ -394,9 +385,6 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $resource->id,
                     'action_msg'       => 'Update resource data',
                 ];
@@ -437,9 +425,6 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $post['resource_uri'],
                     'action_msg'       => 'Deleted resource',
                 ];
@@ -884,9 +869,6 @@ class ResourceController extends ApiController
             $logData = [
                 'module_name'      => Module::getModuleName(Module::RESOURCES),
                 'action'           => ActionsHistory::TYPE_SEE,
-                'user_id'          => \Auth::user()->id,
-                'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                 'action_msg'       => 'Listed data formats',
             ];
 
@@ -918,9 +900,6 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_SEE,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_msg'       => 'Checked if user has reported resource',
                 ];
 

@@ -77,9 +77,6 @@ class DataRequestController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $dataRequest->id,
                     'action_msg'       => 'Sent data request',
                 ];
@@ -168,9 +165,6 @@ class DataRequestController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $requestToEdit->id,
                     'action_msg'       => 'Edited data request',
                 ];
@@ -210,9 +204,6 @@ class DataRequestController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $deleteRequestData['request_id'],
                     'action_msg'       => 'Deleted data request',
                 ];
@@ -373,9 +364,6 @@ class DataRequestController extends ApiController
         $logData = [
             'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
             'action'           => ActionsHistory::TYPE_SEE,
-            'user_id'          => \Auth::user()->id,
-            'ip_address'       => $_SERVER['REMOTE_ADDR'],
-            'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
             'action_msg'       => 'Listed data request',
         ];
 

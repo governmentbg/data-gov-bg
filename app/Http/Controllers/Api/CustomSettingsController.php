@@ -35,9 +35,6 @@ class CustomSettingsController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::CUSTOM_SETTINGS),
                     'action'           => ActionsHistory::TYPE_DEL,
-                    'user_id'          => \Auth::user()->id,
-                    'ip_address'       => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'       => $_SERVER['HTTP_USER_AGENT'],
                     'action_object'    => $data['id'],
                     'action_msg'       => 'Deleted custom setting',
                 ];

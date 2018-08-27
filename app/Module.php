@@ -85,9 +85,8 @@ class Module extends Model
         if (in_array($moduleIndex, array_flip($modules))) {
             return $modules[$moduleIndex];
         }
-        else {
-            return false;
-        }
+
+        return false;
     }
 
     /**
@@ -105,13 +104,10 @@ class Module extends Model
         $actions = ActionsHistory::getTypes();
 
         $validator = \Validator::make($request, [
-            'user_id'       => 'required|int|digits_between:1,10|exists:users,id',
             'module_name'   => 'required|string|max:191',
             'action'        => 'required|int|digits_between:1,3|in:'. implode(',', array_flip($actions)),
             'action_object' => 'max:191',
             'action_msg'    => 'required|string|max:191',
-            'ip_address'    => 'required|string|max:15',
-            'user_agent'    => 'required|string|max:191',
         ]);
 
         if (isset($request['action_object'])) {
@@ -123,13 +119,13 @@ class Module extends Model
         if (!$validator->fails()) {
             try {
                 $dbData = [
-                    'user_id'       => $request['user_id'],
+                    'user_id'       => Auth::user()->id,
                     'module_name'   => $request['module_name'],
                     'action'        => $request['action'],
                     'action_object' => $actionObject,
                     'action_msg'    => $request['action_msg'],
-                    'ip_address'    => $request['ip_address'],
-                    'user_agent'    => $request['user_agent'],
+                    'ip_address'    => $_SERVER['REMOTE_ADDR'],
+                    'user_agent'    => $_SERVER['HTTP_USER_AGENT'],
                     'occurrence'    => date('Y-m-d H:i:s'),
                 ];
 

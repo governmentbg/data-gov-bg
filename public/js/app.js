@@ -11334,7 +11334,7 @@ module.exports = Cancel;
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(11);
-module.exports = __webpack_require__(49);
+module.exports = __webpack_require__(51);
 
 
 /***/ }),
@@ -46544,7 +46544,7 @@ function getInt(string) {
 
 /***/ }),
 /* 48 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 $(function () {
     if ($('.js-logo').length) {
@@ -46820,8 +46820,157 @@ $(function () {
     });
 });
 
+$(function () {
+    if ($('.js-ress-type').length) {
+        $('.js-ress-type').on('change', function () {
+            var type = $(".js-ress-type option:selected").val();
+            switch (parseInt(type)) {
+                case 1:
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').hide();
+                    $('.js-ress-file').show();
+                    break;
+                case 2:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-api').hide();
+                    $('.js-ress-url').show();
+                    break;
+                case 3:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').show();
+                    break;
+                default:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').hide();
+            }
+        });
+    }
+});
+
+$(function () {
+    if ($('.js-xml-prev').length) {
+        var format = __webpack_require__(49);
+        var xmlData = $(".js-xml-prev").data('xml-data');
+        var formattedXml = format(xmlData.trim());
+        $('.js-xml-prev').html(formattedXml);
+    }
+});
+
 /***/ }),
 /* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _os = __webpack_require__(50);
+
+var stringTimesN = function stringTimesN(n, char) {
+  return Array(n + 1).join(char);
+};
+
+// Adapted from https://gist.github.com/sente/1083506
+function prettifyXml(xmlInput) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var _options$indent = options.indent,
+      indentOption = _options$indent === undefined ? 2 : _options$indent,
+      _options$newline = options.newline,
+      newlineOption = _options$newline === undefined ? _os.EOL : _options$newline;
+
+  var indentString = stringTimesN(indentOption, ' ');
+
+  var formatted = '';
+  var regex = /(>)(<)(\/*)/g;
+  var xml = xmlInput.replace(regex, '$1' + newlineOption + '$2$3');
+  var pad = 0;
+  xml.split(/\r?\n/).forEach(function (l) {
+    var line = l.trim();
+
+    var indent = 0;
+    if (line.match(/.+<\/\w[^>]*>$/)) {
+      indent = 0;
+    } else if (line.match(/^<\/\w/)) {
+      // Somehow istanbul doesn't see the else case as covered, although it is. Skip it.
+      /* istanbul ignore else  */
+      if (pad !== 0) {
+        pad -= 1;
+      }
+    } else if (line.match(/^<\w([^>]*[^\/])?>.*$/)) {
+      indent = 1;
+    } else {
+      indent = 0;
+    }
+
+    var padding = stringTimesN(pad, indentString);
+    formatted += padding + line + newlineOption; // eslint-disable-line prefer-template
+    pad += indent;
+  });
+
+  return formatted.trim();
+}
+
+// For non-es2015 usage
+module.exports = prettifyXml;
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports) {
+
+exports.endianness = function () { return 'LE' };
+
+exports.hostname = function () {
+    if (typeof location !== 'undefined') {
+        return location.hostname
+    }
+    else return '';
+};
+
+exports.loadavg = function () { return [] };
+
+exports.uptime = function () { return 0 };
+
+exports.freemem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.totalmem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.cpus = function () { return [] };
+
+exports.type = function () { return 'Browser' };
+
+exports.release = function () {
+    if (typeof navigator !== 'undefined') {
+        return navigator.appVersion;
+    }
+    return '';
+};
+
+exports.networkInterfaces
+= exports.getNetworkInterfaces
+= function () { return {} };
+
+exports.arch = function () { return 'javascript' };
+
+exports.platform = function () { return 'browser' };
+
+exports.tmpdir = exports.tmpDir = function () {
+    return '/tmp';
+};
+
+exports.EOL = '\n';
+
+exports.homedir = function () {
+	return '/'
+};
+
+
+/***/ }),
+/* 51 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

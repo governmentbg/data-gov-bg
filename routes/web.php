@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/user/organisations/register', 'UserController@registerOrg');
     Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
-    Route::match(['get', 'post'], '/user/resource/download/{esid}/{name}', 'UserController@resourceDownload')->name('resourceDownload');
+    Route::match(['get', 'post'], '/user/resource/download', 'UserController@resourceDownload')->name('resourceDownload');
 
     Route::match(['get', 'post'], '/admin/organisations', 'Admin\OrganisationController@list');
     Route::match(['get', 'post'], '/admin/organisations/search', 'Admin\OrganisationController@search');
@@ -124,6 +124,10 @@ Route::middleware('auth')->group(function () {
         )->name('orgResourceCreate');
 
         Route::match(['get', 'post'], '/user/resourceView/{uri}', 'UserController@resourceView')->name('resourceView');
+        Route::match(['get', 'post'], '/user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
+        Route::match(['get', 'post'], '/user/importCSV', 'UserController@importCsvData');
+        Route::match(['get', 'post'], '/user/importXML', 'UserController@importXmlData');
+        Route::match(['get', 'post'], '/user/importElastic', 'UserController@importElasticData');
         Route::match(['get', 'post'], '/user/invite', 'UserController@inviteUser');
         Route::match(['get', 'post'], '/user/settings', 'UserController@settings')->name('settings');
 

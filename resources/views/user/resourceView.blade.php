@@ -27,26 +27,29 @@
                         <span><a href="#"><i class="fa fa-envelope"></i></a></span>
                     </div>
                 </div>
+                <h2>{{ $resource->name }}</h2>
+                <p>{{ $resource->description }}</p>
 
                 <div class="col-sm-12 p-l-none">
-                    <h2>{{ $resource->name }}</h2>
-                    <p>{{ $resource->description }}</p>
-
-                    <div class="col-sm-12 p-l-none">
-                        <div class="tags pull-left">
-                            <span class="badge badge-pill">ТАГ</span>
-                            <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                            <span class="badge badge-pill">ТАГ</span>
-                        </div>
+                    <div class="tags pull-left">
+                        <span class="badge badge-pill">ТАГ</span>
+                        <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
+                        <span class="badge badge-pill">ТАГ</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="col-sm-12 m-t-lg p-l-r-none">
-                        @if (empty($data))
-                            <div class="col-sm-12 m-t-lg text-center">
-                                {{ __('custom.no_info') }}
-                            </div>
-                        @else
-                            <table class="table m-t-lg">
+            <div class="col-sm-12 p-l-none">
+
+                <div class="col-sm-12 m-t-lg p-l-r-none">
+                    @if (empty($data))
+                        <div class="col-sm-12 m-t-lg text-center">
+                            {{ __('custom.no_info') }}
+                        </div>
+                    @else
+                        @if ($resource->format_code == App\Resource::FORMAT_CSV)
+                        <div class="m-b-sm overflow-x-auto">
+                            <table class="table">
                                 @foreach ($data as $index => $row)
                                     @if ($index == 0)
                                         @foreach ($row as $key => $value)
@@ -61,38 +64,68 @@
                                     @endif
                                 @endforeach
                             </table>
-                            <a
-                               class="badge badge-pill pull-right"
-                               href="{{ url('/user/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
-                            >{{ uctrans('custom.download') }}</a>
+                        </div>
+                        @elseif ($resource->format_code == App\Resource::FORMAT_XML)
+                            <textarea class="js-xml-prev col-xs-12 m-b-md" data-xml-data="{{ $data }}" rows="20"></textarea>
+                        @else
+                            <p> {{ uctrans('custom.resource_no_visualization') }} </p>
                         @endif
-                    </div>
 
-                    <div class="col-xs-12 m-t-md p-l-r-none text-right">
-                        <form method="POST">
+                        <form method="POST" action="{{ url('/user/resource/download') }}">
                             {{ csrf_field() }}
-                            <button
-                                name="delete"
-                                class="badge badge-pill m-b-sm del-btn"
-                                data-confirm="{{ __('custom.remove_data') }}"
-                            >{{ uctrans('custom.remove') }}</button>
+                            <input
+                                hidden
+                                name="es_id"
+                                type="text"
+                                value="{{ $resource->es_id }}"
+                            >
+                            <input
+                                hidden
+                                name="name"
+                                type="text"
+                                value="{{ $resource->name }}"
+                            >
+                            <input
+                                hidden
+                                name="format"
+                                type="text"
+                                value="{{ $resource->file_format }}"
+                            >
+
+                        <button
+                            name="download"
+                            type="submit"
+                            class="badge badge-pill pull-right"
+                        >{{ uctrans('custom.download') }}</button>
+
                         </form>
-                    </div>
-                    <!-- IF there are old versions of this article -->
-                    <div class="col-sm-12 pull-left m-t-md p-l-none">
-                        <div class="pull-left history">
-                            <div>
-                                <a href="#">
-                                    <span class="version-heading">{{ __('custom.title') }}</span>
-                                    <span class="version">&nbsp;&#8211;&nbsp;версия 1</span>
-                                </a>
-                            </div>
-                            <div>
-                                <a href="#">
-                                    <span class="version-heading">{{ __('custom.title') }}</span>
-                                    <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
-                                </a>
-                            </div>
+                    @endif
+                </div>
+
+                <div class="col-xs-12 m-t-md p-l-r-none text-right">
+                    <form method="POST">
+                        {{ csrf_field() }}
+                        <button
+                            name="delete"
+                            class="badge badge-pill m-b-sm del-btn"
+                            data-confirm="{{ __('custom.remove_data') }}"
+                        >{{ uctrans('custom.remove') }}</button>
+                    </form>
+                </div>
+                <!-- IF there are old versions of this article -->
+                <div class="col-sm-12 pull-left m-t-md p-l-none">
+                    <div class="pull-left history">
+                        <div>
+                            <a href="#">
+                                <span class="version-heading">{{ __('custom.title') }}</span>
+                                <span class="version">&nbsp;&#8211;&nbsp;версия 1</span>
+                            </a>
+                        </div>
+                        <div>
+                            <a href="#">
+                                <span class="version-heading">{{ __('custom.title') }}</span>
+                                <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
+                            </a>
                         </div>
                     </div>
                 </div>

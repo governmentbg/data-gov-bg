@@ -45,6 +45,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($array);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_xml'));
             }
         }
@@ -72,6 +73,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json'));
             }
         }
@@ -118,6 +120,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($array);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_csv'));
             }
         }
@@ -145,6 +148,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json'));
             }
         }
@@ -174,6 +178,7 @@ class ConversionController extends ApiController
                     return $this->successResponse(json_decode($geo->out('json'), true));
                 }
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_kml'));
             }
         }
@@ -201,6 +206,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_kml_json'));
             }
         }
@@ -230,6 +236,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse(json_decode($easyRdf->serialise('json')));
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_rdf'));
             }
         }
@@ -257,6 +264,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json'));
             }
         }
@@ -379,7 +387,7 @@ class ConversionController extends ApiController
 
         $temp = tmpfile();
         $path = stream_get_meta_data($temp)['uri'];
-        $writer->setEnclosure('');
+        $writer->setEnclosure('"');
         $writer->save($path);
 
         $data = file_get_contents($path);
@@ -410,6 +418,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json_kml'));
             }
         }
@@ -452,6 +461,7 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($data);
             } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invlid_json_rdf'));
             }
         }

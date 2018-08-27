@@ -47,10 +47,8 @@ class LoginController extends Controller
         $loginData = $request->all();
 
         if ($request->has('username')) {
-            $field = filter_var($loginData['username'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
             $validator = \Validator::make($loginData, [
-                'username'      => 'required|string|exists:users,'. $field,
+                'username'      => 'required|string',
                 'password'      => 'required|string',
                 'remember_me'   => 'nullable|boolean'
             ]);
@@ -68,8 +66,8 @@ class LoginController extends Controller
             });
 
             if (!$validator->fails()) {
-                $request->merge([$field => $loginData['username']]);
-                $credentials = $request->only($field, 'password');
+                $request->merge(['username' => $loginData['username']]);
+                $credentials = $request->only('username', 'password');
                 $rememberMe = isset($loginData['remember_me']) ? $loginData['remember_me'] : false;
 
                 if (Auth::attempt($credentials, $rememberMe)) {

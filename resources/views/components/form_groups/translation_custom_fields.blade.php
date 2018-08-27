@@ -35,6 +35,19 @@
                                                 class="input-border-r-12 form-control"
                                                 {{ isset($model[$i - 1]) && !empty($model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][0] }) ? 'disabled' : null }}
                                             >
+
+                                            @if (
+                                                isset($model[$i - 1]) && !empty($model[$i - 1]->translate($active['locale'],
+                                                $active['locale'])->{ $field['val'][0] })
+                                            )
+                                                <input
+                                                    value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][0] } : null }}"
+                                                    name="{{ $field['name'] }}[{{ $i }}][label][{{ $active['locale'] }}]"
+                                                    type="hidden"
+                                                    class="input-border-r-12 form-control"
+                                                >
+                                            @endif
+
                                             <input name="sett_id[{{ $i }}]" value="{{ count($model) ? $model[$i - 1]->id : null }}" type="hidden">
                                         @elseif (
                                             isset(old($field['name'])[$i])

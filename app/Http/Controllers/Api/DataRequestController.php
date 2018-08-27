@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Module;
 use App\DataRequest;
+use App\ActionsHistory;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -71,6 +73,16 @@ class DataRequestController extends ApiController
 
             try {
                 $dataRequest->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $dataRequest->id,
+                    'action_msg'       => 'Sent data request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['request_id' => $dataRequest->id], true);
             } catch (QueryException $e) {
                 Log::error($ex->getMessage());
@@ -149,6 +161,16 @@ class DataRequestController extends ApiController
 
             try {
                 $requestToEdit->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $requestToEdit->id,
+                    'action_msg'       => 'Edited data request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 Log::error($ex->getMessage());
@@ -178,6 +200,16 @@ class DataRequestController extends ApiController
 
             try {
                 $requestToDelete->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $deleteRequestData['request_id'],
+                    'action_msg'       => 'Deleted data request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
 
@@ -328,6 +360,15 @@ class DataRequestController extends ApiController
                 ];
             }
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed data request',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse([
             'total_records' => $total_records,
             'dataRequests'  => $result,

@@ -7,6 +7,8 @@ use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Log;
 use App\TermsOfUseRequest;
+use App\Module;
+use App\ActionsHistory;
 
 class TermsOfUseRequestController extends ApiController
 {
@@ -53,6 +55,15 @@ class TermsOfUseRequestController extends ApiController
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+                'action'           => ActionsHistory::TYPE_ADD,
+                'action_object'    => $newTerms->id,
+                'action_msg'       => 'Sent terms of use request',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse(['id' => $newTerms->id], true);
         }
@@ -104,6 +115,15 @@ class TermsOfUseRequestController extends ApiController
             try {
                 $terms->save();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $terms->id,
+                    'action_msg'       => 'Edited terms of use request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -144,6 +164,15 @@ class TermsOfUseRequestController extends ApiController
 
             return $this->errorResponse(__('custom.delete_terms_request_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+            'action'           => ActionsHistory::TYPE_DEL,
+            'action_object'    => $post['request_id'],
+            'action_msg'       => 'Deleted terms of use request',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }
@@ -243,6 +272,14 @@ class TermsOfUseRequestController extends ApiController
             if (!$terms->isEmpty()) {
                 $result = $this->prepareTerms($terms);
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_msg'       => 'Listed terms of use requests',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse([
                 'total_records'         => $total_records,

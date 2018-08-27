@@ -2,6 +2,8 @@
 namespace App\Http\Controllers\Api;
 
 use Uuid;
+use App\Module;
+use App\ActionsHistory;
 use App\DataSet;
 use App\Category;
 use App\DataSetGroup;
@@ -165,6 +167,15 @@ class DataSetController extends ApiController
                     }
 
                     DB::commit();
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $newDataSet->uri,
+                        'action_msg'       => 'Added dataset',
+                    ];
+
+                    Module::add($logData);
 
                     return $this->successResponse(['uri' => $newDataSet->uri], true);
                 } else {
@@ -358,6 +369,15 @@ class DataSetController extends ApiController
 
                     DB::commit();
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $dataSet->uri,
+                        'action_msg'       => 'Edited dataset',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse();
                 } else {
                     DB::rollback();
@@ -394,6 +414,16 @@ class DataSetController extends ApiController
 
         try {
             $dataset->delete();
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                'action'           => ActionsHistory::TYPE_DEL,
+                'action_object'    => $post['dataset_uri'],
+                'action_msg'       => 'Deleted dataset',
+            ];
+
+            Module::add($logData);
+
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
 
@@ -765,6 +795,15 @@ class DataSetController extends ApiController
 
                     unset($data['resource']);
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_SEE,
+                        'action_object'    =>  $post['dataset_uri'],
+                        'action_msg'       => 'Got dataset details',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse($data);
                 }
             } catch (QueryException $e) {
@@ -809,6 +848,14 @@ class DataSetController extends ApiController
                         ['group_id' => $post['group_id']
                     ])
                 ) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $post['data_set_uri'],
+                        'action_msg'       => 'Added dataset to group',
+                    ];
+
+                    Module::add($logData);
 
                     return $this->successResponse();
                 }
@@ -849,6 +896,14 @@ class DataSetController extends ApiController
                             'data_set_id'   => $dataSet->id,
                         ])->delete()
                     ) {
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                            'action'           => ActionsHistory::TYPE_MOD,
+                            'action_object'    => $post['data_set_uri'],
+                            'action_msg'       => 'Removed dataset from group',
+                        ];
+
+                        Module::add($logData);
 
                         return $this->successResponse();
                     }
@@ -1040,6 +1095,15 @@ class DataSetController extends ApiController
 
             try {
                 $count = $sets->count();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $data['id'],
+                    'action_msg'       => 'Got user dataset count',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['count' => $count], true);
             } catch (QueryException $ex) {

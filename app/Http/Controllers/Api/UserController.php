@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Role;
 use App\User;
 use App\Locale;
+use App\Module;
 use PDOException;
 use App\RoleRight;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -125,6 +127,14 @@ class UserController extends ApiController
             try {
                 $users = $query->get();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_msg'       => 'Listed users',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['users'=> $users, 'total_records' => $count], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -188,6 +198,14 @@ class UserController extends ApiController
             try {
                 $data = $query->get();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_msg'       => 'Searched users',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['users' => $data, 'total_records' => $count], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -223,6 +241,15 @@ class UserController extends ApiController
                         'role_id'   => $role->role_id,
                     ];
                 }
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $post['id'],
+                    'action_msg'       => 'Got user roles',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['roles' => $result]);
             }
@@ -274,6 +301,15 @@ class UserController extends ApiController
                     }
                 }
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::USERS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_object'    => $request->id,
+                'action_msg'       => 'Got user settings',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse(['user' => $result], true);
         }
@@ -391,6 +427,15 @@ class UserController extends ApiController
                 $userSettings->save();
 
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $user->id,
+                    'action_msg'       => 'Added user',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['api_key' => $apiKey], true);
             } catch (QueryException $ex) {
@@ -598,6 +643,15 @@ class UserController extends ApiController
             }
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_MOD,
+            'action_object'    => $user->id,
+            'action_msg'       => 'Edited user',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse(['api_key' => $user['api_key']], true);
     }
 
@@ -645,6 +699,15 @@ class UserController extends ApiController
             return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_DEL,
+            'action_object'    => $id,
+            'action_msg'       => 'Deleted user',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse();
     }
 
@@ -677,6 +740,15 @@ class UserController extends ApiController
 
             return $this->errorResponse(__('custom.generate_api_key_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_MOD,
+            'action_object'    => $request->id,
+            'action_msg'       => 'Generated API key',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }
@@ -812,6 +884,15 @@ class UserController extends ApiController
                 return $this->errorResponse(__('custom.invite_user_fail'), $validator->errors()->messages());
             }
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_ADD,
+            'action_object'    => $user->id,
+            'action_msg'       => 'Invited user',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }

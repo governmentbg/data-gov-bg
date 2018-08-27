@@ -7,6 +7,8 @@ use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Log;
 use App\TermsOfUse;
+use App\ActionsHistory;
+use App\Module;
 
 
 class TermsOfUseController extends ApiController
@@ -67,6 +69,15 @@ class TermsOfUseController extends ApiController
 
             return $this->errorResponse(__('custom.add_terms_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_ADD,
+            'action_object'    => $newTerms->id,
+            'action_msg'       => 'Added terms of use',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse(['id' => $newTerms->id], true);
     }
@@ -134,6 +145,15 @@ class TermsOfUseController extends ApiController
             return $this->errorResponse(__('custom.edit_terms_fail'));
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_MOD,
+            'action_object'    => $terms->id,
+            'action_msg'       => 'Edited terms of use',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse();
     }
 
@@ -166,6 +186,15 @@ class TermsOfUseController extends ApiController
 
             return $this->errorResponse(__('custom.delete_terms_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_DEL,
+            'action_object'    => $post['terms_id'],
+            'action_msg'       => 'Deleted terms of use',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }
@@ -215,6 +244,14 @@ class TermsOfUseController extends ApiController
         }
 
         $response = $this->prepareTerms($terms);
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed terms of use',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse(
             array_merge(

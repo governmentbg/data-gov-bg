@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use \App\Signal;
 use \Validator;
+use App\Module;
+use App\ActionsHistory;
 
 class SignalsController extends ApiController
 {
@@ -60,6 +62,15 @@ class SignalsController extends ApiController
                 }
 
                 $newSignal->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SIGNALS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newSignal->id,
+                    'action_msg'       => 'Sent signal',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['signal_id :' . $newSignal->id]);
             } catch (QueryException $e) {
@@ -135,6 +146,16 @@ class SignalsController extends ApiController
                 }
 
                 $signalToEdit->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SIGNALS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $signalToEdit->id,
+                    'action_msg'       => 'Edited signal',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
@@ -163,6 +184,16 @@ class SignalsController extends ApiController
                 $signalToBeDeleted = Signal::find($deleteData['signal_id']);
 
                 $signalToBeDeleted->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SIGNALS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $deleteData['signal_id'],
+                    'action_msg'       => 'Deleted signal',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
 
             } catch (QueryException $e) {
@@ -312,6 +343,13 @@ class SignalsController extends ApiController
             }
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::SIGNALS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed signals',
+        ];
+
+        Module::add($logData);
         return $this->successResponse([
             'total_records' => $total_records,
             'signals' => $result,

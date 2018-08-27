@@ -562,5 +562,7 @@ return [
     'del_member' => 'Delete member',
     'edit_group' => 'Edit group',
     'del_group' => 'Delete group',
-    'add_group' => 'Add group'
+    'add_group' => 'Add group',
+    'followed' => 'Followed',
+    'unfollowed' => 'Stopped following',
 ];

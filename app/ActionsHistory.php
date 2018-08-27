@@ -22,6 +22,8 @@ class ActionsHistory extends Model
     const TYPE_ADD_GROUP = 8;
     const TYPE_EDIT_GROUP = 9;
     const TYPE_DEL_GROUP = 10;
+    const TYPE_FOLLOW = 11;
+    const TYPE_UNFOLLOW = 12;
 
     /*
      * User actions
@@ -106,6 +108,8 @@ class ActionsHistory extends Model
             self::TYPE_ADD_GROUP      => __('custom.add_group'),
             self::TYPE_EDIT_GROUP     => __('custom.edit_group'),
             self::TYPE_DEL_GROUP      => __('custom.del_group'),
+            self::TYPE_FOLLOW         => __('custom.followed'),
+            self::TYPE_UNFOLLOW       => __('custom.unfollowed')
         ];
     }
 

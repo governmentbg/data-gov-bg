@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\CustomSetting;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +31,15 @@ class CustomSettingsController extends ApiController
 
             try {
                 $query->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::CUSTOM_SETTINGS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $data['id'],
+                    'action_msg'       => 'Deleted custom setting',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {

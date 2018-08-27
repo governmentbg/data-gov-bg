@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use \App\Page;
 use \Validator;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -89,8 +91,17 @@ class PageController extends ApiController
 
                 $newPage->save();
                 DB::commit();
-                return $this->successResponse(['page_id' => $newPage->id]);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::PAGES),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newPage->id,
+                    'action_msg'       => 'Added page',
+                ];
+
+                Module::add($logData);
+
+                return $this->successResponse(['page_id' => $newPage->id]);
             } catch (QueryException $e) {
                 DB::rollback();
                 Log::error($e->getMessage());
@@ -187,6 +198,16 @@ class PageController extends ApiController
 
                 $pageToEdit->save();
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::PAGES),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $pageToEdit->id,
+                    'action_msg'       => 'Edited page',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 DB::rollback();
@@ -219,6 +240,16 @@ class PageController extends ApiController
                 $pageToBeDeleted = Page::find($deleteData['page_id']);
 
                 $pageToBeDeleted->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::PAGES),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $deleteData['page_id'],
+                    'action_msg'       => 'Deleted page',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 Log::error($ex->getMessage());
@@ -355,6 +386,14 @@ class PageController extends ApiController
                     ];
                 }
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::PAGES),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_msg'       => 'Listed pages',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse([
                 'total_records' => $total_records,

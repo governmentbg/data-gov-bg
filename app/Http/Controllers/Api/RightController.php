@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
@@ -27,6 +29,13 @@ class RightController extends ApiController
                 ];
             }
 
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::RIGHTS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_msg'       => 'Listed rights',
+            ];
+
+            Module::add($logData);
             return $this->successResponse(['rights' => $result], true);
         }
 

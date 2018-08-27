@@ -16,6 +16,14 @@ class ActionsHistory extends Model
     const TYPE_ADD = 2;
     const TYPE_MOD = 3;
     const TYPE_DEL = 4;
+    const TYPE_ADD_MEMBER = 5;
+    const TYPE_EDIT_MEMBER = 6;
+    const TYPE_DEL_MEMBER = 7;
+    const TYPE_ADD_GROUP = 8;
+    const TYPE_EDIT_GROUP = 9;
+    const TYPE_DEL_GROUP = 10;
+    const TYPE_FOLLOW = 11;
+    const TYPE_UNFOLLOW = 12;
 
     /*
      * User actions
@@ -90,10 +98,18 @@ class ActionsHistory extends Model
     public static function getTypes()
     {
         return [
-            self::TYPE_SEE     => __('custom.saw'),
-            self::TYPE_ADD     => __('custom.added'),
-            self::TYPE_MOD     => __('custom.modified'),
-            self::TYPE_DEL     => __('custom.deleted'),
+            self::TYPE_SEE            => __('custom.saw'),
+            self::TYPE_ADD            => __('custom.added'),
+            self::TYPE_MOD            => __('custom.modified'),
+            self::TYPE_DEL            => __('custom.deleted'),
+            self::TYPE_ADD_MEMBER     => __('custom.add_members'),
+            self::TYPE_EDIT_MEMBER    => __('custom.edit_member'),
+            self::TYPE_DEL_MEMBER     => __('custom.del_member'),
+            self::TYPE_ADD_GROUP      => __('custom.add_group'),
+            self::TYPE_EDIT_GROUP     => __('custom.edit_group'),
+            self::TYPE_DEL_GROUP      => __('custom.del_group'),
+            self::TYPE_FOLLOW         => __('custom.followed'),
+            self::TYPE_UNFOLLOW       => __('custom.unfollowed')
         ];
     }
 

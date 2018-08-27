@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Role;
 use App\User;
 use App\Locale;
+use App\Module;
+use App\ActionsHistory;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
@@ -168,6 +170,15 @@ class OrganisationController extends ApiController
                 }
 
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $organisation->id,
+                    'action_msg'       => 'Added organisation',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['org_id' => $organisation->id], true);
             } catch (QueryException $ex) {
@@ -368,6 +379,15 @@ class OrganisationController extends ApiController
 
                     DB::commit();
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $organisation->id,
+                        'action_msg'       => 'Edited organisation',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse();
                 } catch (QueryException $ex) {
                     DB::rollback();
@@ -413,6 +433,15 @@ class OrganisationController extends ApiController
                 $organisation->delete();
                 $organisation->deleted_by = \Auth::id();
                 $organisation->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $request->org_id,
+                    'action_msg'       => 'Deleted organisation',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -702,6 +731,14 @@ class OrganisationController extends ApiController
                         'updated_by'      => $org->updated_by,
                     ];
                 }
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_msg'       => 'Got user organisations',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
             } catch (QueryException $ex) {
@@ -1005,13 +1042,24 @@ class OrganisationController extends ApiController
 
                 $user->save();
 
+                $username = User::where('id', $post['user_id'])->first();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                    'action'           => ActionsHistory::TYPE_ADD_MEMBER,
+                    'action_object'    => $request->org_id,
+                    'action_msg'       => 'Added member '. $username->username . ' (' . $post['user_id'].') to organisation ',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
             }
         }
 
-        return $this->errorResponse('Add Member Failure', $validator->errors()->messages());
+        return $this->errorResponse(__('custom.add_member_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1037,6 +1085,17 @@ class OrganisationController extends ApiController
                     'org_id'    => $post['org_id'],
                     'user_id'   => $post['user_id'],
                 ])->delete();
+
+               $username = User::where('id', $post['user_id'])->first();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                    'action'           => ActionsHistory::TYPE_DEL_MEMBER,
+                    'action_object'    => $post['org_id'],
+                    'action_msg'       => 'Deleted member '. $username->username . ' (' . $post['user_id'].') from organisation ',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -1071,6 +1130,17 @@ class OrganisationController extends ApiController
                 $user = UserToOrgRole::where('org_id', $post['org_id'])
                     ->where('user_id', $post['user_id'])
                     ->update(['role_id' => $post['role_id']]);
+
+                $username = User::where('id', $post['user_id'])->first();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
+                    'action'           => ActionsHistory::TYPE_EDIT_MEMBER,
+                    'action_object'    => $post['org_id'],
+                    'action_msg'       => 'Edited member '. $username->username . ' (' . $post['user_id'].') for organisation ',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -1208,6 +1278,15 @@ class OrganisationController extends ApiController
                         }
 
                         DB::commit();
+
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::GROUPS),
+                            'action'           => ActionsHistory::TYPE_ADD_GROUP,
+                            'action_object'    => $newGroup->id,
+                            'action_msg'       => 'Added group',
+                        ];
+
+                        Module::add($logData);
 
                         return $this->successResponse(['id' => $newGroup->id], true);
                     }
@@ -1358,6 +1437,15 @@ class OrganisationController extends ApiController
 
                         DB::commit();
 
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::GROUPS),
+                            'action'           => ActionsHistory::TYPE_EDIT_GROUP,
+                            'action_object'    => $group->id,
+                            'action_msg'       => 'Edited group',
+                        ];
+
+                        Module::add($logData);
+
                         return $this->successResponse();
                     } catch (QueryException $e) {
                         Log::error($e->getMessage());
@@ -1402,6 +1490,15 @@ class OrganisationController extends ApiController
                 $group->delete();
                 $group->deleted_by = \Auth::id();
                 $group->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::GROUPS),
+                    'action'           => ActionsHistory::TYPE_DEL_GROUP,
+                    'action_object'    => $group->id,
+                    'action_msg'       => 'Deleted group',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\User;
 use App\UserFollow;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -46,40 +48,57 @@ class UserFollowController extends ApiController
         if (!$validator->fails()) {
             $follow = new UserFollow;
 
+            $moduleName = '';
             $follow->user_id = $data['user_id'];
 
             if (!empty($data['org_id'])) {
                 $follow->org_id = $data['org_id'];
+                $moduleName = Module::getModuleName(Module::ORGANISATIONS);
             }
 
             if (!empty($data['group_id'])) {
                 $follow->group_id = $data['group_id'];
+                $moduleName = Module::getModuleName(Module::GROUPS);
             }
 
             if (!empty($data['data_set_id'])) {
                 $follow->data_set_id = $data['data_set_id'];
+                $moduleName = Module::getModuleName(Module::DATA_SETS);
             }
 
             if (!empty($data['category_id'])) {
                 $follow->category_id = $data['category_id'];
+                $moduleName = Module::getModuleName(Module::MAIN_CATEGORIES);
             }
 
             if (!empty($data['tag_id'])) {
                 $follow->tag_id = $data['tag_id'];
+                $moduleName = Module::getModuleName(Module::TAGS);
             }
 
             if (!empty($data['follow_user_id'])) {
                 $follow->follow_user_id = $data['follow_user_id'];
+                $moduleName = Module::getModuleName(Module::USERS);
             }
 
             if (!empty($data['news'])) {
                 $follow->news = $data['news'];
+                $moduleName = Module::getModuleName(Module::NEWS);
             } else {
                 $follow->news = 0;
             }
 
             try {
                 $follow->save();
+
+                $logData = [
+                    'module_name'      => $moduleName,
+                    'action'           => ActionsHistory::TYPE_FOLLOW,
+                    'action_object'    => $follow->id,
+                    'action_msg'       => 'User followed',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -118,35 +137,58 @@ class UserFollowController extends ApiController
             'follow_user_id'    => 'nullable|integer|digits_between:1,10',
         ]);
 
+        $moduleName = '';
+        $unfollowObject = '';
         if (!$validator->fails()) {
             $query = UserFollow::where('user_id', $data['user_id']);
 
             if (!empty($data['org_id'])) {
                 $query->where('org_id', $data['org_id']);
+                $unfollowObject = $data['org_id'];
+                $moduleName = Module::getModuleName(Module::ORGANISATIONS);
             }
 
             if (!empty($data['group_id'])) {
                 $query->where('group_id', $data['group_id']);
+                $unfollowObject = $data['group_id'];
+                $moduleName = Module::getModuleName(Module::GROUPS);
             }
 
             if (!empty($data['data_set_id'])) {
                 $query->where('data_set_id', $data['data_set_id']);
+                $unfollowObject = $data['data_set_id'];
+                $moduleName = Module::getModuleName(Module::DATA_SETS);
             }
 
             if (!empty($data['category_id'])) {
                 $query->where('category_id', $data['category_id']);
+                $unfollowObject = $data['category_id'];
+                $moduleName = Module::getModuleName(Module::MAIN_CATEGORIES);
             }
 
             if (!empty($data['tag_id'])) {
                 $query->where('tag_id', $data['tag_id']);
+                $unfollowObject = $data['tag_id'];
+                $moduleName = Module::getModuleName(Module::TAGS);
             }
 
             if (!empty($data['follow_user_id'])) {
                 $query->where('follow_user_id', $data['follow_user_id']);
+                $unfollowObject = $data['follow_user_id'];
+                $moduleName = Module::getModuleName(Module::USERS);
             }
 
             try {
                 $query->delete();
+
+                $logData = [
+                    'module_name'      => $moduleName,
+                    'action'           => ActionsHistory::TYPE_UNFOLLOW,
+                    'action_object'    => $unfollowObject,
+                    'action_msg'       => 'User unfollowed',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -177,6 +219,15 @@ class UserFollowController extends ApiController
             $query = UserFollow::where('follow_user_id', $data['id']);
             $count = $query->count();
             $users = $query->select('user_id')->get()->toArray();
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::USERS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_object'    => $data['id'],
+                'action_msg'       => 'Got user followers count',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse(['count' => $count, 'followers' => $users], true);
         }

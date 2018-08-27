@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Role;
 use App\RoleRight;
+use App\Module;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,15 @@ class RoleController extends ApiController
         if (!$validator->fails()) {
             try {
                 $newRole = Role::create($post);
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newRole->id,
+                    'action_msg'       => 'Added role',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['id' => $newRole->id], true);
             } catch (QueryException $ex) {
@@ -85,7 +95,17 @@ class RoleController extends ApiController
 
             if (!$validator->fails()) {
                 try {
-                    Role::where('id', $post['id'])->update($post['data']);
+                    $role = Role::where('id', $post['id'])->update($post['data']);
+                    if ($role) {
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::ROLES),
+                            'action'           => ActionsHistory::TYPE_MOD,
+                            'action_object'    => $post['id'],
+                            'action_msg'       => 'Edited role',
+                        ];
+
+                        Module::add($logData);
+                    }
 
                     return $this->successResponse();
                 } catch (QueryException $ex) {
@@ -113,7 +133,18 @@ class RoleController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                Role::find($id)->delete();
+                $role = Role::find($id)->delete();
+
+                if ($role) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::ROLES),
+                        'action'           => ActionsHistory::TYPE_DEL,
+                        'action_object'    => $id,
+                        'action_msg'       => 'Deleted role',
+                    ];
+
+                    Module::add($logData);
+                }
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -169,6 +200,14 @@ class RoleController extends ApiController
             try {
                 $roles = $query->get()->toArray();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_msg'       => 'Listed roles',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['roles' => $roles], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -204,6 +243,15 @@ class RoleController extends ApiController
 
                     $result[] = $right->toArray();
                 }
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $id,
+                    'action_msg'       => 'Got role rights',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['rights' => $result], true);
             } catch (QueryException $ex) {
@@ -278,6 +326,14 @@ class RoleController extends ApiController
             if ($success) {
                 DB::commit();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $post['id'],
+                    'action_msg'       => 'Modified role rights',
+                ];
+
+                Module::add($logData);
                 return $this->successResponse();
             }
 

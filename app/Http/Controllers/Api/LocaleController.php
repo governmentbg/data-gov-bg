@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use \Validator;
 use \App\Locale;
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
@@ -38,6 +40,15 @@ class LocaleController extends ApiController
 
             try {
                 $locale->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::LOCALE),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $post['data']['locale'],
+                    'action_msg'       => 'Added locale',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -85,6 +96,15 @@ class LocaleController extends ApiController
             try {
                 $locale->save();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::LOCALE),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $post['locale'],
+                    'action_msg'       => 'Edited locale',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 Log::error($ex->getMessage());
@@ -119,6 +139,15 @@ class LocaleController extends ApiController
 
             try {
                 $locale->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::LOCALE),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $post['locale'],
+                    'action_msg'       => 'Deleted locale',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {

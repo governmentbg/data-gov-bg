@@ -221,7 +221,7 @@ Route::get('/terms', function () {
 
 Route::match(['get', 'post'], '/data', 'DataController@view')->name('dataView');
 
-Route::get('/data/view/{uri?}', function () {
+Route::get('/data/view/{uri}', function () {
     return view('data/view', [
         'class' => 'data',
         'filter' => 'healthcare',
@@ -255,9 +255,7 @@ Route::get('/data/resourceView/{uri}', function () {
     ]);
 });
 
-Route::get('/data/relatedData', function () {
-    return view('data/relatedData', ['class' => 'data']);
-});
+Route::match(['get', 'post'], '/data/linkedData', 'DataController@linkedData');
 
 Route::get('/data/reportedList', function () {
     return view('data/reportedList', [

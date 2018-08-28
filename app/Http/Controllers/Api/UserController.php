@@ -1201,7 +1201,7 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'username' => 'required|string|exists:users,username,deleted_at,NULL|digits_between:1,10'
+            'username' => 'required|string|exists:users,username,deleted_at,NULL|max:255'
         ]);
 
         if (!$validator->fails()) {

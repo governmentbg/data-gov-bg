@@ -1054,47 +1054,24 @@ class UserController extends Controller {
         if (!empty($username)) {
             if ($request->isMethod('post')) {
                 $user = User::where('username', $username)->first();
-                $params = $request->all();
+                $params['org_data'] = $request->all();
+                $params['username'] = $user->username;
                 $apiKey = $user->api_key;
-
-                if (Auth::uset()->approved) {
-                    $params['approved'] = true;
+                if ($user->approved) {
+                    $params['org_data']['approved'] = true;
                 }
 
-                if (!empty($params['logo'])) {
-                    try {
-                        $img = \Image::make($params['logo']);
-                    } catch (\Exception $ex) {
-                        Log::error($ex->getMessage());
-                    }
-
-                    if (!empty($img)) {
-                        $img->resize(300, 200);
-                        $params['logo_filename'] = $params['logo']->getClientOriginalName();
-                        $params['logo_mimetype'] = $img->mime();
-                        $params['logo_data'] = $img->encode('data-url');
-
-                        unset($params['logo']);
-                    }
+                if (!empty($params['org_data']['logo'])) {
+                    $params['org_data']['logo_filename'] = $params['org_data']['logo']->getClientOriginalName();
+                    $params['org_data']['logo'] = $params['org_data']['logo']->getPathName();
                 }
 
-                $req = Request::create('/addOrganisation', 'POST', ['api_key' => $apiKey,'data' => $params]);
-                $api = new ApiOrganisation($req);
-                $result = $api->addOrganisation($req)->getData();
+                $req = Request::create('/register', 'POST', ['api_key' => $apiKey, 'data' => $params]);
+                $api = new ApiUser($req);
+                $result = $api->register($req)->getData();
 
                 if ($result->success) {
-                    $userToOrgRole = new UserToOrgRole;
-                    $userToOrgRole->org_id = $result->org_id;
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
-
-                    try {
-                        $userToOrgRole->save();
-                        session()->flash('alert-success', __('custom.add_org_success'));
-                    } catch (QueryException $ex) {
-                        Log::error($ex->getMessage());
-                        session()->flash('alert-danger', __('custom.add_org_error'));
-                    }
+                    session()->flash('alert-success', __('custom.add_org_success'));
 
                     return redirect('login');
                 } else {

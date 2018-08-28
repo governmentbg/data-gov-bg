@@ -1023,9 +1023,10 @@ class UserController extends ApiController
 
                 $userSettings->save();
 
-                if (!empty($data['org_data'])) {
+                if (!empty($data['org_data']) && $registered) {
                     $organisation = new Organisation;
 
+                    $organisation->uri = !empty($data['org_data']['uri']) ? $data['org_data']['uri'] : \Uuid::generate(4)->string;
                     $organisation->type = $data['org_data']['type'];
                     $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
                         ? $data['org_data']['parent_org_id']
@@ -1041,7 +1042,7 @@ class UserController extends ApiController
                         : null;
                     $organisation->active = 0;
                     $organisation->approved = 0;
-                    $organisation->created_by = $user->id;
+                    $organisation->created_by = $registered->id;
                     $organisation->name = $this->trans($locale, $data['org_data']['name']);
                     $organisation->descript = $this->trans($locale, $data['org_data']['description']);
                     $organisation->activity_info = $data['org_data']['activity_info'];
@@ -1063,6 +1064,103 @@ class UserController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('email', __('custom.send_mail_failed'));
+            }
+        } else if(!empty($data['org_data']) && !empty($data['username'])) {
+            $user = User::where('username', $data['username'])->first();
+            $id = $user->id;
+
+            $validator = \Validator::make($data['org_data'], [
+                'locale'                => 'nullable|string|max:5',
+                'name'                  => 'required_with:locale|max:191',
+                'name.bg'               => 'required_without:locale|string|max:191',
+                'type'                  => 'required|int|max:191|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+                'description'           => 'nullable|max:8000',
+                'uri'                   => 'nullable|string|unique:organisations,uri|max:191',
+                'logo'                  => 'nullable|string|max:191',
+                'logo_filename'         => 'nullable|string|max:191',
+                'logo_mimetype'         => 'nullable|string|max:191',
+                'logo_data'             => 'nullable|max:16777215',
+                'activity_info'         => 'nullable|max:8000',
+                'contacts'              => 'nullable|max:8000',
+                'parent_org_id'         => 'nullable|int|digits_between:1,10',
+                'active'                => 'nullable|bool',
+                'approved'              => 'nullable|bool',
+                'custom_fields.*.label' => 'nullable|max:191',
+                'custom_fields.*.value' => 'nullable|max:8000',
+            ]);
+
+            if ($user && !$validator->fails()) {
+                DB::beginTransaction();
+
+                try {
+                    $organisation = new Organisation;
+
+                    $organisation->uri = !empty($data['org_data']['uri']) ? $data['org_data']['uri'] : \Uuid::generate(4)->string;
+                    $organisation->type = $data['org_data']['type'];
+                    $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
+                        ? $data['org_data']['parent_org_id']
+                        : null;
+                    $organisation->active = 0;
+                    $organisation->approved = 0;
+                    $organisation->created_by = $id;
+                    $organisation->name = $this->trans($locale, $data['org_data']['name']);
+                    $organisation->descript = $this->trans($locale, $data['org_data']['descript']);
+                    $organisation->activity_info = $data['org_data']['activity_info'];
+                    $organisation->contacts = $data['org_data']['contacts'];
+
+                    if (!empty($data['org_data']['logo'])) {
+                        try {
+                            $img = \Image::make($data['org_data']['logo']);
+
+                            $organisation->logo_file_name = empty($data['org_data']['logo_filename'])
+                                ? basename($data['org_data']['logo'])
+                                : $data['org_data']['logo_filename'];
+                            $organisation->logo_mime_type = $img->mime();
+
+                            $temp = tmpfile();
+                            $path = stream_get_meta_data($temp)['uri'];
+                            $img->save($path);
+                            $organisation->logo_data = file_get_contents($path);
+
+                            fclose($temp);
+                        } catch (\Exception $ex) {
+                            $imageError = true;
+
+                            $validator->errors()->add('logo', $this->getImageTypeError());
+                        }
+
+                        if (isset($data['org_data']['logo_filename']) && isset($data['org_data']['logo_mimetype']) && isset($data['org_data']['logo_data'])) {
+                            $organisation->logo_file_name = $data['org_data']['logo_filename'];
+                            $organisation->logo_mime_type = $data['org_data']['logo_mimetype'];
+                            $organisation->logo_data = $data['org_data']['logo_data'];
+                        }
+
+                        if (isset($organisation->logo_data) && !$this->checkImageSize($organisation->logo_data)) {
+                            $imageError = true;
+
+                            $validator->errors()->add('logo', $this->getImageSizeError());
+                        }
+                    }
+
+                    $organisation->save();
+
+                    if ($organisation) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->org_id = $organisation->id;
+                        $userToOrgRole->user_id = $id;
+                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                        $userToOrgRole->save();
+
+                        DB::commit();
+                    }
+
+                    return $this->successResponse(['api_key' => $user->api_key], true);
+                } catch (QueryException $ex) {
+                    DB::rollback();
+
+                    Log::error($ex->getMessage());
+                }
             }
         }
 

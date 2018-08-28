@@ -3,6 +3,7 @@
 use App\Tag;
 use App\Role;
 use App\User;
+use App\Module;
 use App\Group;
 use App\Dataset;
 use App\Category;
@@ -27,7 +28,7 @@ class ActionsHistorySeeder extends Seeder
 
         $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
         $types = array_keys(ActionsHistory::getTypes());
-        $modules = Role::MODULE_NAMES;
+        $modules = Module::getModules();
 
         $actionObjects = [];
 

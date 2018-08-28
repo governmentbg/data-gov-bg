@@ -28,21 +28,6 @@ class Role extends Model
     const RIGHT_EDIT = 2;
     const RIGHT_ALL = 3;
 
-    /**
-     * Module names used to specify the different areas for authorization
-     * Always add new module at the end of the array in case the are used by the array key
-     *
-     */
-    const MODULE_NAMES = [
-        'Category',
-        'Tag',
-        'Organisation',
-        'Group',
-        'User',
-        'Dataset',
-        'Resource',
-    ];
-
     protected $guarded = ['id'];
 
     /**
@@ -82,15 +67,6 @@ class Role extends Model
             self::RIGHT_EDIT    => __('custom.edit_right_desc'),
             self::RIGHT_ALL     => __('custom.all_right_desc'),
         ];
-    }
-
-    /**
-     * Get all module names
-     *
-     */
-    public static function getModuleNames()
-    {
-        return self::MODULE_NAMES;
     }
 
     /**

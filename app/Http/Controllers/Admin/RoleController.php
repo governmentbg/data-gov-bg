@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\Module;
+use App\RoleRight;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
@@ -175,7 +178,7 @@ class RoleController extends AdminController {
         $api = new ApiRole($rq);
         $result = $api->getRoleRights($rq)->getData();
         $rights = isset($result->rights) ? $result->rights : [];
-        $modules = Role::getModuleNames();
+        $modules = Module::getModules();
         $moduleKeys = array_flip($modules);
         $rightTypes = Role::getRights();
 

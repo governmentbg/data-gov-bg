@@ -308,19 +308,15 @@ class UserController extends Controller {
         ];
 
         $orgId = Organisation::where('uri', $request->uri)->value('id');
-        $dataSetIds = DataSet::where('org_id', $orgId)->pluck('id')->toArray();
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
-            if (!empty($dataSetIds)) {
-                $params['criteria']['dataset_ids'] = $dataSetIds;
-                $rq = Request::create('/api/listDataSets', 'POST', $params);
-                $api = new ApiDataSet($rq);
-                $datasets = $api->listDataSets($rq)->getData();
-                $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
-            } else {
-                $paginationData = $this->getPaginationData([], 0, [], $perPage);
-            }
+            $params['criteria']['org_ids'] = [$orgId];
+            $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $datasets = $api->listDataSets($rq)->getData();
+            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
             $paginationData = $this->getPaginationData([], 0, [], $perPage);
         }
@@ -1528,6 +1524,7 @@ class UserController extends Controller {
     {
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
@@ -1627,6 +1624,7 @@ class UserController extends Controller {
             'class'     => 'user',
             'uri'       => $datasetUri,
             'types'     => $types,
+            'reqTypes'  => $reqTypes,
             'fields'    => self::getResourceTransFields()
         ]);
     }

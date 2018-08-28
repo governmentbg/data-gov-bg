@@ -18,11 +18,15 @@ trait RecordSignature
         }
 
         static::updating(function ($model) use ($userId) {
-            $model->updated_by = $userId;
+            if (empty($model->updated_by)) {
+                $model->updated_by = $userId;
+            }
         });
 
         static::creating(function ($model) use ($userId) {
-            $model->created_by = $userId;
+            if (empty($model->created_by)) {
+                $model->created_by = $userId;
+            }
         });
     }
 }

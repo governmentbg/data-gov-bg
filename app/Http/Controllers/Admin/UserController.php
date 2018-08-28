@@ -270,18 +270,14 @@ class UserController extends AdminController {
             if ($request->has('change_pass')) {
                 $oldPass = $request->offsetGet('old_password');
 
-                if (Hash::check($oldPass, $user->password)) {
-                    $saveData = [
-                        'api_key'   => $user->api_key,
-                        'id'        => $user->id,
-                        'data'      => [
-                            'password'          => $request->offsetGet('password'),
-                            'password_confirm'  => $request->offsetGet('password_confirm'),
-                        ],
-                    ];
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.wrong_password'));
-                }
+                $saveData = [
+                    'api_key'   => $user->api_key,
+                    'id'        => $user->id,
+                    'data'      => [
+                        'password'          => $request->offsetGet('password'),
+                        'password_confirm'  => $request->offsetGet('password_confirm'),
+                    ],
+                ];
             }
 
             if ($request->has('generate_key')) {

@@ -279,7 +279,7 @@ class RoleController extends ApiController
     public function modifyRoleRights(Request $request)
     {
         $post = $request->all();
-        $modules = Role::getModuleNames();
+        $modules = Module::getModules();
         $rights = Role::getRights();
 
         $validator = \Validator::make($post, [

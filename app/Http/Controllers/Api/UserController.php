@@ -236,10 +236,27 @@ class UserController extends ApiController
                 $result = [];
 
                 foreach($user->userToOrgRole as $role) {
+
+                    $roleRights = RoleRight::where('role_id', $role->role_id)->get();
+
+                    foreach($roleRights as $singleRoleRight) {
+                        $rightResult[] = [
+                            'module_name'          => $singleRoleRight->module_name,
+                            'right_id'             => $singleRoleRight->right,
+                            'limit_to_own_data'    => $singleRoleRight->limit_to_own_data,
+                            'api'                  => $singleRoleRight->api
+                        ];
+                    }
+
                     $result[] = [
                         'org_id'    => $role->org_id,
                         'role_id'   => $role->role_id,
+                        'rights'    => $rightResult
+
                     ];
+
+                    unset($roleRights);
+                    unset($rightResult);
                 }
 
                 $logData = [

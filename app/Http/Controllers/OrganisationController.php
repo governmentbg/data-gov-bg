@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Role;
 use App\ActionsHistory;
+use App\Module;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
@@ -326,7 +327,7 @@ class OrganisationController extends Controller {
             $criteria = [
                 'org_ids' => [$result->data->id]
             ];
-            $objType = Role::MODULE_NAMES[2];
+            $objType = Module::getModules(Module::ORGANISATIONS);
             $actObjData[$objType] = [];
             $actObjData[$objType][$result->data->id] = [
                 'obj_id'        => $result->data->uri,
@@ -337,8 +338,8 @@ class OrganisationController extends Controller {
                 'parent_obj_id' => ''
             ];
             if (isset($res->success) && $res->success && !empty($res->datasets)) {
-                $objType = Role::MODULE_NAMES[5];
-                $objTypeRes = Role::MODULE_NAMES[6];
+                $objType = Module::getModules(Module::DATA_SETS);
+                $objTypeRes = Module::getModules(Module::RESOURCES);
                 $actObjData[$objType] = [];
                 foreach ($res->datasets as $dataset) {
                     $criteria['dataset_ids'][] = $dataset->id;

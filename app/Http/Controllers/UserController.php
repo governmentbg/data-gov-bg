@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Role;
 use App\User;
 use App\Locale;
+use App\Module;
 use App\DataSet;
 use App\Category;
 use App\Resource;
@@ -13,6 +14,8 @@ use App\DataSetGroup;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
+use App\RoleRight;
+use App\Http\Controllers\Api\RightController;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -2615,7 +2618,7 @@ class UserController extends Controller {
                     $res = $api->listOrganisations($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->organisations)) {
-                        $objType = Role::MODULE_NAMES[2];
+                        $objType = Module::getModuleName(Module::ORGANISATIONS);
                         $actObjData[$objType] = [];
 
                         foreach ($res->organisations as $org) {
@@ -2661,7 +2664,7 @@ class UserController extends Controller {
                     $res = $api->listGroups($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->groups)) {
-                        $objType = Role::MODULE_NAMES[3];
+                        $objType = Module::getModuleName(Module::GROUPS);
                         $actObjData[$objType] = [];
 
                         foreach ($res->groups as $group) {
@@ -2706,7 +2709,7 @@ class UserController extends Controller {
                     $res = $api->listMainCategories($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->categories)) {
-                        $objType = Role::MODULE_NAMES[0];
+                        $objType = Module::getModuleName(Module::MAIN_CATEGORIES);
                         $actObjData[$objType] = [];
 
                         foreach ($res->categories as $category) {
@@ -2751,7 +2754,7 @@ class UserController extends Controller {
                     $res = $api->listTags($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->tags)) {
-                        $objType = Role::MODULE_NAMES[1];
+                        $objType = Module::getModuleName(Module::MAIN_CATEGORIES);
                         $actObjData[$objType] = [];
 
                         foreach ($res->tags as $tag) {
@@ -2798,7 +2801,7 @@ class UserController extends Controller {
                     $res = $api->listUsers($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->users)) {
-                        $objType = Role::MODULE_NAMES[4];
+                        $objType = Module::getModuleName(Module::USERS);
                         $actObjData[$objType] = [];
 
                         foreach ($res->users as $followUser) {
@@ -2848,7 +2851,7 @@ class UserController extends Controller {
 
             // user profile actions
             if (!isset($filters[$filter])) {
-                $objType = Role::MODULE_NAMES[4];
+                $objType = Module::getModuleName(Module::USERS);
 
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
@@ -2929,7 +2932,7 @@ class UserController extends Controller {
         $res = $api->listDataSets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
-            $objType = Role::MODULE_NAMES[5];
+            $objType = Module::getModuleName(Module::DATA_SETS);
 
             if (!isset($actObjData[$objType])) {
                 $actObjData[$objType] = [];
@@ -2998,7 +3001,7 @@ class UserController extends Controller {
                     $criteria['dataset_ids'][] = $dataset->id;
 
                     if (!empty($dataset->resource)) {
-                        $objTypeRes = Role::MODULE_NAMES[6];
+                        $objTypeRes = Module::getModuleName(Module::RESOURCES);
 
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
@@ -3359,6 +3362,12 @@ class UserController extends Controller {
      */
     public function groups(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(Module::getModuleName(Module::GROUPS), ActionsHistory::TYPE_SEE, Auth::user()->id);
+
+        if (!$rightCheck) {
+           return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $class = 'user';
         $groups = [];
         $perPage = 6;

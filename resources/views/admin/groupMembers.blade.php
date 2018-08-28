@@ -222,7 +222,13 @@
                         <div class="form-group row m-b-lg m-t-md">
                         <label for="role_exist" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
-                                <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role_exist">
+                                <select
+                                    class="js-select form-control"
+                                    multiple="multiple"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    name="role[]"
+                                    id="role_exist"
+                                >
                                     <option></option>
                                     @foreach($roles as $role)
                                         <option
@@ -270,7 +276,13 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
-                                <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role">
+                                <select
+                                    class="js-select form-control"
+                                    multiple="multiple"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    name="role[]"
+                                    id="role"
+                                >
                                     <option></option>
                                     @foreach($roles as $role)
                                         <option

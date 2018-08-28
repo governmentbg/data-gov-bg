@@ -794,7 +794,7 @@ class UserController extends ApiController
                 'email'    => 'required|email|max:191',
                 'is_admin' => 'nullable|int|digits_between:1,10',
                 'approved' => 'nullable|int|digits_between:1,10',
-                'role_id'  => 'nullable|int|required_with:org_id|digits_between:1,10',
+                'role_id'  => 'nullable|required_with:org_id',
                 'org_id'   => 'nullable|int|required_with:role_id|digits_between:1,10',
                 'generate' => 'nullable|boolean',
             ]);
@@ -852,14 +852,15 @@ class UserController extends ApiController
                         'pass'      => $password,
                     ];
 
-                    if (isset($request->data['role_id']) && isset($request->data['org_id'])) {
-                        $userToOrgRole = new UserToOrgRole;
+                    if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
+                        foreach ($post['data']['role_id'] as $role) {
+                            $userToOrgRole = new UserToOrgRole;
+                            $userToOrgRole->user_id = $user->id;
+                            $userToOrgRole->org_id = !empty($post['data']['org_id']) ? $post['data']['org_id'] : null;
+                            $userToOrgRole->role_id = $role;
 
-                        $userToOrgRole->user_id = $user->id;
-                        $userToOrgRole->role_id = $request->data['role_id'];
-                        $userToOrgRole->org_id = $request->data['org_id'];
-
-                        $userToOrgRole->save();
+                            $userToOrgRole->save();
+                        }
                     }
                 }
 
@@ -995,13 +996,14 @@ class UserController extends ApiController
                 });
 
                 if (isset($data['role_id']) || isset($data['org_id'])) {
-                    $userToOrgRole = new UserToOrgRole;
+                    foreach ($data['role_id'] as $role) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->user_id = $user->id;
+                        $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
+                        $userToOrgRole->role_id = $role;
 
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = (int) $data['role_id'];
-                    $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
-
-                    $userToOrgRole->save();
+                        $userToOrgRole->save();
+                    }
                 }
 
                 $userSettings = new UserSetting;

@@ -1834,13 +1834,13 @@ class UserController extends Controller {
             if ($result->success) {
                 session()->flash('alert-success', __('custom.delete_success'));
 
-                return back();
+                return redirect('/user/organisations');
             }
         }
 
         session()->flash('alert-danger', __('custom.delete_error'));
 
-        return back();
+        return redirect('/user/organisations');
     }
 
     /**
@@ -3428,13 +3428,13 @@ class UserController extends Controller {
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return back();
+                return redirect('/user/groups');
             }
         }
 
         $request->session()->flash('alert-danger', __('custom.delete_error'));
 
-        return back();
+        return redirect('/user/groups');
     }
 
     /**

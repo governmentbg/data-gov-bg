@@ -738,6 +738,16 @@ class DataSetController extends ApiController
                     $results[] = $result;
                 }
 
+                $transFields = ['name', 'sla', 'descript'];
+
+                if ($order && in_array($order['field'], $transFields)) {
+                    usort($result, function ($a, $b) use($order) {
+                        return strtolower($order['type']) == 'asc'
+                            ? strcmp($order['field'], $order['field'])
+                            : strcmp($order['field'], $order['field']);
+                    });
+                }
+
                 return $this->successResponse([
                     'datasets'      => $results,
                     'total_records' => $count,

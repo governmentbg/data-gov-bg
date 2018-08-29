@@ -103,13 +103,14 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="newsLetter" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.roles') }}:</label>
-                            <div class="col-sm-3 col-xs-6 p-r-none">
+                            <label for="role" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.roles') }}:</label>
+                            <div class="col-sm-9 ">
                                 <select
-                                    class="js-select form-control open-select"
-                                    name="role_id"
+                                    class="js-select form-control col-xs-12"
+                                    multiple="multiple"
+                                    name="role_id[]"
                                     data-placeholder="{{ __('custom.select_role') }}"
-                                    size="5"
+                                    id="role"
                                 >
                                     <option></option>
                                     @foreach ($roles as $role)
@@ -119,13 +120,13 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-sm-6 col-xs-6 text-right p-l-none reg-btns">
-                                <button
-                                    type="submit"
-                                    name="save"
-                                    class="m-l-md btn btn-primary m-b-sm"
-                                >{{ uctrans('custom.save') }}</button>
-                            </div>
+                        </div>
+                        <div class="reg-btns">
+                            <button
+                                type="submit"
+                                name="save"
+                                class="m-l-md btn pull-right btn-primary m-b-sm"
+                            >{{ uctrans('custom.save') }}</button>
                         </div>
                     </form>
                 </div>

@@ -74,7 +74,6 @@
                                     type="password"
                                     class="input-border-r-12 form-control"
                                     name="password"
-                                    value="{{ old('password') }}"
                                 >
                                 <span class="error">{{ $errors->first('password') }}</span>
                             </div>

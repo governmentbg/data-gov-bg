@@ -234,7 +234,8 @@
                             <div class="col-lg-10">
                                 <select
                                     class="js-select form-control"
-                                    name="role"
+                                    multiple="multiple"
+                                    name="role[]"
                                     data-placeholder="{{ __('custom.select_role') }}"
                                     id="role_exist"
                                 >
@@ -250,7 +251,7 @@
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
                                 <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
-                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
+                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.add') }}</button>
                             </div>
                         </div>
                     </form>
@@ -285,7 +286,14 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
-                                <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role">
+                                <select
+                                    class="js-select form-control"
+                                    multiple="multiple"
+                                    name="role[]"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    name="role"
+                                    id="role"
+                                >
                                     <option></option>
                                     @foreach($roles as $role)
                                         <option

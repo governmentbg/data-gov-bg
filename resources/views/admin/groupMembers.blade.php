@@ -61,16 +61,6 @@
                                         >{{ $role->name }}</a>
                                     </li>
                                 @endforeach
-                                <li>
-                                    <a
-                                        class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                                        href="{{ route('adminGroupMembersView', [
-                                            'uri'       => $group->uri,
-                                            'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                            'keywords'  => $keywords,
-                                        ]) }}"
-                                    >{{ __('custom.for_approval') }}</a>
-                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -232,7 +222,13 @@
                         <div class="form-group row m-b-lg m-t-md">
                         <label for="role_exist" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
-                                <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role_exist">
+                                <select
+                                    class="js-select form-control"
+                                    multiple="multiple"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    name="role[]"
+                                    id="role_exist"
+                                >
                                     <option></option>
                                     @foreach($roles as $role)
                                         <option
@@ -245,7 +241,7 @@
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
                                 <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
-                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
+                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ uctrans('custom.add') }}</button>
                             </div>
                         </div>
                     </form>
@@ -280,7 +276,13 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
-                                <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role">
+                                <select
+                                    class="js-select form-control"
+                                    multiple="multiple"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    name="role[]"
+                                    id="role"
+                                >
                                     <option></option>
                                     @foreach($roles as $role)
                                         <option

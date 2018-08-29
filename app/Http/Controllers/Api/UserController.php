@@ -61,11 +61,12 @@ class UserController extends ApiController
                 'active'       => 'nullable|boolean',
                 'approved'     => 'nullable|boolean',
                 'is_admin'     => 'nullable|int|digits_between:1,10',
-                'role_id'      => 'nullable|int|digits_between:1,10',
-                'org_id'       => 'nullable|int|digits_between:1,10',
+                'role_id'      => 'nullable',
+                'org_id'       => 'nullable',
                 'id'           => 'nullable|int|digits_between:1,10',
                 'user_ids'     => 'nullable|array',
                 'order'        => 'nullable|array',
+                'keywords'     => 'nullable|string|max:191'
             ]);
         }
 
@@ -81,6 +82,11 @@ class UserController extends ApiController
         if (!$validator->fails()) {
             $query = User::select()->with('userToOrgRole');
 
+            if (isset($criteria['keywords'])) {
+                $ids = User::search($criteria['keywords'])->get()->pluck('id');
+                $query = User::whereIn('id', $ids)->with('userToOrgRole');
+            }
+
             if (isset($criteria['active'])) {
                 $query->where('active', $criteria['active']);
             }
@@ -93,15 +99,23 @@ class UserController extends ApiController
                 $query->where('is_admin', $criteria['is_admin']);
             }
 
-            if (!empty($criteria['role_id'])) {
+            if (!empty($criteria['role_ids'])) {
                 $query->whereHas('userToOrgRole', function($q) use($criteria) {
-                    $q->where('role_id', $criteria['role_id']);
+                    if (is_array($criteria['role_ids'])) {
+                        $q->whereIn('role_id', $criteria['role_ids']);
+                    } else {
+                        $q->where('role_id', $criteria['role_ids']);
+                    }
                 });
             }
 
-            if (!empty($criteria['org_id'])) {
+            if (!empty($criteria['org_ids'])) {
                 $query->whereHas('userToOrgRole', function($q) use($criteria) {
-                    $q->where('org_id', $criteria['org_id']);
+                    if (is_array($criteria['org_ids'])) {
+                        $q->whereIn('org_id', $criteria['org_ids']);
+                    } else {
+                        $q->where('org_id', $criteria['org_ids']);
+                    }
                 });
             }
 
@@ -797,7 +811,7 @@ class UserController extends ApiController
                 'email'    => 'required|email|max:191',
                 'is_admin' => 'nullable|int|digits_between:1,10',
                 'approved' => 'nullable|int|digits_between:1,10',
-                'role_id'  => 'nullable|int|required_with:org_id|digits_between:1,10',
+                'role_id'  => 'nullable|required_with:org_id',
                 'org_id'   => 'nullable|int|required_with:role_id|digits_between:1,10',
                 'generate' => 'nullable|boolean',
             ]);
@@ -855,14 +869,15 @@ class UserController extends ApiController
                         'pass'      => $password,
                     ];
 
-                    if (isset($request->data['role_id']) && isset($request->data['org_id'])) {
-                        $userToOrgRole = new UserToOrgRole;
+                    if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
+                        foreach ($post['data']['role_id'] as $role) {
+                            $userToOrgRole = new UserToOrgRole;
+                            $userToOrgRole->user_id = $user->id;
+                            $userToOrgRole->org_id = !empty($post['data']['org_id']) ? $post['data']['org_id'] : null;
+                            $userToOrgRole->role_id = $role;
 
-                        $userToOrgRole->user_id = $user->id;
-                        $userToOrgRole->role_id = $request->data['role_id'];
-                        $userToOrgRole->org_id = $request->data['org_id'];
-
-                        $userToOrgRole->save();
+                            $userToOrgRole->save();
+                        }
                     }
                 }
 
@@ -998,13 +1013,14 @@ class UserController extends ApiController
                 });
 
                 if (isset($data['role_id']) || isset($data['org_id'])) {
-                    $userToOrgRole = new UserToOrgRole;
+                    foreach ($data['role_id'] as $role) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->user_id = $user->id;
+                        $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
+                        $userToOrgRole->role_id = $role;
 
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = (int) $data['role_id'];
-                    $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
-
-                    $userToOrgRole->save();
+                        $userToOrgRole->save();
+                    }
                 }
 
                 $userSettings = new UserSetting;
@@ -1026,9 +1042,10 @@ class UserController extends ApiController
 
                 $userSettings->save();
 
-                if (!empty($data['org_data'])) {
+                if (!empty($data['org_data']) && $registered) {
                     $organisation = new Organisation;
 
+                    $organisation->uri = !empty($data['org_data']['uri']) ? $data['org_data']['uri'] : \Uuid::generate(4)->string;
                     $organisation->type = $data['org_data']['type'];
                     $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
                         ? $data['org_data']['parent_org_id']
@@ -1044,7 +1061,7 @@ class UserController extends ApiController
                         : null;
                     $organisation->active = 0;
                     $organisation->approved = 0;
-                    $organisation->created_by = $user->id;
+                    $organisation->created_by = $registered->id;
                     $organisation->name = $this->trans($locale, $data['org_data']['name']);
                     $organisation->descript = $this->trans($locale, $data['org_data']['description']);
                     $organisation->activity_info = $data['org_data']['activity_info'];
@@ -1066,6 +1083,103 @@ class UserController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('email', __('custom.send_mail_failed'));
+            }
+        } else if(!empty($data['org_data']) && !empty($data['username'])) {
+            $user = User::where('username', $data['username'])->first();
+            $id = $user->id;
+
+            $validator = \Validator::make($data['org_data'], [
+                'locale'                => 'nullable|string|max:5',
+                'name'                  => 'required_with:locale|max:191',
+                'name.bg'               => 'required_without:locale|string|max:191',
+                'type'                  => 'required|int|max:191|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+                'description'           => 'nullable|max:8000',
+                'uri'                   => 'nullable|string|unique:organisations,uri|max:191',
+                'logo'                  => 'nullable|string|max:191',
+                'logo_filename'         => 'nullable|string|max:191',
+                'logo_mimetype'         => 'nullable|string|max:191',
+                'logo_data'             => 'nullable|max:16777215',
+                'activity_info'         => 'nullable|max:8000',
+                'contacts'              => 'nullable|max:8000',
+                'parent_org_id'         => 'nullable|int|digits_between:1,10',
+                'active'                => 'nullable|bool',
+                'approved'              => 'nullable|bool',
+                'custom_fields.*.label' => 'nullable|max:191',
+                'custom_fields.*.value' => 'nullable|max:8000',
+            ]);
+
+            if ($user && !$validator->fails()) {
+                DB::beginTransaction();
+
+                try {
+                    $organisation = new Organisation;
+
+                    $organisation->uri = !empty($data['org_data']['uri']) ? $data['org_data']['uri'] : \Uuid::generate(4)->string;
+                    $organisation->type = $data['org_data']['type'];
+                    $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
+                        ? $data['org_data']['parent_org_id']
+                        : null;
+                    $organisation->active = 0;
+                    $organisation->approved = 0;
+                    $organisation->created_by = $id;
+                    $organisation->name = $this->trans($locale, $data['org_data']['name']);
+                    $organisation->descript = $this->trans($locale, $data['org_data']['descript']);
+                    $organisation->activity_info = $data['org_data']['activity_info'];
+                    $organisation->contacts = $data['org_data']['contacts'];
+
+                    if (!empty($data['org_data']['logo'])) {
+                        try {
+                            $img = \Image::make($data['org_data']['logo']);
+
+                            $organisation->logo_file_name = empty($data['org_data']['logo_filename'])
+                                ? basename($data['org_data']['logo'])
+                                : $data['org_data']['logo_filename'];
+                            $organisation->logo_mime_type = $img->mime();
+
+                            $temp = tmpfile();
+                            $path = stream_get_meta_data($temp)['uri'];
+                            $img->save($path);
+                            $organisation->logo_data = file_get_contents($path);
+
+                            fclose($temp);
+                        } catch (\Exception $ex) {
+                            $imageError = true;
+
+                            $validator->errors()->add('logo', $this->getImageTypeError());
+                        }
+
+                        if (isset($data['org_data']['logo_filename']) && isset($data['org_data']['logo_mimetype']) && isset($data['org_data']['logo_data'])) {
+                            $organisation->logo_file_name = $data['org_data']['logo_filename'];
+                            $organisation->logo_mime_type = $data['org_data']['logo_mimetype'];
+                            $organisation->logo_data = $data['org_data']['logo_data'];
+                        }
+
+                        if (isset($organisation->logo_data) && !$this->checkImageSize($organisation->logo_data)) {
+                            $imageError = true;
+
+                            $validator->errors()->add('logo', $this->getImageSizeError());
+                        }
+                    }
+
+                    $organisation->save();
+
+                    if ($organisation) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->org_id = $organisation->id;
+                        $userToOrgRole->user_id = $id;
+                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+
+                        $userToOrgRole->save();
+
+                        DB::commit();
+                    }
+
+                    return $this->successResponse(['api_key' => $user->api_key], true);
+                } catch (QueryException $ex) {
+                    DB::rollback();
+
+                    Log::error($ex->getMessage());
+                }
             }
         }
 
@@ -1104,7 +1218,7 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'username' => 'required|string|exists:users,username,deleted_at,NULL|digits_between:1,10'
+            'username' => 'required|string|exists:users,username,deleted_at,NULL|max:255'
         ]);
 
         if (!$validator->fails()) {

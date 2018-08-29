@@ -309,11 +309,13 @@ class UserController extends Controller {
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
-        $userOrgIds = UserToOrgRole::where('user_id', \Auth::user()->id)->pluck('org_id')->toArray();
-        $dataSetIds = DataSet::whereIn('org_id', $userOrgIds)->pluck('id')->toArray();
 
-        if (!empty($dataSetIds)) {
-            $params['criteria']['dataset_ids'] = $dataSetIds;
+        $orgId = Organisation::where('uri', $request->uri)->value('id');
+        $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
+
+        if (!is_null($orgId) && $hasRole) {
+            $params['criteria']['org_ids'] = [$orgId];
+            $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
             $rq = Request::create('/api/listDataSets', 'POST', $params);
             $api = new ApiDataSet($rq);
             $datasets = $api->listDataSets($rq)->getData();
@@ -1051,47 +1053,24 @@ class UserController extends Controller {
         if (!empty($username)) {
             if ($request->isMethod('post')) {
                 $user = User::where('username', $username)->first();
-                $params = $request->all();
+                $params['org_data'] = $request->all();
+                $params['username'] = $user->username;
                 $apiKey = $user->api_key;
-
-                if (Auth::uset()->approved) {
-                    $params['approved'] = true;
+                if ($user->approved) {
+                    $params['org_data']['approved'] = true;
                 }
 
-                if (!empty($params['logo'])) {
-                    try {
-                        $img = \Image::make($params['logo']);
-                    } catch (\Exception $ex) {
-                        Log::error($ex->getMessage());
-                    }
-
-                    if (!empty($img)) {
-                        $img->resize(300, 200);
-                        $params['logo_filename'] = $params['logo']->getClientOriginalName();
-                        $params['logo_mimetype'] = $img->mime();
-                        $params['logo_data'] = $img->encode('data-url');
-
-                        unset($params['logo']);
-                    }
+                if (!empty($params['org_data']['logo'])) {
+                    $params['org_data']['logo_filename'] = $params['org_data']['logo']->getClientOriginalName();
+                    $params['org_data']['logo'] = $params['org_data']['logo']->getPathName();
                 }
 
-                $req = Request::create('/addOrganisation', 'POST', ['api_key' => $apiKey,'data' => $params]);
-                $api = new ApiOrganisation($req);
-                $result = $api->addOrganisation($req)->getData();
+                $req = Request::create('/register', 'POST', ['api_key' => $apiKey, 'data' => $params]);
+                $api = new ApiUser($req);
+                $result = $api->register($req)->getData();
 
                 if ($result->success) {
-                    $userToOrgRole = new UserToOrgRole;
-                    $userToOrgRole->org_id = $result->org_id;
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
-
-                    try {
-                        $userToOrgRole->save();
-                        session()->flash('alert-success', __('custom.add_org_success'));
-                    } catch (QueryException $ex) {
-                        Log::error($ex->getMessage());
-                        session()->flash('alert-danger', __('custom.add_org_error'));
-                    }
+                    session()->flash('alert-success', __('custom.add_org_success'));
 
                     return redirect('login');
                 } else {
@@ -1548,6 +1527,7 @@ class UserController extends Controller {
     {
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
@@ -1647,6 +1627,7 @@ class UserController extends Controller {
             'class'     => 'user',
             'uri'       => $datasetUri,
             'types'     => $types,
+            'reqTypes'  => $reqTypes,
             'fields'    => self::getResourceTransFields()
         ]);
     }
@@ -1856,13 +1837,13 @@ class UserController extends Controller {
             if ($result->success) {
                 session()->flash('alert-success', __('custom.delete_success'));
 
-                return back();
+                return redirect('/user/organisations');
             }
         }
 
         session()->flash('alert-danger', __('custom.delete_error'));
 
-        return back();
+        return redirect('/user/organisations');
     }
 
     /**
@@ -2457,8 +2438,10 @@ class UserController extends Controller {
         $result = $api->listTermsOfUse($request)->getData();
         $termsOfUse = [];
 
-        foreach ($result->terms_of_use as $row) {
-            $termsOfUse[$row->id] = $row->name;
+        if (isset($result->terms_of_use)) {
+            foreach ($result->terms_of_use as $row) {
+                $termsOfUse[$row->id] = $row->name;
+            }
         }
 
         return $termsOfUse;
@@ -3454,13 +3437,13 @@ class UserController extends Controller {
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return back();
+                return redirect('/user/groups');
             }
         }
 
         $request->session()->flash('alert-danger', __('custom.delete_error'));
 
-        return back();
+        return redirect('/user/groups');
     }
 
     /**

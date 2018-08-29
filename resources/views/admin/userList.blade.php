@@ -17,6 +17,15 @@
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"
                 >
+                @foreach (app('request')->except(['q']) as $key => $value)
+                    @if (is_array($value))
+                        @foreach ($value as $innerValue)
+                            <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
+                        @endforeach
+                    @else
+                        <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                    @endif
+                @endforeach
             </form>
         </div>
     </div>
@@ -26,36 +35,59 @@
                 <li class="js-show-submenu">
                     <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ utrans('custom.organisations') }}</a>
                     <ul class="sidebar-submenu">
+                        <li>
+                            <a
+                                href="{{
+                                    !isset(app('request')->input()['orgs_count'])
+                                    ? action(
+                                        'Admin\UserController@list', array_merge(
+                                            ['orgs_count' => $orgDropCount],
+                                            array_except(app('request')->input(), ['orgs_count'])
+                                        )
+                                    )
+                                    : action(
+                                        'Admin\UserController@list', array_merge(
+                                            [
+                                                'orgs_count'    => null,
+                                                'org'           => [],
+                                            ],
+                                            array_except(app('request')->input(), ['org', 'orgs_count'])
+                                        )
+                                    )
+                                }}"
+                                class="{{
+                                    isset(app('request')->input()['orgs_count']) && app('request')->input()['orgs_count'] == $orgDropCount
+                                        ? 'active'
+                                        : ''
+                                }}"
+                            >{{ !isset(app('request')->input()['orgs_count']) ? __('custom.show_all') : __('custom.clear_filter') }}</a>
+                        </li>
                         @foreach ($organisations as $id => $org)
                             <li>
                                 <a
                                     href="{{
-                                        action(
-                                            'Admin\UserController@list',
-                                            array_merge(
-                                                ['org' => $id],
-                                                array_except(app('request')->input(), ['org', 'q'])
+                                        !in_array($id, $selectedOrgs)
+                                            ? action(
+                                                'Admin\UserController@list', array_merge(
+                                                    ['org' => array_merge([$id], $selectedOrgs)],
+                                                    array_except(app('request')->input(), ['org'])
+                                                )
                                             )
-                                        )
+                                            : action(
+                                                'Admin\UserController@list', array_merge(
+                                                    ['org' => array_diff($selectedOrgs, [$id])],
+                                                    array_except(app('request')->input(), ['org'])
+                                                )
+                                            )
                                     }}"
                                     class="{{
-                                        isset(app('request')->input()['org']) && app('request')->input()['org'] == $id
+                                        isset($selectedOrgs) && in_array($id, $selectedOrgs)
                                             ? 'active'
                                             : ''
                                     }}"
                                 >{{ $org }}</a>
                             </li>
                         @endforeach
-                        <li>
-                            <a
-                                href="{{
-                                    action(
-                                        'Admin\UserController@list',
-                                        array_except(app('request')->input(), ['org', 'q'])
-                                    )
-                                }}"
-                            >{{ __('custom.show_all') }}</a>
-                        </li>
                     </ul>
                 </li>
             </ul>
@@ -67,32 +99,28 @@
                             <li>
                                 <a
                                     href="{{
-                                        action(
-                                            'Admin\UserController@list',
-                                            array_merge(
-                                                ['role' => $role->id],
-                                                array_except(app('request')->input(), ['role', 'q'])
+                                        !in_array($role->id, $selectedRoles)
+                                        ? action(
+                                            'Admin\UserController@list', array_merge(
+                                                ['role' => array_merge([$role->id], $selectedRoles)],
+                                                array_except(app('request')->input(), ['role'])
+                                            )
+                                        )
+                                        : action(
+                                            'Admin\UserController@list', array_merge(
+                                                ['role' => array_diff($selectedRoles, [$role->id])],
+                                                array_except(app('request')->input(), ['role'])
                                             )
                                         )
                                     }}"
                                     class="{{
-                                        isset(app('request')->input()['role']) && app('request')->input()['role'] == $role->id
+                                        isset($selectedRoles) && in_array($role->id, $selectedRoles)
                                             ? 'active'
                                             : ''
                                     }}"
                                 >{{ $role->name }}</a>
                             </li>
                         @endforeach
-                        <li>
-                            <a
-                                href="{{
-                                    action(
-                                        'Admin\UserController@list',
-                                        array_except(app('request')->input(), ['role', 'q'])
-                                    )
-                                }}"
-                            >{{ __('custom.show_all') }}</a>
-                        </li>
                     </ul>
                 </li>
             </ul>
@@ -107,7 +135,7 @@
                                         'Admin\UserController@list',
                                         array_merge(
                                             ['approved' => 1],
-                                            array_except(app('request')->input(), ['approved', 'q'])
+                                            array_except(app('request')->input(), ['approved'])
                                         )
                                     )
                                 }}"
@@ -125,7 +153,7 @@
                                         'Admin\UserController@list',
                                         array_merge(
                                             ['approved' => 0],
-                                            array_except(app('request')->input(), ['approved', 'q'])
+                                            array_except(app('request')->input(), ['approved'])
                                         )
                                     )
                                 }}"
@@ -143,11 +171,11 @@
                                         'Admin\UserController@list',
                                         array_except(
                                             app('request')->input(),
-                                            ['approved', 'q']
+                                            ['approved']
                                         )
                                     )
                                 }}"
-                            >{{ __('custom.show_all') }}</a>
+                            >{{ __('custom.clear_filter') }}</a>
                         </li>
                     </ul>
                 </li>
@@ -163,7 +191,7 @@
                                         'Admin\UserController@list',
                                         array_merge(
                                             ['active' => 1],
-                                            array_except(app('request')->input(), ['active', 'q'])
+                                            array_except(app('request')->input(), ['active'])
                                         )
                                     )
                                 }}"
@@ -181,7 +209,7 @@
                                         'Admin\UserController@list',
                                         array_merge(
                                             ['active' => 0],
-                                            array_except(app('request')->input(), ['active', 'q'])
+                                            array_except(app('request')->input(), ['active'])
                                         )
                                     )
                                 }}"
@@ -197,10 +225,10 @@
                                 href="{{
                                     action(
                                         'Admin\UserController@list',
-                                        array_except(app('request')->input(), ['active', 'q'])
+                                        array_except(app('request')->input(), ['active'])
                                     )
                                 }}"
-                            >{{ __('custom.show_all') }}</a>
+                            >{{ __('custom.clear_filter') }}</a>
                         </li>
                     </ul>
                 </li>
@@ -217,6 +245,15 @@
                             value="1"
                             {{ $adminFilter ? 'checked' : '' }}
                         >
+                        @foreach (app('request')->except(['is_admin']) as $key => $value)
+                            @if (is_array($value))
+                                @foreach ($value as $innerValue)
+                                    <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
+                                @endforeach
+                            @else
+                                <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                            @endif
+                        @endforeach
                     </div>
                 </div>
             </form>
@@ -231,6 +268,7 @@
                 class="pull-right badge cust-btn badge-pill m-b-sm"
                 href="{{ url('/admin/users/create') }}"
             >{{ __('custom.new_user') }}</a>
+
             @if (!empty($users))
                 @foreach ($users as $member)
                     <div class="col-xs-12 p-l-none">
@@ -266,6 +304,7 @@
             </div>
         </div>
     @endif
+
 </div>
 
 <div class="modal inmodal fade" id="invite" tabindex="-1" role="dialog"  aria-hidden="true">

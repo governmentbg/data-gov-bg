@@ -585,4 +585,5 @@ return [
     'edit_date' => 'корекция',
     'order_by_c' => 'Подреди по',
     'clear_filter' => 'Изчисти филтър',
+    'select_terms_of_use' => 'Изберете условия за ползване',
 ];

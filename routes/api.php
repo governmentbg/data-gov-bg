@@ -62,6 +62,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('addDataSet', 'Api\DataSetController@addDataSet');
     Route::post('editDataSet', 'Api\DataSetController@editDataSet');
     Route::post('deleteDataSet', 'Api\DataSetController@deleteDataSet');
+    Route::post('listDataSets', 'Api\DataSetController@listDataSets');
     Route::post('getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
     Route::post('addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
     Route::post('removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
@@ -145,7 +146,6 @@ Route::post('register', 'Api\UserController@register');
 Route::post('searchNews', 'Api\NewsController@searchNews');
 Route::post('listNews', 'Api\NewsController@listNews');
 
-Route::post('listDataSets', 'Api\DataSetController@listDataSets');
 Route::post('searchDataSet', 'Api\DataSetController@searchDataSet');
 
 Route::post('listActionHistory', 'Api\ActionsHistoryController@listActionHistory');

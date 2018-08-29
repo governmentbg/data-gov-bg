@@ -34,11 +34,16 @@
                             @endif
                         </li>
                         <li>
-                            @if (!\App\Role::isAdmin())
+                            @if (\App\Role::isAdmin())
                                 <a
-                                    class="{{ $view == 'datasets' ? 'active' : null }}"
+                                    class="{{ $view == 'members' ? 'active' : null }}"
                                     href="{{ url('/user/organisations/datasets/'. $organisation->uri) }}"
-                                >{{ ultrans('custom.data_sets') }}</a>
+                                >{{ ultrans('custom.datasets') }}</a>
+                            @else
+                                <a
+                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    href="{{ url('/user/organisations/datasets/'. $organisation->uri) }}"
+                                >{{ ultrans('custom.datasets') }}</a>
                             @endif
                         </li>
                     </ul>

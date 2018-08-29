@@ -5,6 +5,7 @@ use Uuid;
 use App\Module;
 use App\ActionsHistory;
 use App\DataSet;
+use App\Resource;
 use App\Category;
 use App\DataSetGroup;
 use \App\Organisation;
@@ -469,170 +470,164 @@ class DataSetController extends ApiController
     public function listDataSets(Request $request)
     {
         $post = $request->all();
-        $criteria = !empty($post['criteria']) ? $post['criteria'] : false;
+
+        $criteria = !empty($post['criteria']) ? $post['criteria'] : [];
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
 
-        if ($criteria) {
-            $validator = \Validator::make($post, [
-                'criteria'                   => 'nullable|array',
-                'records_per_page'           => 'nullable|int|digits_between:1,10',
-                'page_number'                => 'nullable|int|digits_between:1,10',
+        $validator = \Validator::make($post, [
+            'criteria'                   => 'nullable|array',
+            'records_per_page'           => 'nullable|int|digits_between:1,10',
+            'page_number'                => 'nullable|int|digits_between:1,10',
+        ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'dataset_ids'       => 'nullable|array',
+                'locale'            => 'nullable|string|max:5',
+                'org_ids'           => 'nullable|array',
+                'group_ids'         => 'nullable|array',
+                'category_ids'      => 'nullable|array',
+                'tag_ids'           => 'nullable|array',
+                'formats'           => 'nullable|array|min:1',
+                'formats.*'         => 'string|in:'. implode(',', Resource::getFormats()),
+                'terms_of_use_ids'  => 'nullable|array',
+                'keywords'          => 'nullable|string|max:191',
+                'status'            => 'nullable|int|digits_between:1,10|in:'. implode(',', array_keys(DataSet::getStatus())),
+                'visibility'        => 'nullable|int|digits_between:1,10|in:'. implode(',', array_keys(DataSet::getVisibility())),
+                'reported'          => 'nullable|int|digits_between:1,10',
+                'created_by'        => 'nullable|int|digits_between:1,10',
+                'order'             => 'nullable|array',
             ]);
+        }
 
-            if (!$validator->fails()) {
-                $validator = \Validator::make($criteria, [
-                    'dataset_ids'       => 'nullable|array',
-                    'locale'            => 'nullable|string|max:5',
-                    'org_id'            => 'nullable|int|digits_between:1,10',
-                    'group_id'          => 'nullable|int|digits_between:1,10',
-                    'category_id'       => 'nullable|int|digits_between:1,10',
-                    'tag_id'            => 'nullable|int|digits_between:1,10',
-                    'format'            => 'nullable|string|max:191',
-                    'terms_of_use_id'   => 'nullable|int|digits_between:1,10',
-                    'reported'          => 'nullable|int|digits_between:1,10',
-                    'created_by'        => 'nullable|int|digits_between:1,10',
-                    'order'             => 'nullable|array',
-                ]);
-            }
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'        => 'nullable|string|max:191',
+                'field'       => 'nullable|string|max:191',
+            ]);
+        }
 
-            if (!$validator->fails()) {
-                $validator = \Validator::make($order, [
-                    'type'        => 'nullable|string|max:191',
-                    'field'       => 'nullable|string|max:191',
-                ]);
-            }
+        if (!$validator->fails()) {
+            $data = [];
+            $reported = [];
 
-            if (!$validator->fails()) {
-                $data = [];
-                $reported = [];
+            try {
+                $query = DataSet::select();
 
-                try {
-                    $query = DataSet::select();
+                if (!empty($criteria['dataset_ids'])) {
+                    $query->whereIn('id', $criteria['dataset_ids']);
+                }
 
-                    if (!empty($criteria['dataset_ids'])) {
-                        $query->whereIn('id', $criteria['dataset_ids']);
-                    }
+                if (!empty($criteria['keywords'])) {
+                    $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
+                    $query->whereIn('id', $ids);
+                }
 
-                    // if user id criteria passed get all his datasets, if not get only published
-                    if (!empty($criteria['created_by'])) {
-                        $query->where('created_by', $criteria['created_by']);
-                    } else {
-                        $query->where('status', DataSet::STATUS_PUBLISHED);
-                    }
+                if (!empty($criteria['status'])) {
+                    $query->where('status', $criteria['status']);
+                }
 
-                    if (!empty($criteria['org_id'])) {
-                        $query->where('org_id', $criteria['org_id']);
-                    }
+                if (!empty($criteria['visibility'])) {
+                    $query->where('visibility', $criteria['visibility']);
+                }
 
-                    if (!empty($criteria['group_id'])) {
-                        $query->whereHas('dataSetGroup', function($q) use($criteria) {
-                            $q->where('group_id', $criteria['group_id']);
-                        });
-                    }
+                if (!empty($criteria['org_ids'])) {
+                    $query->whereIn('org_id', $criteria['org_ids']);
+                }
 
-                    if (!empty($criteria['category_id'])) {
-                        $query->where('category_id', $criteria['category_id']);
-                    }
+                if (!empty($criteria['group_ids'])) {
+                    $query->whereHas('dataSetGroup', function($q) use($criteria) {
+                        $q->whereIn('group_id', $criteria['group_ids']);
+                    });
+                }
 
-                    if (!empty($criteria['tag_id'])) {
-                        $query->whereHas('datasetsubcategory', function($q) use($criteria) {
-                            $q->where('sub_cat_id', $criteria['tag_id']);
-                        });
-                    }
+                if (!empty($criteria['category_ids'])) {
+                    $query->whereIn('category_id', $criteria['category_ids']);
+                }
 
-                    if (!empty($criteria['format'])) {
-                        $query->whereHas('resource', function($q) use($criteria) {
-                            $q->where('file_format', $criteria['format']);
-                        });
-                    }
+                if (!empty($criteria['tag_ids'])) {
+                    $query->whereHas('datasetsubcategory', function($q) use($criteria) {
+                        $q->where('sub_cat_id', $criteria['tag_ids']);
+                    });
+                }
 
-                    if (!empty($criteria['terms_of_use_id'])) {
-                        $query->where('terms_of_use_id', $criteria['terms_of_use_id']);
-                    }
-
-                    if (!empty($criteria['reported'])) {
-                        $query->whereHas('resource', function($q) use($criteria) {
-                            $q->where('is_reported', $criteria['reported']);
-                        });
-                    }
-
-                    if (!empty($order)) {
-                        $query->orderBy($order['field'], $order['type']);
-                    }
-
-                    $count = $query->count();
-                    $query->forPage(
-                        $request->offsetGet('page_number'),
-                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                    );
-
-                    $data = $query->get();
-
-                    foreach ($data as $set) {
-                        $set['name'] = $set->name;
-                        $set['sla'] = $set->sla;
-                        $set['descript'] = $set->descript;
-                        $set['reported'] = 0;
-
-                        $hasRes = $set->resource()->count();
-
-                        if ($hasRes) {
-                            foreach ($set->resource as $resourse) {
-                                if ($resourse->is_reported) {
-                                    $set['reported'] = 1;
-                                }
-                            }
+                if (!empty($criteria['formats'])) {
+                    $formatCodes = array_flip(Resource::getFormats());
+                    $formats = [];
+                    foreach ($criteria['formats'] as $format) {
+                        if (isset($formatCodes[$format])) {
+                            array_push($formats, $formatCodes[$format]);
                         }
                     }
 
-                    return $this->successResponse([
-                        'datasets'      => $data,
-                        'total_records' => $count
-                    ], true);
-                } catch (QueryException $ex) {
-                    Log::error($ex->getMessage());
+                    $query->whereHas('resource', function($q) use($formats) {
+                        $q->whereIn('file_format', $formats);
+                    });
                 }
-            }
 
-            return $this->errorResponse(__('custom.criteria_error'), $validator->errors()->messages());
-        }
+                if (!empty($criteria['terms_of_use_ids'])) {
+                    $query->whereIn('terms_of_use_id', $criteria['terms_of_use_ids']);
+                }
 
-        $query = DataSet::where('status', DataSet::STATUS_PUBLISHED);
+                if (!empty($criteria['reported'])) {
+                    $query->whereHas('resource', function($q) use($criteria) {
+                        $q->where('is_reported', $criteria['reported']);
+                    });
+                }
 
-        if (!empty($order)) {
-            $query->orderBy($order['field'], $order['type']);
-        }
+                if (!empty($criteria['created_by'])) {
+                    $query->orWhere('created_by', $criteria['created_by']);
 
-        if (!empty($pagination)) {
-            $query->paginate($pagination, ['*'], 'page', $page);
-        }
+                    if (!empty($criteria['org_ids'])) {
+                        $query->whereIn('org_id', $criteria['org_ids']);
+                    }
 
-        $count = $query->count();
-        $dataSets = $query->get();
-
-        foreach ($dataSets as $set) {
-            $set['name'] = $set->name;
-            $set['sla'] = $set->sla;
-            $set['descript'] = $set->descript;
-            $set['followers_count'] = $set->userFollow()->count();
-            $set['reported'] = 0;
-
-            $hasRes = $set->resource()->count();
-
-            if ($hasRes) {
-                foreach ($set->resource as $resourse) {
-                    if ($resourse->is_reported) {
-                        $set['reported'] = 1;
+                    if (!empty($criteria['group_ids'])) {
+                        $query->whereHas('dataSetGroup', function($q) use($criteria) {
+                            $q->whereIn('group_id', $criteria['group_ids']);
+                        });
                     }
                 }
+
+                if (!empty($order)) {
+                    $query->orderBy($order['field'], $order['type']);
+                }
+
+                $count = $query->count();
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
+
+                $data = $query->get();
+
+                foreach ($data as $set) {
+                    $set['name'] = $set->name;
+                    $set['sla'] = $set->sla;
+                    $set['descript'] = $set->descript;
+
+                    $hasRes = $set->resource()->count();
+
+                    if ($hasRes) {
+                        foreach ($set->resource as $resourse) {
+                            if ($resourse->is_reported) {
+                                $set['reported'] = 1;
+                            }
+                        }
+                    }
+                }
+
+                return $this->successResponse([
+                    'datasets'      => $data,
+                    'total_records' => $count
+                ], true);
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
         }
 
-        return $this->successResponse([
-            'datasets'      => $dataSets,
-            'total_records' => $count
-        ], true);
+        return $this->errorResponse(__('custom.criteria_error'), $validator->errors()->messages());
     }
 
 

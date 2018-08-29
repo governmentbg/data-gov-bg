@@ -33,6 +33,19 @@
                                 >{{ ultrans('custom.members') }}</a>
                             @endif
                         </li>
+                        <li>
+                            @if (\App\Role::isAdmin())
+                                <a
+                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    href="{{ url('/user/groups/datasets/'. $group->uri) }}"
+                                >{{ ultrans('custom.datasets') }}</a>
+                            @else
+                                <a
+                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    href="{{ url('/user/groups/datasets/'. $group->uri) }}"
+                                >{{ ultrans('custom.datasets') }}</a>
+                            @endif
+                        </li>
                     </ul>
                 </div>
             </div>

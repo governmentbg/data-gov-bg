@@ -328,7 +328,7 @@ class SignalsController extends ApiController
         if (!empty($signalList)) {
             foreach ($signalList as $singleSignal) {
                 $result[] = [
-                    'id' => $singleSignal->id,
+                    'id'            => $singleSignal->id,
                     'resource_id'   => $singleSignal->resource_id,
                     'description'   => $singleSignal->descript,
                     'firstname'     => $singleSignal->firstname,

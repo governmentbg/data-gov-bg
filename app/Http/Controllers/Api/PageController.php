@@ -395,6 +395,23 @@ class PageController extends ApiController
 
             Module::add($logData);
 
+            $transFields = [
+                'title',
+                'abstract',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+                usort($result, function ($a, $b) use($criteria) {
+                    return strtolower($criteria['order']['type']) == 'asc'
+                        ? strcmp($criteria['order']['field'], $criteria['order']['field'])
+                        : strcmp($criteria['order']['field'], $criteria['order']['field']);
+                });
+            }
+
             return $this->successResponse([
                 'total_records' => $total_records,
                 'pages'         => $result,

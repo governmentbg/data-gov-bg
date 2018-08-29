@@ -369,6 +369,14 @@ class DataRequestController extends ApiController
 
         Module::add($logData);
 
+        if ($criteria['order'] && $criteria['order']['field'] == 'description') {
+            usort($result, function ($a, $b) use($criteria) {
+                return strtolower($criteria['order']['type']) == 'asc'
+                    ? strcmp($criteria['order']['field'], $criteria['order']['field'])
+                    : strcmp($criteria['order']['field'], $criteria['order']['field']);
+            });
+        }
+
         return $this->successResponse([
             'total_records' => $total_records,
             'dataRequests'  => $result,

@@ -314,6 +314,7 @@ class UserController extends Controller {
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
+            $params['criteria']['created_by'] = \Auth::user()->id;
             $params['criteria']['org_ids'] = [$orgId];
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
             $rq = Request::create('/api/listDataSets', 'POST', $params);
@@ -3618,48 +3619,30 @@ class UserController extends Controller {
      *
      * @return view with list of datasets
      */
-    public function groupDatasets(Request $request)
+    public function groupDatasets(Request $request, $uri)
     {
+        $orgId = Organisation::where('uri', $uri)
+            ->where('type', Organisation::TYPE_GROUP)
+            ->value('id');
+
         $class = 'user';
+        $apiKey = \Auth::user()->api_key;
         $actMenu = 'group';
         $groups = [];
         $perPage = 6;
         $params = [
-            'api_key'          => \Auth::user()->api_key,
-            'criteria'         => [
-                'user_id'           => \Auth::user()->id,
-            ],
+            'api_key'          => $apiKey,
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgReq = Request::create('/api/listGroups', 'POST', $params);
-        $api = new ApiOrganisation($orgReq);
-        $result = $api->listGroups($orgReq)->getData();
-
-        if ($result->success) {
-            foreach ($result->groups as $group) {
-                $groups[] = $group->id;
-            }
-        }
-
-        $dataSetIds = DataSetGroup::whereIn('group_id', $groups)->pluck('data_set_id')->toArray();
-
-        if (!empty($dataSetIds)) {
-            $params = [
-                'api_key'          => \Auth::user()->api_key,
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
-
-            $params['criteria']['dataset_ids'] = $dataSetIds;
-            $dataRq = Request::create('/api/listDataSets', 'POST', $params);
-            $dataApi = new ApiDataSet($dataRq);
-            $datasets = $dataApi->listDataSets($dataRq)->getData();
-            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
-        } else {
-            $paginationData = $this->getPaginationData([], 0, [], $perPage);
-        }
+        $params['criteria']['created_by'] = \Auth::user()->id;
+        $params['criteria']['group_ids'] = [$orgId];
+        $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
+        $dataRq = Request::create('/api/listDataSets', 'POST', $params);
+        $dataApi = new ApiDataSet($dataRq);
+        $datasets = $dataApi->listDataSets($dataRq)->getData();
+        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
 
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');

@@ -344,6 +344,16 @@ class DocumentController extends ApiController
 
         Module::add($logData);
 
+        $transFields = ['description', 'name'];
+
+        if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+            usort($results, function ($a, $b) use($criteria) {
+                return strtolower($criteria['order']['type']) == 'asc'
+                    ? strcmp($criteria['order']['field'], $criteria['order']['field'])
+                    : strcmp($criteria['order']['field'], $criteria['order']['field']);
+            });
+        }
+
         return $this->successResponse(
             [
                 'total_records' => $count,
@@ -456,6 +466,16 @@ class DocumentController extends ApiController
             ];
 
             Module::add($logData);
+
+            $transFields = ['description', 'name'];
+
+            if ($order && in_array($order['field'], $transFields)) {
+                usort($results, function ($a, $b) use($criteria) {
+                    return strtolower($order['type']) == 'asc'
+                    ? strcmp($order['field'], $order['field'])
+                    : strcmp($order['field'], $order['field']);
+                });
+            }
 
             return $this->successResponse([
                 'documents'     => $results,

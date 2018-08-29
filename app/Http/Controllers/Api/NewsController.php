@@ -462,6 +462,23 @@ class NewsController extends ApiController
                 }
             }
 
+            $transFields = [
+                'title',
+                'abstract',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+                usort($results, function ($a, $b) use($criteria) {
+                    return strtolower($criteria['order']['type']) == 'asc'
+                        ? strcmp($criteria['order']['field'], $criteria['order']['field'])
+                        : strcmp($criteria['order']['field'], $criteria['order']['field']);
+                });
+            }
+
             return $this->successResponse([
                 'total_records' => $count,
                 'news'          => $result,

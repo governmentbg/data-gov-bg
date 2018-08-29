@@ -553,6 +553,16 @@ class ResourceController extends ApiController
                 ];
             }
 
+            $transFields = ['name', 'description'];
+
+            if (in_array($field, $transFields)) {
+                usort($results, function ($a, $b) use($type, $field) {
+                    return strtolower($type) == 'asc'
+                        ? strcmp($a[$field], $b[$field])
+                        : strcmp($b[$field], $a[$field]);
+                });
+            }
+
             return $this->successResponse(['resources' => $results, 'total_records' => $count], true);
         }
 

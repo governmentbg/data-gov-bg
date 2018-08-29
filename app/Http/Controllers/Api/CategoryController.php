@@ -282,13 +282,30 @@ class CategoryController extends ApiController
             );
 
             try {
-                $results = $query->get();
+                $results = [];
+                $categories = $query->get();
 
-                $locale = \LaravelLocalization::getCurrentLocale();
+                foreach ($categories as $category) {
+                    $results[] = [
+                        'id'            => $category->id,
+                        'name'          => $category->name,
+                        'locale'        => \LaravelLocalization::getCurrentLocale(),
+                        'active'        => $category->active,
+                        'ordering'      => $category->ordering,
+                        'icon'          => $this->getImageData($category->icon_data, $category->icon_mime_type),
+                        'created_at'    => date($category->created_at),
+                        'created_by'    => $category->created_by,
+                        'updated_at'    => date($category->updated_at),
+                        'updated_by'    => $category->updated_by,
+                    ];
+                }
 
-                foreach ($results as $category) {
-                    $category['name'] = $category->name;
-                    $category['locale'] = $locale;
+                if ($order && $order['field'] == 'name') {
+                    usort($results, function ($a, $b) use($order) {
+                        return strtolower($order['type']) == 'asc'
+                            ? strcmp($order['field'], $order['field'])
+                            : strcmp($order['field'], $order['field']);
+                    });
                 }
 
                 return $this->successResponse([
@@ -589,6 +606,14 @@ class CategoryController extends ApiController
                         'updated_at'    => date($record->updated_at),
                         'updated_by'    => $record->updated_by,
                     ];
+                }
+
+                if ($order && $order['field'] == 'name') {
+                    usort($tags, function ($a, $b) use($order) {
+                        return strtolower($order['type']) == 'asc'
+                            ? strcmp($order['field'], $order['field'])
+                            : strcmp($order['field'], $order['field']);
+                    });
                 }
 
                 return $this->successResponse([

@@ -602,6 +602,16 @@ class OrganisationController extends ApiController
                     ];
                 }
 
+                $transFields = ['name', 'description'];
+
+                if (in_array($field, $transFields)) {
+                    usort($results, function ($a, $b) use($type, $field) {
+                        return strtolower($type) == 'asc'
+                            ? strcmp($a[$field], $b[$field])
+                            : strcmp($b[$field], $a[$field]);
+                    });
+                }
+
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
 
             } catch (QueryException $ex) {
@@ -740,6 +750,16 @@ class OrganisationController extends ApiController
 
                 Module::add($logData);
 
+                $transFields = ['name', 'description'];
+
+                if (in_array($field, $transFields)) {
+                    usort($results, function ($a, $b) use($type, $field) {
+                        return strtolower($type) == 'asc'
+                            ? strcmp($a[$field], $b[$field])
+                            : strcmp($b[$field], $a[$field]);
+                    });
+                }
+
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
@@ -851,6 +871,16 @@ class OrganisationController extends ApiController
                         'created_by'      => $org->created_by,
                         'updated_by'      => $org->updated_by,
                     ];
+                }
+
+                $transFields = ['name', 'description'];
+
+                if (in_array($field, $transFields)) {
+                    usort($results, function ($a, $b) use($type, $field) {
+                        return strtolower($type) == 'asc'
+                            ? strcmp($a[$field], $b[$field])
+                            : strcmp($b[$field], $a[$field]);
+                    });
                 }
 
                 return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
@@ -1607,14 +1637,8 @@ class OrganisationController extends ApiController
                 }
             }
 
-            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                if (strtolower($criteria['order']['type']) == 'desc') {
-                    $query->orderBy($criteria['order']['field'], 'desc');
-                }
-                if (strtolower($criteria['order']['type']) == 'asc') {
-                    $query->orderBy($criteria['order']['field'], 'asc');
-                }
-            }
+            $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+            $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
             $count = $query->count();
 
@@ -1652,6 +1676,16 @@ class OrganisationController extends ApiController
                         'created_by'        => $group->created_by,
                         'updated_by'        => $group->updated_by,
                     ];
+                }
+
+                $transFields = ['name', 'description'];
+
+                if (in_array($field, $transFields)) {
+                    usort($result, function ($a, $b) use($type, $field) {
+                        return strtolower($type) == 'asc'
+                            ? strcmp($a[$field], $b[$field])
+                            : strcmp($b[$field], $a[$field]);
+                    });
                 }
 
                 return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
@@ -1822,6 +1856,16 @@ class OrganisationController extends ApiController
                         'created_by'        => $group->created_by,
                         'updated_by'        => $group->updated_by,
                     ];
+                }
+
+                $transFields = ['name', 'description'];
+
+                if (in_array($field, $transFields)) {
+                    usort($result, function ($a, $b) use($type, $field) {
+                        return strtolower($type) == 'asc'
+                            ? strcmp($a[$field], $b[$field])
+                            : strcmp($b[$field], $a[$field]);
+                    });
                 }
 
                 return $this->successResponse(['groups'=> $result, 'total_records' => $count], true);

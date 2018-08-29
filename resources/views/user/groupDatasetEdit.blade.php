@@ -67,10 +67,11 @@
                 <div class="col-sm-6">
                     <select
                         id="termsOfuse"
-                        class="input-border-r-12 form-control term-use"
+                        class="js-select form-control"
                         name="terms_of_use_id"
-                        size="5"
+                        data-placeholder="{{ utrans('custom.select_terms_of_use') }}"
                     >
+                        <option></option>
                         @foreach ($termsOfUse as $id =>$term)
                             <option
                                 value="{{ $id }}"
@@ -90,9 +91,9 @@
                     <select
                         id="organisation"
                         class="js-autocomplete form-control"
-                        placeholder="{{ utrans('custom.select_org') }}"
                         name="org_id"
                     >
+                        <option value="">{{ utrans('custom.select_org') }}</option>
                         @foreach ($organisations as $id =>$org)
                             <option
                                 value="{{ $id }}"
@@ -109,9 +110,10 @@
                     <select
                         id="group"
                         class="js-autocomplete form-control"
-                        data-placeholder="{{ utrans('custom.groups', 1) }}"
                         name="group_id"
+                        data-placeholder="{{ utrans('custom.groups', 1) }}"
                     >
+                        <option></option>
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"

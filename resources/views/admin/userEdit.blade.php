@@ -102,7 +102,7 @@
             @endif
             @if (!empty($orgRoles))
                 @foreach ($orgRoles as $org => $orgRole)
-                    @if ($org != 0)
+                    @if ($org != 0 && isset($organisations[$org]))
                         <div class="form-group row">
                                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
                                 <span class="col-sm-3 col-xs-12">{{ $organisations[$org] }} </span>
@@ -253,17 +253,6 @@
                 <div class="modal-body">
                     <form class="m-t-lg" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group row required">
-                            <label for="oldPass" class="col-sm-4 col-xs-12 col-form-label">{{ __('custom.password') }}:</label>
-                            <div class="col-sm-8">
-                                <input
-                                    type="password"
-                                    class="input-border-r-12 form-control"
-                                    name="old_password"
-                                    id="oldPass"
-                                >
-                            </div>
-                        </div>
                         <div class="form-group row required">
                             <label for="password" class="col-sm-4 col-xs-12 col-form-label">{{ __('custom.new_password') }}:</label>
                             <div class="col-sm-8">

@@ -1119,7 +1119,8 @@
 
 .theme-organisation .container a:hover,
 .theme-organisation .container a:focus,
-.theme-organisation .container a:active {
+.theme-organisation .container a:active,
+.theme-organisation .container a.active {
   color: #76ad3f;
 }
 
@@ -15052,6 +15053,66 @@ textarea {
 
 .theme-organisation .list-orgs img {
   height: 200px;
+}
+
+.theme-organisation .list-orgs {
+  padding: 50px;
+}
+
+.theme-organisation .list-orgs .ch-del-btns {
+  margin-top: 10px;
+  margin-bottom: 35px;
+  min-height: 36px;
+}
+
+.theme-organisation .list-orgs .ch-del-btns div div button {
+  border-radius: 10px;
+  padding: 7px;
+  background-color: #108f9e;
+  color: white;
+  border: none;
+  min-width: 80px;
+}
+
+.theme-organisation .list-orgs .org-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  height: 130px;
+}
+
+.theme-organisation .list-orgs .org-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.theme-organisation .list-orgs .logo {
+  height: 120px;
+  margin: 0 auto;
+}
+
+.theme-organisation .list-orgs .show-more {
+  margin-top: 10px;
+  padding-right: 7px;
+}
+
+.theme-organisation .list-orgs .org-col {
+  margin: 10px;
+  height: 450px;
+  width: 310px;
+  border: 1px #888888;
+  -webkit-box-shadow: 0px 0px 6px 0px #888888;
+          box-shadow: 0px 0px 6px 0px #888888;
+}
+
+.theme-organisation .list-orgs .org-col:hover {
+  -webkit-box-shadow: 0px 0px 18px 0px #108f9e;
+          box-shadow: 0px 0px 18px 0px #108f9e;
 }
 
 .theme-organisation .chronology > .row .info-icon {

@@ -96,6 +96,9 @@ return [
     'related_message' => 'You can search for the metadata included in the database of type triplestore in the opendata portal of the EU through the SPARQL editor and endpoint down below.',
     'namespaces' => 'Namespaces',
     'sparql_search' => 'SPARQL search',
+    'search_query' => 'Search query',
+    'invalid_search_query' => 'Invalid search query',
+    'invalid_search_query_sort' => 'Invalid format of sort parameter',
     'format' => 'format',
     'limit_results' => 'Limit results',
     'begin_search' => 'Search',
@@ -583,4 +586,5 @@ return [
     'creation' => 'creation',
     'edit_date' => 'edit',
     'order_by_c' => 'Order by',
+    'clear_filter' => 'Clear the filter',
 ];

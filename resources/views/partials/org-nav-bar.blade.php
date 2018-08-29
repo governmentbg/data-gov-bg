@@ -33,6 +33,14 @@
                                 >{{ ultrans('custom.members') }}</a>
                             @endif
                         </li>
+                        <li>
+                            @if (!\App\Role::isAdmin())
+                                <a
+                                    class="{{ $view == 'datasets' ? 'active' : null }}"
+                                    href="{{ url('/user/organisations/datasets/'. $organisation->uri) }}"
+                                >{{ ultrans('custom.data_sets') }}</a>
+                            @endif
+                        </li>
                     </ul>
                 </div>
             </div>

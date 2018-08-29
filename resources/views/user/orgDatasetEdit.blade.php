@@ -238,8 +238,14 @@
             <div class="form-group row">
                 <div class="col-sm-12 pull right text-right">
                     <div class="row">
-                        <button type="button" class="btn btn-primary">{{ uctrans('custom.add_resource') }}</button>
-                        <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
+                        <a
+                            class="btn btn-primary"
+                            href="{{ route('orgResourceCreate', ['uri' => $dataSet->uri]) }}"
+                        >{{ uctrans('custom.add_resource') }}</a>
+                        <a
+                           class="btn btn-primary"
+                           href="{{ route('orgDatasetView', ['uri' => $dataSet->uri]) }}"
+                        >{{ uctrans('custom.preview') }}</a>
                         @if ($hasResources)
                         <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
                         @endif

@@ -148,7 +148,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/user/groups/delete/{id}', 'UserController@deleteGroup');
         Route::match(['get', 'post'], '/user/groups/datasets', 'UserController@groupDatasets');
 
-        Route::match(['get', 'post'], '/user/organisations/datasets', 'UserController@orgDatasets');
+        Route::match(['get', 'post'], '/user/organisations/datasets/{uri}', 'UserController@orgDatasets');
         Route::match(['get', 'post'], '/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
         Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView')->name('orgDatasetView');
 
@@ -221,7 +221,7 @@ Route::get('/terms', function () {
 
 Route::match(['get', 'post'], '/data', 'DataController@view')->name('dataView');
 
-Route::get('/data/view/{uri?}', function () {
+Route::get('/data/view/{uri}', function () {
     return view('data/view', [
         'class' => 'data',
         'filter' => 'healthcare',
@@ -255,9 +255,7 @@ Route::get('/data/resourceView/{uri}', function () {
     ]);
 });
 
-Route::get('/data/relatedData', function () {
-    return view('data/relatedData', ['class' => 'data']);
-});
+Route::match(['get', 'post'], '/data/linkedData', 'DataController@linkedData');
 
 Route::get('/data/reportedList', function () {
     return view('data/reportedList', [

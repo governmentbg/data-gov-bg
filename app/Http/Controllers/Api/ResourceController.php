@@ -781,8 +781,8 @@ class ResourceController extends ApiController
      * Gets linked data
      *
      * @param Request $request
-     * @param string namespaces - required
-     * @param query - required
+     * @param string namespaces - optional
+     * @param json query - required
      * @param string order[type] - optional
      * @param string order[field] - optional
      * @param string format - optional
@@ -796,8 +796,8 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'namespaces'        => 'required|string|max:191',
-            'query'             => 'required|max:8000',
+            'namespaces'        => 'nullable|string|max:191',
+            'query'             => 'required|json|max:8000',
             'order.type'        => 'nullable|string|max:191',
             'order.field'       => 'nullable|string|max:191',
             'format'            => 'nullable|string|max:191',
@@ -806,7 +806,10 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            preg_match_all('!\d+!', $post['namespaces'], $namespaces);
+            $namespaces = [];
+            if (isset($post['namespaces'])) {
+                preg_match_all('!\d+!', $post['namespaces'], $namespaces);
+            }
             $orderType = isset($post['order']['type']) ? $post['order']['type'] : null;
             $orderField = isset($post['order']['field']) ? $post['order']['field'] : null;
             $pageNumber = !empty($post['page_number']) ? $post['page_number'] : 1;
@@ -827,9 +830,9 @@ class ResourceController extends ApiController
                     'index' => isset($namespaces[0]) ? $namespaces[0] : null,
                     'body'  => '{
                         "size": '. $recordsPerPage .',
-                        "from": '. ($pageNumber * $recordsPerPage - $recordsPerPage + 1) .',
+                        "from": '. ($pageNumber * $recordsPerPage - $recordsPerPage) .',
                         '. $orderJson .'
-                        "query": '. json_encode($post['query']) .'
+                        "query": '. $post['query'] .'
                     }',
                 ]);
 
@@ -838,8 +841,12 @@ class ResourceController extends ApiController
                 }
 
                 return $this->successResponse(['data' => $data], true);
+            } catch (\Elasticsearch\Common\Exceptions\BadRequest400Exception $ex) {
+                Log::error($ex->getMessage());
+                return $this->errorResponse(__('custom.link_data_fail'), ['query' => $ex->getMessage()]);
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
+                return $this->errorResponse(__('custom.link_data_fail'));
             }
         }
 

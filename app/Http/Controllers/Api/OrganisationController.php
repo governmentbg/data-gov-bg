@@ -1030,17 +1030,21 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($post, [
             'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
             'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'       => 'nullable|int|exists:roles,id|digits_between:1,10',
+            'role_id'       => 'nullable|exists:roles,id',
         ]);
 
         if (!$validator->fails()) {
             try {
-                $user = new UserToOrgRole;
-                $user->user_id = $post['user_id'];
-                $user->org_id = $post['org_id'];
-                $user->role_id = $post['role_id'];
+                if (isset($post['role_id']) || isset($post['org_id'])) {
+                    foreach ($post['role_id'] as $role) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->user_id = $post['user_id'];
+                        $userToOrgRole->org_id = !empty($post['org_id']) ? $post['org_id'] : null;
+                        $userToOrgRole->role_id = $role;
 
-                $user->save();
+                        $userToOrgRole->save();
+                    }
+                }
 
                 $username = User::where('id', $post['user_id'])->first();
 

@@ -587,4 +587,5 @@ return [
     'edit_date' => 'edit',
     'order_by_c' => 'Order by',
     'clear_filter' => 'Clear the filter',
+    'select_terms_of_use' => 'Select terms and conditions',
 ];

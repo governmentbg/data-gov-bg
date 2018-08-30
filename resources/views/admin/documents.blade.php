@@ -187,15 +187,15 @@
                                                 <td class="buttons">
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('/admin/documents/edit/'. $doc->id) }}"
                                                     >{{ utrans('custom.edit') }}</a>
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('/admin/documents/view/'. $doc->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
                                                     <a
                                                         class="link-action red"
-                                                        href=""
+                                                        href="{{ url('/admin/documents/delete/'. $doc->id) }}"
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                     >{{ __('custom.delete') }}</a>
                                                 </td>

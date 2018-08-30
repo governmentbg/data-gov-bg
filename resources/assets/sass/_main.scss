@@ -209,7 +209,7 @@ ul > li {
     cursor: pointer;
 
     &.red {
-        background-color: red !important;
+        background-color: $error-color !important;
     }
 
     &:hover {

@@ -12911,7 +12911,7 @@ button:focus {
 }
 
 .red {
-  color: red !important;
+  color: #C02E54 !important;
 }
 
 .p-l-lg {
@@ -13270,7 +13270,7 @@ ul > li {
 }
 
 .badge.red {
-  background-color: red !important;
+  background-color: #C02E54 !important;
 }
 
 .badge:hover {

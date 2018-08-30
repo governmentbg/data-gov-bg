@@ -11,7 +11,7 @@
 |
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
     Route::match(['get', 'post'], '/user/profile/{id}', 'UserController@profile');
     Route::get('/users/list/search', 'UserController@searchUsers');

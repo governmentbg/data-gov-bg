@@ -314,6 +314,7 @@ return [
     'get_tags_fail' => 'Грешка при вземане на информация за тагове',
     'converse_fail' => 'Грешка при конверсия',
     'invalid_xml' => 'Невалиден xml синтаксис!',
+    'invalid_file' => 'Невалиден :type файл!',
     'invalid_json' => 'Невалиден json синтаксис!',
     'invalid_csv' => 'Невалиден csv сингаксис!',
     'invalid_kml' => 'Невалиден kml синтаксис!',

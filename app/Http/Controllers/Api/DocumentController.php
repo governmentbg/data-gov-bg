@@ -46,8 +46,19 @@ class DocumentController extends ApiController
                 'filename'       => 'required|string|max:191',
                 'mimetype'       => 'required|string|max:191',
                 'data'           => 'required|string|max:4294967295',
+                'forum_link'     => 'nullable|string|max:191'
             ]);
         }
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('filename')) {
+                $validator->errors()->add('document', $validator->errors()->first('filename'));
+            }
+
+            if ($validator->errors()->has('data')) {
+                $validator->errors()->add('document', $validator->errors()->first('data'));
+            }
+        });
 
         if (!$validator->fails()) {
             try {
@@ -59,6 +70,7 @@ class DocumentController extends ApiController
                 $newDocument->file_name = $post['data']['filename'];
                 $newDocument->mime_type = $post['data']['mimetype'];
                 $newDocument->data = $post['data']['data'];
+                $newDocument->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
                 $newDocument->save();
 
                 DB::commit();
@@ -108,14 +120,36 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($post['data'], [
-                'name'         => 'nullable|max:191',
-                'description'  => 'nullable|max:8000',
-                'locale'       => 'nullable|string|max:5',
-                'filename'     => 'nullable|string|max:191',
-                'mimetype'     => 'nullable|string|max:191',
-                'data'         => 'nullable|string|max:4294967295',
+                'name'           => 'required_with:locale|max:191',
+                'name.bg'        => 'required_without:locale|string|max:191',
+                'name.*'         => 'max:191',
+                'description'    => 'required_with:locale|max:8000',
+                'description.bg' => 'required_without:locale|string|max:8000',
+                'locale'         => 'nullable|string|max:5',
+                'filename'       => 'nullable|string|max:191',
+                'mimetype'       => 'nullable|string|max:191',
+                'data'           => 'nullable|string|max:4294967295',
+                'forum_link'     => 'nullable|string|max:191'
             ]);
         }
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('description.bg')) {
+                $validator->errors()->add('descript.bg', $validator->errors()->first('description.bg'));
+            }
+
+            if ($validator->errors()->has('description')) {
+                $validator->errors()->add('descript', $validator->errors()->first('description'));
+            }
+
+            if ($validator->errors()->has('filename')) {
+                $validator->errors()->add('document', $validator->errors()->first('filename'));
+            }
+
+            if ($validator->errors()->has('data')) {
+                $validator->errors()->add('document', $validator->errors()->first('data'));
+            }
+        });
 
         if (!$validator->fails()) {
             try {
@@ -123,24 +157,28 @@ class DocumentController extends ApiController
 
                 DB::beginTransaction();
 
-                if (isset($post['data']['name'])) {
+                if (!empty($post['data']['name'])) {
                     $editDocument->name = $this->trans($post['data']['locale'], $post['data']['name'], true);
                 }
 
-                if (isset($post['data']['description'])) {
+                if (!empty($post['data']['description'])) {
                     $editDocument->descript = $this->trans($post['data']['locale'], $post['data']['description'], true);
                 }
 
-                if (isset($post['data']['filename'])) {
+                if (!empty($post['data']['filename'])) {
                     $editDocument->file_name = $post['data']['filename'];
                 }
 
-                if (isset($post['data']['mimetype'])) {
+                if (!empty($post['data']['mimetype'])) {
                     $editDocument->mime_type = $post['data']['mimetype'];
                 }
 
-                if (isset($post['data']['data'])) {
+                if (!empty($post['data']['data'])) {
                     $editDocument->data = $post['data']['data'];
+                }
+
+                if (!empty($post['data']['forum_link'])) {
+                    $editDocument->forum_link = $post['data']['forum_link'];
                 }
 
                 $editDocument->save();
@@ -243,6 +281,7 @@ class DocumentController extends ApiController
                 'locale'       => 'nullable|string|max:5',
                 'date_type'    => 'nullable|string|max:191',
                 'order'        => 'nullable|array',
+                'forum_link'   => 'nullable|string|max:191'
             ]);
         }
 
@@ -300,6 +339,10 @@ class DocumentController extends ApiController
             $query->where($filterColumn, '>=', $criteria['date_from']);
         }
 
+        if (isset($criteria['forum_link'])) {
+            $query->where('forum_link', $criteria['forum_link']);
+        }
+
         if (isset($criteria['date_to'])) {
             $query->where($filterColumn, '<=', $criteria['date_to']);
         }
@@ -321,19 +364,23 @@ class DocumentController extends ApiController
         $results = [];
 
         foreach ($query->get() as $result) {
-            $results[] = [
+            $itemData = [
                 'id'            => $result->id,
                 'locale'        => $locale,
                 'name'          => $result->name,
                 'description'   => $result->descript,
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
-                'data'          => $result->data,
+                'forum_link'    => $result->forum_link,
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
                 'created_by'    => $result->created_by,
                 'updated_by'    => $result->updated_by,
             ];
+
+            $results[] = isset($criteria['doc_id'])
+                ? array_merge(['data' => utf8_encode($result->data)], $itemData)
+                : $itemData;
         }
 
         $logData = [
@@ -346,11 +393,11 @@ class DocumentController extends ApiController
 
         $transFields = ['description', 'name'];
 
-        if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
-            usort($results, function ($a, $b) use($criteria) {
+        if (isset($criteria['order']) && $criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+            usort($results, function($a, $b) use ($criteria) {
                 return strtolower($criteria['order']['type']) == 'asc'
-                    ? strcmp($criteria['order']['field'], $criteria['order']['field'])
-                    : strcmp($criteria['order']['field'], $criteria['order']['field']);
+                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                    : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
             });
         }
 
@@ -392,6 +439,7 @@ class DocumentController extends ApiController
             $validator = Validator::make($criteria, [
                 'search'       => 'required|string|max:191',
                 'order'        => 'nullable|array',
+                'forum_link'   => 'nullable|string|max:191'
             ]);
         }
 
@@ -451,7 +499,7 @@ class DocumentController extends ApiController
                     'description'   => $result->descript,
                     'filename'      => $result->file_name,
                     'mimetype'      => $result->mime_type,
-                    'data'          => $result->data,
+                    'forum_link'    => $result->forum_link,
                     'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                     'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
                     'created_by'    => $result->created_by,

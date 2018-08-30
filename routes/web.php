@@ -86,6 +86,9 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/admin/documents/list', 'Admin\DocumentController@list');
     Route::match(['get', 'post'], '/admin/documents/search', 'Admin\DocumentController@search');
     Route::match(['get', 'post'], '/admin/documents/add', 'Admin\DocumentController@add');
+    Route::match(['get', 'post'], '/admin/documents/view/{id}', 'Admin\DocumentController@view');
+    Route::match(['get', 'post'], '/admin/documents/edit/{id}', 'Admin\DocumentController@edit');
+    Route::match(['get', 'post'], '/admin/documents/delete/{id}', 'Admin\DocumentController@delete');
 
     Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
     Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');

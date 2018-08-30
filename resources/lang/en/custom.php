@@ -589,4 +589,8 @@ return [
     'order_by_c' => 'Order by',
     'clear_filter' => 'Clear the filter',
     'select_terms_of_use' => 'Select terms and conditions',
+    'forum_link' => 'Forum link',
+    'select_file' => 'Select file',
+    'doc_add' => 'Add document',
+    'doc_edit' => 'Редакция на документ',
 ];

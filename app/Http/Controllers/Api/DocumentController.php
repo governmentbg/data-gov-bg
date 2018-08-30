@@ -32,7 +32,7 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'data'              => 'required|array',
+            'data'  => 'required|array',
         ]);
 
         if (!$validator->fails()) {

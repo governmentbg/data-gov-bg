@@ -399,7 +399,6 @@ class ConversionController extends ApiController
             try {
                 $temp = tmpfile();
                 $path = stream_get_meta_data($temp)['uri'];
-                error_log('post: '. print_r($post['data'], true));
                 fwrite($temp, base64_decode($post['data']));
                 $spreadsheet = IOFactory::load($path);
                 $worksheet = $spreadsheet->getActiveSheet();

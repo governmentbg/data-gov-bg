@@ -128,7 +128,6 @@ class DataRequestController extends ApiController
         }
 
         if (!$validator->fails()) {
-
             $requestToEdit = DataRequest::find($editRequestData['request_id']);
 
             if (isset($editRequestData['data']['org_id'])) {

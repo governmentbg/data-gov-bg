@@ -208,6 +208,10 @@ ul > li {
     border: none;
     cursor: pointer;
 
+    &.red {
+        background-color: red !important;
+    }
+
     &:hover {
         transition: 0.5s ease-in;
     }

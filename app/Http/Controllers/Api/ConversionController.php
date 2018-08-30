@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use thiagoalessio\TesseractOCR\TesseractOCR;
 use Elasticsearch\Common\Exceptions\RuntimeException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 
@@ -39,9 +40,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $xml = simplexml_load_string('<data>'. $post['data'] .'</data>');
-                $json = json_encode($xml);
-                $array = json_decode($json, true);
+                $array = $this->fromXML($post['data'], true);
 
                 return $this->successResponse($array);
             } catch (\ErrorException $ex) {
@@ -273,6 +272,164 @@ class ConversionController extends ApiController
     }
 
     /**
+     * Convert from pdf base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with pdf text or error
+     */
+    public function pdf2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $temp = tmpfile();
+                $path = stream_get_meta_data($temp)['uri'];
+
+                file_put_contents($path, base64_decode($post['data']));
+
+                $im = new \Imagick();
+
+                $im->setResolution(300, 300);
+                $im->readimage($path);
+                $im->setImageDepth(8);
+                $im->stripImage();
+                $im->setBackgroundColor('white');
+                $im->writeImage($path);
+
+                $result = (new TesseractOCR($path))->lang('bul', 'eng')->run();
+
+                $im->clear();
+                $im->destroy();
+
+                fclose($temp);
+
+                return $this->successResponse($result);
+            } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from img base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with img text or error
+     */
+    public function img2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $temp = tmpfile();
+                $path = stream_get_meta_data($temp)['uri'];
+
+                file_put_contents($path, base64_decode($post['data']));
+
+                $result = (new TesseractOCR($path))->lang('bul', 'eng')->run();
+
+                fclose($temp);
+
+                return $this->successResponse($result);
+            } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'img']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from doc/docx base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with doc/docx text or error
+     */
+    public function doc2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $result = $this->fromWORD($post['data']);
+
+                return $this->successResponse($result);
+            } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'doc/docx']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from xls/xlsx base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with xls/xlsx text or error
+     */
+    public function xls2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $temp = tmpfile();
+                $path = stream_get_meta_data($temp)['uri'];
+                error_log('post: '. print_r($post['data'], true));
+                fwrite($temp, base64_decode($post['data']));
+                $spreadsheet = IOFactory::load($path);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = [];
+
+                foreach ($worksheet->getRowIterator() as $row) {
+                    $cellIterator = $row->getCellIterator();
+                    $cellIterator->setIterateOnlyExistingCells(false);
+                    $cells = [];
+
+                    foreach ($cellIterator as $cell) {
+                        $cells[] = trim($cell->getValue());
+                    }
+
+                    $array[] = $cells;
+                }
+
+                fclose($temp);
+
+                return $this->successResponse($array);
+            } catch (\ErrorException $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'xls/xlsx']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
      * Get ellastic search data
      *
      * @param string api_key - required
@@ -369,6 +526,76 @@ class ConversionController extends ApiController
         }
 
         return $this->errorResponse(__('custom.data_failure'), $validator->errors()->messages());
+    }
+
+    /**
+     * Get text from word document data
+     *
+     * @param word document data - required
+     *
+     * @return text data
+     */
+    private function fromWORD($data)
+    {
+        $result = '';
+        $temp = tmpfile();
+        $path = stream_get_meta_data($temp)['uri'];
+        $tempOut = tmpfile();
+        $pathOut = stream_get_meta_data($tempOut)['uri'];
+
+        file_put_contents($path, base64_decode($data));
+
+        if (mime_content_type($path) == 'application/msword') {
+            shell_exec('/usr/bin/wvText '. $path .' '. $pathOut);
+            $result = file_get_contents($pathOut);
+
+            if (!mb_detect_encoding($result, 'UTF-8', true)) {
+                $result = utf8_encode($text);
+            }
+        } else {
+            $result = \PhpOffice\PhpWord\IOFactory::load($path);
+            $result->save($pathOut, 'HTML');
+            $result = $this->fromHTML(file_get_contents($pathOut));
+        }
+
+        fclose($temp);
+        fclose($tempOut);
+
+        return $result;
+    }
+
+    /**
+     * Get text from html data
+     *
+     * @param html data - required
+     *
+     * @return json data
+     */
+    private function fromHTML($data)
+    {
+        $html = new \Html2Text\Html2Text($data);
+
+        return $html->getText();
+    }
+
+    /**
+     * Get json from xml data
+     *
+     * @param xml data - required
+     *
+     * @return json data
+     */
+    private function fromXML($data, $parentTag = false)
+    {
+        if ($parentTag) {
+            $data = '<data>'. $data .'</data>';
+        }
+
+        $xml = simplexml_load_string($data);
+        $json = json_encode($xml);
+        $array = json_decode($json, true);
+
+        return $array;
     }
 
     /**

@@ -103,7 +103,7 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
         Route::match(['get', 'post'], '/user/dataset/view/{uri}', 'UserController@datasetView')->name('datasetView');
-        Route::post('/user/datasetDelete', 'UserController@datasetDelete');
+        Route::match(['get', 'post'], '/user/datasetDelete', 'UserController@datasetDelete');
         Route::match(['get', 'post'], '/user/datasets', 'UserController@datasets');
         Route::match(['get', 'post'], '/user/dataset/search', 'UserController@datasetSearch');
         Route::match(['get', 'post'], '/user/dataset/create', 'UserController@datasetCreate');
@@ -145,14 +145,14 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/groups', 'UserController@groups');
         Route::match(['get', 'post'], '/user/groups/view/{uri}', 'UserController@viewGroup');
         Route::match(['get', 'post'], '/user/groups/edit/{uri}', 'UserController@editGroup');
-        Route::post('/user/groups/delete/{id}', 'UserController@deleteGroup');
+        Route::match(['get', 'post'], '/user/groups/delete/{id}', 'UserController@deleteGroup');
 
         Route::match(['get', 'post'], '/user/organisations/datasets/{uri}', 'UserController@orgDatasets');
         Route::match(['get', 'post'], '/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
         Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView')->name('orgDatasetView');
 
         Route::get('/user/organisations', 'UserController@organisations');
-        Route::post('/user/organisations/delete/{id}', 'UserController@deleteOrg');
+        Route::match(['get', 'post'], '/user/organisations/delete/{id}', 'UserController@deleteOrg');
         Route::match(['get', 'post'], '/user/organisations/search', 'UserController@searchOrg');
         Route::get('/user/organisations/view/{uri}', 'UserController@viewOrg')->name('userOrgView');
         Route::match(['get', 'post'], '/user/organisations/edit/{uri}', 'UserController@editOrg');
@@ -192,6 +192,7 @@ Route::post('/user/sendTermsOfUseReq', 'UserController@sendTermsOfUseReq');
 Route::get('/', 'HomeController@index');
 
 Route::get('/logout', function() {
+    Session::flush();
     Auth::logout();
 
     return redirect('/');

@@ -20,9 +20,9 @@
                                         <h3>{{ $organisation->name }}</h3>
                                         <p>{{ $organisation->description }}</p>
                                     </div>
-                                    @if (\App\Role::isAdmin($organisation->id))
-                                        <div class="col-xs-12 view-btns">
-                                            <div class="row">
+                                    <div class="col-xs-12 view-btns">
+                                        <div class="row">
+                                            @if ($buttons[$organisation->uri]['edit'])
                                                 <form
                                                     method="POST"
                                                     class="inline-block"
@@ -32,6 +32,8 @@
                                                     <button class="btn btn-primary" type="submit" name="edit">{{ uctrans('custom.edit') }}</button>
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
+                                            @endif
+                                            @if ($buttons[$organisation->uri]['delete'])
                                                 <form
                                                     method="POST"
                                                     class="inline-block"
@@ -45,9 +47,9 @@
                                                             data-confirm="{{ __('custom.delete_organisation_confirm') }}"
                                                         >{{ uctrans('custom.remove') }}</button>
                                                 </form>
-                                            </div>
+                                            @endif
                                         </div>
-                                    @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>

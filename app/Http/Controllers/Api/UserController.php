@@ -253,6 +253,8 @@ class UserController extends ApiController
 
                     $roleRights = RoleRight::where('role_id', $role->role_id)->get();
 
+                    $rightResult =[];
+
                     foreach($roleRights as $singleRoleRight) {
                         $rightResult[] = [
                             'module_name'          => $singleRoleRight->module_name,

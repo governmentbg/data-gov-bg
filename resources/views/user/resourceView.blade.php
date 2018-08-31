@@ -101,7 +101,7 @@
                         </form>
                     @endif
                 </div>
-
+                @if ($buttons[$resource->uri]['delete'])
                 <div class="col-xs-12 m-t-md p-l-r-none text-right">
                     <form method="POST">
                         {{ csrf_field() }}
@@ -112,6 +112,7 @@
                         >{{ uctrans('custom.remove') }}</button>
                     </form>
                 </div>
+                @endif
                 <!-- IF there are old versions of this article -->
                 <div class="col-sm-12 pull-left m-t-md p-l-none">
                     <div class="pull-left history">

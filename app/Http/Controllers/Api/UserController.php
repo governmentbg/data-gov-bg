@@ -27,10 +27,11 @@ class UserController extends ApiController
     /**
      * List user records by given criteria
      *
-     * @param string api_key - required
+     * @param string api_key - optional
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      * @param array criteria - optional
+     * @param string criteria[keywords] - optional
      * @param integer criteria[active] - optional
      * @param integer criteria[is_admin] - optional
      * @param integer criteria[org_id] - optional
@@ -141,13 +142,15 @@ class UserController extends ApiController
             try {
                 $users = $query->get();
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::USERS),
-                    'action'           => ActionsHistory::TYPE_SEE,
-                    'action_msg'       => 'Listed users',
-                ];
+                if (Auth::user() !== null) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::USERS),
+                        'action'           => ActionsHistory::TYPE_SEE,
+                        'action_msg'       => 'Listed users',
+                    ];
 
-                Module::add($logData);
+                    Module::add($logData);
+                }
 
                 return $this->successResponse(['users'=> $users, 'total_records' => $count], true);
             } catch (QueryException $ex) {

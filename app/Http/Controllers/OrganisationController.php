@@ -307,6 +307,7 @@ class OrganisationController extends Controller {
             'org_uri' => $uri,
             'locale'  => $locale
         ];
+
         $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
         $api = new ApiOrganisation($rq);
         $result = $api->getOrganisationDetails($rq)->getData();
@@ -320,6 +321,7 @@ class OrganisationController extends Controller {
                     'locale' => $locale
                 ]
             ];
+
             $rq = Request::create('/api/listDataSets', 'POST', $params);
             $api = new ApiDataSet($rq);
             $res = $api->listDataSets($rq)->getData();
@@ -337,10 +339,12 @@ class OrganisationController extends Controller {
                 'obj_view'      => '/organisation/profile/'. $result->data->uri,
                 'parent_obj_id' => ''
             ];
+
             if (isset($res->success) && $res->success && !empty($res->datasets)) {
                 $objType = Module::getModules(Module::DATA_SETS);
                 $objTypeRes = Module::getModules(Module::RESOURCES);
                 $actObjData[$objType] = [];
+
                 foreach ($res->datasets as $dataset) {
                     $criteria['dataset_ids'][] = $dataset->id;
                     $actObjData[$objType][$dataset->id] = [
@@ -351,6 +355,7 @@ class OrganisationController extends Controller {
                         'obj_view'      => '/data/view/'. $dataset->uri,
                         'parent_obj_id' => ''
                     ];
+
                     if (!empty($dataset->resource)) {
                         foreach ($dataset->resource as $resource) {
                             $criteria['resource_uris'][] = $resource->uri;
@@ -378,6 +383,7 @@ class OrganisationController extends Controller {
                 $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
                 $api = new ApiActionsHistory($rq);
                 $res = $api->listActionTypes($rq)->getData();
+
                 if ($res->success && !empty($res->types)) {
                     $linkWords = ActionsHistory::getTypesLinkWords();
                     foreach ($res->types as $type) {

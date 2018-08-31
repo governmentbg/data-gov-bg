@@ -240,13 +240,15 @@
             <div class="form-group row">
                 <div class="col-sm-12 pull right text-right">
                     <div class="row">
-                        <a
-                           class="btn btn-primary"
-                           href="{{ route('resourceCreate', ['uri' => $dataSet->uri]) }}"
-                        >{{ uctrans('custom.add_resource') }}</a>
+                        @if ($buttons['addResource'])
+                            <a
+                            class="btn btn-primary"
+                            href="{{ route('resourceCreate', ['uri' => $dataSet->uri]) }}"
+                            >{{ uctrans('custom.add_resource') }}</a>
+                        @endif
                         <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
                         @if ($hasResources)
-                        <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
+                            <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
                         @endif
                         <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                     </div>

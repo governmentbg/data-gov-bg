@@ -240,7 +240,9 @@
             <div class="form-group row">
                 <div class="col-sm-12 pull right text-right">
                     <div class="row">
+                        @if ($buttons['addResource'])
                         <button type="button" class="btn btn-primary">{{ uctrans('custom.add_resource') }}</button>
+                        @endif
                         <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
                         @if ($hasResources)
                         <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>

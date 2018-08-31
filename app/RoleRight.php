@@ -46,14 +46,26 @@ class RoleRight extends Model
         return $rightType;
     }
 
-    public static function checkUserRight($module, $action, $userId, $objectId = null)
-    {
-        //за да се покаже даден бутон към списък се проверява дали има вю право - за организация -> Органисатионс view
-            //ако кликне линка апито трябва да провери дали е цъкнат own data - ако цъкнат връща само моите организации.
-            //objectId - не е задължително другите са задължителни
+    // protected $checkData = array (
+    //     'check_api' => true/false,
+    //     'user_id'    => int,
+    //     'org_id'     => int
+    // );
 
-            //$objectId, $action, $userId, $module
+    // protected $objData = array (
+    //     'created_by' => int,
+    //     'org_id'     => int,
+    //     'group_ids'  => array (
+    //        'group_id',
+    //        'group_id'
+    //     )
+    // );
+
+    public static function checkUserRight($module, $action, $checkData = array(), $objData = array())
+    {
         $rolesArray = session()->get('roles');
+
+        $checkData['user_id'] = \Auth::user()->id;
 
         if (empty($rolesArray)) {
             return false;
@@ -74,16 +86,54 @@ class RoleRight extends Model
                 foreach ($singleRole['rights'] as $singleRight) {
                     if ($singleRight['module_name'] == $module) {
                         if ($singleRight['right_id'] >= $rightType) {
-                            // if ($singleRight['limit_to_own_data'] == true) {
+                            if (!empty($checkData)) {   //check additional right settings
+                                if (isset($checkData['check_api']) && !empty($checkData['check_api'])) {
+                                    if (!$singleRight['api']) { //action not allowed through api
+                                        continue;
+                                    }
+                                }
 
-                            // }
-                            return true;
+                                $check = false;
+
+                                if (isset($checkData['user_id']) && !empty($checkData['user_id'])
+                                    && isset($objData['created_by']) && !empty($objData['created_by'])) {
+
+                                    if ($singleRight['limit_to_own_data'] == 1) {
+
+                                        if ($checkData['user_id'] == $objData['created_by']) {
+                                            return true;
+                                        }
+                                    }
+                                }
+
+                                if (isset($checkData['org_id']) && !empty($checkData['org_id'])
+                                    && isset($objData['org_id']) && !empty($objData['org_id'])) {
+                                    $check = true;
+                                    if ($singleRole['org_id'] == $objData['org_id']) {
+                                        return true;
+                                    }
+                                }
+
+                                if (isset($checkData['group_id']) && !empty($checkData['group_id'])
+                                    && isset($objData['group_ids']) && !empty($objData['group_ids'])) {
+                                    $check = true;
+                                    if (in_array($singleRole['org_id'], $objData['group_ids'])) {
+                                        dd('6th');
+                                        return true;
+                                    }
+                                }
+
+                                if (!$check) {
+                                    return true;
+                                }
+                            } else {
+                                return true;
+                            }
                         }
                     }
                 }
             }
         }
-
         return false;
     }
 

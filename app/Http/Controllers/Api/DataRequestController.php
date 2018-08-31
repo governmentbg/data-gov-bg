@@ -369,9 +369,9 @@ class DataRequestController extends ApiController
         Module::add($logData);
 
         if ($criteria['order'] && $criteria['order']['field'] == 'description') {
-            usort($result, function ($a, $b) use($criteria) {
+            usort($result, function($a, $b) use ($criteria) {
                 return strtolower($criteria['order']['type']) == 'asc'
-                    ? strcmp($criteria['order']['field'], $criteria['order']['field'])
+                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
                     : strcmp($criteria['order']['field'], $criteria['order']['field']);
             });
         }

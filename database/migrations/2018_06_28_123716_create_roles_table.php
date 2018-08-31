@@ -20,6 +20,8 @@ class CreateRolesTable extends Migration
             $table->boolean('default_user')->nullable();
             $table->boolean('default_group_admin')->nullable();
             $table->boolean('default_org_admin')->nullable();
+            $table->unsignedTinyInteger('for_org')->nullable();
+            $table->unsignedTinyInteger('for_group')->nullable();
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

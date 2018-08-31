@@ -10,7 +10,7 @@
             <div class="col-md-8 col-sm-10">
                 <div class="frame add-terms">
                     <div class="p-w-md text-center m-b-lg m-t-lg">
-                        <h2>Добавяне на документ</h2>
+                        <h2>{{ __('custom.doc_add') }}</h2>
                     </div>
                     <div class="body">
                         <form method="POST" enctype="multipart/form-data" class="form-horisontal">
@@ -29,21 +29,34 @@
                                     )
                                 @endif
                             @endforeach
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                                <div class="col-sm-9">
+                                    <input
+                                        name="forum_link"
+                                        class="input-border-r-12 form-control"
+                                        value="{{ old('forum_link') }}"
+                                    >
+                                    @if (isset($errors) && $errors->has('forum_link'))
+                                        <span class="error">{{ $errors->first('forum_link') }}</span>
+                                    @endif
+                                </div>
+                            </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="file" class="col-sm-3 col-xs-12 col-form-label">Файл</label>
+                                <label for="document" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}</label>
                                 <div class="col-sm-6">
                                     <input
                                         type="file"
-                                        name="file"
+                                        name="document"
                                         class="input-border-r-12 form-control doc-upload-input js-doc-input"
-                                        value="{{ old('file') }}"
+                                        value="{{ old('documet') }}"
                                     >
-                                    @if (isset($errors) && $errors->has('file'))
-                                        <span class="error">{{ $errors->first('file') }}</span>
+                                    @if (isset($errors) && $errors->has('document'))
+                                        <span class="error">{{ $errors->first('document') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-sm-3 text-right">
-                                    <button type="submit" class="btn btn-custom js-doc-btn">Избери файл</button>
+                                    <button type="submit" class="btn btn-custom js-doc-btn">{{ __('custom.select_file') }}</button>
                                 </div>
                             </div>
                             <div class="form-group row">

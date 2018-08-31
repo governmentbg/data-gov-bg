@@ -160,6 +160,12 @@ $(function() {
 $(function() {
     $('.js-doc-btn').on('click', function(e) {
         e.preventDefault();
+
+        if ($(this).hasClass('edit')) {
+            $('.js-doc-input').prop('disabled', false);
+            $('.js-doc-input').attr('type', 'file');
+        }
+
         $('.js-doc-input').trigger('click');
     })
 });

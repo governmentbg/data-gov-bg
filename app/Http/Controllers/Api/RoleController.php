@@ -37,6 +37,8 @@ class RoleController extends ApiController
             'default_user'          => 'nullable|bool',
             'default_group_admin'   => 'nullable|bool',
             'default_org_admin'     => 'nullable|bool',
+            'for_org'               => 'nullable|int',
+            'for_group'             => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -91,6 +93,8 @@ class RoleController extends ApiController
                 'default_user'          => 'nullable|bool',
                 'default_group_admin'   => 'nullable|bool',
                 'default_org_admin'     => 'nullable|bool',
+                'for_org'               => 'nullable|int',
+                'for_group'             => 'nullable|int',
             ]);
 
             if (!$validator->fails()) {
@@ -178,6 +182,8 @@ class RoleController extends ApiController
             'default_user'          => 'nullable|bool',
             'default_group_admin'   => 'nullable|bool',
             'default_org_admin'     => 'nullable|bool',
+            'for_org'               => 'nullable|int',
+            'for_group'             => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -195,6 +201,14 @@ class RoleController extends ApiController
                 $query->whereHas('userToOrg', function($q) use ($post) {
                     $q->where('org_id', $post['org_id']);
                 });
+            }
+
+            if (isset($post['for_org'])) {
+                $query->where('for_org', $post['for_org']);
+            }
+
+            if (isset($post['for_group'])) {
+                $query->where('for_group', $post['for_group']);
             }
 
             try {

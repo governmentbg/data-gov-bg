@@ -17,6 +17,7 @@ use App\UserToOrgRole;
 use App\RoleRight;
 use App\Http\Controllers\Api\RightController;
 use App\ActionsHistory;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
-use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -2918,7 +2918,7 @@ class UserController extends Controller {
                 $perPage
             );
 
-            $rq = Request::create('/api/listRoles', 'POST');
+            $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
@@ -2944,7 +2944,7 @@ class UserController extends Controller {
         $class = 'user';
 
         if ($organisation) {
-            $rq = Request::create('/api/listRoles', 'POST');
+            $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
@@ -3952,10 +3952,16 @@ class UserController extends Controller {
         $class = 'user';
         $users = [];
         $params = [
-            'api_key'           => Auth::user()->api_key,
             'records_per_page'  => $perPage,
             'page_number'       => !empty($request->page) ? $request->page : 1,
+            'criteria'          => [
+                'active'            => Organisation::ACTIVE_TRUE,
+            ]
         ];
+
+        if ($request->has('search')) {
+            $params['criteria']['keywords'] = $request->offsetGet('search');
+        }
 
         $listReq = Request::create('/api/listUsers', 'POST', $params);
         $api = new ApiUser($listReq);
@@ -4031,7 +4037,6 @@ class UserController extends Controller {
         $followersCount = 0;
         $followed = false;
         $params = [
-            'api_key'   => Auth::user()->api_key,
             'criteria'  => [
                 'id'        => $id,
             ],
@@ -4104,6 +4109,154 @@ class UserController extends Controller {
 
             return redirect('/');
         }
+    }
+
+    public function userChronology(Request $request, $id)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+        $actObjData = [];
+        $criteria = [];
+        $params = [
+            'criteria'  => [
+                'id'        => $id,
+            ],
+        ];
+
+        $listReq = Request::create('/api/listUsers', 'POST', $params);
+        $apiUser = new ApiUser($listReq);
+        $result = $apiUser->listUsers($listReq)->getData();
+
+        if ($result->success) {
+            $criteria['user_id'] = $id;
+
+            $objType = Module::getModules()[Module::USERS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->users[0]->id] = [
+                'obj_id'        => $result->users[0]->id,
+                'obj_name'      => $result->users[0]->username,
+                'obj_module'    => 'User',
+                'obj_type'      => 'user',
+                'obj_view'      => '/user/profile/'. $result->users[0]->id,
+                'parent_obj_id' => ''
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', [
+                'criteria' => [
+                    'created_by' => $id
+                ]
+            ]);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            if ($res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];
+                $objTypeRes = Module::getModules()[Module::RESOURCES];
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $rq = Request::create('/api/listOrganisations', 'POST', [
+                'criteria' => [
+                    'user_id' => $id
+                ]
+            ]);
+            $api = new ApiOrganisation($rq);
+            $res = $api->listOrganisations($rq)->getData();
+
+            if ($res->success && !empty($res->organisations)) {
+                $objType = Module::getModules()[Module::ORGANISATIONS];
+                $actObjData[$objType] = [];
+
+                foreach ($res->organisations as $organisations) {
+                    $criteria['org_ids'][] = $organisations->id;
+                    $actObjData[$objType][$organisations->id] = [
+                        'obj_id'        => $organisations->uri,
+                        'obj_name'      => $organisations->name,
+                        'obj_module'    => Str::lower(__('custom.organisation')),
+                        'obj_type'      => 'org',
+                        'obj_view'      => '/organisation/profile/'. $organisations->uri,
+                        'parent_obj_id' => ''
+                    ];
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 10;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/userChronology',
+                [
+                    'class'          => 'user',
+                    'user'           => $result->users[0],
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect(url('user/profile/'. $id));
     }
 
     /**
@@ -5195,7 +5348,7 @@ class UserController extends Controller {
                 $perPage
             );
 
-            $rq = Request::create('/api/listRoles', 'POST');
+            $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_group' => 1]]);
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];
@@ -5221,7 +5374,7 @@ class UserController extends Controller {
         $class = 'user';
 
         if ($group) {
-            $rq = Request::create('/api/listRoles', 'POST');
+            $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_group' => 1]]);
             $api = new ApiRole($rq);
             $result = $api->listRoles($rq)->getData();
             $roles = isset($result->roles) ? $result->roles : [];

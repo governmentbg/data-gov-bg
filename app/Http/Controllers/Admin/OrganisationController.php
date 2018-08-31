@@ -537,7 +537,7 @@ class OrganisationController extends AdminController
                     $perPage
                 );
 
-                $rq = Request::create('/api/listRoles', 'POST');
+                $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
                 $api = new ApiRole($rq);
                 $result = $api->listRoles($rq)->getData();
                 $roles = isset($result->roles) ? $result->roles : [];
@@ -567,7 +567,7 @@ class OrganisationController extends AdminController
 
         if ($organisation) {
             if (Role::isAdmin($organisation->id)) {
-                $rq = Request::create('/api/listRoles', 'POST');
+                $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
                 $api = new ApiRole($rq);
                 $result = $api->listRoles($rq)->getData();
                 $roles = isset($result->roles) ? $result->roles : [];

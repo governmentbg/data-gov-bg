@@ -405,10 +405,10 @@ class PageController extends ApiController
             ];
 
             if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
-                usort($result, function ($a, $b) use($criteria) {
+                usort($result, function($a, $b) use ($criteria) {
                     return strtolower($criteria['order']['type']) == 'asc'
-                        ? strcmp($criteria['order']['field'], $criteria['order']['field'])
-                        : strcmp($criteria['order']['field'], $criteria['order']['field']);
+                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
                 });
             }
 

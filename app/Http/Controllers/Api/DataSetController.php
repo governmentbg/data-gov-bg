@@ -3,20 +3,21 @@ namespace App\Http\Controllers\Api;
 
 use Uuid;
 use App\Module;
-use App\ActionsHistory;
 use App\DataSet;
-use App\Resource;
 use App\Category;
+use App\Resource;
 use App\DataSetGroup;
 use \App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
+use App\ActionsHistory;
 use App\DataSetSubCategory;
 use Illuminate\Http\Request;
 use App\Translator\Translation;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 
@@ -736,10 +737,10 @@ class DataSetController extends ApiController
                 $transFields = ['name', 'sla', 'descript'];
 
                 if ($order && in_array($order['field'], $transFields)) {
-                    usort($result, function ($a, $b) use($order) {
+                    usort($result, function($a, $b) use ($order) {
                         return strtolower($order['type']) == 'asc'
-                            ? strcmp($order['field'], $order['field'])
-                            : strcmp($order['field'], $order['field']);
+                            ? strcmp($a[$order['field']], $b[$order['field']])
+                            : strcmp($b[$order['field']], $a[$order['field']]);
                     });
                 }
 
@@ -1101,14 +1102,16 @@ class DataSetController extends ApiController
             try {
                 $count = $sets->count();
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
-                    'action'           => ActionsHistory::TYPE_SEE,
-                    'action_object'    => $data['id'],
-                    'action_msg'       => 'Got user dataset count',
-                ];
+                if (Auth::user() !== null) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_SEE,
+                        'action_object'    => $data['id'],
+                        'action_msg'       => 'Got user dataset count',
+                    ];
 
-                Module::add($logData);
+                    Module::add($logData);
+                }
 
                 return $this->successResponse(['count' => $count], true);
             } catch (QueryException $ex) {

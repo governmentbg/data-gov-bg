@@ -347,10 +347,10 @@ class DocumentController extends ApiController
         $transFields = ['description', 'name'];
 
         if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
-            usort($results, function ($a, $b) use($criteria) {
+            usort($results, function($a, $b) use ($criteria) {
                 return strtolower($criteria['order']['type']) == 'asc'
-                    ? strcmp($criteria['order']['field'], $criteria['order']['field'])
-                    : strcmp($criteria['order']['field'], $criteria['order']['field']);
+                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                    : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
             });
         }
 
@@ -470,10 +470,10 @@ class DocumentController extends ApiController
             $transFields = ['description', 'name'];
 
             if ($order && in_array($order['field'], $transFields)) {
-                usort($results, function ($a, $b) use($criteria) {
+                usort($results, function($a, $b) use ($criteria) {
                     return strtolower($order['type']) == 'asc'
-                    ? strcmp($order['field'], $order['field'])
-                    : strcmp($order['field'], $order['field']);
+                    ? strcmp($a[$order['field']], $b[$order['field']])
+                    : strcmp($b[$order['field']], $a[$order['field']]);
                 });
             }
 

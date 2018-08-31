@@ -605,7 +605,7 @@ class OrganisationController extends ApiController
                 $transFields = ['name', 'description'];
 
                 if (in_array($field, $transFields)) {
-                    usort($results, function ($a, $b) use($type, $field) {
+                    usort($results, function($a, $b) use ($type, $field) {
                         return strtolower($type) == 'asc'
                             ? strcmp($a[$field], $b[$field])
                             : strcmp($b[$field], $a[$field]);
@@ -753,7 +753,7 @@ class OrganisationController extends ApiController
                 $transFields = ['name', 'description'];
 
                 if (in_array($field, $transFields)) {
-                    usort($results, function ($a, $b) use($type, $field) {
+                    usort($results, function($a, $b) use ($type, $field) {
                         return strtolower($type) == 'asc'
                             ? strcmp($a[$field], $b[$field])
                             : strcmp($b[$field], $a[$field]);
@@ -876,7 +876,7 @@ class OrganisationController extends ApiController
                 $transFields = ['name', 'description'];
 
                 if (in_array($field, $transFields)) {
-                    usort($results, function ($a, $b) use($type, $field) {
+                    usort($results, function($a, $b) use ($type, $field) {
                         return strtolower($type) == 'asc'
                             ? strcmp($a[$field], $b[$field])
                             : strcmp($b[$field], $a[$field]);
@@ -1681,7 +1681,7 @@ class OrganisationController extends ApiController
                 $transFields = ['name', 'description'];
 
                 if (in_array($field, $transFields)) {
-                    usort($result, function ($a, $b) use($type, $field) {
+                    usort($result, function($a, $b) use ($type, $field) {
                         return strtolower($type) == 'asc'
                             ? strcmp($a[$field], $b[$field])
                             : strcmp($b[$field], $a[$field]);
@@ -1861,7 +1861,7 @@ class OrganisationController extends ApiController
                 $transFields = ['name', 'description'];
 
                 if (in_array($field, $transFields)) {
-                    usort($result, function ($a, $b) use($type, $field) {
+                    usort($result, function($a, $b) use ($type, $field) {
                         return strtolower($type) == 'asc'
                             ? strcmp($a[$field], $b[$field])
                             : strcmp($b[$field], $a[$field]);

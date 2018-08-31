@@ -301,10 +301,10 @@ class CategoryController extends ApiController
                 }
 
                 if ($order && $order['field'] == 'name') {
-                    usort($results, function ($a, $b) use($order) {
+                    usort($results, function($a, $b) use ($order) {
                         return strtolower($order['type']) == 'asc'
-                            ? strcmp($order['field'], $order['field'])
-                            : strcmp($order['field'], $order['field']);
+                            ? strcmp($a[$order['field']], $b[$order['field']])
+                            : strcmp($b[$order['field']], $a[$order['field']]);
                     });
                 }
 
@@ -609,10 +609,10 @@ class CategoryController extends ApiController
                 }
 
                 if ($order && $order['field'] == 'name') {
-                    usort($tags, function ($a, $b) use($order) {
+                    usort($tags, function($a, $b) use ($order) {
                         return strtolower($order['type']) == 'asc'
-                            ? strcmp($order['field'], $order['field'])
-                            : strcmp($order['field'], $order['field']);
+                            ? strcmp($a[$order['field']], $b[$order['field']])
+                            : strcmp($b[$order['field']], $a[$order['field']]);
                     });
                 }
 

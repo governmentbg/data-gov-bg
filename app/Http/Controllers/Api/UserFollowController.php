@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\User;
-use App\UserFollow;
 use App\Module;
+use App\UserFollow;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 
 class UserFollowController extends ApiController
 {
@@ -220,14 +221,16 @@ class UserFollowController extends ApiController
             $count = $query->count();
             $users = $query->select('user_id')->get()->toArray();
 
-            $logData = [
-                'module_name'      => Module::getModuleName(Module::USERS),
-                'action'           => ActionsHistory::TYPE_SEE,
-                'action_object'    => $data['id'],
-                'action_msg'       => 'Got user followers count',
-            ];
+            if (Auth::user() !== null) {
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $data['id'],
+                    'action_msg'       => 'Got user followers count',
+                ];
 
-            Module::add($logData);
+                Module::add($logData);
+            }
 
             return $this->successResponse(['count' => $count, 'followers' => $users], true);
         }

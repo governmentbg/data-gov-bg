@@ -592,5 +592,7 @@ return [
     'forum_link' => 'Forum link',
     'select_file' => 'Select file',
     'doc_add' => 'Add document',
-    'doc_edit' => 'Редакция на документ',
+    'doc_edit' => 'Edit document',
+    'for_org' => 'For organisation',
+    'for_group' => 'For group',
 ];

@@ -40,6 +40,34 @@
                     </div>
                 </div>
                 <div class="form-group row">
+                    <label for="for_org" class="col-sm-11 col-form-label">{{ __('custom.for_org') }}</label>
+                    <div class="col-sm-1 text-right">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="for_org"
+                                id="for_org"
+                                value="1"
+                                {{ $role[0]->for_org ? 'checked' : '' }}
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="for_group" class="col-sm-11 col-form-label">{{ __('custom.for_group') }}</label>
+                    <div class="col-sm-1 text-right">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="for_group"
+                                id="for_group"
+                                value="1"
+                                {{ $role[0]->for_group ? 'checked' : '' }}
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
                     <label
                         for="default_user"
                         class="col-sm-11 col-form-label"

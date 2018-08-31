@@ -425,7 +425,7 @@ class GroupController extends AdminController
                     $perPage
                 );
 
-                $rq = Request::create('/api/listRoles', 'POST');
+                $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_group' => 1]]);
                 $api = new ApiRole($rq);
                 $result = $api->listRoles($rq)->getData();
                 $roles = isset($result->roles) ? $result->roles : [];
@@ -455,7 +455,7 @@ class GroupController extends AdminController
 
         if ($group) {
             if (Role::isAdmin($group->id)) {
-                $rq = Request::create('/api/listRoles', 'POST');
+                $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_group' => 1]]);
                 $api = new ApiRole($rq);
                 $result = $api->listRoles($rq)->getData();
                 $roles = isset($result->roles) ? $result->roles : [];

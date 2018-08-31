@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\User;
+use App\DataSet;
+use App\Category;
+use App\Resource;
 use App\UserSetting;
 use App\Organisation;
 use App\CustomSetting;
@@ -14,6 +18,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
+use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 
 class OrganisationController extends AdminController
 {

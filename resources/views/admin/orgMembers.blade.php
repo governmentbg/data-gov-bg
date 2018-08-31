@@ -130,11 +130,11 @@
                         @if (!empty($members))
                             @foreach ($members as $member)
                                 <div class="col-xs-12 p-l-none">
-                                    <h3 class="m-b-md">{{
+                                    <h3 class="m-b-md"><a href="{{ url('/admin/users/edit/'. $member->id) }}">{{
                                         empty($member->firstname)
                                         ? $member->username
                                         : $member->firstname .' '. $member->lastname
-                                    }}</h3>
+                                    }}</a></h3>
                                     @if ($isAdmin)
                                         <div class="js-member-admin-controls">
                                             <button

@@ -105,7 +105,7 @@
                     @if ($org != 0 && isset($organisations[$org]))
                         <div class="form-group row">
                                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
-                                <span class="col-sm-3 col-xs-12">{{ $organisations[$org] }} </span>
+                                <span class="col-sm-3 col-xs-12">{{ $organisations[$org]->name }} </span>
                                 <label for="role[{{ $org }}]" class="col-sm-1 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
                                 <div class="col-sm-3">
                                     <select
@@ -117,10 +117,21 @@
                                     >
                                         <option></option>
                                         @foreach ($roles as $role)
-                                            <option
-                                                value="{{ $role->id }}"
-                                                {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
-                                            >{{ $role->name }}</option>
+                                            @if (
+                                                (
+                                                    $organisations[$org]->type != \App\Organisation::TYPE_GROUP
+                                                    && $role->for_org
+                                                )
+                                                || (
+                                                    $organisations[$org]->type == \App\Organisation::TYPE_GROUP
+                                                    && $role->for_group
+                                                )
+                                            )
+                                                <option
+                                                    value="{{ $role->id }}"
+                                                    {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
+                                                >{{ $role->name }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                     <span class="error">{{ $errors->first('role_id') }}</span>

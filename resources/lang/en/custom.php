@@ -313,6 +313,7 @@ return [
     'list_tags_fail' => 'List tags failure',
     'get_tags_fail' => 'Get tag details failure',
     'converse_fail' => 'Conversion failure',
+    'invalid_file' => 'Invalid :type file!',
     'invalid_xml' => 'Invalid xml syntax!',
     'invalid_json' => 'Invalid json syntax!',
     'invalid_csv' => 'Invalid csv syntax!',
@@ -588,4 +589,8 @@ return [
     'order_by_c' => 'Order by',
     'clear_filter' => 'Clear the filter',
     'select_terms_of_use' => 'Select terms and conditions',
+    'forum_link' => 'Forum link',
+    'select_file' => 'Select file',
+    'doc_add' => 'Add document',
+    'doc_edit' => 'Редакция на документ',
 ];

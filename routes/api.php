@@ -134,6 +134,10 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('json2kml', 'Api\ConversionController@json2kml');
     Route::post('rdf2json', 'Api\ConversionController@rdf2json');
     Route::post('json2rdf', 'Api\ConversionController@json2rdf');
+    Route::post('pdf2json', 'Api\ConversionController@pdf2json');
+    Route::post('img2json', 'Api\ConversionController@img2json');
+    Route::post('doc2json', 'Api\ConversionController@doc2json');
+    Route::post('xls2json', 'Api\ConversionController@xls2json');
     Route::post('toJSON', 'Api\ConversionController@toJSON');
     Route::post('toXML', 'Api\ConversionController@toXML');
     Route::post('toCSV', 'Api\ConversionController@toCSV');

@@ -18,7 +18,7 @@ class DocumentController extends AdminController
      *
      * @return array of fields
      */
-    public static function getTransFields()
+    public static function getTransFields($edit = false)
     {
         return [
             [
@@ -30,7 +30,7 @@ class DocumentController extends AdminController
             ],
             [
                 'label'    => 'custom.description',
-                'name'     => 'descript',
+                'name'     => $edit ? 'descript' : 'description',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
                 'required' => true,
@@ -150,11 +150,172 @@ class DocumentController extends AdminController
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
-            /*if ($request->has('create')) {
+            if ($request->has('create')) {
+                $params = [];
 
-            }*/
+                if (!empty($request->document)) {
+                    $params['filename'] = $request->document->getClientOriginalName();
+                    $path = $request->document->getPathName();
+                    $params['data'] = \File::get($path);
+                    $params['mimetype'] = $request->document->getMimeType();
+                }
+
+                $rq = Request::create('/api/addDocument', 'POST', [
+                    'data' => [
+                        'name'        => $request->offsetGet('name'),
+                        'description' => $request->offsetGet('description'),
+                        'filename'    => isset($params['filename']) ? $params['filename'] : null,
+                        'mimetype'    => isset($params['mimetype']) ? $params['mimetype'] : null,
+                        'data'        => isset($params['data']) ? $params['data'] : null,
+                        'forum_link'  => $request->offsetGet('forum_link'),
+                    ]
+                ]);
+                $api = new ApiDocument($rq);
+                $result = $api->addDocument($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+
+                    return redirect('/admin/documents/view/'. $result->data->doc_id);
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                    return back()->withErrors($result->errors)->withInput(Input::all());
+                }
+            }
 
             return view('admin/documentsAdd', ['class' => 'user', 'fields' => self::getTransFields()]);
+        }
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+    }
+
+    /**
+     * Displays information for a given document
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return view on success on failure redirect to homepage
+     */
+    public function view(Request $request, $id)
+    {
+        if (Role::isAdmin()) {
+            $req = Request::create('/api/listDocuments', 'POST', ['criteria' => ['doc_id' => $id]]);
+            $api = new ApiDocument($req);
+            $result = $api->listDocuments($req)->getData();
+            $doc = isset($result->documents[0]) ? $result->documents[0] : null;
+
+            if (!is_null($doc)) {
+                if ($request->has('download')) {
+                    return response(utf8_decode($doc->data))
+                        ->header('Cache-Control', 'no-cache private')
+                        ->header('Content-Description', 'File Transfer')
+                        ->header('Content-Type', $doc->mimetype)
+                        ->header('Content-length', strlen(utf8_decode($doc->data)))
+                        ->header('Content-Disposition', 'attachment; filename='. $doc->filename)
+                        ->header('Content-Transfer-Encoding', 'binary');
+
+                }
+
+                return view(
+                    'admin/documentsView',
+                    [
+                        'class'    => 'user',
+                        'document' => $doc
+                    ]
+                );
+            }
+
+            return redirect('/admin/documents/list');
+        }
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+    }
+
+    /**
+     * Edit a document based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return view on success with messages
+     */
+    public function edit(Request $request, $id)
+    {
+        if (Role::isAdmin()) {
+            $class = 'user';
+            $fields = self::getTransFields(true);
+
+            $model = Document::find($id)->loadTranslations();
+
+            if ($request->has('edit')) {
+                if (!empty($request->document)) {
+                    $params['filename'] = $request->document->getClientOriginalName();
+                    $path = $request->document->getPathName();
+                    $params['data'] = \File::get($path);
+                    $params['mimetype'] = $request->document->getMimeType();
+                }
+
+                $rq = Request::create('/api/editDocument', 'POST', [
+                    'doc_id' => $id,
+                    'data' => [
+                        'name'        => $request->offsetGet('name'),
+                        'description' => $request->offsetGet('descript'),
+                        'filename'    => isset($params['filename']) ? $params['filename'] : null,
+                        'mimetype'    => isset($params['mimetype']) ? $params['mimetype'] : null,
+                        'data'        => isset($params['data']) ? $params['data'] : null,
+                        'forum_link'  => $request->offsetGet('forum_link'),
+                    ]
+                ]);
+
+                $api = new ApiDocument($rq);
+                $result = $api->editDocument($rq)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                    return back();
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return back()->withErrors(isset($result->errors) ? $result->errors : []);
+                }
+            }
+
+            return view('admin/documentsEdit', compact('class', 'fields', 'model'));
+        }
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+    }
+
+    /**
+     * Delete a document based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return view on success with messages
+     */
+    public function delete(Request $request, $id)
+    {
+        if (Role::isAdmin()) {
+            $class = 'user';
+
+            $rq = Request::create('/api/deleteDocument', 'POST', [
+                'doc_id' => $id,
+            ]);
+
+            $api = new ApiDocument($rq);
+            $result = $api->deleteDocument($rq)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                return redirect('/admin/documents/list');
+            } else {
+                $request->session()->flash('alert-danger', __('custom.delete_error'));
+
+                return redirect('/admin/documents/list')->withErrors(isset($result->errors) ? $result->errors : []);
+            }
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));

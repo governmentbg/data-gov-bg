@@ -19,6 +19,7 @@ class CreateDocumentsTable extends Migration
             $table->integer('descript')->unsigned();
             $table->string('file_name');
             $table->string('mime_type');
+            $table->string('forum_link')->nullable();
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();
             $table->foreign('updated_by')->references('id')->on('users');

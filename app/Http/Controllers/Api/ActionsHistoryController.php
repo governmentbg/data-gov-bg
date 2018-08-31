@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Role;
 use \Validator;
+use App\Module;
 use \App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -173,31 +174,31 @@ class ActionsHistoryController extends ApiController
 
         $actObjCriteria = [];
         if (isset($criteria['category_ids'])) {
-            $actObjCriteria[Role::MODULE_NAMES[0]] = $criteria['category_ids'];
+            $actObjCriteria[Module::getModules()[Module::MAIN_CATEGORIES]] = $criteria['category_ids'];
         }
 
         if (isset($criteria['tag_ids'])) {
-            $actObjCriteria[Role::MODULE_NAMES[1]] = $criteria['tag_ids'];
+            $actObjCriteria[Module::getModules()[Module::TAGS]] = $criteria['tag_ids'];
         }
 
         if (isset($criteria['org_ids'])) {
-            $actObjCriteria[Role::MODULE_NAMES[2]] = $criteria['org_ids'];
+            $actObjCriteria[Module::getModules()[Module::ORGANISATIONS]] = $criteria['org_ids'];
         }
 
         if (isset($criteria['group_ids'])) {
-            $actObjCriteria[Role::MODULE_NAMES[3]] = $criteria['group_ids'];
+            $actObjCriteria[Module::getModules()[Module::GROUPS]] = $criteria['group_ids'];
         }
 
         if (isset($criteria['user_ids'])) {
-            $actObjCriteria[Role::MODULE_NAMES[4]] = $criteria['user_ids'];
+            $actObjCriteria[Module::getModules()[Module::USERS]] = $criteria['user_ids'];
         }
 
         if (isset($criteria['dataset_ids'])) {
-            $actObjCriteria[Role::MODULE_NAMES[5]] = $criteria['dataset_ids'];
+            $actObjCriteria[Module::getModules()[Module::DATA_SETS]] = $criteria['dataset_ids'];
         }
 
         if (isset($criteria['resource_uris'])) {
-            $actObjCriteria[Role::MODULE_NAMES[6]] = $criteria['resource_uris'];
+            $actObjCriteria[Module::getModules()[Module::RESOURCES]] = $criteria['resource_uris'];
         }
 
         if (!empty($actObjCriteria)) {

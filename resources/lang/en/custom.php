@@ -595,4 +595,5 @@ return [
     'doc_edit' => 'Edit document',
     'for_org' => 'For organisation',
     'for_group' => 'For group',
+    'additional_fields' => 'Additional fields',
 ];

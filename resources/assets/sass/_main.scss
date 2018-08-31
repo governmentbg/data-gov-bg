@@ -595,3 +595,69 @@ textarea {
 .doc-upload-input::-webkit-file-upload-button {
     visibility: hidden;
 }
+
+.info-box {
+    a {
+        display: inline-block;
+        width: 100%;
+        margin-top: 15px;
+        position: relative;
+        height: 85px;
+        border-radius: 10px;
+
+        img {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+        }
+
+        &.reg-users {
+            background: #13ca9a;
+        }
+
+        &.reg-orgs {
+            background: #e8e129;
+        }
+
+        &.updates {
+            background: #76ad3f;
+        }
+
+        &.followers {
+            background: #77ad3e;
+        }
+
+        &.data-sets {
+            background: #c02e54;
+        }
+
+        p {
+            color: #fff;
+            margin: 0;
+
+            &:first-child {
+                padding: 5px 17px 3px 17px;
+                font-size: 22px;
+                font-weight: bold;
+            }
+
+            &:nth-child(3) {
+                padding: 6px 17px 0 17px;
+                font-size: 16px;
+                position: absolute;
+                z-index: 1;
+                width: 100%;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        }
+
+        hr {
+            margin: 0 0 0 17px;
+            width: 100px;
+            text-align: left;
+        }
+    }
+}

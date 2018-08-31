@@ -1732,12 +1732,14 @@ class OrganisationController extends ApiController
                     }
 
                     $result = [
-                        'name'          => $group->name,
-                        'description'   => $group->descript,
-                        'locale'        => $locale,
-                        'uri'           => $group->uri,
-                        'logo'          => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
-                        'custom_fields' => $customFields
+                        'name'            => $group->name,
+                        'description'     => $group->descript,
+                        'locale'          => $locale,
+                        'uri'             => $group->uri,
+                        'logo'            => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
+                        'custom_fields'   => $customFields,
+                        'datasets_count'  => $group->dataSet()->count(),
+                        'followers_count' => $group->userFollow()->count(),
                     ];
 
                     return $this->successResponse($result);

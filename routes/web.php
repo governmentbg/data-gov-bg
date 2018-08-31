@@ -12,10 +12,6 @@
 */
 
 Route::middleware('auth')->group(function() {
-    Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
-    Route::match(['get', 'post'], '/user/profile/{id}', 'UserController@profile');
-    Route::get('/users/list/search', 'UserController@searchUsers');
-
     Route::post('/user/organisations/register', 'UserController@registerOrg');
     Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
     Route::match(['get', 'post'], '/user/resource/download', 'UserController@resourceDownload')->name('resourceDownload');
@@ -190,6 +186,10 @@ Route::middleware('auth')->group(function() {
         )->name('delOrgMember');
     });
 });
+
+Route::match(['get', 'post'], '/users/list', 'UserController@listUsers')->name('usersList');
+Route::match(['get', 'post'], '/user/profile/{id}', 'UserController@profile');
+Route::match(['get', 'post'], '/user/profile/{id}/chronology', 'UserController@userChronology');
 
 Route::post('/user/sendTermsOfUseReq', 'UserController@sendTermsOfUseReq');
 Route::get('/', 'HomeController@index');

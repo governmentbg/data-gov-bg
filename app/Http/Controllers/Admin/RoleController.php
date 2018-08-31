@@ -55,6 +55,8 @@ class RoleController extends AdminController {
                     'default_user'          => $request->get('default_user', false),
                     'default_group_admin'   => $request->get('default_group_admin', false),
                     'default_org_admin'     => $request->get('default_org_admin', false),
+                    'for_org'               => $request->get('for_org', null),
+                    'for_group'             => $request->get('for_group', null),
                 ],
             ]);
             $api = new ApiRole($rq);
@@ -99,6 +101,8 @@ class RoleController extends AdminController {
                     'default_user'          => $request->get('default_user', false),
                     'default_group_admin'   => $request->get('default_group_admin', false),
                     'default_org_admin'     => $request->get('default_org_admin', false),
+                    'for_org'               => $request->get('for_org', null),
+                    'for_group'             => $request->get('for_group', null),
                 ],
             ]);
             $api = new ApiRole($rq);

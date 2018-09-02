@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Role;
 use App\UserSetting;
-use App\DataSet;
 use App\Organisation;
 use App\TermsOfUse;
 use Illuminate\Http\Request;
@@ -196,10 +195,6 @@ class TermsOfUseController extends AdminController
    public function delete(Request $request, $id)
    {
         if (Role::isAdmin()) {
-            DataSet::withTrashed()
-                ->where('terms_of_use_id', $id)
-                ->update(['terms_of_use_id' => null]);
-
             $rq = Request::create('/api/deleteTermsOfUse', 'POST', [
                 'terms_id'  => $id,
             ]);

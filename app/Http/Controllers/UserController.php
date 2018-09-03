@@ -1000,8 +1000,7 @@ class UserController extends Controller {
         } else {
             $result = ['success' => false];
         }
-error_log('ne trqbva da e ot tuka');
-        error_log('result: '. print_r($result, true));
+
         return json_encode($result);
     }
 
@@ -1253,6 +1252,7 @@ error_log('ne trqbva da e ot tuka');
                         'resourceUri'   => $result->data->uri,
                     ];
                         // check uploded file extention and use the corresponding converter
+                    if (!empty($extension) && $metadata['data']['type'] !== Resource::TYPE_HYPERLINK) {
                         switch ($extension) {
                             case 'json':
                                 Session::put('elasticData', json_decode($content, true));
@@ -1301,6 +1301,7 @@ error_log('ne trqbva da e ot tuka');
 
                                 return view('user/resourceImportXml', $importViewData);
                         }
+                    }
 
                     return redirect()->route('datasetView', ['uri' => $datasetUri]);
                 }

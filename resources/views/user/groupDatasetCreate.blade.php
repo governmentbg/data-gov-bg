@@ -322,7 +322,6 @@
                         class="btn btn-primary"
                         name="add_resource"
                     >{{ uctrans('custom.add_resource') }}</button>
-                    <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
                     <button type="submit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>

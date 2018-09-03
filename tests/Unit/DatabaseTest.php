@@ -224,7 +224,7 @@ class DatabaseTest extends TestCase
      */
     private function roleRights()
     {
-        $rights = array_keys(Role::getRights());
+        $rights = array_keys(RoleRight::getRights());
         $roles = Role::limit(self::ROLES_RECORDS)->get()->toArray();
         // Test creation
         foreach ($roles as $role) {

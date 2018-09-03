@@ -248,7 +248,7 @@ class RoleController extends ApiController
 
             try {
                 $role = Role::find($id);
-                $rights = Role::getRightsDescription();
+                $rights = RoleRight::getRightsDescription();
                 $result = [];
 
                 foreach ($role->rights as $right) {
@@ -294,7 +294,7 @@ class RoleController extends ApiController
     {
         $post = $request->all();
         $modules = Module::getModules();
-        $rights = Role::getRights();
+        $rights = RoleRight::getRights();
 
         $validator = \Validator::make($post, [
             'id'                        => 'required|int|exists:roles,id|digits_between:1,10',

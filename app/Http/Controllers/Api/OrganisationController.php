@@ -10,6 +10,7 @@ use App\ActionsHistory;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
+use App\RoleRight;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -46,6 +47,15 @@ class OrganisationController extends ApiController
      */
     public function addOrganisation(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::getModuleName(Module::ORGANISATIONS),
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
@@ -147,10 +157,15 @@ class OrganisationController extends ApiController
                 $organisation->save();
 
                 if (\Auth::user()) {
+                    $role = Role::getOrgAdminRole();
+                    if (!isset($role)) {
+                        return $this->errorResponse(__('custom.add_role_fail'));
+                    }
+
                     $userToOrgRole = new UserToOrgRole;
                     $userToOrgRole->org_id = $organisation->id;
                     $userToOrgRole->user_id = \Auth::user()->id;
-                    $userToOrgRole->role_id = Role::ROLE_ADMIN;
+                    $userToOrgRole->role_id = $role->id;
 
                     try {
                         $userToOrgRole->save();
@@ -244,6 +259,23 @@ class OrganisationController extends ApiController
         ]);
 
         $organisation = Organisation::find($data['org_id']);
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::getModuleName(Module::ORGANISATIONS),
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $organisation->id
+            ],
+            [
+                'created_by' => $organisation->created_by,
+                'org_id'     => $organisation->id
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $imageError = false;
 
         if (!empty($data['logo'])) {
@@ -281,10 +313,6 @@ class OrganisationController extends ApiController
         }
 
         $validator->after(function ($validator) use ($data) {
-            if (!Role::isAdmin($data['org_id'])) {
-                $validator->errors()->add('org_id', __('custom.edit_error'));
-            }
-
             if (!empty($data['uri'])) {
                 if (Organisation::where('uri', $data['uri'])->where('id', '!=', $data['org_id'])->value('name')) {
                     $validator->errors()->add('uri', __('custom.taken_uri'));
@@ -414,16 +442,25 @@ class OrganisationController extends ApiController
             'org_id' => 'required|exists:organisations,id,deleted_at,NULL|max:110',
         ]);
 
-        $validator->after(function ($validator) use ($request) {
-            if (!Role::isAdmin($request->org_id)) {
-                $validator->errors()->add('org_id', __('custom.delete_error'));
-            }
-        });
-
         if (
             !$validator->fails()
             && !empty($organisation = Organisation::find($request->org_id))
         ) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::getModuleName(Module::ORGANISATIONS),
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'created_by' => $organisation->created_by,
+                    'org_id'     => $organisation->id
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             if (!in_array($organisation->type, array_keys(Organisation::getPublicTypes()))) {
                 return $this->errorResponse(__('custom.no_org_found'));

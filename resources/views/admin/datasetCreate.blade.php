@@ -105,9 +105,10 @@
                 <div class="col-sm-9">
                     <select
                         id="group"
-                        name="group_id"
+                        name="group_id[]"
                         class="js-autocomplete form-control"
                         data-placeholder="{{ utrans('custom.groups', 1) }}"
+                        multiple="multiple"
                     >
                         <option></option>
                         @foreach ($groups as $id =>$group)

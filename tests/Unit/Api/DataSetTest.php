@@ -244,14 +244,14 @@ class DataSetTest extends TestCase
         $this->post(url('api/addDataSetToGroup'), [
             'api_key'        => $this->getApiKey(),
             'data_set_uri'   => null,
-            'group_id'       => $organisation->id,
+            'group_id'       => [$organisation->id],
         ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test successful request
         $this->post(url('api/addDataSetToGroup'), [
             'api_key'       => $this->getApiKey(),
             'data_set_uri'  => $dataSet->uri,
-            'group_id'      => $organisation->id,
+            'group_id'      => [$organisation->id],
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
 

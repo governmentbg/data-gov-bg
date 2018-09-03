@@ -199,9 +199,17 @@ class UserController extends Controller {
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
+        $setGroups = [];
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+
+        if (!empty($model->dataSetGroup)) {
+            foreach ($model->dataSetGroup as $record) {
+                $setGroups[] = $record->group_id;
+            }
+        }
+
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
@@ -239,21 +247,19 @@ class UserController extends Controller {
             $editData = $this->prepareTags($editData);
             $groupId = $request->offsetGet('group_id');
 
-            if ($groupId) {
-                $post = [
-                    'api_key'       => Auth::user()->api_key,
-                    'data_set_uri'  => $uri,
-                    'group_id'      => $groupId,
-                ];
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
 
-                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-                $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
 
-                if (!$added->success) {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return redirect()->back()->withInput()->withErrors($added->errors);
-                }
+                return redirect()->back()->withInput()->withErrors($added->errors);
             }
 
             if ($request->has('publish')) {
@@ -291,6 +297,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
+            'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }
@@ -637,9 +644,17 @@ class UserController extends Controller {
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
+        $setGroups = [];
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+
+        if (!empty($model->dataSetGroup)) {
+            foreach ($model->dataSetGroup as $record) {
+                $setGroups[] = $record->group_id;
+            }
+        }
+
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
@@ -677,21 +692,19 @@ class UserController extends Controller {
             $editData = $this->prepareTags($editData);
             $groupId = $request->offsetGet('group_id');
 
-            if ($groupId) {
-                $post = [
-                    'api_key'       => Auth::user()->api_key,
-                    'data_set_uri'  => $uri,
-                    'group_id'      => $groupId,
-                ];
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
 
-                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-                $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
 
-                if (!$added->success) {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return redirect()->back()->withInput()->withErrors($added->errors);
-                }
+                return redirect()->back()->withInput()->withErrors($added->errors);
             }
 
             if ($request->has('publish')) {
@@ -729,6 +742,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
+            'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }
@@ -3687,9 +3701,17 @@ class UserController extends Controller {
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
+        $setGroups = [];
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+
+        if (!empty($model->dataSetGroup)) {
+            foreach ($model->dataSetGroup as $record) {
+                $setGroups[] = $record->group_id;
+            }
+        }
+
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
         $tagModel = Category::where('parent_id', $model->category_id)
@@ -3727,21 +3749,19 @@ class UserController extends Controller {
             $editData = $this->prepareTags($editData);
             $groupId = $request->offsetGet('group_id');
 
-            if ($groupId) {
-                $post = [
-                    'api_key'       => Auth::user()->api_key,
-                    'data_set_uri'  => $uri,
-                    'group_id'      => $groupId,
-                ];
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
 
-                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-                $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
 
-                if (!$added->success) {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return redirect()->back()->withInput()->withErrors($added->errors);
-                }
+                return redirect()->back()->withInput()->withErrors($added->errors);
             }
 
             if ($request->has('publish')) {

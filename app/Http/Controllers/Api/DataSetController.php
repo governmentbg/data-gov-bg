@@ -836,7 +836,8 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'data_set_uri'  => 'required|string|exists:data_sets,uri,deleted_at,NULL|max:191',
-            'group_id'      => [
+            'group_id'      => 'nullable|array',
+            'group_id.*'     => [
                 'required',
                 'int',
                 Rule::exists('organisations', 'id')->where(function ($query) {
@@ -848,23 +849,28 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             try {
                 $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
+                DataSetGroup::destroy($dataSetId);
 
-                if (
-                    DataSetGroup::updateOrCreate(['data_set_id' => $dataSetId],
-                        ['group_id' => $post['group_id']
-                    ])
-                ) {
-                    $logData = [
-                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
-                        'action'           => ActionsHistory::TYPE_MOD,
-                        'action_object'    => $post['data_set_uri'],
-                        'action_msg'       => 'Added dataset to group',
-                    ];
+                if (!empty($post['group_id'])) {
+                    foreach ($post['group_id'] as $id) {
+                        $setGroup = new DataSetGroup;
+                        $setGroup->data_set_id = $dataSetId;
+                        $setGroup->group_id = $id;
 
-                    Module::add($logData);
-
-                    return $this->successResponse();
+                        $setGroup->save();
+                    }
                 }
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $post['data_set_uri'],
+                    'action_msg'       => 'Added dataset to group',
+                ];
+
+                Module::add($logData);
+
+                return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }

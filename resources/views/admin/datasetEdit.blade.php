@@ -107,14 +107,15 @@
                     <select
                         id="group"
                         class="js-autocomplete form-control"
-                        name="group_id"
+                        name="group_id[]"
                         data-placeholder="{{ utrans('custom.groups', 1) }}"
+                        multiple="multiple"
                     >
                         <option></option>
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"
-                                {{ isset($dataSet->dataSetGroup[0]) && $id == $dataSet->dataSetGroup[0]->group_id ? 'selected' : '' }}
+                                {{ !empty($setGroups) && in_array($id, $setGroups) ? 'selected' : '' }}
                             >{{ $group }}</option>
                         @endforeach
                     </select>

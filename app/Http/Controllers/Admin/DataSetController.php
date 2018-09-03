@@ -279,7 +279,7 @@ class DataSetController extends AdminController
                 $request->session()->flash('alert-success', __('custom.edit_success'));
                 $newUri = DataSet::where('id', $model->id)->first();
 
-                return redirect( url('/admin/dataset/edit/'. $newURI));
+                return redirect(url('/admin/dataset/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 

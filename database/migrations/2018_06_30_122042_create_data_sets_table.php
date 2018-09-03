@@ -25,7 +25,7 @@ class CreateDataSetsTable extends Migration
             $table->integer('terms_of_use_id')->unsigned()->nullable();
             $table->foreign('terms_of_use_id')->references('id')->on('terms_of_use');
             $table->unsignedTinyInteger('visibility');
-            $table->string('source', 255)->nullable();
+            $table->string('source')->nullable();
             $table->string('version', 15);
             $table->string('author_name')->nullable();
             $table->string('author_email')->nullable();

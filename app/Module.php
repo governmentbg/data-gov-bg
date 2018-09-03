@@ -110,11 +110,7 @@ class Module extends Model
             'action_msg'    => 'required|string|max:191',
         ]);
 
-        if (isset($request['action_object'])) {
-            $actionObject = $request['action_object'];
-        } else {
-            $actionObject = "";
-        }
+        $actionObject = isset($request['action_object']) ? $request['action_object'] : '';
 
         if (!$validator->fails()) {
             try {
@@ -124,13 +120,12 @@ class Module extends Model
                     'action'        => $request['action'],
                     'action_object' => $actionObject,
                     'action_msg'    => $request['action_msg'],
-                    'ip_address'    => $_SERVER['REMOTE_ADDR'],
-                    'user_agent'    => $_SERVER['HTTP_USER_AGENT'],
+                    'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
+                    'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
                     'occurrence'    => date('Y-m-d H:i:s'),
                 ];
 
-                $newRecord = ActionsHistory::create($dbData);
-
+                ActionsHistory::create($dbData);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }

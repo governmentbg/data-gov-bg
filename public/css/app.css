@@ -13956,16 +13956,17 @@ textarea {
 
 .bootstrap-tagsinput {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 12px !important;
 }
 
 .bootstrap-tagsinput span {
-  margin-bottom: 5px;
+  margin-top: 3px;
+  margin-bottom: 3px;
   display: inline-block;
 }
 
 .bootstrap-tagsinput input {
-  margin-top: 10px;
+  margin-top: 3px;
   padding: 5px 0;
   width: 100%;
 }

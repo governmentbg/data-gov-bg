@@ -90,4 +90,9 @@ class DataSet extends Model implements TranslatableInterface
     {
         return 'data_sets';
     }
+
+    public function customSetting()
+    {
+        return $this->hasMany('App\CustomSetting', 'data_set_id');
+    }
 }

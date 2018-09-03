@@ -44,7 +44,7 @@
                                                     value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][0] } : null }}"
                                                     name="{{ $field['name'] }}[{{ $i }}][label][{{ $active['locale'] }}]"
                                                     type="hidden"
-                                                    class="input-border-r-12 form-control"
+                                                    class="input-border-r-12 form-control hidden-input"
                                                 >
                                             @endif
 

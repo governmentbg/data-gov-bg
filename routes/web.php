@@ -158,7 +158,7 @@ Route::middleware('auth')->group(function() {
         Route::post('/user/groups/delete/{id}', 'UserController@deleteGroup');
 
         Route::match(['get', 'post'], '/user/organisations/datasets/{uri}', 'UserController@orgDatasets');
-        Route::match(['get', 'post'], '/user/organisations/datasets/resourceView', 'UserController@orgResourceView')->name('orgResourceView');
+        Route::match(['get', 'post'], '/user/organisations/datasets/resourceView/{uri}', 'UserController@orgResourceView')->name('orgResourceView');
         Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView')->name('orgDatasetView');
 
         Route::get('/user/organisations', 'UserController@organisations');

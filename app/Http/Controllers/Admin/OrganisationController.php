@@ -24,53 +24,6 @@ use App\Http\Controllers\Api\ResourceController as ApiResource;
 class OrganisationController extends AdminController
 {
     /**
-     * Function for getting an array of translatable fields
-     *
-     * @return array of fields
-     */
-    public static function getTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.activity',
-                'name'     => 'activity_info',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.contact',
-                'name'     => 'contacts',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    /**
      * Loads a view for browsing organisations
      *
      * @param Request $request
@@ -247,7 +200,7 @@ class OrganisationController extends AdminController
                 'admin/orgRegister',
                 [
                     'class'      => 'user',
-                    'fields'     => self::getTransFields(),
+                    'fields'     => $this->getTransFields(),
                     'parentOrgs' => $parentOrgs
                 ]
             );
@@ -314,7 +267,7 @@ class OrganisationController extends AdminController
                         'class'      => 'user',
                         'model'      => $orgModel,
                         'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
+                        'fields'     => $this->getTransFields(),
                         'parentOrgs' => $parentOrgs
                     ]
                 );
@@ -359,7 +312,7 @@ class OrganisationController extends AdminController
                             'class'      => 'user',
                             'model'      => $orgModel,
                             'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
+                            'fields'     => $this->getTransFields(),
                             'parentOrgs' => $parentOrgs
                         ]
                     )->withErrors($result->errors)
@@ -369,7 +322,7 @@ class OrganisationController extends AdminController
                             'class'      => 'user',
                             'model'      => $orgModel,
                             'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
+                            'fields'     => $this->getTransFields(),
                             'parentOrgs' => $parentOrgs
                         ]
                     );
@@ -382,7 +335,7 @@ class OrganisationController extends AdminController
                     'class'      => 'user',
                     'model'      => $orgModel,
                     'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
+                    'fields'     => $this->getTransFields(),
                     'parentOrgs' => $parentOrgs
                 ]);
         }

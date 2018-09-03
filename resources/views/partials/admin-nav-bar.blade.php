@@ -22,7 +22,7 @@
                             @endif
                             <a
                                 class="{{ $view == 'dataset' ? 'active' : '' }}"
-                                href="{{ url('/user/datasets') }}"
+                                href="{{ url('/admin/datasets') }}"
                             >{{ __('custom.my_data') }}</a>
                         </li>
                         <li>

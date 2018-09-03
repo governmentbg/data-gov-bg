@@ -596,4 +596,5 @@ return [
     'for_org' => 'For organisation',
     'for_group' => 'For group',
     'additional_fields' => 'Additional fields',
+    'id' => 'ID',
 ];

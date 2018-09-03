@@ -43,161 +43,6 @@ use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest
 
 class UserController extends Controller {
     /**
-     * Function for getting an array of translatable fields
-     *
-     * @return array of fields
-     */
-    public static function getTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.activity',
-                'name'     => 'activity_info',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.contact',
-                'name'     => 'contacts',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-     /**
-     * Function for getting an array of translatable fields for datasets
-     *
-     * @return array of fields
-     */
-    public static function getDatasetTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.label',
-                'name'     => 'tags',
-                'type'     => 'text',
-                'view'     => 'translation_tags',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.sla_agreement',
-                'name'     => 'sla',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    /**
-     * Function for getting an array of translatable fields for groups
-     *
-     * @return array of fields
-     */
-    public static function getGroupTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    public static function getResourceTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    /**
      * Show the application dashboard.
      *
      * @return \Illuminate\Http\Response
@@ -349,7 +194,6 @@ class UserController extends Controller {
     public function orgDatasetEdit(Request $request, DataSet $datasetModel, $uri)
     {
         $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
@@ -446,7 +290,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
-            'fields'        => self::getDatasetTransFields(),
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -652,7 +496,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
-            'fields'        => self::getDatasetTransFields(),
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -713,7 +557,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
-            'fields'        => self::getDatasetTransFields(),
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -772,7 +616,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
-            'fields'        => self::getDatasetTransFields(),
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -780,14 +624,13 @@ class UserController extends Controller {
      * Returns a view for editing a dataset
      *
      * @param Request $request
-     * @param Dataset $datasetModel
+     * @param Dataset $
      *
      * @return view for edditing a dataset
      */
-    public function datasetEdit(Request $request, DataSet $datasetModel, $uri)
+    public function datasetEdit(Request $request, $uri)
     {
-        $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
+        $visibilityOptions = Dataset::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
@@ -865,7 +708,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                return redirect( url('/user/dataset/edit/'. $success->uri));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -884,7 +727,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
-            'fields'        => self::getDatasetTransFields(),
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -1117,15 +960,15 @@ class UserController extends Controller {
             ? view(
                 'user/orgRegistration',
                 [
-                    'class' => 'user',
-                    'fields'=> self::getTransFields(),
+                    'class'     => 'user',
+                    'fields'    => $this->getTransFields(),
                 ]
             )->withErrors($result->errors)
             : view(
                 'user/orgRegistration',
                 [
-                    'class' => 'user',
-                    'fields'=> self::getTransFields(),
+                    'class'     => 'user',
+                    'fields'    => $this->getTransFields(),
                 ]
             );
     }
@@ -1339,7 +1182,7 @@ class UserController extends Controller {
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => self::getResourceTransFields()
+            'fields'    => $this->getResourceTransFields()
         ]);
     }
 
@@ -1550,7 +1393,7 @@ class UserController extends Controller {
             'class'     => 'user',
             'uri'       => $datasetUri,
             'types'     => $types,
-            'fields'    => self::getResourceTransFields()
+            'fields'    => $this->getResourceTransFields()
         ]);
     }
 
@@ -1659,7 +1502,7 @@ class UserController extends Controller {
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => self::getResourceTransFields()
+            'fields'    => $this->getResourceTransFields()
         ]);
     }
 
@@ -2320,7 +2163,7 @@ class UserController extends Controller {
             'user/orgRegister',
             [
                 'class'      => 'user',
-                'fields'     => self::getTransFields(),
+                'fields'     => $this->getTransFields(),
                 'parentOrgs' => $parentOrgs
             ]
         );
@@ -2360,7 +2203,7 @@ class UserController extends Controller {
                         'class'      => 'user',
                         'model'      => $orgModel,
                         'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
+                        'fields'     => $this->getTransFields(),
                         'parentOrgs' => $parentOrgs
                     ]
                 );
@@ -2404,7 +2247,7 @@ class UserController extends Controller {
                             'class'      => 'user',
                             'model'      => $orgModel,
                             'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
+                            'fields'     => $this->getTransFields(),
                             'parentOrgs' => $parentOrgs
                         ]
                     )->withErrors($result->errors)
@@ -2414,7 +2257,7 @@ class UserController extends Controller {
                             'class'      => 'user',
                             'model'      => $orgModel,
                             'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
+                            'fields'     => $this->getTransFields(),
                             'parentOrgs' => $parentOrgs
                         ]
                     );
@@ -2426,56 +2269,12 @@ class UserController extends Controller {
                     'class'      => 'user',
                     'model'      => $orgModel,
                     'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
+                    'fields'     => $this->getTransFields(),
                     'parentOrgs' => $parentOrgs
                 ]);
         }
 
         return redirect('/user/organisations');
-    }
-
-    /**
-     * Prepares an array of categories
-     *
-     * @return array categories
-     */
-    private function prepareMainCategories()
-    {
-        $params['api_key'] = \Auth::user()->api_key;
-        $params['criteria']['active'] = 1;
-        $request = Request::create('/api/listMainCategories', 'POST', $params);
-        $api = new ApiCategory($request);
-        $result = $api->listMainCategories($request)->getData();
-        $categories = [];
-
-        foreach ($result->categories as $row) {
-            $categories[$row->id] = $row->name;
-        }
-
-        return $categories;
-    }
-
-    /**
-     * Prepares an array of terms of use
-     *
-     * @return array termsOfUse
-     */
-    private function prepareTermsOfUse()
-    {
-        $params['api_key'] = \Auth::user()->api_key;
-        $params['criteria']['active'] = 1;
-        $request = Request::create('/api/listTermsOfUse', 'POST', $params);
-        $api = new ApiTermsOfUse($request);
-        $result = $api->listTermsOfUse($request)->getData();
-        $termsOfUse = [];
-
-        if (isset($result->terms_of_use)) {
-            foreach ($result->terms_of_use as $row) {
-                $termsOfUse[$row->id] = $row->name;
-            }
-        }
-
-        return $termsOfUse;
     }
 
     /**
@@ -3881,7 +3680,6 @@ class UserController extends Controller {
     public function groupDatasetEdit(Request $request, DataSet $datasetModel, $uri)
     {
         $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
@@ -3978,7 +3776,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
-            'fields'        => self::getDatasetTransFields(),
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -4243,28 +4041,6 @@ class UserController extends Controller {
         }
 
         return view('user/addGroupMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'group'));
-    }
-
-    public function prepareTags($data)
-    {
-        if (isset($data['tags'])) {
-            $tagData = [];
-            $editData = [];
-
-            foreach ($data['tags'] as $lang => $string) {
-                $tagData[$lang] = array_values(explode(',', $string));
-            }
-
-            foreach ($tagData as $lang => $tags) {
-                foreach ($tags as $tag) {
-                    $editData[] = [$lang => $tag];
-                }
-            }
-
-            $data['tags'] = $editData;
-        }
-
-        return $data;
     }
 
     public function deleteCustomSettings(Request $request)

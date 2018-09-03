@@ -8,7 +8,6 @@
             <div class="row">
                 <div class="info-bar-sm col-sm-7 col-xs-12 m-t-md m-l-10">
                     <ul class="p-l-none">
-                        <li>{{ __('custom.contact_support_name') }}: {{ $dataset->support_name }}</li>
                         <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
                         <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
                         <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
@@ -40,27 +39,18 @@
                             @endforeach
                         </div>
                     </div>
-                    <!-- IF there are old versions of this article -->
-                    <div class="col-xs-12 pull-left m-t-sm p-l-none">
-                        <div class="pull-left history">
-                            <div class="m-b-lg">
-                                <span class="version">{{ utrans('custom.version') }}:&nbsp;{{ $dataset->version }}</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a
-                       class="badge badge-pill m-b-sm"
-                       href="{{ route('groupResourceCreate', ['uri' => $dataset->uri]) }}"
+                        class="btn btn-primary"
+                        href="{{ route('groupResourceCreate', ['uri' => $dataset->uri]) }}"
                     >{{ uctrans('custom.add_resource') }}</a>
                 </div>
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a
-                        type="button"
-                        class="badge badge-pill m-b-sm"
+                        class="btn btn-primary"
                         href="{{ url('/user/groups/dataset/edit/'. $dataset->uri) }}"
                     >{{ uctrans('custom.edit') }}</a>
                 </div>
@@ -68,10 +58,10 @@
                     <form method="POST">
                         {{ csrf_field() }}
                         <button
-                            class="badge badge-pill m-b-sm del-btn"
+                            class="btn del-btn btn-primary"
                             type="submit"
                             name="delete"
-                            data-confirm="{{ __('Изтриване на данните?') }}"
+                            data-confirm="{{ __('custom.remove_data') }}"
                         >{{ uctrans('custom.remove') }}</button>
                         <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                     </form>

@@ -1,104 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="frame">
-                <div class="p-w-md">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ __('custom.close') }}</span></button>
-                    <h2>{{ __('custom.license_add_req') }}</h2>
-                </div>
-                <div class="modal-body">
-                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <p>{{ __('custom.terms_req_success') }}</p>
-                    </div>
-                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <p>{{ __('custom.terms_req_error') }}</p>
-                    </div>
-                    <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
-                        {{ csrf_field() }}
-                        <div class="form-group row required">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
-                            <div class="col-sm-9">
-                                <input
-                                    id="fname"
-                                    class="input-border-r-12 form-control"
-                                    name="firstname"
-                                    type="text"
-                                    value="{{ \Auth::user()->firstname }}"
-                                >
-                            </div>
-                        </div>
-                        <div class="form-group row required">
-                            <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.family_name') }}:</label>
-                            <div class="col-sm-9">
-                                <input
-                                    id="lname"
-                                    class="input-border-r-12 form-control"
-                                    name="lastname"
-                                    type="text"
-                                    value="{{ \Auth::user()->lastname }}"
-                                >
-                            </div>
-                        </div>
-                        <div class="form-group row required">
-                            <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.e_mail') }}:</label>
-                            <div class="col-sm-9">
-                                <input
-                                    id="email"
-                                    class="input-border-r-12 form-control"
-                                    name="email"
-                                    type="email"
-                                    value="{{ \Auth::user()->email }}"
-                                >
-                            </div>
-                        </div>
-                        <div class="form-group row required">
-                            <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.description') }}:</label>
-                            <div class="col-sm-9">
-                                <textarea
-                                    id="description"
-                                    class="input-border-r-12 form-control"
-                                    name="description"
-                                ></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-sm-12 text-right">
-                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
-                                <button type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'dataset'])
+    @include('partials.admin-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
-        <form method="POST" action="{{ url('/user/dataset/create') }}">
+        <form method="POST" action="{{ url('/admin/dataset/add') }}">
             {{ csrf_field() }}
             <div class="form-group row">
                 <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">
                     <input
                         id="identifier"
-                        class="input-border-r-12 form-control"
                         name="uri"
-                        value="{{ old('uri') }}"
                         type="text"
+                        class="input-border-r-12 form-control"
+                        value="{{ old('uri') }}"
                         placeholder="Уникален идентификатор">
                     <span class="error">{{ $errors->first('uri') }}</span>
                 </div>
@@ -108,8 +27,8 @@
                 <div class="col-sm-9">
                     <select
                         id="theme"
-                        class="js-select form-control"
                         name="category_id"
+                        class="js-select form-control"
                         data-placeholder="{{ __('custom.select_main_topic') }}"
                     >
                         <option></option>
@@ -145,11 +64,11 @@
 
             <div class="form-group row">
                 <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.terms_and_conditions') }}:</label>
-                <div class="col-sm-6">
+                <div class="col-sm-9">
                     <select
                         id="termsOfuse"
-                        class="js-select form-control"
                         name="terms_of_use_id"
+                        class="js-select form-control"
                     >
                         <option value="">{{ utrans('custom.select_terms_of_use') }}</option>
                         @foreach ($termsOfUse as $id =>$term)
@@ -161,17 +80,14 @@
                     </select>
                     <span class="error">{{ $errors->first('terms_of_use_id') }}</span>
                 </div>
-                <div class="col-sm-3 text-right add-terms">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">{{ __('custom.new_terms_and_conditions') }}</button>
-                </div>
             </div>
             <div class="form-group row">
                 <label for="organisation" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.organisations', 1) }}:</label>
                 <div class="col-sm-9">
                     <select
                         id="organisation"
-                        class="js-autocomplete form-control"
                         name="org_id"
+                        class="js-autocomplete form-control"
                     >
                         <option value="">{{ utrans('custom.select_org') }}</option>
                         @foreach ($organisations as $id =>$org)
@@ -189,8 +105,8 @@
                 <div class="col-sm-9">
                     <select
                         id="group"
-                        class="js-autocomplete form-control"
                         name="group_id"
+                        class="js-autocomplete form-control"
                         data-placeholder="{{ utrans('custom.groups', 1) }}"
                     >
                         <option></option>
@@ -209,8 +125,8 @@
                 <div class="col-sm-9">
                     <select
                         id="visibility"
-                        class="js-select form-control"
                         name="visibility"
+                        class="js-select form-control"
                         data-placeholder="{{ utrans('custom.select_visibility') }}"
                     >
                         <option></option>
@@ -229,8 +145,8 @@
                 <div class="col-sm-9">
                     <input
                         id="source"
-                        class="input-border-r-12 form-control"
                         name="source"
+                        class="input-border-r-12 form-control"
                         value="{{ old('source') }}"
                         type="text"
                         placeholder="Източник"
@@ -243,8 +159,8 @@
                 <div class="col-sm-9">
                     <input
                         id="version"
-                        class="input-border-r-12 form-control"
                         name="version"
+                        class="input-border-r-12 form-control"
                         value="{{ old('version') }}"
                         type="text"
                         placeholder="Версия"
@@ -257,8 +173,8 @@
                 <div class="col-sm-9">
                     <input
                         id="author"
-                        class="input-border-r-12 form-control"
                         name="author_name"
+                        class="input-border-r-12 form-control"
                         value="{{ old('author_name') }}"
                         type="text"
                         placeholder="Автор">
@@ -270,8 +186,8 @@
                 <div class="col-sm-9">
                     <input
                         id="author-email"
-                        class="input-border-r-12 form-control"
                         name="author_email"
+                        class="input-border-r-12 form-control"
                         value="{{ old('author_email') }}"
                         type="email"
                         placeholder="E-mail на автора"
@@ -284,8 +200,8 @@
                 <div class="col-sm-9">
                     <input
                         id="support"
-                        class="input-border-r-12 form-control"
                         name="support_name"
+                        class="input-border-r-12 form-control"
                         value="{{ old('support_name') }}"
                         type="text"
                         placeholder="Контакт"
@@ -298,8 +214,8 @@
                 <div class="col-sm-9">
                     <input
                         id="support-email"
-                        class="input-border-r-12 form-control"
                         name="support_email"
+                        class="input-border-r-12 form-control"
                         value="{{ old('support_email') }}"
                         type="email"
                         placeholder="E-mail за контакти"
@@ -319,10 +235,14 @@
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
                     <button
-                        class="btn btn-primary"
                         name="add_resource"
+                        class="btn btn-primary"
                     >{{ uctrans('custom.add_resource') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
+                    <button
+                        type="submit"
+                        name="create"
+                        class="btn btn-primary">{{ uctrans('custom.save') }}
+                    </button>
                 </div>
             </div>
         </form>

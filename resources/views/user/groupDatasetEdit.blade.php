@@ -241,9 +241,17 @@
                 <div class="col-sm-12 pull right text-right">
                     <div class="row">
                         <button type="button" class="btn btn-primary">{{ uctrans('custom.add_resource') }}</button>
-                        <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
+                        <a
+                            type="button"
+                            class="btn btn-primary"
+                            href="{{ url('/user/groups/dataset/'. $dataSet->uri) }}"
+                        >{{ uctrans('custom.preview') }}</a>
                         @if ($hasResources)
-                        <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
+                            <button
+                                type="submit"
+                                name="publish"
+                                class="btn btn-primary"
+                            >{{ uctrans('custom.publish') }}</button>
                         @endif
                         <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                     </div>

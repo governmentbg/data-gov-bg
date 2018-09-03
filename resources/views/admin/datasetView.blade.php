@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.user-nav-bar', ['view' => 'dataset'])
+        @include('partials.admin-nav-bar', ['view' => 'dataset'])
         @if (isset($dataset->name))
             <div class="row">
                 <div class="col-sm-12 user-dataset m-l-10">
@@ -27,6 +27,14 @@
                             &nbsp;<span>{{ utrans('custom.private') }}</span>&nbsp;
                         @endif
                         &nbsp;{{ utrans('custom.version') }}:&nbsp;{{ $dataset->version }}
+                    </p>
+                    <p>
+                        <strong>{{ __('custom.id') }}:</strong>
+                        &nbsp;{{ $dataset->id }}
+                    </p>
+                    <p>
+                        <strong>{{ __('custom.unique_identificator') }}:</strong>
+                        &nbsp;{{ $dataset->uri }}
                     </p>
                     @if (!empty($dataset->source))
                         <p>
@@ -87,7 +95,6 @@
                     </div>
                     <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
                         <ul class="p-l-none">
-                            <li>Отговорник по подръжка: {{ $dataset->support_name }}</li>
                             <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
                             <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
                             @if (!empty($dataset->updated_by))
@@ -102,18 +109,18 @@
             <div class="row">
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a
-                        class="btn btn-primary"
-                        href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
+                       class="btn btn-primary"
+                       href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
                     >{{ uctrans('custom.add_resource') }}</a>
                 </div>
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a
                         class="btn btn-primary"
-                        href="{{ url('/user/dataset/edit/'. $dataset->uri) }}"
+                        href="{{ url('/admin/dataset/edit/'. $dataset->uri) }}"
                     >{{ uctrans('custom.edit') }}</a>
                 </div>
                 <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-md">
-                    <form method="POST">
+                    <form method="POST" action="{{ url('/admin/dataset/delete') }}">
                         {{ csrf_field() }}
                         <button
                             class="btn del-btn btn-primary"

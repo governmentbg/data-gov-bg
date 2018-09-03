@@ -49,7 +49,7 @@
         </div>
         <div class="row m-b-lg">
             <div class="col-sm-3 sidenav col-xs-12 m-t-md">
-                 <form
+                <form
                     method="GET"
                     action="{{ action('Admin\TermsOfUseRequestController@list', []) }}"
                 >

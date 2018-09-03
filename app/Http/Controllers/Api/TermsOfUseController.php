@@ -231,6 +231,8 @@ class TermsOfUseController extends ApiController
                 $query->where('active', '=', $request->input('criteria.active'));
             }
 
+            $query->orderBy('ordering', 'asc');
+
             $total_records = $query->count();
 
             $query->forPage(

@@ -917,22 +917,6 @@ class UserController extends Controller {
                 }
             }
 
-            if ($request->has('change_pass')) {
-                $oldPass = $request->offsetGet('old_password');
-
-                if (Hash::check($oldPass, $user['password'])) {
-                    $saveData = [
-                        'api_key'   => $user['api_key'],
-                        'id'        => $user['id'],
-                        'data'      => [
-                            'password'          => $request->offsetGet('password'),
-                            'password_confirm'  => $request->offsetGet('password_confirm'),
-                        ],
-                    ];
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.wrong_password'));
-                }
-            }
 
             if ($request->has('generate_key')) {
                 $data = [
@@ -992,6 +976,33 @@ class UserController extends Controller {
         }
 
         return redirect('/');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $id = $request->offsetGet('id');
+        $user = User::find($id);
+        $oldPass = $request->offsetGet('old_password');
+
+        if (Hash::check($oldPass, $user->password)) {
+            $passData = [
+                'api_key'   => Auth::user()->api_key,
+                'id'        => $id,
+                'data'      => [
+                    'password'          => $request->offsetGet('password'),
+                    'password_confirm'  => $request->offsetGet('password_confirm'),
+                ],
+            ];
+
+            $editPost = Request::create('api/editUser', 'POST', $passData);
+            $api = new ApiUser($editPost);
+            $result = $api->editUser($editPost)->getData();
+        } else {
+            $result = ['success' => false];
+        }
+error_log('ne trqbva da e ot tuka');
+        error_log('result: '. print_r($result, true));
+        return json_encode($result);
     }
 
     /**

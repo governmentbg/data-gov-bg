@@ -1000,8 +1000,7 @@ class UserController extends Controller {
         } else {
             $result = ['success' => false];
         }
-error_log('ne trqbva da e ot tuka');
-        error_log('result: '. print_r($result, true));
+
         return json_encode($result);
     }
 

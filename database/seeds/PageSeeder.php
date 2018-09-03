@@ -6,7 +6,7 @@ use App\Locale;
 use App\Page;
 use App\Section;
 
-class PageTableSeeder extends Seeder
+class PageSeeder extends Seeder
 {
     const PAGES_RECORDS = 10;
 

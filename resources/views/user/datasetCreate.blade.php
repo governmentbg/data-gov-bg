@@ -135,13 +135,10 @@
                         'components.form_groups.translation_textarea',
                         ['field' => $field]
                     )
-                @elseif ($field['view'] == 'translation_tags')
-                    @include(
-                        'components.form_groups.translation_tags',
-                        ['field' => $field]
-                    )
                 @endif
             @endforeach
+
+            @include('components.form_groups.tags')
 
             <div class="form-group row">
                 <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.terms_and_conditions') }}:</label>
@@ -317,6 +314,7 @@
                     )
                 @endif
             @endforeach
+
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
                     <button

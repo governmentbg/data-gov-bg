@@ -25,10 +25,15 @@ class DataSet extends Model implements TranslatableInterface
     const VISIBILITY_PRIVATE = 2;
 
     protected static $translatable = [
-        'name'      => 'text',
-        'descript'  => 'text',
-        'sla'       => 'text',
+        'name'          => 'text',
+        'descript'      => 'text',
+        'sla'           => 'text',
     ];
+
+    public function getDescriptionAttribute()
+    {
+        return $this->descript;
+    }
 
     public static function getStatus()
     {
@@ -66,9 +71,14 @@ class DataSet extends Model implements TranslatableInterface
         return $this->hasMany('App\DataSetGroup');
     }
 
-    public function dataSetSubCategory()
+    public function dataSetTags()
     {
-        return $this->belongsToMany('App\Category', 'data_set_sub_categories', 'data_set_id', 'sub_cat_id');
+        return $this->hasMany('App\DataSetTags');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tags', 'data_set_tags', 'data_set_id', 'tag_id');
     }
 
     public function resource()

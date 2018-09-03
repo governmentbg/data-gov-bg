@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\Tags;
 use App\DataSet;
 use App\Resource;
-use App\Category;
 use App\Organisation;
 use App\CustomSetting;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 
 class DataSetController extends AdminController
 {
@@ -60,9 +59,9 @@ class DataSetController extends AdminController
                 'page_number'       => !empty($request->page) ? $request->page : 1,
             ];
 
-            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $rq = Request::create('/api/listDatasets', 'POST', $params);
             $api = new ApiDataSet($rq);
-            $result = $api->listDataSets($rq)->getData();
+            $result = $api->listDatasets($rq)->getData();
             $datasets = !empty($result->datasets) ? $result->datasets : [];
             $count = !empty($result->total_records) ? $result->total_records : 0;
 
@@ -120,16 +119,16 @@ class DataSetController extends AdminController
                 $params['api_key'] = \Auth::user()->api_key;
                 $params['data'] = $data;
 
-                $savePost = Request::create('/api/addDataSet', 'POST', $params);
+                $savePost = Request::create('/api/addDataset', 'POST', $params);
                 $api = new ApiDataSet($savePost);
-                $save = $api->addDataSet($savePost)->getData();
+                $save = $api->addDataset($savePost)->getData();
 
                 if ($save->success) {
                     if (isset($groupId)) {
                         $groupParams['group_id'] = $groupId;
                         $groupParams['data_set_uri'] = $save->uri;
-                        $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                        $res = $api->addDataSetToGroup($addGroup)->getData();
+                        $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                        $res = $api->addDatasetToGroup($addGroup)->getData();
 
                         if (!$res->success) {
                             $request->session()->flash('alert-danger', __('custom.add_error'));
@@ -177,9 +176,9 @@ class DataSetController extends AdminController
     {
         $params['dataset_uri'] = $uri;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         // prepera request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
@@ -220,19 +219,16 @@ class DataSetController extends AdminController
             }
         }
 
-
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -250,12 +246,6 @@ class DataSetController extends AdminController
                 $newURI = $editData['uri'];
             }
 
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
-            }
-
-            $tagList = $request->offsetGet('tags');
-
             $editData = $this->prepareTags($editData);
 
             $groupId = $request->offsetGet('group_id');
@@ -266,8 +256,8 @@ class DataSetController extends AdminController
                 'group_id'      => $groupId,
             ];
 
-            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-            $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $post);
+            $added = $api->addDatasetToGroup($addGroup)->getData();
 
             if (!$added->success) {
                 session()->flash('alert-danger', __('custom.edit_error'));
@@ -285,8 +275,8 @@ class DataSetController extends AdminController
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
@@ -329,9 +319,9 @@ class DataSetController extends AdminController
             $params['api_key'] = \Auth::user()->api_key;
             $params['dataset_uri'] = $request->offsetGet('dataset_uri');
 
-            $apiRequest = Request::create('/api/deleteDataSet', 'POST', $params);
+            $apiRequest = Request::create('/api/deleteDataset', 'POST', $params);
             $api = new ApiDataSet($apiRequest);
-            $result = $api->deleteDataSet($apiRequest)->getData();
+            $result = $api->deleteDataset($apiRequest)->getData();
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {

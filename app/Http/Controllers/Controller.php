@@ -183,20 +183,7 @@ class Controller extends BaseController
     public function prepareTags($data)
     {
         if (isset($data['tags'])) {
-            $tagData = [];
-            $editData = [];
-
-            foreach ($data['tags'] as $lang => $string) {
-                $tagData[$lang] = array_values(explode(',', $string));
-            }
-
-            foreach ($tagData as $lang => $tags) {
-                foreach ($tags as $tag) {
-                    $editData[] = [$lang => $tag];
-                }
-            }
-
-            $data['tags'] = $editData;
+            $data['tags'] = array_values(explode(',', $data['tags']));
         }
 
         return $data;
@@ -249,7 +236,7 @@ class Controller extends BaseController
         ];
     }
 
-     /**
+    /**
      * Function for getting an array of translatable fields for datasets
      *
      * @return array of fields
@@ -266,16 +253,9 @@ class Controller extends BaseController
             ],
             [
                 'label'    => 'custom.description',
-                'name'     => 'descript',
+                'name'     => 'description',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.label',
-                'name'     => 'tags',
-                'type'     => 'text',
-                'view'     => 'translation_tags',
                 'required' => false,
             ],
             [
@@ -329,6 +309,11 @@ class Controller extends BaseController
         ];
     }
 
+    /**
+     * Function for getting an array of translatable fields for resources
+     *
+     * @return array of fields
+     */
     protected function getResourceTransFields()
     {
         return [

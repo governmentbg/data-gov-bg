@@ -22,7 +22,7 @@
                         <p>{{ __('custom.published') }}</p>
                     @endif
                     <div class="desc">
-                        {{ $dataset->descript }}
+                        {{ $dataset->description }}
                     </div>
                     <div class="col-sm-12 pull-left m-t-md p-l-none">
                         <div class="pull-left history">

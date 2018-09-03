@@ -4,6 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => $activeMenu])
+    @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $organisation])
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/organisations/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>

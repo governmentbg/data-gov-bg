@@ -46467,7 +46467,7 @@ $(function () {
             $('.js-custom-fields').append($('.js-custom-field-set').last().clone());
 
             var $element = $('.js-custom-field-set').last();
-
+            $element.find('.hidden-input').remove();
             $('.js-delete-custom-field').removeClass('hidden');
 
             var index = $element.data('index');

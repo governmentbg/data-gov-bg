@@ -272,7 +272,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect( url('/user/organisations/datasets/edit/'. $newURI));
+                return redirect(url('/user/organisations/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -710,7 +710,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect( url('/user/dataset/edit/'. $newURI));
+                return redirect(url('/user/dataset/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -3760,7 +3760,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect( url('/user/groups/datasets/edit/'. $newURI));
+                return redirect(url('/user/groups/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 

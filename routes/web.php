@@ -68,6 +68,12 @@ Route::middleware('auth')->group(function() {
         'Admin\GroupController@addMembersNew'
     )->name('adminAddGroupMembersNew');
 
+    Route::match(['get', 'post'], '/admin/datasets', 'Admin\DataSetController@listDatasets');
+    Route::match(['get', 'post'], '/admin/dataset/add', 'Admin\DataSetController@add');
+    Route::match(['get', 'post'], '/admin/dataset/view/{uri}', 'Admin\DataSetController@view');
+    Route::match(['get', 'post'], '/admin/dataset/edit/{uri}', 'Admin\DataSetController@edit');
+    Route::match(['get', 'post'], '/admin/dataset/delete', 'Admin\DataSetController@delete');
+
     Route::match(['get', 'post'], '/admin/terms-of-use/list', 'Admin\TermsOfUseController@list');
     Route::match(['get', 'post'], '/admin/terms-of-use/add', 'Admin\TermsOfUseController@add');
     Route::match(['get', 'post'], '/admin/terms-of-use/view/{id}', 'Admin\TermsOfUseController@view');

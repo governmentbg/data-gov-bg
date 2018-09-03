@@ -18,39 +18,6 @@ use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 class GroupController extends AdminController
 {
     /**
-     * Function for getting an array of translatable fields for groups
-     *
-     * @return array of fields
-     */
-    public static function getGroupTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    /**
      * Lists the groups in which the user is a member of
      *
      * @param Request $request
@@ -99,7 +66,7 @@ class GroupController extends AdminController
     {
         if (Role::isAdmin()) {
             $class = 'user';
-            $fields = self::getGroupTransFields();
+            $fields = $this->getGroupTransFields();
 
             if ($request->has('create')) {
                 $data = $request->all();
@@ -221,7 +188,7 @@ class GroupController extends AdminController
 
         if (Role::isAdmin($orgId)) {
             $class = 'user';
-            $fields = self::getGroupTransFields();
+            $fields = $this->getGroupTransFields();
 
             $model = Organisation::find($orgId)->loadTranslations();
             $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();

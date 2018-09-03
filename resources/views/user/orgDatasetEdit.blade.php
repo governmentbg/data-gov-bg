@@ -248,9 +248,17 @@
                            href="{{ route('orgDatasetView', ['uri' => $dataSet->uri]) }}"
                         >{{ uctrans('custom.preview') }}</a>
                         @if ($hasResources)
-                        <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
+                            <button
+                                type="submit"
+                                name="publish"
+                                class="btn btn-primary"
+                            >{{ uctrans('custom.publish') }}</button>
                         @endif
-                        <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
+                        <button
+                            type="submit"
+                            name="save"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.save') }}</button>
                     </div>
                 </div>
             </div>

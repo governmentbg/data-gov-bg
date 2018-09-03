@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\UserController as ApiUsers;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 
 class AdminController extends Controller
@@ -23,5 +24,23 @@ class AdminController extends Controller
         }
 
         return $organisations;
+    }
+
+    public function getGroupDropdown($userId = null, $count = null)
+    {
+        $request = Request::create('/api/listGroups', 'POST', ['criteria' => ['user_id' => $userId]]);
+        $api = new ApiOrganisation($request);
+        $result = $api->listGroups($request)->getData();
+        $groups = [];
+
+        foreach ($result->groups as $index => $row) {
+            $groups[$row->id] = $row->name;
+
+            if ($count && $index + 1 == $count) {
+                break;
+            }
+        }
+
+        return $groups;
     }
 }

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 
 class Controller extends BaseController
 {
@@ -133,17 +136,224 @@ class Controller extends BaseController
         return $model;
     }
 
-    protected function checkIsValidXML($xmlstr)
+    /**
+     * Prepares an array of categories
+     *
+     * @return array categories
+     */
+    public function prepareMainCategories()
     {
-        libxml_use_internal_errors(true);
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['criteria']['active'] = 1;
+        $request = Request::create('/api/listMainCategories', 'POST', $params);
+        $api = new ApiCategory($request);
+        $result = $api->listMainCategories($request)->getData();
+        $categories = [];
 
-        $doc = simplexml_load_string($xmlstr);
-        $xml = explode("\n", $xmlstr);
-
-        if (!$doc) {
-            return false;
-        } else {
-            return true;
+        foreach ($result->categories as $row) {
+            $categories[$row->id] = $row->name;
         }
+
+        return $categories;
+    }
+
+    /**
+     * Prepares an array of terms of use
+     *
+     * @return array termsOfUse
+     */
+    protected function prepareTermsOfUse()
+    {
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['criteria']['active'] = 1;
+        $request = Request::create('/api/listTermsOfUse', 'POST', $params);
+        $api = new ApiTermsOfUse($request);
+        $result = $api->listTermsOfUse($request)->getData();
+        $termsOfUse = [];
+
+        if (isset($result->terms_of_use)) {
+            foreach ($result->terms_of_use as $row) {
+                $termsOfUse[$row->id] = $row->name;
+            }
+        }
+
+        return $termsOfUse;
+    }
+
+    public function prepareTags($data)
+    {
+        if (isset($data['tags'])) {
+            $tagData = [];
+            $editData = [];
+
+            foreach ($data['tags'] as $lang => $string) {
+                $tagData[$lang] = array_values(explode(',', $string));
+            }
+
+            foreach ($tagData as $lang => $tags) {
+                foreach ($tags as $tag) {
+                    $editData[] = [$lang => $tag];
+                }
+            }
+
+            $data['tags'] = $editData;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Function for getting an array of translatable fields
+     *
+     * @return array of fields
+     */
+    protected function getTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'custom.activity',
+                'name'     => 'activity_info',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'custom.contact',
+                'name'     => 'contacts',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
+     /**
+     * Function for getting an array of translatable fields for datasets
+     *
+     * @return array of fields
+     */
+    protected function getDatasetTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => 'custom.label',
+                'name'     => 'tags',
+                'type'     => 'text',
+                'view'     => 'translation_tags',
+                'required' => false,
+            ],
+            [
+                'label'    => 'custom.sla_agreement',
+                'name'     => 'sla',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
+    /**
+     * Function for getting an array of translatable fields for groups
+     *
+     * @return array of fields
+     */
+    protected function getGroupTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
+    }
+
+    protected function getResourceTransFields()
+    {
+        return [
+            [
+                'label'    => 'custom.label_name',
+                'name'     => 'name',
+                'type'     => 'text',
+                'view'     => 'translation',
+                'required' => true,
+            ],
+            [
+                'label'    => 'custom.description',
+                'name'     => 'descript',
+                'type'     => 'text',
+                'view'     => 'translation_txt',
+                'required' => false,
+            ],
+            [
+                'label'    => ['custom.title', 'custom.value'],
+                'name'     => 'custom_fields',
+                'type'     => 'text',
+                'view'     => 'translation_custom',
+                'val'      => ['key', 'value'],
+                'required' => false,
+            ],
+        ];
     }
 }

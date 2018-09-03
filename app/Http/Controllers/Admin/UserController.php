@@ -7,6 +7,7 @@ use App\UserSetting;
 use App\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
@@ -267,18 +268,6 @@ class UserController extends AdminController {
                 }
             }
 
-            if ($request->has('change_pass')) {
-                $oldPass = $request->offsetGet('old_password');
-
-                $saveData = [
-                    'api_key'   => $user->api_key,
-                    'id'        => $user->id,
-                    'data'      => [
-                        'password'          => $request->offsetGet('password'),
-                        'password_confirm'  => $request->offsetGet('password_confirm'),
-                    ],
-                ];
-            }
 
             if ($request->has('generate_key')) {
                 $data = [
@@ -390,4 +379,23 @@ class UserController extends AdminController {
             ]
         );
     }
+
+    public function adminChangePassword(Request $request)
+    {
+        $passData = [
+            'api_key'   => Auth::user()->api_key,
+            'id'        => $request->offsetGet('id'),
+            'data'      => [
+                'password'          => $request->offsetGet('password'),
+                'password_confirm'  => $request->offsetGet('password_confirm'),
+            ],
+        ];
+
+        $editPost = Request::create('api/editUser', 'POST', $passData);
+        $api = new ApiUser($editPost);
+        $result = $api->editUser($editPost)->getData();
+
+        return json_encode($result);
+    }
+
 }

@@ -14,7 +14,11 @@
 Route::middleware('auth')->group(function() {
     Route::post('/user/organisations/register', 'UserController@registerOrg');
     Route::get('/user/organisations/register', 'UserController@showOrgRegisterForm');
+
+    Route::post('/user/changePassword', 'UserController@changePassword');
+
     Route::match(['get', 'post'], '/user/resource/download', 'UserController@resourceDownload')->name('resourceDownload');
+    Route::post('/admin/adminChangePassword', 'Admin\UserController@adminChangePassword');
 
     Route::match(['get', 'post'], '/admin/organisations', 'Admin\OrganisationController@list');
     Route::match(['get', 'post'], '/admin/organisations/search', 'Admin\OrganisationController@search');
@@ -109,6 +113,7 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/organisations/dataset/create', 'UserController@orgDatasetCreate');
         Route::match(['get', 'post'], '/user/groups/dataset/create', 'UserController@groupDatasetCreate');
         Route::match(['get', 'post'], '/user/dataset/edit/{uri}', 'UserController@datasetEdit')->name('datasetEdit');
+
 
         Route::match(
             ['get', 'post'],

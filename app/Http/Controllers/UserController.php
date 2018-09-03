@@ -568,6 +568,26 @@ class UserController extends Controller {
     }
 
     /**
+     * Attempts to delete a dataset based on uri
+     *
+     * @param Request $request
+     * @return true on success and false on failure
+     *
+     */
+    public function removeDataset($groupId, $uri)
+    {
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['group_id'] = $groupId;
+        $params['data_set_uri'] = $uri;
+
+        $request = Request::create('/api/removeDataSetFromGroup', 'POST', $params);
+        $api = new ApiDataSet($request);
+        $datasets = $api->removeDataSetFromGroup($request)->getData();
+
+        return $datasets->success;
+    }
+
+    /**
      * Prepares data and makes an API call to create a dataset
      *
      * @param Request $request
@@ -3804,7 +3824,7 @@ class UserController extends Controller {
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
-            if ($this->datasetDelete($uri)) {
+            if ($this->removeDataset($orgId, $uri)) {
                 $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
                 $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));

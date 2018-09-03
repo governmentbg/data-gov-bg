@@ -32,6 +32,7 @@
                                     class="input-border-r-12 form-control"
                                     name="firstname"
                                     type="text"
+                                    value="{{ \Auth::user()->firstname }}"
                                 >
                             </div>
                         </div>
@@ -43,6 +44,7 @@
                                     class="input-border-r-12 form-control"
                                     name="lastname"
                                     type="text"
+                                    value="{{ \Auth::user()->lastname }}"
                                 >
                             </div>
                         </div>
@@ -54,6 +56,7 @@
                                     class="input-border-r-12 form-control"
                                     name="email"
                                     type="email"
+                                    value="{{ \Auth::user()->email }}"
                                 >
                             </div>
                         </div>

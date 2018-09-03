@@ -14,19 +14,19 @@
                         <div class="form-group row">
                             <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{uctrans(custom.name)}}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="fname" placeholder="Иван">
+                                <input type="text" class="input-border-r-12 form-control" id="fname" value="{{ \Auth::user()->firstname }}">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{__(custom.family_name)}}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="lname" placeholder="Иванов">
+                                <input type="text" class="input-border-r-12 form-control" id="lname" value="{{ \Auth::user()->lastname }}">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{__(custom.e_mail)}}:</label>
                             <div class="col-sm-9">
-                                <input type="email" class="input-border-r-12 form-control" id="email" placeholder="ivanov@abv.bg">
+                                <input type="email" class="input-border-r-12 form-control" id="email" value="{{ \Auth::user()->email }}">
                             </div>
                         </div>
                         <div class="form-group row">

@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\Tags;
 use App\DataSet;
 use App\Resource;
-use App\Category;
 use App\Organisation;
 use App\CustomSetting;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 
 class DataSetController extends AdminController
 {
@@ -220,15 +219,12 @@ class DataSetController extends AdminController
             }
         }
 
-
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
         $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
@@ -249,12 +245,6 @@ class DataSetController extends AdminController
             } else {
                 $newURI = $editData['uri'];
             }
-
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
-            }
-
-            $tagList = $request->offsetGet('tags');
 
             $editData = $this->prepareTags($editData);
 

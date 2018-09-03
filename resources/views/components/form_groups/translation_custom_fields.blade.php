@@ -18,7 +18,7 @@
             data-id="{{ isset($model) && count($model) ? $model[$i - 1]->id : null }}"
         >
             @foreach (Lang::getInstance()->getActive() as $key => $active)
-                <div class="col-xs-12">{{ !$key ?  __('custom.additional_field') : '' }}</div>
+                <div class="col-xs-12">{{ !$key ? __('custom.additional_field') : '' }}</div>
                 <div class="col-lg-12 form-group">
                     <div class="col-sm-12 col-xs-12 p-r-none">
                         <div class="row">

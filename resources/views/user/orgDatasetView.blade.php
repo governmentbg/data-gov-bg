@@ -63,7 +63,7 @@
                     </p>
                     <p><strong>{{ __('custom.description') }}:</strong></p>
                     <div class="m-b-sm">
-                        {{ $dataset->descript }}
+                        {{ $dataset->description }}
                     </div>
                     <p><strong>{{ __('custom.sla_agreement') }}:</strong></p>
                     <div class="m-b-sm">

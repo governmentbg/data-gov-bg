@@ -156,7 +156,25 @@
                     <h2>{{ __('custom.change_password') }}</h2>
                 </div>
                 <div class="modal-body">
-                    <form class="m-t-lg" method="post">
+                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.pass_change_succ') }}</p>
+                    </div>
+                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.pass_change_err') }}</p>
+                    </div>
+                    <form
+                        class="js-change-pass"
+                        class="m-t-lg"
+                        method="post"
+                        action="{{ url('/user/changePassword') }}"
+                        data-url="{{ url('/user/changePassword') }}"
+                    >
                         {{ csrf_field() }}
                         <div class="form-group row required">
                             <label for="oldPass" class="col-sm-4 col-xs-12 col-form-label">{{ __('custom.password') }}:</label>
@@ -191,7 +209,7 @@
                                 >
                             </div>
                         </div>
-
+                        <input type="hidden" name="id" value="{{ $user['id'] }}">
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
                                 <button type="submit" name="change_pass" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>

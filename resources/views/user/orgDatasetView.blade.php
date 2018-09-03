@@ -98,11 +98,12 @@
                     </div>
                     <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
                         <ul class="p-l-none">
-                            <li>Отговорник по подръжка: {{ $dataset->support_name }}</li>
                             <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
                             <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
-                            <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
-                            <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
+                            @if (!empty($dataset->updated_by))
+                                <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
+                                <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
+                            @endif
                             <li>.....................................</li>
                         </ul>
                     </div>

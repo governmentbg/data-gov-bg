@@ -256,12 +256,12 @@ class UserController extends ApiController
 
                     $roleRights = RoleRight::where('role_id', $role->role_id)->get();
 
-                    $rightResult =[];
+                    $rightResult = [];
 
                     foreach($roleRights as $singleRoleRight) {
                         $rightResult[] = [
                             'module_name'          => $singleRoleRight->module_name,
-                            'right_id'             => $singleRoleRight->right,
+                            'right'                => $singleRoleRight->right,
                             'limit_to_own_data'    => $singleRoleRight->limit_to_own_data,
                             'api'                  => $singleRoleRight->api
                         ];

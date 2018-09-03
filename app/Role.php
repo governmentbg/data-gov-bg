@@ -12,62 +12,7 @@ class Role extends Model
 {
     use RecordSignature;
 
-    /**
-     * Base roles included in the initial migration
-     *
-     */
-    const ROLE_ADMIN = 1;
-    const ROLE_MODERATOR = 2;
-    const ROLE_MEMBER = 3;
-
-    /**
-     * Right types
-     *
-     */
-    const RIGHT_VIEW = 1;
-    const RIGHT_EDIT = 2;
-    const RIGHT_ALL = 3;
-
     protected $guarded = ['id'];
-
-    /**
-     * Get base role types
-     *
-     */
-    public static function getBaseRoles()
-    {
-        return [
-            self::ROLE_ADMIN        => 'Admin',
-            self::ROLE_MODERATOR    => 'Moderator',
-            self::ROLE_MEMBER       => 'Member',
-        ];
-    }
-
-    /**
-     * Get translated right types and keys
-     *
-     */
-    public static function getRights()
-    {
-        return [
-            self::RIGHT_VIEW    => __('custom.view_right'),
-            self::RIGHT_EDIT    => __('custom.edit_right'),
-            self::RIGHT_ALL     => __('custom.all_right'),
-        ];
-    }
-
-    /**
-     * Get translated right types descriptions and keys
-     *
-     */
-    public static function getRightsDescription()
-    {
-        return [
-            self::RIGHT_VIEW    => __('custom.view_right_desc'),
-            self::RIGHT_EDIT    => __('custom.edit_right_desc'),
-            self::RIGHT_ALL     => __('custom.all_right_desc'),
-        ];
-    }
 
     /**
      * RoleRights relation
@@ -87,15 +32,47 @@ class Role extends Model
         return $this->hasMany('App\UserToOrgRole');
     }
 
-    public static function isAdmin($org = null) {
+    //get the default role for organisation admin. Return null if the role is not found
+    public static function getOrgAdminRole()
+    {
+        if ($orgAdminRole = Role::where('active', 1)->where('default_org_admin', 1)->first()) {
+            return $orgAdminRole;
+        }
+
+        return null;
+    }
+
+    //get the default role for group admin. Return null if the role is not found
+    public static function getGroupAdminRole()
+    {
+        if ($groupAdminRole = Role::where('active', 1)->where('default_group_admin', 1)->first()) {
+            return $groupAdminRole;
+        }
+
+        return null;
+    }
+
+    public static function isAdmin($org = null, $group = null) {
         if (Auth::user()->is_admin) {
             return true;
         } elseif ($org) {
-            return UserToOrgRole::where([
-                'user_id'   => Auth::user()->id,
-                'org_id'    => $org,
-                'role_id'   => self::ROLE_ADMIN,
-            ])->count();
+            $role = self::getOrgAdminRole();
+            if (isset($role)) {
+                return UserToOrgRole::where([
+                    'user_id'   => Auth::user()->id,
+                    'org_id'    => $org,
+                    'role_id'   => $role->id
+                ])->count();
+            }
+        } elseif ($group) {
+            $role = self::getGroupAdminRole();
+            if (isset($role)) {
+                return UserToOrgRole::where([
+                    'user_id'   => Auth::user()->id,
+                    'org_id'    => $group,
+                    'role_id'   => $role->id
+                ])->count();
+            }
         }
 
         return false;

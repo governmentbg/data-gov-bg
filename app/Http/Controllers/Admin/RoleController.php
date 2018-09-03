@@ -184,7 +184,7 @@ class RoleController extends AdminController {
         $rights = isset($result->rights) ? $result->rights : [];
         $modules = Module::getModules();
         $moduleKeys = array_flip($modules);
-        $rightTypes = Role::getRights();
+        $rightTypes = RoleRight::getRights();
 
         if (!empty($rights)) {
             $formatted = [];

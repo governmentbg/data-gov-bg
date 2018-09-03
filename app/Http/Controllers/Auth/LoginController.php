@@ -80,7 +80,10 @@ class LoginController extends Controller
                     $result = $api->getUserRoles($rq)->getData();
 
                     if ($result->success) {
-                        Session::push('roles', $result->data->roles);
+                        $result = json_decode(json_encode($result->data), true);
+
+                        Session::put('roles', $result['roles']);
+
                     }
 
                     return redirect('/');

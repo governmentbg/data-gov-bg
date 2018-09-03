@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Role;
+use App\Tags;
 use App\User;
 use App\Locale;
 use App\Module;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\TagController as ApiTags;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
@@ -71,9 +73,9 @@ class UserController extends Controller {
             'page_number'       => !empty($request->page) ? $request->page : 1,
         ];
 
-        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($rq);
-        $result = $api->listDataSets($rq)->getData();
+        $result = $api->listDatasets($rq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
@@ -125,9 +127,9 @@ class UserController extends Controller {
             'page_number'       => !empty($request->page) ? $request->page : 1,
         ];
 
-        $searchRq = Request::create('/api/searchDataSet', 'POST', $params);
+        $searchRq = Request::create('/api/searchDataset', 'POST', $params);
         $api = new ApiDataSet($searchRq);
-        $result = $api->searchDataSet($searchRq)->getData();
+        $result = $api->searchDataset($searchRq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
@@ -161,9 +163,9 @@ class UserController extends Controller {
             $params['criteria']['created_by'] = \Auth::user()->id;
             $params['criteria']['org_ids'] = [$orgId];
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
-            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $rq = Request::create('/api/listDatasets', 'POST', $params);
             $api = new ApiDataSet($rq);
-            $datasets = $api->listDataSets($rq)->getData();
+            $datasets = $api->listDatasets($rq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
             $paginationData = $this->getPaginationData([], 0, [], $perPage);
@@ -214,16 +216,14 @@ class UserController extends Controller {
 
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -239,10 +239,6 @@ class UserController extends Controller {
                 $newURI = $uri;
             } else {
                 $newURI = $editData['uri'];
-            }
-
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
             }
 
             $tagList = $request->offsetGet('tags');
@@ -274,8 +270,8 @@ class UserController extends Controller {
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
@@ -316,9 +312,9 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         // prepera request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
@@ -356,9 +352,9 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
 
@@ -416,9 +412,9 @@ class UserController extends Controller {
         $params['api_key'] = \Auth::user()->api_key;
         $params['dataset_uri'] = $uri;
 
-        $request = Request::create('/api/deleteDataSet', 'POST', $params);
+        $request = Request::create('/api/deleteDataset', 'POST', $params);
         $api = new ApiDataSet($request);
-        $datasets = $api->deleteDataSet($request)->getData();
+        $datasets = $api->deleteDataset($request)->getData();
 
         return $datasets->success;
     }
@@ -475,16 +471,16 @@ class UserController extends Controller {
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
 
-            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $save = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataset($savePost)->getData();
 
             if ($save->success) {
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $api->addDataSetToGroup($addGroup)->getData();
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $api->addDatasetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -535,17 +531,17 @@ class UserController extends Controller {
             // make request to API
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
-            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $save = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataset($savePost)->getData();
 
             if ($save->success) {
                 // connect data set to group
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $api->addDataSetToGroup($addGroup)->getData();
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $api->addDatasetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -595,16 +591,16 @@ class UserController extends Controller {
 
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
-            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $save = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataset($savePost)->getData();
 
             if ($save->success) {
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $api->addDataSetToGroup($addGroup)->getData();
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $api->addDatasetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -650,7 +646,6 @@ class UserController extends Controller {
         $errors = [];
         $setGroups = [];
         $params = ['dataset_uri' => $uri];
-
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
 
         if (!empty($model->dataSetGroup)) {
@@ -661,16 +656,14 @@ class UserController extends Controller {
 
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -688,11 +681,6 @@ class UserController extends Controller {
                 $newURI = $editData['uri'];
             }
 
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
-            }
-
-            $tagList = $request->offsetGet('tags');
             $editData = $this->prepareTags($editData);
             $groupId = $request->offsetGet('group_id');
 
@@ -721,8 +709,8 @@ class UserController extends Controller {
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
@@ -2530,8 +2518,8 @@ class UserController extends Controller {
                 if (!empty($userFollows['category_id'])) {
                     $params = [
                         'criteria' => [
-                            'category_ids' => $userFollows['category_id'],
-                            'locale' => $locale
+                            'category_ids'  => $userFollows['category_id'],
+                            'locale'        => $locale
                         ]
                     ];
 
@@ -2575,13 +2563,12 @@ class UserController extends Controller {
                 if (!empty($userFollows['tag_id'])) {
                     $params = [
                         'criteria' => [
-                            'tag_ids' => $userFollows['tag_id'],
-                            'locale' => $locale
+                            'tag_ids'   => $userFollows['tag_id'],
                         ]
                     ];
 
                     $rq = Request::create('/api/listTags', 'POST', $params);
-                    $api = new ApiCategory($rq);
+                    $api = new ApiTags($rq);
                     $res = $api->listTags($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->tags)) {
@@ -2758,9 +2745,9 @@ class UserController extends Controller {
      * @return void
      */
     private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData, &$filters, $filter, $objIdFilter = false) {
-        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($rq);
-        $res = $api->listDataSets($rq)->getData();
+        $res = $api->listDatasets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
             $objType = Role::MODULE_NAMES[5];
@@ -3303,7 +3290,7 @@ class UserController extends Controller {
     public function registerGroup(Request $request)
     {
         $class = 'user';
-        $fields = self::getGroupTransFields();
+        $fields = $this->getGroupTransFields();
 
         if ($request->has('create')) {
             $data = $request->all();
@@ -3456,7 +3443,7 @@ class UserController extends Controller {
 
         if ($this->checkUserOrg($orgId)) {
             $class = 'user';
-            $fields = self::getGroupTransFields();
+            $fields = $this->getGroupTransFields();
 
             $model = Organisation::find($orgId)->loadTranslations();
             $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
@@ -3633,9 +3620,9 @@ class UserController extends Controller {
         $params['criteria']['created_by'] = \Auth::user()->id;
         $params['criteria']['group_ids'] = [$orgId];
         $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
-        $dataRq = Request::create('/api/listDataSets', 'POST', $params);
+        $dataRq = Request::create('/api/listDatasets', 'POST', $params);
         $dataApi = new ApiDataSet($dataRq);
-        $datasets = $dataApi->listDataSets($dataRq)->getData();
+        $datasets = $dataApi->listDatasets($dataRq)->getData();
         $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
 
         if ($request->has('delete')) {
@@ -3662,9 +3649,9 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
 
@@ -3716,16 +3703,14 @@ class UserController extends Controller {
 
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -3741,10 +3726,6 @@ class UserController extends Controller {
                 $newURI = $uri;
             } else {
                 $newURI = $editData['uri'];
-            }
-
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
             }
 
             $tagList = $request->offsetGet('tags');
@@ -3776,8 +3757,8 @@ class UserController extends Controller {
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));

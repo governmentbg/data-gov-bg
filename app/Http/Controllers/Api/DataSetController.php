@@ -778,9 +778,23 @@ class DataSetController extends ApiController
             try {
                 $data = DataSet::where('uri', $post['dataset_uri'])
                     ->withCount('userFollow as followers_count')
-                    ->first();
+                    ->with('CustomSetting')
+                    ->first()->loadTranslations();
 
                 if ($data) {
+                    $customFields = [];
+                    $settings = $data->customSetting()->get();
+
+                    if (count($settings)) {
+                        foreach ($settings as $setting) {
+                            $customFields[] = [
+                                'key'    =>$setting->key,
+                                'value'  =>$setting->value
+                            ];
+                        }
+                    }
+
+                    $data['custom_settings'] = $customFields;
                     $data['name'] = $data->name;
                     $data['sla'] = $data->sla;
                     $data['descript'] = $data->descript;

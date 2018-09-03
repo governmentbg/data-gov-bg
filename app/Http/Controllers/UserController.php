@@ -153,7 +153,8 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgId = Organisation::where('uri', $request->uri)->value('id');
+        $org = Organisation::where('uri', $request->uri)->first();
+        $orgId = !is_null($org) ? $org->id : null;
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
@@ -186,7 +187,8 @@ class UserController extends Controller {
                 'class'         => 'user',
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
-                'activeMenu'    => 'organisation'
+                'activeMenu'    => 'organisation',
+                'organisation'  => $org
             ]
         );
     }
@@ -365,6 +367,7 @@ class UserController extends Controller {
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
         if (isset($dataset->data->name)) {
+            $organisation = Organisation::where('id', $dataset->data->org_id)->first();
 
             if (
                 $dataset->data->updated_by == $dataset->data->created_by
@@ -392,10 +395,11 @@ class UserController extends Controller {
         return view(
             'user/orgDatasetView',
             [
-                'class'      => 'user',
-                'dataset'    => $dataset->data,
-                'resources'  => $resources->resources,
-                'activeMenu' => 'organisation'
+                'class'        => 'user',
+                'dataset'      => $dataset->data,
+                'resources'    => $resources->resources,
+                'activeMenu'   => 'organisation',
+                'organisation' => isset($organisation) ? $organisation : null,
             ]
         );
     }
@@ -1627,10 +1631,8 @@ class UserController extends Controller {
      *
      * @return view for browsing org resources
      */
-    public function orgResourceView(Request $request)
+    public function orgResourceView(Request $request, $uri)
     {
-        $uri = $request->uri;
-
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();

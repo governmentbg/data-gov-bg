@@ -217,7 +217,7 @@ class UserController extends AdminController {
             ]);
             $result = $api->getUserSettings($rq)->getData();
             $userSett = isset($result->user) ? $result->user->settings : [];
-            $organisations = $this->getOrgDropdown($id);
+            $organisations = $this->getOrgDropdown($id, null, true);
 
             if ($request->has('remove_role')) {
                 $params = [

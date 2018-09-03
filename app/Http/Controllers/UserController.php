@@ -226,6 +226,9 @@ class UserController extends Controller {
 
             if ($editData['uri'] == $uri) {
                 unset($editData['uri']);
+                $newURI = $uri;
+            } else {
+                $newURI = $editData['uri'];
             }
 
             if (!empty($editData['descript'])) {
@@ -233,9 +236,7 @@ class UserController extends Controller {
             }
 
             $tagList = $request->offsetGet('tags');
-
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
             if ($groupId) {
@@ -271,7 +272,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                return redirect(url('/user/organisations/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -663,6 +664,9 @@ class UserController extends Controller {
 
             if ($editData['uri'] == $uri) {
                 unset($editData['uri']);
+                $newURI = $uri;
+            } else {
+                $newURI = $editData['uri'];
             }
 
             if (!empty($editData['descript'])) {
@@ -670,9 +674,7 @@ class UserController extends Controller {
             }
 
             $tagList = $request->offsetGet('tags');
-
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
             if ($groupId) {
@@ -708,7 +710,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect( url('/user/dataset/edit/'. $success->uri));
+                return redirect(url('/user/dataset/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -3712,6 +3714,9 @@ class UserController extends Controller {
 
             if ($editData['uri'] == $uri) {
                 unset($editData['uri']);
+                $newURI = $uri;
+            } else {
+                $newURI = $editData['uri'];
             }
 
             if (!empty($editData['descript'])) {
@@ -3719,9 +3724,7 @@ class UserController extends Controller {
             }
 
             $tagList = $request->offsetGet('tags');
-
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
             if ($groupId) {
@@ -3757,7 +3760,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                return redirect(url('/user/groups/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 

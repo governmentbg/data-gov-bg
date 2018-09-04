@@ -2785,7 +2785,7 @@ class UserController extends Controller {
                         }
                     }
 
-                    $actObjData[$objType][$dataset->uri] = [
+                    $actObjData[$objType][$dataset->id] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
                         'obj_module'     => Str::lower(__('custom.dataset')),

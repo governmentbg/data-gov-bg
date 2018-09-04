@@ -11334,7 +11334,7 @@ module.exports = Cancel;
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(11);
-module.exports = __webpack_require__(49);
+module.exports = __webpack_require__(52);
 
 
 /***/ }),
@@ -11377,6 +11377,7 @@ __webpack_require__(46);
 // Main js
 __webpack_require__(47);
 __webpack_require__(48);
+__webpack_require__(49);
 
 /***/ }),
 /* 12 */
@@ -31858,7 +31859,7 @@ module.exports = function spread(callback) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.16
+ * Vue.js v2.5.17
  * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
@@ -36947,7 +36948,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.5.16';
+Vue.version = '2.5.17';
 
 /*  */
 
@@ -46466,7 +46467,7 @@ $(function () {
             $('.js-custom-fields').append($('.js-custom-field-set').last().clone());
 
             var $element = $('.js-custom-field-set').last();
-
+            $element.find('.hidden-input').remove();
             $('.js-delete-custom-field').removeClass('hidden');
 
             var index = $element.data('index');
@@ -46557,6 +46558,44 @@ function getInt(string) {
 
 /***/ }),
 /* 48 */
+/***/ (function(module, exports) {
+
+$(function () {
+    if ($('.js-change-pass').length) {
+        $('.js-change-pass').on('submit', function (e) {
+            e.preventDefault();
+            console.log($('.js-change-pass').data('url'));
+            $.ajax({
+                url: $('.js-change-pass').data('url'),
+                type: 'POST',
+                data: $('.js-change-pass').serialize(),
+                success: function success(data) {
+                    var response = JSON.parse(data);
+                    if (response.success) {
+                        $('#js-alert-success').show();
+                        $('.alert-success').fadeTo(3000, 500).slideUp(500, function () {
+                            $('.alert-success').slideUp(500);
+                        });
+                    } else {
+                        $('#js-alert-danger').show();
+                        $('.alert-danger').fadeTo(3000, 500).slideUp(500, function () {
+                            $('.alert-danger').slideUp(500);
+                        });
+                    }
+                },
+                error: function error(jqXHR) {
+                    $('#js-alert-danger').show();
+                    $('.alert-danger').fadeTo(2000, 500).slideUp(500, function () {
+                        $('.alert-danger').alert('close');
+                    });
+                }
+            });
+        });
+    }
+});
+
+/***/ }),
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 $(function () {
@@ -46864,7 +46903,7 @@ $(function () {
 
 $(function () {
     if ($('.js-xml-prev').length) {
-        var format = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"prettify-xml\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+        var format = __webpack_require__(50);
         var xmlData = $(".js-xml-prev").data('xml-data');
         var formattedXml = format(xmlData.trim());
         $('.js-xml-prev').html(formattedXml);
@@ -46872,7 +46911,118 @@ $(function () {
 });
 
 /***/ }),
-/* 49 */
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _os = __webpack_require__(51);
+
+var stringTimesN = function stringTimesN(n, char) {
+  return Array(n + 1).join(char);
+};
+
+// Adapted from https://gist.github.com/sente/1083506
+function prettifyXml(xmlInput) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var _options$indent = options.indent,
+      indentOption = _options$indent === undefined ? 2 : _options$indent,
+      _options$newline = options.newline,
+      newlineOption = _options$newline === undefined ? _os.EOL : _options$newline;
+
+  var indentString = stringTimesN(indentOption, ' ');
+
+  var formatted = '';
+  var regex = /(>)(<)(\/*)/g;
+  var xml = xmlInput.replace(regex, '$1' + newlineOption + '$2$3');
+  var pad = 0;
+  xml.split(/\r?\n/).forEach(function (l) {
+    var line = l.trim();
+
+    var indent = 0;
+    if (line.match(/.+<\/\w[^>]*>$/)) {
+      indent = 0;
+    } else if (line.match(/^<\/\w/)) {
+      // Somehow istanbul doesn't see the else case as covered, although it is. Skip it.
+      /* istanbul ignore else  */
+      if (pad !== 0) {
+        pad -= 1;
+      }
+    } else if (line.match(/^<\w([^>]*[^\/])?>.*$/)) {
+      indent = 1;
+    } else {
+      indent = 0;
+    }
+
+    var padding = stringTimesN(pad, indentString);
+    formatted += padding + line + newlineOption; // eslint-disable-line prefer-template
+    pad += indent;
+  });
+
+  return formatted.trim();
+}
+
+// For non-es2015 usage
+module.exports = prettifyXml;
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports) {
+
+exports.endianness = function () { return 'LE' };
+
+exports.hostname = function () {
+    if (typeof location !== 'undefined') {
+        return location.hostname
+    }
+    else return '';
+};
+
+exports.loadavg = function () { return [] };
+
+exports.uptime = function () { return 0 };
+
+exports.freemem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.totalmem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.cpus = function () { return [] };
+
+exports.type = function () { return 'Browser' };
+
+exports.release = function () {
+    if (typeof navigator !== 'undefined') {
+        return navigator.appVersion;
+    }
+    return '';
+};
+
+exports.networkInterfaces
+= exports.getNetworkInterfaces
+= function () { return {} };
+
+exports.arch = function () { return 'javascript' };
+
+exports.platform = function () { return 'browser' };
+
+exports.tmpdir = exports.tmpDir = function () {
+    return '/tmp';
+};
+
+exports.EOL = '\n';
+
+exports.homedir = function () {
+	return '/'
+};
+
+
+/***/ }),
+/* 52 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

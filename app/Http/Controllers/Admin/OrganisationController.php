@@ -3,9 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\User;
+use App\Module;
+use App\DataSet;
+use App\Category;
+use App\Resource;
 use App\UserSetting;
 use App\Organisation;
 use App\CustomSetting;
+use App\ActionsHistory;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -13,57 +20,13 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class OrganisationController extends AdminController
 {
-    /**
-     * Function for getting an array of translatable fields
-     *
-     * @return array of fields
-     */
-    public static function getTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.activity',
-                'name'     => 'activity_info',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.contact',
-                'name'     => 'contacts',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
     /**
      * Loads a view for browsing organisations
      *
@@ -241,7 +204,7 @@ class OrganisationController extends AdminController
                 'admin/orgRegister',
                 [
                     'class'      => 'user',
-                    'fields'     => self::getTransFields(),
+                    'fields'     => $this->getTransFields(),
                     'parentOrgs' => $parentOrgs
                 ]
             );
@@ -287,37 +250,39 @@ class OrganisationController extends AdminController
      */
     public function edit(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+            ->first();
 
-        if (Role::isAdmin($orgId)) {
+        if (empty($org)) {
+            return redirect('/admin/organisations');
+        }
+
+        if (Role::isAdmin($org->id)) {
             $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
             $parentOrgs = $query->get();
 
-            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+            $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            if (isset($request->view)) {
+            $viewData = [
+                'class'      => 'user',
+                'model'      => $orgModel,
+                'withModel'  => $customModel,
+                'fields'     => $this->getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ];
 
-                return view(
-                    'admin/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                );
+            if (isset($request->view)) {
+                return view('admin/orgEdit', $viewData);
             }
 
             $post = [
                 'api_key'       => Auth::user()->api_key,
                 'data'          => $request->all(),
-                'org_id'        => $orgId,
+                'org_id'        => $org->id,
                 'parentOrgs'    => $parentOrgs,
             ];
 
@@ -336,51 +301,23 @@ class OrganisationController extends AdminController
                 $result = $api->editOrganisation($request)->getData();
                 $errors = !empty($result->errors) ? $result->errors : [];
 
-                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
                 $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
                 $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
                 if ($result->success) {
                     session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($post['data']['uri'])) {
+                        return redirect(url('/admin/organisations/edit/'. $post['data']['uri']));
+                    }
                 } else {
                     session()->flash('alert-danger', __('custom.edit_error'));
                 }
-
-                return !$result->success
-                    ? view(
-                        'admin/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    )->withErrors($result->errors)
-                    : view(
-                        'admin/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    );
-
-                return redirect('/admin/organisations');
             }
-            return view(
-                'admin/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]);
-        }
 
+            return view('admin/orgEdit', $viewData)->withErrors(isset($result->errors) ? $result->errors : []);
+        }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
@@ -608,5 +545,132 @@ class OrganisationController extends AdminController
         }
 
         return view('admin/addOrgMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'organisation'));
+    }
+
+    public function chronology(Request $request, $uri)
+    {
+        $class = 'user';
+        $group = Organisation::where('uri', $uri)->first();
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'org_uri'   => $uri,
+            'locale'    => $locale
+        ];
+
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data)) {
+            $params = [
+                'criteria' => [
+                    'org_ids' => [$result->data->id],
+                    'locale'    => $locale
+                ]
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            $criteria = [
+                'org_ids' => [$result->data->id]
+            ];
+
+            $objType = Module::getModules()[Module::ORGANISATIONS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];;
+                $objTypeRes =Module::getModules()[Module::RESOURCES];;
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 6;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/orgChronology',
+                [
+                    'class'          => $class,
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect('admin/organisations');
     }
 }

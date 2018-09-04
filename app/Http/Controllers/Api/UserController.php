@@ -126,8 +126,6 @@ class UserController extends ApiController
                 $query->whereIn('id', $criteria['user_ids']);
             }
 
-            $query->where('username', '!=', 'system');
-
             $count = $query->count();
 
             if (isset($criteria['order']['field']) && isset($criteria['order']['type'])) {
@@ -204,7 +202,6 @@ class UserController extends ApiController
             $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
             $query = User::whereIn('id', $ids)->with('userToOrgRole');
 
-            $query->where('username', '!=', 'system');
             $count = $query->count();
 
             $query->forPage(

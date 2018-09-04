@@ -62,9 +62,9 @@ class HomeController extends Controller {
         $result = $api->listOrganisations($rq)->getData();
         $organisations = $result->total_records;
 
-        $rq = Request::create('/api/listDataSets', 'POST');
+        $rq = Request::create('/api/listDatasets', 'POST');
         $api = new ApiDataSet($rq);
-        $sets = $api->listDataSets($rq)->getData();
+        $sets = $api->listDatasets($rq)->getData();
         $datasets = $sets->total_records;
 
         return view('/home/index', compact('class', 'updates', 'users', 'organisations', 'datasets'));

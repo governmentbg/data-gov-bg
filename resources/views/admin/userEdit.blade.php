@@ -105,7 +105,7 @@
                     @if ($org != 0 && isset($organisations[$org]))
                         <div class="form-group row">
                                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
-                                <span class="col-sm-3 col-xs-12">{{ $organisations[$org] }} </span>
+                                <span class="col-sm-3 col-xs-12">{{ $organisations[$org]->name }} </span>
                                 <label for="role[{{ $org }}]" class="col-sm-1 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
                                 <div class="col-sm-3">
                                     <select
@@ -117,10 +117,21 @@
                                     >
                                         <option></option>
                                         @foreach ($roles as $role)
-                                            <option
-                                                value="{{ $role->id }}"
-                                                {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
-                                            >{{ $role->name }}</option>
+                                            @if (
+                                                (
+                                                    $organisations[$org]->type != \App\Organisation::TYPE_GROUP
+                                                    && $role->for_org
+                                                )
+                                                || (
+                                                    $organisations[$org]->type == \App\Organisation::TYPE_GROUP
+                                                    && $role->for_group
+                                                )
+                                            )
+                                                <option
+                                                    value="{{ $role->id }}"
+                                                    {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
+                                                >{{ $role->name }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                     <span class="error">{{ $errors->first('role_id') }}</span>
@@ -251,7 +262,24 @@
                     <h2>{{ __('custom.change_password') }}</h2>
                 </div>
                 <div class="modal-body">
-                    <form class="m-t-lg" method="post">
+                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.pass_change_succ') }}</p>
+                    </div>
+                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.pass_change_err') }}</p>
+                    </div>
+                    <form
+                        class="m-t-lg js-change-pass"
+                        method="post"
+                        action="{{ url('/admin/adminChangePassword') }}"
+                        data-url="{{ url('/admin/adminChangePassword') }}"
+                    >
                         {{ csrf_field() }}
                         <div class="form-group row required">
                             <label for="password" class="col-sm-4 col-xs-12 col-form-label">{{ __('custom.new_password') }}:</label>
@@ -275,9 +303,10 @@
                                 >
                             </div>
                         </div>
-
+                        <input type="hidden" name="id" value="{{ $user->id }}">
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
+                                <button class="m-l-md btn btn-primary del-btn" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
                                 <button type="submit" name="change_pass" class="m-l-md btn btn-custom">{{ utrans('custom.save') }}</button>
                             </div>
                         </div>

@@ -8,14 +8,68 @@
             <div class="row">
                 <div class="col-sm-12 user-dataset m-l-10">
                     <h2>{{ $dataset->name }}</h2>
-                    @if ($dataset->status == 1)
-                        <p>{{ __('custom.draft') }}</p>
-                    @else
-                        <p>{{ __('custom.published') }}</p>
-                    @endif
-                    <div class="desc">
-                        {{ $dataset->descript }}
+                    <div class="col-sm-12 p-l-none">
+                        <div class="tags pull-left">
+                            <span class="badge badge-pill">ТАГ</span>
+                            <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
+                            <span class="badge badge-pill">ТАГ</span>
+                        </div>
                     </div>
+                    <p>
+                        @if ($dataset->status == App\DataSet::STATUS_DRAFT)
+                            &nbsp;<span>{{ utrans('custom.draft') }}</span>&nbsp;
+                        @else
+                            &nbsp;<span>{{ utrans('custom.published') }}</span>&nbsp;
+                        @endif
+                        @if ($dataset->visibility == App\DataSet::VISIBILITY_PUBLIC)
+                            &nbsp;<span>{{ utrans('custom.public') }}</span>&nbsp;
+                        @else
+                            &nbsp;<span>{{ utrans('custom.private') }}</span>&nbsp;
+                        @endif
+                        &nbsp;{{ utrans('custom.version') }}:&nbsp;{{ $dataset->version }}
+                    </p>
+                    @if (!empty($dataset->source))
+                        <p>
+                            <strong>{{ __('custom.source') }}:</strong>
+                            &nbsp;{{ $dataset->source }}
+                        </p>
+                    @endif
+                    @if (!empty($dataset->author_name))
+                        <p>
+                            <strong>{{ __('custom.author') }}:</strong>
+                            &nbsp;{{ $dataset->author_name }}
+                        </p>
+                    @endif
+                    @if (!empty($dataset->author_email))
+                        <p>
+                            <strong>{{ __('custom.contact_author') }}:</strong>
+                            &nbsp;{{ $dataset->author_email }}
+                        </p>
+                    @endif
+                    @if (!empty($dataset->support_name))
+                        <p>
+                            <strong>{{ __('custom.contact_support_name') }}:</strong>
+                            &nbsp;{{ $dataset->support_name }}
+                        </p>
+                    @endif
+                    @if (!empty($dataset->support_email))
+                        <p>
+                            <strong>{{ __('custom.contact_support') }}:</strong>
+                            &nbsp;{{ $dataset->support_email }}
+                        </p>
+                    @endif
+                    @if (!empty($dataset->descript))
+                    <p><strong>{{ __('custom.description') }}:</strong></p>
+                    <div class="m-b-sm">
+                        {{ $dataset->description }}
+                    </div>
+                    @endif
+                    @if (!empty($dataset->sla))
+                    <p><strong>{{ __('custom.sla_agreement') }}:</strong></p>
+                    <div class="m-b-sm">
+                        {{ $dataset->sla }}
+                    </div>
+                    @endif
                     <div class="col-sm-12 pull-left m-t-md p-l-none">
                         <div class="pull-left history">
                             @foreach ($resources as $resource)
@@ -38,51 +92,45 @@
                             <li>Отговорник по подръжка: {{ $dataset->support_name }}</li>
                             <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
                             <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
-                            <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
-                            <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
+                            @if (!empty($dataset->updated_by))
+                                <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
+                                <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
+                            @endif
                             <li>.....................................</li>
                         </ul>
-                    </div>
-                    <!-- IF there are old versions of this article -->
-                    <div class="col-xs-12 pull-left m-t-sm p-l-none">
-                        <div class="pull-left history">
-                            <div class="m-b-lg">
-                                <span class="version">{{ utrans('custom.version') }}:&nbsp;{{ $dataset->version }}</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 @if ($general['addResource'])
-                    <div class="col-md-2 col-sm-3 text-left m-l-10">
-                        <a
-                        class="badge badge-pill m-b-sm"
+                <div class="col-md-2 col-sm-3 text-left m-l-10">
+                    <a
+                        class="btn btn-primary"
                         href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
-                        >{{ uctrans('custom.add_resource') }}</a>
-                    </div>
+                    >{{ uctrans('custom.add_resource') }}</a>
+                </div>
                 @endif
                 @if ($buttons[$dataset->uri]['edit'])
-                    <div class="col-md-2 col-sm-3 text-left m-l-10">
-                        <a
-                            class="badge badge-pill m-b-sm"
-                            href="{{ url('/user/dataset/edit/'. $dataset->uri) }}"
-                        >{{ uctrans('custom.edit') }}</a>
-                    </div>
+                <div class="col-md-2 col-sm-3 text-left m-l-10">
+                    <a
+                        class="btn btn-primary"
+                        href="{{ url('/user/dataset/edit/'. $dataset->uri) }}"
+                    >{{ uctrans('custom.edit') }}</a>
+                </div>
                 @endif
                 @if ($buttons[$dataset->uri]['delete'])
-                    <div class="col-md-9 col-sm-8 text-left m-l-10">
-                        <form method="POST">
-                            {{ csrf_field() }}
-                            <button
-                                class="badge badge-pill m-b-sm del-btn"
-                                type="submit"
-                                name="delete"
-                                data-confirm="{{ __('custom.remove_data') }}"
-                            >{{ uctrans('custom.remove') }}</button>
-                            <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
-                        </form>
-                    </div>
+                <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-md">
+                    <form method="POST">
+                        {{ csrf_field() }}
+                        <button
+                            class="btn del-btn btn-primary"
+                            type="submit"
+                            name="delete"
+                            data-confirm="{{ __('custom.remove_data') }}"
+                        >{{ uctrans('custom.remove') }}</button>
+                        <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
+                    </form>
+                </div>
                 @endif
             </div>
         @endif

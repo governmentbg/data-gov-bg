@@ -4,10 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class DataSetSubCategory extends Model
+class DataSetTags extends Model
 {
     protected $guarded = [];
-    protected $table = 'data_set_sub_categories';
+    protected $table = 'data_set_tags';
     public $timestamps = false;
 
     public function dataSet()
@@ -15,8 +15,8 @@ class DataSetSubCategory extends Model
         return $this->belongsTo('App\DataSet');
     }
 
-    public function category()
+    public function tag()
     {
-        return $this->belongsTo('App\Category');
+        return $this->belongsTo('App\Tag');
     }
 }

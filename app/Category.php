@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Laravel\Scout\Searchable;
 use App\Translator\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\TranslatableInterface;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Traits\RecordSignature;
 
 class Category extends Model implements TranslatableInterface
 {
+    use Searchable;
     use Translatable;
     use RecordSignature;
 
@@ -38,6 +40,13 @@ class Category extends Model implements TranslatableInterface
     public function tags()
     {
         return $this->hasMany('App\Category', 'parent_id');
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'name' => $this->concatTranslations('name'),
+        ];
     }
 
 }

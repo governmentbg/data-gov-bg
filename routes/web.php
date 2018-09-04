@@ -84,6 +84,9 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/admin/terms-of-use-request/edit/{id}', 'Admin\TermsOfUseRequestController@edit');
     Route::match(['get', 'post'], '/admin/terms-of-use-request/delete/{id}', 'Admin\TermsOfUseRequestController@delete');
 
+    Route::match(['get', 'post'], '/admin/themes/list', 'Admin\ThemeController@list');
+    Route::match(['get', 'post'], '/admin/subthemes/list/{id}', 'Admin\SubThemeController@list');
+
     Route::match(['get', 'post'], '/admin/users', 'Admin\UserController@list');
     Route::match(['get', 'post'], '/admin/users/search', 'Admin\UserController@search');
     Route::match(['get', 'post'], '/admin/users/create', 'Admin\UserController@create');

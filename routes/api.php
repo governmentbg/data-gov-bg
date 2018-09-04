@@ -56,6 +56,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('deleteSection', 'Api\SectionController@deleteSection');
     Route::post('listSections', 'Api\SectionController@listSections');
     Route::post('listSubsections', 'Api\SectionController@listSubsections');
+    Route::post('isParent', 'Api\SectionController@isParent');
 
     Route::post('listThemes', 'Api\ThemeController@listThemes');
 

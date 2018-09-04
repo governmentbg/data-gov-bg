@@ -593,4 +593,7 @@ return [
     'for_group' => 'За Група',
     'additional_fields' => 'Допълнителни полета',
     'id' => 'ИД',
+    'tags_h' => 'Eтикети',
+    'main_themes_list' => 'Списък основни теми',
+    'categories_list' => 'Списък с категории',
 ];

@@ -595,4 +595,7 @@ return [
     'for_group' => 'For group',
     'additional_fields' => 'Additional fields',
     'id' => 'ID',
+    'tags_h' => 'Tags',
+    'main_themes_list' => 'Main themes list',
+    'categories_list' => 'Categories list',
 ];

@@ -15696,6 +15696,10 @@ textarea {
   }
 }
 
+.long-badge {
+  padding: 5px 40px;
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;

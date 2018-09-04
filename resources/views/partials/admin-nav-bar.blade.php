@@ -69,7 +69,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'topicsSubtopics' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/themes/list') }}"
                             >{{ __('custom.topics_subtopics') }}</a>
                         </li>
                         <li>

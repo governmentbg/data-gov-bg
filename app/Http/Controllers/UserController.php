@@ -4308,7 +4308,6 @@ class UserController extends Controller {
                     $res = $api->listActionHistory($rq)->getData();
                     $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
                     $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
-                    error_log('paginationData[]: '. print_r($paginationData['items'], true));
                 }
             }
 

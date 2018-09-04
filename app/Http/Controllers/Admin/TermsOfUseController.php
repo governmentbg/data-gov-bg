@@ -19,7 +19,7 @@ class TermsOfUseController extends AdminController
      *
      * @return array of fields
      */
-    public static function getTransFields()
+    public static function getTermsTransFields()
     {
         return [
             [
@@ -65,7 +65,7 @@ class TermsOfUseController extends AdminController
             }
         }
 
-        return view('admin/termsOfUseAdd', ['class' => 'user', 'fields' => self::getTransFields()]);
+        return view('admin/termsOfUseAdd', ['class' => 'user', 'fields' => self::getTermsTransFields()]);
     }
 
     /**
@@ -107,7 +107,7 @@ class TermsOfUseController extends AdminController
     {
         if (Role::isAdmin()) {
             $class = 'user';
-            $fields = self::getTransFields();
+            $fields = self::getTermsTransFields();
 
             $model = TermsOfUse::find($id)->loadTranslations();
 

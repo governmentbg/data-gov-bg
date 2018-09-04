@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\TermsOfUse;
 use App\ActionsHistory;
 use App\Module;
+use App\DataSet;
 
 
 class TermsOfUseController extends ApiController
@@ -180,6 +181,10 @@ class TermsOfUseController extends ApiController
         }
 
         try {
+            DataSet::withTrashed()
+                ->where('terms_of_use_id', $post['terms_id'])
+                ->update(['terms_of_use_id' => null]);
+
             $terms->delete();
         } catch (QueryException $ex) {
             Log::error($ex->getMessage());
@@ -225,6 +230,8 @@ class TermsOfUseController extends ApiController
             if ($request->filled('criteria.active')) {
                 $query->where('active', '=', $request->input('criteria.active'));
             }
+
+            $query->orderBy('ordering', 'asc');
 
             $total_records = $query->count();
 

@@ -18,7 +18,7 @@ class DocumentController extends AdminController
      *
      * @return array of fields
      */
-    public static function getTransFields($edit = false)
+    public static function getDocTransFields($edit = false)
     {
         return [
             [
@@ -184,7 +184,7 @@ class DocumentController extends AdminController
                 }
             }
 
-            return view('admin/documentsAdd', ['class' => 'user', 'fields' => self::getTransFields()]);
+            return view('admin/documentsAdd', ['class' => 'user', 'fields' => self::getDocTransFields()]);
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
@@ -244,7 +244,7 @@ class DocumentController extends AdminController
     {
         if (Role::isAdmin()) {
             $class = 'user';
-            $fields = self::getTransFields(true);
+            $fields = self::getDocTransFields(true);
 
             $model = Document::find($id)->loadTranslations();
 

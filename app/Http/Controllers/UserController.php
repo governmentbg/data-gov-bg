@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Role;
+use App\Tags;
 use App\User;
 use App\Locale;
 use App\Module;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\TagController as ApiTags;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
@@ -44,161 +46,6 @@ use App\Http\Controllers\Api\CustomSettingsController as ApiCustomSettings;
 use App\Http\Controllers\Api\TermsOfUseRequestController as ApiTermsOfUseRequest;
 
 class UserController extends Controller {
-    /**
-     * Function for getting an array of translatable fields
-     *
-     * @return array of fields
-     */
-    public static function getTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.activity',
-                'name'     => 'activity_info',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.contact',
-                'name'     => 'contacts',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-     /**
-     * Function for getting an array of translatable fields for datasets
-     *
-     * @return array of fields
-     */
-    public static function getDatasetTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.label',
-                'name'     => 'tags',
-                'type'     => 'text',
-                'view'     => 'translation_tags',
-                'required' => false,
-            ],
-            [
-                'label'    => 'custom.sla_agreement',
-                'name'     => 'sla',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    /**
-     * Function for getting an array of translatable fields for groups
-     *
-     * @return array of fields
-     */
-    public static function getGroupTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
-    public static function getResourceTransFields()
-    {
-        return [
-            [
-                'label'    => 'custom.label_name',
-                'name'     => 'name',
-                'type'     => 'text',
-                'view'     => 'translation',
-                'required' => true,
-            ],
-            [
-                'label'    => 'custom.description',
-                'name'     => 'descript',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
-                'label'    => ['custom.title', 'custom.value'],
-                'name'     => 'custom_fields',
-                'type'     => 'text',
-                'view'     => 'translation_custom',
-                'val'      => ['key', 'value'],
-                'required' => false,
-            ],
-        ];
-    }
-
     /**
      * Show the application dashboard.
      *
@@ -228,9 +75,9 @@ class UserController extends Controller {
             'page_number'       => !empty($request->page) ? $request->page : 1,
         ];
 
-        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($rq);
-        $result = $api->listDataSets($rq)->getData();
+        $result = $api->listDatasets($rq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
@@ -404,16 +251,17 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgId = Organisation::where('uri', $request->uri)->value('id');
+        $org = Organisation::where('uri', $request->uri)->first();
+        $orgId = !is_null($org) ? $org->id : null;
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
             $params['criteria']['created_by'] = \Auth::user()->id;
             $params['criteria']['org_ids'] = [$orgId];
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
-            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $rq = Request::create('/api/listDatasets', 'POST', $params);
             $api = new ApiDataSet($rq);
-            $datasets = $api->listDataSets($rq)->getData();
+            $datasets = $api->listDatasets($rq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
             $paginationData = $this->getPaginationData([], 0, [], $perPage);
@@ -504,7 +352,8 @@ class UserController extends Controller {
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => 'organisation',
                 'buttons'       => $buttons,
-                'general'       => $general
+                'general'       => $general,
+                'organisation'  => $org
             ]
         );
     }
@@ -534,27 +383,32 @@ class UserController extends Controller {
 
 
         $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
+        $setGroups = [];
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+
+        if (!empty($model->dataSetGroup)) {
+            foreach ($model->dataSetGroup as $record) {
+                $setGroups[] = $record->group_id;
+            }
+        }
+
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -567,33 +421,28 @@ class UserController extends Controller {
 
             if ($editData['uri'] == $uri) {
                 unset($editData['uri']);
-            }
-
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
+                $newURI = $uri;
+            } else {
+                $newURI = $editData['uri'];
             }
 
             $tagList = $request->offsetGet('tags');
-
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
-            if ($groupId) {
-                $post = [
-                    'api_key'       => Auth::user()->api_key,
-                    'data_set_uri'  => $uri,
-                    'group_id'      => $groupId,
-                ];
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
 
-                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-                $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
 
-                if (!$added->success) {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return redirect()->back()->withInput()->withErrors($added->errors);
-                }
+                return redirect()->back()->withInput()->withErrors($added->errors);
             }
 
             if ($request->has('publish')) {
@@ -606,13 +455,13 @@ class UserController extends Controller {
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                return redirect(url('/user/organisations/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -631,8 +480,9 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
-            'fields'        => self::getDatasetTransFields(),
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'setGroups'     => $setGroups,
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -682,9 +532,9 @@ class UserController extends Controller {
 
         $general['addResource'] = $rightCheck;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         // prepera request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
@@ -770,9 +620,9 @@ class UserController extends Controller {
 
         $buttons['addResource'] = $rightCheck;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
 
@@ -781,6 +631,7 @@ class UserController extends Controller {
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
         if (isset($dataset->data->name)) {
+            $organisation = Organisation::where('id', $dataset->data->org_id)->first();
 
             if (
                 $dataset->data->updated_by == $dataset->data->created_by
@@ -808,11 +659,12 @@ class UserController extends Controller {
         return view(
             'user/orgDatasetView',
             [
-                'class'      => 'user',
-                'dataset'    => $dataset->data,
-                'resources'  => $resources->resources,
-                'activeMenu' => 'organisation',
-                'buttons'    => $buttons
+                'class'        => 'user',
+                'dataset'      => $dataset->data,
+                'resources'    => $resources->resources,
+                'activeMenu'   => 'organisation',
+                'organisation' => isset($organisation) ? $organisation : null,
+                'buttons'      => $buttons
             ]
         );
     }
@@ -844,9 +696,29 @@ class UserController extends Controller {
         $params['api_key'] = \Auth::user()->api_key;
         $params['dataset_uri'] = $uri;
 
-        $request = Request::create('/api/deleteDataSet', 'POST', $params);
+        $request = Request::create('/api/deleteDataset', 'POST', $params);
         $api = new ApiDataSet($request);
-        $datasets = $api->deleteDataSet($request)->getData();
+        $datasets = $api->deleteDataset($request)->getData();
+
+        return $datasets->success;
+    }
+
+    /**
+     * Attempts to delete a dataset based on uri
+     *
+     * @param Request $request
+     * @return true on success and false on failure
+     *
+     */
+    public function removeDataset($groupId, $uri)
+    {
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['group_id'] = $groupId;
+        $params['data_set_uri'] = $uri;
+
+        $request = Request::create('/api/removeDataSetFromGroup', 'POST', $params);
+        $api = new ApiDataSet($request);
+        $datasets = $api->removeDataSetFromGroup($request)->getData();
 
         return $datasets->success;
     }
@@ -900,16 +772,16 @@ class UserController extends Controller {
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
 
-            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $save = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataset($savePost)->getData();
 
             if ($save->success) {
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $api->addDataSetToGroup($addGroup)->getData();
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $api->addDatasetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -933,8 +805,8 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
-            'fields'        => self::getDatasetTransFields(),
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -968,17 +840,17 @@ class UserController extends Controller {
             // make request to API
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
-            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $save = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataset($savePost)->getData();
 
             if ($save->success) {
                 // connect data set to group
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $api->addDataSetToGroup($addGroup)->getData();
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $api->addDatasetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -1002,8 +874,8 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
-            'fields'        => self::getDatasetTransFields(),
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -1045,16 +917,16 @@ class UserController extends Controller {
 
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
-            $savePost = Request::create('/api/addDataSet', 'POST', $params);
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
-            $save = $api->addDataSet($savePost)->getData();
+            $save = $api->addDataset($savePost)->getData();
 
             if ($save->success) {
                 if (isset($groupId)) {
                     $groupParams['group_id'] = $groupId;
                     $groupParams['data_set_uri'] = $save->uri;
-                    $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-                    $api->addDataSetToGroup($addGroup)->getData();
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $api->addDatasetToGroup($addGroup)->getData();
                 }
 
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -1078,8 +950,8 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
-            'fields'        => self::getDatasetTransFields(),
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -1087,11 +959,11 @@ class UserController extends Controller {
      * Returns a view for editing a dataset
      *
      * @param Request $request
-     * @param Dataset $datasetModel
+     * @param Dataset $
      *
      * @return view for editing a dataset
      */
-    public function datasetEdit(Request $request, DataSet $datasetModel, $uri)
+    public function datasetEdit(Request $request, $uri)
     {
         $datasetData = DataSet::where('uri', $uri)->first();
         $buttons = '';
@@ -1122,28 +994,32 @@ class UserController extends Controller {
 
         $buttons['addResource'] = $rightCheck;
 
-        $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
+        $visibilityOptions = Dataset::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
+        $setGroups = [];
         $params = ['dataset_uri' => $uri];
-
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+
+        if (!empty($model->dataSetGroup)) {
+            foreach ($model->dataSetGroup as $record) {
+                $setGroups[] = $record->group_id;
+            }
+        }
+
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -1156,33 +1032,27 @@ class UserController extends Controller {
 
             if ($editData['uri'] == $uri) {
                 unset($editData['uri']);
+                $newURI = $uri;
+            } else {
+                $newURI = $editData['uri'];
             }
-
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
-            }
-
-            $tagList = $request->offsetGet('tags');
 
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
-            if ($groupId) {
-                $post = [
-                    'api_key'       => Auth::user()->api_key,
-                    'data_set_uri'  => $uri,
-                    'group_id'      => $groupId,
-                ];
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
 
-                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-                $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
 
-                if (!$added->success) {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return redirect()->back()->withInput()->withErrors($added->errors);
-                }
+                return redirect()->back()->withInput()->withErrors($added->errors);
             }
 
             if ($request->has('publish')) {
@@ -1195,13 +1065,13 @@ class UserController extends Controller {
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                return redirect(url('/user/dataset/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -1220,8 +1090,9 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
-            'fields'        => self::getDatasetTransFields(),
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'setGroups'     => $setGroups,
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -1274,22 +1145,6 @@ class UserController extends Controller {
                 }
             }
 
-            if ($request->has('change_pass')) {
-                $oldPass = $request->offsetGet('old_password');
-
-                if (Hash::check($oldPass, $user['password'])) {
-                    $saveData = [
-                        'api_key'   => $user['api_key'],
-                        'id'        => $user['id'],
-                        'data'      => [
-                            'password'          => $request->offsetGet('password'),
-                            'password_confirm'  => $request->offsetGet('password_confirm'),
-                        ],
-                    ];
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.wrong_password'));
-                }
-            }
 
             if ($request->has('generate_key')) {
                 $data = [
@@ -1349,6 +1204,32 @@ class UserController extends Controller {
         }
 
         return redirect('/');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $id = $request->offsetGet('id');
+        $user = User::find($id);
+        $oldPass = $request->offsetGet('old_password');
+
+        if (Hash::check($oldPass, $user->password)) {
+            $passData = [
+                'api_key'   => Auth::user()->api_key,
+                'id'        => $id,
+                'data'      => [
+                    'password'          => $request->offsetGet('password'),
+                    'password_confirm'  => $request->offsetGet('password_confirm'),
+                ],
+            ];
+
+            $editPost = Request::create('api/editUser', 'POST', $passData);
+            $api = new ApiUser($editPost);
+            $result = $api->editUser($editPost)->getData();
+        } else {
+            $result = ['success' => false];
+        }
+
+        return json_encode($result);
     }
 
     /**
@@ -1444,15 +1325,15 @@ class UserController extends Controller {
             ? view(
                 'user/orgRegistration',
                 [
-                    'class' => 'user',
-                    'fields'=> self::getTransFields(),
+                    'class'     => 'user',
+                    'fields'    => $this->getTransFields(),
                 ]
             )->withErrors($result->errors)
             : view(
                 'user/orgRegistration',
                 [
-                    'class' => 'user',
-                    'fields'=> self::getTransFields(),
+                    'class'     => 'user',
+                    'fields'    => $this->getTransFields(),
                 ]
             );
     }
@@ -1608,6 +1489,7 @@ class UserController extends Controller {
                         'resourceUri'   => $result->data->uri,
                     ];
                         // check uploded file extention and use the corresponding converter
+                    if (!empty($extension) && $metadata['data']['type'] !== Resource::TYPE_HYPERLINK) {
                         switch ($extension) {
                             case 'json':
                                 Session::put('elasticData', json_decode($content, true));
@@ -1656,6 +1538,7 @@ class UserController extends Controller {
 
                                 return view('user/resourceImportXml', $importViewData);
                         }
+                    }
 
                     return redirect()->route('datasetView', ['uri' => $datasetUri]);
                 }
@@ -1673,7 +1556,7 @@ class UserController extends Controller {
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => self::getResourceTransFields()
+            'fields'    => $this->getResourceTransFields()
         ]);
     }
 
@@ -1893,7 +1776,7 @@ class UserController extends Controller {
             'class'     => 'user',
             'uri'       => $datasetUri,
             'types'     => $types,
-            'fields'    => self::getResourceTransFields()
+            'fields'    => $this->getResourceTransFields()
         ]);
     }
 
@@ -2011,7 +1894,7 @@ class UserController extends Controller {
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => self::getResourceTransFields()
+            'fields'    => $this->getResourceTransFields()
         ]);
     }
 
@@ -2160,7 +2043,7 @@ class UserController extends Controller {
      *
      * @return view for browsing org resources
      */
-    public function orgResourceView(Request $request)
+    public function orgResourceView(Request $request, $uri)
     {
         $uri = $request->uri;
 
@@ -2926,7 +2809,7 @@ class UserController extends Controller {
             'user/orgRegister',
             [
                 'class'      => 'user',
-                'fields'     => self::getTransFields(),
+                'fields'     => $this->getTransFields(),
                 'parentOrgs' => $parentOrgs
             ]
         );
@@ -2967,11 +2850,11 @@ class UserController extends Controller {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
         }
 
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+            ->first();
 
-        if ($this->checkUserOrg($orgId)) {
+        if (!empty($org) && $this->checkUserOrg($org->id)) {
             $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
             $query->whereHas('userToOrgRole', function($q) {
@@ -2980,27 +2863,25 @@ class UserController extends Controller {
 
             $parentOrgs = $query->get();
 
-            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+            $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            if (isset($request->view)) {
+            $viewData = [
+                'class'      => 'user',
+                'model'      => $orgModel,
+                'withModel'  => $customModel,
+                'fields'     => $this->getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ];
 
-                return view(
-                    'user/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => self::getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                );
+            if (isset($request->view)) {
+                return view('user/orgEdit', $viewData);
             }
 
             $post = [
                 'data'          => $request->all(),
-                'org_id'        => $orgId,
+                'org_id'        => $org->id,
                 'parentOrgs'    => $parentOrgs,
             ];
 
@@ -3019,95 +2900,25 @@ class UserController extends Controller {
                 $result = $api->editOrganisation($request)->getData();
                 $errors = !empty($result->errors) ? $result->errors : [];
 
-                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
                 $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
                 $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
                 if ($result->success) {
                     session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($post['data']['uri'])) {
+                        return redirect(url('/user/organisations/edit/'. $post['data']['uri']));
+                    }
                 } else {
                     session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.edit_error'));
                 }
-
-                return !$result->success
-                    ? view(
-                        'user/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    )->withErrors($result->errors)
-                    : view(
-                        'user/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => self::getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    );
             }
 
-            return view(
-                'user/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => self::getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]);
+            return view('user/orgEdit', $viewData)->withErrors(isset($result->errors) ? $result->errors : []);
         }
 
         return redirect('/user/organisations');
-    }
-
-    /**
-     * Prepares an array of categories
-     *
-     * @return array categories
-     */
-    private function prepareMainCategories()
-    {
-        $params['api_key'] = \Auth::user()->api_key;
-        $params['criteria']['active'] = 1;
-        $request = Request::create('/api/listMainCategories', 'POST', $params);
-        $api = new ApiCategory($request);
-        $result = $api->listMainCategories($request)->getData();
-        $categories = [];
-
-        foreach ($result->categories as $row) {
-            $categories[$row->id] = $row->name;
-        }
-
-        return $categories;
-    }
-
-    /**
-     * Prepares an array of terms of use
-     *
-     * @return array termsOfUse
-     */
-    private function prepareTermsOfUse()
-    {
-        $params['api_key'] = \Auth::user()->api_key;
-        $params['criteria']['active'] = 1;
-        $request = Request::create('/api/listTermsOfUse', 'POST', $params);
-        $api = new ApiTermsOfUse($request);
-        $result = $api->listTermsOfUse($request)->getData();
-        $termsOfUse = [];
-
-        if (isset($result->terms_of_use)) {
-            foreach ($result->terms_of_use as $row) {
-                $termsOfUse[$row->id] = $row->name;
-            }
-        }
-
-        return $termsOfUse;
     }
 
     /**
@@ -3117,7 +2928,12 @@ class UserController extends Controller {
      */
     private function prepareOrganisations()
     {
-        $params['criteria']['user_id'] = \Auth::user()->id;
+        $params = [];
+
+        if (!Role::isAdmin()) {
+            $params['criteria']['user_id'] = \Auth::user()->id;
+        }
+
         $request = Request::create('/api/listOrganisations', 'POST', $params);
         $api = new ApiOrganisation($request);
         $result = $api->listOrganisations($request)->getData();
@@ -3137,7 +2953,12 @@ class UserController extends Controller {
      */
     private function prepareGroups()
     {
-        $params['criteria']['user_id'] = \Auth::user()->id;
+        $params = [];
+
+        if (!Role::isAdmin()) {
+            $params['criteria']['user_id'] = \Auth::user()->id;
+        }
+
         $request = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($request);
         $result = $api->listGroups($request)->getData();
@@ -3264,7 +3085,7 @@ class UserController extends Controller {
                     $res = $api->listOrganisations($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->organisations)) {
-                        $objType = Module::getModuleName(Module::ORGANISATIONS);
+                        $objType = Module::getModules()[Module::ORGANISATIONS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->organisations as $org) {
@@ -3310,7 +3131,7 @@ class UserController extends Controller {
                     $res = $api->listGroups($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->groups)) {
-                        $objType = Module::getModuleName(Module::GROUPS);
+                        $objType = Module::getModules()[Module::GROUPS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->groups as $group) {
@@ -3345,8 +3166,8 @@ class UserController extends Controller {
                 if (!empty($userFollows['category_id'])) {
                     $params = [
                         'criteria' => [
-                            'category_ids' => $userFollows['category_id'],
-                            'locale' => $locale
+                            'category_ids'  => $userFollows['category_id'],
+                            'locale'        => $locale
                         ]
                     ];
 
@@ -3355,7 +3176,7 @@ class UserController extends Controller {
                     $res = $api->listMainCategories($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->categories)) {
-                        $objType = Module::getModuleName(Module::MAIN_CATEGORIES);
+                        $objType = Module::getModules()[Module::MAIN_CATEGORIES];
                         $actObjData[$objType] = [];
 
                         foreach ($res->categories as $category) {
@@ -3390,17 +3211,16 @@ class UserController extends Controller {
                 if (!empty($userFollows['tag_id'])) {
                     $params = [
                         'criteria' => [
-                            'tag_ids' => $userFollows['tag_id'],
-                            'locale' => $locale
+                            'tag_ids'   => $userFollows['tag_id'],
                         ]
                     ];
 
                     $rq = Request::create('/api/listTags', 'POST', $params);
-                    $api = new ApiCategory($rq);
+                    $api = new ApiTags($rq);
                     $res = $api->listTags($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->tags)) {
-                        $objType = Module::getModuleName(Module::MAIN_CATEGORIES);
+                        $objType = Module::getModules()[Module::TAGS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->tags as $tag) {
@@ -3447,7 +3267,7 @@ class UserController extends Controller {
                     $res = $api->listUsers($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->users)) {
-                        $objType = Module::getModuleName(Module::USERS);
+                        $objType = Module::getModules()[Module::USERS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->users as $followUser) {
@@ -3497,7 +3317,7 @@ class UserController extends Controller {
 
             // user profile actions
             if (!isset($filters[$filter])) {
-                $objType = Module::getModuleName(Module::USERS);
+                $objType = Module::getModules()[Module::USERS];
 
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
@@ -3573,12 +3393,12 @@ class UserController extends Controller {
      * @return void
      */
     private function prepareNewsFeedDatasets($params, &$criteria, &$actObjData, &$filters, $filter, $objIdFilter = false) {
-        $rq = Request::create('/api/listDataSets', 'POST', $params);
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($rq);
-        $res = $api->listDataSets($rq)->getData();
+        $res = $api->listDatasets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
-            $objType = Module::getModuleName(Module::DATA_SETS);
+            $objType = Module::getModules()[Module::DATA_SETS];
 
             if (!isset($actObjData[$objType])) {
                 $actObjData[$objType] = [];
@@ -3631,7 +3451,7 @@ class UserController extends Controller {
                         }
                     }
 
-                    $actObjData[$objType][$dataset->id] = [
+                    $actObjData[$objType][$dataset->uri] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
                         'obj_module'     => Str::lower(__('custom.dataset')),
@@ -3647,7 +3467,7 @@ class UserController extends Controller {
                     $criteria['dataset_ids'][] = $dataset->id;
 
                     if (!empty($dataset->resource)) {
-                        $objTypeRes = Module::getModuleName(Module::RESOURCES);
+                        $objTypeRes = Module::getModules()[Module::RESOURCES];
 
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
@@ -4127,7 +3947,7 @@ class UserController extends Controller {
         }
 
         $class = 'user';
-        $fields = self::getGroupTransFields();
+        $fields = $this->getGroupTransFields();
 
         if ($request->has('create')) {
             $data = $request->all();
@@ -4382,9 +4202,9 @@ class UserController extends Controller {
      */
     public function editGroup(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->where('type', Organisation::TYPE_GROUP)
-            ->value('id');
+            ->first();
 
         $groupData = Organisation::where('uri', $uri)->first();
 
@@ -4404,12 +4224,12 @@ class UserController extends Controller {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
         }
 
-        if ($this->checkUserOrg($orgId)) {
+        if (!empty($org) && $this->checkUserOrg($org->id)) {
             $class = 'user';
-            $fields = self::getGroupTransFields();
+            $fields = $this->getGroupTransFields();
 
-            $model = Organisation::find($orgId)->loadTranslations();
-            $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
+            $model = Organisation::find($org->id)->loadTranslations();
+            $withModel = CustomSetting::where('org_id', $org->id)->get()->loadTranslations();
             $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
             if ($request->has('edit')) {
@@ -4424,7 +4244,7 @@ class UserController extends Controller {
 
                 $params = [
                     'api_key'   => Auth::user()->api_key,
-                    'group_id'  => $orgId,
+                    'group_id'  => $org->id,
                     'data'      => $data,
                 ];
 
@@ -4434,6 +4254,10 @@ class UserController extends Controller {
 
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($params['data']['uri'])) {
+                        return redirect(url('/user/groups/edit/'. $params['data']['uri']));
+                    }
                 } else {
                     $request->session()->flash('alert-danger', __('custom.edit_error'));
                 }
@@ -4476,12 +4300,7 @@ class UserController extends Controller {
             }
         }
 
-        return view(
-            'user/forgottenPassword',
-            [
-                'class' => 'index',
-            ]
-        )->with('errors', $errors);
+        return view('user/forgottenPassword', ['class' => 'index'])->with('errors', $errors);
     }
 
     /**
@@ -4583,9 +4402,9 @@ class UserController extends Controller {
         $params['criteria']['created_by'] = \Auth::user()->id;
         $params['criteria']['group_ids'] = [$orgId];
         $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
-        $dataRq = Request::create('/api/listDataSets', 'POST', $params);
+        $dataRq = Request::create('/api/listDatasets', 'POST', $params);
         $dataApi = new ApiDataSet($dataRq);
-        $datasets = $dataApi->listDataSets($dataRq)->getData();
+        $datasets = $dataApi->listDatasets($dataRq)->getData();
         $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
 
         $buttons = '';
@@ -4645,7 +4464,7 @@ class UserController extends Controller {
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
-            if ($this->datasetDelete($uri)) {
+            if ($this->removeDataset($orgId, $uri)) {
                 $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
                 $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
@@ -4714,9 +4533,9 @@ class UserController extends Controller {
 
         $params['dataset_uri'] = $uri;
 
-        $detailsReq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDataSetDetails($detailsReq)->getData();
+        $dataset = $api->getDatasetDetails($detailsReq)->getData();
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
 
@@ -4776,27 +4595,32 @@ class UserController extends Controller {
         $buttons['addResource'] = $rightCheck;
 
         $visibilityOptions = $datasetModel->getVisibility();
-        $mainCategories = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $errors = [];
+        $setGroups = [];
         $params = ['dataset_uri' => $uri];
 
         $model = DataSet::where('uri', $uri)->with('dataSetGroup')->first()->loadTranslations();
+
+        if (!empty($model->dataSetGroup)) {
+            foreach ($model->dataSetGroup as $record) {
+                $setGroups[] = $record->group_id;
+            }
+        }
+
         $hasResources = Resource::where('data_set_id', $model->id)->count();
         $withModel = CustomSetting::where('data_set_id', $model->id)->get()->loadTranslations();
-        $tagModel = Category::where('parent_id', $model->category_id)
-            ->whereHas('dataSetSubCategory', function($q) use($model) {
+        $tagModel = Tags::whereHas('dataSetTags', function($q) use ($model) {
                 $q->where('data_set_id', $model->id);
             })
-            ->get()
-            ->loadTranslations();
+            ->get();
 
-        $setRq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $setRq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($setRq);
-        $result = $api->getDataSetDetails($setRq)->getData();
+        $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
             $request->session()->flash('alert-danger', __('custom.no_dataset'));
@@ -4809,33 +4633,28 @@ class UserController extends Controller {
 
             if ($editData['uri'] == $uri) {
                 unset($editData['uri']);
-            }
-
-            if (!empty($editData['descript'])) {
-                $editData['description'] = $editData['descript'];
+                $newURI = $uri;
+            } else {
+                $newURI = $editData['uri'];
             }
 
             $tagList = $request->offsetGet('tags');
-
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
-            if ($groupId) {
-                $post = [
-                    'api_key'       => Auth::user()->api_key,
-                    'data_set_uri'  => $uri,
-                    'group_id'      => $groupId,
-                ];
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
 
-                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-                $added = $api->addDataSetToGroup($addGroup)->getData();
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
 
-                if (!$added->success) {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return redirect()->back()->withInput()->withErrors($added->errors);
-                }
+                return redirect()->back()->withInput()->withErrors($added->errors);
             }
 
             if ($request->has('publish')) {
@@ -4848,13 +4667,13 @@ class UserController extends Controller {
                 'data'          => $editData,
             ];
 
-            $editRq = Request::create('/api/editDataSet', 'POST', $edit);
-            $success = $api->editDataSet($editRq)->getData();
+            $editRq = Request::create('/api/editDataset', 'POST', $edit);
+            $success = $api->editDataset($editRq)->getData();
 
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                return redirect(url('/user/groups/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -4873,8 +4692,8 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
-            'fields'        => self::getDatasetTransFields(),
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
@@ -5215,28 +5034,6 @@ class UserController extends Controller {
         return view('user/addGroupMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'group'));
     }
 
-    public function prepareTags($data)
-    {
-        if (isset($data['tags'])) {
-            $tagData = [];
-            $editData = [];
-
-            foreach ($data['tags'] as $lang => $string) {
-                $tagData[$lang] = array_values(explode(',', $string));
-            }
-
-            foreach ($tagData as $lang => $tags) {
-                foreach ($tags as $tag) {
-                    $editData[] = [$lang => $tag];
-                }
-            }
-
-            $data['tags'] = $editData;
-        }
-
-        return $data;
-    }
-
     public function deleteCustomSettings(Request $request)
     {
         $id = $request->offsetGet('id');
@@ -5249,5 +5046,259 @@ class UserController extends Controller {
         $result = $api->delete($rq)->getData();
 
         return ['success' => $result->success];
+    }
+
+    public function groupChronology(Request $request, $uri)
+    {
+        $class = 'user';
+        $group = Organisation::where('uri', $uri)->first();
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'group_uri' => $uri,
+            'locale'    => $locale
+        ];
+
+        $rq = Request::create('/api/getGroupDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getGroupDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data)) {
+            $params = [
+                'criteria' => [
+                    'group_ids' => [$result->data->id],
+                    'locale'    => $locale
+                ]
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            $criteria = [
+                'group_ids' => [$result->data->id]
+            ];
+
+            $objType = Module::getModules()[Module::GROUPS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];
+                $objTypeRes =Module::getModules()[Module::RESOURCES];
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 6;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/groupChronology',
+                [
+                    'class'          => $class,
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect('user/groups');
+    }
+
+    public function orgChronology(Request $request, $uri)
+    {
+        $class = 'user';
+        $group = Organisation::where('uri', $uri)->first();
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'org_uri'   => $uri,
+            'locale'    => $locale
+        ];
+
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data)) {
+            $params = [
+                'criteria' => [
+                    'org_ids' => [$result->data->id],
+                    'locale'    => $locale
+                ]
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            $criteria = [
+                'org_ids' => [$result->data->id]
+            ];
+
+            $objType = Module::getModules()[Module::ORGANISATIONS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];
+                $objTypeRes =Module::getModules()[Module::RESOURCES];
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->uri] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 6;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/orgChronology',
+                [
+                    'class'          => $class,
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect('user/groups');
     }
 }

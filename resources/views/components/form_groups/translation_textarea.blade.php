@@ -8,7 +8,10 @@
             {{ isset($result->errors->{ $field['name'] }) ? 'has-error' : '' }}
         "
     >
-        <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ !$key ? __($field['label']) . ':' : '' }}</label>
+        <label
+            for="description"
+            class="col-sm-3 col-xs-12 col-form-label"
+        >{{ !$key ? __($field['label']) .':' : '' }}</label>
         <div class="col-sm-9">
             <div class="input-group">
                 @if (isset($model) && empty(old($field['name'])))

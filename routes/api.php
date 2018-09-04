@@ -56,17 +56,21 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('deleteSection', 'Api\SectionController@deleteSection');
     Route::post('listSections', 'Api\SectionController@listSections');
     Route::post('listSubsections', 'Api\SectionController@listSubsections');
+    Route::post('isParent', 'Api\SectionController@isParent');
 
     Route::post('listThemes', 'Api\ThemeController@listThemes');
 
-    Route::post('addDataSet', 'Api\DataSetController@addDataSet');
-    Route::post('editDataSet', 'Api\DataSetController@editDataSet');
-    Route::post('deleteDataSet', 'Api\DataSetController@deleteDataSet');
-    Route::post('listDataSets', 'Api\DataSetController@listDataSets');
-    Route::post('getDataSetDetails', 'Api\DataSetController@getDataSetDetails');
-    Route::post('addDataSetToGroup', 'Api\DataSetController@addDataSetToGroup');
-    Route::post('removeDataSetFromGroup', 'Api\DataSetController@removeDataSetFromGroup');
+    Route::post('addDataset', 'Api\DataSetController@addDataset');
+    Route::post('editDataset', 'Api\DataSetController@editDataset');
+    Route::post('deleteDataset', 'Api\DataSetController@deleteDataset');
+    Route::post('listDatasets', 'Api\DataSetController@listDatasets');
+    Route::post('addDatasetToGroup', 'Api\DataSetController@addDatasetToGroup');
+    Route::post('removeDatasetFromGroup', 'Api\DataSetController@removeDatasetFromGroup');
     Route::post('getUsersDataSetCount', 'Api\DataSetController@getUsersDataSetCount');
+
+    Route::post('addTag', 'Api\TagController@addTag');
+    Route::post('editTag', 'Api\TagController@editTag');
+    Route::post('deleteTag', 'Api\TagController@deleteTag');
 
     Route::post('sendDataRequest', 'Api\DataRequestController@sendDataRequest');
     Route::post('editDataRequest', 'Api\DataRequestController@editDataRequest');
@@ -117,9 +121,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('addMainCategory', 'Api\CategoryController@addMainCategory');
     Route::post('editMainCategory', 'Api\CategoryController@editMainCategory');
     Route::post('deleteMainCategory', 'Api\CategoryController@deleteMainCategory');
-    Route::post('addTag', 'Api\CategoryController@addTag');
-    Route::post('editTag', 'Api\CategoryController@editTag');
-    Route::post('deleteTag', 'Api\CategoryController@deleteTag');
+
     Route::post('deleteCustomSetting', 'Api\CustomSettingsController@delete');
 
     Route::post('addFollow', 'Api\UserFollowController@addFollow');
@@ -150,7 +152,12 @@ Route::post('register', 'Api\UserController@register');
 Route::post('searchNews', 'Api\NewsController@searchNews');
 Route::post('listNews', 'Api\NewsController@listNews');
 
-Route::post('searchDataSet', 'Api\DataSetController@searchDataSet');
+Route::post('searchDataset', 'Api\DataSetController@searchDataset');
+Route::post('getDatasetDetails', 'Api\DataSetController@getDatasetDetails');
+
+Route::post('listTags', 'Api\TagController@listTags');
+Route::post('getTagDetails', 'Api\TagController@getTagDetails');
+Route::post('searchTag', 'Api\TagController@searchTag');
 
 Route::post('listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
 Route::post('userCount', 'Api\UserController@userCount');
@@ -165,8 +172,6 @@ Route::post('getLinkedData', 'Api\ResourceController@getLinkedData');
 
 Route::post('listMainCategories', 'Api\CategoryController@listMainCategories');
 Route::post('getMainCategoryDetails', 'Api\CategoryController@getMainCategoryDetails');
-Route::post('listTags', 'Api\CategoryController@listTags');
-Route::post('getTagDetails', 'Api\CategoryController@getTagDetails');
 
 Route::post('listOrganisations', 'Api\OrganisationController@listOrganisations');
 Route::post('searchOrganisations', 'Api\OrganisationController@searchOrganisations');

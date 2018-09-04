@@ -29,14 +29,6 @@
                 </div>
                 <h2>{{ $resource->name }}</h2>
                 <p>{{ $resource->description }}</p>
-
-                <div class="col-sm-12 p-l-none">
-                    <div class="tags pull-left">
-                        <span class="badge badge-pill">ТАГ</span>
-                        <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                        <span class="badge badge-pill">ТАГ</span>
-                    </div>
-                </div>
             </div>
 
             <div class="col-sm-12 p-l-none">

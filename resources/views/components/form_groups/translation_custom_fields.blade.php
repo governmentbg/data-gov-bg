@@ -18,7 +18,7 @@
             data-id="{{ isset($model) && count($model) ? $model[$i - 1]->id : null }}"
         >
             @foreach (Lang::getInstance()->getActive() as $key => $active)
-                <div class="col-xs-12">{{ !$key ?  __('custom.additional_field') : '' }}</div>
+                <div class="col-xs-12">{{ !$key ? __('custom.additional_field') : '' }}</div>
                 <div class="col-lg-12 form-group">
                     <div class="col-sm-12 col-xs-12 p-r-none">
                         <div class="row">
@@ -44,7 +44,7 @@
                                                     value="{{ isset($model[$i - 1]) ? $model[$i - 1]->translate($active['locale'], $active['locale'])->{ $field['val'][0] } : null }}"
                                                     name="{{ $field['name'] }}[{{ $i }}][label][{{ $active['locale'] }}]"
                                                     type="hidden"
-                                                    class="input-border-r-12 form-control"
+                                                    class="input-border-r-12 form-control hidden-input"
                                                 >
                                             @endif
 
@@ -78,7 +78,9 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
-                                <label class="col-lg-4 col-md-6 col-xs-12 col-form-label">{{ !$key ? utrans($field['label'][1]) : '' }}</label>
+                                <label
+                                    class="col-lg-4 col-md-6 col-xs-12 col-form-label"
+                                >{{ !$key ? utrans($field['label'][1]) : '' }}</label>
                                 <div class="col-lg-8 col-md-6 col-sm-6 col-sm-12 custom-trans-filed">
                                     <div class="input-group">
                                         @if (isset($model) && empty(old($field['name'])))
@@ -119,15 +121,17 @@
                     </div>
                 </div>
             @endforeach
-            <div class="col-xs-12 text-right mng-btns">
-                <a class="btn btn-primary del-btn js-delete-custom-field {{ isset($model) ? '' : 'hidden' }}">{{ __('custom.delete') }}</a>
+            <div class="col-xs-12 text-right m-t-n-xs">
+                <a
+                    class="btn btn-primary del-btn js-delete-custom-field {{ isset($model) ? '' : 'hidden' }}"
+                >{{ __('custom.delete') }}</a>
             </div>
         </div>
     @endfor
 </div>
 
 <div class="row">
-    <div class="col-xs-12 text-right mng-btns">
+    <div class="col-xs-12 text-right m-t-n-xs m-b-md">
         <a class="btn btn-primary js-add-custom-field">{{ __('custom.add') }}</a>
     </div>
 </div>

@@ -243,6 +243,7 @@ class CategoryController extends ApiController
                 'locale'        => 'nullable|string|max:5',
                 'active'        => 'nullable|boolean',
                 'order'         => 'nullable|array',
+                'keywords'      => 'nullable|string|max:191',
             ]);
         }
 
@@ -268,6 +269,11 @@ class CategoryController extends ApiController
 
             if (isset($criteria['active'])) {
                 $query->where('active', $criteria['active']);
+            }
+
+            if (!empty($criteria['keywords'])) {
+                $ids = Category::search($criteria['keywords'])->get()->pluck('id');
+                $query->whereIn('id', $ids);
             }
 
             if ($order) {
@@ -547,12 +553,13 @@ class CategoryController extends ApiController
                 'locale'       => 'nullable|string|max:5',
                 'category_id'  => 'nullable|integer|digits_between:1,10',
                 'active'       => 'nullable|boolean',
-                'order'        => 'nullable|array'
+                'order'        => 'nullable|array',
+                'keywords'     => 'nullable|string|max:191',
             ]);
         }
 
         if (!$validator->fails()) {
-            $order = isset($request['criteria']['order']) ? $request['criteria']['order'] : [];
+            $order = isset($request->criteria['order']) ? $request->criteria['order'] : [];
             $validator = \Validator::make($order, [
                 'type'    => 'nullable|string|max:191',
                 'field'   => 'nullable|string|max:191'
@@ -566,6 +573,11 @@ class CategoryController extends ApiController
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
 
             $query = Category::where('parent_id', '!=', null);
+
+            if (!empty($criteria['keywords'])) {
+                $ids = Category::search($criteria['keywords'])->get()->pluck('id');
+                $query->whereIn('id', $ids);
+            }
 
             if (!empty($criteria['tag_ids'])) {
                 $query->whereIn('id', $request->criteria['tag_ids']);

@@ -321,10 +321,9 @@ class OrganisationController extends Controller {
                     'locale' => $locale
                 ]
             ];
-
-            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $rq = Request::create('/api/listDatasets', 'POST', $params);
             $api = new ApiDataSet($rq);
-            $res = $api->listDataSets($rq)->getData();
+            $res = $api->listDatasets($rq)->getData();
 
             $criteria = [
                 'org_ids' => [$result->data->id]

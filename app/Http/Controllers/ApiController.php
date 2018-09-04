@@ -161,11 +161,19 @@ class ApiController extends Controller
         if (is_array($data)) {
             $locales = array_keys($data);
 
-            if ($isUpdate || in_array($defaultLocale, $locales)) {
+            if (
+                $isUpdate
+                || in_array($defaultLocale, $locales)
+                && !empty($data[$defaultLocale])
+            ) {
                 return $data;
             }
 
-            return array_merge([$defaultLocale => $data[$locales[0]]], $data);
+            unset($data[$defaultLocale]);
+
+            return array_merge([
+                $defaultLocale => $data[$locales[0] == $defaultLocale ? $locales[1] : $locales[0]]
+            ], $data);
         }
 
         return [[]];

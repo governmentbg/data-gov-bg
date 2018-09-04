@@ -5,7 +5,7 @@ use App\Locale;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class SectionTableSeeder extends Seeder
+class SectionSeeder extends Seeder
 {
     const SECTION_RECORDS = 10;
 
@@ -26,7 +26,6 @@ class SectionTableSeeder extends Seeder
                 'name'          => [
                     $locale         => $this->faker->word
                 ],
-                'parent_id'     => 1,
                 'active'        => $this->faker->boolean(),
                 'ordering'      => $this->faker->boolean(),
                 'read_only'     => $this->faker->boolean(),

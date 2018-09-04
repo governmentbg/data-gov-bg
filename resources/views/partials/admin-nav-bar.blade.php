@@ -22,7 +22,7 @@
                             @endif
                             <a
                                 class="{{ $view == 'dataset' ? 'active' : '' }}"
-                                href="{{ url('/user/datasets') }}"
+                                href="{{ url('/admin/datasets') }}"
                             >{{ __('custom.my_data') }}</a>
                         </li>
                         <li>
@@ -69,7 +69,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'topicsSubtopics' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/themes/list') }}"
                             >{{ __('custom.topics_subtopics') }}</a>
                         </li>
                         <li>
@@ -126,7 +126,7 @@
         </div>
     </div>
 </div>
-@if (isset($pagination))
+@if (isset($pagination) && $view !== 'group' && $view !== 'organisation')
     <div class="row m-t-md">
         <div class="col-xs-12 text-center">
             {{ $pagination->render() }}

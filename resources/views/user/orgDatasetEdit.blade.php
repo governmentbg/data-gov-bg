@@ -43,24 +43,21 @@
                 </div>
             </div>
 
-            @foreach($fields as $field)
-                @if($field['view'] == 'translation')
+            @foreach ($fields as $field)
+                @if ($field['view'] == 'translation')
                     @include(
                         'components.form_groups.translation_input',
                         ['field' => $field, 'model' => $dataSet]
                     )
-                @elseif($field['view'] == 'translation_txt')
+                @elseif ($field['view'] == 'translation_txt')
                     @include(
                         'components.form_groups.translation_textarea',
                         ['field' => $field, 'model' => $dataSet]
                     )
-                @elseif($field['view'] == 'translation_tags')
-                    @include(
-                        'components.form_groups.translation_tags',
-                        ['field' => $field, 'model' => $tagModel]
-                    )
                 @endif
             @endforeach
+
+            @include('components.form_groups.tags', ['model' => $tagModel])
 
             <div class="form-group row">
                 <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.terms_and_conditions') }}:</label>
@@ -111,12 +108,13 @@
                         id="group"
                         class="js-autocomplete form-control"
                         data-placeholder="{{ utrans('custom.groups', 1) }}"
-                        name="group_id"
+                        name="group_id[]"
+                        multiple="multiple"
                     >
                         @foreach ($groups as $id =>$group)
                             <option
                                 value="{{ $id }}"
-                                {{ isset($dataSet->dataSetGroup[0]) && $id == $dataSet->dataSetGroup[0]->group_id ? 'selected' : '' }}
+                                {{ !empty($setGroups) && in_array($id, $setGroups) ? 'selected' : '' }}
                             >{{ $group }}</option>
                         @endforeach
                     </select>
@@ -250,9 +248,17 @@
                            href="{{ route('orgDatasetView', ['uri' => $dataSet->uri]) }}"
                         >{{ uctrans('custom.preview') }}</a>
                         @if ($hasResources)
-                        <button type="submit" name="publish" class="btn btn-primary">{{ uctrans('custom.publish') }}</button>
+                            <button
+                                type="submit"
+                                name="publish"
+                                class="btn btn-primary"
+                            >{{ uctrans('custom.publish') }}</button>
                         @endif
-                        <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
+                        <button
+                            type="submit"
+                            name="save"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.save') }}</button>
                     </div>
                 </div>
             </div>
@@ -291,6 +297,7 @@
                                     class="input-border-r-12 form-control"
                                     name="firstname"
                                     type="text"
+                                    value="{{ \Auth::user()->firstname }}"
                                 >
                             </div>
                         </div>
@@ -302,6 +309,7 @@
                                     class="input-border-r-12 form-control"
                                     name="lastname"
                                     type="text"
+                                    value="{{ \Auth::user()->lastname }}"
                                 >
                             </div>
                         </div>
@@ -313,6 +321,7 @@
                                     class="input-border-r-12 form-control"
                                     name="email"
                                     type="email"
+                                    value="{{ \Auth::user()->email }}"
                                 >
                             </div>
                         </div>

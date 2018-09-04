@@ -33,4 +33,5 @@ require('icheck');
 
 // Main js
 require('./custom');
+require('./admin');
 require('./user');

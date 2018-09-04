@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function() {
     Route::post('/admin/organisations/register', 'Admin\OrganisationController@register');
     Route::get('/admin/organisations/register', 'Admin\OrganisationController@showOrgRegisterForm');
     Route::get('/admin/organisations/view/{uri}', 'Admin\OrganisationController@view')->name('adminOrgView');
+    Route::match(['get', 'post'], '/admin/organisations/{uri}/chronology', 'Admin\OrganisationController@chronology');
     Route::match(['post', 'get'], '/admin/organisations/edit/{uri}', 'Admin\OrganisationController@edit');
     Route::post('/admin/organisations/delete/{id}', 'Admin\OrganisationController@delete');
     Route::match(
@@ -54,6 +55,8 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/admin/groups', 'Admin\GroupController@list');
     Route::match(['get', 'post'], '/admin/groups/register', 'Admin\GroupController@register');
     Route::match(['get', 'post'], '/admin/groups/view/{uri}', 'Admin\GroupController@view');
+    Route::match(['get', 'post'], '/admin/groups/{uri}/chronology', 'Admin\GroupController@chronology');
+
     Route::post('/admin/groups/delete/{id}', 'Admin\GroupController@delete');
     Route::match(['get', 'post'], '/admin/groups/edit/{uri}', 'Admin\GroupController@edit');
     Route::get('/admin/groups/search', 'Admin\GroupController@search');
@@ -123,7 +126,6 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/groups/dataset/create', 'UserController@groupDatasetCreate');
         Route::match(['get', 'post'], '/user/dataset/edit/{uri}', 'UserController@datasetEdit')->name('datasetEdit');
 
-
         Route::match(
             ['get', 'post'],
             '/user/dataset/resource/create/{uri}',
@@ -158,11 +160,13 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/groups', 'UserController@groups');
         Route::match(['get', 'post'], '/user/groups/view/{uri}', 'UserController@viewGroup');
         Route::match(['get', 'post'], '/user/groups/edit/{uri}', 'UserController@editGroup');
+        Route::match(['get', 'post'], '/user/groups/{uri}/chronology', 'UserController@groupChronology');
         Route::post('/user/groups/delete/{id}', 'UserController@deleteGroup');
 
         Route::match(['get', 'post'], '/user/organisations/datasets/{uri}', 'UserController@orgDatasets');
         Route::match(['get', 'post'], '/user/organisations/datasets/resourceView/{uri}', 'UserController@orgResourceView')->name('orgResourceView');
         Route::match(['get', 'post'], '/user/organisations/dataset/view/{uri}', 'UserController@orgDatasetView')->name('orgDatasetView');
+        Route::match(['get', 'post'], '/user/organisations/{uri}/chronology', 'UserController@orgChronology');
 
         Route::get('/user/organisations', 'UserController@organisations');
         Route::post('/user/organisations/delete/{id}', 'UserController@deleteOrg');

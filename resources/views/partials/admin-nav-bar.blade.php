@@ -126,7 +126,7 @@
         </div>
     </div>
 </div>
-@if (isset($pagination))
+@if (isset($pagination) && $view !== 'group' && $view !== 'organisation')
     <div class="row m-t-md">
         <div class="col-xs-12 text-center">
             {{ $pagination->render() }}

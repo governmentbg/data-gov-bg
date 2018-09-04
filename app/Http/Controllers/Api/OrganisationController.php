@@ -1710,7 +1710,8 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'group_id'   => 'required|int|digits_between:1,10',
+            'group_id'   => 'required_without:group_uri|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
+            'group_uri'  => 'required_without:group_id|nullable|string|exists:organisations,uri,deleted_at,NULL|max:191',
             'locale'     => 'nullable|string|max:5',
         ]);
 
@@ -1718,7 +1719,11 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $group = Organisation::where('id', $post['group_id'])->first();
+                if (!empty($post['group_id'])) {
+                    $group = Organisation::where('id', $post['group_id'])->first();
+                } else {
+                    $group = Organisation::where('uri', $post['group_uri'])->first();
+                }
                 $customFields = [];
 
                 if ($group) {
@@ -1734,6 +1739,7 @@ class OrganisationController extends ApiController
                     }
 
                     $result = [
+                        'id'              => $group->id,
                         'name'            => $group->name,
                         'description'     => $group->descript,
                         'locale'          => $locale,

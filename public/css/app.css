@@ -267,7 +267,7 @@
 }
 
 .theme-index .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-index .container .info-icon:after {
@@ -668,7 +668,7 @@
 }
 
 .theme-data .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-data .container .info-icon:after {
@@ -1069,7 +1069,7 @@
 }
 
 .theme-data-attention .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-data-attention .container .info-icon:after {
@@ -1470,7 +1470,7 @@
 }
 
 .theme-organisation .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-organisation .container .info-icon:after {
@@ -1871,7 +1871,7 @@
 }
 
 .theme-request .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-request .container .info-icon:after {
@@ -2272,7 +2272,7 @@
 }
 
 .theme-visualisations .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-visualisations .container .info-icon:after {
@@ -2673,7 +2673,7 @@
 }
 
 .theme-news .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-news .container .info-icon:after {
@@ -3074,7 +3074,7 @@
 }
 
 .theme-documents .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-documents .container .info-icon:after {
@@ -3475,7 +3475,7 @@
 }
 
 .theme-contact .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-contact .container .info-icon:after {
@@ -3876,7 +3876,7 @@
 }
 
 .theme-user .container .info-icon img {
-  max-height: 70px;
+  max-height: 70px !important;
 }
 
 .theme-user .container .info-icon:after {

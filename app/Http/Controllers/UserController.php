@@ -2262,7 +2262,12 @@ class UserController extends Controller {
      */
     private function prepareOrganisations()
     {
-        $params['criteria']['user_id'] = \Auth::user()->id;
+        $params = [];
+
+        if (!Role::isAdmin()) {
+            $params['criteria']['user_id'] = \Auth::user()->id;
+        }
+
         $request = Request::create('/api/listOrganisations', 'POST', $params);
         $api = new ApiOrganisation($request);
         $result = $api->listOrganisations($request)->getData();
@@ -2282,7 +2287,12 @@ class UserController extends Controller {
      */
     private function prepareGroups()
     {
-        $params['criteria']['user_id'] = \Auth::user()->id;
+        $params = [];
+
+        if (!Role::isAdmin()) {
+            $params['criteria']['user_id'] = \Auth::user()->id;
+        }
+
         $request = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($request);
         $result = $api->listGroups($request)->getData();
@@ -2409,7 +2419,7 @@ class UserController extends Controller {
                     $res = $api->listOrganisations($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->organisations)) {
-                        $objType = Role::MODULE_NAMES[2];
+                        $objType = Module::getModules()[Module::ORGANISATIONS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->organisations as $org) {
@@ -2455,7 +2465,7 @@ class UserController extends Controller {
                     $res = $api->listGroups($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->groups)) {
-                        $objType = Role::MODULE_NAMES[3];
+                        $objType = Module::getModules()[Module::GROUPS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->groups as $group) {
@@ -2500,7 +2510,7 @@ class UserController extends Controller {
                     $res = $api->listMainCategories($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->categories)) {
-                        $objType = Role::MODULE_NAMES[0];
+                        $objType = Module::getModules()[Module::MAIN_CATEGORIES];
                         $actObjData[$objType] = [];
 
                         foreach ($res->categories as $category) {
@@ -2544,7 +2554,7 @@ class UserController extends Controller {
                     $res = $api->listTags($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->tags)) {
-                        $objType = Role::MODULE_NAMES[1];
+                        $objType = Module::getModules()[Module::TAGS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->tags as $tag) {
@@ -2591,7 +2601,7 @@ class UserController extends Controller {
                     $res = $api->listUsers($rq)->getData();
 
                     if (isset($res->success) && $res->success && !empty($res->users)) {
-                        $objType = Role::MODULE_NAMES[4];
+                        $objType = Module::getModules()[Module::USERS];
                         $actObjData[$objType] = [];
 
                         foreach ($res->users as $followUser) {
@@ -2641,7 +2651,7 @@ class UserController extends Controller {
 
             // user profile actions
             if (!isset($filters[$filter])) {
-                $objType = Role::MODULE_NAMES[4];
+                $objType = Module::getModules()[Module::USERS];
 
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
@@ -2722,7 +2732,7 @@ class UserController extends Controller {
         $res = $api->listDatasets($rq)->getData();
 
         if (isset($res->success) && $res->success && !empty($res->datasets)) {
-            $objType = Role::MODULE_NAMES[5];
+            $objType = Module::getModules()[Module::DATA_SETS];
 
             if (!isset($actObjData[$objType])) {
                 $actObjData[$objType] = [];
@@ -2775,7 +2785,7 @@ class UserController extends Controller {
                         }
                     }
 
-                    $actObjData[$objType][$dataset->id] = [
+                    $actObjData[$objType][$dataset->uri] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
                         'obj_module'     => Str::lower(__('custom.dataset')),
@@ -2791,7 +2801,7 @@ class UserController extends Controller {
                     $criteria['dataset_ids'][] = $dataset->id;
 
                     if (!empty($dataset->resource)) {
-                        $objTypeRes = Role::MODULE_NAMES[6];
+                        $objTypeRes = Module::getModules()[Module::RESOURCES];
 
                         foreach ($dataset->resource as $resource) {
                             $actObjData[$objTypeRes][$resource->uri] = [
@@ -4032,5 +4042,259 @@ class UserController extends Controller {
         $result = $api->delete($rq)->getData();
 
         return ['success' => $result->success];
+    }
+
+    public function groupChronology(Request $request, $uri)
+    {
+        $class = 'user';
+        $group = Organisation::where('uri', $uri)->first();
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'group_uri' => $uri,
+            'locale'    => $locale
+        ];
+
+        $rq = Request::create('/api/getGroupDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getGroupDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data)) {
+            $params = [
+                'criteria' => [
+                    'group_ids' => [$result->data->id],
+                    'locale'    => $locale
+                ]
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            $criteria = [
+                'group_ids' => [$result->data->id]
+            ];
+
+            $objType = Module::getModules()[Module::GROUPS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];
+                $objTypeRes =Module::getModules()[Module::RESOURCES];
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 6;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/groupChronology',
+                [
+                    'class'          => $class,
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect('user/groups');
+    }
+
+    public function orgChronology(Request $request, $uri)
+    {
+        $class = 'user';
+        $group = Organisation::where('uri', $uri)->first();
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'org_uri'   => $uri,
+            'locale'    => $locale
+        ];
+
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data)) {
+            $params = [
+                'criteria' => [
+                    'org_ids' => [$result->data->id],
+                    'locale'    => $locale
+                ]
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            $criteria = [
+                'org_ids' => [$result->data->id]
+            ];
+
+            $objType = Module::getModules()[Module::ORGANISATIONS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];
+                $objTypeRes =Module::getModules()[Module::RESOURCES];
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->uri] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 6;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/orgChronology',
+                [
+                    'class'          => $class,
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect('user/groups');
     }
 }

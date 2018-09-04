@@ -3,17 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\Module;
 use App\UserSetting;
 use App\Organisation;
 use App\CustomSetting;
+use App\ActionsHistory;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\RoleController as ApiRole;
+use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class GroupController extends AdminController
 {
@@ -471,5 +476,132 @@ class GroupController extends AdminController
         }
 
         return view('admin/addGroupMembersNew', compact('class', 'error', 'digestFreq', 'invMail', 'roles', 'group'));
+    }
+
+    public function chronology(Request $request, $uri)
+    {
+        $class = 'user';
+        $group = Organisation::where('uri', $uri)->first();
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'group_uri' => $uri,
+            'locale'    => $locale
+        ];
+
+        $rq = Request::create('/api/getGroupDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getGroupDetails($rq)->getData();
+
+        if ($result->success && !empty($result->data)) {
+            $params = [
+                'criteria' => [
+                    'group_ids' => [$result->data->id],
+                    'locale'    => $locale
+                ]
+            ];
+
+            $rq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDataSets($rq)->getData();
+
+            $criteria = [
+                'group_ids' => [$result->data->id]
+            ];
+
+            $objType = Module::getModules()[Module::GROUPS];
+            $actObjData[$objType] = [];
+            $actObjData[$objType][$result->data->id] = [
+                'obj_id'        => $result->data->uri,
+                'obj_name'      => $result->data->name,
+                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_type'      => 'org',
+                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'parent_obj_id' => ''
+            ];
+
+            if (isset($res->success) && $res->success && !empty($res->datasets)) {
+                $objType = Module::getModules()[Module::DATA_SETS];;
+                $objTypeRes =Module::getModules()[Module::RESOURCES];;
+                $actObjData[$objType] = [];
+
+                foreach ($res->datasets as $dataset) {
+                    $criteria['dataset_ids'][] = $dataset->id;
+                    $actObjData[$objType][$dataset->id] = [
+                        'obj_id'        => $dataset->uri,
+                        'obj_name'      => $dataset->name,
+                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_type'      => 'dataset',
+                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'parent_obj_id' => ''
+                    ];
+
+                    if (!empty($dataset->resource)) {
+                        foreach ($dataset->resource as $resource) {
+                            $criteria['resource_uris'][] = $resource->uri;
+                            $actObjData[$objTypeRes][$resource->uri] = [
+                                'obj_id'            => $resource->uri,
+                                'obj_name'          => $resource->name,
+                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_type'          => 'resource',
+                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'parent_obj_id'     => $dataset->uri,
+                                'parent_obj_name'   => $dataset->name,
+                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_type'   => 'dataset',
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 6;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'user/groupChronology',
+                [
+                    'class'          => $class,
+                    'organisation'   => $result->data,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes,
+                ]
+            );
+        }
+
+        return redirect('admin/groups');
     }
 }

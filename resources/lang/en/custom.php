@@ -598,4 +598,5 @@ return [
     'tags_h' => 'Tags',
     'main_themes_list' => 'Main themes list',
     'categories_list' => 'Categories list',
+    'error' => 'An error occurred',
 ];

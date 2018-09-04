@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use App\Http\Controllers\ApiController;
-use Illuminate\Support\Facades\Log;
-use App\Section;
 use App\Locale;
 use App\Module;
+use App\Section;
 use App\ActionsHistory;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 
 class SectionController extends ApiController
 {
@@ -306,6 +307,28 @@ class SectionController extends ApiController
         return $this->successResponse($response);
     }
 
+    public function isParent(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['id' => 'required|int|exists:sections,id|digits_between:1,10']);
+
+        if (!$validator->fails()) {
+            $section = Section::find($post['id']);
+
+            if ($section) {
+                if (Section::where('parent_id', $section->id)->count()) {
+
+                    return $this->successResponse(['data' => true], true);
+                }
+
+                return $this->successResponse(['data' => false], true);
+            }
+        }
+
+        return $this->errorResponse(__('custom.error'), $validator->errors()->messages());
+    }
+
     /**
      * Helper function for listing APIs - preparing section records for response
      *
@@ -328,8 +351,8 @@ class SectionController extends ApiController
                 'forum_link'    => $section->forum_link,
                 'theme'         => $section->theme,
                 'created_at'    => $section->created_at,
-                'updated_at'   => $section->updated_at,
-                'created_by'   => $section->created_by,
+                'updated_at'    => $section->updated_at,
+                'created_by'    => $section->created_by,
                 'updated_by'    => $section->updated_by,
             ];
         }

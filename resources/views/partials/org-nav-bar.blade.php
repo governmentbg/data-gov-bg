@@ -51,6 +51,19 @@
                                     >{{ ultrans('custom.datasets') }}</a>
                                 @endif
                             </li>
+                            <li>
+                            @if ($isAdmin)
+                                <a
+                                    class="{{ $view == 'chronology' ? 'active' : null }}"
+                                    href="{{ url('/admin/organisations/'. $organisation->uri .'/chronology') }}"
+                                >{{ ultrans('custom.chronology') }}</a>
+                            @else
+                                <a
+                                    class="{{ $view == 'chronology' ? 'active' : null }}"
+                                    href="{{ url('/user/organisations/'. $organisation->uri .'/chronology') }}"
+                                >{{ ultrans('custom.chronology') }}</a>
+                            @endif
+                        </li>
                         </ul>
                     </div>
                 </div>

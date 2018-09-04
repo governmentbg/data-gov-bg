@@ -39,14 +39,27 @@
                         <li>
                             @if ($isAdmin)
                                 <a
-                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    class="{{ $view == 'datasets' ? 'active' : null }}"
                                     href="{{ url('/user/groups/datasets/'. $group->uri) }}"
                                 >{{ ultrans('custom.datasets') }}</a>
                             @else
                                 <a
-                                    class="{{ $view == 'members' ? 'active' : null }}"
+                                    class="{{ $view == 'datasets' ? 'active' : null }}"
                                     href="{{ url('/user/groups/datasets/'. $group->uri) }}"
                                 >{{ ultrans('custom.datasets') }}</a>
+                            @endif
+                        </li>
+                        <li>
+                            @if ($isAdmin)
+                                <a
+                                    class="{{ $view == 'chronology' ? 'active' : null }}"
+                                    href="{{ url('/admin/groups/'. $group->uri .'/chronology') }}"
+                                >{{ ultrans('custom.chronology') }}</a>
+                            @else
+                                <a
+                                    class="{{ $view == 'chronology' ? 'active' : null }}"
+                                    href="{{ url('/user/groups/'. $group->uri .'/chronology') }}"
+                                >{{ ultrans('custom.chronology') }}</a>
                             @endif
                         </li>
                     </ul>

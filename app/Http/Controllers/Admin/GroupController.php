@@ -182,16 +182,20 @@ class GroupController extends AdminController
      */
     public function edit(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->where('type', Organisation::TYPE_GROUP)
-            ->value('id');
+            ->first();
 
-        if (Role::isAdmin($orgId)) {
+        if (empty($org)) {
+            return redirect('/admin/groups');
+        }
+
+        if (Role::isAdmin($org->id)) {
             $class = 'user';
             $fields = $this->getGroupTransFields();
 
-            $model = Organisation::find($orgId)->loadTranslations();
-            $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
+            $model = Organisation::find($org->id)->loadTranslations();
+            $withModel = CustomSetting::where('org_id', $org->id)->get()->loadTranslations();
             $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
             if ($request->has('edit')) {
@@ -206,7 +210,7 @@ class GroupController extends AdminController
 
                 $params = [
                     'api_key'   => \Auth::user()->api_key,
-                    'group_id'  => $orgId,
+                    'group_id'  => $org->id,
                     'data'      => $data,
                 ];
 
@@ -216,6 +220,10 @@ class GroupController extends AdminController
 
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($params['data']['uri'])) {
+                        return redirect(url('/admin/groups/edit/'. $params['data']['uri']));
+                    }
                 } else {
                     $request->session()->flash('alert-danger', __('custom.edit_error'));
                 }

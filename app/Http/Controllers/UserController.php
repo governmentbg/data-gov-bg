@@ -2184,11 +2184,11 @@ class UserController extends Controller {
      */
     public function editOrg(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+            ->first();
 
-        if ($this->checkUserOrg($orgId)) {
+        if (!empty($org) && $this->checkUserOrg($org->id)) {
             $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
             $query->whereHas('userToOrgRole', function($q) {
@@ -2197,27 +2197,25 @@ class UserController extends Controller {
 
             $parentOrgs = $query->get();
 
-            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+            $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            if (isset($request->view)) {
+            $viewData = [
+                'class'      => 'user',
+                'model'      => $orgModel,
+                'withModel'  => $customModel,
+                'fields'     => $this->getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ];
 
-                return view(
-                    'user/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => $this->getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                );
+            if (isset($request->view)) {
+                return view('user/orgEdit', $viewData);
             }
 
             $post = [
                 'data'          => $request->all(),
-                'org_id'        => $orgId,
+                'org_id'        => $org->id,
                 'parentOrgs'    => $parentOrgs,
             ];
 
@@ -2236,48 +2234,22 @@ class UserController extends Controller {
                 $result = $api->editOrganisation($request)->getData();
                 $errors = !empty($result->errors) ? $result->errors : [];
 
-                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
                 $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
                 $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
                 if ($result->success) {
                     session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($post['data']['uri'])) {
+                        return redirect(url('/user/organisations/edit/'. $post['data']['uri']));
+                    }
                 } else {
                     session()->flash('alert-danger', __('custom.edit_error'));
                 }
-
-                return !$result->success
-                    ? view(
-                        'user/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => $this->getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    )->withErrors($result->errors)
-                    : view(
-                        'user/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => $this->getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    );
             }
 
-            return view(
-                'user/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => $this->getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]);
+            return view('user/orgEdit', $viewData)->withErrors(isset($result->errors) ? $result->errors : []);
         }
 
         return redirect('/user/organisations');
@@ -3437,16 +3409,16 @@ class UserController extends Controller {
      */
     public function editGroup(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->where('type', Organisation::TYPE_GROUP)
-            ->value('id');
+            ->first();
 
-        if ($this->checkUserOrg($orgId)) {
+        if (!empty($org) && $this->checkUserOrg($org->id)) {
             $class = 'user';
             $fields = $this->getGroupTransFields();
 
-            $model = Organisation::find($orgId)->loadTranslations();
-            $withModel = CustomSetting::where('org_id', $orgId)->get()->loadTranslations();
+            $model = Organisation::find($org->id)->loadTranslations();
+            $withModel = CustomSetting::where('org_id', $org->id)->get()->loadTranslations();
             $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
 
             if ($request->has('edit')) {
@@ -3461,7 +3433,7 @@ class UserController extends Controller {
 
                 $params = [
                     'api_key'   => Auth::user()->api_key,
-                    'group_id'  => $orgId,
+                    'group_id'  => $org->id,
                     'data'      => $data,
                 ];
 
@@ -3471,6 +3443,10 @@ class UserController extends Controller {
 
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($params['data']['uri'])) {
+                        return redirect(url('/user/groups/edit/'. $params['data']['uri']));
+                    }
                 } else {
                     $request->session()->flash('alert-danger', __('custom.edit_error'));
                 }
@@ -3513,12 +3489,7 @@ class UserController extends Controller {
             }
         }
 
-        return view(
-            'user/forgottenPassword',
-            [
-                'class' => 'index',
-            ]
-        )->with('errors', $errors);
+        return view('user/forgottenPassword', ['class' => 'index'])->with('errors', $errors);
     }
 
     /**

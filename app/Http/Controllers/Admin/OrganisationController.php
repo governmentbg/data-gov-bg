@@ -246,37 +246,39 @@ class OrganisationController extends AdminController
      */
     public function edit(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
+        $org = Organisation::where('uri', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+            ->first();
 
-        if (Role::isAdmin($orgId)) {
+        if (empty($org)) {
+            return redirect('/admin/organisations');
+        }
+
+        if (Role::isAdmin($org->id)) {
             $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
             $parentOrgs = $query->get();
 
-            $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+            $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            if (isset($request->view)) {
+            $viewData = [
+                'class'      => 'user',
+                'model'      => $orgModel,
+                'withModel'  => $customModel,
+                'fields'     => $this->getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ];
 
-                return view(
-                    'admin/orgEdit',
-                    [
-                        'class'      => 'user',
-                        'model'      => $orgModel,
-                        'withModel'  => $customModel,
-                        'fields'     => $this->getTransFields(),
-                        'parentOrgs' => $parentOrgs
-                    ]
-                );
+            if (isset($request->view)) {
+                return view('admin/orgEdit', $viewData);
             }
 
             $post = [
                 'api_key'       => Auth::user()->api_key,
                 'data'          => $request->all(),
-                'org_id'        => $orgId,
+                'org_id'        => $org->id,
                 'parentOrgs'    => $parentOrgs,
             ];
 
@@ -295,51 +297,23 @@ class OrganisationController extends AdminController
                 $result = $api->editOrganisation($request)->getData();
                 $errors = !empty($result->errors) ? $result->errors : [];
 
-                $orgModel = Organisation::with('CustomSetting')->find($orgId)->loadTranslations();
+                $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
                 $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
                 $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
                 if ($result->success) {
                     session()->flash('alert-success', __('custom.edit_success'));
+
+                    if (!empty($post['data']['uri'])) {
+                        return redirect(url('/admin/organisations/edit/'. $post['data']['uri']));
+                    }
                 } else {
                     session()->flash('alert-danger', __('custom.edit_error'));
                 }
-
-                return !$result->success
-                    ? view(
-                        'admin/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => $this->getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    )->withErrors($result->errors)
-                    : view(
-                        'admin/orgEdit',
-                        [
-                            'class'      => 'user',
-                            'model'      => $orgModel,
-                            'withModel'  => $customModel,
-                            'fields'     => $this->getTransFields(),
-                            'parentOrgs' => $parentOrgs
-                        ]
-                    );
-
-                return redirect('/admin/organisations');
             }
-            return view(
-                'admin/orgEdit',
-                [
-                    'class'      => 'user',
-                    'model'      => $orgModel,
-                    'withModel'  => $customModel,
-                    'fields'     => $this->getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]);
-        }
 
+            return view('admin/orgEdit', $viewData)->withErrors(isset($result->errors) ? $result->errors : []);
+        }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }

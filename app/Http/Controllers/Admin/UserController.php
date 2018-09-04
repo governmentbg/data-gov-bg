@@ -83,7 +83,6 @@ class UserController extends AdminController {
         $api = new ApiUser($rq);
         $result = $api->listUsers($rq)->getData();
 
-
         $paginationData = $this->getPaginationData(
             $result->users,
             $result->total_records,

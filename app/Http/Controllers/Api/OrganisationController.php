@@ -47,12 +47,13 @@ class OrganisationController extends ApiController
     public function addOrganisation(Request $request)
     {
         $data = $request->get('data', []);
+        $publicTypes = Organisation::getPublicTypes();
 
         $validator = \Validator::make($data, [
             'locale'                => 'nullable|string|max:5',
             'name'                  => 'required_with:locale|max:191',
             'name.bg'               => 'required_without:locale|string|max:191',
-            'type'                  => 'required|int|max:191|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+            'type'                  => 'required|int|max:191|in:'. implode(',', array_keys($publicTypes)),
             'description'           => 'nullable|max:8000',
             'uri'                   => 'nullable|string|unique:organisations,uri|max:191',
             'logo'                  => 'nullable|string|max:191',
@@ -165,6 +166,7 @@ class OrganisationController extends ApiController
                 if (!empty($customFields)) {
                     if (!$this->checkAndCreateCustomSettings($customFields, $organisation->id)) {
                         DB::rollback();
+
                         return $this->errorResponse(__('custom.add_org_fail'));
                     }
                 }
@@ -1900,50 +1902,51 @@ class OrganisationController extends ApiController
      */
     public function checkAndCreateCustomSettings($customFields, $orgId)
     {
-        try {
-            if (count($customFields) <= 3) {
-                if ($orgId) {
-                    DB::beginTransaction();
-                    $deletedRows = CustomSetting::where('org_id', $orgId)->delete();
+        if (!empty($orgId)) {
+            try {
+                DB::beginTransaction();
 
-                    foreach ($customFields as $field) {
-                        if (!empty($field['label']) && !empty($field['value'])) {
-                            foreach ($field['label'] as $locale => $label) {
-                                if (
-                                    (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
-                                    || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
+                CustomSetting::where('org_id', $orgId)->delete();
 
-                                ) {
-                                    DB::rollback();
+                foreach ($customFields as $field) {
+                    if (!empty($field['label']) && !empty($field['value'])) {
+                        foreach ($field['label'] as $locale => $label) {
+                            if (
+                                (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                                || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
 
-                                    return false;
-                                }
+                            ) {
+                                DB::rollback();
+
+                                return false;
                             }
-
-                            $saveField = new CustomSetting;
-                            $saveField->org_id = $orgId;
-                            $saveField->created_by = \Auth::user()->id;
-                            $saveField->key = $this->trans($empty, $field['label']);
-                            $saveField->value = $this->trans($empty, $field['value']);
-
-                            $saveField->save();
-                        } else {
-                            DB::rollback();
-
-                            return false;
                         }
+
+                        $saveField = new CustomSetting;
+                        $saveField->org_id = $orgId;
+                        $saveField->created_by = \Auth::user()->id;
+                        $saveField->key = $this->trans($empty, $field['label']);
+                        $saveField->value = $this->trans($empty, $field['value']);
+
+                        $saveField->save();
+                    } else {
+                        DB::rollback();
+
+                        return false;
                     }
-
-                    DB::commit();
-
-                    return true;
                 }
-            }
-        } catch (QueryException $ex) {
-            Log::error($ex->getMessage());
 
-            return false;
+                DB::commit();
+
+                return true;
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
         }
+
+        return false;
     }
 
     /**

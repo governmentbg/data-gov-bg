@@ -1025,13 +1025,21 @@ class OrganisationController extends ApiController
                 $members = [];
 
                 foreach ($query->get()->toArray() as $member) {
+                    $roles = [];
+
+                    if (!empty($member['user_to_org_role'])) {
+                        foreach ($member['user_to_org_role'] as $role) {
+                            $roles[] = $role['role_id'];
+                        }
+                    }
+
                     $members[] = [
                         'id'        => $member['id'],
                         'username'  => $member['username'],
                         'firstname' => $member['firstname'],
                         'lastname'  => $member['lastname'],
                         'email'     => $member['email'],
-                        'role_id'   => $member['user_to_org_role'][0]['role_id'],
+                        'role_id'   => $roles,
                     ];
                 }
 
@@ -1062,7 +1070,8 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($post, [
             'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
             'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'       => 'nullable|exists:roles,id',
+            'role_id'       => 'nullable|array',
+            'role_id.*'     => 'required|int|exists:roles,id|digits_between:1,10'
         ]);
 
         if (!$validator->fails()) {
@@ -1083,7 +1092,7 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_ADD_MEMBER,
-                    'action_object'    => $request->org_id,
+                    'action_object'    => $post['org_id'],
                     'action_msg'       => 'Added member '. $username->username . ' (' . $post['user_id'].') to organisation ',
                 ];
 
@@ -1091,6 +1100,7 @@ class OrganisationController extends ApiController
 
                 return $this->successResponse();
             } catch (QueryException $e) {
+                error_log('e->getMessage(): '. print_r($e->getMessage(), true));
                 Log::error($e->getMessage());
             }
         }
@@ -1158,7 +1168,8 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($post, [
             'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
             'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'       => 'nullable|int|exists:roles,id|digits_between:1,10',
+            'role_id'       => 'nullable|array',
+            'role_id.*'     => 'int|exists:roles,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {

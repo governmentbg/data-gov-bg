@@ -128,6 +128,8 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('unFollow', 'Api\UserFollowController@unFollow');
     Route::post('getFollowersCount', 'Api\UserFollowController@getFollowersCount');
 
+    Route::post('addMember', 'Api\OrganisationController@addMember');
+
     Route::post('xml2json', 'Api\ConversionController@xml2json');
     Route::post('json2xml', 'Api\ConversionController@json2xml');
     Route::post('csv2json', 'Api\ConversionController@csv2json');
@@ -177,7 +179,6 @@ Route::post('listOrganisations', 'Api\OrganisationController@listOrganisations')
 Route::post('searchOrganisations', 'Api\OrganisationController@searchOrganisations');
 Route::post('getOrganisationDetails', 'Api\OrganisationController@getOrganisationDetails');
 Route::post('getMembers', 'Api\OrganisationController@getMembers');
-Route::post('addMember', 'Api\OrganisationController@addMember');
 
 Route::post('listGroups', 'Api\OrganisationController@listGroups');
 Route::post('searchGroups', 'Api\OrganisationController@searchGroups');

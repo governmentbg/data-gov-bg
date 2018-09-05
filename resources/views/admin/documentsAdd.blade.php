@@ -49,7 +49,7 @@
                                         type="file"
                                         name="document"
                                         class="input-border-r-12 form-control doc-upload-input js-doc-input"
-                                        value="{{ old('documet') }}"
+                                        value="{{ old('document') }}"
                                     >
                                     @if (isset($errors) && $errors->has('document'))
                                         <span class="error">{{ $errors->first('document') }}</span>

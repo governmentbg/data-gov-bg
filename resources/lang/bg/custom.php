@@ -597,4 +597,10 @@ return [
     'main_themes_list' => 'Списък основни теми',
     'categories_list' => 'Списък с категории',
     'error' => 'Възникна грешка',
+    'filename' => 'Име на файл',
+    'theme_preview' => 'Преглед на тема',
+    'categories' => 'Категории',
+    'main_theme_add' => 'Добавяне на основна тема',
+    'main_theme_edit' => 'Редактиране на основна тема',
+    'edit_category' => 'Редактиране на категория',
 ];

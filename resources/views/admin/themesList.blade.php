@@ -23,7 +23,12 @@
         <div class="row m-b-lg">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
-                    <a href="">{{ __('custom.add') }}</a>
+                    <a href="{{ url('/admin/themes/add') }}">{{ __('custom.add') }}</a>
+                </span>
+            </div>
+            <div class="col-xs-12 text-right m-t-md">
+                <span class="badge badge-pill long-badge">
+                    <a href="{{ url('admin/categories/list/') }}">{{ __('custom.categories') }}</a>
                 </span>
             </div>
         </div>
@@ -39,7 +44,6 @@
                                         <th>{{ utrans('custom.name') }}</th>
                                         <th>{{ utrans('custom.active') }}</th>
                                         <th>{{ __('custom.action') }}</th>
-                                        <th>{{ __('custom.tags_h') }}</th>
                                     </thead>
                                     <tbody>
                                         @foreach ($themes as $theme)
@@ -49,24 +53,17 @@
                                                 <td class="buttons">
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('admin/themes/edit/'. $theme->id) }}"
                                                     >{{ utrans('custom.edit') }}</a>
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('admin/themes/view/'. $theme->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
                                                     <a
                                                         class="link-action red"
-                                                        href=""
+                                                        href="{{ url('admin/themes/delete/'. $theme->id) }}"
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                     >{{ __('custom.delete') }}</a>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-pill">
-                                                        <a
-                                                            href="{{ url('admin/subthemes/list/'. $theme->id) }}"
-                                                        >{{ __('custom.tags_h') }}</a>
-                                                    </span>
                                                 </td>
                                             </tr>
                                         @endforeach

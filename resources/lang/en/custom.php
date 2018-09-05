@@ -599,4 +599,10 @@ return [
     'main_themes_list' => 'Main themes list',
     'categories_list' => 'Categories list',
     'error' => 'An error occurred',
+    'filename' => 'Име на файл',
+    'theme_preview' => 'Theme preview',
+    'categories' => 'Categories',
+    'main_theme_add' => 'Add main theme',
+    'main_theme_edit' => 'Edit main theme',
+    'edit_category' => 'Edit category',
 ];

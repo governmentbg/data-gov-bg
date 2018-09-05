@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Module;
 use App\Category;
+use App\DataSet;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,8 +33,10 @@ class CategoryController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($request->get('data', []), [
-            'name'              => 'required|string|max:191',
-            'locale'            => 'required|string|max:5',
+            'name'              => 'required_with:locale|max:191',
+            'name.bg'           => 'required_without:locale|string|max:191',
+            'name.*'            => 'max:191',
+            'locale'            => 'nullable|string|max:5',
             'icon'              => 'nullable|string|max:191',
             'icon_filename'     => 'nullable|string|max:191',
             'icon_mimetype'     => 'nullable|string|max:191',
@@ -41,6 +44,16 @@ class CategoryController extends ApiController
             'active'            => 'nullable|boolean',
             'ordering'          => 'nullable|integer|digits_between:1,3',
         ]);
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('icon_filename')) {
+                $validator->errors()->add('file', $validator->errors()->first('icon_filename'));
+            }
+
+            if ($validator->errors()->has('icon_data')) {
+                $validator->errors()->add('file', $validator->errors()->first('icon_data'));
+            }
+        });
 
         // add main category
         if (!$validator->fails()) {
@@ -114,8 +127,10 @@ class CategoryController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'             => 'required|string|max:191',
-                'locale'           => 'required|string|max:5',
+                'name'             => 'required_with:locale|max:191',
+                'name.bg'          => 'required_without:locale|string|max:191',
+                'name.*'           => 'max:191',
+                'locale'           => 'nullable|string|max:5',
                 'icon'             => 'nullable|string|max:191',
                 'icon_filename'    => 'nullable|string|max:191',
                 'icon_mimetype'    => 'nullable|string|max:191',
@@ -124,6 +139,16 @@ class CategoryController extends ApiController
                 'ordering'         => 'nullable|integer|digits_between:1,3',
             ]);
         }
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('icon_filename')) {
+                $validator->errors()->add('file', $validator->errors()->first('icon_filename'));
+            }
+
+            if ($validator->errors()->has('icon_data')) {
+                $validator->errors()->add('file', $validator->errors()->first('icon_data'));
+            }
+        });
 
         if (!$validator->fails()) {
             $category = Category::find($post['category_id']);
@@ -146,6 +171,8 @@ class CategoryController extends ApiController
 
                 if (!empty($post['data']['active'])) {
                     $category->active = $post['data']['active'];
+                } else {
+                    $category->active = Category::ACTIVE_FALSE;
                 }
 
                 if (!empty($post['data']['ordering'])) {
@@ -191,6 +218,19 @@ class CategoryController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                DataSet::withTrashed()
+                    ->where('category_id', $post['category_id'])
+                    ->update(['category_id' => null]);
+
+                DB::table('user_follows')->where('category_id', $post['category_id'])
+                    ->update(['category_id' => null]);
+
+                DB::table('user_follows')->where('tag_id', $post['category_id'])
+                    ->update(['tag_id' => null]);
+
+                DB::table('categories')->where('parent_id', $post['category_id'])
+                    ->update(['parent_id' => null]);
+
                 if (Category::find($post['category_id'])->delete()) {
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
@@ -348,6 +388,7 @@ class CategoryController extends ApiController
 
             $category['name'] = $category->name;
             $category['locale'] = \LaravelLocalization::getCurrentLocale();
+            $category['icon_data'] = utf8_encode($category->icon_data);
 
             if ($category) {
                 return $this->successResponse(['category' => $category], true);

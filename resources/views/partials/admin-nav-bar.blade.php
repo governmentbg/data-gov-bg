@@ -62,15 +62,9 @@
                         </li>
                         <li>
                             <a
-                                class="{{ $view == 'topicsCategories' ? 'active' : '' }}"
-                                href="#"
-                            >{{ __('custom.topics_categories') }}</a>
-                        </li>
-                        <li>
-                            <a
                                 class="{{ $view == 'topicsSubtopics' ? 'active' : '' }}"
                                 href="{{ url('/admin/themes/list') }}"
-                            >{{ __('custom.topics_subtopics') }}</a>
+                            >{{ __('custom.topics_categories') }}</a>
                         </li>
                         <li>
                             <a

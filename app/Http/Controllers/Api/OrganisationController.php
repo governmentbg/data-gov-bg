@@ -6,6 +6,7 @@ use App\Role;
 use App\User;
 use App\Locale;
 use App\Module;
+use App\DataSet;
 use App\ActionsHistory;
 use App\Organisation;
 use App\CustomSetting;
@@ -952,13 +953,20 @@ class OrganisationController extends ApiController
                         'active'          => $org->active,
                         'approved'        => $org->approved,
                         'custom_fields'   => $customFields,
-                        'datasets_count'  => $org->dataSet()->count(),
                         'followers_count' => $org->userFollow()->count(),
                         'created_at'      => isset($org->created_at) ? $org->created_at->toDateTimeString() : null,
                         'updated_at'      => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
                         'created_by'      => $org->created_by,
                         'updated_by'      => $org->updated_by,
                     ];
+
+                    $ids = [];
+                    $relations = $org->dataSet()->get();
+                    foreach ($relations as $v) {
+                        $ids[] = $v->id;
+                    }
+                    $count = DataSet::whereIn('id', $ids)->where('status', DataSet::STATUS_PUBLISHED)->count();
+                    $result['datasets_count'] = $count;
 
                     return $this->successResponse($result);
                 }
@@ -1734,6 +1742,7 @@ class OrganisationController extends ApiController
                 } else {
                     $group = Organisation::where('uri', $post['group_uri'])->first();
                 }
+
                 $customFields = [];
 
                 if ($group) {
@@ -1756,9 +1765,16 @@ class OrganisationController extends ApiController
                         'uri'             => $group->uri,
                         'logo'            => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
                         'custom_fields'   => $customFields,
-                        'datasets_count'  => $group->dataSet()->count(),
                         'followers_count' => $group->userFollow()->count(),
                     ];
+
+                    $ids = [];
+                    $relations = $group->dataSetGroup()->get();
+                    foreach ($relations as $v) {
+                        $ids[] = $v->data_set_id;
+                    }
+                    $count = DataSet::whereIn('id', $ids)->where('status', DataSet::STATUS_PUBLISHED)->count();
+                    $result['datasets_count'] = $count;
 
                     return $this->successResponse($result);
                 }

@@ -18,7 +18,7 @@
                         type="text"
                         class="input-border-r-12 form-control"
                         value="{{ old('uri') }}"
-                        placeholder="Уникален идентификатор"
+                        placeholder="{{ __('custom.unique_identificator') }}"
                     >
                     <span class="error">{{ $errors->first('uri') }}</span>
                 </div>

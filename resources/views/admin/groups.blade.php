@@ -22,13 +22,6 @@
                 </form>
             </div>
         </div>
-        <div class="row">
-            <div class="col-sm-6 col-xs-12 text-left">
-                <span class="badge badge-pill m-t-md new-data user-add-btn">
-                    <a href="">{{ __('custom.data_sets') }}</a>
-                </span>
-            </div>
-        </div>
         <div class="col-xs-12 m-t-md list-orgs user-orgs">
             <div class="row">
                 @if (count($groups))

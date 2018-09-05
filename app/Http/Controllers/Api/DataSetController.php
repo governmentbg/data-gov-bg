@@ -482,8 +482,6 @@ class DataSetController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $data = [];
-            $reported = [];
 
             try {
                 $query = DataSet::select();
@@ -550,17 +548,7 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['created_by'])) {
-                    $query->orWhere('created_by', $criteria['created_by']);
-
-                    if (!empty($criteria['org_ids'])) {
-                        $query->whereIn('org_id', $criteria['org_ids']);
-                    }
-
-                    if (!empty($criteria['group_ids'])) {
-                        $query->whereHas('dataSetGroup', function($q) use($criteria) {
-                            $q->whereIn('group_id', $criteria['group_ids']);
-                        });
-                    }
+                    $query->where('created_by', $criteria['created_by']);
                 }
 
                 if (!empty($order)) {
@@ -573,26 +561,76 @@ class DataSetController extends ApiController
                     $this->getRecordsPerPage($request->offsetGet('records_per_page'))
                 );
 
-                $data = $query->get();
+                $results = [];
+                $locale = !empty($post['criteria']['locale'])
+                    ? $post['criteria']['locale']
+                    : \LaravelLocalization::getCurrentLocale();
 
-                foreach ($data as $set) {
-                    $set['name'] = $set->name;
-                    $set['sla'] = $set->sla;
-                    $set['descript'] = $set->descript;
+                foreach ($query->get() as $set) {
+                    $result['id'] = $set->id;
+                    $result['uri'] = $set->uri;
+                    $result['org_id'] = $set->org_id;
+                    $result['name'] = $set->name;
+                    $result['descript'] = $set->descript;
+                    $result['locale'] = $locale;
+                    $result['category_id'] = $set->category_id;
+                    $result['terms_of_use_id'] = $set->terms_of_use_id;
+                    $result['visibility'] = $set->visibility;
+                    $result['source'] = $set->source;
+                    $result['version'] = $set->version;
+                    $result['author_name'] = $set->author_name;
+                    $result['author_email'] = $set->author_email;
+                    $result['support_name'] = $set->support_name;
+                    $result['support_email'] = $set->support_email;
+                    $result['sla'] = $set->sla;
+                    $result['status'] = $set->status;
+                    $result['followers_count'] = $set->userFollow()->count();
+                    $result['reported'] = 0;
+                    $result['created_at'] = isset($set->created_at) ? $set->created_at->toDateTimeString() : null;
+                    $result['updated_at'] = isset($set->updated_at) ? $set->updated_at->toDateTimeString() : null;
+                    $result['created_by'] = $set->created_by;
+                    $result['updated_by'] = $set->updated_by;
 
                     $hasRes = $set->resource()->count();
+                    $formats = [];
+                    $formatList = Resource::getFormats();
 
                     if ($hasRes) {
                         foreach ($set->resource as $resourse) {
+                            if (!empty($resourse->file_format)) {
+                                $formats[$formatList[$resourse->file_format]] = $formatList[$resourse->file_format];
+                            }
                             if ($resourse->is_reported) {
-                                $set['reported'] = 1;
+                                $result['reported'] = 1;
                             }
                         }
                     }
+
+                    $result['formats'] = array_keys($formats);
+                    $tags = [];
+                    foreach ($set->tags as $tag) {
+                        $tags[] = [
+                            'id'    => $tag->id,
+                            'name'  => $tag->name,
+                        ];
+                    }
+                    $result['tags'] = $tags;
+
+                    $results[] = $result;
+                }
+
+                $transFields = ['name', 'sla', 'descript'];
+
+                if ($order && in_array($order['field'], $transFields)) {
+                    usort($results, function($a, $b) use ($order) {
+                        return strtolower($order['type']) == 'asc'
+                            ? strcmp($a[$order['field']], $b[$order['field']])
+                            : strcmp($b[$order['field']], $a[$order['field']]);
+                    });
                 }
 
                 return $this->successResponse([
-                    'datasets'      => $data,
+                    'datasets'      => $results,
                     'total_records' => $count
                 ], true);
             } catch (QueryException $ex) {
@@ -680,12 +718,22 @@ class DataSetController extends ApiController
                 $results = [];
 
                 foreach ($query->get() as $set) {
+                    $result['id'] = $set->id;
+                    $result['uri'] = $set->uri;
+                    $result['org_id'] = $set->org_id;
                     $result['name'] = $set->name;
-                    $result['uri'] = $set->uri;
-                    $result['sla'] = $set->sla;
                     $result['descript'] = $set->descript;
-                    $result['uri'] = $set->uri;
-                    $result['created_at'] = (string) $set->created_at;
+                    $result['category_id'] = $set->category_id;
+                    $result['terms_of_use_id'] = $set->terms_of_use_id;
+                    $result['visibility'] = $set->visibility;
+                    $result['source'] = $set->source;
+                    $result['version'] = $set->version;
+                    $result['author_name'] = $set->author_name;
+                    $result['author_email'] = $set->author_email;
+                    $result['support_name'] = $set->support_name;
+                    $result['support_email'] = $set->support_email;
+                    $result['sla'] = $set->sla;
+                    $result['status'] = $set->status;
                     $result['followers_count'] = $set->userFollow()->count();
                     $result['reported'] = 0;
                     $result['created_at'] = isset($set->created_at) ? $set->created_at->toDateTimeString() : null;
@@ -709,7 +757,7 @@ class DataSetController extends ApiController
                 $transFields = ['name', 'sla', 'descript'];
 
                 if ($order && in_array($order['field'], $transFields)) {
-                    usort($result, function($a, $b) use ($order) {
+                    usort($results, function($a, $b) use ($order) {
                         return strtolower($order['type']) == 'asc'
                             ? strcmp($a[$order['field']], $b[$order['field']])
                             : strcmp($b[$order['field']], $a[$order['field']]);

@@ -160,7 +160,6 @@ class UserController extends Controller {
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
-            $params['criteria']['created_by'] = \Auth::user()->id;
             $params['criteria']['org_ids'] = [$orgId];
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
             $rq = Request::create('/api/listDatasets', 'POST', $params);
@@ -3598,7 +3597,6 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $params['criteria']['created_by'] = \Auth::user()->id;
         $params['criteria']['group_ids'] = [$orgId];
         $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
         $dataRq = Request::create('/api/listDatasets', 'POST', $params);

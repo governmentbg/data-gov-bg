@@ -209,7 +209,7 @@ class TagController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $order = isset($request->criteria['order']) ? $request->criteria['order'] : [];
+            $order = isset($criteria['order']) ? $criteria['order'] : [];
             $validator = \Validator::make($order, [
                 'type'    => 'nullable|string|max:191',
                 'field'   => 'nullable|string|max:191'
@@ -223,7 +223,7 @@ class TagController extends ApiController
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
 
             if (!empty($criteria['tag_ids'])) {
-                $query->whereIn('id', $request->criteria['tag_ids']);
+                $query->whereIn('id', $criteria['tag_ids']);
             }
 
             $query->orderBy($order['field'], $order['type']);

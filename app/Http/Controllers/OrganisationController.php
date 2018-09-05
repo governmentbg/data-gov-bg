@@ -4,13 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Role;
 use App\ActionsHistory;
+use App\Organisation;
+use App\DataSet;
+use App\Resource;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
+use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\TagController as ApiTag;
+use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
+use App\Http\Controllers\Api\ResourceController as ApiResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class OrganisationController extends Controller {
 
@@ -80,7 +86,7 @@ class OrganisationController extends Controller {
         $paginationData = $this->getPaginationData(
             $result->success ? $result->organisations : [],
             $result->success ? $result->total_records : 0,
-            array_except(app('request')->input(), ['q', 'page',]),
+            array_except(app('request')->input(), ['q', 'page']),
             $perPage
         );
 
@@ -191,7 +197,9 @@ class OrganisationController extends Controller {
         $api = new ApiOrganisation($rq);
         $result = $api->getOrganisationDetails($rq)->getData();
 
-        if ($result->success && !empty($result->data) && $result->data->active && $result->data->approved) {
+        if (isset($result->success) && $result->success && !empty($result->data) &&
+            $result->data->active && $result->data->approved) {
+
             $params = [
                 'criteria'     => [
                     'org_id'   => $result->data->id,
@@ -236,32 +244,32 @@ class OrganisationController extends Controller {
                         $followed = true;
                     }
                 }
-            }
 
-            if (!$followed) {
-                if ($request->has('follow')) {
-                    $followRq = Request::create('api/addFollow', 'POST', [
-                        'api_key' => $user->api_key,
-                        'user_id' => $user->id,
-                        'org_id'  => $result->data->id,
-                    ]);
-                    $apiFollow = new ApiFollow($followRq);
-                    $followResult = $apiFollow->addFollow($followRq)->getData();
-                    if ($followResult->success) {
-                        return back();
+                if (!$followed) {
+                    if ($request->has('follow')) {
+                        $followRq = Request::create('api/addFollow', 'POST', [
+                            'api_key' => $user->api_key,
+                            'user_id' => $user->id,
+                            'org_id'  => $result->data->id,
+                        ]);
+                        $apiFollow = new ApiFollow($followRq);
+                        $followResult = $apiFollow->addFollow($followRq)->getData();
+                        if ($followResult->success) {
+                            return back();
+                        }
                     }
-                }
-            } else {
-                if ($request->has('unfollow')) {
-                    $followRq = Request::create('api/unFollow', 'POST', [
-                        'api_key' => $user->api_key,
-                        'user_id' => $user->id,
-                        'org_id'  => $result->data->id,
-                    ]);
-                    $apiFollow = new ApiFollow($followRq);
-                    $followResult = $apiFollow->unFollow($followRq)->getData();
-                    if ($followResult->success) {
-                        return back();
+                } else {
+                    if ($request->has('unfollow')) {
+                        $followRq = Request::create('api/unFollow', 'POST', [
+                            'api_key' => $user->api_key,
+                            'user_id' => $user->id,
+                            'org_id'  => $result->data->id,
+                        ]);
+                        $apiFollow = new ApiFollow($followRq);
+                        $followResult = $apiFollow->unFollow($followRq)->getData();
+                        if ($followResult->success) {
+                            return back();
+                        }
                     }
                 }
             }
@@ -278,24 +286,356 @@ class OrganisationController extends Controller {
             );
         }
 
-        return redirect('organisation');
+        return redirect()->back();
     }
 
     public function datasets(Request $request, $uri)
     {
-        return view(
-            'organisation/datasets',
-            [
-                'class' => 'organisation',
-                'uri'   => $uri
-            ]
-        );
+        $locale = \LaravelLocalization::getCurrentLocale();
 
+        // get organisation details by uri
+        $params = [
+            'org_uri' => $uri,
+            'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if (isset($result->success) && $result->success && !empty($result->data) &&
+            $result->data->active && $result->data->approved) {
+
+            $criteria = [
+                'org_ids' => [$result->data->id]
+            ];
+
+            // filters
+            $categories = [];
+            $tags = [];
+            $formats = [];
+            $termsOfUse = [];
+            $getParams = [];
+            $display = [];
+
+            // main categories filter
+            if ($request->filled('category') && is_array($request->category)) {
+                $criteria['category_ids'] = $request->category;
+                $getParams['category'] = $request->category;
+            } else {
+                $getParams['category'] = [];
+            }
+
+            // tags filter
+            if ($request->filled('tag') && is_array($request->tag)) {
+                $criteria['tag_ids'] = $request->tag;
+                $getParams['tag'] = $request->tag;
+            } else {
+                $getParams['tag'] = [];
+            }
+
+            // data formats filter
+            if ($request->filled('format') && is_array($request->format)) {
+                $criteria['formats'] = array_map('strtoupper', $request->format);
+                $getParams['format'] = $request->format;
+            } else {
+                $getParams['format'] = [];
+            }
+
+            // terms of use filter
+            if ($request->filled('license') && is_array($request->license)) {
+                $criteria['terms_of_use_ids'] = $request->license;
+                $getParams['license'] = $request->license;
+            } else {
+                $getParams['license'] = [];
+            }
+
+            // prepare datasets parameters
+            $perPage = 6;
+            $params = [
+                'records_per_page' => $perPage,
+                'page_number'      => !empty($request->page) ? $request->page : 1,
+                'criteria'         => $criteria,
+            ];
+            $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
+            $params['criteria']['visibility'] = DataSet::VISIBILITY_PUBLIC;
+
+            // apply search
+            if ($request->filled('q') && !empty(trim($request->q))) {
+                $getParams['q'] = trim($request->q);
+                $params['criteria']['keywords'] = $getParams['q'];
+            }
+
+            // apply sort parameters
+            if ($request->has('sort')) {
+                if ($request->sort != 'relevance') {
+                    $params['criteria']['order']['field'] = $request->sort;
+                    if ($request->has('order')) {
+                        $params['criteria']['order']['type'] = $request->order;
+                    }
+                }
+            }
+
+            // list datasets
+            $rq = Request::create('/api/listDatasets', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->listDatasets($rq)->getData();
+
+            $datasets = !empty($res->datasets) ? $res->datasets : [];
+            $count = !empty($res->total_records) ? $res->total_records : 0;
+
+            $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
+
+            $followed = [];
+
+            if (!empty($paginationData['items'])) {
+                $recordsLimit = 10;
+
+                // check for category records limit
+                $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
+
+                // list data categories
+                $params = [
+                    'criteria' => [
+                        'dataset_criteria' => $criteria,
+                        'locale' => $locale
+                    ],
+                ];
+                if ($hasLimit) {
+                    $params['criteria']['records_limit'] = $recordsLimit;
+                }
+
+                $rq = Request::create('/api/listDataCategories', 'POST', $params);
+                $api = new ApiCategory($rq);
+                $res = $api->listDataCategories($rq)->getData();
+
+                $categories = !empty($res->categories) ? $res->categories : [];
+
+                $this->prepareDisplayParams(count($categories), $hasLimit, $recordsLimit, 'category', $display);
+
+                // check for tag records limit
+                $hasLimit = !($request->filled('tag_limit') && $request->tag_limit == 0);
+
+                // list data tags
+                $params = [
+                    'criteria' => [
+                        'dataset_criteria' => $criteria
+                    ],
+                ];
+                if ($hasLimit) {
+                    $params['criteria']['records_limit'] = $recordsLimit;
+                }
+
+                $rq = Request::create('/api/listDataTags', 'POST', $params);
+                $api = new ApiTag($rq);
+                $res = $api->listDataTags($rq)->getData();
+
+                $tags = !empty($res->tags) ? $res->tags : [];
+
+                $this->prepareDisplayParams(count($tags), $hasLimit, $recordsLimit, 'tag', $display);
+
+                // check for format records limit
+                $hasLimit = !($request->filled('format_limit') && $request->format_limit == 0);
+
+                // list data formats
+                $params = [
+                    'criteria' => [
+                        'dataset_criteria' => $criteria,
+                    ],
+                ];
+                if ($hasLimit) {
+                    $params['criteria']['records_limit'] = $recordsLimit;
+                }
+
+                $rq = Request::create('/api/listDataFormats', 'POST', $params);
+                $api = new ApiResource($rq);
+                $res = $api->listDataFormats($rq)->getData();
+
+                $formats = !empty($res->data_formats) ? $res->data_formats : [];
+
+                $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
+
+                // check for terms of use records limit
+                $hasLimit = !($request->filled('license_limit') && $request->license_limit == 0);
+
+                // list data terms of use
+                $params = [
+                    'criteria' => [
+                        'dataset_criteria' => $criteria,
+                        'locale' => $locale
+                    ],
+                ];
+                if ($hasLimit) {
+                    $params['criteria']['records_limit'] = $recordsLimit;
+                }
+
+                $rq = Request::create('/api/listDataTermsOfUse', 'POST', $params);
+                $api = new ApiTermsOfUse($rq);
+                $res = $api->listDataTermsOfUse($rq)->getData();
+
+                $termsOfUse = !empty($res->terms_of_use) ? $res->terms_of_use : [];
+
+                $this->prepareDisplayParams(count($termsOfUse), $hasLimit, $recordsLimit, 'license', $display);
+
+                // follow / unfollow dataset
+                if ($user = \Auth::user()) {
+                    // get user follows
+                    $params = [
+                        'api_key' => $user->api_key,
+                        'id'      => $user->id
+                    ];
+                    $rq = Request::create('/api/getUserSettings', 'POST', $params);
+                    $api = new ApiUser($rq);
+                    $res = $api->getUserSettings($rq)->getData();
+                    if (!empty($res->user) && !empty($res->user->follows)) {
+                        $followed = array_where(array_pluck($res->user->follows, 'dataset_id'), function ($value, $key) {
+                            return !is_null($value);
+                        });
+                    }
+
+                    $datasetIds = array_pluck($paginationData['items'], 'id');
+
+                    if ($request->has('follow')) {
+                        // follow dataset
+                        if (in_array($request->follow, $datasetIds) && !in_array($request->follow, $followed)) {
+                            $followRq = Request::create('api/addFollow', 'POST', [
+                                'api_key' => $user->api_key,
+                                'user_id' => $user->id,
+                                'data_set_id' => $request->follow,
+                            ]);
+                            $apiFollow = new ApiFollow($followRq);
+                            $followResult = $apiFollow->addFollow($followRq)->getData();
+                            if ($followResult->success) {
+                                return back();
+                            }
+                        }
+                    } elseif ($request->has('unfollow')) {
+                        // unfollow dataset
+                        if (in_array($request->unfollow, $datasetIds) && in_array($request->unfollow, $followed)) {
+                            $followRq = Request::create('api/unFollow', 'POST', [
+                                'api_key' => $user->api_key,
+                                'user_id' => $user->id,
+                                'data_set_id' => $request->unfollow,
+                            ]);
+                            $apiFollow = new ApiFollow($followRq);
+                            $followResult = $apiFollow->unFollow($followRq)->getData();
+                            if ($followResult->success) {
+                                return back();
+                            }
+                        }
+                    }
+                }
+            }
+
+            return view(
+                'organisation/datasets',
+                [
+                    'class'              => 'organisation',
+                    'organisation'       => $result->data,
+                    'approved'           => ($result->data->type == Organisation::TYPE_COUNTRY),
+                    'datasets'           => $paginationData['items'],
+                    'resultsCount'       => $count,
+                    'pagination'         => $paginationData['paginate'],
+                    'categories'         => $categories,
+                    'tags'               => $tags,
+                    'formats'            => $formats,
+                    'termsOfUse'         => $termsOfUse,
+                    'getParams'          => $getParams,
+                    'display'            => $display,
+                    'followed'           => $followed
+                ]
+            );
+        }
+
+        return redirect()->back();
     }
 
-    public function viewDataset()
-    {
+    private function prepareDisplayParams($count, $hasLimit, $recordsLimit, $type, &$display) {
+        if ($hasLimit && $count >= $recordsLimit) {
+            $display['show_all'][$type] = true;
+            $display['only_popular'][$type] = false;
+        } elseif ($count > $recordsLimit) {
+            $display['show_all'][$type] = false;
+            $display['only_popular'][$type] = true;
+        } else {
+            $display['show_all'][$type] = false;
+            $display['only_popular'][$type] = false;
+        }
+    }
 
+    public function viewDataset(Request $request, $orgUri, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'org_uri' => $orgUri,
+            'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $result = $api->getOrganisationDetails($rq)->getData();
+
+        if (isset($result->success) && $result->success && !empty($result->data) &&
+            $result->data->active && $result->data->approved) {
+
+            $params = [
+                'dataset_uri' => $uri
+            ];
+            $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->getDataSetDetails($rq)->getData();
+            $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
+
+            if (!empty($dataset)) {
+                $params = [
+                    'criteria' => [
+                        'dataset_uri' => $uri
+                    ]
+                ];
+                $rq = Request::create('/api/listResources', 'POST', $params);
+                $apiResources = new ApiResource($rq);
+                $res = $apiResources->listResources($rq)->getData();
+                $resources = !empty($res->resources) ? $res->resources : [];
+
+                // get category details
+                if (!empty($dataset->category_id)) {
+                    $params = [
+                        'category_id' => $dataset->category_id,
+                        'locale'  => $locale
+                    ];
+                    $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
+                    $api = new ApiCategory($rq);
+                    $res = $api->getMainCategoryDetails($rq)->getData();
+
+                    $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
+                }
+
+                // get terms of use details
+                if (!empty($dataset->terms_of_use_id)) {
+                    $params = [
+                        'terms_id' => $dataset->terms_of_use_id,
+                        'locale'  => $locale
+                    ];
+                    $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
+                    $api = new ApiTermsOfUse($rq);
+                    $res = $api->getTermsOfUseDetails($rq)->getData();
+
+                    $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
+                }
+
+                return view(
+                    'organisation/viewDataset',
+                    [
+                        'class'          => 'organisation',
+                        'organisation'   => $result->data,
+                        'approved'       => ($result->data->type == Organisation::TYPE_COUNTRY),
+                        'dataset'        => $dataset,
+                        'resources'      => $resources
+                    ]
+                );
+            }
+        }
+
+        return redirect()->back();
     }
 
     public function chronology(Request $request, $uri)
@@ -333,7 +673,7 @@ class OrganisationController extends Controller {
             $actObjData[$objType][$result->data->id] = [
                 'obj_id'        => $result->data->uri,
                 'obj_name'      => $result->data->name,
-                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_module'    => ultrans('custom.organisations'),
                 'obj_type'      => 'org',
                 'obj_view'      => '/organisation/profile/'. $result->data->uri,
                 'parent_obj_id' => ''
@@ -349,7 +689,7 @@ class OrganisationController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'        => $dataset->uri,
                         'obj_name'      => $dataset->name,
-                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_module'    => ultrans('custom.dataset'),
                         'obj_type'      => 'dataset',
                         'obj_view'      => '/data/view/'. $dataset->uri,
                         'parent_obj_id' => ''
@@ -361,12 +701,12 @@ class OrganisationController extends Controller {
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,
-                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_module'        => ultrans('custom.resource'),
                                 'obj_type'          => 'resource',
                                 'obj_view'          => '/data/resourceView/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
-                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_module' => ultrans('custom.dataset'),
                                 'parent_obj_type'   => 'dataset',
                                 'parent_obj_view'   => '/data/view/'. $dataset->uri
                             ];
@@ -421,6 +761,6 @@ class OrganisationController extends Controller {
             );
         }
 
-        return redirect('organisation');
+        return redirect()->back();
     }
 }

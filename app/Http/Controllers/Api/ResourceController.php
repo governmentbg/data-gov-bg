@@ -7,6 +7,7 @@ use App\Resource;
 use App\Module;
 use App\ActionsHistory;
 use App\ElasticDataSet;
+use App\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -866,41 +867,136 @@ class ResourceController extends ApiController
     /**
      * Lists the count of the datasets per format
      *
-     * @param Request $request
+     * @param array criteria - optional
+     * @param array criteria[dataset_criteria] - optional
+     * @param array criteria[dataset_criteria][user_ids] - optional
+     * @param array criteria[dataset_criteria][org_ids] - optional
+     * @param array criteria[dataset_criteria][group_ids] - optional
+     * @param array criteria[dataset_criteria][category_ids] - optional
+     * @param array criteria[dataset_criteria][tag_ids] - optional
+     * @param array criteria[dataset_criteria][formats] - optional
+     * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
+     * @param array criteria[dataset_ids] - optional
+     * @param int criteria[records_limit] - optional
+     *
      * @return json response
      */
     public function listDataFormats(Request $request)
     {
-        $dataSets = Resource::select('file_format', DB::raw('count(*) as total'))
-            ->groupBy('file_format')->pluck('total', 'file_format')
-            ->all();
-        $formats = Resource::getFormats();
-        $formatLabel = '';
+        $post = $request->all();
 
-        if (!empty($dataSets)) {
-            foreach ($dataSets as $key => $value) {
-                foreach ($formats as $id => $format) {
-                    if ($id == $key) {
-                        $formatLabel = $format;
+        $validator = \Validator::make($post, [
+            'criteria' => 'nullable|array',
+        ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = \Validator::make($criteria, [
+                'dataset_criteria'  => 'nullable|array',
+                'dataset_ids'       => 'nullable|array',
+                'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
+                'records_limit'     => 'nullable|int|digits_between:1,10|min:1',
+            ]);
+        }
+
+        $formats = Resource::getFormats();
+
+        if (!$validator->fails()) {
+            $dsCriteria = isset($criteria['dataset_criteria']) ? $criteria['dataset_criteria'] : [];
+            $validator = \Validator::make($dsCriteria, [
+                'user_ids'            => 'nullable|array',
+                'user_ids.*'          => 'int|digits_between:1,10|exists:users,id',
+                'org_ids'             => 'nullable|array',
+                'org_ids.*'           => 'int|digits_between:1,10|exists:organisations,id',
+                'group_ids'           => 'nullable|array',
+                'group_ids.*'         => 'int|digits_between:1,10|exists:organisations,id,type,'. Organisation::TYPE_GROUP,
+                'category_ids'        => 'nullable|array',
+                'category_ids.*'      => 'int|digits_between:1,10|exists:categories,id,parent_id,NULL',
+                'tag_ids'             => 'nullable|array',
+                'tag_ids.*'           => 'int|digits_between:1,10|exists:tags,id',
+                'terms_of_use_ids'    => 'nullable|array',
+                'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
+                'formats'             => 'nullable|array|min:1',
+                'formats.*'           => 'string|in:'. implode(',', $formats),
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            try {
+                $data = Resource::select('file_format', DB::raw('count(distinct data_set_id, file_format) as total'));
+
+                $data->whereHas('DataSet', function($q) use ($dsCriteria) {
+                    if (!empty($dsCriteria['user_ids'])) {
+                        $q->whereIn('created_by', $dsCriteria['user_ids']);
+                    }
+                    if (!empty($dsCriteria['org_ids'])) {
+                        $q->whereIn('org_id', $dsCriteria['org_ids']);
+                    }
+                    if (!empty($dsCriteria['group_ids'])) {
+                        $q->whereHas('DataSetGroup', function($qr) use ($dsCriteria) {
+                            $qr->whereIn('group_id', $dsCriteria['group_ids']);
+                        });
+                    }
+                    if (!empty($dsCriteria['category_ids'])) {
+                        $q->whereIn('category_id', $dsCriteria['category_ids']);
+                    }
+                    if (!empty($dsCriteria['tag_ids'])) {
+                        $q->whereHas('DataSetTags', function($qr) use ($dsCriteria) {
+                            $qr->whereIn('tag_id', $dsCriteria['tag_ids']);
+                        });
+                    }
+                    if (!empty($dsCriteria['terms_of_use_ids'])) {
+                        $q->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
+                    }
+                    $q->where('status', DataSet::STATUS_PUBLISHED);
+                    $q->where('visibility', DataSet::VISIBILITY_PUBLIC);
+                });
+
+                $fileFormats = [];
+                if (!empty($dsCriteria['formats'])) {
+                    foreach ($dsCriteria['formats'] as $format) {
+                        $fileFormats[] = Resource::getFormatsCode($format);
+                    }
+                } else {
+                    $fileFormats = array_flip($formats);
+                }
+                $data->whereIn(
+                    'data_set_id',
+                    DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                );
+
+                if (!empty($criteria['dataset_ids'])) {
+                    $data->whereIn('data_set_id', $criteria['dataset_ids']);
+                }
+
+                $data->groupBy('file_format')->orderBy('total', 'desc');
+
+                if (!empty($criteria['records_limit'])) {
+                    $data->take($criteria['records_limit']);
+                }
+
+                $data = $data->pluck('total', 'file_format')->all();
+
+                $results = [];
+                if (!empty($data)) {
+                    foreach ($data as $key => $value) {
+                        if (isset($formats[$key])) {
+                            $results[] = [
+                                'format'         => $formats[$key],
+                                'datasets_count' => $value,
+                            ];
+                        }
                     }
                 }
 
-                $result[] = [
-                    'format'            => $formatLabel,
-                    'datasets_count'    => $value,
-                ];
+                return $this->successResponse(['data_formats' => $results], true);
+
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
             }
-
-            $logData = [
-                'module_name'      => Module::getModuleName(Module::RESOURCES),
-                'action'           => ActionsHistory::TYPE_SEE,
-                'action_msg'       => 'Listed data formats',
-            ];
-
-            Module::add($logData);
-
-            return $this->successResponse(['data_formats' => $result], true);
         }
+
+        return $this->errorResponse(__('custom.list_data_formats_fail'), $validator->errors()->messages());
     }
 
     /**

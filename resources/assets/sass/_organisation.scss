@@ -11,16 +11,110 @@
         }
     }
 
+    a.active {
+      color: #76ad3f;
+    }
+
     .view-profile {
         color: #5e5e5e;
         font-weight: 600;
     }
 
-    .list-orgs img {
-        height: 200px;
+    .list-orgs {
+        img {
+            height: 200px;
+        }
+            
+        padding: 50px;
+
+        .ch-del-btns {
+            margin-top: 10px;
+            margin-bottom: 35px;
+            min-height: 36px;
+            div {
+                div {
+                    button {
+                        border-radius: 10px;
+                        padding: 7px;
+                        background-color: #108f9e;
+                        color: white;
+                        border: none;
+                        min-width: 80px;
+                    }
+                }
+            }
+        }
+
+        .org-desc {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+             -webkit-box-orient: vertical;
+             -webkit-line-clamp: 6;
+            height: 130px;
+        }
+
+        .org-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
+
+        .logo {
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .show-more {
+            margin-top: 10px;
+            padding-right: 7px;
+        }
+
+        .org-col {
+            margin: 10px;
+            height: 450px;
+            width: 310px;
+            border: 1px #888888;
+            box-shadow: 0px 0px 6px 0px #888888;
+
+            &:hover {
+                box-shadow: 0px 0px 18px 0px #108f9e;
+            }
+        }
     }
 
-    .chronology > .row{
+    .history {
+        .version-heading {
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .version {
+            font-size: 17px;
+        }
+
+        span > svg {
+            height: 20px;
+            width: 20px;
+        }
+
+        .signaled {
+            span {
+                color: #d32a31;
+            }
+            a {
+                &:hover, &:focus, &:active {
+                    svg {
+                        fill: #d32a31;
+                    }
+                }
+            }
+        }
+    }
+
+    .chronology > .row {
         .info-icon {
             border: none !important;
             position: relative;
@@ -30,7 +124,7 @@
             bottom: 10px;
 
             img {
-                max-height: 70px;
+                max-height: 70px !important;
             }
 
             &:after {

@@ -75,6 +75,26 @@
     }
 }
 
+.order-datasets {
+    a {
+        &.active {
+            color: #108f9e;
+        }
+
+        padding-bottom: 10px;
+        padding-top: 10px;
+
+        border-right: 1px solid #108f9e;
+        height: 20px;
+        padding-right: 10px;
+
+        &:last-child() {
+            border: none;
+            padding-left: 10px;
+        }
+    }
+}
+
 .order-documents {
     a {
         &.active {

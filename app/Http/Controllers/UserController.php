@@ -256,7 +256,6 @@ class UserController extends Controller {
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
-            $params['criteria']['created_by'] = \Auth::user()->id;
             $params['criteria']['org_ids'] = [$orgId];
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
             $rq = Request::create('/api/listDatasets', 'POST', $params);
@@ -3451,7 +3450,7 @@ class UserController extends Controller {
                         }
                     }
 
-                    $actObjData[$objType][$dataset->uri] = [
+                    $actObjData[$objType][$dataset->id] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
                         'obj_module'     => Str::lower(__('custom.dataset')),
@@ -4399,7 +4398,6 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $params['criteria']['created_by'] = \Auth::user()->id;
         $params['criteria']['group_ids'] = [$orgId];
         $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
         $dataRq = Request::create('/api/listDatasets', 'POST', $params);
@@ -4673,7 +4671,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect(url('/user/groups/datasets/edit/'. $newURI));
+                return redirect(url('/user/groups/dataset/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -4693,6 +4691,7 @@ class UserController extends Controller {
             'groups'        => $groups,
             'hasResources'  => $hasResources,
             'buttons'       => $buttons,
+            'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }

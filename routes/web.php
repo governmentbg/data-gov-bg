@@ -71,12 +71,6 @@ Route::middleware('auth')->group(function() {
         'Admin\GroupController@addMembersNew'
     )->name('adminAddGroupMembersNew');
 
-    Route::match(['get', 'post'], '/admin/datasets', 'Admin\DataSetController@listDatasets');
-    Route::match(['get', 'post'], '/admin/dataset/add', 'Admin\DataSetController@add');
-    Route::match(['get', 'post'], '/admin/dataset/view/{uri}', 'Admin\DataSetController@view');
-    Route::match(['get', 'post'], '/admin/dataset/edit/{uri}', 'Admin\DataSetController@edit');
-    Route::match(['get', 'post'], '/admin/dataset/delete', 'Admin\DataSetController@delete');
-
     Route::match(['get', 'post'], '/admin/terms-of-use/list', 'Admin\TermsOfUseController@list');
     Route::match(['get', 'post'], '/admin/terms-of-use/add', 'Admin\TermsOfUseController@add');
     Route::match(['get', 'post'], '/admin/terms-of-use/view/{id}', 'Admin\TermsOfUseController@view');
@@ -88,7 +82,17 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/admin/terms-of-use-request/delete/{id}', 'Admin\TermsOfUseRequestController@delete');
 
     Route::match(['get', 'post'], '/admin/themes/list', 'Admin\ThemeController@list');
-    Route::match(['get', 'post'], '/admin/subthemes/list/{id}', 'Admin\SubThemeController@list');
+    Route::match(['get', 'post'], '/admin/themes/add', 'Admin\ThemeController@add');
+    Route::match(['get', 'post'], '/admin/themes/view/{id}', 'Admin\ThemeController@view');
+    Route::match(['get', 'post'], '/admin/themes/edit/{id}', 'Admin\ThemeController@edit');
+    Route::match(['get', 'post'], '/admin/themes/delete/{id}', 'Admin\ThemeController@delete');
+
+    Route::match(['get', 'post'], '/admin/categories/list', 'Admin\SubThemeController@list');
+    Route::match(['get', 'post'], '/admin/categories/search', 'Admin\SubThemeController@search');
+    Route::match(['get', 'post'], '/admin/categories/add', 'Admin\SubThemeController@add');
+    Route::match(['get', 'post'], '/admin/categories/view/{id}', 'Admin\SubThemeController@view');
+    Route::match(['get', 'post'], '/admin/categories/edit/{id}', 'Admin\SubThemeController@edit');
+    Route::match(['get', 'post'], '/admin/categories/delete/{id}', 'Admin\SubThemeController@delete');
 
     Route::match(['get', 'post'], '/admin/users', 'Admin\UserController@list');
     Route::match(['get', 'post'], '/admin/users/search', 'Admin\UserController@search');
@@ -125,6 +129,12 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/organisations/dataset/create', 'UserController@orgDatasetCreate');
         Route::match(['get', 'post'], '/user/groups/dataset/create', 'UserController@groupDatasetCreate');
         Route::match(['get', 'post'], '/user/dataset/edit/{uri}', 'UserController@datasetEdit')->name('datasetEdit');
+
+        Route::match(['get', 'post'], '/admin/datasets', 'Admin\DataSetController@listDatasets');
+        Route::match(['get', 'post'], '/admin/dataset/add', 'Admin\DataSetController@add');
+        Route::match(['get', 'post'], '/admin/dataset/view/{uri}', 'Admin\DataSetController@view');
+        Route::match(['get', 'post'], '/admin/dataset/edit/{uri}', 'Admin\DataSetController@edit');
+        Route::match(['get', 'post'], '/admin/dataset/delete', 'Admin\DataSetController@delete');
 
         Route::match(
             ['get', 'post'],

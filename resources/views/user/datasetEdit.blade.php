@@ -238,10 +238,12 @@
 
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
+                @if ($buttons['addResource'])
                     <a
                         class="btn btn-primary"
                         href="{{ route('resourceCreate', ['uri' => $dataSet->uri]) }}"
                     >{{ uctrans('custom.add_resource') }}</a>
+                    @endif
                     <a
                         type="button"
                         class="btn btn-primary"

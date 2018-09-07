@@ -41,7 +41,7 @@
                             </div>
                             <div class="col-xs-12 ch-del-btns">
                                 <div class="row">
-                                    @if (\App\Role::isAdmin($group->id))
+                                    @if (\App\Role::isAdmin())
                                         <form method="POST" action="{{ url('/admin/groups/edit/'. $group->uri) }}">
                                             {{ csrf_field() }}
                                             <div class="col-xs-6">

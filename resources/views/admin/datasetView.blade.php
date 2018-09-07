@@ -10,9 +10,9 @@
                     <h2>{{ $dataset->name }}</h2>
                     <div class="col-sm-12 p-l-none">
                         <div class="tags pull-left">
-                            <span class="badge badge-pill">ТАГ</span>
-                            <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                            <span class="badge badge-pill">ТАГ</span>
+                            @foreach ($dataset->tags as $tag)
+                                <span class="badge badge-pill">{{ $tag->name }}</span>
+                            @endforeach
                         </div>
                     </div>
                     <p>

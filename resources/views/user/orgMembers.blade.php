@@ -102,7 +102,7 @@
                                 <input type="submit" class="hidden">
                             </form>
                         </div>
-                        @if ($isAdmin)
+                        @if ($buttons[$organisation->id]['editMember'])
                             <div class="m-r-md p-h-xs col-md-6 invite-choice">
                                 <div>{{ __('custom.add_members') }}</div>
                                 <ul class="input-border-r-12">
@@ -135,23 +135,25 @@
                                         ? $member->username
                                         : $member->firstname .' '. $member->lastname
                                     }}</h3>
-                                    @if ($isAdmin)
                                         <div class="js-member-admin-controls">
-                                            <button
-                                                class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
-                                            >{{ uctrans('custom.edit') }}</button>
-                                            <form method="POST" class="inline-block">
-                                                {{ csrf_field() }}
+                                            @if ($buttons[$organisation->id]['editMember'])
                                                 <button
-                                                    class="badge cust-btn badge-pill m-b-sm del-btn"
-                                                    type="submit"
-                                                    name="delete"
-                                                    data-confirm="{{ __('custom.remove_data') }}"
-                                                >{{ uctrans('custom.remove') }}</button>
-                                                <input name="user_id" type="hidden" value="{{ $member->id }}">
-                                            </form>
+                                                    class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
+                                                >{{ uctrans('custom.edit') }}</button>
+                                            @endif
+                                            @if ($buttons[$organisation->id]['deleteMember'])
+                                                <form method="POST" class="inline-block">
+                                                    {{ csrf_field() }}
+                                                    <button
+                                                        class="badge cust-btn badge-pill m-b-sm del-btn"
+                                                        type="submit"
+                                                        name="delete"
+                                                        data-confirm="{{ __('custom.remove_data') }}"
+                                                    >{{ uctrans('custom.remove') }}</button>
+                                                    <input name="user_id" type="hidden" value="{{ $member->id }}">
+                                                </form>
+                                            @endif
                                         </div>
-                                    @endif
                                     <div class="js-member-edit-controls m-b-sm hidden">
                                         <form method="POST" class="member-edit-form">
                                             {{ csrf_field() }}

@@ -222,11 +222,11 @@ class OrganisationController extends AdminController
      */
     public function view(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
-            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+        if (Role::isAdmin()) {
+            $orgId = Organisation::where('uri', $uri)
+                ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+                ->value('id');
 
-        if (Role::isAdmin($orgId)) {
             $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
             $api = new ApiOrganisation($request);
             $result = $api->getOrganisationDetails($request)->getData();
@@ -250,15 +250,15 @@ class OrganisationController extends AdminController
      */
     public function edit(Request $request, $uri)
     {
-        $org = Organisation::where('uri', $uri)
-            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->first();
+        if (Role::isAdmin()) {
+            $org = Organisation::where('uri', $uri)
+                ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+                ->first();
 
-        if (empty($org)) {
-            return redirect('/admin/organisations');
-        }
+            if (empty($org)) {
+                return redirect('/admin/organisations');
+            }
 
-        if (Role::isAdmin($org->id)) {
             $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
             $parentOrgs = $query->get();
@@ -331,11 +331,11 @@ class OrganisationController extends AdminController
      */
     public function delete(Request $request, $id)
     {
-        $orgId = Organisation::where('id', $id)
+        if (Role::isAdmin()) {
+            $orgId = Organisation::where('id', $id)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
             ->value('id');
 
-        if (Role::isAdmin($orgId)) {
             $params = [
                 'api_key' => \Auth::user()->api_key,
                 'org_id'  => $id,
@@ -361,15 +361,14 @@ class OrganisationController extends AdminController
 
     public function viewMembers(Request $request, $uri)
     {
-        $perPage = 6;
-        $filter = $request->offsetGet('filter');
-        $userId = $request->offsetGet('user_id');
-        $roleId = $request->offsetGet('role_id');
-        $keywords = $request->offsetGet('keywords');
-        $org = Organisation::where('uri', $uri)->first();
-        $isAdmin = Role::isAdmin($org->id);
+        if (Role::isAdmin()) {
+            $perPage = 6;
+            $filter = $request->offsetGet('filter');
+            $userId = $request->offsetGet('user_id');
+            $roleId = $request->offsetGet('role_id');
+            $keywords = $request->offsetGet('keywords');
+            $org = Organisation::where('uri', $uri)->first();
 
-        if ($isAdmin) {
             if ($org) {
                 if ($request->has('edit_member')) {
                     $rq = Request::create('/api/editMember', 'POST', [
@@ -487,7 +486,7 @@ class OrganisationController extends AdminController
                     'roles'         => $roles,
                     'filter'        => $filter,
                     'keywords'      => $keywords,
-                    'isAdmin'       => $isAdmin
+                    'isAdmin'       => true
                 ]);
             }
 
@@ -503,7 +502,7 @@ class OrganisationController extends AdminController
         $class = 'user';
 
         if ($organisation) {
-            if (Role::isAdmin($organisation->id)) {
+            if (Role::isAdmin()) {
                 $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
                 $api = new ApiRole($rq);
                 $result = $api->listRoles($rq)->getData();

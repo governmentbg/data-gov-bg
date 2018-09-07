@@ -5,9 +5,11 @@
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'group'])
     <div class="row">
+    @if ($buttons['add'])
         <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/groups/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>
         </div>
+    @endif
         <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
             <form method="GET" action="{{ url('/user/organisations/search') }}">
                 <input
@@ -39,24 +41,28 @@
                                         <div class="col-sm-12 p-l-none btns">
                                             <div class="pull-left row">
                                                 <div class="col-xs-6">
+                                                @if ($buttons[$set->uri]['edit'])
                                                     <span class="badge badge-pill m-r-md m-b-sm">
                                                         <a href="{{ url('/user/groups/dataset/edit/'. $set->uri) }}">{{ uctrans('custom.edit') }}</a>
                                                     </span>
+                                                @endif
                                                 </div>
-                                                <div class="col-xs-6">
-                                                    <form method="POST">
-                                                        {{ csrf_field() }}
-                                                        <div class="col-xs-6 text-right">
-                                                            <button
-                                                                class="badge badge-pill m-b-sm"
-                                                                type="submit"
-                                                                name="delete"
-                                                                onclick="return confirm('Изтриване на данните?');"
-                                                            >{{ uctrans('custom.remove') }}</button>
-                                                        </div>
-                                                        <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
-                                                    </form>
-                                                </div>
+                                                @if ($buttons[$set->uri]['delete'])
+                                                    <div class="col-xs-6">
+                                                        <form method="POST">
+                                                            {{ csrf_field() }}
+                                                            <div class="col-xs-6 text-right">
+                                                                <button
+                                                                    class="badge badge-pill m-b-sm del-btn"
+                                                                    type="submit"
+                                                                    name="delete"
+                                                                    onclick="return confirm('Изтриване на данните?');"
+                                                                >{{ uctrans('custom.remove') }}</button>
+                                                            </div>
+                                                            <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
+                                                        </form>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div class="pull-right">
                                                 <span><a href="{{ route('datasetView', ['uri' => $set->uri]) }}">{{ __('custom.see_more') }}</a></span>

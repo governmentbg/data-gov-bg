@@ -69,16 +69,18 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="col-xs-12 m-t-md p-l-r-none text-right">
-                                <form method="POST">
-                                    {{ csrf_field() }}
-                                    <button
-                                        name="delete"
-                                        class="badge badge-pill m-b-sm del-btn"
-                                        data-confirm="{{ __('custom.remove_data') }}"
-                                    >{{ uctrans('custom.remove') }}</button>
-                                </form>
-                            </div>
+                            @if ($buttons['deleteResource'])
+                                <div class="col-xs-12 m-t-md p-l-r-none text-right">
+                                    <form method="POST">
+                                        {{ csrf_field() }}
+                                        <button
+                                            name="delete"
+                                            class="badge badge-pill m-b-sm del-btn"
+                                            data-confirm="{{ __('custom.remove_data') }}"
+                                        >{{ uctrans('custom.remove') }}</button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -18,7 +18,7 @@ class RoleRightSeeder extends Seeder
     {
         $this->faker = Faker::create();
 
-        $rights = array_keys(Role::getRights());
+        $rights = array_keys(RoleRight::getRights());
         $roles = Role::orderBy('created_at', 'desc')->limit(self::ROLE_RIGHT_RECORDS)->get()->toArray();
 
         // Test creation

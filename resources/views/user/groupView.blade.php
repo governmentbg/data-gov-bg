@@ -65,7 +65,7 @@
                                             @endforeach
                                         @endif
                                     </div>
-                                    @if (\App\Role::isAdmin($id))
+                                    @if ($buttons[$group->uri]['edit'])
                                         <div class="col-xs-12 view-btns">
                                             <div class="row">
                                                 <form
@@ -77,6 +77,8 @@
                                                     <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
+                                    @endif
+                                    @if ($buttons[$group->uri]['delete'])
                                                 <form
                                                     method="POST"
                                                     class="inline-block"

@@ -237,10 +237,12 @@
             <div class="form-group row">
                 <div class="col-sm-12 pull right text-right">
                     <div class="row">
+                    @if ($buttons['addResource'])
                         <a
                             class="btn btn-primary"
                             href="{{ route('orgResourceCreate', ['uri' => $dataSet->uri]) }}"
                         >{{ uctrans('custom.add_resource') }}</a>
+                    @endif
                         <a
                            class="btn btn-primary"
                            href="{{ route('orgDatasetView', ['uri' => $dataSet->uri]) }}"

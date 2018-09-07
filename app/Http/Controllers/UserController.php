@@ -15,6 +15,8 @@ use App\DataSetGroup;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
+use App\RoleRight;
+use App\Http\Controllers\Api\RightController;
 use App\ActionsHistory;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -63,6 +65,23 @@ class UserController extends Controller {
      */
     public function datasets(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return view('user/datasets', [
+                'class'         => 'user',
+                'datasets'      => [],
+                'pagination'    => null,
+                'buttons'       => $buttons
+            ]);
+        }
+
         $perPage = 6;
         $params = [
             'api_key'           => \Auth::user()->api_key,
@@ -78,6 +97,49 @@ class UserController extends Controller {
         $result = $api->listDatasets($rq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        foreach ($datasets as $dataset) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_VIEW,
+                [],
+                [
+                    'created_by' => $dataset->created_by
+                ]
+            );
+
+            $buttons[$dataset->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $dataset->created_by,
+                ]
+            );
+
+            $buttons[$dataset->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $dataset->created_by,
+                ]
+            );
+
+            $buttons[$dataset->uri]['delete'] = $rightCheck;
+        }
 
         $paginationData = $this->getPaginationData($datasets, $count, [], $perPage);
 
@@ -97,6 +159,7 @@ class UserController extends Controller {
             'class'         => 'user',
             'datasets'      => $paginationData['items'],
             'pagination'    => $paginationData['paginate'],
+            'buttons'       => $buttons
         ]);
     }
 
@@ -120,18 +183,59 @@ class UserController extends Controller {
         $params = [
             'api_key'           => \Auth::user()->api_key,
             'criteria'          => [
-                'keywords'          => $search,
-                'created_by'        => \Auth::user()->id,
+                'keywords'          => $search
             ],
             'records_per_page'  => $perPage,
             'page_number'       => !empty($request->page) ? $request->page : 1,
         ];
 
-        $searchRq = Request::create('/api/searchDataset', 'POST', $params);
+        $searchRq = Request::create('/api/listDataSets', 'POST', $params);
         $api = new ApiDataSet($searchRq);
-        $result = $api->searchDataset($searchRq)->getData();
+        $result = $api->listDataSets($searchRq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+
+        foreach ($datasets as $dataset) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_VIEW,
+                [],
+                [
+                    'created_by' => $dataset->created_by
+                ]
+            );
+
+            $buttons[$dataset->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $dataset->created_by,
+                ]
+            );
+
+            $buttons[$dataset->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $dataset->created_by,
+                ]
+            );
+
+            $buttons[$dataset->uri]['delete'] = $rightCheck;
+        }
 
         $getParams = [
             'q' => $search
@@ -144,10 +248,12 @@ class UserController extends Controller {
             'datasets'      => $paginationData['items'],
             'pagination'    => $paginationData['paginate'],
             'search'        => $search,
+            'buttons'       => $buttons
         ]);
     }
 
-    public function orgDatasets(Request $request) {
+    public function orgDatasets(Request $request)
+    {
         $perPage = 6;
         $params = [
             'api_key'          => \Auth::user()->api_key,
@@ -157,6 +263,35 @@ class UserController extends Controller {
 
         $org = Organisation::where('uri', $request->uri)->first();
         $orgId = !is_null($org) ? $org->id : null;
+
+        if (!$orgId) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW,
+            [
+                'org_id' => $org->id
+            ],
+            [
+                'org_id' => $org->id
+            ]
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return view('user/orgDatasets', [
+                'class'         => 'user',
+                'datasets'      => [],
+                'activeMenu'    => 'organisation',
+                'buttons'       => $buttons,
+                'organisation'  => $org
+            ]);
+        }
+
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
         if (!is_null($orgId) && $hasRole) {
@@ -168,6 +303,75 @@ class UserController extends Controller {
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         } else {
             $paginationData = $this->getPaginationData([], 0, [], $perPage);
+        }
+
+        if ($request->has('q')) {
+            $search = $request->q;
+            $perPage = 6;
+            $params = [
+                'api_key'           => \Auth::user()->api_key,
+                'criteria'          => [
+                    'keywords'      => $search,
+                ],
+                'records_per_page'  => $perPage,
+                'page_number'       => !empty($request->page) ? $request->page : 1,
+            ];
+
+            $searchRq = Request::create('/api/listDataSets', 'POST', $params);
+            $api = new ApiDataSet($searchRq);
+            $datasets = $api->listDataSets($searchRq)->getData();
+            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        if (isset($datasets)) {
+            foreach ($datasets->datasets as $dataset) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DATA_SETS,
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'org_id'       => $orgId
+                    ],
+                    [
+                        'org_id'        => $orgId
+                    ]
+                );
+
+                $buttons[$dataset->uri]['view'] = $rightCheck;
+
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DATA_SETS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id'       => $orgId
+                    ],
+                    [
+                        'org_id'        => $orgId
+                    ]
+                );
+
+                $buttons[$dataset->uri]['edit'] = $rightCheck;
+
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DATA_SETS,
+                    RoleRight::RIGHT_ALL,
+                    [
+                        'org_id'       => $orgId
+                    ],
+                    [
+                        'org_id'        => $orgId
+                    ]
+                );
+
+                $buttons[$dataset->uri]['delete'] = $rightCheck;
+            }
         }
 
         if ($request->has('delete')) {
@@ -189,6 +393,7 @@ class UserController extends Controller {
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => 'organisation',
+                'buttons'       => $buttons,
                 'organisation'  => $org
             ]
         );
@@ -196,6 +401,45 @@ class UserController extends Controller {
 
     public function orgDatasetEdit(Request $request, DataSet $datasetModel, $uri)
     {
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $dataset = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($dataset)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $dataset->org_id
+            ],
+            [
+                'created_by'    => $dataset->created_by,
+                'org_id'        => $dataset->org_id
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $dataset->org_id
+            ],
+            [
+                'created_by'    => $dataset->created_by,
+                'org_id'        => $dataset->org_id
+            ]
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
         $visibilityOptions = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
@@ -294,6 +538,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
+            'buttons'       => $buttons,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
         ]);
@@ -311,6 +556,53 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $datasetData->created_by
+            ]
+        );
+
+        $buttons[$datasetData->uri]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $datasetData->created_by
+            ]
+        );
+
+        $buttons[$datasetData->uri]['delete'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
         $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDatasetDetails($detailsReq)->getData();
@@ -321,6 +613,19 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        foreach ($resources->resources as $resource) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_VIEW,
+                [],
+                [
+                    'created_by'   => $resource->created_by
+                ]
+            );
+
+            $buttons[$resource->uri]['view'] = $rightCheck;
+        }
 
         if ($request->has('delete')) {
             if ($this->datasetDelete($uri)) {
@@ -336,6 +641,7 @@ class UserController extends Controller {
             'class'     => 'user',
             'dataset'   => $this->getModelUsernames($dataset->data),
             'resources' => $resources->resources,
+            'buttons'   => $buttons,
         ]);
     }
 
@@ -350,6 +656,76 @@ class UserController extends Controller {
     public function orgDatasetView(Request $request, $uri)
     {
         $params['dataset_uri'] = $uri;
+
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW,
+            [
+                'org_id'       => $datasetData->org_id
+            ],
+            [
+                'org_id'        => $datasetData->org_id
+            ]
+        );
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['view'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $datasetData->org_id
+            ],
+            [
+                'org_id'        => $datasetData->org_id
+            ]
+        );
+
+        $buttons[$datasetData->uri]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_ALL,
+            [
+                'org_id'       => $datasetData->org_id
+            ],
+            [
+                'org_id'        => $datasetData->org_id
+            ]
+        );
+
+        $buttons[$datasetData->uri]['delete'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $datasetData->org_id
+            ],
+            [
+                'org_id'        => $datasetData->org_id
+            ]
+        );
+
+        $buttons['addResource'] = $rightCheck;
 
         $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
@@ -395,6 +771,7 @@ class UserController extends Controller {
                 'resources'    => $resources->resources,
                 'activeMenu'   => 'organisation',
                 'organisation' => isset($organisation) ? $organisation : null,
+                'buttons'      => $buttons
             ]
         );
     }
@@ -408,6 +785,28 @@ class UserController extends Controller {
      */
     public function datasetDelete($uri)
     {
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $datasetData->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $params['api_key'] = \Auth::user()->api_key;
         $params['dataset_uri'] = $uri;
 
@@ -427,6 +826,22 @@ class UserController extends Controller {
      */
     public function removeDataset($groupId, $uri)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_ALL,
+            [
+                'group_id'       => $groupId
+            ],
+            [
+                'created_by'    => $dataset->created_by,
+                'group_ids'     => [$groupId]
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $params['api_key'] = \Auth::user()->api_key;
         $params['group_id'] = $groupId;
         $params['data_set_uri'] = $uri;
@@ -449,6 +864,22 @@ class UserController extends Controller {
      */
     public function datasetCreate(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+
         $visibilityOptions = DataSet::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
@@ -503,12 +934,24 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
     public function orgDatasetCreate(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $visibilityOptions = DataSet::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
@@ -564,12 +1007,29 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
     public function groupDatasetCreate(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
         $visibilityOptions = DataSet::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
@@ -623,6 +1083,7 @@ class UserController extends Controller {
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
             'groups'        => $groups,
+            'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }
@@ -633,10 +1094,45 @@ class UserController extends Controller {
      * @param Request $request
      * @param Dataset $
      *
-     * @return view for edditing a dataset
+     * @return view for editing a dataset
      */
     public function datasetEdit(Request $request, $uri)
     {
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        if (!$datasetData) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $datasetData->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $buttons[$datasetData->uri]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
         $visibilityOptions = Dataset::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
@@ -733,6 +1229,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
+            'buttons'       => $buttons,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
         ]);
@@ -992,6 +1489,15 @@ class UserController extends Controller {
      */
     public function resourceCreate(Request $request, $datasetUri)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
@@ -1298,6 +1804,15 @@ class UserController extends Controller {
 
     public function groupResourceCreate(Request $request, $datasetUri)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
 
@@ -1406,6 +1921,15 @@ class UserController extends Controller {
 
     public function orgResourceCreate(Request $request, $datasetUri)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
@@ -1522,6 +2046,39 @@ class UserController extends Controller {
      */
     public function resourceView(Request $request, $uri)
     {
+        $resourceReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $apiResources = new ApiResource($resourceReq);
+        $resourceData = $apiResources->getResourceMetadata($resourceReq)->getData();
+        $resourceData = !empty($resourceData->resource) ? $resourceData->resource : null;
+
+        if (!isset($resourceData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_VIEW,
+            [],
+            [
+                'created_by'   => $resourceData->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by'   => $resourceData->created_by
+            ]
+        );
+
+        $buttons[$resourceData->uri]['delete'] = $rightCheck;
+
         $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiMetadata = new ApiResource($reqMetadata);
         $resource = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
@@ -1533,6 +2090,19 @@ class UserController extends Controller {
 
         if (!empty($resource)) {
             if ($request->has('delete')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by'   => $resourceData->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
                 $apiDelete = new ApiResource($reqDelete);
                 $result = $apiDelete->deleteResource($reqDelete)->getData();
@@ -1567,6 +2137,7 @@ class UserController extends Controller {
                 'class'         => 'user',
                 'resource'      => $resource,
                 'data'          => $data,
+                'buttons'       => $buttons
             ]);
         }
 
@@ -1620,6 +2191,17 @@ class UserController extends Controller {
      */
     public function orgResourceView(Request $request, $uri)
     {
+        $uri = $request->uri;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
@@ -1627,8 +2209,43 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource);
 
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $resource->dataset_uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $dataset = !empty($dataset->data) ? $dataset->data : null;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_ALL,
+            [
+                'org_id'       => $dataset->org_id
+            ],
+            [
+                'created_by'     => $dataset->created_by,
+                'org_id'         => $dataset->org_id
+            ]
+        );
+
+        $buttons['deleteResource'] = $rightCheck;
+
         if (!empty($resource)) {
             if ($request->has('delete')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_ALL,
+                    [
+                        'org_id'       => $dataset->org_id
+                    ],
+                    [
+                        'created_by'     => $dataset->created_by,
+                        'org_id'         => $dataset->org_id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
                 $api = new ApiResource($rq);
                 $result = $api->deleteResource($rq)->getData();
@@ -1651,6 +2268,7 @@ class UserController extends Controller {
                 'class'         => 'user',
                 'resource'      => $resource,
                 'data'          => $data,
+                'buttons'       => $buttons,
                 'activeMenu'    => 'organisation'
             ]);
         }
@@ -1667,6 +2285,23 @@ class UserController extends Controller {
      */
     public function organisations(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return view('user/organisations', [
+                'class'         => 'user',
+                'organisations' => [],
+                'pagination'    => null,
+                'buttons'       => $buttons
+            ]);
+        }
+
         $perPage = 6;
         $params = [
             'api_key'          => \Auth::user()->api_key,
@@ -1678,6 +2313,57 @@ class UserController extends Controller {
         $api = new ApiOrganisation($request);
         $result = $api->getUserOrganisations($request)->getData();
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        foreach ($result->organisations as $organisation) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_VIEW,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'org_id'     => $organisation->id
+                ]
+            );
+
+            $buttons[$organisation->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'org_id'     => $organisation->id,
+                    'created_by' => $organisation->created_by
+                ]
+            );
+
+            $buttons[$organisation->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'org_id'     => $organisation->id,
+                    'created_by' => $organisation->created_by
+                ]
+            );
+
+            $buttons[$organisation->uri]['delete'] = $rightCheck;
+        }
+
         $paginationData = $this->getPaginationData($result->organisations, $result->total_records, [], $perPage);
 
         return view(
@@ -1685,7 +2371,8 @@ class UserController extends Controller {
             [
                 'class'         => 'user',
                 'organisations' => $paginationData['items'],
-                'pagination'    => $paginationData['paginate']
+                'pagination'    => $paginationData['paginate'],
+                'buttons'       => $buttons
             ]
         );
     }
@@ -1699,28 +2386,30 @@ class UserController extends Controller {
      */
     public function deleteOrg(Request $request, $id)
     {
-        $orgId = Organisation::where('id', $id)
-            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+        $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $id]);
+        $api = new ApiOrganisation($request);
+        $result = $api->getOrganisationDetails($request)->getData();
 
-        if ($this->checkUserOrg($orgId)) {
-            $params = [
-                'api_key' => \Auth::user()->api_key,
-                'org_id'  => $id,
-            ];
-
-            $request = Request::create('/api/deleteOrganisation', 'POST', $params);
-            $api = new ApiOrganisation($request);
-            $result = $api->deleteOrganisation($request)->getData();
-
-            if ($result->success) {
-                session()->flash('alert-success', __('custom.delete_success'));
-
-                return redirect('/user/organisations');
-            }
+        if (!$result->success) {
+            return redirect()->back();
         }
 
-        session()->flash('alert-danger', __('custom.delete_error'));
+        $params = [
+            'api_key' => \Auth::user()->api_key,
+            'org_id'  => $id,
+        ];
+
+        $request = Request::create('/api/deleteOrganisation', 'POST', $params);
+        $api = new ApiOrganisation($request);
+        $result = $api->deleteOrganisation($request)->getData();
+
+        if ($result->success) {
+            session()->flash('alert-success', __('custom.delete_success'));
+
+            return redirect('/user/organisations');
+        }
+
+        session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
 
         return redirect('/user/organisations');
     }
@@ -1758,6 +2447,56 @@ class UserController extends Controller {
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+
+        foreach ($organisations as $organisation) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_VIEW,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'org_id'     => $organisation->id
+                ]
+            );
+
+            $buttons[$organisation->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'created_by' => $organisation->created_by,
+                    'org_id'     => $organisation->id,
+                ]
+            );
+
+            $buttons[$organisation->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'created_by' => $organisation->created_by,
+                    'org_id'     => $organisation->id
+                ]
+            );
+
+            $buttons[$organisation->uri]['delete'] = $rightCheck;
+        }
+
         $getParams = [
             'q' => $search
         ];
@@ -1770,7 +2509,8 @@ class UserController extends Controller {
                 'class'         => 'user',
                 'organisations' => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
-                'search'        => $search
+                'search'        => $search,
+                'buttons'       => $buttons
             ]
         );
     }
@@ -1807,6 +2547,57 @@ class UserController extends Controller {
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+
+        foreach ($datasets as $dataset) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_VIEW,
+                [
+                    'org_id'       => $dataset->id
+                ],
+                [
+                    'created_by' => $dataset->created_by,
+                    'org_id'     => $dataset->id
+                ]
+            );
+
+            $buttons[$dataset->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'       => $dataset->id
+                ],
+                [
+                    'created_by' => $dataset->created_by,
+                    'org_id'     => $dataset->id,
+                ]
+            );
+
+            $buttons[$dataset->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id'       => $dataset->id
+                ],
+                [
+                    'created_by' => $dataset->created_by,
+                    'org_id'     => $dataset->id
+                ]
+            );
+
+            $buttons[$dataset->uri]['delete'] = $rightCheck;
+        }
+
         $getParams = [
             'q' => $search
         ];
@@ -1820,7 +2611,8 @@ class UserController extends Controller {
                 'datasets'   => $paginationData['items'],
                 'pagination' => $paginationData['paginate'],
                 'search'     => $search,
-                'activeMenu' => 'organisation'
+                'activeMenu' => 'organisation',
+                'buttons'    => $buttons
             ]
         );
     }
@@ -1848,6 +2640,7 @@ class UserController extends Controller {
         $result = $api->addOrganisation($request)->getData();
 
         if ($result->success) {
+            RoleRight::refreshSession();
             session()->flash('alert-success', __('custom.add_org_success'));
         } else {
             session()->flash(
@@ -1869,19 +2662,47 @@ class UserController extends Controller {
      * @return view to view the a registered organisation
      */
     public function viewOrg(Request $request, $uri)
-    {
-        $orgId = Organisation::where('uri', $uri)
-            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+{
+        $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_uri' => $uri]);
+        $api = new ApiOrganisation($request);
+        $result = $api->getOrganisationDetails($request)->getData();
 
-        if ($this->checkUserOrg($orgId)) {
-            $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
-            $api = new ApiOrganisation($request);
-            $result = $api->getOrganisationDetails($request)->getData();
+        if (!$result->success) {
+            return redirect()->back();
+        }
 
-            if ($result->success) {
-                return view('user/orgView', ['class' => 'user', 'organisation' => $result->data]);
-            }
+        $orgData = $result->data;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $orgData->id
+            ],
+            [
+                'created_by' => $orgData->created_by,
+                'org_id'     => $orgData->id
+            ]
+        );
+
+        $buttons[$orgData->uri]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_ALL,
+            [
+                'org_id'       => $orgData->id
+            ],
+            [
+                'created_by' => $orgData->created_by,
+                'org_id'     => $orgData->id
+            ]
+        );
+
+        $buttons[$orgData->uri]['delete'] = $rightCheck;
+
+        if ($result->success) {
+            return view('user/orgView', ['class' => 'user', 'organisation' => $result->data, 'buttons' => $buttons]);
         }
 
         return redirect('/user/organisations');
@@ -1911,10 +2732,53 @@ class UserController extends Controller {
         $roleId = $request->offsetGet('role_id');
         $keywords = $request->offsetGet('keywords');
         $org = Organisation::where('uri', $uri)->first();
-        $isAdmin = Role::isAdmin($org->id);
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'        => $org->id
+            ],
+            [
+                'created_by'    => $org->created_by,
+                'org_id'        => $org->id
+            ]
+        );
+
+        $buttons[$org->id]['editMember'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_ALL,
+            [
+                'org_id'        => $org->id
+            ],
+            [
+                'created_by'    => $org->created_by,
+                'org_id'        => $org->id
+            ]
+        );
+
+        $buttons[$org->id]['deleteMember'] = $rightCheck;
 
         if ($org) {
             if ($request->has('edit_member')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id'        => $org->id
+                    ],
+                    [
+                        'created_by'    => $org->created_by,
+                        'org_id'        => $org->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $rq = Request::create('/api/editMember', 'POST', [
                     'org_id'    => $org->id,
                     'user_id'   => $userId,
@@ -1933,6 +2797,22 @@ class UserController extends Controller {
             }
 
             if ($request->has('delete')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_ALL,
+                    [
+                        'org_id'        => $org->id
+                    ],
+                    [
+                        'created_by'    => $org->created_by,
+                        'org_id'        => $org->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 if ($this->delMember($userId, $org->id)) {
                     $request->session()->flash('alert-success', __('custom.delete_success'));
                 } else {
@@ -1943,6 +2823,22 @@ class UserController extends Controller {
             }
 
             if ($request->has('invite_existing')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id'        => $org->id
+                    ],
+                    [
+                        'created_by'    => $org->created_by,
+                        'org_id'        => $org->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $newUser = $request->offsetGet('user');
                 $newRole = $request->offsetGet('role');
 
@@ -1964,6 +2860,22 @@ class UserController extends Controller {
             }
 
             if ($request->has('invite')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id'        => $org->id
+                    ],
+                    [
+                        'created_by'    => $org->created_by,
+                        'org_id'        => $org->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $email = $request->offsetGet('email');
                 $role = $request->offsetGet('role');
 
@@ -2030,7 +2942,7 @@ class UserController extends Controller {
                 'roles'         => $roles,
                 'filter'        => $filter,
                 'keywords'      => $keywords,
-                'isAdmin'       => $isAdmin
+                'buttons'       => $buttons
             ]);
         }
 
@@ -2041,6 +2953,22 @@ class UserController extends Controller {
     {
         $organisation = Organisation::where('uri', $uri)->first();
         $class = 'user';
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'        => $organisation->id
+                ],
+                [
+                    'created_by'    => $organisation->created_by,
+                    'org_id'        => $organisation->id
+                ]
+            );
+
+            if (!$rightCheck) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+            }
 
         if ($organisation) {
             $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
@@ -2151,11 +3079,21 @@ class UserController extends Controller {
     }
 
     /**
-     * Loads a view for registering an organisations
+     * Loads a view for registering an organisation
      *
      * @return view login on success or error on fail
      */
-    public function showOrgRegisterForm() {
+    public function showOrgRegisterForm()
+    {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
         $query->whereHas('userToOrgRole', function($q) {
@@ -2183,6 +3121,32 @@ class UserController extends Controller {
      */
     public function editOrg(Request $request, $uri)
     {
+        $rq = Request::create('/api/getOrganisationDetails', 'POST', ['org_uri' => $uri]);
+        $api = new ApiOrganisation($rq);
+        $res = $api->getOrganisationDetails($rq)->getData();
+
+        if (!$res->success) {
+            return redirect()->back();
+        }
+
+        $orgData = $res->data;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $orgData->id
+            ],
+            [
+                'created_by' => $orgData->created_by,
+                'org_id'     => $orgData->id
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $org = Organisation::where('uri', $uri)
             ->whereIn('type', array_flip(Organisation::getPublicTypes()))
             ->first();
@@ -2244,7 +3208,7 @@ class UserController extends Controller {
                         return redirect(url('/user/organisations/edit/'. $post['data']['uri']));
                     }
                 } else {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+                    session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.edit_error'));
                 }
             }
 
@@ -3270,6 +4234,15 @@ class UserController extends Controller {
      */
     public function registerGroup(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
         $class = 'user';
         $fields = $this->getGroupTransFields();
 
@@ -3292,9 +4265,10 @@ class UserController extends Controller {
             $result = $orgApi->addGroup($groupReq)->getData();
 
             if ($result->success) {
+                RoleRight::refreshSession();
                 $request->session()->flash('alert-success', __('custom.successful_group_creation'));
 
-                return redirect('/user/groups/view/'. Organisation::find($result->id)->value('uri'));
+                return redirect('/user/groups/view/'. Organisation::find($result->id)->uri);
             } else {
                 $request->session()->flash('alert-danger', __('custom.failed_group_creation'));
 
@@ -3314,6 +4288,23 @@ class UserController extends Controller {
      */
     public function groups(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return view('user/groups', [
+                'class'         => 'user',
+                'groups'        => [],
+                'pagination'    => null,
+                'buttons'       => $buttons
+            ]);
+        }
+
         $class = 'user';
         $groups = [];
         $perPage = 6;
@@ -3334,12 +4325,65 @@ class UserController extends Controller {
             $groups = $result->groups;
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        foreach ($groups as $group) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_VIEW,
+                [
+                    'org_id'       => $group->id
+                ],
+                [
+                    'created_by' => $group->created_by,
+                    'org_id'     => $group->id
+                ]
+            );
+
+            $buttons[$group->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'       => $group->id
+                ],
+                [
+                    'created_by' => $group->created_by,
+                    'org_id'     => $group->id
+                ]
+            );
+
+            $buttons[$group->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id'       => $group->id
+                ],
+                [
+                    'created_by' => $group->created_by,
+                    'org_id'     => $group->id
+                ]
+            );
+
+            $buttons[$group->uri]['delete'] = $rightCheck;
+        }
+
         $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
 
         return view('/user/groups', [
             'class'         => 'user',
             'groups'        => $paginationData['items'],
-            'pagination'    => $paginationData['paginate']
+            'pagination'    => $paginationData['paginate'],
+            'buttons'       => $buttons
         ]);
     }
 
@@ -3357,7 +4401,41 @@ class UserController extends Controller {
             ->where('type', Organisation::TYPE_GROUP)
             ->value('id');
 
-        if ($this->checkUserOrg($orgId)) {
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $uri]);
+        $apiGroups = new ApiOrganisation($groupReq);
+        $groupData = $apiGroups->getGroupDetails($groupReq)->getData();
+        $groupData = !empty($groupData->data) ? $groupData->data : null;
+
+        if (!$groupData) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $groupData->id
+            ],
+            [
+                'org_id'     => $groupData->id
+            ]
+        );
+
+        $buttons[$groupData->uri]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_ALL,
+            [
+                'org_id'       => $groupData->id
+            ],
+            [
+                'org_id'     => $groupData->id
+            ]
+        );
+
+        $buttons[$groupData->uri]['delete'] = $rightCheck;
+
             $request = Request::create('/api/getGroupDetails', 'POST', [
                 'group_id'  => $orgId,
                 'locale'    => \LaravelLocalization::getCurrentLocale(),
@@ -3366,9 +4444,8 @@ class UserController extends Controller {
             $result = $api->getGroupDetails($request)->getData();
 
             if ($result->success) {
-                return view('user/groupView', ['class' => 'user', 'group' => $result->data, 'id' => $orgId]);
+                return view('user/groupView', ['class' => 'user', 'group' => $result->data, 'id' => $orgId, 'buttons' => $buttons]);
             }
-        }
 
         return redirect('/user/groups');
     }
@@ -3387,7 +4464,6 @@ class UserController extends Controller {
             ->where('type', Organisation::TYPE_GROUP)
             ->value('id');
 
-        if ($this->checkUserOrg($orgId)) {
             $delArr = [
                 'api_key'   => Auth::user()->api_key,
                 'group_id'  => $id,
@@ -3402,7 +4478,6 @@ class UserController extends Controller {
 
                 return redirect('/user/groups');
             }
-        }
 
         $request->session()->flash('alert-danger', __('custom.delete_error'));
 
@@ -3421,6 +4496,30 @@ class UserController extends Controller {
         $org = Organisation::where('uri', $uri)
             ->where('type', Organisation::TYPE_GROUP)
             ->first();
+
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $uri]);
+        $apiGroups = new ApiOrganisation($groupReq);
+        $groupData = $apiGroups->getGroupDetails($groupReq)->getData();
+        $groupData = !empty($groupData->data) ? $groupData->data : null;
+
+        if (!isset($groupData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id'       => $groupData->id
+            ],
+            [
+                'group_ids'     => [$groupData->id]
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
 
         if (!empty($org) && $this->checkUserOrg($org->id)) {
             $class = 'user';
@@ -3586,6 +4685,39 @@ class UserController extends Controller {
             ->where('type', Organisation::TYPE_GROUP)
             ->value('id');
 
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $uri]);
+        $apiOrgs = new ApiOrganisation($groupReq);
+        $group = $apiOrgs->getGroupDetails($groupReq)->getData();
+        $groupData = !empty($group->data) ? $group->data : null;
+
+        if (!$groupData) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW,
+            [
+                'group_id' => $groupData->id
+            ],
+            [
+                'group_ids' => [$groupData->id]
+            ]
+        );
+
+        $buttons['add'] = $rightCheck;
+        $buttons['view'] = $rightCheck;
+
+        if (!$rightCheck) {
+            return view('user/groupDatasets', [
+                'class'         => 'user',
+                'datasets'      => [],
+                'activeMenu'    => 'group',
+                'buttons'       => $buttons,
+                'organisation'  => $orgId
+            ]);
+        }
+
         $class = 'user';
         $apiKey = \Auth::user()->api_key;
         $actMenu = 'group';
@@ -3604,6 +4736,60 @@ class UserController extends Controller {
         $datasets = $dataApi->listDatasets($dataRq)->getData();
         $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id' => $orgId
+            ],
+            [
+                'group_ids' => [$orgId]
+            ]
+        );
+
+        $buttons['add'] = $rightCheck;
+
+        foreach ($datasets->datasets as $dataset) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_VIEW,
+                [
+                    'group_id'       => $orgId
+                ],
+                [
+                    'group_ids'     => [$orgId]
+                ]
+            );
+
+            $buttons[$dataset->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'group_id'       => $orgId
+                ],
+                [
+                    'group_ids'     => [$orgId]
+                ]
+            );
+
+            $buttons[$dataset->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'group_id'       => $orgId
+                ],
+                [
+                    'group_ids'     => [$orgId]
+                ]
+            );
+
+            $buttons[$dataset->uri]['delete'] = $rightCheck;
+        }
+
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
@@ -3621,11 +4807,63 @@ class UserController extends Controller {
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => $actMenu,
+                'buttons'       => $buttons
         ]);
     }
 
     public function groupDatasetView(Request $request, $uri)
     {
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['seeResource'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id'       => $datasetData->org_id
+            ],
+            [
+                'created_by'    => $datasetData->created_by,
+                'group_ids'     => [$datasetData->org_id]
+            ]
+        );
+
+        $buttons[$datasetData->uri]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_ALL,
+            [
+                'group_id'       => $datasetData->org_id
+            ],
+            [
+                'created_by'    => $datasetData->created_by,
+                'group_ids'     => [$datasetData->org_id]
+            ]
+        );
+
+        $buttons[$datasetData->uri]['delete'] = $rightCheck;
+
         $params['dataset_uri'] = $uri;
 
         $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
@@ -3656,13 +4894,53 @@ class UserController extends Controller {
                 'class'      => 'user',
                 'dataset'    => $dataset->data,
                 'resources'  => $resources->resources,
-                'activeMenu' => 'group'
+                'activeMenu' => 'group',
+                'buttons'    => $buttons
             ]
         );
     }
 
     public function groupDatasetEdit(Request $request, DataSet $datasetModel, $uri)
     {
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id'       => $datasetData->org_id
+            ],
+            [
+                'created_by'    => $datasetData->created_by,
+                'group_ids'     => [$datasetData->org_id]
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id'       => $datasetData->org_id
+            ],
+            [
+                'created_by'    => $datasetData->created_by,
+                'group_ids'     => [$datasetData->org_id]
+            ]
+        );
+
+        $buttons['addResource'] = $rightCheck;
+
         $visibilityOptions = $datasetModel->getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
@@ -3761,6 +5039,7 @@ class UserController extends Controller {
             'organisations' => $organisations,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
+            'buttons'       => $buttons,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
         ]);
@@ -3773,10 +5052,49 @@ class UserController extends Controller {
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
         $resource = !empty($resource->resource) ? $resource->resource : null;
 
+        if (!isset($resource)) {
+            return back();
+        }
+
         $resource = $this->getModelUsernames($resource);
+
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $resource->dataset_uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $dataset = !empty($dataset->data) ? $dataset->data : null;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_ALL,
+            [
+                'group_id'       => $dataset->org_id
+            ],
+            [
+                'created_by'     => $dataset->created_by,
+                'groups_ids'     => [$dataset->org_id]
+            ]
+        );
+
+        $buttons['delResource'] = $rightCheck;
 
         if (!empty($resource)) {
             if ($request->has('delete')) {
+        $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_ALL,
+            [
+                        'group_id'       => $dataset->org_id
+            ],
+            [
+                        'created_by'     => $dataset->created_by,
+                        'groups_ids'     => [$dataset->org_id]
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
                 $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
                 $api = new ApiResource($rq);
                 $result = $api->deleteResource($rq)->getData();
@@ -3799,6 +5117,7 @@ class UserController extends Controller {
                 'class'         => 'user',
                 'resource'      => $resource,
                 'data'          => $data,
+                'buttons'       => $buttons
             ]);
         }
 
@@ -3840,12 +5159,64 @@ class UserController extends Controller {
             'search' => $search
         ];
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['add'] = $rightCheck;
+
+        foreach ($groups as $group) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_VIEW,
+                [
+                    'group_id'       => $group->id
+                ],
+                [
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
+                ]
+            );
+
+            $buttons[$group->uri]['view'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'group_id'       => $group->id
+                ],
+                [
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
+                ]
+            );
+
+            $buttons[$group->uri]['edit'] = $rightCheck;
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'group_id'       => $group->id
+                ],
+                [
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
+                ]
+            );
+
+            $buttons[$group->uri]['delete'] = $rightCheck;
+        }
+
         $paginationData = $this->getPaginationData($groups, $count, $getParams, $perPage);
 
         return view('user/groups', [
             'class'         => 'user',
             'groups'        => $paginationData['items'],
-            'pagination'    => $paginationData['paginate']
+            'pagination'    => $paginationData['paginate'],
+            'buttons'       => $buttons
         ]);
     }
 
@@ -3857,10 +5228,49 @@ class UserController extends Controller {
         $roleId = $request->offsetGet('role_id');
         $keywords = $request->offsetGet('keywords');
         $group = Organisation::where('uri', $uri)->first();
-        $isAdmin = Role::isAdmin($group->id);
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id'       => $group->id
+            ],
+            [
+                'created_by'    => $group->created_by,
+                'group_ids'     => [$group->id]
+            ]
+        );
+
+        $buttons[$group->id]['edit'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_ALL,
+            [
+                'group_id'       => $group->id
+            ],
+            [
+                'created_by'    => $group->created_by,
+                'group_ids'     => [$group->id]
+            ]
+        );
+
+        $buttons[$group->id]['deleteMember'] = $rightCheck;
 
         if ($group) {
             if ($request->has('edit_member')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'group_id'       => $group->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $rq = Request::create('/api/editMember', 'POST', [
                     'org_id'    => $group->id,
                     'user_id'   => $userId,
@@ -3879,6 +5289,21 @@ class UserController extends Controller {
             }
 
             if ($request->has('delete')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_ALL,
+                    [
+                        'group_id'       => $group->id
+                    ],
+                    [
+                        'group_ids'      => [$group->id]
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 if ($this->delMember($userId, $group->id)) {
                     $request->session()->flash('alert-success', __('custom.delete_success'));
                 } else {
@@ -3889,6 +5314,21 @@ class UserController extends Controller {
             }
 
             if ($request->has('invite_existing')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'group_id'       => $group->id
+                    ],
+                    [
+                        'group_ids'      => [$group->id]
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $newUser = $request->offsetGet('user');
                 $newRole = $request->offsetGet('role');
 
@@ -3910,6 +5350,21 @@ class UserController extends Controller {
             }
 
             if ($request->has('invite')) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'group_id'       => $group->id
+                    ],
+                    [
+                        'group_ids'      => [$group->id]
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
                 $email = $request->offsetGet('email');
                 $role = $request->offsetGet('role');
 
@@ -3976,7 +5431,7 @@ class UserController extends Controller {
                 'roles'         => $roles,
                 'filter'        => $filter,
                 'keywords'      => $keywords,
-                'isAdmin'       => $isAdmin
+                'buttons'       => $buttons
             ]);
         }
 
@@ -3987,6 +5442,18 @@ class UserController extends Controller {
     {
         $group = Organisation::where('uri', $uri)->first();
         $class = 'user';
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT,
+            [
+                'group_id'       => $group->id
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
 
         if ($group) {
             $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_group' => 1]]);

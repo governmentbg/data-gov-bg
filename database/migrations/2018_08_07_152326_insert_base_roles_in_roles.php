@@ -9,7 +9,25 @@ class InsertBaseRolesInRoles extends Migration
 {
     public function __construct()
     {
-        $this->roles = Role::getBaseRoles();
+        $this->roles = [
+            [
+                 'name'              => 'Organisation Admin',
+                 'active'            => 1,
+                 'default_org_admin' => 1,
+                 'for_org'           => 1
+            ],
+            [
+                 'name'                => 'Group Admin',
+                 'active'              => 1,
+                 'default_group_admin' => 1,
+                 'for_group'           => 1
+            ],
+            [
+                 'name'              => 'User',
+                 'active'            => 1,
+                 'default_user'      => 1
+            ]
+         ];
     }
 
     /**
@@ -20,29 +38,8 @@ class InsertBaseRolesInRoles extends Migration
     public function up()
     {
         foreach ($this->roles as $role) {
-            Role::create(array_merge([
-                'name'      => $role,
-                'active'    => true,
-            ], $this->getDefaultRoleValues($role)));
+            Role::create($role);
         }
-    }
-
-    private function getDefaultRoleValues($role)
-    {
-        $array = [
-            'default_user'          => false,
-            'default_group_admin'   => false,
-            'default_org_admin'     => false,
-        ];
-
-        if ($role == $this->roles[Role::ROLE_ADMIN]) {
-            $array['default_group_admin'] = true;
-            $array['default_org_admin'] = true;
-        } else if ($role == $this->roles[Role::ROLE_MEMBER]) {
-            $array['default_user'] = true;
-        }
-
-        return $array;
     }
 
     /**
@@ -53,7 +50,7 @@ class InsertBaseRolesInRoles extends Migration
     public function down()
     {
         foreach ($this->roles as $role) {
-            Role::where(['name' => $role])->get()->delete();
+            Role::where(['name' => $role['name']])->get()->delete();
         }
     }
 }

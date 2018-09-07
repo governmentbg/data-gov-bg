@@ -19,7 +19,7 @@ class RightController extends ApiController
      */
     public function listRights(Request $request)
     {
-        $rights = Role::getRights();
+        $rights = RoleRight::getRights();
 
         if (!empty($rights)) {
             foreach ($rights as $id => $right) {

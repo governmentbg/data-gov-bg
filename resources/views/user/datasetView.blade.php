@@ -73,7 +73,7 @@
                     <div class="col-sm-12 pull-left m-t-md p-l-none">
                         <div class="pull-left history">
                             @foreach ($resources as $resource)
-                                @if ($general[$resource->uri]['view'])
+                                @if ($buttons[$resource->uri]['view'])
                                     <div class="{{ $resource->reported ? 'signaled' : '' }}">
                                         <a href="{{ route('resourceView', ['uri' => $resource->uri]) }}">
                                             <span>
@@ -101,35 +101,35 @@
                 </div>
             </div>
             <div class="row">
-                @if ($general['addResource'])
-                <div class="col-md-2 col-sm-3 text-left m-l-10">
-                    <a
-                        class="btn btn-primary"
-                        href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
-                    >{{ uctrans('custom.add_resource') }}</a>
-                </div>
+                @if ($buttons['addResource'])
+                    <div class="col-md-2 col-sm-3 text-left m-l-10">
+                        <a
+                            class="btn btn-primary"
+                            href="{{ route('resourceCreate', ['uri' => $dataset->uri]) }}"
+                        >{{ uctrans('custom.add_resource') }}</a>
+                    </div>
                 @endif
                 @if ($buttons[$dataset->uri]['edit'])
-                <div class="col-md-2 col-sm-3 text-left m-l-10">
-                    <a
-                        class="btn btn-primary"
-                        href="{{ url('/user/dataset/edit/'. $dataset->uri) }}"
-                    >{{ uctrans('custom.edit') }}</a>
-                </div>
+                    <div class="col-md-2 col-sm-3 text-left m-l-10">
+                        <a
+                            class="btn btn-primary"
+                            href="{{ url('/user/dataset/edit/'. $dataset->uri) }}"
+                        >{{ uctrans('custom.edit') }}</a>
+                    </div>
                 @endif
                 @if ($buttons[$dataset->uri]['delete'])
-                <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-md">
-                    <form method="POST">
-                        {{ csrf_field() }}
-                        <button
-                            class="btn del-btn btn-primary"
-                            type="submit"
-                            name="delete"
-                            data-confirm="{{ __('custom.remove_data') }}"
-                        >{{ uctrans('custom.remove') }}</button>
-                        <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
-                    </form>
-                </div>
+                    <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-md">
+                        <form method="POST">
+                            {{ csrf_field() }}
+                            <button
+                                class="btn del-btn btn-primary"
+                                type="submit"
+                                name="delete"
+                                data-confirm="{{ __('custom.remove_data') }}"
+                            >{{ uctrans('custom.remove') }}</button>
+                            <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
+                        </form>
+                    </div>
                 @endif
             </div>
         @endif

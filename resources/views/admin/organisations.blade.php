@@ -185,7 +185,7 @@
                                 </div>
                                 <div class="col-xs-12 ch-del-btns">
                                     <div class="row">
-                                        @if (\App\Role::isAdmin($organisation->id))
+                                        @if (\App\Role::isAdmin())
                                             <form
                                                 method="POST"
                                                 action="{{ url('/admin/organisations/edit/'. $organisation->uri) }}"

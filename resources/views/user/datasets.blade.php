@@ -5,11 +5,12 @@
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="row">
-    @if ($general['add'])
+    @if ($buttons['add'])
         <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>
         </div>
     @endif
+    @if ($buttons['view'])
         <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
             <form method="GET" action="{{ url('/user/dataset/search') }}">
                 <input
@@ -21,6 +22,7 @@
                 >
             </form>
         </div>
+    @endif
     </div>
     <div class="row">
         <div class="col-xs-12 m-t-md">

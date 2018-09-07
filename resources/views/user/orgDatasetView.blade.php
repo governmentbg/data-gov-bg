@@ -84,7 +84,7 @@
                     <div class="col-sm-12 pull-left m-t-md p-l-none">
                         <div class="pull-left history">
                             @foreach ($resources as $resource)
-                                @if ($buttons['addResource'])
+                                @if ($buttons['view'])
                                 <div class="{{ $resource->reported ? 'signaled' : '' }}">
                                     <a href="{{ url('/user/organisations/datasets/resourceView/'. $resource->uri) }}">
                                         <span>
@@ -125,13 +125,9 @@
                         href="{{ url('/user/organisations/datasets/edit/'. $dataset->uri) }}"
                     >{{ uctrans('custom.edit') }}</a>
                 </div>
-<<<<<<< HEAD
             @endif
             @if ($buttons[$dataset->uri]['delete'])
-                <div class="col-md-9 col-sm-8 text-left m-l-10">
-=======
                 <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-sm">
->>>>>>> a353f8e8aecf384d48e8a723e751b70e7cc35d5e
                     <form method="POST">
                         {{ csrf_field() }}
                         <button

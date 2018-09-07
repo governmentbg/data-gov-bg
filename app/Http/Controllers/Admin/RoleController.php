@@ -71,7 +71,7 @@ class RoleController extends AdminController {
                 return redirect(url('admin/roles'));
             } else {
                 $errors = $result->errors;
-                $request->session()->flash('alert-danger', __('custom.edit_error'));
+                $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.edit_error'));
             }
 
             return back()->withInput()->withErrors($errors);

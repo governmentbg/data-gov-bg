@@ -118,11 +118,11 @@ class GroupController extends AdminController
      */
     public function view(Request $request, $uri)
     {
-        $orgId = Organisation::where('uri', $uri)
-            ->where('type', Organisation::TYPE_GROUP)
-            ->value('id');
+        if (Role::isAdmin()) {
+            $orgId = Organisation::where('uri', $uri)
+                ->where('type', Organisation::TYPE_GROUP)
+                ->value('id');
 
-        if (Role::isAdmin($orgId)) {
             $request = Request::create('/api/getGroupDetails', 'POST', [
                 'group_id'  => $orgId,
                 'locale'    => \LaravelLocalization::getCurrentLocale(),
@@ -150,11 +150,11 @@ class GroupController extends AdminController
      */
     public function delete(Request $request, $id)
     {
-        $orgId = Organisation::where('id', $id)
-            ->where('type', Organisation::TYPE_GROUP)
-            ->value('id');
+        if (Role::isAdmin()) {
+            $orgId = Organisation::where('id', $id)
+                ->where('type', Organisation::TYPE_GROUP)
+                ->value('id');
 
-        if (Role::isAdmin($orgId)) {
             $delArr = [
                 'api_key'   => \Auth::user()->api_key,
                 'group_id'  => $id,
@@ -187,15 +187,15 @@ class GroupController extends AdminController
      */
     public function edit(Request $request, $uri)
     {
-        $org = Organisation::where('uri', $uri)
-            ->where('type', Organisation::TYPE_GROUP)
-            ->first();
+        if (Role::isAdmin()) {
+            $org = Organisation::where('uri', $uri)
+                ->where('type', Organisation::TYPE_GROUP)
+                ->first();
 
-        if (empty($org)) {
-            return redirect('/admin/groups');
-        }
+            if (empty($org)) {
+                return redirect('/admin/groups');
+            }
 
-        if (Role::isAdmin($org->id)) {
             $class = 'user';
             $fields = $this->getGroupTransFields();
 
@@ -292,15 +292,14 @@ class GroupController extends AdminController
 
     public function viewMembers(Request $request, $uri)
     {
-        $perPage = 6;
-        $filter = $request->offsetGet('filter');
-        $userId = $request->offsetGet('user_id');
-        $roleId = $request->offsetGet('role_id');
-        $keywords = $request->offsetGet('keywords');
-        $group = Organisation::where('uri', $uri)->first();
-        $isAdmin = Role::isAdmin($group->id);
+        if (Role::isAdmin()) {
+            $perPage = 6;
+            $filter = $request->offsetGet('filter');
+            $userId = $request->offsetGet('user_id');
+            $roleId = $request->offsetGet('role_id');
+            $keywords = $request->offsetGet('keywords');
+            $group = Organisation::where('uri', $uri)->first();
 
-        if ($isAdmin) {
             if ($group) {
                 if ($request->has('edit_member')) {
                     $rq = Request::create('/api/editMember', 'POST', [
@@ -418,7 +417,7 @@ class GroupController extends AdminController
                     'roles'         => $roles,
                     'filter'        => $filter,
                     'keywords'      => $keywords,
-                    'isAdmin'       => $isAdmin
+                    'isAdmin'       => true
                 ]);
             }
 
@@ -434,7 +433,7 @@ class GroupController extends AdminController
         $class = 'user';
 
         if ($group) {
-            if (Role::isAdmin($group->id)) {
+            if (Role::isAdmin()) {
                 $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_group' => 1]]);
                 $api = new ApiRole($rq);
                 $result = $api->listRoles($rq)->getData();

@@ -49,7 +49,7 @@ class OrganisationController extends ApiController
     public function addOrganisation(Request $request)
     {
         $rightCheck = RoleRight::checkUserRight(
-            Module::getModuleName(Module::ORGANISATIONS),
+            Module::ORGANISATIONS,
             RoleRight::RIGHT_EDIT
         );
 
@@ -264,7 +264,7 @@ class OrganisationController extends ApiController
         $organisation = Organisation::find($data['org_id']);
 
         $rightCheck = RoleRight::checkUserRight(
-            Module::getModuleName(Module::ORGANISATIONS),
+            Module::ORGANISATIONS,
             RoleRight::RIGHT_EDIT,
             [
                 'org_id'       => $organisation->id
@@ -450,7 +450,7 @@ class OrganisationController extends ApiController
             && !empty($organisation = Organisation::find($request->org_id))
         ) {
             $rightCheck = RoleRight::checkUserRight(
-                Module::getModuleName(Module::ORGANISATIONS),
+                Module::ORGANISATIONS,
                 RoleRight::RIGHT_ALL,
                 [
                     'org_id'       => $organisation->id
@@ -1353,10 +1353,15 @@ class OrganisationController extends ApiController
                     $newGroup->save();
 
                     if ($newGroup) {
+                        $role = Role::getGroupAdminRole();
+                        if (!isset($role)) {
+                            return $this->errorResponse(__('custom.add_role_fail'));
+                        }
+
                         $userToOrgRole = new UserToOrgRole;
                         $userToOrgRole->org_id = $newGroup->id;
                         $userToOrgRole->user_id = \Auth::user()->id;
-                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+                        $userToOrgRole->role_id = $role->id;
 
                         $userToOrgRole->save();
 
@@ -1470,10 +1475,6 @@ class OrganisationController extends ApiController
         }
 
         $validator->after(function ($validator) use ($data) {
-            if (!Role::isAdmin($data['group_id'])) {
-                $validator->errors()->add('group_id', __('custom.edit_error'));
-            }
-
             if (!empty($data['uri'])) {
                 if (Organisation::where('uri', $data['uri'])->where('id', '!=', $data['group_id'])->value('name')) {
                     $validator->errors()->add('uri', __('custom.taken_uri'));
@@ -1570,11 +1571,21 @@ class OrganisationController extends ApiController
             return $this->errorResponse(__('custom.no_group_found'));
         }
 
-        $validator->after(function ($validator) use ($request) {
-            if (!Role::isAdmin($request->group_id)) {
-                $validator->errors()->add('group_id', __('custom.delete_error'));
-            }
-        });
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_ALL,
+            [
+                'group_id'      => $group->id
+            ],
+            [
+                'created_by'    => $group->created_by,
+                'group_ids'     => [$group->id]
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
 
         if (!$validator->fails()) {
             try {

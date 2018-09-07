@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\TagController as ApiTags;
 use App\Http\Controllers\Api\UserController as ApiUsers;
+use App\Http\Controllers\Api\CategoryController as ApiCategory;
+use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 
 class AdminController extends Controller
@@ -42,5 +45,79 @@ class AdminController extends Controller
         }
 
         return $groups;
+    }
+
+    public function getUserDropdown($count = null)
+    {
+        $request = Request::create('/api/listUsers', 'POST');
+        $api = new ApiUsers($request);
+        $result = $api->listUsers($request)->getData();
+        $users = [];
+
+        foreach ($result->users as $index => $row) {
+            if ($row->id !== 1) {
+                $users[$row->id] = $row->firstname .' '. $row->lastname;
+
+                if ($count && $index == $count) {
+                    break;
+                }
+            }
+        }
+
+        return $users;
+    }
+
+    public function getTermsDropdown($count = null)
+    {
+        $request = Request::create('/api/listTermsOfUse', 'POST');
+        $api = new ApiTermsOfUse($request);
+        $result = $api->listTermsOfUse($request)->getData();
+        $terms = [];
+
+        foreach ($result->terms_of_use as $index => $row) {
+            $terms[$row->id] = $row->name;
+
+            if ($count && $index + 1 == $count) {
+                break;
+            }
+        }
+
+        return $terms;
+    }
+
+    public function getTagsDropdown($count = null)
+    {
+        $request = Request::create('/api/listTags', 'POST');
+        $api = new ApiTags($request);
+        $result = $api->listTags($request)->getData();
+        $tags = [];
+
+        foreach ($result->tags as $index => $row) {
+            $tags[$row->id] = $row->name;
+
+            if ($count && $index + 1 == $count) {
+                break;
+            }
+        }
+
+        return $tags;
+    }
+
+    public function getMainCategoriesDropdown($count = null)
+    {
+        $request = Request::create('/api/listMainCategories', 'POST');
+        $api = new ApiCategory($request);
+        $result = $api->listMainCategories($request)->getData();
+        $categories = [];
+
+        foreach ($result->categories as $index => $row) {
+            $categories[$row->id] = $row->name;
+
+            if ($count && $index + 1 == $count) {
+                break;
+            }
+        }
+
+        return $categories;
     }
 }

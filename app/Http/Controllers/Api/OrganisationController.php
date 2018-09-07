@@ -6,6 +6,7 @@ use App\Role;
 use App\User;
 use App\Locale;
 use App\Module;
+use App\DataSet;
 use App\ActionsHistory;
 use App\Organisation;
 use App\CustomSetting;
@@ -989,13 +990,20 @@ class OrganisationController extends ApiController
                         'active'          => $org->active,
                         'approved'        => $org->approved,
                         'custom_fields'   => $customFields,
-                        'datasets_count'  => $org->dataSet()->count(),
                         'followers_count' => $org->userFollow()->count(),
                         'created_at'      => isset($org->created_at) ? $org->created_at->toDateTimeString() : null,
                         'updated_at'      => isset($org->updated_at) ? $org->updated_at->toDateTimeString() : null,
                         'created_by'      => $org->created_by,
                         'updated_by'      => $org->updated_by,
                     ];
+
+                    $ids = [];
+                    $relations = $org->dataSet()->get();
+                    foreach ($relations as $v) {
+                        $ids[] = $v->id;
+                    }
+                    $count = DataSet::whereIn('id', $ids)->where('status', DataSet::STATUS_PUBLISHED)->count();
+                    $result['datasets_count'] = $count;
 
                     return $this->successResponse($result);
                 }
@@ -1062,13 +1070,21 @@ class OrganisationController extends ApiController
                 $members = [];
 
                 foreach ($query->get()->toArray() as $member) {
+                    $roles = [];
+
+                    if (!empty($member['user_to_org_role'])) {
+                        foreach ($member['user_to_org_role'] as $role) {
+                            $roles[] = $role['role_id'];
+                        }
+                    }
+
                     $members[] = [
                         'id'        => $member['id'],
                         'username'  => $member['username'],
                         'firstname' => $member['firstname'],
                         'lastname'  => $member['lastname'],
                         'email'     => $member['email'],
-                        'role_id'   => $member['user_to_org_role'][0]['role_id'],
+                        'role_id'   => $roles,
                     ];
                 }
 
@@ -1099,7 +1115,8 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($post, [
             'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
             'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'       => 'nullable|exists:roles,id',
+            'role_id'       => 'nullable|array',
+            'role_id.*'     => 'required|int|exists:roles,id|digits_between:1,10'
         ]);
 
         if (!$validator->fails()) {
@@ -1120,7 +1137,7 @@ class OrganisationController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_ADD_MEMBER,
-                    'action_object'    => $request->org_id,
+                    'action_object'    => $post['org_id'],
                     'action_msg'       => 'Added member '. $username->username . ' (' . $post['user_id'].') to organisation ',
                 ];
 
@@ -1195,7 +1212,8 @@ class OrganisationController extends ApiController
         $validator = \Validator::make($post, [
             'org_id'        => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
             'user_id'       => 'required|int|exists:users,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'       => 'nullable|int|exists:roles,id|digits_between:1,10',
+            'role_id'       => 'nullable|array',
+            'role_id.*'     => 'int|exists:roles,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -1761,6 +1779,7 @@ class OrganisationController extends ApiController
                 } else {
                     $group = Organisation::where('uri', $post['group_uri'])->first();
                 }
+
                 $customFields = [];
 
                 if ($group) {
@@ -1783,9 +1802,16 @@ class OrganisationController extends ApiController
                         'uri'             => $group->uri,
                         'logo'            => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
                         'custom_fields'   => $customFields,
-                        'datasets_count'  => $group->dataSet()->count(),
                         'followers_count' => $group->userFollow()->count(),
                     ];
+
+                    $ids = [];
+                    $relations = $group->dataSetGroup()->get();
+                    foreach ($relations as $v) {
+                        $ids[] = $v->data_set_id;
+                    }
+                    $count = DataSet::whereIn('id', $ids)->where('status', DataSet::STATUS_PUBLISHED)->count();
+                    $result['datasets_count'] = $count;
 
                     return $this->successResponse($result);
                 }

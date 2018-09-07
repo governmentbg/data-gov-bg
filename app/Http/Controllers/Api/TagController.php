@@ -156,6 +156,7 @@ class TagController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                DB::table('data_set_tags')->where('tag_id', $post['tag_id'])->delete();
                 Tags::find($post['tag_id'])->delete();
 
                 $logData = [
@@ -208,7 +209,7 @@ class TagController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $order = isset($request['criteria']['order']) ? $request['criteria']['order'] : [];
+            $order = isset($criteria['order']) ? $criteria['order'] : [];
             $validator = \Validator::make($order, [
                 'type'    => 'nullable|string|max:191',
                 'field'   => 'nullable|string|max:191'
@@ -222,7 +223,7 @@ class TagController extends ApiController
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
 
             if (!empty($criteria['tag_ids'])) {
-                $query->whereIn('id', $request->criteria['tag_ids']);
+                $query->whereIn('id', $criteria['tag_ids']);
             }
 
             $query->orderBy($order['field'], $order['type']);
@@ -320,6 +321,7 @@ class TagController extends ApiController
                 $tag = $this->getModelUsernames($tag);
 
                 $data = [
+                    'id'            => $tag->id,
                     'name'          => $tag->name,
                     'created_at'    => $tag->created_at->toDateTimeString(),
                     'updated_at'    => isset($tag->updated_at) ? $tag->updated_at->toDateTimeString() : null,

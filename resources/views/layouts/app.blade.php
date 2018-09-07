@@ -69,7 +69,7 @@
                                 <span class="login-link username">
                                     <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
                                 </span>
-                                <span class="user-icon {{ Request::segment(1) == 'user' ? 'active' : '' }}">
+                                <span class="user-icon {{ Request::segment(1) == 'user' || 'admin' ? 'active' : '' }}">
                                     <a
                                         href="{{ url('/user') }}"
                                     >

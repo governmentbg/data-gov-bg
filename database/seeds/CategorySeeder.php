@@ -25,10 +25,14 @@ class CategorySeeder extends Seeder
                 'icon_file_name'    => $this->faker->name,
                 'icon_mime_type'    => $this->faker->mimeType,
                 'icon_data'         => $this->faker->name,
-                'parent_id'         => $i < 5 || empty($category) ? null : $category->id,
+                'parent_id'         => $i < 5 || empty($catId) ? null : $catId,
                 'active'            => $this->faker->boolean(),
                 'ordering'          => $this->faker->randomDigit(),
             ]);
+
+            $catId = $category->id;
+
+            $category->searchable();
         }
     }
 }

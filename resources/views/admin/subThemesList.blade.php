@@ -9,7 +9,7 @@
         </div>
         <div class="row m-b-md">
             <div class="col-md-6 col-sm-8 col-xs-12 pull-right">
-                    <form method="GET" action="{{ url('admin/subthemes/list/'. $mainThemeId) }}">
+                    <form method="GET" action="{{ url('admin/categories/search') }}">
                         <input
                             type="text"
                             class="input-border-r-12 form-control"
@@ -23,7 +23,7 @@
         <div class="row m-b-lg">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
-                    <a href="">{{ __('custom.add') }}</a>
+                    <a href="{{ url('admin/categories/add') }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
         </div>
@@ -37,26 +37,25 @@
                                 <table class="table">
                                     <thead>
                                         <th>{{ utrans('custom.name') }}</th>
-                                        <th>{{ utrans('custom.active') }}</th>
                                         <th>{{ __('custom.action') }}</th>
                                     </thead>
                                     <tbody>
                                         @foreach ($themes as $theme)
+
                                             <tr>
                                                 <td class="name">{{ $theme->name }}</td>
-                                                <td>{{ $theme->active ? __('custom.yes') : __('custom.no') }}</td>
                                                 <td class="buttons">
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('admin/categories/edit/'. $theme->id) }}"
                                                     >{{ utrans('custom.edit') }}</a>
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('admin/categories/view/'. $theme->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
                                                     <a
                                                         class="link-action red"
-                                                        href=""
+                                                        href="{{ url('admin/categories/delete/'. $theme->id) }}"
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                     >{{ __('custom.delete') }}</a>
                                                 </td>

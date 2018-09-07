@@ -86,7 +86,7 @@ class Organisation extends Model implements TranslatableInterface
 
     public function dataSetGroup()
     {
-        return $this->hasMany('App\DataSetGroup');
+        return $this->hasMany('App\DataSetGroup', 'group_id');
     }
 
     public function dataRequest()

@@ -53,7 +53,7 @@ class Module extends Model
             self::ORGANISATIONS          => 'Organisation',
             self::GROUPS                 => 'Group',
             self::USERS                  => 'User',
-            self::DATA_SETS              => 'DataSet',
+            self::DATA_SETS              => 'Dataset',
             self::RESOURCES              => 'Resource',
             self::SIGNALS                => 'Signal',
             self::DATA_REQUESTS          => 'DataRequest',

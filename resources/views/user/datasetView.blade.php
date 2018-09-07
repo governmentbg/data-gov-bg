@@ -10,9 +10,9 @@
                     <h2>{{ $dataset->name }}</h2>
                     <div class="col-sm-12 p-l-none">
                         <div class="tags pull-left">
-                            <span class="badge badge-pill">ТАГ</span>
-                            <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                            <span class="badge badge-pill">ТАГ</span>
+                            @foreach ($dataset->tags as $tag)
+                                <span class="badge badge-pill">{{ $tag->name }}</span>
+                            @endforeach
                         </div>
                     </div>
                     <p>
@@ -89,7 +89,6 @@
                     </div>
                     <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
                         <ul class="p-l-none">
-                            <li>Отговорник по подръжка: {{ $dataset->support_name }}</li>
                             <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
                             <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
                             @if (!empty($dataset->updated_by))

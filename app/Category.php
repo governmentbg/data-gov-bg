@@ -22,6 +22,8 @@ class Category extends Model implements TranslatableInterface
     const ORDERING_ASC = 1;
     const ORDERING_DESC = 2;
 
+    const ACTIVE_FALSE = 0;
+
     public function userFollow()
     {
         return $this->hasMany('App\UserFollow');
@@ -45,6 +47,7 @@ class Category extends Model implements TranslatableInterface
     public function toSearchableArray()
     {
         return [
+            'id'   => $this->id,
             'name' => $this->concatTranslations('name'),
         ];
     }

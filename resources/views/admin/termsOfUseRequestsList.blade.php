@@ -27,7 +27,8 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.req_creation_date') }}</a><a
+                >{{ __('custom.req_creation_date') }}</a>
+                <a
                     href="{{
                         action(
                             'Admin\TermsOfUseRequestController@list',

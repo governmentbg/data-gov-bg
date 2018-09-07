@@ -15,17 +15,16 @@ class InsertBaseRolesInRoles extends Migration
                  'active'            => 1,
                  'default_org_admin' => 1,
                  'for_org'           => 1
-             ],
+            ],
             [
                  'name'                => 'Group Admin',
                  'active'              => 1,
                  'default_group_admin' => 1,
                  'for_group'           => 1
-             ],
+            ],
             [
                  'name'              => 'User',
                  'active'            => 1,
-                 'default_org_admin' => 1,
                  'default_user'      => 1
             ]
          ];

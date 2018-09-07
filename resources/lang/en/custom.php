@@ -607,4 +607,7 @@ return [
     'main_theme_add' => 'Add main theme',
     'main_theme_edit' => 'Edit main theme',
     'edit_category' => 'Edit category',
+    'default_org_admin_role' => 'The default admin role for organisations is already set',
+    'default_group_admin_role' => 'The default admin role for groups is already set',
+    'default_user_role' => 'The default role for users is already set',
 ];

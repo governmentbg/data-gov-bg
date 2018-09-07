@@ -102,7 +102,7 @@
                                 <input type="submit" class="hidden">
                             </form>
                         </div>
-                        @if ($isAdmin)
+                        @if ($buttons[$group->id]['edit'])
                             <div class="m-r-md p-h-xs col-md-6 invite-choice">
                                 <div>{{ __('custom.add_members') }}</div>
                                 <ul class="input-border-r-12">
@@ -135,11 +135,13 @@
                                         ? $member->username
                                         : $member->firstname .' '. $member->lastname
                                     }}</h3>
-                                    @if ($isAdmin)
                                         <div class="js-member-admin-controls">
+                                        @if ($buttons[$group->id]['edit'])
                                             <button
                                                 class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
                                             >{{ uctrans('custom.edit') }}</button>
+                                        @endif
+                                        @if ($buttons[$group->id]['deleteMember'])
                                             <form method="POST" class="inline-block">
                                                 {{ csrf_field() }}
                                                 <button
@@ -150,8 +152,8 @@
                                                 >{{ uctrans('custom.remove') }}</button>
                                                 <input name="user_id" type="hidden" value="{{ $member->id }}">
                                             </form>
+                                        @endif
                                         </div>
-                                    @endif
                                     <div class="js-member-edit-controls m-b-sm hidden">
                                         <form method="POST" class="member-edit-form">
                                             {{ csrf_field() }}

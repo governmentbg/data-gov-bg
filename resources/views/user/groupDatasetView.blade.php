@@ -73,6 +73,7 @@
                         <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                     </form>
                 </div>
+                @endif
             </div>
         @endif
     </div>

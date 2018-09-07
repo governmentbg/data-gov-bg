@@ -328,7 +328,7 @@ class OrganisationController extends Controller {
             $criteria = [
                 'org_ids' => [$result->data->id]
             ];
-            $objType = Module::getModules(Module::ORGANISATIONS);
+            $objType = Module::getModuleName(Module::ORGANISATIONS);
             $actObjData[$objType] = [];
             $actObjData[$objType][$result->data->id] = [
                 'obj_id'        => $result->data->uri,
@@ -340,8 +340,8 @@ class OrganisationController extends Controller {
             ];
 
             if (isset($res->success) && $res->success && !empty($res->datasets)) {
-                $objType = Module::getModules(Module::DATA_SETS);
-                $objTypeRes = Module::getModules(Module::RESOURCES);
+                $objType = Module::getModuleName(Module::DATA_SETS);
+                $objTypeRes = Module::getModuleName(Module::RESOURCES);
                 $actObjData[$objType] = [];
 
                 foreach ($res->datasets as $dataset) {

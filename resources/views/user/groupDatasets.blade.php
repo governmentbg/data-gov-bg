@@ -5,7 +5,7 @@
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'group'])
     <div class="row">
-    @if ($general['add'])
+    @if ($buttons['add'])
         <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/groups/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>
         </div>
@@ -48,21 +48,21 @@
                                                 @endif
                                                 </div>
                                                 @if ($buttons[$set->uri]['delete'])
-                                                <div class="col-xs-6">
-                                                    <form method="POST">
-                                                        {{ csrf_field() }}
-                                                        <div class="col-xs-6 text-right">
-                                                            <button
-                                                                class="badge badge-pill m-b-sm"
-                                                                type="submit"
-                                                                name="delete"
-                                                                onclick="return confirm('Изтриване на данните?');"
-                                                            >{{ uctrans('custom.remove') }}</button>
+                                                    <div class="col-xs-6">
+                                                        <form method="POST">
+                                                            {{ csrf_field() }}
+                                                            <div class="col-xs-6 text-right">
+                                                                <button
+                                                                    class="badge badge-pill m-b-sm del-btn"
+                                                                    type="submit"
+                                                                    name="delete"
+                                                                    onclick="return confirm('Изтриване на данните?');"
+                                                                >{{ uctrans('custom.remove') }}</button>
+                                                            </div>
+                                                            <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
+                                                        </form>
+                                                    </div>
                                                 @endif
-                                                        </div>
-                                                        <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
-                                                    </form>
-                                                </div>
                                             </div>
                                             <div class="pull-right">
                                                 <span><a href="{{ route('datasetView', ['uri' => $set->uri]) }}">{{ __('custom.see_more') }}</a></span>

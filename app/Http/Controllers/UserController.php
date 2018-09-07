@@ -70,7 +70,6 @@ class UserController extends Controller {
             RoleRight::RIGHT_VIEW
         );
 
-        $buttons = '';
         $buttons['add'] = $rightCheck;
         $buttons['view'] = $rightCheck;
 
@@ -98,8 +97,6 @@ class UserController extends Controller {
         $result = $api->listDatasets($rq)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -198,8 +195,6 @@ class UserController extends Controller {
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
-        $buttons = '';
-
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_EDIT
@@ -284,7 +279,6 @@ class UserController extends Controller {
             ]
         );
 
-        $buttons = '';
         $buttons['add'] = $rightCheck;
         $buttons['view'] = $rightCheck;
 
@@ -328,8 +322,6 @@ class UserController extends Controller {
             $datasets = $api->listDataSets($searchRq)->getData();
             $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
         }
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -582,8 +574,6 @@ class UserController extends Controller {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
         }
 
-        $buttons = '';
-
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_EDIT,
@@ -675,8 +665,6 @@ class UserController extends Controller {
         if (!isset($datasetData)) {
             return back();
         }
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -876,7 +864,6 @@ class UserController extends Controller {
      */
     public function datasetCreate(Request $request)
     {
-        $buttons = '';
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_EDIT
@@ -1119,8 +1106,6 @@ class UserController extends Controller {
         if (!isset($datasetData)) {
             return back();
         }
-
-        $buttons = '';
 
         if (!$datasetData) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
@@ -2229,8 +2214,6 @@ class UserController extends Controller {
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
         $dataset = !empty($dataset->data) ? $dataset->data : null;
 
-        $buttons = '';
-
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
             RoleRight::RIGHT_ALL,
@@ -2307,7 +2290,6 @@ class UserController extends Controller {
             RoleRight::RIGHT_VIEW
         );
 
-        $buttons = '';
         $buttons['add'] = $rightCheck;
         $buttons['view'] = $rightCheck;
 
@@ -2330,8 +2312,6 @@ class UserController extends Controller {
         $request = Request::create('/api/getUserOrganisations', 'POST', $params);
         $api = new ApiOrganisation($request);
         $result = $api->getUserOrganisations($request)->getData();
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::ORGANISATIONS,
@@ -2467,8 +2447,6 @@ class UserController extends Controller {
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
-        $buttons = '';
-
         $rightCheck = RoleRight::checkUserRight(
             Module::ORGANISATIONS,
             RoleRight::RIGHT_EDIT
@@ -2568,8 +2546,6 @@ class UserController extends Controller {
         $result = $api->searchDataset($request)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -2696,7 +2672,6 @@ class UserController extends Controller {
         }
 
         $orgData = $result->data;
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::ORGANISATIONS,
@@ -2757,7 +2732,6 @@ class UserController extends Controller {
         $roleId = $request->offsetGet('role_id');
         $keywords = $request->offsetGet('keywords');
         $org = Organisation::where('uri', $uri)->first();
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::ORGANISATIONS,
@@ -4319,7 +4293,6 @@ class UserController extends Controller {
             RoleRight::RIGHT_VIEW
         );
 
-        $buttons = '';
         $buttons['add'] = $rightCheck;
         $buttons['view'] = $rightCheck;
 
@@ -4351,8 +4324,6 @@ class UserController extends Controller {
         if (!empty($result->groups)) {
             $groups = $result->groups;
         }
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
@@ -4438,8 +4409,6 @@ class UserController extends Controller {
         if (!$groupData) {
             return back();
         }
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
@@ -4736,7 +4705,6 @@ class UserController extends Controller {
             ]
         );
 
-        $buttons = '';
         $buttons['add'] = $rightCheck;
         $buttons['view'] = $rightCheck;
 
@@ -4767,8 +4735,6 @@ class UserController extends Controller {
         $dataApi = new ApiDataSet($dataRq);
         $datasets = $dataApi->listDatasets($dataRq)->getData();
         $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -4855,8 +4821,6 @@ class UserController extends Controller {
         if (!isset($datasetData)) {
             return back();
         }
-
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
@@ -5195,8 +5159,6 @@ class UserController extends Controller {
             'search' => $search
         ];
 
-        $buttons = '';
-
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
             RoleRight::RIGHT_EDIT
@@ -5266,7 +5228,6 @@ class UserController extends Controller {
         $roleId = $request->offsetGet('role_id');
         $keywords = $request->offsetGet('keywords');
         $group = Organisation::where('uri', $uri)->first();
-        $buttons = '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,

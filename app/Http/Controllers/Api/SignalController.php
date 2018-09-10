@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Log;
 use \App\Signal;
 use \Validator;
 use App\Module;
+use App\DataSet;
+use App\Resource;
 use App\ActionsHistory;
 
-class SignalsController extends ApiController
+class SignalController extends ApiController
 {
     /**
      * Send a signal
@@ -106,12 +108,12 @@ class SignalsController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($editSignalData['data'], [
-                'resource_id'  => 'nullable|integer|digits_between:1,10',
-                'description'  => 'nullable|string|max:191',
-                'firstname'    => 'nullable|string|max:100',
-                'lastname'     => 'nullable|string|max:100',
-                'email'        => 'nullable|email|max:191',
-                'status'       => 'nullable|integer|digits_between:1,3',
+                'resource_id'  => 'sometimes|integer|digits_between:1,10',
+                'description'  => 'sometimes|string|max:191',
+                'firstname'    => 'sometimes|string|max:100',
+                'lastname'     => 'sometimes|string|max:100',
+                'email'        => 'sometimes|email|max:191',
+                'status'       => 'sometimes|integer|digits_between:1,3',
             ]);
         }
 
@@ -244,12 +246,12 @@ class SignalsController extends ApiController
             ]);
         }
 
-        $order = isset($data['criteria']['order']) ? $data['criteria']['order'] : [];
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'   => 'nullable|string|digits_between:1,10',
-                'field'  => 'nullable|string|digits_between:1,10',
+                'type'   => 'nullable|string',
+                'field'  => 'nullable|string',
             ]);
         }
 
@@ -258,9 +260,6 @@ class SignalsController extends ApiController
         }
 
         $result = [];
-        $criteria = $request->json('criteria');
-
-        $signalList = '';
         $columns = [
             'id',
             'resource_id',
@@ -275,10 +274,10 @@ class SignalsController extends ApiController
             'updated_by',
         ];
 
-        $signalList = Signal::select($columns);
+        $query = Signal::select($columns);
 
         if (isset($criteria['signal_id'])) {
-            $signalList->where('id', $criteria['signal_id']);
+            $query->where('id', $criteria['signal_id']);
         }
 
         if (isset($criteria['order'])) {
@@ -290,46 +289,71 @@ class SignalsController extends ApiController
         }
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            $signalList->orderBy(
+            $query->orderBy(
                 $criteria['order']['field'],
                 $criteria['order']['type'] == 'asc' ? 'asc' : 'desc'
             );
         }
 
         if (isset($criteria['status'])) {
-            $signalList->where('status', $criteria['status']);
+            $query->where('status', $criteria['status']);
         }
 
         if (isset($criteria['search'])) {
             $search = $criteria['search'];
 
-            $signalList->where('firstname', 'like', '%' . $search . '%')
+            $query->where('firstname', 'like', '%' . $search . '%')
                 ->orWhere('lastname', 'like', '%' . $search . '%')
                 ->orWhere('email', 'like', '%' . $search . '%')
                 ->orWhere('descript', 'like', '%' . $search . '%');
         }
 
         if (isset($criteria['date_from'])) {
-            $signalList->where('created_at', '>=', $criteria['date_from']);
+            $query->where('created_at', '>=', $criteria['date_from']);
         }
 
         if (isset($criteria['date_to'])) {
-            $signalList->where('created_at', '<=', $criteria['date_to']);
+            $query->where('created_at', '<=', $criteria['date_to']);
         }
 
-        $total_records = $signalList->count();
+        $total_records = $query->count();
 
-        if (isset($request['records_per_page']) || isset($request['page_number'])) {
-            $signalList->forPage($request->input('page_number'), $request->input('records_per_page'));
+        if ($request->has('records_per_page') || $request->has('page_number')) {
+            $query->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
 
-        $signalList = $signalList->get();
+        $signals = $query->get();
 
-        if (!empty($signalList)) {
-            foreach ($signalList as $singleSignal) {
+        $resourceIds = $resourceDatasets = $datasets = [];
+
+        foreach ($signals as $signal) {
+            $resourceIds[] = $signal->resource_id;
+        }
+
+        $resources = \App\Resource::whereIn('id', $resourceIds)->get();
+
+        foreach ($resources as $resource) {
+            $resourceDatasets[$resource->id] = $resource->data_set_id;
+        }
+
+        $datasetModels = Dataset::whereHas('resource', function ($query) use ($resourceIds) {
+            $query->whereIn('id', $resourceIds);
+        })->get();
+
+        foreach ($datasetModels as $dataset) {
+            $datasets[$dataset->id] = [
+                'name'  => $dataset->name,
+                'uri'   => $dataset->uri,
+            ];
+        }
+
+        if (!empty($signals)) {
+            foreach ($signals as $singleSignal) {
                 $result[] = [
                     'id'            => $singleSignal->id,
                     'resource_id'   => $singleSignal->resource_id,
+                    'dataset_name'  => $datasets[$resourceDatasets[$singleSignal->resource_id]]['name'],
+                    'dataset_uri'   => $datasets[$resourceDatasets[$singleSignal->resource_id]]['uri'],
                     'description'   => $singleSignal->descript,
                     'firstname'     => $singleSignal->firstname,
                     'lastname'      => $singleSignal->lastname,

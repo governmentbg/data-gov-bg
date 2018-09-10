@@ -212,6 +212,10 @@ Route::middleware('auth')->group(function() {
             '/user/organisations/members/delete',
             'UserController@delOrgMember'
         )->name('delOrgMember');
+
+        Route::match(['get', 'post'], '/admin/signals/list', 'Admin\SignalController@list');
+        Route::match(['get', 'post'], '/admin/signal/edit/{id}', 'Admin\SignalController@edit');
+        Route::match(['get', 'post'], '/admin/signal/delete/{id}', 'Admin\SignalController@delete');
     });
 });
 

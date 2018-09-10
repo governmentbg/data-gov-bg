@@ -22,6 +22,6 @@ class TermsOfUse extends Model implements TranslatableInterface
 
     public function dataSet()
     {
-        return $this->belongsTo('App\DataSet');
+        return $this->belongsTo('App\DataSet', 'id', 'terms_of_use_id');
     }
 }

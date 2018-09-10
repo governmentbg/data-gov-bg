@@ -314,10 +314,7 @@ Route::match(['get', 'post'], '/organisation/search', 'OrganisationController@se
 Route::match(['get', 'post'], '/organisation/profile/{uri}', 'OrganisationController@view');
 
 Route::match(['get', 'post'], '/organisation/{uri}/datasets', 'OrganisationController@datasets');
-
-Route::get('/organisation/viewDataset', function () {
-    return view('organisation/viewDataset', ['class' => 'organisation']);
-});
+Route::match(['get', 'post'], '/organisation/{orgUri}/dataset/{uri}', 'OrganisationController@viewDataset');
 
 Route::match(['get', 'post'], '/organisation/{uri}/chronology', 'OrganisationController@chronology');
 

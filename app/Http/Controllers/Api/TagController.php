@@ -335,4 +335,133 @@ class TagController extends ApiController
 
         return $this->errorResponse(__('custom.search_tags_fail'), $validator->errors()->messages());
     }
+
+    /**
+     * Lists the count of the datasets per main category
+     *
+     * @param array criteria - optional
+     * @param array criteria[dataset_criteria] - optional
+     * @param array criteria[dataset_criteria][user_ids] - optional
+     * @param array criteria[dataset_criteria][org_ids] - optional
+     * @param array criteria[dataset_criteria][group_ids] - optional
+     * @param array criteria[dataset_criteria][category_ids] - optional
+     * @param array criteria[dataset_criteria][tag_ids] - optional
+     * @param array criteria[dataset_criteria][formats] - optional
+     * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
+     * @param array criteria[dataset_ids] - optional
+     * @param int criteria[records_limit] - optional
+     *
+     * @return json response
+     */
+    public function listDataTags(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'criteria' => 'nullable|array'
+        ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = \Validator::make($criteria, [
+                'dataset_criteria'  => 'nullable|array',
+                'dataset_ids'       => 'nullable|array',
+                'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
+                'records_limit'     => 'nullable|int|digits_between:1,10|min:1',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $dsCriteria = isset($criteria['dataset_criteria']) ? $criteria['dataset_criteria'] : [];
+            $validator = \Validator::make($dsCriteria, [
+                'user_ids'            => 'nullable|array',
+                'user_ids.*'          => 'int|digits_between:1,10|exists:users,id',
+                'org_ids'             => 'nullable|array',
+                'org_ids.*'           => 'int|digits_between:1,10|exists:organisations,id',
+                'group_ids'           => 'nullable|array',
+                'group_ids.*'         => 'int|digits_between:1,10|exists:organisations,id,type,'. Organisation::TYPE_GROUP,
+                'category_ids'        => 'nullable|array',
+                'category_ids.*'      => 'int|digits_between:1,10|exists:categories,id,parent_id,NULL',
+                'tag_ids'             => 'nullable|array',
+                'tag_ids.*'           => 'int|digits_between:1,10|exists:tags,id',
+                'terms_of_use_ids'    => 'nullable|array',
+                'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
+                'formats'             => 'nullable|array|min:1',
+                'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            try {
+                $data = DataSetTags::join('tags', 'tag_id', '=', 'tags.id');
+                $data->select('tags.id', 'tags.name', DB::raw('count(distinct data_set_id, tag_id) as total'));
+
+                $data->whereHas('DataSet', function($q) use ($dsCriteria) {
+                    if (!empty($dsCriteria['user_ids'])) {
+                        $q->whereIn('created_by', $dsCriteria['user_ids']);
+                    }
+                    if (!empty($dsCriteria['org_ids'])) {
+                        $q->whereIn('org_id', $dsCriteria['org_ids']);
+                    }
+                    if (!empty($dsCriteria['group_ids'])) {
+                        $q->whereHas('DataSetGroup', function($qr) use ($dsCriteria) {
+                            $qr->whereIn('group_id', $dsCriteria['group_ids']);
+                        });
+                    }
+                    if (!empty($dsCriteria['category_ids'])) {
+                        $q->whereIn('category_id', $dsCriteria['category_ids']);
+                    }
+                    if (!empty($dsCriteria['tag_ids'])) {
+                        $q->whereHas('DataSetTags', function($qr) use ($dsCriteria) {
+                            $qr->whereIn('tag_id', $dsCriteria['tag_ids']);
+                        });
+                    }
+                    if (!empty($dsCriteria['terms_of_use_ids'])) {
+                        $q->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
+                    }
+                    if (!empty($dsCriteria['formats'])) {
+                        $fileFormats = [];
+                        foreach ($dsCriteria['formats'] as $format) {
+                            $fileFormats[] = Resource::getFormatsCode($format);
+                        }
+                        $q->whereIn(
+                            'data_sets.id',
+                            DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                        );
+                    }
+                    $q->where('status', DataSet::STATUS_PUBLISHED);
+                    $q->where('visibility', DataSet::VISIBILITY_PUBLIC);
+                });
+
+                if (!empty($criteria['dataset_ids'])) {
+                    $data->whereIn('data_set_id', $criteria['dataset_ids']);
+                }
+
+                $data->groupBy('tags.id', 'tags.name')->orderBy('total', 'desc');
+
+                if (!empty($criteria['records_limit'])) {
+                    $data->take($criteria['records_limit']);
+                }
+                $data = $data->get();
+
+                $results = [];
+                if (!empty($data)) {
+                    foreach ($data as $item) {
+                        $results[] = [
+                            'id'             => $item->id,
+                            'name'           => $item->name,
+                            'datasets_count' => $item->total,
+                        ];
+                    }
+                }
+
+                return $this->successResponse(['tags' => $results], true);
+
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.list_data_tags_fail'), $validator->errors()->messages());
+    }
 }

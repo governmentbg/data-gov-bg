@@ -99,7 +99,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'signals' ? 'active' : '' }}"
-                                href="#"
+                                href="{{ url('/admin/signals/list') }}"
                             >{{ __('custom.signals') }}</a>
                         </li>
                         <li>

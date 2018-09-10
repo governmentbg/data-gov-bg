@@ -359,7 +359,7 @@ class PageController extends ApiController
 
             $total_records = $pageList->count();
 
-            if (isset($request['records_per_page']) || isset($request['page_number'])) {
+            if (isset($request->records_per_page) || isset($request->page_number)) {
                 $pageList->forPage($request->input('page_number'), $request->input('records_per_page'));
             }
 

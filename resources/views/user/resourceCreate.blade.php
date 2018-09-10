@@ -82,7 +82,7 @@
                             name="http_rq_type"
                         >
                             <option value=""> {{ uctrans('custom.request_type') }}</option>
-                            @foreach ($reqTypes as $id => $rqtype)
+                            @foreach ($types as $id => $rqtype)
                                 <option
                                     value="{{ $rqtype }}"
                                     {{ $rqtype == old('http_rq_type') ? 'selected' : '' }}

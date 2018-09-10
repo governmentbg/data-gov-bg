@@ -84,6 +84,7 @@
                     <div class="col-sm-12 pull-left m-t-md p-l-none">
                         <div class="pull-left history">
                             @foreach ($resources as $resource)
+                                @if ($buttons['view'])
                                 <div class="{{ $resource->reported ? 'signaled' : '' }}">
                                     <a href="{{ url('/user/organisations/datasets/resourceView/'. $resource->uri) }}">
                                         <span>
@@ -93,6 +94,7 @@
                                         <span class="version">&nbsp;&#8211;&nbsp;{{ $resource->name }}</span>
                                     </a>
                                 </div>
+                                @endif
                             @endforeach
                         </div>
                     </div>
@@ -110,6 +112,7 @@
                 </div>
             </div>
             <div class="row">
+            @if ($buttons[$dataset->uri]['edit'])
                 <div class="col-md-2 col-sm-3 text-left m-l-10">
                     <a
                         class="btn btn-primary"
@@ -122,6 +125,8 @@
                         href="{{ url('/user/organisations/datasets/edit/'. $dataset->uri) }}"
                     >{{ uctrans('custom.edit') }}</a>
                 </div>
+            @endif
+            @if ($buttons[$dataset->uri]['delete'])
                 <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-sm">
                     <form method="POST">
                         {{ csrf_field() }}
@@ -134,6 +139,7 @@
                         <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                     </form>
                 </div>
+            @endif
             </div>
         @endif
     </div>

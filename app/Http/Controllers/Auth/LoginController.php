@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Api\RightController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -71,6 +74,18 @@ class LoginController extends Controller
                 $rememberMe = isset($loginData['remember_me']) ? $loginData['remember_me'] : false;
 
                 if (Auth::attempt($credentials, $rememberMe)) {
+                    $user = \App\User::where('username', $request->username)->first();
+                    $rq = Request::create('/api/getUserRoles', 'POST', ['id' => $user->id]);
+                    $api = new UserController($rq);
+                    $result = $api->getUserRoles($rq)->getData();
+
+                    if ($result->success) {
+                        $result = json_decode(json_encode($result->data), true);
+
+                        Session::put('roles', $result['roles']);
+
+                    }
+
                     return redirect('/');
                 } else {
                     $error['password'][0] = __('custom.wrong_password');

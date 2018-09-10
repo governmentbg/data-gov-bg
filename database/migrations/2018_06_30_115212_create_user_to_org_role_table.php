@@ -19,7 +19,7 @@ class CreateUserToOrgRoleTable extends Migration
             $table->integer('org_id')->unsigned()->nullable();
             $table->foreign('org_id')->references('id')->on('organisations');
             $table->integer('role_id')->unsigned();
-            $table->foreign('role_id')->references('id')->on('roles');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->unique(['user_id', 'org_id', 'role_id']);
         });
     }

@@ -114,16 +114,15 @@
                                 href="{{ url('/admin/documents/list') }}"
                             >{{ ultrans('custom.documents') }}</a>
                         </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'images' ? 'active' : '' }}"
+                                href="{{ url('/admin/images/list') }}"
+                            >{{ ultrans('custom.images') }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
-@if (isset($pagination) && $view !== 'group' && $view !== 'organisation')
-    <div class="row m-t-md">
-        <div class="col-xs-12 text-center">
-            {{ $pagination->render() }}
-        </div>
-    </div>
-@endif

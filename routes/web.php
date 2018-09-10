@@ -87,6 +87,15 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/admin/themes/edit/{id}', 'Admin\ThemeController@edit');
     Route::match(['get', 'post'], '/admin/themes/delete/{id}', 'Admin\ThemeController@delete');
 
+    Route::match(['get', 'post'], '/admin/images/add', 'Admin\ImageController@add');
+    Route::match(['get', 'post'], '/admin/images/view/{id}', 'Admin\ImageController@view');
+    Route::match(['get', 'post'], '/admin/images/edit/{id}', 'Admin\ImageController@edit');
+    Route::match(['get', 'post'], '/admin/images/delete/{id}', 'Admin\ImageController@delete');
+    Route::match(['get', 'post'], '/admin/images/list', 'Admin\ImageController@list');
+
+    Route::get('/images/item/{id}', 'Admin\ImageController@viewImage');
+    Route::get('/images/thumb/{id}', 'Admin\ImageController@viewImage');
+
     Route::match(['get', 'post'], '/admin/categories/list', 'Admin\SubThemeController@list');
     Route::match(['get', 'post'], '/admin/categories/search', 'Admin\SubThemeController@search');
     Route::match(['get', 'post'], '/admin/categories/add', 'Admin\SubThemeController@add');

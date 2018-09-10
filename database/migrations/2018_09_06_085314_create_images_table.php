@@ -29,8 +29,6 @@ class CreateImagesTable extends Migration
             $table->integer('created_by')->unsigned();
             $table->foreign('created_by')->references('id')->on('users');
         });
-
-        //DB::statement("ALTER TABLE images ADD img_data MEDIUMBLOB");
     }
 
     /**

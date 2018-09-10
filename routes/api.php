@@ -131,6 +131,12 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('addMember', 'Api\OrganisationController@addMember');
 
+    Route::post('addImage', 'Api\ImageController@addImage');
+    Route::post('getImageDetails', 'Api\ImageController@getImageDetails');
+    Route::post('listImages', 'Api\ImageController@listImages');
+    Route::post('editImage', 'Api\ImageController@editImage');
+    Route::post('deleteImage', 'Api\ImageController@deleteImage');
+
     Route::post('xml2json', 'Api\ConversionController@xml2json');
     Route::post('json2xml', 'Api\ConversionController@json2xml');
     Route::post('csv2json', 'Api\ConversionController@csv2json');

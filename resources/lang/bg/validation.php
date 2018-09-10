@@ -251,6 +251,10 @@ return [
         'news' => 'следвай новини',
         'schema_description' => 'схема',
         'schema_url' => 'връзка към схема',
+        'img_file' => 'файл',
+        'img_url' => 'линк към файл',
+        'comment' => 'коментар',
+        'mime_type' => 'тип',
     ],
 
 ];

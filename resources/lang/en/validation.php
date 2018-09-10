@@ -246,7 +246,11 @@ return [
         'news' => 'news',
         'schema_description' => 'schema',
         'schema_url' => 'schema url',
-        'category_id' => 'main topic'
+        'category_id' => 'main topic',
+        'img_file' => 'file',
+        'img_url' => 'url to file',
+        'comment' => 'comment',
+        'mime_type' => 'mime type',
     ],
 
 ];

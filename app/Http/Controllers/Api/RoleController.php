@@ -41,6 +41,24 @@ class RoleController extends ApiController
             'for_group'             => 'nullable|int',
         ]);
 
+        if (isset($post['default_user']) && $post['default_user']) {
+            if (Role::where('default_user', 1)->where('active', 1)->first()) {
+               return $this->errorResponse(__('custom.default_user_role'));
+            }
+        }
+
+        if (isset($post['default_group_admin']) && $post['default_group_admin']) {
+            if (Role::where('default_group_admin', 1)->where('active', 1)->first()) {
+               return $this->errorResponse(__('custom.default_group_admin_role'));
+            }
+        }
+
+        if (isset($post['default_org_admin']) && $post['default_org_admin']) {
+            if (Role::where('default_org_admin', 1)->where('active', 1)->first()) {
+               return $this->errorResponse(__('custom.default_org_admin_role'));
+            }
+        }
+
         if (!$validator->fails()) {
             try {
                 $newRole = Role::create($post);
@@ -96,6 +114,25 @@ class RoleController extends ApiController
                 'for_org'               => 'nullable|int',
                 'for_group'             => 'nullable|int',
             ]);
+
+
+        if (isset($post['data']['default_user']) && $post['data']['default_user']) {
+            if (Role::where('default_user', 1)->first()) {
+               return $this->errorResponse(__('custom.edit_role_fail'));
+            }
+        }
+
+        if (isset($post['data']['default_group_admin']) && $post['data']['default_group_admin']) {
+            if (Role::where('default_group_admin', 1)->first()) {
+               return $this->errorResponse(__('custom.edit_role_fail'));
+            }
+        }
+
+        if (isset($post['data']['default_org_admin']) && $post['data']['default_org_admin']) {
+            if (Role::where('default_org_admin', 1)->first()) {
+               return $this->errorResponse(__('custom.edit_role_fail'));
+            }
+        }
 
             if (!$validator->fails()) {
                 try {
@@ -248,7 +285,7 @@ class RoleController extends ApiController
 
             try {
                 $role = Role::find($id);
-                $rights = Role::getRightsDescription();
+                $rights = RoleRight::getRightsDescription();
                 $result = [];
 
                 foreach ($role->rights as $right) {
@@ -293,8 +330,8 @@ class RoleController extends ApiController
     public function modifyRoleRights(Request $request)
     {
         $post = $request->all();
-        $modules = Role::getModuleNames();
-        $rights = Role::getRights();
+        $modules = Module::getModules();
+        $rights = RoleRight::getRights();
 
         $validator = \Validator::make($post, [
             'id'                        => 'required|int|exists:roles,id|digits_between:1,10',

@@ -65,7 +65,7 @@
                                             @endforeach
                                         @endif
                                     </div>
-                                    @if (\App\Role::isAdmin($organisation->id))
+                                    @if (\App\Role::isAdmin())
                                         <div class="col-xs-12 view-btns m-t-lg">
                                             <div class="row">
                                                 <form

@@ -250,10 +250,29 @@ class UserController extends ApiController
                 $result = [];
 
                 foreach($user->userToOrgRole as $role) {
+
+                    $roleRights = RoleRight::where('role_id', $role->role_id)->get();
+
+                    $rightResult = [];
+
+                    foreach($roleRights as $singleRoleRight) {
+                        $rightResult[] = [
+                            'module_name'          => $singleRoleRight->module_name,
+                            'right'                => $singleRoleRight->right,
+                            'limit_to_own_data'    => $singleRoleRight->limit_to_own_data,
+                            'api'                  => $singleRoleRight->api
+                        ];
+                    }
+
                     $result[] = [
                         'org_id'    => $role->org_id,
                         'role_id'   => $role->role_id,
+                        'rights'    => $rightResult
+
                     ];
+
+                    unset($roleRights);
+                    unset($rightResult);
                 }
 
                 $logData = [
@@ -795,13 +814,54 @@ class UserController extends ApiController
                 'is_admin' => 'nullable|int|digits_between:1,10',
                 'approved' => 'nullable|int|digits_between:1,10',
                 'role_id'  => 'nullable|required_with:org_id',
-                'org_id'   => 'nullable|int|required_with:role_id|digits_between:1,10',
+                'org_id'   => 'nullable|int|required_with:role_id|digits_between:1,10|exists:organisations,id',
                 'generate' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
                 $errors = $validator->errors()->messages();
             }
+        }
+
+        $rightCheck = false;
+
+        if (isset($post['data']['org_id'])) {
+            if ($orgData = Organisation::where('id', $post['data']['org_id'])->first()) {
+                if( $orgData->type == Organisation::TYPE_GROUP) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::GROUP,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id'       => $orgData->id
+                        ],
+                        [
+                            'created_by'    => $orgData->created_by,
+                            'group_ids'     => [$orgData->id]
+                        ]
+                    );
+                } else {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::ORGANISATIONS,
+                        RoleRight::RIGHT_ALL,
+                        [
+                            'org_id'       => $organisation->id
+                        ],
+                        [
+                            'created_by' => $organisation->created_by,
+                            'org_id'     => $organisation->id
+                        ]
+                    );
+                }
+            }
+        } else {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_EDIT
+            );
+        }
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         if (!empty($errors)) {
@@ -840,27 +900,25 @@ class UserController extends ApiController
             try {
                 $user->save();
 
-                if (Role::isAdmin($reqOrgId)) {
-                    if (isset($request->data['approved'])) {
-                        $user->approved = $request->data['approved'];
-                    }
+                if (isset($request->data['approved'])) {
+                    $user->approved = $request->data['approved'];
+                }
 
-                    $template = 'mail/generateMail';
-                    $mailData = [
-                        'user'      => Auth::user()->firstname .' '. Auth::user()->lastname,
-                        'username'  => $user->username,
-                        'pass'      => $password,
-                    ];
+                $template = 'mail/generateMail';
+                $mailData = [
+                    'user'      => Auth::user()->firstname .' '. Auth::user()->lastname,
+                    'username'  => $user->username,
+                    'pass'      => $password,
+                ];
 
-                    if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
-                        foreach ($post['data']['role_id'] as $role) {
-                            $userToOrgRole = new UserToOrgRole;
-                            $userToOrgRole->user_id = $user->id;
-                            $userToOrgRole->org_id = !empty($post['data']['org_id']) ? $post['data']['org_id'] : null;
-                            $userToOrgRole->role_id = $role;
+                if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
+                    foreach ($post['data']['role_id'] as $role) {
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->user_id = $user->id;
+                        $userToOrgRole->org_id = !empty($post['data']['org_id']) ? $post['data']['org_id'] : null;
+                        $userToOrgRole->role_id = $role;
 
-                            $userToOrgRole->save();
-                        }
+                        $userToOrgRole->save();
                     }
                 }
 

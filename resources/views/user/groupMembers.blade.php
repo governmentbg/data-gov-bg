@@ -162,12 +162,15 @@
                                             <div class="m-b-sm">
                                                 <select
                                                     class="form-control js-select m-b-md"
-                                                    name="role_id"
+                                                    name="role_id[]"
+                                                    multiple="multiple"
                                                 >
                                                     @foreach ($roles as $role)
                                                         <option
                                                             value="{{ $role->id }}"
-                                                            {{ $member->role_id == $role->id ? 'selected' : null }}
+                                                            @foreach ($member->role_id as $memberRole)
+                                                                {{ $memberRole == $role->id ? 'selected' : null }}
+                                                            @endforeach
                                                         >{{ $role->name }}</option>
                                                     @endforeach
                                                 </select>

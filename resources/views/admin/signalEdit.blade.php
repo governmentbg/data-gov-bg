@@ -3,13 +3,13 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.admin-nav-bar', ['view' => 'termsConditionsReq'])
+        @include('partials.admin-nav-bar', ['view' => 'signals'])
         <div class="row">
             <div class="col-md-2 col-sm-1"></div>
             <div class="col-md-8 col-sm-10">
                 <div class="frame add-terms">
                     <div class="p-w-md text-center m-b-lg m-t-lg">
-                        <h2>{{ __('custom.edit_terms_req') }}</h2>
+                        <h2>{{ __('custom.signal_edit') }}</h2>
                     </div>
                     <div class="body">
                         <form method="POST" class="form-horisontal">
@@ -20,8 +20,8 @@
                                     <input
                                         name="firstname"
                                         class="input-border-r-12 form-control"
-                                        value="{{ !empty($termsRequest->firstname)
-                                            ? $termsRequest->firstname
+                                        value="{{ !empty($signal->firstname)
+                                            ? $signal->firstname
                                             : old('firstname')
                                         }}"
                                     >
@@ -36,8 +36,8 @@
                                     <input
                                         name="lastname"
                                         class="input-border-r-12 form-control"
-                                        value="{{ !empty($termsRequest->lastname)
-                                            ? $termsRequest->lastname
+                                        value="{{ !empty($signal->lastname)
+                                            ? $signal->lastname
                                             : old('lastname')
                                         }}"
                                     >
@@ -52,8 +52,8 @@
                                     <input
                                         name="email"
                                         class="input-border-r-12 form-control"
-                                        value="{{ !empty($termsRequest->email)
-                                            ? $termsRequest->email
+                                        value="{{ !empty($signal->email)
+                                            ? $signal->email
                                             : old('email')
                                         }}"
                                     >
@@ -68,7 +68,7 @@
                                     <textarea
                                         name="description"
                                         class="input-border-r-12 form-control"
-                                    >{{ !empty($termsRequest->description) ? $termsRequest->description : old('description') }}</textarea>
+                                    >{{ !empty($signal->description) ? $signal->description : old('description') }}</textarea>
                                     @if (isset($errors) && $errors->has('description'))
                                         <span class="error">{{ $errors->first('description') }}</span>
                                     @endif
@@ -87,7 +87,7 @@
                                             @foreach ($statuses as $key => $status)
                                                 <option
                                                     value="{{ $key }}"
-                                                    {{ $key == $termsRequest->status ? 'selected' : '' }}
+                                                    {{ $key == $signal->status ? 'selected' : '' }}
                                                 >{{ utrans('custom.'. $status) }}</option>
                                             @endforeach
                                         </select>
@@ -96,10 +96,10 @@
                             @endif
                             <div class="form-group row m-b-lg m-t-md"><div class="col-xs-12 terms-hr"><hr></div></div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <div class="col-xs-12">{{ __('custom.created_at') }}: &nbsp; {{ $termsRequest->created_at }}</div>
-                                <div class="col-xs-12">{{ __('custom.created_by') }}: &nbsp; {{ $termsRequest->created_by }}</div>
-                                <div class="col-xs-12">{{ __('custom.updated_at') }}: &nbsp; {{ $termsRequest->updated_at }}</div>
-                                <div class="col-xs-12">{{ __('custom.updated_by') }}: &nbsp; {{ $termsRequest->updated_by }}</div>
+                                <div class="col-xs-12">{{ __('custom.created_at') }}: &nbsp; {{ $signal->created_at }}</div>
+                                <div class="col-xs-12">{{ __('custom.created_by') }}: &nbsp; {{ $signal->created_by }}</div>
+                                <div class="col-xs-12">{{ __('custom.updated_at') }}: &nbsp; {{ $signal->updated_at }}</div>
+                                <div class="col-xs-12">{{ __('custom.updated_by') }}: &nbsp; {{ $signal->updated_by }}</div>
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">

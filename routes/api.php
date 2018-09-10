@@ -87,10 +87,11 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
 
-    Route::post('sendSignal', 'Api\SignalsController@sendSignal');
-    Route::post('editSignal', 'Api\SignalsController@editSignal');
-    Route::post('deleteSignal', 'Api\SignalsController@deleteSignal');
-    Route::post('listSignals', 'Api\SignalsController@listSignals');
+    Route::post('sendSignal', 'Api\SignalController@sendSignal');
+    Route::post('editSignal', 'Api\SignalController@editSignal');
+    Route::post('deleteSignal', 'Api\SignalController@deleteSignal');
+    Route::post('listSignals', 'Api\SignalController@listSignals');
+
     Route::post('addTermsOfUse', 'Api\TermsOfUseController@addTermsOfUse');
     Route::post('editTermsOfUse', 'Api\TermsOfUseController@editTermsOfUse');
     Route::post('deleteTermsOfUse', 'Api\TermsOfUseController@deleteTermsOfUse');

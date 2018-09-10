@@ -101,33 +101,35 @@ class Module extends Model
      */
     public static function add($request)
     {
-        $actions = ActionsHistory::getTypes();
+        if (Auth::check()) {
+            $actions = ActionsHistory::getTypes();
 
-        $validator = \Validator::make($request, [
-            'module_name'   => 'required|string|max:191',
-            'action'        => 'required|int|digits_between:1,3|in:'. implode(',', array_flip($actions)),
-            'action_object' => 'max:191',
-            'action_msg'    => 'required|string|max:191',
-        ]);
+            $validator = \Validator::make($request, [
+                'module_name'   => 'required|string|max:191',
+                'action'        => 'required|int|digits_between:1,3|in:'. implode(',', array_flip($actions)),
+                'action_object' => 'max:191',
+                'action_msg'    => 'required|string|max:191',
+            ]);
 
-        $actionObject = isset($request['action_object']) ? $request['action_object'] : '';
+            $actionObject = isset($request['action_object']) ? $request['action_object'] : '';
 
-        if (!$validator->fails()) {
-            try {
-                $dbData = [
-                    'user_id'       => Auth::user()->id,
-                    'module_name'   => $request['module_name'],
-                    'action'        => $request['action'],
-                    'action_object' => $actionObject,
-                    'action_msg'    => $request['action_msg'],
-                    'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
-                    'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
-                    'occurrence'    => date('Y-m-d H:i:s'),
-                ];
+            if (!$validator->fails()) {
+                try {
+                    $dbData = [
+                        'user_id'       => Auth::user()->id,
+                        'module_name'   => $request['module_name'],
+                        'action'        => $request['action'],
+                        'action_object' => $actionObject,
+                        'action_msg'    => $request['action_msg'],
+                        'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
+                        'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
+                        'occurrence'    => date('Y-m-d H:i:s'),
+                    ];
 
-                ActionsHistory::create($dbData);
-            } catch (QueryException $ex) {
-                Log::error($ex->getMessage());
+                    ActionsHistory::create($dbData);
+                } catch (QueryException $ex) {
+                    Log::error($ex->getMessage());
+                }
             }
         }
     }

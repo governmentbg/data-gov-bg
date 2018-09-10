@@ -86,14 +86,14 @@
                         </li>
                         <li>
                             <a
-                                class="{{ $view == 'actionsHistory' ? 'active' : '' }}"
-                                href="#"
+                                class="{{ $view == 'action' ? 'active' : '' }}"
+                                href="{{ url('/admin/history/action') }}"
                             >{{ __('custom.actions_history') }}</a>
                         </li>
                         <li>
                             <a
-                                class="{{ $view == 'loginsHistory' ? 'active' : '' }}"
-                                href="#"
+                                class="{{ $view == 'login' ? 'active' : '' }}"
+                                href="{{ url('/admin/history/login') }}"
                             >{{ __('custom.logins_history') }}</a>
                         </li>
                         <li>

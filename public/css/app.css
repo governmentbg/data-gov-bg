@@ -15717,6 +15717,23 @@ textarea {
   padding: 5px 40px;
 }
 
+.sort-links {
+  position: relative;
+  bottom: 105px;
+  left: 240px;
+}
+
+@media screen and (max-width: 1199px) {
+  .sort-links {
+    bottom: 0px;
+    left: 0px;
+  }
+}
+
+.sort-links a {
+  padding: 10px 10px 10px 6px !important;
+}
+
 .theme-organisation .sidebar-submenu .order {
   display: inline-block;
   margin-left: -45px;

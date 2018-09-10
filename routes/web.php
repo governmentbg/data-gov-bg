@@ -118,6 +118,8 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/admin/languages/edit/{id}', 'Admin\LangController@editLang');
     Route::match(['get', 'post'], '/admin/languages/delete/{id}', 'Admin\LangController@deleteLocale');
 
+    Route::match(['get', 'post'], 'admin/history/{type}', 'Admin\HistoryController@history');
+
     Route::middleware('check.resources')->group(function () {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 

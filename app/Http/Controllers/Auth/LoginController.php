@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Module;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Api\RightController;
@@ -85,6 +87,15 @@ class LoginController extends Controller
                         Session::put('roles', $result['roles']);
 
                     }
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::USERS),
+                        'action'           => ActionsHistory::TYPE_LOGIN,
+                        'action_object'    => $loginData['username'],
+                        'action_msg'       => 'Login',
+                    ];
+
+                    Module::add($logData);
 
                     return redirect('/');
                 } else {

@@ -618,4 +618,8 @@ return [
     'results_found' => 'намерен резултат|намерени резултата',
     'selected_topics' => 'избрани теми',
     'selected_tags' => 'избрани етикети',
+    'module' => 'Модул',
+    'date' => 'Дата',
+    'object' => 'Обект',
+    'ip_address' => 'IP Адрес',
 ];

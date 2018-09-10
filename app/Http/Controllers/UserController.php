@@ -4021,10 +4021,12 @@ class UserController extends Controller {
                 $followersCount = $followers->count;
 
                 foreach($followers->followers as $follower) {
-                    if ($follower->user_id == Auth::user()->id) {
-                        $followed = true;
+                    if (Auth::check()) {
+                        if ($follower->user_id == Auth::user()->id) {
+                            $followed = true;
 
-                        break;
+                            break;
+                        }
                     }
                 }
             }

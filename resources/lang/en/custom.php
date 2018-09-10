@@ -621,4 +621,8 @@ return [
     'results_found' => 'result found|results found',
     'selected_topics' => 'selected topics',
     'selected_tags' => 'selected tags',
+    'module' => 'Module',
+    'date' => 'Date',
+    'object' => 'Object',
+    'ip_address' => 'IP Address',
 ];

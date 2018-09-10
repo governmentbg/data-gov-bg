@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\TagController as ApiTags;
 use App\Http\Controllers\Api\UserController as ApiUsers;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class AdminController extends Controller
 {
@@ -119,5 +121,29 @@ class AdminController extends Controller
         }
 
         return $categories;
+    }
+
+    public function getIpDropdown($view = '', $count = null)
+    {
+        $ips = [];
+        $collection = ActionsHistory::select('ip_address');
+
+        if ($view == 'login') {
+            $collection->where('action', ActionsHistory::TYPE_LOGIN);
+        }
+
+        $collection = $collection->get();
+
+        foreach ($collection as $index => $ip) {
+            if (!in_array($ip->ip_address, $ips)) {
+                $ips[] = $ip->ip_address;
+            }
+
+            if ($count && $index + 1 == $count) {
+                break;
+            }
+        }
+
+        return $ips;
     }
 }

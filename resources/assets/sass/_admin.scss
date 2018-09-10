@@ -129,3 +129,18 @@
 .long-badge {
     padding: 5px 40px;
 }
+
+.sort-links {
+    position: relative;
+    bottom: 105px;
+    left: 240px;
+
+    @include mobile() {
+        bottom: 0px;
+        left: 0px;
+    }
+
+    a {
+        padding: 10px 10px 10px 6px !important;
+    }
+}

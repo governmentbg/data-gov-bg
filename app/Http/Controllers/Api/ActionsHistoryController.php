@@ -37,6 +37,10 @@ class ActionsHistoryController extends ApiController
     public function listActionHistory(Request $request)
     {
         $post = $request->all();
+        $order = [];
+
+        $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'desc';
+        $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'occurrence';
 
         $validator = Validator::make($post, [
             'criteria'               => 'nullable|array',
@@ -68,9 +72,18 @@ class ActionsHistoryController extends ApiController
                 'dataset_ids.*'   => 'int',
                 'resource_uris'   => 'nullable|array',
                 'resource_uris.*' => 'string',
-                'ip_adress'       => 'nullable|string',
+                'ip_address'      => 'nullable|string',
+                'order'           => 'nullable|array',
             ]);
         }
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'        => 'nullable|string|max:191',
+                'field'       => 'nullable|string|max:191',
+            ]);
+        }
+
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
@@ -83,8 +96,9 @@ class ActionsHistoryController extends ApiController
             'action',
             'action_object',
             'action_msg',
-            'user_id'
-        )->with('user:id,username,firstname,lastname')->orderBy('occurrence', 'desc');
+            'user_id',
+            'ip_address'
+        )->with('user:id,username,firstname,lastname');
 
         if (isset($criteria['period_from'])) {
             $history->where('occurrence', '>=', $criteria['period_from']);
@@ -119,6 +133,7 @@ class ActionsHistoryController extends ApiController
         if (isset($criteria['actions'])) {
             $history->whereIn('action', $criteria['actions']);
         }
+
 
         $actObjCriteria = [];
         if (isset($criteria['category_ids'])) {
@@ -172,6 +187,11 @@ class ActionsHistoryController extends ApiController
         );
 
         $results = [];
+
+        if (!empty($order)) {
+            $history->orderBy($order['field'], $order['type']);
+        }
+
         $history = $history->get();
 
         if (!empty($history)) {
@@ -187,6 +207,7 @@ class ActionsHistoryController extends ApiController
                     'action'         => $record->action,
                     'action_object'  => $record->action_object,
                     'action_msg'     => $record->action_msg,
+                    'ip_address'     => $record->ip_address,
                 ];
             }
         }

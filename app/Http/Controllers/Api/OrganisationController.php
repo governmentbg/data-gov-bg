@@ -1245,7 +1245,6 @@ class OrganisationController extends ApiController
 
                 return $this->successResponse();
             } catch (QueryException $e) {
-                dd($e);
                 Log::error($e->getMessage());
             }
         }

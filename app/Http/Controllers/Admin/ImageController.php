@@ -51,6 +51,13 @@ class ImageController extends AdminController
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
+    /**
+     * Add image
+     *
+     * @param Request $request
+     *
+     * @return view on success on failure redirect to homepage
+     */
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
@@ -95,12 +102,12 @@ class ImageController extends AdminController
     }
 
     /**
-     * Displays information for a given image
+     * Displays information for an image
      *
      * @param Request $request
      * @param integer $id
      *
-     * @return view on success on failure redirect to homepage
+     * @return view on success on failure redirect to listing page
      */
     public function view(Request $request, $id)
     {
@@ -214,6 +221,14 @@ class ImageController extends AdminController
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
+    /**
+     * Displays an image
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return image on success
+     */
     public function viewImage(Request $request, $id)
     {
         try {
@@ -229,6 +244,13 @@ class ImageController extends AdminController
         }
     }
 
+    /**
+     * Add public URIs to an image object
+     *
+     * @param object $image
+     *
+     * @return object with public URIs added
+     */
     public function appendPublicURI($image)
     {
         if (is_object($image)) {

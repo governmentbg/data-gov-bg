@@ -42,6 +42,7 @@
                     </div>
                 </div>
                 <div>
+                @if ($resultsCount > 0)
                     <div class="m-r-md p-h-xs">
                         <p>{{ __('custom.list_order_by') }}:</p>
                         <ul class="nav sort-by p-l-r-none">
@@ -123,6 +124,7 @@
                             </li>
                         </ul>
                     </div>
+                @endif
                 </div>
             </div>
             <div class="articles">

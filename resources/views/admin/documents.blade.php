@@ -4,6 +4,7 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'documents'])
+        @include('partials.pagination')
         <div class="col-xs-12 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{ __('custom.document_list') }}</span>
         </div>

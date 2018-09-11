@@ -4,6 +4,7 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'organisation'])
+        @include('partials.pagination')
         <div class="row">
             <div class="col-sm-3 col-xs-12 text-left">
                 <span class="badge badge-pill m-t-md new-data user-add-btn">

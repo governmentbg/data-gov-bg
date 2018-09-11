@@ -53,13 +53,12 @@
                                             'OrganisationController@datasets',
                                             array_merge(
                                                 array_except(app('request')->input(), ['sort', 'order', 'page']),
-                                                ['uri' => $organisation->uri, 'sort' => 'relevance', 'order' => 'asc']
+                                                ['uri' => $organisation->uri, 'sort' => 'relevance']
                                             )
                                         )
                                     }}"
                                     class="{{
-                                        isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'relevance' &&
-                                        isset(app('request')->input()['order']) && app('request')->input()['order'] == 'asc'
+                                        isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'relevance'
                                             ? 'active'
                                             : ''
                                     }}"
@@ -154,8 +153,13 @@
                         </div>
                     @endif
                 </div>
+                @if (isset($pagination))
+                    <div class="col-lg-12 m-t-md text-center">
+                        {{ $pagination->render() }}
+                    </div>
+                @endif
                 @foreach ($datasets as $dataset)
-                    <div class="col-sm-12 article m-t-lg m-b-md p-l-r-none">
+                    <div class="col-sm-12 article m-t-md m-b-md p-l-r-none">
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
                                 <div class="col-sm-2 col-xs-4 logo">
@@ -230,13 +234,8 @@
                 </div>
             @endif
             </div>
-
-            @if (isset($pagination))
-                <div class="row">
-                    <div class="col-xs-12 text-center">
-                        {{ $pagination->render() }}
-                    </div>
-                </div>
+            @if ($resultsCount > 0)
+                @include('partials.pagination')
             @endif
         </div>
     </div>

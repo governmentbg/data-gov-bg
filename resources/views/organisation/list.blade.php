@@ -25,7 +25,7 @@
                                                             )
                                                         )
                                                     }}"
-                                                    class="{{ ($type == $orgType->id) ? 'active' : '' }}"
+                                                    class="{{ (isset($getParams['type']) && $getParams['type'] == $orgType->id) ? 'active' : '' }}"
                                                 >{{ $orgType->name }}</a>
                                             </li>
                                         @endforeach
@@ -39,15 +39,15 @@
         </div>
         <div class="row">
             <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 col-xs-offset-3 p-w-xl search-field">
-                <form method="GET" action="{{ url('/organisation/search') }}">
+                <form method="GET" action="{{ url('/organisation') }}">
                     <input
                         type="text"
                         class="m-t-md input-border-r-12 form-control"
                         placeholder="{{ __('custom.search') }}"
-                        value="{{ isset($search) ? $search : '' }}"
+                        value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
                         name="q"
                     >
-                    @foreach (array_except(app('request')->query(), ['q', 'page']) as $qp => $qpv)
+                    @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
                         <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
                     @endforeach
                 </form>
@@ -62,7 +62,7 @@
                     <a
                         href="{{
                             action(
-                                'OrganisationController@search',
+                                'OrganisationController@list',
                                 array_merge(
                                     array_except(app('request')->input(), ['sort', 'order', 'page']),
                                     ['sort' => 'name', 'order' => 'asc']
@@ -78,7 +78,7 @@
                     <a
                         href="{{
                             action(
-                                'OrganisationController@search',
+                                'OrganisationController@list',
                                 array_merge(
                                     array_except(app('request')->input(), ['sort', 'order', 'page']),
                                     ['sort' => 'name', 'order' => 'desc']
@@ -94,8 +94,11 @@
                 </div>
             @endif
         </div>
+        @if (count($organisations))
+            @include('partials.pagination')
+        @endif
         <div class="row">
-            <div class="col-xs-12 m-t-md list-orgs">
+            <div class="col-xs-12 list-orgs">
                 <div class="row">
                     @if (count($organisations))
                         @foreach ($organisations as $key => $organisation)
@@ -122,13 +125,8 @@
                 </div>
             </div>
         </div>
-
-        @if (isset($pagination))
-            <div class="row">
-                <div class="col-xs-12 text-center">
-                    {{ $pagination->render() }}
-                </div>
-            </div>
+        @if (count($organisations))
+            @include('partials.pagination')
         @endif
     </div>
 @endsection

@@ -324,7 +324,6 @@ Route::get('data/reportedView', function () {
 });
 
 Route::match(['get', 'post'], 'organisation', 'OrganisationController@list')->name('orgList');
-Route::match(['get', 'post'], 'organisation/search', 'OrganisationController@search');
 Route::match(['get', 'post'], 'organisation/profile/{uri}', 'OrganisationController@view');
 
 Route::match(['get', 'post'], 'organisation/{uri}/datasets', 'OrganisationController@datasets');

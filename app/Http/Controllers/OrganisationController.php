@@ -50,15 +50,19 @@ class OrganisationController extends Controller {
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
+        // list organisation types
         $rq = Request::create('/api/listOrganisationTypes', 'GET', ['locale' => $locale]);
         $api = new ApiOrganisation($rq);
         $result = $api->listOrganisationTypes($rq)->getData();
         $orgTypes = $result->success ? $result->types : [];
 
+        $getParams = [];
+
+        // apply type filter
         if ($request->filled('type')) {
-            $type = $request->type;
+            $getParams['type'] = $request->type;
         } else {
-            $type = !empty($orgTypes) ? array_first($orgTypes)->id : '';
+            $getParams['type'] = !empty($orgTypes) ? array_first($orgTypes)->id : '';
         }
 
         $perPage = 6;
@@ -68,110 +72,36 @@ class OrganisationController extends Controller {
             'criteria'         => [
                 'active'   => true,
                 'approved' => true,
-                'type'     => $type,
+                'type'     => $getParams['type'],
                 'locale'   => $locale
             ]
         ];
 
+        // apply search
+        if ($request->filled('q') && !empty(trim($request->q))) {
+            $getParams['q'] = trim($request->q);
+            $params['criteria']['keywords'] = $getParams['q'];
+        }
+
+        // apply sort parameters
         if ($request->has('sort')) {
             $params['criteria']['order']['field'] = $request->sort;
+            $getParams['sort'] = $request->sort;
             if ($request->has('order')) {
                 $params['criteria']['order']['type'] = $request->order;
+                $getParams['order'] = $request->order;
             }
         }
 
+        // list organisations
         $rq = Request::create('/api/listOrganisations', 'POST', $params);
         $api = new ApiOrganisation($rq);
         $result = $api->listOrganisations($rq)->getData();
 
-        $paginationData = $this->getPaginationData(
-            $result->success ? $result->organisations : [],
-            $result->success ? $result->total_records : 0,
-            array_except(app('request')->input(), ['q', 'page']),
-            $perPage
-        );
-
-        return view(
-            'organisation.list',
-            [
-                'class'         => 'organisation',
-                'organisations' => $paginationData['items'],
-                'pagination'    => $paginationData['paginate'],
-                'orgTypes'      => $orgTypes,
-                'type'          => $type
-            ]
-        );
-    }
-
-    /**
-     * Loads a view for searching organisations
-     *
-     * @param Request $request
-     *
-     * @return view with a list of organisations or
-     * a list of filtered organisations if search string is provided
-     */
-    public function search(Request $request)
-    {
-        $search = $request->q;
-
-        if (empty(trim($search))) {
-            return redirect()->route('orgList', array_except(app('request')->query(), ['q']));
-        }
-
-        $locale = \LaravelLocalization::getCurrentLocale();
-
-        $rq = Request::create('/api/listOrganisationTypes', 'GET', ['locale' => $locale]);
-        $api = new ApiOrganisation($rq);
-        $result = $api->listOrganisationTypes($rq)->getData();
-        $orgTypes = $result->success ? $result->types : [];
-
-        if ($request->filled('type')) {
-            $type = $request->type;
-        } else {
-            $type = !empty($orgTypes) ? array_first($orgTypes)->id : '';
-        }
-
-        $perPage = 6;
-        $params = [
-            'records_per_page' => $perPage,
-            'page_number'      => !empty($request->page) ? $request->page : 1,
-            'criteria'         => [
-                'active'   => true,
-                'approved' => true,
-                'type'     => $type,
-                'keywords' => $search,
-                'locale'   => $locale
-            ]
-        ];
-
-        if (isset($request->sort)) {
-            $params['criteria']['order']['field'] = $request->sort;
-            if (isset($request->order)) {
-                $params['criteria']['order']['type'] = $request->order;
-            }
-        }
-
-        $rq = Request::create('/api/searchOrganisations', 'POST', $params);
-        $api = new ApiOrganisation($rq);
-        $result = $api->listOrganisations($rq)->getData();
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
-        $getParams = ['q' => $search, 'type' => $type];
-        if ($request->has('sort')) {
-            $getParams['sort'] = $request->sort;
-        }
-        if ($request->has('order')) {
-            $getParams['order'] = $request->order;
-        }
-
-        $paginationData = $this->getPaginationData(
-            $organisations,
-            $count,
-            $getParams,
-            $perPage
-        );
+        $paginationData = $this->getPaginationData($organisations, $count, $getParams, $perPage);
 
         return view(
             'organisation.list',
@@ -179,9 +109,8 @@ class OrganisationController extends Controller {
                 'class'         => 'organisation',
                 'organisations' => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
-                'search'        => $search,
                 'orgTypes'      => $orgTypes,
-                'type'          => $type
+                'getParams'     => $getParams,
             ]
         );
     }
@@ -368,11 +297,13 @@ class OrganisationController extends Controller {
 
             // apply sort parameters
             if ($request->has('sort')) {
+                $getParams['sort'] = $request->sort;
                 if ($request->sort != 'relevance') {
                     $params['criteria']['order']['field'] = $request->sort;
                     if ($request->has('order')) {
                         $params['criteria']['order']['type'] = $request->order;
                     }
+                    $getParams['order'] = $request->order;
                 }
             }
 
@@ -410,6 +341,7 @@ class OrganisationController extends Controller {
                 $res = $api->listDataCategories($rq)->getData();
 
                 $categories = !empty($res->categories) ? $res->categories : [];
+                $getParams['category'] = array_intersect($getParams['category'], array_pluck($categories, 'id'));
 
                 $this->prepareDisplayParams(count($categories), $hasLimit, $recordsLimit, 'category', $display);
 
@@ -431,6 +363,7 @@ class OrganisationController extends Controller {
                 $res = $api->listDataTags($rq)->getData();
 
                 $tags = !empty($res->tags) ? $res->tags : [];
+                $getParams['tag'] = array_intersect($getParams['tag'], array_pluck($tags, 'id'));
 
                 $this->prepareDisplayParams(count($tags), $hasLimit, $recordsLimit, 'tag', $display);
 
@@ -452,6 +385,7 @@ class OrganisationController extends Controller {
                 $res = $api->listDataFormats($rq)->getData();
 
                 $formats = !empty($res->data_formats) ? $res->data_formats : [];
+                $getParams['format'] = array_intersect($getParams['format'], array_map('strtolower', array_pluck($formats, 'format')));
 
                 $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
 
@@ -474,6 +408,7 @@ class OrganisationController extends Controller {
                 $res = $api->listDataTermsOfUse($rq)->getData();
 
                 $termsOfUse = !empty($res->terms_of_use) ? $res->terms_of_use : [];
+                $getParams['license'] = array_intersect($getParams['license'], array_pluck($termsOfUse, 'id'));
 
                 $this->prepareDisplayParams(count($termsOfUse), $hasLimit, $recordsLimit, 'license', $display);
 

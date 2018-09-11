@@ -96,28 +96,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $temp = tmpfile();
-                $path = stream_get_meta_data($temp)['uri'];
-                fwrite($temp, $post['data']);
-                $spreadsheet = IOFactory::load($path);
-                $worksheet = $spreadsheet->getActiveSheet();
-                $rows = [];
+                $data = $this->fromCells($post['data']);
 
-                foreach ($worksheet->getRowIterator() as $row) {
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    $cells = [];
-
-                    foreach ($cellIterator as $cell) {
-                        $cells[] = trim($cell->getValue());
-                    }
-
-                    $array[] = $cells;
-                }
-
-                fclose($temp);
-
-                return $this->successResponse($array);
+                return $this->successResponse($data);
             } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_csv'));
@@ -397,28 +378,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $temp = tmpfile();
-                $path = stream_get_meta_data($temp)['uri'];
-                fwrite($temp, base64_decode($post['data']));
-                $spreadsheet = IOFactory::load($path);
-                $worksheet = $spreadsheet->getActiveSheet();
-                $rows = [];
+                $data = $this->fromCells($post['data'], false);
 
-                foreach ($worksheet->getRowIterator() as $row) {
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    $cells = [];
-
-                    foreach ($cellIterator as $cell) {
-                        $cells[] = trim($cell->getValue());
-                    }
-
-                    $array[] = $cells;
-                }
-
-                fclose($temp);
-
-                return $this->successResponse($array);
+                return $this->successResponse($data);
             } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'xls/xlsx']));
@@ -561,6 +523,46 @@ class ConversionController extends ApiController
         fclose($tempOut);
 
         return $result;
+    }
+
+    /**
+     * Get text from csv/xls/xlsx document data
+     *
+     * @param csv/xls/xlsx document data - required
+     * @param bool document data - optional
+     *
+     * @return text data
+     */
+    private function fromCells($data, $csv = true)
+    {
+        $temp = tmpfile();
+        $path = stream_get_meta_data($temp)['uri'];
+        fwrite($temp, $csv ? $data : base64_decode($data));
+        $spreadsheet = IOFactory::load($path);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = [];
+
+        foreach ($worksheet->getRowIterator() as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+            $cells = [];
+
+            foreach ($cellIterator as $cell) {
+                $value = trim($cell->getFormattedValue());
+
+                if ($value != '') {
+                    $cells[] = $value;
+                }
+            }
+
+            if (!empty($cells)) {
+                $rows[] = $cells;
+            }
+        }
+
+        fclose($temp);
+
+        return $rows;
     }
 
     /**

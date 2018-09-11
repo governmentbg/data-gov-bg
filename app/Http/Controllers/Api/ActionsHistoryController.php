@@ -84,7 +84,6 @@ class ActionsHistoryController extends ApiController
             ]);
         }
 
-
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
         }
@@ -134,8 +133,8 @@ class ActionsHistoryController extends ApiController
             $history->whereIn('action', $criteria['actions']);
         }
 
-
         $actObjCriteria = [];
+
         if (isset($criteria['category_ids'])) {
             $actObjCriteria[Module::getModuleName(Module::MAIN_CATEGORIES)] = $criteria['category_ids'];
         }

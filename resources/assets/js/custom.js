@@ -13,6 +13,30 @@ $(function() {
     });
 });
 
+// data tables functionality
+$(function() {
+    $(document).ready(function() {
+        $('.data-table').DataTable({
+            pageLength: 25,
+            responsive: true,
+            language: {
+                search: $('.js-translations').data('search'),
+                info: $('.js-translations').data('info'),
+                infoFiltered: $('.js-translations').data('info-filtered'),
+                infoEmpty: $('.js-translations').data('info-empty'),
+                zeroRecords: $('.js-translations').data('zero-records'),
+                lengthMenu: $('.js-translations').data('length-menu'),
+                paginate: {
+                    first: $('.js-translations').data('first'),
+                    last: $('.js-translations').data('last'),
+                    next: $('.js-translations').data('next'),
+                    previous: $('.js-translations').data('previous'),
+                },
+            }
+        });
+    });
+});
+
 $(function () {
     var $checkboxes = $('.js-check');
 

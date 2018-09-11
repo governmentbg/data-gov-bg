@@ -138,9 +138,9 @@
                             <span class="h4">{{ __('custom.selected_topics') }}:</span>
                         </div>
                         <div class="col-lg-9 p-h-xs">
-                        @foreach ($getParams['category'] as $selCategory)
-                            <span class="badge badge-pill">{{ array_pluck($categories, 'name', 'id')[$selCategory] }}</span>
-                        @endforeach
+                            @foreach ($getParams['category'] as $selCategory)
+                                <span class="badge badge-pill">{{ array_pluck($categories, 'name', 'id')[$selCategory] }}</span>
+                            @endforeach
                         </div>
                     @endif
                     @if (isset($getParams['tag']) && count($getParams['tag']) > 0)
@@ -148,9 +148,9 @@
                             <span class="h4">{{ __('custom.selected_tags') }}:</span>
                         </div>
                         <div class="col-lg-9 p-h-xs">
-                        @foreach ($getParams['tag'] as $selTag)
-                            <span class="badge badge-pill">{{ array_pluck($tags, 'name', 'id')[$selTag] }}</span>
-                        @endforeach
+                            @foreach ($getParams['tag'] as $selTag)
+                                <span class="badge badge-pill">{{ array_pluck($tags, 'name', 'id')[$selTag] }}</span>
+                            @endforeach
                         </div>
                     @endif
                 </div>
@@ -168,9 +168,9 @@
                                     </a>
                                 </div>
                                 <div class="socialPadding p-w-sm">
-                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
+                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
+                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
+                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
                                 </div>
                                 <div class="sendMail m-r-sm">
                                     <span><a href="#"><i class="fa fa-envelope"></i></a></span>

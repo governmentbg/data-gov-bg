@@ -132,10 +132,12 @@
                             <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : '' }}">
                                 <a href="{{ url('/contact') }}">{{ utrans('custom.contacts', 2) }}</a>
                             </li>
-                            <li class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
+                            <li
+                                class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
                                     Request::segment(1),
                                     ['user', 'login', 'registration']
-                                ) ? 'active' : null }}">
+                                ) ? 'active' : null }}"
+                            >
                                 @if (!\Auth::check())
                                     <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
                                 @else
@@ -198,6 +200,7 @@
         </div>
     </div>
 
+    @include('partials.js-translations')
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>

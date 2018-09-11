@@ -251,8 +251,7 @@ class UserController extends ApiController
             if ($user) {
                 $result = [];
 
-                foreach($user->userToOrgRole as $role) {
-
+                foreach ($user->userToOrgRole as $role) {
                     $roleRights = RoleRight::where('role_id', $role->role_id)->get();
 
                     $rightResult = [];
@@ -270,7 +269,6 @@ class UserController extends ApiController
                         'org_id'    => $role->org_id,
                         'role_id'   => $role->role_id,
                         'rights'    => $rightResult
-
                     ];
 
                     unset($roleRights);
@@ -417,30 +415,7 @@ class UserController extends ApiController
 
                 $registered = $user->save();
 
-                if (!$user->active) {
-                    $mailData = [
-                        'user'  => $user->firstname,
-                        'hash'  => $user->hash_id,
-                        'id'    => $user->id,
-                    ];
-
-                    Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                        $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                        $m->to($user->email, $user->firstname);
-                        $m->subject(__('custom.register_subject'));
-                    });
-                }
-
-                if (isset($data['role_id']) || isset($data['org_id'])) {
-                    foreach ($data['role_id'] as $role) {
-                        $userToOrgRole = new UserToOrgRole;
-                        $userToOrgRole->user_id = $user->id;
-                        $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
-                        $userToOrgRole->role_id = $role;
-
-                        $userToOrgRole->save();
-                    }
-                }
+                $this->addRoles($user->id, $data['role_id'], $data['org_id']);
 
                 $userSettings = new UserSetting;
 
@@ -461,7 +436,19 @@ class UserController extends ApiController
 
                 $userSettings->save();
 
-                DB::commit();
+                if (!$user->active) {
+                    $mailData = [
+                        'user'  => $user->firstname,
+                        'hash'  => $user->hash_id,
+                        'id'    => $user->id,
+                    ];
+
+                    Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                        $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                        $m->to($user->email, $user->firstname);
+                        $m->subject(__('custom.register_subject'));
+                    });
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
@@ -471,6 +458,8 @@ class UserController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse(['api_key' => $apiKey], true);
             } catch (QueryException $ex) {
@@ -643,7 +632,6 @@ class UserController extends ApiController
             );
 
             if ($validator->fails()) {
-
                 return $this->errorResponse(__('custom.edit_user_fail'));
             }
 
@@ -1042,29 +1030,7 @@ class UserController extends ApiController
 
                 $registered = $user->save();
 
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                    'id'    => $user->id,
-                    'mail'  => $user->email
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject(__('custom.register_subject'));
-                });
-
-                if (isset($data['role_id']) || isset($data['org_id'])) {
-                    foreach ($data['role_id'] as $role) {
-                        $userToOrgRole = new UserToOrgRole;
-                        $userToOrgRole->user_id = $user->id;
-                        $userToOrgRole->org_id = !empty($data['org_id']) ? $data['org_id'] : null;
-                        $userToOrgRole->role_id = $role;
-
-                        $userToOrgRole->save();
-                    }
-                }
+                $this->addRoles($user->id, $data['role_id'], $data['org_id']);
 
                 $userSettings = new UserSetting;
 
@@ -1114,6 +1080,19 @@ class UserController extends ApiController
                 }
 
                 DB::commit();
+
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                    'id'    => $user->id,
+                    'mail'  => $user->email
+                ];
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user->email, $user->firstname);
+                    $m->subject(__('custom.register_subject'));
+                });
 
                 return $this->successResponse(['api_key' => $apiKey], true);
             } catch (QueryException $ex) {
@@ -1481,5 +1460,23 @@ class UserController extends ApiController
         }
 
         return $this->errorResponse(__('custom.list_data_users_fail'), $validator->errors()->messages());
+    }
+
+    private function addRoles($userId, &$roleIds, &$orgId)
+    {
+        if (!empty($roleIds) && is_numeric($roleIds)) {
+            $roleIds = [$roleIds];
+        } else if (empty($roleIds)) {
+            $roleIds = [Role::where('default_user', 1)->first()->id];
+        }
+
+        foreach ($roleIds as $role) {
+            $userToOrgRole = new UserToOrgRole;
+            $userToOrgRole->user_id = $userId;
+            $userToOrgRole->org_id = !empty($orgId) ? $orgId : null;
+            $userToOrgRole->role_id = $role;
+
+            $userToOrgRole->save();
+        }
     }
 }

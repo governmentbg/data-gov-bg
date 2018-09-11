@@ -1513,7 +1513,7 @@ class UserController extends Controller {
                     }
 
                     return view('user/resourceImport', array_merge([
-                        'class'         => 'user',
+                        'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                     ], $response['data']));
@@ -1528,7 +1528,7 @@ class UserController extends Controller {
         }
 
         return view('user/resourceCreate', [
-            'class'     => 'user',
+            'class'     => $class,
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
@@ -3598,12 +3598,11 @@ class UserController extends Controller {
     {
         $class = 'user';
         $hash = $request->offsetGet('hash');
-error_log('hash: '. print_r($hash, true));
+
         if ($hash) {
             $user = User::where('hash_id', $hash)->first();
 
             if ($user) {
-                error_log('here');
                 $user->active = true;
 
                 try {

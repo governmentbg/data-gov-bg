@@ -424,14 +424,15 @@ class DataSetController extends ApiController
      * @param array criteria - optional
      * @param array criteria[dataset_ids] - optional
      * @param string criteria[locale] - optional
-     * @param integer criteria[org_id] - optional
-     * @param integer criteria[group_id] - optional
-     * @param integer criteria[tag_id] - optional
-     * @param integer criteria[category_id] - optional
-     * @param integer criteria[terms_of_use_id] - optional
-     * @param string criteria[format] - optional
+     * @param array criteria[org_ids] - optional
+     * @param array criteria[group_ids] - optional
+     * @param array criteria[tag_ids] - optional
+     * @param array criteria[category_ids] - optional
+     * @param array criteria[terms_of_use_ids] - optional
+     * @param array criteria[formats] - optional
      * @param integer criteria[reported] - optional
      * @param integer criteria[created_by] - optional
+     * @param boolean criteria[user_datasets_only] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -456,21 +457,22 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
-                'dataset_ids'       => 'nullable|array',
-                'locale'            => 'nullable|string|max:5',
-                'org_ids'           => 'nullable|array',
-                'group_ids'         => 'nullable|array',
-                'category_ids'      => 'nullable|array',
-                'tag_ids'           => 'nullable|array',
-                'formats'           => 'nullable|array|min:1',
-                'formats.*'         => 'string|in:'. implode(',', Resource::getFormats()),
-                'terms_of_use_ids'  => 'nullable|array',
-                'keywords'          => 'nullable|string|max:191',
-                'status'            => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
-                'visibility'        => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
-                'reported'          => 'nullable|int|digits_between:1,10',
-                'created_by'        => 'nullable|int|digits_between:1,10',
-                'order'             => 'nullable|array',
+                'dataset_ids'         => 'nullable|array',
+                'locale'              => 'nullable|string|max:5',
+                'org_ids'             => 'nullable|array',
+                'group_ids'           => 'nullable|array',
+                'category_ids'        => 'nullable|array',
+                'tag_ids'             => 'nullable|array',
+                'formats'             => 'nullable|array|min:1',
+                'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
+                'terms_of_use_ids'    => 'nullable|array',
+                'keywords'            => 'nullable|string|max:191',
+                'status'              => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
+                'visibility'          => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
+                'reported'            => 'nullable|int|digits_between:1,10',
+                'created_by'          => 'nullable|int|digits_between:1,10',
+                'user_datasets_only'  => 'nullable|bool',
+                'order'               => 'nullable|array',
             ]);
         }
 
@@ -503,7 +505,9 @@ class DataSetController extends ApiController
                     $query->where('visibility', $criteria['visibility']);
                 }
 
-                if (!empty($criteria['org_ids'])) {
+                if (isset($criteria['user_datasets_only']) && $criteria['user_datasets_only']) {
+                    $query->whereNull('org_id');
+                } elseif (!empty($criteria['org_ids'])) {
                     $query->whereIn('org_id', $criteria['org_ids']);
                 }
 

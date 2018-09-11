@@ -28,6 +28,9 @@ require('./bootstrap-datepicker.bg');
 // Dropdowns
 require('./select2.full.min');
 
+// DataTables
+require('datatables.net-dt');
+
 // Checkboxes
 require('icheck');
 

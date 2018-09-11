@@ -241,3 +241,9 @@
         }
     }
 }
+
+.custom-fields {
+    &.form-group {
+        overflow: hidden;
+    }
+}

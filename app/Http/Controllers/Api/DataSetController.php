@@ -97,7 +97,7 @@ class DataSetController extends ApiController
                 'name'              => $this->trans($locale, $data['name']),
                 'descript'          => empty($data['description']) ? null : $this->trans($locale, $data['description']),
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
-                'org_id'            => empty($data['org_id']) ? null : $data['org_id'],
+                'org_id'            => empty($post['org_id']) ? null : $post['org_id'],
                 'visibility'        => DataSet::VISIBILITY_PRIVATE,
                 'version'           => empty($data['version']) ? 1 : $data['version'],
                 'status'            => DataSet::STATUS_DRAFT,
@@ -882,6 +882,8 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                DB::beginTransaction();
+
                 $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
                 DataSetGroup::destroy($dataSetId);
 
@@ -904,8 +906,12 @@ class DataSetController extends ApiController
 
                 Module::add($logData);
 
+                DB::commit();
+
                 return $this->successResponse();
             } catch (QueryException $ex) {
+                DB::rollback();
+
                 Log::error($ex->getMessage());
             }
         }

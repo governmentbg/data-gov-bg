@@ -356,11 +356,6 @@
         img.img-responsive {
             width: 100%;
         }
-
-        button {
-            font-size: 13px;
-            padding: 5px 12px;
-        }
     }
 
     .filter-content {
@@ -697,8 +692,10 @@
 }
 
 .mng-btns {
-    margin-bottom: 5px;
-    margin-top: 5px;
+    .btn {
+        margin-bottom: 5px;
+        margin-top: 5px;
+    }
 }
 
 .no-info {

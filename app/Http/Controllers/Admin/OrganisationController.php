@@ -192,13 +192,8 @@ class OrganisationController extends AdminController
     public function showOrgRegisterForm() {
 
         if (Role::isAdmin()) {
-            $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
-
-            $query->whereHas('userToOrgRole', function($q) {
-                $q->where('user_id', \Auth::user()->id);
-            });
-
-            $parentOrgs = $query->get();
+            $parentOrgs = Organisation::select('id', 'name')
+                ->where('type', '!=', Organisation::TYPE_GROUP)->get();
 
             return view(
                 'admin/orgRegister',

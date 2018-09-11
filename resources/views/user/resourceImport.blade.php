@@ -5,7 +5,7 @@
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-lg">
-        <p class="b-b-md">{{ uctrans('custom.confirm_resource_import') }}</p>
+        <p class="m-b-md">{{ uctrans('custom.confirm_resource_import') }}</p>
         @if (!empty($csvData))
             <form
                 class="form-horizontal"

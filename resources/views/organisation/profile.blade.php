@@ -4,20 +4,16 @@
 <div class="container">
     <div class="col-xs-12">
         <div class="row">
-            <div class="col-sm-3 sidenav p-l-r-none">
-            </div>
-            <div class="col-sm-9 col-xs-12 p-l-r-none">
-                <div class="filter-content">
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-6 text-center p-l-none">
-                                <div>
-                                    <ul class="nav filter-type right-border">
-                                        <li><a class="active p-l-none" href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ __('custom.profile') }}</a></li>
-                                        <li><a href="{{ url('/organisation/'. $organisation->uri .'/datasets') }}">{{ __('custom.data') }}</a></li>
-                                        <li><a href="{{ url('/organisation/'. $organisation->uri .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
-                                    </ul>
-                                </div>
+             <div class="col-sm-offset-3 filter-content">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-xs-12 p-l-r-none">
+                            <div>
+                                <ul class="nav filter-type right-border">
+                                    <li><a class="active p-l-none" href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ __('custom.profile') }}</a></li>
+                                    <li><a href="{{ url('/organisation/'. $organisation->uri .'/datasets') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/organisation/'. $organisation->uri .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
+                                </ul>
                             </div>
                         </div>
                     </div>

@@ -21,7 +21,14 @@
             </div>
             <div class="row">
                 @if (count($chronology))
-                    <div class="col-xs-12 p-sm m-t-sm chronology">
+                    @if (isset($pagination))
+                        <div class="row">
+                            <div class="col-sm-12 m-t-md text-center">
+                                {{ $pagination->render() }}
+                            </div>
+                        </div>
+                    @endif
+                    <div class="col-xs-12 col-xs-offset-1 chronology">
                         @foreach ($chronology as $chr)
                             @php
                                 if (isset($actionObjData[$chr->module][$chr->action_object])) {
@@ -40,12 +47,12 @@
                             @endphp
                             <div class="row">
                                 <div class="col-xs-1 info-icon">
-                                    <img class="img-thumnail m-xs m-t-md" src="{{ asset('img/'. $objType .'-icon.svg') }}"/>
+                                    <img class="img-responsive m-xs m-t-md" src="{{ asset('img/'. $objType .'-icon.svg') }}"/>
                                 </div>
                                 <div class="col-xs-11 p-h-sm">
                                     <div class="col-md-1 col-xs-2 logo-img">
                                         <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">
-                                            <img class="img-thumnail m-xs m-t-sm" src="{{ $organisation->logo }}"/>
+                                            <img class="img-responsive m-xs m-t-sm" src="{{ $organisation->logo }}"/>
                                         </a>
                                     </div>
                                     <div class="col-md-10 col-xs-10 m-t-md p-l-none">
@@ -75,13 +82,15 @@
                             </div>
                         @endforeach
                     </div>
-                    <div class="row">
-                        <div class="col-sm-9 text-center">
-                            {{ $pagination->render() }}
+                    @if (isset($pagination))
+                        <div class="row">
+                            <div class="col-sm-12 text-center">
+                                {{ $pagination->render() }}
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @else
-                    <div class="col-sm-9 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-xl text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

@@ -4,6 +4,7 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'termsConditions'])
+    @include('partials.pagination')
     <div class="col-xs-12 sidenav m-t-lg">
         <span class="my-profile m-l-sm">{{ __('custom.terms_and_conditions') }}</span>
     </div>

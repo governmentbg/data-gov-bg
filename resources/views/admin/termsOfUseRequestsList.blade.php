@@ -5,6 +5,7 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'termsConditionsReq'])
+        @include('partials.pagination')
         <div class="row m-b-lg">
             <div class="col-sm-3 hidden-xs"></div>
             <div class="col-sm-9 col-xs-12 m-t-lg m-b-md p-l-lg">{{ __('custom.order_by') }}</div>

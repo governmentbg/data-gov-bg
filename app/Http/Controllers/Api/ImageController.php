@@ -96,12 +96,16 @@ class ImageController extends ApiController
                     $image->save();
 
                     file_put_contents($this->path . $image->id, $post['data']['img_data']);
+
                     try {
                         $uploadedImage = \Image::make($this->path . $image->id);
                     } catch (\Exception $e) {
+                        Log::error($e->getMessage());
+
                         if (file_exists($this->path . $image->id)) {
                             unlink($this->path . $image->id);
                         }
+
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.add_error'), $validator->errors()->messages());
@@ -118,6 +122,8 @@ class ImageController extends ApiController
                     try {
                         $content = file_get_contents($post['data']['img_url']);
                     } catch (\Exception $e) {
+                        Log::error($e->getMessage());
+
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.add_error'), $validator->errors()->messages());
@@ -129,12 +135,16 @@ class ImageController extends ApiController
                     $image->save();
 
                     file_put_contents($this->path . $image->id, $content);
+
                     try {
                         $uploadedImage = \Image::make($this->path . $image->id);
                     } catch (\Exception $e) {
+                        Log::error($e->getMessage());
+
                         if (file_exists($this->path . $image->id)) {
                             unlink($this->path . $image->id);
                         }
+
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.add_error'), $validator->errors()->messages());

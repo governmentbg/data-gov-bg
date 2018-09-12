@@ -4,6 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'group'])
+    @include('partials.pagination')
     <div class="row">
     @if ($buttons['add'])
         <div class="col-sm-3 col-xs-12 text-left">

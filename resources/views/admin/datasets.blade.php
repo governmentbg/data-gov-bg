@@ -4,6 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'dataset'])
+    @include('partials.pagination')
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/admin/dataset/add') }}">{{ __('custom.add_new_dataset') }}</a></span>
@@ -618,12 +619,6 @@
             </div>
         </div>
     </div>
-    @if (isset($pagination))
-        <div class="row">
-            <div class="col-xs-12 text-center pagination">
-                {{ $pagination->render() }}
-            </div>
-        </div>
-    @endif
+    @include('partials.pagination')
 </div>
 @endsection

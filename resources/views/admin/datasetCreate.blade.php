@@ -10,6 +10,19 @@
         <form method="POST" action="{{ url('/admin/dataset/add') }}">
             {{ csrf_field() }}
             <div class="form-group row">
+                <div class="form-group row m-r-xs">
+                    <div class="col-xs-12 text-right mng-btns">
+                        <button
+                            name="add_resource"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.add_resource') }}</button>
+                        <button
+                            type="submit"
+                            name="create"
+                            class="btn btn-primary">{{ uctrans('custom.save') }}
+                        </button>
+                    </div>
+                </div>
                 <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">
                     <input

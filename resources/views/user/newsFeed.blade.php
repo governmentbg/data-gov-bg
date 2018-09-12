@@ -8,6 +8,7 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'newsfeed'])
     @endif
+    @include('partials.pagination')
     <div class="col-xs-12">
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-12 sidenav">
@@ -126,11 +127,7 @@
                             </div>
                         @endforeach
                     </div>
-                    <div class="row">
-                        <div class="col-sm-9 text-center">
-                            {{ $pagination->render() }}
-                        </div>
-                    </div>
+                    @include('partials.pagination')
                 @else
                     <div class="col-sm-9 m-t-xl no-info">
                         {{ __('custom.no_info') }}

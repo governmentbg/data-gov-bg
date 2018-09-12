@@ -4,6 +4,7 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => $view])
+    @include('partials.pagination')
     <h3>{{ utrans('custom.logins_history') }}</h3>
     <div class="row">
         <div class="col-sm-3 sidenav col-xs-12 m-t-md">
@@ -476,14 +477,7 @@
                             </tbody>
                         </table>
                     </div>
-
-                    @if (isset($pagination))
-                        <div class="row">
-                            <div class="col-xs-12 text-center">
-                                {{ $pagination->render() }}
-                            </div>
-                        </div>
-                    @endif
+                    @include('partials.pagination')
                 @else
                     <div class="col-sm-12 m-t-xl text-center no-info">
                         {{ __('custom.no_info') }}

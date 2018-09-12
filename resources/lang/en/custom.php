@@ -653,4 +653,10 @@ return [
     'previous' => 'Previous',
     'first' => 'First',
     'last' => 'Last',
+    'topics_sections' => 'Sections and subsections',
+    'topics_pages' => 'pages',
+    'sections' => 'sections',
+    'subsections' => 'subsections',
+    'forum' => 'forum',
+    'subsections_list' => 'Subsections list',
 ];

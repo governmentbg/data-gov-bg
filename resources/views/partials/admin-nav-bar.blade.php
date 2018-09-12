@@ -68,6 +68,12 @@
                         </li>
                         <li>
                             <a
+                                class="{{ $view == 'sections' ? 'active' : '' }}"
+                                href="{{ url('/admin/sections/list') }}"
+                            >{{ __('custom.topics_sections') }}</a>
+                        </li>
+                        <li>
+                            <a
                                 class="{{ $view == 'languages' ? 'active' : '' }}"
                                 href="{{ url('/admin/languages') }}"
                             >{{ __('custom.languages') }}</a>

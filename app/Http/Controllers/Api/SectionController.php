@@ -194,44 +194,81 @@ class SectionController extends ApiController
      * @param string criteria[locale] - optional
      * @param integer criteria[id] - optional
      * @param integer criteria[active] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
      *
      * @return JsonResponse - with list of sections or error
      */
     public function listSections(Request $request)
     {
-        $sectionModel = new Section;
-        $post = $request->criteria;
+        $post = $request->all();
 
-        if (!empty($post)) {
-            $validator = \Validator::make($request->all(), [
-                'criteria'          => 'nullable|array'
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|max:191',
+        ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'id'       => 'nullable|integer|digits_between:1,10',
+                'active'   => 'nullable|boolean',
+                'locale'   => 'nullable|string|max:5',
             ]);
-
-            if (!$validator->fails()) {
-                $validator = \Validator::make($request['criteria'], [
-                    'id'       => 'nullable|integer|digits_between:1,10',
-                    'active'   => 'nullable|boolean',
-                    'locale'   => 'nullable|string|max:5',
-                ]);
-            }
-
-            if ($validator->fails()) {
-                return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
-            }
-
-            $criteria['locale'] = $request->filled('criteria.locale')
-                    ? $request->input('criteria.locale')
-                    : config('app.locale');
-
-            if ($request->filled('criteria.active')) {
-                $criteria['active'] = $request->input('criteria.active');
-            }
-        } else {
-            $criteria['locale'] = config('app.locale');
         }
 
-        $sections = $sectionModel->listSections($criteria);
-        $response = $this->prepareSections($sections);
+        if ($validator->fails()) {
+            return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
+
+        $query = Section::where('parent_id', null);
+        $criteria = [];
+
+        if (isset($post['criteria'])) {
+            if (isset($post['criteria']['locale'])) {
+                $criteria['locale'] = $post['criteria']['locale'];
+            }
+
+            if (isset($post['criteria']['active'])) {
+                $criteria['active'] = $post['criteria']['active'];
+            }
+
+            if (isset($post['criteria']['id'])) {
+                $criteria['id'] = $post['criteria']['id'];
+            }
+        }
+
+        if (!empty($criteria)) {
+            $query->where($criteria);
+        }
+
+        $count = $query->count();
+        $query->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
+
+        $result = [];
+
+        foreach ($query->get() as $section) {
+            $result[] = [
+                'id'            => $section->id,
+                'name'          => $section->name,
+                'locale'        => \LaravelLocalization::getCurrentLocale(),
+                'parent_id'     => $section->parent_id,
+                'active'        => $section->active,
+                'ordering'      => $section->ordering,
+                'read_only'     => $section->read_only,
+                'forum_link'    => $section->forum_link,
+                'theme'         => $section->theme,
+                'created_at'    => $section->created_at,
+                'updated_at'    => $section->updated_at,
+                'created_by'    => $section->created_by,
+                'updated_by'    => $section->updated_by,
+            ];
+        }
 
         $logData = [
             'module_name'      => Module::getModuleName(Module::SECTIONS),
@@ -241,7 +278,7 @@ class SectionController extends ApiController
 
         Module::add($logData);
 
-        return $this->successResponse($response);
+        return $this->successResponse(['sections' => $result, 'total_records' => $count], true);
     }
 
     /**
@@ -251,50 +288,85 @@ class SectionController extends ApiController
      * @param string criteria[locale] - optional
      * @param integer criteria[section_id] - optional
      * @param integer criteria[active] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
      *
      * @return JsonResponse - with list of subsections or error
      */
     public function listSubsections(Request $request)
     {
-        $sectionModel = new Section;
-        $post = $request->criteria;
+        $post = $request->all();
 
-        if (!empty($post)) {
-            $validator = \Validator::make($request->all(), [
-                'criteria'   => 'nullable|array',
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|max:191',
+        ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'id'         => 'nullable|integer|digits_between:1,10',
+                'active'     => 'nullable|boolean',
+                'locale'     => 'nullable|string|max:5',
+                'section_id' => 'nullable|int|digits_between:1,10',
             ]);
-
-            if (!$validator->fails()) {
-                $validator = \Validator::make($post, [
-                    'section_id'   => 'nullable|integer|digits_between:1,10',
-                    'active'       => 'nullable|boolean',
-                    'locale'       => 'nullable|string|max:5',
-                ]);
-            }
-
-            if ($validator->fails()) {
-                return $this->errorResponse(__('custom.list_subsections_fail'), $validator->errors()->messages());
-            }
-
-            $criteria['locale'] = $request->filled('criteria.locale')
-                    ? $request->input('criteria.locale')
-                    : config('app.locale');
-
-            if ($request->filled('criteria.active')) {
-                $criteria['active'] = $request->input('criteria.active');
-            }
-
-            if ($request->filled('criteria.section_id')) {
-                $criteria['parent_id'] = $request->input('criteria.section_id');
-            }
-
-            $sections = $sectionModel->listSubsections($criteria);
-        } else {
-            $criteria['locale'] = config('app.locale');
-            $sections = $sectionModel->listSubsections($criteria);
         }
 
-        $response = $this->prepareSections($sections);
+        if ($validator->fails()) {
+            return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
+
+        $query = isset($criteria['section_id'])
+            ? Section::where('parent_id', $criteria['section_id'])
+            : Section::where('parent_id', '!=', null);
+
+        $criteria = [];
+
+        if (isset($post['criteria'])) {
+            if (isset($post['criteria']['locale'])) {
+                $criteria['locale'] = $post['criteria']['locale'];
+            }
+
+            if (isset($post['criteria']['active'])) {
+                $criteria['active'] = $post['criteria']['active'];
+            }
+
+            if (isset($post['criteria']['id'])) {
+                $criteria['id'] = $post['criteria']['id'];
+            }
+        }
+
+        if (!empty($criteria)) {
+            $query->where($criteria);
+        }
+
+        $count = $query->count();
+        $query->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
+
+        $result = [];
+
+        foreach ($query->get() as $section) {
+            $result[] = [
+                'id'            => $section->id,
+                'name'          => $section->name,
+                'locale'        => \LaravelLocalization::getCurrentLocale(),
+                'parent_id'     => $section->parent_id,
+                'active'        => $section->active,
+                'ordering'      => $section->ordering,
+                'read_only'     => $section->read_only,
+                'forum_link'    => $section->forum_link,
+                'theme'         => $section->theme,
+                'created_at'    => $section->created_at,
+                'updated_at'    => $section->updated_at,
+                'created_by'    => $section->created_by,
+                'updated_by'    => $section->updated_by,
+            ];
+        }
 
         $logData = [
             'module_name'      => Module::getModuleName(Module::SECTIONS),
@@ -304,7 +376,7 @@ class SectionController extends ApiController
 
         Module::add($logData);
 
-        return $this->successResponse($response);
+        return $this->successResponse(['subsections' => $result, 'total_records' => $count], true);
     }
 
     public function isParent(Request $request)
@@ -327,36 +399,5 @@ class SectionController extends ApiController
         }
 
         return $this->errorResponse(__('custom.error'), $validator->errors()->messages());
-    }
-
-    /**
-     * Helper function for listing APIs - preparing section records for response
-     *
-     * @param Collection $sections - collection of Section records
-     * @return array - Section records data prepared for response
-     */
-    private function prepareSections($sections)
-    {
-        $result = [];
-
-        foreach ($sections as $section) {
-            $result[] = [
-                'id'            => $section->id,
-                'name'          => $section->label,
-                'locale'        => $section->locale,
-                'parent_id'     => $section->parent_id,
-                'active'        => $section->active,
-                'ordering'      => $section->ordering,
-                'read_only'     => $section->read_only,
-                'forum_link'    => $section->forum_link,
-                'theme'         => $section->theme,
-                'created_at'    => $section->created_at,
-                'updated_at'    => $section->updated_at,
-                'created_by'    => $section->created_by,
-                'updated_by'    => $section->updated_by,
-            ];
-        }
-
-        return $result;
     }
 }

@@ -126,6 +126,7 @@
                 @endif
                 </div>
             </div>
+            @include('partials.pagination')
             <div class="articles">
             @if ($resultsCount > 0)
                 <div class="col-lg-12 p-h-xxs p-l-r-none">

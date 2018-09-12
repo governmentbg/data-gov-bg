@@ -20,6 +20,7 @@
                     </div>
                 </div>
             </div>
+            @include('partials.pagination')
             <div class="row">
                 @if (count($chronology))
                     <div class="col-xs-12 p-sm m-t-sm chronology">

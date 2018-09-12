@@ -4,6 +4,7 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'users'])
+    @include('partials.pagination')
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left">
             <h3>{{ __('custom.users_list') }}<h3>
@@ -296,15 +297,7 @@
             @endif
         </div>
     </div>
-
-    @if (isset($pagination))
-        <div class="row">
-            <div class="col-xs-12 text-center">
-                {{ $pagination->render() }}
-            </div>
-        </div>
-    @endif
-
+    @include('partials.pagination')
 </div>
 
 <div class="modal inmodal fade" id="invite" tabindex="-1" role="dialog"  aria-hidden="true">

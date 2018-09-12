@@ -20,6 +20,7 @@
         "vue": "2.5.17"
     },
     "dependencies": {
+        "datatables.net-dt": "^1.10.19",
         "flag-icon-css": "^3.0.0",
         "icheck": "^1.0.2",
         "prettify-xml": "^1.2.0"

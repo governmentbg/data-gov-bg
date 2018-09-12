@@ -91,6 +91,17 @@
         <form method="POST">
             {{ csrf_field() }}
             <div class="form-group row">
+                <div class="col-xs-12 text-right mng-btns">
+                @if($buttons['addResource'])
+                    <button
+                        class="btn btn-primary"
+                        name="add_resource"
+                    >{{ uctrans('custom.add_resource') }}</button>
+                @endif
+                    <button type="submit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
+                </div>
+            </div>
+            <div class="form-group row">
                 <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">
                     <input

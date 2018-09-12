@@ -30,6 +30,17 @@
         }
     }
 
+    .section {
+        padding-right: 0px !important;
+
+        .section-nav-bar {
+            .filter-type {
+                border-radius: 10px;
+                border: 1px solid $themeUser;
+            }
+        }
+    }
+
     .filter-type {
         li a {
             clear: both;
@@ -39,6 +50,19 @@
     .my-profile {
         color: $black;
         font-size: 28px;
+        &.head {
+            @include xsMobile() {
+                font-size: 20px;
+            }
+
+        }
+        &.elipsis {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
     }
 
     .tag.label {

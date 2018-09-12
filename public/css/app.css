@@ -14959,6 +14959,15 @@ textarea {
   border: 1px solid #108f9e;
 }
 
+.theme-user .section {
+  padding-right: 0px !important;
+}
+
+.theme-user .section .section-nav-bar .filter-type {
+  border-radius: 10px;
+  border: 1px solid #108f9e;
+}
+
 .theme-user .filter-type li a {
   clear: both;
 }
@@ -14966,6 +14975,20 @@ textarea {
 .theme-user .my-profile {
   color: #333333;
   font-size: 28px;
+}
+
+@media screen and (max-width: 479px) {
+  .theme-user .my-profile.head {
+    font-size: 20px;
+  }
+}
+
+.theme-user .my-profile.elipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
 .theme-user .tag.label {

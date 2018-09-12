@@ -650,4 +650,10 @@ return [
     'previous' => 'Предишна',
     'first' => 'Първа',
     'last' => 'Последна',
+    'topics_sections' => 'секции и подсекции',
+    'topics_pages' => 'страници',
+    'sections' => 'секции',
+    'subsections' => 'подсекции',
+    'forum' => 'форум',
+    'subsections_list' => 'Списък с подсекции',
 ];

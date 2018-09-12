@@ -4,7 +4,6 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'users'])
-    @include('partials.pagination')
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left">
             <h3>{{ __('custom.users_list') }}<h3>
@@ -42,7 +41,7 @@
                                     !isset(app('request')->input()['orgs_count'])
                                     ? action(
                                         'Admin\UserController@list', array_merge(
-                                            ['orgs_count' => $orgDropCount],
+                                            ['orgs_count' => $orgDropCount, 'page' => 1],
                                             array_except(app('request')->input(), ['orgs_count'])
                                         )
                                     )
@@ -51,8 +50,9 @@
                                             [
                                                 'orgs_count'    => null,
                                                 'org'           => [],
+                                                'page'          => 1,
                                             ],
-                                            array_except(app('request')->input(), ['org', 'orgs_count'])
+                                            array_except(app('request')->input(), ['org', 'orgs_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -70,14 +70,14 @@
                                         !in_array($id, $selectedOrgs)
                                             ? action(
                                                 'Admin\UserController@list', array_merge(
-                                                    ['org' => array_merge([$id], $selectedOrgs)],
-                                                    array_except(app('request')->input(), ['org'])
+                                                    ['org' => array_merge([$id], $selectedOrgs), 'page' => 1],
+                                                    array_except(app('request')->input(), ['org', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\UserController@list', array_merge(
-                                                    ['org' => array_diff($selectedOrgs, [$id])],
-                                                    array_except(app('request')->input(), ['org'])
+                                                    ['org' => array_diff($selectedOrgs, [$id]), 'page' => 1],
+                                                    array_except(app('request')->input(), ['org', 'page'])
                                                 )
                                             )
                                     }}"
@@ -103,14 +103,14 @@
                                         !in_array($role->id, $selectedRoles)
                                         ? action(
                                             'Admin\UserController@list', array_merge(
-                                                ['role' => array_merge([$role->id], $selectedRoles)],
-                                                array_except(app('request')->input(), ['role'])
+                                                ['role' => array_merge([$role->id], $selectedRoles), 'page' => 1],
+                                                array_except(app('request')->input(), ['role', 'page'])
                                             )
                                         )
                                         : action(
                                             'Admin\UserController@list', array_merge(
-                                                ['role' => array_diff($selectedRoles, [$role->id])],
-                                                array_except(app('request')->input(), ['role'])
+                                                ['role' => array_diff($selectedRoles, [$role->id]), 'page' => 1],
+                                                array_except(app('request')->input(), ['role', 'page'])
                                             )
                                         )
                                     }}"
@@ -135,8 +135,8 @@
                                     action(
                                         'Admin\UserController@list',
                                         array_merge(
-                                            ['approved' => 1],
-                                            array_except(app('request')->input(), ['approved'])
+                                            ['approved' => 1, 'page' => 1],
+                                            array_except(app('request')->input(), ['approved', 'page'])
                                         )
                                     )
                                 }}"
@@ -153,8 +153,8 @@
                                     action(
                                         'Admin\UserController@list',
                                         array_merge(
-                                            ['approved' => 0],
-                                            array_except(app('request')->input(), ['approved'])
+                                            ['approved' => 0, 'page' => 1],
+                                            array_except(app('request')->input(), ['approved', 'page'])
                                         )
                                     )
                                 }}"
@@ -191,8 +191,8 @@
                                     action(
                                         'Admin\UserController@list',
                                         array_merge(
-                                            ['active' => 1],
-                                            array_except(app('request')->input(), ['active'])
+                                            ['active' => 1, 'page' => 1],
+                                            array_except(app('request')->input(), ['active', 'page'])
                                         )
                                     )
                                 }}"
@@ -209,8 +209,8 @@
                                     action(
                                         'Admin\UserController@list',
                                         array_merge(
-                                            ['active' => 0],
-                                            array_except(app('request')->input(), ['active'])
+                                            ['active' => 0, 'page' => 1],
+                                            array_except(app('request')->input(), ['active', 'page'])
                                         )
                                     )
                                 }}"
@@ -246,7 +246,7 @@
                             value="1"
                             {{ $adminFilter ? 'checked' : '' }}
                         >
-                        @foreach (app('request')->except(['is_admin']) as $key => $value)
+                        @foreach (app('request')->except(['is_admin', 'page']) as $key => $value)
                             @if (is_array($value))
                                 @foreach ($value as $innerValue)
                                     <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
@@ -271,6 +271,7 @@
             >{{ __('custom.new_user') }}</a>
 
             @if (!empty($users))
+                @include('partials.pagination')
                 @foreach ($users as $member)
                     <div class="col-xs-12 p-l-none">
                         <h3 class="m-b-md">{{
@@ -288,6 +289,7 @@
                         @endif
                     </div>
                 @endforeach
+                @include('partials.pagination')
             @else
                 <div class="row">
                     <div class="col-sm-12 m-t-xl text-center no-info">
@@ -297,7 +299,6 @@
             @endif
         </div>
     </div>
-    @include('partials.pagination')
 </div>
 
 <div class="modal inmodal fade" id="invite" tabindex="-1" role="dialog"  aria-hidden="true">

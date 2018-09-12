@@ -231,17 +231,23 @@ class ImageController extends AdminController
      */
     public function viewImage(Request $request, $id)
     {
-        try {
-            $image = \Image::make(storage_path('images') .'/'. $id);
+        $isActive = Image::where('id', $id)->value('active');
 
-            if ($request->segment(2) == Image::TYPE_THUMBNAIL) {
-                $image->resize(160, 108);
+        if ($isActive) {
+            try {
+                $image = \Image::make(storage_path('images') .'/'. $id);
+
+                if ($request->segment(2) == Image::TYPE_THUMBNAIL) {
+                    $image->resize(160, 108);
+                }
+
+                return $image->response();
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
             }
-
-            return $image->response();
-        } catch (\Exception $e) {
-            return __('custom.non_existing_image');
         }
+
+        return __('custom.non_existing_image');
     }
 
     /**

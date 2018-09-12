@@ -656,4 +656,6 @@ return [
     'subsections' => 'подсекции',
     'forum' => 'форум',
     'subsections_list' => 'Списък с подсекции',
+    'history_action' => 'История на действията',
+    'history_login' => 'История на влизанията',
 ];

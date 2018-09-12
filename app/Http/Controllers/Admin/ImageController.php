@@ -243,7 +243,7 @@ class ImageController extends AdminController
 
                 return $image->response();
             } catch (\Exception $e) {
-                return __('custom.non_existing_image');
+                Log::error($e->getMessage());
             }
         }
 

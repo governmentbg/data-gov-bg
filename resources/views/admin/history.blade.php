@@ -289,7 +289,7 @@
                                                 'ips_count'  => null,
                                                 'ip'         => [],
                                                 'type'       => $view,
-                                                'page'          => 1,
+                                                'page'       => 1,
                                             ],
                                             array_except(app('request')->input(), ['ip', 'ips_count', 'page'])
                                         )

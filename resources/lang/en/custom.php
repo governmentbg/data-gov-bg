@@ -659,4 +659,6 @@ return [
     'subsections' => 'subsections',
     'forum' => 'forum',
     'subsections_list' => 'Subsections list',
+    'history_action' => 'actions history',
+    'history_login' => 'login history',
 ];

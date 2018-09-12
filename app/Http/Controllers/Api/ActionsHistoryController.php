@@ -180,16 +180,16 @@ class ActionsHistoryController extends ApiController
 
         $count = $history->count();
 
+        if (!empty($order) && $order['field'] != 'username') {
+            $history->orderBy($order['field'], $order['type']);
+        }
+
         $history->forPage(
             $request->offsetGet('page_number'),
             $this->getRecordsPerPage($request->offsetGet('records_per_page'))
         );
 
         $results = [];
-
-        if (!empty($order)) {
-            $history->orderBy($order['field'], $order['type']);
-        }
 
         $history = $history->get();
 
@@ -208,6 +208,14 @@ class ActionsHistoryController extends ApiController
                     'action_msg'     => $record->action_msg,
                     'ip_address'     => $record->ip_address,
                 ];
+            }
+
+            if ($order && $order['field'] == 'username') {
+                usort($results, function($a, $b) use ($order) {
+                    return strtolower($order['type']) == 'asc'
+                        ? strcmp($a['user'], $b['user'])
+                        : strcmp($b['user'], $a['user']);
+                });
             }
         }
 

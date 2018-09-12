@@ -4,7 +4,7 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => $view])
-    <h3>{{ utrans('custom.logins_history') }}</h3>
+    <h3>{{ utrans('custom.history_'. $view) }}</h3>
     <div class="row">
         <div class="col-sm-3 sidenav col-xs-12 m-t-md">
             <form
@@ -43,8 +43,12 @@
                                     !isset(app('request')->input()['orgs_count'])
                                     ? action(
                                         'Admin\HistoryController@history', array_merge(
-                                            ['orgs_count' => $orgDropCount, 'type' => $view],
-                                            array_except(app('request')->input(), ['orgs_count'])
+                                            [
+                                                'orgs_count'    => $orgDropCount,
+                                                'type'          => $view,
+                                                'page'          => 1,
+                                            ],
+                                            array_except(app('request')->input(), ['orgs_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -53,8 +57,9 @@
                                                 'orgs_count'    => null,
                                                 'org'           => [],
                                                 'type'          => $view,
+                                                'page'          => 1,
                                             ],
-                                            array_except(app('request')->input(), ['org', 'orgs_count'])
+                                            array_except(app('request')->input(), ['org', 'orgs_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -72,14 +77,22 @@
                                         !in_array($id, $selectedOrgs)
                                             ? action(
                                                 'Admin\HistoryController@history', array_merge(
-                                                    ['org' => array_merge([$id], $selectedOrgs), 'type' => $view],
-                                                    array_except(app('request')->input(), ['org'])
+                                                    [
+                                                        'org'   => array_merge([$id], $selectedOrgs),
+                                                        'type'  => $view,
+                                                        'page'  => 1,
+                                                    ],
+                                                    array_except(app('request')->input(), ['org', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\HistoryController@history', array_merge(
-                                                    ['org' => array_diff($selectedOrgs, [$id]), 'type' => $view],
-                                                    array_except(app('request')->input(), ['org'])
+                                                    [
+                                                        'org'   => array_diff($selectedOrgs, [$id]),
+                                                        'type'  => $view,
+                                                        'page'  => 1,
+                                                    ],
+                                                    array_except(app('request')->input(), ['org', 'page'])
                                                 )
                                             )
                                     }}"
@@ -106,14 +119,22 @@
                                             !in_array($module, $selectedModules)
                                             ? action(
                                                 'Admin\HistoryController@history', array_merge(
-                                                    ['module' => array_merge([$module], $selectedModules), 'type' => $view],
-                                                    array_except(app('request')->input(), ['module'])
+                                                    [
+                                                        'module'    => array_merge([$module],$selectedModules),
+                                                        'type'      => $view,
+                                                        'page'      => 1,
+                                                    ],
+                                                    array_except(app('request')->input(), ['module', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\HistoryController@history', array_merge(
-                                                    ['module' => array_diff($selectedModules, [$module]), 'type' => $view],
-                                                    array_except(app('request')->input(), ['module'])
+                                                    [
+                                                        'module'    => array_diff($selectedModules, [$module]),
+                                                        'type'      => $view,
+                                                        'page'      => 1,
+                                                    ],
+                                                    array_except(app('request')->input(), ['module', 'page'])
                                                 )
                                             )
                                         }}"
@@ -139,14 +160,22 @@
                                             !in_array($id, $selectedActions)
                                             ? action(
                                                 'Admin\HistoryController@history', array_merge(
-                                                    ['action' => array_merge([$id], $selectedActions), 'type' => $view],
-                                                    array_except(app('request')->input(), ['action'])
+                                                    [
+                                                        'action'    => array_merge([$id], $selectedActions),
+                                                        'type'      => $view,
+                                                        'page'      => 1,
+                                                    ],
+                                                    array_except(app('request')->input(), ['action', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\HistoryController@history', array_merge(
-                                                    ['action' => array_diff($selectedActions, [$id]), 'type' => $view],
-                                                    array_except(app('request')->input(), ['action'])
+                                                    [
+                                                        'action'    => array_diff($selectedActions, [$id]),
+                                                        'type'      => $view,
+                                                        'page'      => 1,
+                                                    ],
+                                                    array_except(app('request')->input(), ['action', 'page'])
                                                 )
                                             )
                                         }}"
@@ -172,8 +201,12 @@
                                     !isset(app('request')->input()['users_count'])
                                     ? action(
                                         'Admin\HistoryController@history', array_merge(
-                                            ['users_count' => $userDropCount, 'type' => $view],
-                                            array_except(app('request')->input(), ['users_count'])
+                                            [
+                                                'users_count'   => $userDropCount,
+                                                'type'          => $view,
+                                                'page'          => 1,
+                                            ],
+                                            array_except(app('request')->input(), ['users_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -182,8 +215,9 @@
                                                 'users_count'  => null,
                                                 'user'         => [],
                                                 'type'         => $view,
+                                                'page'         => 1,
                                             ],
-                                            array_except(app('request')->input(), ['user', 'users_count'])
+                                            array_except(app('request')->input(), ['user', 'users_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -198,10 +232,25 @@
                             <li>
                                 <a
                                     href="{{
-                                        action(
+                                        empty($selectedUser)
+                                        ? action(
                                             'Admin\HistoryController@history', array_merge(
-                                                ['user' => $id, 'type' => $view],
-                                                array_except(app('request')->input(), ['user'])
+                                                [
+                                                    'user'  => $id,
+                                                    'type'  => $view,
+                                                    'page'  => 1,
+                                                ],
+                                                array_except(app('request')->input(), ['user', 'page'])
+                                            )
+                                        )
+                                        : action(
+                                            'Admin\HistoryController@history', array_merge(
+                                                [
+                                                    'user'  => [],
+                                                    'type'  => $view,
+                                                    'page'  => 1,
+                                                ],
+                                                array_except(app('request')->input(), ['user', 'page'])
                                             )
                                         )
                                     }}"
@@ -226,8 +275,12 @@
                                     !isset(app('request')->input()['ips_count'])
                                     ? action(
                                         'Admin\HistoryController@history', array_merge(
-                                            ['ips_count' => $ipDropCount, 'type' => $view],
-                                            array_except(app('request')->input(), ['ips_count'])
+                                            [
+                                                'ips_count' => $ipDropCount,
+                                                'type'      => $view,
+                                                'page'      => 1,
+                                            ],
+                                            array_except(app('request')->input(), ['ips_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -236,8 +289,9 @@
                                                 'ips_count'  => null,
                                                 'ip'         => [],
                                                 'type'       => $view,
+                                                'page'          => 1,
                                             ],
-                                            array_except(app('request')->input(), ['ip', 'ips_count'])
+                                            array_except(app('request')->input(), ['ip', 'ips_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -254,8 +308,12 @@
                                     href="{{
                                         action(
                                             'Admin\HistoryController@history', array_merge(
-                                                ['ip' => $ip, 'type' => $view],
-                                                array_except(app('request')->input(), ['ip'])
+                                                [
+                                                    'ip'    => $ip,
+                                                    'type'  => $view,
+                                                    'page'  => 1,
+                                                ],
+                                                array_except(app('request')->input(), ['ip', 'page'])
                                             )
                                         )
                                     }}"
@@ -280,7 +338,7 @@
                         action(
                             'Admin\HistoryController@history',
                             array_merge(
-                                ['order_field' => 'action_object', 'type' => $view],
+                                ['order_field' => 'username', 'type' => $view],
                                 array_except(app('request')->input(), ['order_field'])
                             )
                         )
@@ -288,7 +346,7 @@
 
                     class="{{
                         isset(app('request')->input()['order_field'])
-                        && app('request')->input()['order_field'] == 'action_object'
+                        && app('request')->input()['order_field'] == 'username'
                             ? 'active'
                             : ''
                     }}"
@@ -317,7 +375,7 @@
                             action(
                                 'Admin\HistoryController@history',
                                 array_merge(
-                                    ['order_field' => 'module', 'type' => $view],
+                                    ['order_field' => 'module_name', 'type' => $view],
                                     array_except(app('request')->input(), ['order_field'])
                                 )
                             )
@@ -325,7 +383,7 @@
 
                         class="{{
                             isset(app('request')->input()['order_field'])
-                            && app('request')->input()['order_field'] == 'module'
+                            && app('request')->input()['order_field'] == 'module_name'
                                 ? 'active'
                                 : ''
                         }}"
@@ -443,6 +501,7 @@
         </div>
     <div class="row">
         <form method="POST" class="form-horizontal">
+            @include('partials.pagination')
             {{ csrf_field() }}
             <div class="col-lg-12">
                 @if (!empty($history))
@@ -476,20 +535,13 @@
                             </tbody>
                         </table>
                     </div>
-
-                    @if (isset($pagination))
-                        <div class="row">
-                            <div class="col-xs-12 text-center">
-                                {{ $pagination->render() }}
-                            </div>
-                        </div>
-                    @endif
                 @else
                     <div class="col-sm-12 m-t-xl text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif
             </div>
+            @include('partials.pagination')
             <div class="col-lg-12 text-right">
                 <button
                     class="btn btn-primary add"

@@ -189,7 +189,7 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_ADD,
-                    'action_object'    => $elasticDataSet->id,
+                    'action_object'    => $resource->uri,
                     'action_msg'       => 'Added resource data',
                 ];
 
@@ -250,7 +250,6 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'resource_uri'         => 'nullable|string|unique:resources,uri',
                 'name'                 => 'nullable|string|max:191',
                 'description'          => 'nullable|string|max:8000',
                 'file_format'          => 'nullable|string|max:191',
@@ -281,10 +280,6 @@ class ResourceController extends ApiController
             DB::beginTransaction();
 
             $resource = Resource::where('uri', $post['resource_uri'])->first();
-
-            if (isset($post['data']['resource_uri'])) {
-                $resource->uri = $post['data']['resource_uri'];
-            }
 
             if (isset($post['data']['version'])) {
                 $resource->version = $post['data']['version'];
@@ -342,7 +337,7 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $resource->id,
+                    'action_object'    => $resource->uri,
                     'action_msg'       => 'Edit resource metadata',
                 ];
 
@@ -394,7 +389,7 @@ class ResourceController extends ApiController
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $resource->id,
+                    'action_object'    => $resource->uri,
                     'action_msg'       => 'Update resource data',
                 ];
 
@@ -1017,14 +1012,6 @@ class ResourceController extends ApiController
             try {
                 $hasReported = Resource::where('created_by', $post['user_id'])
                         ->where('is_reported', 1)->count();
-
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::RESOURCES),
-                    'action'           => ActionsHistory::TYPE_SEE,
-                    'action_msg'       => 'Checked if user has reported resource',
-                ];
-
-                Module::add($logData);
 
                 return $this->successResponse(['flag' => ($hasReported) ? true : false], true);
             } catch (Exception $ex) {

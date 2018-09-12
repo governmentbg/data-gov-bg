@@ -8,7 +8,6 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'newsfeed'])
     @endif
-    @include('partials.pagination')
     <div class="col-xs-12">
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-12 sidenav">
@@ -49,6 +48,7 @@
                     </div>
                 @endif
                 @if (count($actionsHistory))
+                    @include('partials.pagination')
                     <div class="col-xs-12 p-sm chronology">
                         @foreach ($actionsHistory as $actionHistory)
                             @php

@@ -153,6 +153,7 @@ class DataSetController extends ApiController
                 Module::add($logData);
 
                 DB::commit();
+
                 return $this->successResponse(['uri' => $newDataSet->uri], true);
             } catch (QueryException $ex) {
                 DB::rollback();

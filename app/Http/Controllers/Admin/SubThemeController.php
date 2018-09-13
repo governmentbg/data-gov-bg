@@ -169,7 +169,7 @@ class SubThemeController extends AdminController
     {
         if (Role::isAdmin()) {
             $class = 'user';
-            $model = Tags::where('id', $id)->first();
+            $model = $this->getModelUsernames(Tags::where('id', $id)->first());
 
             if ($request->has('edit')) {
 

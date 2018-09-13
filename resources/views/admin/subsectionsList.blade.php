@@ -31,7 +31,7 @@
         <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
-                    <a href="">{{ __('custom.add') }}</a>
+                    <a href="{{ url('/admin/subsections/add') }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
         </div>
@@ -58,15 +58,15 @@
                                                 <td class="buttons">
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('/admin/subsections/edit/'. $section->id) }}"
                                                     >{{ utrans('custom.edit') }}</a>
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('/admin/subsections/view/'. $section->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
                                                     <a
                                                         class="link-action red"
-                                                        href=""
+                                                        href="{{ url('/admin/subsections/delete/'. $section->id) }}"
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                     >{{ __('custom.delete') }}</a>
                                                 </td>

@@ -228,7 +228,16 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/signal/delete/{id}', 'Admin\SignalController@delete');
 
         Route::match(['get', 'post'], '/admin/sections/list', 'Admin\SectionController@list');
+        Route::match(['get', 'post'], '/admin/sections/add', 'Admin\SectionController@add');
+        Route::match(['get', 'post'], '/admin/sections/view/{id}', 'Admin\SectionController@view');
+        Route::match(['get', 'post'], '/admin/sections/edit/{id}', 'Admin\SectionController@edit');
+        Route::match(['get', 'post'], '/admin/sections/delete/{id}', 'Admin\SectionController@delete');
+
         Route::match(['get', 'post'], '/admin/subsections/list/{id}', 'Admin\SubsectionController@list');
+        Route::match(['get', 'post'], '/admin/subsections/add', 'Admin\SubsectionController@add');
+        Route::match(['get', 'post'], '/admin/subsections/view/{id}', 'Admin\SubsectionController@view');
+        Route::match(['get', 'post'], '/admin/subsections/edit/{id}', 'Admin\SubsectionController@edit');
+        Route::match(['get', 'post'], '/admin/subsections/delete/{id}', 'Admin\SubsectionController@delete');
     });
 });
 

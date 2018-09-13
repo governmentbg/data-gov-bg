@@ -10,7 +10,10 @@
 
 {{ __('custom.greetings') }}, {{ $user }}!<br>
 {{ __('custom.register_success') }}.<br>
-{{ __('custom.to_activate') }}:<br/>
+{{ __('custom.to_activate') }}:<br>
+@if (!empty($pass))
+    {{ __('custom.password') }}: {{ $pass }}<br>
+@endif
 <a href="{{ route('confirmation', ['hash' => $hash, 'id' => $id]) }}"> {{ __('custom.confirm') }}</a>
 
 @endsection

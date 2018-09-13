@@ -6,7 +6,8 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use \App\Signal;
+use App\RoleRight;
+use App\Signal;
 use \Validator;
 use App\Module;
 use App\DataSet;
@@ -48,6 +49,15 @@ class SignalController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SIGNALS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 $newSignal = new Signal;
 
@@ -60,7 +70,7 @@ class SignalController extends ApiController
                 if (isset($signalData['data']['status'])) {
                     $newSignal->status = $signalData['data']['status'];
                 } else {
-                    $newSignal->status = Signal::TYPE_NEW;
+                    $newSignal->status = Signal::STATUS_NEW;
                 }
 
                 $newSignal->save();
@@ -120,6 +130,18 @@ class SignalController extends ApiController
         if (!$validator->fails()) {
             try {
                 $signalToEdit = Signal::find($editSignalData['signal_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::SIGNALS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $signalToEdit->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 if (isset($editSignalData['data']['resource_id'])) {
                     $signalToEdit->resource_id = $editSignalData['data']['resource_id'];
@@ -144,7 +166,7 @@ class SignalController extends ApiController
                 if (isset($editSignalData['data']['status'])) {
                     $signalToEdit->status = $editSignalData['data']['status'];
                 } else {
-                    $signalToEdit->status = Signal::TYPE_NEW;
+                    $signalToEdit->status = Signal::STATUS_NEW;
                 }
 
                 $signalToEdit->save();
@@ -184,6 +206,18 @@ class SignalController extends ApiController
         if (!$validator->fails()) {
             try {
                 $signalToBeDeleted = Signal::find($deleteData['signal_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::SIGNALS,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $signalToBeDeleted->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $signalToBeDeleted->delete();
 
@@ -257,6 +291,15 @@ class SignalController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_signals_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SIGNALS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $result = [];

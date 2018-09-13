@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Module;
 use App\DataRequest;
 use App\ActionsHistory;
+use App\RoleRight;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -47,6 +48,14 @@ class DataRequestController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             $dataRequest = new DataRequest;
             $dataRequest->org_id = $requestData['data']['org_id'];
@@ -130,6 +139,19 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
             $requestToEdit = DataRequest::find($editRequestData['request_id']);
 
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $requestToEdit->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             if (isset($editRequestData['data']['org_id'])) {
                 $requestToEdit->org_id = $editRequestData['data']['org_id'];
             }
@@ -196,6 +218,19 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
 
             $requestToDelete = DataRequest::find($deleteRequestData['request_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $requestToDelete->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             try {
                 $requestToDelete->delete();
@@ -267,6 +302,15 @@ class DataRequestController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_request_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_REQUESTS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $result = [];
@@ -368,12 +412,14 @@ class DataRequestController extends ApiController
 
         Module::add($logData);
 
-        if ($criteria['order'] && $criteria['order']['field'] == 'description') {
-            usort($result, function($a, $b) use ($criteria) {
-                return strtolower($criteria['order']['type']) == 'asc'
-                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                    : strcmp($criteria['order']['field'], $criteria['order']['field']);
-            });
+        if(isset($criteria['order'])) {
+            if ($criteria['order'] && $criteria['order']['field'] == 'description') {
+                usort($result, function($a, $b) use ($criteria) {
+                    return strtolower($criteria['order']['type']) == 'asc'
+                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+                });
+            }
         }
 
         return $this->successResponse([

@@ -52,6 +52,7 @@ class UserController extends ApiController
         $data = $request->all();
 
         $validator = \Validator::make($data, [
+            'api_key'               => 'nullable|string|exists:users,api_key',
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|digits_between:1,10',
             'criteria'              => 'nullable|array',
@@ -90,8 +91,23 @@ class UserController extends ApiController
                 $query = User::whereIn('id', $ids)->with('userToOrgRole');
             }
 
-            if (isset($criteria['active'])) {
-                $query->where('active', $criteria['active']);
+            if (isset($data['api_key'])) {
+                $user = User::where('api_key', $data['api_key'])->first();
+                \Auth::loginUsingId($user->id);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_VIEW
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
+                if (isset($criteria['active'])) {
+                    $query->where('active', $criteria['active']);
+                }
+            } else {
+                $query->where('active', 1);
             }
 
             if (isset($criteria['approved'])) {
@@ -246,34 +262,18 @@ class UserController extends ApiController
         $validator = \Validator::make($post, ['id' => 'required|int|digits_between:1,10']);
 
         if (!$validator->fails()) {
-            $user = User::find($post['id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_VIEW
+            );
 
-            if ($user) {
-                $result = [];
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
-                foreach ($user->userToOrgRole as $role) {
-                    $roleRights = RoleRight::where('role_id', $role->role_id)->get();
+            $result = User::getUserRoles($post['id']);
 
-                    $rightResult = [];
-
-                    foreach($roleRights as $singleRoleRight) {
-                        $rightResult[] = [
-                            'module_name'          => $singleRoleRight->module_name,
-                            'right'                => $singleRoleRight->right,
-                            'limit_to_own_data'    => $singleRoleRight->limit_to_own_data,
-                            'api'                  => $singleRoleRight->api
-                        ];
-                    }
-
-                    $result[] = [
-                        'org_id'    => $role->org_id,
-                        'role_id'   => $role->role_id,
-                        'rights'    => $rightResult
-                    ];
-
-                    unset($roleRights);
-                    unset($rightResult);
-                }
+            if (is_array($result)) {
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
@@ -306,6 +306,15 @@ class UserController extends ApiController
         $validator = \Validator::make($request->all(), ['id' => 'required|int|digits_between:1,10']);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $user = User::with('userSetting', 'follow')->find($request->id);
 
             if (!empty($user)) {
@@ -387,7 +396,74 @@ class UserController extends ApiController
             'org_id'            => 'nullable',
         ]);
 
+        $data['role_id'] = isset($data['role_id']) ? $data['role_id'] : [];
+
         if (!$validator->fails()) {
+            if (isset($data['org_id'])) {
+               $org = Organisation::where('id', $data['org_id'])->first();
+
+               if ($org->type != Organisation::TYPE_GROUP) {
+                    $orgRightCheck = RoleRight::checkUserRight(
+                        Module::ORGANISATIONS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id' => $org->id
+                        ],
+                        [
+                            'created_by'    => $org->created_by,
+                            'org_id'        => $org->id
+                        ]
+                    );
+
+                    $usersRightCheck = RoleRight::checkUserRight(
+                        Module::USERS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id' => $org->id
+                        ],
+                        [
+                            'org_id' => $org->id
+                        ]
+                    );
+
+                    $rightCheck = ($usersRightCheck && $orgRightCheck) ? true : false;
+               } else {
+                    $groupRightCheck = RoleRight::checkUserRight(
+                        Module::GROUPS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id'      => $org->id
+                        ],
+                        [
+                            'created_by'    => $org->created_by,
+                            'group_ids'     => [$org->id]
+                        ]
+                    );
+
+                    $usersRightCheck = RoleRight::checkUserRight(
+                        Module::USERS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id' => $org->id
+                        ],
+                        [
+                            'group_ids' => [$org->id]
+                        ]
+                    );
+
+                    $rightCheck = ($usersRightCheck && $groupRightCheck) ? true : false;
+                }
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT
+                );
+            }
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
 
@@ -530,6 +606,19 @@ class UserController extends ApiController
 
         if (empty($user = User::find($request->id))) {
             return $this->errorResponse(__('custom.edit_user_fail'));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::USERS,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $user->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $newUserData = [];
@@ -706,6 +795,19 @@ class UserController extends ApiController
             return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::USERS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $user->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         try {
             $user->delete();
         } catch (QueryException $e) {
@@ -752,6 +854,19 @@ class UserController extends ApiController
 
         if (empty($user = User::find($request->id))) {
             return $this->errorResponse(__('custom.generate_api_key_fail'));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::USERS,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $user->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         try {
@@ -832,7 +947,7 @@ class UserController extends ApiController
                 } else {
                     $rightCheck = RoleRight::checkUserRight(
                         Module::ORGANISATIONS,
-                        RoleRight::RIGHT_ALL,
+                        RoleRight::RIGHT_EDIT,
                         [
                             'org_id'       => $orgData->id
                         ],

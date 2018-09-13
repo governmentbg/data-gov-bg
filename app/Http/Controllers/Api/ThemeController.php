@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
 use App\ActionsHistory;
 use App\Module;
+use App\RoleRight;
 
 class ThemeController extends ApiController
 {
@@ -62,6 +63,15 @@ class ThemeController extends ApiController
      */
     public function listThemes(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::THEMES,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $themeNames = $this->getThemes();
         foreach ($themeNames as $id => $themeName) {
             $themes[] = [

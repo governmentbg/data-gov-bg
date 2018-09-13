@@ -2,12 +2,14 @@
 
 namespace App;
 
-use App\Http\Controllers\Traits\RecordSignature;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
+use App\Http\Controllers\Traits\RecordSignature;
 
 class Signal extends Model
 {
     use RecordSignature;
+    use Searchable;
 
     protected $guarded = ['id'];
 
@@ -25,5 +27,21 @@ class Signal extends Model
     public function resource()
     {
         $this->belongsTo('App\Resource');
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id'        => $this->id,
+            'firstname' => $this->firstname,
+            'lastname'  => $this->lastname,
+            'descript'  => $this->descript,
+            'email'     => $this->email,
+        ];
+    }
+
+    public function searchableAs()
+    {
+        return 'signals';
     }
 }

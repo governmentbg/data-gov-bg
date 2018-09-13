@@ -343,12 +343,12 @@ class OrganisationController extends AdminController
             if ($result->success) {
                 session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect('/admin/groups');
+                return redirect('/admin/organisations');
             }
 
             session()->flash('alert-danger', __('custom.delete_error'));
 
-            return redirect('/admin/groups');
+            return redirect('/admin/organisations');
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));

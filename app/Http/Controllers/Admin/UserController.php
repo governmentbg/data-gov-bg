@@ -239,6 +239,19 @@ class UserController extends AdminController {
             }
 
             if ($request->has('save')) {
+                $validator = \Validator::make($request->all(), [
+                    'firstname' => 'required|string|max:191',
+                    'lastname'  => 'required|string|max:191',
+                    'username'  => 'required|string|max:191',
+                    'email'     => 'required|email',
+                ]);
+
+                if ($validator->fails()) {
+                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+
+                    return redirect()->back()->withErrors($validator->errors()->messages());
+                }
+
                 $rolesPost = $request->offsetGet('role_id');
 
                 $saveData = [

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Page;
 use \Validator;
 use App\Module;
+use App\RoleRight;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -59,6 +60,15 @@ class NewsController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::NEWS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
                 $newNews = new Page;
@@ -201,6 +211,19 @@ class NewsController extends ApiController
             try {
                 $locale = $editData['data']['locale'];
                 $newsToEdit = Page::find($editData['news_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::NEWS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $newsToEdit->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 DB::beginTransaction();
 
                 if (isset($editData['data']['title'])) {
@@ -285,6 +308,18 @@ class NewsController extends ApiController
         if (!$validator->fails()) {
             try {
                 $deleteNews = Page::find($newsDeleteData['news_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::NEWS,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $deleteNews->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $deleteNews->delete();
 
@@ -606,6 +641,19 @@ class NewsController extends ApiController
         $locale = \LaravelLocalization::getCurrentLocale();
         if (!$validator->fails()) {
             $singleNews = Page::find($newsSearchData['news_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::NEWS,
+                RoleRight::RIGHT_VIEW,
+                [],
+                [
+                    'created_by' => $singleNews->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             if ($singleNews) {
                 $result[] = [

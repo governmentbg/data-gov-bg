@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use \Validator;
 use App\Document;
 use App\Module;
+use App\RoleRight;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,15 @@ class DocumentController extends ApiController
         });
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DOCUMENTS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
 
@@ -155,6 +165,19 @@ class DocumentController extends ApiController
             try {
                 $editDocument = Document::find($post['doc_id']);
 
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DOCUMENTS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $editDocument->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 DB::beginTransaction();
 
                 if (!empty($post['data']['name'])) {
@@ -222,6 +245,18 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             $deleteDocument = Document::find($post['doc_id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DOCUMENTS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $deleteDocument->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             try {
                 $deleteDocument->delete();
@@ -296,6 +331,15 @@ class DocumentController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_document_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DOCUMENTS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $result = [];
@@ -433,7 +477,7 @@ class DocumentController extends ApiController
             'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
-        $criteria = $post['criteria'];
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
@@ -453,6 +497,15 @@ class DocumentController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DOCUMENTS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $data = [];
             $criteria = $post['criteria'];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';

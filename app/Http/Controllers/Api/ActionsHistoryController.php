@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Role;
 use \Validator;
 use App\Module;
-use \App\ActionsHistory;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
@@ -223,27 +223,6 @@ class ActionsHistoryController extends ApiController
             'total_records'     => $count,
             'actions_history'   => $results,
         ], true);
-    }
-
-    /**
-     * Lists modules from ActionsHistory model
-     *
-     * @param Request $request
-     * @return json response
-     */
-    public function listModules(Request $request)
-    {
-        $modules = Role::getModuleNames();
-
-        if (!empty($modules)) {
-            foreach ($modules as $module) {
-                $result[] = ['name' => $module];
-            }
-
-            return $this->successResponse(['modules' => $result], true);
-        }
-
-        return $this->errorResponse(__('custom.data_failure'));
     }
 
     /**

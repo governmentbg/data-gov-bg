@@ -7,6 +7,7 @@ use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\RoleRight;
 use App\TermsOfUse;
 use App\ActionsHistory;
 use App\Module;
@@ -47,6 +48,15 @@ class TermsOfUseController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.add_terms_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::TERMS_OF_USE,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         // set default values to optional fields
@@ -135,6 +145,19 @@ class TermsOfUseController extends ApiController
         }
 
         $terms = TermsOfUse::find($post['terms_id']);
+        $rightCheck = RoleRight::checkUserRight(
+            Module::TERMS_OF_USE,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $terms->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $terms->name = $data['name'];
         $terms->descript = $data['description'];
         unset($data['locale'], $data['name'], $data['description'], $data['terms_id']);
@@ -182,6 +205,19 @@ class TermsOfUseController extends ApiController
             return $this->errorResponse(__('custom.delete_terms_fail'));
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::TERMS_OF_USE,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $terms->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         try {
             DataSet::withTrashed()
                 ->where('terms_of_use_id', $post['terms_id'])
@@ -216,6 +252,15 @@ class TermsOfUseController extends ApiController
     public function listTermsOfUse(Request $request)
     {
         $post = $request->criteria;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::TERMS_OF_USE,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
 
         if (!empty($post)) {
             $validator = \Validator::make($post, [

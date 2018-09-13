@@ -6,6 +6,7 @@ use \Validator;
 use App\Image;
 use App\Module;
 use App\ActionsHistory;
+use App\RoleRight;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -72,6 +73,15 @@ class ImageController extends ApiController
         });
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::IMAGES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
 
@@ -210,6 +220,20 @@ class ImageController extends ApiController
                 }
 
                 $image = $query->first();
+
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::IMAGES,
+                    RoleRight::RIGHT_VIEW,
+                    [],
+                    [
+                        'created_by' => $image->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 if (isset($image->id)) {
                     try {
                         $imageContent = file_get_contents($this->path .'/'. $image->id);
@@ -268,6 +292,19 @@ class ImageController extends ApiController
         if (!$validator->fails()) {
             try {
                 $editImage = Image::find($post['img_id']);
+
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::IMAGES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $editImage->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 DB::beginTransaction();
 
@@ -379,6 +416,19 @@ class ImageController extends ApiController
         if (!$validator->fails()) {
             $deleteImage = Image::find($post['img_id']);
 
+            $rightCheck = RoleRight::checkUserRight(
+                Module::IMAGES,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $deleteImage->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 $deleteImage->delete();
 
@@ -424,6 +474,15 @@ class ImageController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_images_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::IMAGES,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $result = [];

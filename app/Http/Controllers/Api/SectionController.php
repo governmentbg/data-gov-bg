@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Locale;
 use App\Module;
 use App\Section;
+use App\RoleRight;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +47,15 @@ class SectionController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $locale = Locale::where('locale', $data['locale'])->value('locale');
 
             //prepare section data
@@ -116,6 +126,19 @@ class SectionController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => \Auth::user()->id
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $data = $request->data;
             $locale = Locale::where('locale', $data['locale'])->value('locale');
 
@@ -170,7 +193,21 @@ class SectionController extends ApiController
         $validator = \Validator::make($post, ['id' => 'required|integer|exists:sections,id|digits_between:1,10']);
 
         if (!$validator->fails()) {
-            if (Section::find($post['id'])->delete()) {
+            $section = Section::find($post['id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $section->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            if ($section->delete()) {
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SECTIONS),
                     'action'           => ActionsHistory::TYPE_DEL,
@@ -221,6 +258,15 @@ class SectionController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SECTIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $query = Section::where('parent_id', null);
@@ -316,6 +362,15 @@ class SectionController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SECTIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $query = isset($criteria['section_id'])

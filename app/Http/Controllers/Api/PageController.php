@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use \App\Page;
 use \Validator;
 use App\Module;
+use App\RoleRight;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,15 @@ class PageController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::PAGES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
                 $locale = $pageData['locale'];
@@ -159,6 +169,18 @@ class PageController extends ApiController
         if (!$validator->fails()) {
             try {
                 $pageToEdit = Page::find($editData['page_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::PAGES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $pageToEdit->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 DB::beginTransaction();
 
@@ -238,6 +260,18 @@ class PageController extends ApiController
         if (!$validator->fails()) {
             try {
                 $pageToBeDeleted = Page::find($deleteData['page_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::PAGES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $pageToBeDeleted->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $pageToBeDeleted->delete();
 
@@ -309,6 +343,15 @@ class PageController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::PAGES,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $result = [];
 
             $locale = \LaravelLocalization::getCurrentLocale();

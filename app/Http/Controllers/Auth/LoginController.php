@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Module;
+use App\User;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -76,17 +77,10 @@ class LoginController extends Controller
                 $rememberMe = isset($loginData['remember_me']) ? $loginData['remember_me'] : false;
 
                 if (Auth::attempt($credentials, $rememberMe)) {
-                    $user = \App\User::where('username', $request->username)->first();
-                    $rq = Request::create('/api/getUserRoles', 'POST', ['id' => $user->id]);
-                    $api = new UserController($rq);
-                    $result = $api->getUserRoles($rq)->getData();
+                    $user = User::where('username', $request->username)->first();
+                    $result = User::getUserRoles($user->id);
 
-                    if ($result->success) {
-                        $result = json_decode(json_encode($result->data), true);
-
-                        Session::put('roles', $result['roles']);
-
-                    }
+                    Session::put('roles', $result);
 
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::USERS),

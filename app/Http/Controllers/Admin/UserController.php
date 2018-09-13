@@ -313,7 +313,7 @@ class UserController extends AdminController {
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.user_success_delete'));
 
-                    return redirect('/');
+                    return redirect(url('admin/users'));
                 } else {
                     $request->session()->flash('alert-danger', __('custom.user_failure_delete'));
                 }

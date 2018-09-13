@@ -85,7 +85,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
 
-    Route::post('sendSignal', 'Api\SignalController@sendSignal');
     Route::post('editSignal', 'Api\SignalController@editSignal');
     Route::post('deleteSignal', 'Api\SignalController@deleteSignal');
     Route::post('listSignals', 'Api\SignalController@listSignals');
@@ -153,6 +152,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('toKML', 'Api\ConversionController@toKML');
     Route::post('toRDF', 'Api\ConversionController@toRDF');
 });
+Route::post('sendSignal', 'Api\SignalController@sendSignal');
 
 Route::post('register', 'Api\UserController@register');
 Route::post('listDataUsers', 'Api\UserController@listDataUsers');

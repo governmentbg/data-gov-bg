@@ -188,8 +188,6 @@ class OrganisationController extends ApiController
                     }
                 }
 
-                DB::commit();
-
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ORGANISATIONS),
                     'action'           => ActionsHistory::TYPE_ADD,
@@ -198,6 +196,8 @@ class OrganisationController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse(['org_id' => $organisation->id], true);
             } catch (QueryException $ex) {

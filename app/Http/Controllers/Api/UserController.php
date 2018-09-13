@@ -819,7 +819,7 @@ class UserController extends ApiController
             if ($orgData = Organisation::where('id', $post['data']['org_id'])->first()) {
                 if( $orgData->type == Organisation::TYPE_GROUP) {
                     $rightCheck = RoleRight::checkUserRight(
-                        Module::GROUP,
+                        Module::GROUPS,
                         RoleRight::RIGHT_EDIT,
                         [
                             'group_id'       => $orgData->id
@@ -834,11 +834,11 @@ class UserController extends ApiController
                         Module::ORGANISATIONS,
                         RoleRight::RIGHT_ALL,
                         [
-                            'org_id'       => $organisation->id
+                            'org_id'       => $orgData->id
                         ],
                         [
-                            'created_by' => $organisation->created_by,
-                            'org_id'     => $organisation->id
+                            'created_by' => $orgData->created_by,
+                            'org_id'     => $orgData->id
                         ]
                     );
                 }

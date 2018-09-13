@@ -1188,10 +1188,12 @@ class UserController extends ApiController
                     $organisation->save();
 
                     if ($organisation) {
+                        $role = Role::getOrgAdminRole();
+
                         $userToOrgRole = new UserToOrgRole;
                         $userToOrgRole->org_id = $organisation->id;
                         $userToOrgRole->user_id = $id;
-                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+                        $userToOrgRole->role_id = $role->id;
 
                         $userToOrgRole->save();
 

@@ -516,7 +516,7 @@ class UserController extends ApiController
                 'lastname'          => 'nullable|string|max:100',
                 'email'             => 'nullable|email|max:191',
                 'add_info'          => 'nullable|string|max:8000',
-                'password'          => 'nullable|string',
+                'password'          => 'nullable|string|min:6',
                 'is_admin'          => 'nullable|bool',
                 'active'            => 'nullable|bool',
                 'aproved'           => 'nullable|bool',

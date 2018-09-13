@@ -7,7 +7,7 @@
     <div class="col-xs-12 m-t-lg">
         <form class="m-t-lg p-sm" method="post">
             {{ csrf_field() }}
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -17,9 +17,10 @@
                         id="fname"
                         value="{{ $user['firstname'] }}"
                     >
+                    <span class="error">{{ $errors->first('firstname') }}</span>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.family_name') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -29,9 +30,10 @@
                         id="lname"
                         value="{{ $user['lastname'] }}"
                     >
+                    <span class="error">{{ $errors->first('lastname') }}</span>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.email') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -41,9 +43,10 @@
                         id="email"
                         value="{{ $user['email'] }}"
                     >
+                    <span class="error">{{ $errors->first('email') }}</span>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="username" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.username') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -53,6 +56,7 @@
                         name="username"
                         value="{{ $user['username'] }}"
                     >
+                    <span class="error">{{ $errors->first('username') }}</span>
                 </div>
             </div>
             <div class="form-group row">
@@ -169,8 +173,7 @@
                         <p>{{ __('custom.pass_change_err') }}</p>
                     </div>
                     <form
-                        class="js-change-pass"
-                        class="m-t-lg"
+                        class="js-change-pass m-t-lg"
                         method="post"
                         action="{{ url('/user/changePassword') }}"
                         data-url="{{ url('/user/changePassword') }}"

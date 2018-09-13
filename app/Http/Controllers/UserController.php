@@ -4087,11 +4087,11 @@ class UserController extends Controller {
                 Module::GROUPS,
                 RoleRight::RIGHT_VIEW,
                 [
-                    'org_id'       => $group->id
+                    'group_id'       => $group->id
                 ],
                 [
                     'created_by' => $group->created_by,
-                    'org_id'     => $group->id
+                    'group_ids'     => [$group->id]
                 ]
             );
 
@@ -4101,11 +4101,11 @@ class UserController extends Controller {
                 Module::GROUPS,
                 RoleRight::RIGHT_EDIT,
                 [
-                    'org_id'       => $group->id
+                    'group_id'       => $group->id
                 ],
                 [
-                    'created_by' => $group->created_by,
-                    'org_id'     => $group->id
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
                 ]
             );
 
@@ -4115,11 +4115,11 @@ class UserController extends Controller {
                 Module::GROUPS,
                 RoleRight::RIGHT_ALL,
                 [
-                    'org_id'       => $group->id
+                    'group_id'       => $group->id
                 ],
                 [
-                    'created_by' => $group->created_by,
-                    'org_id'     => $group->id
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
                 ]
             );
 

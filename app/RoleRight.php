@@ -79,13 +79,12 @@ class RoleRight extends Model
 
         // Used when the request comes from an api and a session is not created.
         if (empty($rolesArray)) {
-            $rq = Request::create('/api/getUserRoles', 'POST', ['id' => $checkData['user_id']]);
-            $api = new UserController($rq);
-            $result = $api->getUserRoles($rq)->getData();
+            $result = User::getUserRoles($checkData['user_id']);
+
             $checkData['check_api'] = true;
 
-            if ($result->success) {
-                $rolesArray = json_decode(json_encode($result->data->roles), true);
+            if (is_array($result)) {
+                $rolesArray = $result;
             }
         }
 
@@ -111,6 +110,7 @@ class RoleRight extends Model
                                 if (isset($checkData['user_id']) && !empty($checkData['user_id'])
                                     && isset($objData['created_by']) && !empty($objData['created_by'])) {
                                     if ($singleRight['limit_to_own_data'] == 1) {
+                                        $check = true;
                                         if ($checkData['user_id'] == $objData['created_by']) {
                                             return true;
                                         }

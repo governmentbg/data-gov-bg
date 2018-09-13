@@ -19,6 +19,9 @@ class Section extends Model implements TranslatableInterface
         'name' => 'label',
     ];
 
+    const ACTIVE_FALSE = 0;
+    const READ_ONLY_FALSE = 0;
+
     public function page()
     {
         return $this->hasMany('App\Page');

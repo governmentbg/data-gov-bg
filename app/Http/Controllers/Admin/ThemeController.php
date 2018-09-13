@@ -164,8 +164,11 @@ class ThemeController extends AdminController
         if (Role::isAdmin()) {
             $class = 'user';
             $fields = self::getThemeTransFields();
+            $model = Category::find($id);
 
-            $model = Category::find($id)->loadTranslations();
+            if (!is_null($model)) {
+                $model = $this->getModelUsernames($model->loadTranslations());
+            }
 
             if ($request->has('edit')) {
                 if (!empty($request->file)) {

@@ -70,7 +70,7 @@ class CategoryController extends ApiController
             }
 
             $catData = [
-                'name'              => $post['data']['name'],
+                'name'              => $this->trans($post['locale'], $post['data']['name']),
                 'icon_file_name'    => empty($post['data']['icon_filename'])
                     ? null
                     : $post['data']['icon_filename'],
@@ -203,6 +203,8 @@ class CategoryController extends ApiController
                 if (!empty($post['data']['ordering'])) {
                     $category->ordering = $post['data']['ordering'];
                 }
+
+                $category->updated_by = \Auth::id();
 
                 try {
                     $category->save();

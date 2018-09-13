@@ -48,6 +48,14 @@ class SignalController extends AdminController
                 $params['criteria']['order']['type'] = 'asc';
             }
 
+            if ($request->has('order_field') && !empty($request->order_field)) {
+                $params['criteria']['order']['field'] = $request->order_field;
+            }
+
+            if ($request->has('order_type') && !empty($request->order_type)) {
+                $params['criteria']['order']['type'] = $request->order_type;
+            }
+
             $rq = Request::create('/api/listSignals', 'POST', $params);
             $api = new ApiSignal($rq);
             $result = $api->listSignals($rq)->getData();

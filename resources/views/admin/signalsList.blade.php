@@ -16,15 +16,15 @@
                         action(
                             'Admin\SignalController@list',
                             array_merge(
-                                ['order' => 'created_at'],
-                                array_except(app('request')->input(), ['order'])
+                                ['order_field' => 'created_at'],
+                                array_except(app('request')->input(), ['order_field'])
                             )
                         )
                     }}"
 
                     class="{{
-                        isset(app('request')->input()['order'])
-                        && app('request')->input()['order'] == 'created_at'
+                        isset(app('request')->input()['order_field'])
+                        && app('request')->input()['order_field'] == 'created_at'
                             ? 'active'
                             : ''
                     }}"
@@ -34,15 +34,15 @@
                         action(
                             'Admin\SignalController@list',
                             array_merge(
-                                ['order' => 'status'],
-                                array_except(app('request')->input(), ['order'])
+                                ['order_field' => 'status'],
+                                array_except(app('request')->input(), ['order_field'])
                             )
                         )
                     }}"
 
                     class="{{
-                        isset(app('request')->input()['order'])
-                        && app('request')->input()['order'] == 'status'
+                        isset(app('request')->input()['order_field'])
+                        && app('request')->input()['order_field'] == 'status'
                             ? 'active'
                             : ''
                     }}"
@@ -52,15 +52,15 @@
                         action(
                             'Admin\SignalController@list',
                             array_merge(
-                                ['order' => 'email'],
-                                array_except(app('request')->input(), ['order'])
+                                ['order_field' => 'email'],
+                                array_except(app('request')->input(), ['order_field'])
                             )
                         )
                     }}"
 
                     class="{{
-                        isset(app('request')->input()['order'])
-                        && app('request')->input()['order'] == 'email'
+                        isset(app('request')->input()['order_field'])
+                        && app('request')->input()['order_field'] == 'email'
                             ? 'active'
                             : ''
                     }}"
@@ -70,19 +70,55 @@
                         action(
                             'Admin\SignalController@list',
                             array_merge(
-                                ['order' => 'lastname'],
-                                array_except(app('request')->input(), ['order'])
+                                ['order_field' => 'lastname'],
+                                array_except(app('request')->input(), ['order_field'])
                             )
                         )
                     }}"
 
                     class="{{
-                        isset(app('request')->input()['order'])
-                        && app('request')->input()['order'] == 'lastname'
+                        isset(app('request')->input()['order_field'])
+                        && app('request')->input()['order_field'] == 'lastname'
                             ? 'active'
                             : ''
                     }}"
                 >{{ __('custom.lastname') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\SignalController@list',
+                            array_merge(
+                                ['order_type' => 'asc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'asc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ uctrans('custom.order_asc') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\SignalController@list',
+                            array_merge(
+                                ['order_type' => 'desc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'desc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ uctrans('custom.order_desc') }}</a>
             </div>
         </div>
         <div class="row m-b-lg">
@@ -106,8 +142,11 @@
                     @if (isset(app('request')->input()['status']))
                         <input type="hidden" name="status" value="{{ app('request')->input()['status'] }}">
                     @endif
-                    @if (isset(app('request')->input()['order']))
-                        <input type="hidden" name="order" value="{{ app('request')->input()['order'] }}">
+                    @if (isset(app('request')->input()['order_field']))
+                        <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['order_type']))
+                        <input type="hidden" name="order_type" value="{{ app('request')->input()['order_type'] }}">
                     @endif
                     @if (isset(app('request')->input()['q']))
                         <input type="hidden" name="q" value="{{ app('request')->input()['q'] }}">
@@ -167,8 +206,11 @@
                             @if (isset(app('request')->input()['status']))
                                 <input type="hidden" name="status" value="{{ app('request')->input()['status'] }}">
                             @endif
-                            @if (isset(app('request')->input()['order']))
-                                <input type="hidden" name="order" value="{{ app('request')->input()['order'] }}">
+                            @if (isset(app('request')->input()['order_field']))
+                                <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
+                            @endif
+                            @if (isset(app('request')->input()['order_type']))
+                                <input type="hidden" name="order_type" value="{{ app('request')->input()['order_type'] }}">
                             @endif
                             @if (isset(app('request')->input()['from']))
                                 <input type="hidden" name="from" value="{{ app('request')->input()['from'] }}">

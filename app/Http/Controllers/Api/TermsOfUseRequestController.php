@@ -36,7 +36,7 @@ class TermsOfUseRequestController extends ApiController
             'firstname'     => 'required|string|max:100',
             'lastname'      => 'required|string|max:100',
             'email'         => 'required|email|string|max:191',
-            'status'        => 'integer|min:1'
+            'status'        => 'integer|in:'. implode(',', array_keys(TermsOfUseRequest::getStatuses())),
         ]);
 
         if (!$validator->fails()) {
@@ -111,7 +111,7 @@ class TermsOfUseRequestController extends ApiController
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
                 'email'        => 'required|email|string|max:191',
-                'status'       => 'integer|min:1'
+                'status'       => 'integer|in:'. implode(',', array_keys(TermsOfUseRequest::getStatuses())),
             ]);
         }
 

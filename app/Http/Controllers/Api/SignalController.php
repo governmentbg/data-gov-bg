@@ -44,7 +44,7 @@ class SignalController extends ApiController
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
                 'email'        => 'required|email|max:191',
-                'status'       => 'nullable|integer|digits_between:1,3',
+                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses())),
             ]);
         }
 
@@ -64,7 +64,15 @@ class SignalController extends ApiController
                     $newSignal->status = Signal::STATUS_NEW;
                 }
 
-                $newSignal->save();
+                $saved = $newSignal->save();
+
+                // mark related resource as reported
+                // if ($saved && $newSignal->status == Signal::STATUS_NEW) {
+                if ($saved) {
+                    $resource = Resource::where('id', $newSignal->resource_id)->first();
+                    $resource->is_reported = Resource::REPORTED_TRUE;
+                    $resource->save();
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
@@ -114,7 +122,7 @@ class SignalController extends ApiController
                 'firstname'    => 'sometimes|string|max:100',
                 'lastname'     => 'sometimes|string|max:100',
                 'email'        => 'sometimes|email|max:191',
-                'status'       => 'sometimes|integer|digits_between:1,3',
+                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses())),
             ]);
         }
 
@@ -294,52 +302,19 @@ class SignalController extends ApiController
         }
 
         $result = [];
-        $columns = [
-            'id',
-            'resource_id',
-            'descript',
-            'firstname',
-            'lastname',
-            'email',
-            'status',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by',
-        ];
+        $query = Signal::select();
 
-        $query = Signal::select($columns);
+        if (isset($criteria['search'])) {
+            $ids = Signal::search($criteria['search'])->get()->pluck('id');
+            $query->whereIn('id', $ids);
+        }
 
         if (isset($criteria['signal_id'])) {
             $query->where('id', $criteria['signal_id']);
         }
 
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
-                if (!in_array($criteria['order']['field'], $columns)) {
-                    unset($criteria['order']['field']);
-                }
-            }
-        }
-
-        if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            $query->orderBy(
-                $criteria['order']['field'],
-                $criteria['order']['type'] == 'asc' ? 'asc' : 'desc'
-            );
-        }
-
         if (isset($criteria['status'])) {
             $query->where('status', $criteria['status']);
-        }
-
-        if (isset($criteria['search'])) {
-            $search = $criteria['search'];
-
-            $query->where('firstname', 'like', '%' . $search . '%')
-                ->orWhere('lastname', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%')
-                ->orWhere('descript', 'like', '%' . $search . '%');
         }
 
         if (isset($criteria['date_from'])) {
@@ -351,6 +326,12 @@ class SignalController extends ApiController
         }
 
         $total_records = $query->count();
+        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
+
+        if (!empty($order)) {
+            $query->orderBy($order['field'], $order['type']);
+        }
 
         if ($request->has('records_per_page') || $request->has('page_number')) {
             $query->forPage($request->input('page_number'), $request->input('records_per_page'));

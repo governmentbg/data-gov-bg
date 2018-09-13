@@ -81,29 +81,27 @@
                     >{{ $user->add_info }}</textarea>
                 </div>
             </div>
-            @if (!empty($orgRoles[0]))
-                <div class="form-group row">
-                    <label for="def_role" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
-                    <div class="col-sm-4">
-                        <select
-                            multiple="multiple"
-                            class="js-select form-control"
-                            name="role_id[0][]"
-                            data-placeholder="{{ __('custom.select_role') }}"
-                            id="def_role"
-                        >
-                            <option></option>
-                            @foreach ($roles as $role)
-                                <option
-                                    value="{{ $role->id }}"
-                                    {{ in_array($role->id, $orgRoles[0]) ? 'selected' : '' }}
-                                >{{ $role->name }}</option>
-                            @endforeach
-                        </select>
-                        <span class="error">{{ $errors->first('role_id') }}</span>
-                    </div>
+            <div class="form-group row">
+                <label for="def_role" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
+                <div class="col-sm-4">
+                    <select
+                        multiple="multiple"
+                        class="js-select form-control"
+                        name="role_id[0][]"
+                        data-placeholder="{{ __('custom.select_role') }}"
+                        id="def_role"
+                    >
+                        <option></option>
+                        @foreach ($roles as $role)
+                            <option
+                                value="{{ $role->id }}"
+                                {{ !empty($orgRoles[0]) && in_array($role->id, $orgRoles[0]) ? 'selected' : '' }}
+                            >{{ $role->name }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error">{{ $errors->first('role_id') }}</span>
                 </div>
-            @endif
+            </div>
             @if (!empty($orgRoles))
                 @foreach ($orgRoles as $org => $orgRole)
                     @if ($org != 0 && isset($organisations[$org]))
@@ -328,7 +326,7 @@
                 <div class="modal-body">
                     <a type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></a>
                     <span>
-                    {{ __('custom.delete_account_message') }}
+                    {{ __('custom.delete_account_message_admin') }}
                         <p class="small-text">
                         {{ __('custom.delete_account_continue') }}
                         </p>

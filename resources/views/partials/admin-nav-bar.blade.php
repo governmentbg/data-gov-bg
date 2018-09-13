@@ -44,12 +44,6 @@
                             >{{ trans_choice(__('custom.users'), 2) }}</a>
                         <li>
                             <a
-                                class="{{ $view == 'createProfile' ? 'active' : '' }}"
-                                href="{{ url('/admin/users/create') }}"
-                            >{{ __('custom.create_profile') }}</a>
-                        </li>
-                        <li>
-                            <a
                                 class="{{ $view == 'statsAnalytics' ? 'active' : '' }}"
                                 href="#"
                             >{{ __('custom.stats_analytics') }}</a>

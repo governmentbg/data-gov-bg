@@ -20,7 +20,7 @@
     <link href="{{ asset('css/nanoscroller.css') }}" rel="stylesheet">
 </head>
 <body class="theme-{{ $class }}">
-    <div id="app" class="nano">
+    <div id="app" class="nano" data-lang="{{ $lang }}">
         <div class="nano-content">
             <nav class="navbar navbar-default navbar-static-top js-head">
                 <div class="container">

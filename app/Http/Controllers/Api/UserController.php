@@ -1258,7 +1258,7 @@ class UserController extends ApiController
                     $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
                         ? $data['org_data']['parent_org_id']
                         : null;
-                    $organisation->active = 0;
+                    $organisation->active = $data['org_data']['active'];
                     $organisation->approved = 0;
                     $organisation->created_by = $id;
                     $organisation->name = $this->trans($locale, $data['org_data']['name']);

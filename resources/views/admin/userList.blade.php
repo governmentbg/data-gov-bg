@@ -17,7 +17,7 @@
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"
                 >
-                @foreach (app('request')->except(['q']) as $key => $value)
+                @foreach (app('request')->except(['q', 'page']) as $key => $value)
                     @if (is_array($value))
                         @foreach ($value as $innerValue)
                             <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">

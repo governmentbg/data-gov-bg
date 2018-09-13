@@ -512,19 +512,21 @@ class UserController extends ApiController
 
                 $userSettings->save();
 
-                if (!$user->active) {
-                    $mailData = [
-                        'user'  => $user->firstname,
-                        'hash'  => $user->hash_id,
-                        'id'    => $user->id,
-                    ];
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                    'id'    => $user->id,
+                ];
 
-                    Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                        $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                        $m->to($user->email, $user->firstname);
-                        $m->subject(__('custom.register_subject'));
-                    });
+                if (Role::isAdmin()) {
+                    $mailData = array_merge($mailData, ['pass' => $request->data['password']]);
                 }
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user->email, $user->firstname);
+                    $m->subject(__('custom.register_subject'));
+                });
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),
@@ -1301,10 +1303,12 @@ class UserController extends ApiController
                     $organisation->save();
 
                     if ($organisation) {
+                        $role = Role::getOrgAdminRole();
+
                         $userToOrgRole = new UserToOrgRole;
                         $userToOrgRole->org_id = $organisation->id;
                         $userToOrgRole->user_id = $id;
-                        $userToOrgRole->role_id = Role::ROLE_ADMIN;
+                        $userToOrgRole->role_id = $role->id;
 
                         $userToOrgRole->save();
 

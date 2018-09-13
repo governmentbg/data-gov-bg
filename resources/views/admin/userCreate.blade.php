@@ -3,7 +3,7 @@
 @section('content')
 <div class="container user-create">
     @include('partials.alerts-bar')
-    @include('partials.admin-nav-bar', ['view' => 'createProfile'])
+    @include('partials.admin-nav-bar', ['view' => 'users'])
     <div class="col-lg-12">
         <h3>{{ utrans('custom.new_user') }}</h3>
         <div class="col-lg-10 col-md-11 col-xs-12 col-lg-offset-1 m-t-md">
@@ -109,7 +109,8 @@
                                     name="org_id"
                                     data-placeholder="{{ utrans('custom.select_org') }}"
                                 >
-                                    <option></option>
+                                    <option value=""></option>
+                                    <option value="0"></option>
                                     @foreach ($organisations as $id =>$org)
                                         <option
                                             value="{{ $id }}"
@@ -134,7 +135,7 @@
                                     @foreach ($roles as $role)
                                         <option
                                             value="{{ $role->id }}"
-                                            {{ $role->id == old('role') ? 'selected' : '' }}
+                                            {{ old('role_id') && in_array($role->id, old('role_id')) ? 'selected' : '' }}
                                         >{{ $role->name }}</option>
                                     @endforeach
                                 </select>

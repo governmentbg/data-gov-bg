@@ -240,6 +240,7 @@ return [
     'new_password' => 'New Password',
     'change_password' => 'Change Password',
     'delete_account_message' => 'Deleting the account will cause a loss of administrative access to datasets uploaded by you. In order to regain your access an administrator\'s assistance will be required.',
+    'delete_account_message_admin' => 'Deleting the account will cause a loss of administrative access to datasets uploaded by the user.',
     'delete_account_continue' => 'If you would like to continue click \'Continue\'.',
     'continue' => 'Continue',
     'delete' => 'Delete',

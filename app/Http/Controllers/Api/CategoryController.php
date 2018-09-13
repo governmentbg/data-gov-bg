@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Module;
 use App\Category;
 use App\DataSet;
+use App\RoleRight;
 use App\ActionsHistory;
 use App\Resource;
 use App\Organisation;
@@ -59,6 +60,15 @@ class CategoryController extends ApiController
 
         // add main category
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::MAIN_CATEGORIES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $catData = [
                 'name'              => $post['data']['name'],
                 'icon_file_name'    => empty($post['data']['icon_filename'])
@@ -156,6 +166,19 @@ class CategoryController extends ApiController
             $category = Category::find($post['category_id']);
 
             if ($category) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::MAIN_CATEGORIES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $category->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $category->name = $post['data']['name'];
 
                 // add library for image manipulation
@@ -219,6 +242,21 @@ class CategoryController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $category = Category::find($post['category_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::MAIN_CATEGORIES,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $category->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DataSet::withTrashed()
                     ->where('category_id', $post['category_id'])
@@ -233,7 +271,7 @@ class CategoryController extends ApiController
                 DB::table('categories')->where('parent_id', $post['category_id'])
                     ->update(['parent_id' => null]);
 
-                if (Category::find($post['category_id'])->delete()) {
+                if ($category->delete()) {
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
                         'action'           => ActionsHistory::TYPE_DEL,

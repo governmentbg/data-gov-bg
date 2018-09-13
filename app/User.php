@@ -54,6 +54,46 @@ class User extends Authenticatable
 
         return $array;
     }
+
+    public static function getUserRoles($id)
+    {
+        $user = User::find($id);
+
+        if ($user) {
+            $result = [];
+
+            foreach($user->userToOrgRole as $role) {
+
+                $roleRights = $role->role->rights;
+
+                $rightResult = [];
+
+                foreach($roleRights as $singleRoleRight) {
+                    $rightResult[] = [
+                        'module_name'          => $singleRoleRight->module_name,
+                        'right'                => $singleRoleRight->right,
+                        'limit_to_own_data'    => $singleRoleRight->limit_to_own_data,
+                        'api'                  => $singleRoleRight->api
+                    ];
+                }
+
+                $result[] = [
+                    'org_id'    => $role->org_id,
+                    'role_id'   => $role->role_id,
+                    'rights'    => $rightResult
+
+                ];
+
+                unset($roleRights);
+                unset($rightResult);
+            }
+
+            return $result;
+        }
+
+        return false;
+    }
+
     /**
      * Get the system user
      *

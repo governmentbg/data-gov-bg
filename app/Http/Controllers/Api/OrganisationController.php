@@ -264,20 +264,22 @@ class OrganisationController extends ApiController
 
         $organisation = Organisation::find($data['org_id']);
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::ORGANISATIONS,
-            RoleRight::RIGHT_EDIT,
-            [
-                'org_id'       => $organisation->id
-            ],
-            [
-                'created_by' => $organisation->created_by,
-                'org_id'     => $organisation->id
-            ]
-        );
+        if ($organisation) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'created_by' => $organisation->created_by,
+                    'org_id'     => $organisation->id
+                ]
+            );
 
-        if (!$rightCheck) {
-            return $this->errorResponse(__('custom.access_denied'));
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
         }
 
         $imageError = false;
@@ -520,6 +522,7 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
+            'api_key'               => 'nullable|string|exists:users,api_key',
             'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|max:191',
@@ -553,13 +556,28 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $criteria = [];
+            if (isset($post['api_key'])) {
+                $user = \App\User::where('api_key', $post['api_key'])->first();
+                \Auth::loginUsingId($user->id);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_VIEW
+                );
 
-            if (isset($request->criteria['active'])) {
-                $criteria['active'] = $request->criteria['active'];
-            }
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
-            if (isset($request->criteria['approved'])) {
-                $criteria['approved'] = $request->criteria['approved'];
+                if (isset($request->criteria['active'])) {
+                    $criteria['active'] = $request->criteria['active'];
+                }
+
+                if (isset($request->criteria['approved'])) {
+                    $criteria['approved'] = $request->criteria['approved'];
+                }
+            } else {
+                $criteria['active'] = 1;
+                $criteria['approved'] = 1;
             }
 
             if (isset($request->criteria['org_id'])) {
@@ -718,6 +736,15 @@ class OrganisationController extends ApiController
 
             if (isset($post->criteria['approved'])) {
                 $criteria['approved'] = $post->criteria['approved'];
+            }
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
             }
 
             try {
@@ -1120,6 +1147,26 @@ class OrganisationController extends ApiController
             'role_id.*'     => 'required|int|exists:roles,id|digits_between:1,10'
         ]);
 
+        $organisation = Organisation::where('id', $post['org_id'])->first();
+
+        if ($organisation) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ORGANISATIONS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'org_id'       => $organisation->id
+                ],
+                [
+                    'created_by' => $organisation->created_by,
+                    'org_id'     => $organisation->id
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+        }
+
         if (!$validator->fails()) {
             try {
                 if (isset($post['role_id']) || isset($post['org_id'])) {
@@ -1171,6 +1218,26 @@ class OrganisationController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $organisation = Organisation::where('id', $post['org_id'])->first();
+
+            if ($organisation) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_ALL,
+                    [
+                        'org_id'       => $organisation->id
+                    ],
+                    [
+                        'created_by' => $organisation->created_by,
+                        'org_id'     => $organisation->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+            }
+
             try {
                 UserToOrgRole::where([
                     'org_id'    => $post['org_id'],
@@ -1218,6 +1285,26 @@ class OrganisationController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $organisation = Organisation::where('id', $post['org_id'])->first();
+
+            if ($organisation) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ORGANISATIONS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id'       => $organisation->id
+                    ],
+                    [
+                        'created_by' => $organisation->created_by,
+                        'org_id'     => $organisation->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+            }
+
             try {
                 if (isset($post['role_id']) || isset($post['org_id'])) {
                     UserToOrgRole::where('org_id', $post['org_id'])->where('user_id', $post['user_id'])->delete();
@@ -1297,6 +1384,15 @@ class OrganisationController extends ApiController
 
         $newGroup = new Organisation;
         $imageError = false;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
 
         if (!empty($post['logo'])) {
             try {
@@ -1453,6 +1549,24 @@ class OrganisationController extends ApiController
         $newGroupData = [];
         $imageError = false;
 
+        if ($group) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_EDIT,
+                [
+                    'group_id'       => $group->id
+                ],
+                [
+                    'created_by'    => $group->created_by,
+                    'group_ids'      => [$group->id]
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+        }
+
         if (!empty($data['logo'])) {
             try {
                 $img = \Image::make($data['logo']);
@@ -1577,6 +1691,24 @@ class OrganisationController extends ApiController
         ]);
 
         $group = Organisation::find($request->group_id);
+
+        if ($group) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::GROUPS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'group_id'       => $group->id
+                ],
+                [
+                    'created_by'    => $group->created_by,
+                    'group_ids'      => [$group->id]
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+        }
 
         if (empty($group) || $group->type != Organisation::TYPE_GROUP) {
             return $this->errorResponse(__('custom.no_group_found'));

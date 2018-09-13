@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use \Validator;
 use \App\Locale;
 use App\Module;
+use App\RoleRight;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -26,6 +27,7 @@ class LocaleController extends ApiController
     public function addLocale(Request $request)
     {
         $post = $request->all();
+        $post['data'] = isset($post['data']) ? $post['data'] : [];
 
         $validator = Validator::make($post['data'], [
             'locale'   => 'required|string|max:5|unique:locale,locale',
@@ -33,6 +35,15 @@ class LocaleController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::LOCALE,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $locale = new Locale;
 
             $locale->locale = $post['data']['locale'];
@@ -87,6 +98,19 @@ class LocaleController extends ApiController
         if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
 
+            $rightCheck = RoleRight::checkUserRight(
+                Module::LOCALE,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $locale->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             if ($locale->locale == \LaravelLocalization::getDefaultLocale()) {
                 return $this->errorResponse(__('custom.default_locale_error'));
             }
@@ -132,6 +156,20 @@ class LocaleController extends ApiController
 
         if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::LOCALE,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $locale->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
 
             if ($locale->locale == \LaravelLocalization::getDefaultLocale()) {
                 return $this->errorResponse(__('custom.default_locale_error'));

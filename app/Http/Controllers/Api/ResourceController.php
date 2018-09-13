@@ -5,6 +5,7 @@ use Uuid;
 use App\DataSet;
 use App\Resource;
 use App\Module;
+use App\RoleRight;
 use App\ActionsHistory;
 use App\ElasticDataSet;
 use App\Organisation;
@@ -92,6 +93,16 @@ class ResourceController extends ApiController
         });
 
         if (!$validator->fails()) {
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             DB::beginTransaction();
 
             try {
@@ -161,6 +172,15 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             DB::beginTransaction();
 
             try {
@@ -277,9 +297,22 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
-            DB::beginTransaction();
 
             $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $resource->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            DB::beginTransaction();
 
             if (isset($post['data']['version'])) {
                 $resource->version = $post['data']['version'];
@@ -375,6 +408,18 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $resource->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
@@ -422,6 +467,19 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $resource->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $resource->deleted_by = \Auth::id();
                 $resource->save();
                 $resource->delete();

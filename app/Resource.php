@@ -32,6 +32,9 @@ class Resource extends Model implements TranslatableInterface
     const HTTP_POST = 1;
     const HTTP_GET = 2;
 
+    const REPORTED_FALSE = 0;
+    const REPORTED_TRUE = 1;
+
     protected static $translatable = [
         'name'      => 'text',
         'descript'  => 'text',

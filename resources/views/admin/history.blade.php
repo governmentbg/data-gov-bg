@@ -4,8 +4,7 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => $view])
-    @include('partials.pagination')
-    <h3>{{ utrans('custom.logins_history') }}</h3>
+    <h3>{{ utrans('custom.history_'. $view) }}</h3>
     <div class="row">
         <div class="col-sm-3 sidenav col-xs-12 m-t-md">
             <form

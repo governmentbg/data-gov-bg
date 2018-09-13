@@ -417,7 +417,7 @@ class DataRequestController extends ApiController
                 usort($result, function($a, $b) use ($criteria) {
                     return strtolower($criteria['order']['type']) == 'asc'
                         ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                        : strcmp($criteria['order']['field'], $criteria['order']['field']);
+                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
                 });
             }
         }

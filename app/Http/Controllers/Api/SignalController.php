@@ -49,15 +49,6 @@ class SignalController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::SIGNALS,
-                RoleRight::RIGHT_EDIT
-            );
-
-            if (!$rightCheck) {
-                return $this->errorResponse(__('custom.access_denied'));
-            }
-
             try {
                 $newSignal = new Signal;
 

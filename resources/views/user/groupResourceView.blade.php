@@ -64,7 +64,7 @@
                                         </table>
                                         <a
                                            class="badge badge-pill pull-right"
-                                           href="{{ url('/user/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
+                                           href="{{ url('/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
                                         >{{ uctrans('custom.download') }}</a>
                                     @endif
                                 </div>

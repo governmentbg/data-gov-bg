@@ -17,7 +17,7 @@ Route::middleware('auth')->group(function() {
 
     Route::post('/user/changePassword', 'UserController@changePassword');
 
-    Route::match(['get', 'post'], '/user/resource/download', 'UserController@resourceDownload')->name('resourceDownload');
+    Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
     Route::post('/admin/adminChangePassword', 'Admin\UserController@adminChangePassword');
 
     Route::get('/images/item/{id}', 'Admin\ImageController@viewImage');
@@ -163,7 +163,14 @@ Route::middleware('auth')->group(function() {
             'UserController@orgResourceCreate'
         )->name('orgResourceCreate');
 
+        Route::match(
+            ['get', 'post'],
+            '/admin/dataset/resource/create/{uri}',
+            'Admin\DataSetController@resourceCreate'
+        );
+
         Route::match(['get', 'post'], 'user/resourceView/{uri}', 'UserController@resourceView')->name('resourceView');
+        Route::match(['get', 'post'], 'admin/resourceView/{uri}', 'Admin\DataSetController@resourceView');
         Route::match(['get', 'post'], 'user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
         Route::match(['get', 'post'], 'importCSV', 'ResourceController@importCsvData');
         Route::match(['get', 'post'], 'importElastic', 'ResourceController@importElasticData');

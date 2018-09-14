@@ -794,7 +794,7 @@ class DatabaseTest extends TestCase
             $record = null;
             $dbData = [
                 'resource_id' => $resource,
-                'descript'    =>$this->faker->sentence(4),
+                'descript'    => $this->faker->sentence(4),
                 'firstname'   => $this->faker->firstName(),
                 'lastname'    => $this->faker->lastName(),
                 'email'       => $this->faker->email(),

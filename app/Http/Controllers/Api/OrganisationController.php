@@ -161,6 +161,7 @@ class OrganisationController extends ApiController
 
                 if (\Auth::user()) {
                     $role = Role::getOrgAdminRole();
+
                     if (!isset($role)) {
                         return $this->errorResponse(__('custom.add_role_fail'));
                     }
@@ -782,8 +783,8 @@ class OrganisationController extends ApiController
 
                     foreach ($org->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 
@@ -913,8 +914,8 @@ class OrganisationController extends ApiController
 
                     foreach ($org->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 
@@ -999,8 +1000,8 @@ class OrganisationController extends ApiController
 
                     foreach ($org->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 
@@ -1867,8 +1868,8 @@ class OrganisationController extends ApiController
                     //get custom fields
                     foreach ($group->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 
@@ -1943,8 +1944,8 @@ class OrganisationController extends ApiController
 
                     foreach ($group->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 
@@ -2062,8 +2063,8 @@ class OrganisationController extends ApiController
                     //get custom fields
                     foreach ($group->customSetting()->get() as $setting) {
                         $customFields[] = [
-                            'key'    =>$setting->key,
-                            'value'  =>$setting->value
+                            'key'    => $setting->key,
+                            'value'  => $setting->value
                         ];
                     }
 

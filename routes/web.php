@@ -330,9 +330,7 @@ Route::get('user/orgMembers', function () {
 Route::match(['get', 'post'], 'password/forgotten', 'UserController@forgottenPassword');
 Route::match(['get', 'post'], 'password/reset', 'UserController@passwordReset')->name('passReset');
 
-Route::get('request', function () {
-    return view('request/dataRequest', ['class' => 'request']);
-});
+Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
 
 Route::get('news', function () {
     return view('news/list', ['class' => 'news']);

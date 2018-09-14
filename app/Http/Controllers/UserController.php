@@ -1499,8 +1499,10 @@ class UserController extends Controller {
 
     /**
      * Adds resource metadata and prepares the resource elasticsearch data
+     *
      * @param Request $request - resource metadata, file with resource data
      * @param int $datasetUri - associated dataset uri
+     *
      * @return type
      */
     public function resourceCreate(Request $request, $datasetUri)
@@ -1524,7 +1526,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect()->route('resourceView', ['uri' => $response['uri']]);
+                        return redirect('/user/resourceView/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1555,7 +1557,11 @@ class UserController extends Controller {
     {
         // delete resource metadata record
         $resource = Resource::where('uri', $uri)->first();
-        $resource->forceDelete();
+
+        if ($resource) {
+            $resource->forceDelete();
+        }
+
         $request->session()->flash('alert-danger', uctrans('custom.cancel_resource_import'));
 
         return redirect('/user/datasets');
@@ -1799,133 +1805,87 @@ class UserController extends Controller {
      */
     public function resourceView(Request $request, $uri)
     {
-        $resourceReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
-        $apiResources = new ApiResource($resourceReq);
-        $resourceData = $apiResources->getResourceMetadata($resourceReq)->getData();
-        $resourceData = !empty($resourceData->resource) ? $resourceData->resource : null;
-
-        if (!isset($resourceData)) {
-            return back();
-        }
-
-        $rightCheck = RoleRight::checkUserRight(
-            Module::RESOURCES,
-            RoleRight::RIGHT_VIEW,
-            [],
-            ['created_by' => $resourceData->created_by]
-        );
-
-        if (!$rightCheck) {
-            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
-        }
-
-        $rightCheck = RoleRight::checkUserRight(
-            Module::RESOURCES,
-            RoleRight::RIGHT_ALL,
-            [],
-            ['created_by' => $resourceData->created_by]
-        );
-
-        $buttons[$resourceData->uri]['delete'] = $rightCheck;
-
         $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiMetadata = new ApiResource($reqMetadata);
         $result = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
         $resource = !empty($result->resource) ? $result->resource : null;
-        $data = [];
 
         if (!empty($resource)) {
-            $resource->format_code = Resource::getFormatsCode($resource->file_format);
-            $resource = $this->getModelUsernames($resource);
-
-            if ($request->has('delete')) {
-                $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_ALL,
-                    [],
-                    ['created_by' => $resourceData->created_by]
-                );
-
-                if (!$rightCheck) {
-                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
-                }
-
-                $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
-                $apiDelete = new ApiResource($reqDelete);
-                $result = $apiDelete->deleteResource($reqDelete)->getData();
-
-                if ($result->success) {
-                    $request->session()->flash('alert-success', __('custom.delete_success'));
-
-                    return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
-                }
-
-                $request->session()->flash('alert-success', __('custom.delete_error'));
-            }
-
-            $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
-            $apiEsData = new ApiResource($reqEsData);
-            $response = $apiEsData->getResourceData($reqEsData)->getData();
-
-            $data = !empty($response->data) ? $response->data : [];
-
-            if ($resource->format_code == Resource::FORMAT_XML) {
-                $convertData = [
-                    'api_key'   => \Auth::user()->api_key,
-                    'data'      => $data,
-                ];
-                $reqConvert = Request::create('/json2xml', 'POST', $convertData);
-                $apiConvert = new ApiConversion($reqConvert);
-                $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
-                $data = $resultConvert->data;
-            }
-
-            return view('user/resourceView', [
-                'class'         => 'user',
-                'resource'      => $resource,
-                'data'          => $data,
-                'buttons'       => $buttons
-            ]);
-        }
-
-        return redirect('/user/datasets');
-    }
-
-    /**
-     * Transforms resource data to donwloadable file
-     *
-     * @param Request $request - file name, file format and id for resource elastic search data
-     *
-     * @return downlodable file
-     */
-    public function resourceDownload(Request $request)
-    {
-        $fileName = $request->offsetGet('name');
-        $esid = $request->offsetGet('es_id');
-        $format = $request->offsetGet('format');
-        $method = 'to'. $format;
-        $convertReq = Request::create('/api/'. $method, 'POST', ['es_id' => $esid]);
-        $apiResources = new ApiConversion($convertReq);
-        $resource = $apiResources->$method($convertReq)->getData();
-        if (strtolower($format) == 'json') {
-            $fileData = json_encode($resource->data);
-        } else {
-            $fileData = $resource->data;
-        }
-
-        if (!empty($resource->data)) {
-            $handle = fopen('../storage/app/'. $fileName, 'w+');
-            $path = stream_get_meta_data($handle)['uri'];
-
-            fwrite($handle, $fileData);
-
-            fclose($handle);
-
-            $headers = array(
-                'Content-Type' => 'text/'. strtolower($method),
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_VIEW,
+                [],
+                ['created_by' => $resource->created_by]
             );
 
-            return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
+            if (!$rightCheck) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+            }
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_ALL,
+                [],
+                ['created_by' => $resource->created_by]
+            );
+
+            $buttons[$resource->uri]['delete'] = $rightCheck;
+
+            $data = [];
+
+            if (!empty($resource)) {
+                $resource->format_code = Resource::getFormatsCode($resource->file_format);
+                $resource = $this->getModelUsernames($resource);
+
+                if ($request->has('delete')) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                        [],
+                        ['created_by' => $resource->created_by]
+                    );
+
+                    if (!$rightCheck) {
+                        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                    }
+
+                    $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                    $apiDelete = new ApiResource($reqDelete);
+                    $result = $apiDelete->deleteResource($reqDelete)->getData();
+
+                    if ($result->success) {
+                        $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                        return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
+                    }
+
+                    $request->session()->flash('alert-success', __('custom.delete_error'));
+                }
+
+                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+                $apiEsData = new ApiResource($reqEsData);
+                $response = $apiEsData->getResourceData($reqEsData)->getData();
+
+                $data = !empty($response->data) ? $response->data : [];
+
+                if ($resource->format_code == Resource::FORMAT_XML) {
+                    $convertData = [
+                        'api_key'   => \Auth::user()->api_key,
+                        'data'      => $data,
+                    ];
+                    $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+                    $apiConvert = new ApiConversion($reqConvert);
+                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                    $data = $resultConvert->data;
+                }
+
+                return view('user/resourceView', [
+                    'class'         => 'user',
+                    'resource'      => $resource,
+                    'data'          => $data,
+                    'buttons'       => $buttons
+                ]);
+            }
         }
 
         return back();

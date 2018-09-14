@@ -69,7 +69,7 @@
                         data-placeholder="{{ utrans('custom.select_terms_of_use') }}"
                     >
                         <option></option>
-                        @foreach ($termsOfUse as $id =>$term)
+                        @foreach ($termsOfUse as $id => $term)
                             <option
                                 value="{{ $id }}"
                                 {{ $id == $dataSet->terms_of_use_id ? 'selected' : '' }}
@@ -79,7 +79,7 @@
                     <span class="error">{{ $errors->first('terms_of_use_id') }}</span>
                 </div>
                 <div class="col-sm-3 text-right add-terms">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">{{ __('custom.new_terms_and_conditions') }}</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-license">{{ __('custom.new_terms_and_conditions') }}</button>
                 </div>
             </div>
             <div class="form-group row">
@@ -91,7 +91,7 @@
                         name="org_id"
                     >
                         <option value="">{{ utrans('custom.select_org') }}</option>
-                        @foreach ($organisations as $id =>$org)
+                        @foreach ($organisations as $id => $org)
                             <option
                                 value="{{ $id }}"
                                 {{ $id == $dataSet->org_id ? 'selected' : '' }}
@@ -112,7 +112,7 @@
                         multiple="multiple"
                     >
                         <option></option>
-                        @foreach ($groups as $id =>$group)
+                        @foreach ($groups as $id => $group)
                             <option
                                 value="{{ $id }}"
                                 {{ !empty($setGroups) && in_array($id, $setGroups) ? 'selected' : '' }}
@@ -263,7 +263,7 @@
     </div>
 </div>
 
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog"  aria-hidden="true">
+<div class="modal inmodal fade" id="add-license" tabindex="-1" role="dialog"  aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">

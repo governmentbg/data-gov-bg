@@ -1,3 +1,4 @@
+@php $root = empty($admin) ? 'user' : 'admin'; @endphp
 <div class="col-xs-12 m-t-md">
     <div class="articles">
         <div class="article m-b-md">
@@ -27,41 +28,10 @@
 
         <div class="col-sm-12 p-l-none">
             <div class="col-sm-12 m-t-lg p-l-r-none">
-                @if (empty($data))
-                    <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
-                @else
-                    @include('partials.resource-visualisation')
-
-                    <form method="POST" action="{{ url('/user/resource/download') }}">
-                        {{ csrf_field() }}
-                        <input
-                            hidden
-                            name="es_id"
-                            type="text"
-                            value="{{ $resource->es_id }}"
-                        >
-                        <input
-                            hidden
-                            name="name"
-                            type="text"
-                            value="{{ $resource->name }}"
-                        >
-                        <input
-                            hidden
-                            name="format"
-                            type="text"
-                            value="{{ $resource->file_format }}"
-                        >
-                        <button
-                            name="download"
-                            type="submit"
-                            class="badge badge-pill pull-right"
-                        >{{ uctrans('custom.download') }}</button>
-                    </form>
-                @endif
+                @include('partials.resource-visualisation')
             </div>
 
-            @if ($buttons[$resource->uri]['delete'])
+            @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
                 <div class="col-xs-12 m-t-md p-l-r-none text-right">
                     <form method="POST">
                         {{ csrf_field() }}

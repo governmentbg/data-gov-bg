@@ -894,8 +894,8 @@ class DataSetController extends ApiController
                     if (count($settings)) {
                         foreach ($settings as $setting) {
                             $customFields[] = [
-                                'key'    =>$setting->key,
-                                'value'  =>$setting->value
+                                'key'    => $setting->key,
+                                'value'  => $setting->value
                             ];
                         }
                     }

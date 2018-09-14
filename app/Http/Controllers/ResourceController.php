@@ -235,6 +235,8 @@ class ResourceController extends Controller {
     public function importCsvData(Request $request)
     {
         if ($request->has('ready_data') && $request->has('resource_uri')) {
+            $admin = $request->offsetGet('admin');
+            $root = empty($admin) ? 'user' : 'admin';
             $uri = $request->offsetGet('resource_uri');
             $elasticData = Session::get('elasticData');
             Session::forget('elasticData');
@@ -264,7 +266,7 @@ class ResourceController extends Controller {
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect()->route('resourceView', ['uri' => $uri]);
+                    return redirect('/'. $root .'/resourceView/'. $uri);
                 }
 
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
@@ -295,6 +297,8 @@ class ResourceController extends Controller {
     public function importElasticData(Request $request)
     {
         if ($request->has('ready_data') && $request->has('resource_uri')) {
+            $admin = $request->offsetGet('admin');
+            $root = empty($admin) ? 'user' : 'admin';
             $uri = $request->offsetGet('resource_uri');
             $elasticData = Session::get('elasticData');
             Session::forget('elasticData');
@@ -311,7 +315,7 @@ class ResourceController extends Controller {
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect()->route('resourceView', ['uri' => $uri]);
+                    return redirect('/'. $root .'/resourceView/'. $uri);
                 }
 
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
@@ -329,5 +333,46 @@ class ResourceController extends Controller {
         $request->session()->flash('alert-danger', __('custom.add_error'));
 
         return redirect()->back()->withInput();
+    }
+
+    /**
+     * Transforms resource data to downloadable file
+     *
+     * @param Request $request - file name, file format and id for resource elastic search data
+     *
+     * @return downlodable file
+     */
+    public function resourceDownload(Request $request)
+    {
+        $fileName = $request->offsetGet('name');
+        $esid = $request->offsetGet('es_id');
+        $format = $request->offsetGet('format');
+        $method = 'to'. $format;
+        $convertReq = Request::create('/api/'. $method, 'POST', ['es_id' => $esid]);
+        $apiResources = new ApiConversion($convertReq);
+        $resource = $apiResources->$method($convertReq)->getData();
+
+        if (strtolower($format) == 'json') {
+            $fileData = json_encode($resource->data);
+        } else {
+            $fileData = $resource->data;
+        }
+
+        if (!empty($resource->data)) {
+            $handle = fopen('../storage/app/'. $fileName, 'w+');
+            $path = stream_get_meta_data($handle)['uri'];
+
+            fwrite($handle, $fileData);
+
+            fclose($handle);
+
+            $headers = array(
+                'Content-Type' => 'text/'. strtolower($method),
+            );
+
+            return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
+        }
+
+        return back();
     }
 }

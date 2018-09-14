@@ -1019,13 +1019,11 @@ class UserController extends ApiController
                 ];
 
                 if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
-                    foreach ($post['data']['role_id'] as $role) {
-                        $userToOrgRole = new UserToOrgRole;
-                        $userToOrgRole->user_id = $user->id;
-                        $userToOrgRole->org_id = !empty($post['data']['org_id']) ? $post['data']['org_id'] : null;
-                        $userToOrgRole->role_id = $role;
+                    $defaultRole = Role::where('default_user', 1)->first()->id;
+                    $this->addRoles($user->id, $defaultRole, $empty);
 
-                        $userToOrgRole->save();
+                    foreach ($post['data']['role_id'] as $role) {
+                        $this->addRoles($user->id, $role, $post['data']['org_id']);
                     }
                 }
 
@@ -1146,6 +1144,11 @@ class UserController extends ApiController
                 $user->remember_token = null;
 
                 $registered = $user->save();
+
+                if (!empty($data['org_id'])) {
+                    $defaultRole = Role::where('default_user', 1)->first()->id;
+                    $this->addRoles($user->id, $defaultRole, $empty);
+                }
 
                 $this->addRoles($user->id, $data['role_id'], $data['org_id']);
 

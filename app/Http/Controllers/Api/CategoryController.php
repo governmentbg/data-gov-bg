@@ -42,13 +42,20 @@ class CategoryController extends ApiController
             'locale'            => 'nullable|string|max:5',
             'icon'              => 'nullable|string|max:191',
             'icon_filename'     => 'nullable|string|max:191',
-            'icon_mimetype'     => 'nullable|string|max:191',
+            'icon_mimetype'     => 'nullable|string|max:191|in:'. env('THEME_FILE_MIMES'),
             'icon_data'         => 'nullable|string|max:16777215',
             'active'            => 'nullable|boolean',
             'ordering'          => 'nullable|integer|digits_between:1,3',
         ]);
 
         $validator->after(function ($validator) {
+            if ($validator->errors()->has('icon_mimetype')) {
+                $validator->errors()->add(
+                    'file',
+                    $validator->errors()->first('icon_mimetype') .' '. __('custom.valid_file_types') .': '. env('THEME_FILE_MIMES')
+                );
+            }
+
             if ($validator->errors()->has('icon_filename')) {
                 $validator->errors()->add('file', $validator->errors()->first('icon_filename'));
             }

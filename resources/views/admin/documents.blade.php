@@ -44,7 +44,7 @@
                                             'Admin\DocumentController@list',
                                             array_merge(
                                                 ['dtype' => \App\Document::DATE_TYPE_CREATED],
-                                                array_except(app('request')->input(), ['dtype', 'q'])
+                                                array_except(app('request')->input(), ['dtype', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -63,7 +63,7 @@
                                             'Admin\DocumentController@list',
                                             array_merge(
                                                 ['dtype' => \App\Document::DATE_TYPE_UPDATED],
-                                                array_except(app('request')->input(), ['dtype', 'q'])
+                                                array_except(app('request')->input(), ['dtype', 'q', 'page'])
                                             )
                                         )
                                     }}"

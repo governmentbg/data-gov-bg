@@ -20,6 +20,15 @@
                         value="{{ isset($search) ? $search : '' }}"
                         name="q"
                     >
+                    @foreach (app('request')->except(['q', 'page']) as $key => $value)
+                        @if (is_array($value))
+                            @foreach ($value as $innerValue)
+                                <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
+                            @endforeach
+                        @else
+                            <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                        @endif
+                    @endforeach
                 </form>
             </div>
         </div>
@@ -36,7 +45,7 @@
                                             'Admin\OrganisationController@list',
                                             array_merge(
                                                 ['approved' => 1],
-                                                array_except(app('request')->input(), ['approved', 'q'])
+                                                array_except(app('request')->input(), ['approved', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -54,7 +63,7 @@
                                             'Admin\OrganisationController@list',
                                             array_merge(
                                                 ['approved' => 0],
-                                                array_except(app('request')->input(), ['approved', 'q'])
+                                                array_except(app('request')->input(), ['approved', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -72,7 +81,7 @@
                                             'Admin\OrganisationController@list',
                                             array_except(
                                                 app('request')->input(),
-                                                ['approved', 'q']
+                                                ['approved', 'q', 'page']
                                             )
                                         )
                                     }}"
@@ -92,7 +101,7 @@
                                             'Admin\OrganisationController@list',
                                             array_merge(
                                                 ['active' => 1],
-                                                array_except(app('request')->input(), ['active', 'q'])
+                                                array_except(app('request')->input(), ['active', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -110,7 +119,7 @@
                                             'Admin\OrganisationController@list',
                                             array_merge(
                                                 ['active' => 0],
-                                                array_except(app('request')->input(), ['active', 'q'])
+                                                array_except(app('request')->input(), ['active', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -126,7 +135,7 @@
                                     href="{{
                                         action(
                                             'Admin\OrganisationController@list',
-                                            array_except(app('request')->input(), ['active', 'q'])
+                                            array_except(app('request')->input(), ['active', 'q', 'page'])
                                         )
                                     }}"
                                 >{{ __('custom.show_all') }}</a>

@@ -2,7 +2,7 @@
 
 @section('content')
 
-@include('components.signal_form', ['postUrl' => 'organisation/resource/sendSignal'])
+@include('partials.add-signal', ['postUrl' => 'organisation/resource/sendSignal'])
 
 <div class="container">
     @include('partials.alerts-bar')

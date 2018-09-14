@@ -36,7 +36,8 @@ class OrganisationController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
 
     }
 
@@ -71,8 +72,8 @@ class OrganisationController extends Controller {
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
             'criteria'         => [
-                'active'   => true,
-                'approved' => true,
+                'active'   => Organisation::ACTIVE_TRUE,
+                'approved' => Organisation::APPROVED_TRUE,
                 'type'     => $getParams['type'],
                 'locale'   => $locale
             ]
@@ -129,13 +130,14 @@ class OrganisationController extends Controller {
         $result = $api->getOrganisationDetails($rq)->getData();
 
         if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active && $result->data->approved) {
+            $result->data->active == Organisation::ACTIVE_TRUE &&
+            $result->data->approved == Organisation::APPROVED_TRUE) {
 
             $params = [
                 'criteria'     => [
                     'org_id'   => $result->data->id,
-                    'active'   => true,
-                    'approved' => true,
+                    'active'   => Organisation::ACTIVE_TRUE,
+                    'approved' => Organisation::APPROVED_TRUE,
                     'locale'   => $locale
                 ]
             ];
@@ -234,7 +236,8 @@ class OrganisationController extends Controller {
         $result = $api->getOrganisationDetails($rq)->getData();
 
         if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active && $result->data->approved) {
+            $result->data->active == Organisation::ACTIVE_TRUE &&
+            $result->data->approved == Organisation::APPROVED_TRUE) {
 
             $criteria = [
                 'org_ids' => [$result->data->id]
@@ -287,6 +290,7 @@ class OrganisationController extends Controller {
                 'page_number'      => !empty($request->page) ? $request->page : 1,
                 'criteria'         => $criteria,
             ];
+            $params['criteria']['locale'] = $locale;
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
             $params['criteria']['visibility'] = DataSet::VISIBILITY_PUBLIC;
 
@@ -486,7 +490,8 @@ class OrganisationController extends Controller {
         return redirect()->back();
     }
 
-    private function prepareDisplayParams($count, $hasLimit, $recordsLimit, $type, &$display) {
+    private function prepareDisplayParams($count, $hasLimit, $recordsLimit, $type, &$display)
+    {
         if ($hasLimit && $count >= $recordsLimit) {
             $display['show_all'][$type] = true;
             $display['only_popular'][$type] = false;
@@ -527,7 +532,10 @@ class OrganisationController extends Controller {
             $res = $api->getOrganisationDetails($rq)->getData();
             $organisation = !empty($res->data) ? $res->data : [];
 
-            if (!empty($organisation) && $organisation->active && $organisation->approved) {
+            if (!empty($organisation) &&
+                $organisation->active == Organisation::ACTIVE_TRUE &&
+                $organisation->approved == Organisation::APPROVED_TRUE) {
+
                 $params = [
                     'criteria' => [
                         'dataset_uri' => $uri
@@ -618,7 +626,10 @@ class OrganisationController extends Controller {
                 $res = $api->getOrganisationDetails($rq)->getData();
                 $organisation = !empty($res->data) ? $res->data : [];
 
-                if (!empty($organisation) && $organisation->active && $organisation->approved) {
+                if (!empty($organisation) &&
+                    $organisation->active == Organisation::ACTIVE_TRUE &&
+                    $organisation->approved == Organisation::APPROVED_TRUE) {
+
                     // set resource format code
                     $resource->format_code = Resource::getFormatsCode($resource->file_format);
 
@@ -687,11 +698,12 @@ class OrganisationController extends Controller {
         $result = $api->getOrganisationDetails($rq)->getData();
 
         if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active && $result->data->approved) {
+            $result->data->active == Organisation::ACTIVE_TRUE &&
+            $result->data->approved == Organisation::APPROVED_TRUE) {
 
             $params = [
                 'criteria' => [
-                    'org_id' => $result->data->id,
+                    'org_ids' => [$result->data->id],
                     'locale' => $locale
                 ]
             ];

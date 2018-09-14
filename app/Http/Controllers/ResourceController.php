@@ -120,10 +120,9 @@ class ResourceController extends Controller {
             if ($result->success) {
                 $uri = $result->data->uri;
 
-                if (
-                    !empty($extension)
-                    && $metadata['data']['type'] !== Resource::TYPE_HYPERLINK
-                ) {
+                if ($metadata['data']['type'] == Resource::TYPE_HYPERLINK) {
+                    $success = true;
+                } else if (!empty($extension)) {
                     $convertData = [
                         'api_key'   => $apiKey,
                         'data'      => $content,

@@ -678,5 +678,5 @@ return [
     'signal_subject' => 'Signal for a problem with dataset',
     'signal_title' => 'Signal for a problem',
     'you_have_received_signal' => 'a problem with resource "%s" published to your dataset has been reported',
-    'valid_types' => 'Valid types',
+    'valid_file_types' => 'Valid types',
 ];

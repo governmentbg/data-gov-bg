@@ -52,7 +52,7 @@ class CategoryController extends ApiController
             if ($validator->errors()->has('icon_mimetype')) {
                 $validator->errors()->add(
                     'file',
-                    $validator->errors()->first('icon_mimetype') .' '. __('custom.valid_types') .': '. env('THEME_FILE_MIMES')
+                    $validator->errors()->first('icon_mimetype') .' '. __('custom.valid_file_types') .': '. env('THEME_FILE_MIMES')
                 );
             }
 

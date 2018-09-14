@@ -70,7 +70,7 @@
                                         <button name="edit" class="badge badge-pill" type="submit">{{ uctrans('custom.edit') }}</button>
                                         <span class="badge badge-pill red">
                                             <a
-                                                href="{{ url('/admin/documents/delete/'. $model->id) }}"
+                                                href="{{ url('/admin/images/delete/'. $model->id) }}"
                                                 data-confirm="{{ __('custom.remove_data') }}"
                                             >{{ __('custom.delete') }}</a>
                                         </span>

@@ -87,7 +87,10 @@ class ThemeController extends AdminController
                     $params['filename'] = $request->file->getClientOriginalName();
                     $path = $request->file->getPathName();
                     $params['data'] = \File::get($path);
-                    $params['mimetype'] = $request->file->getMimeType();
+                    $ext = $request->file->getClientOriginalExtension();
+                    $params['mimetype'] = $ext == Category::IMG_EXT_SVG
+                        ? Category::IMG_MIME_SVG
+                        : $request->file->getMimeType();
                 }
 
                 $rq = Request::create('/api/addMainCategory', 'POST', [
@@ -96,6 +99,7 @@ class ThemeController extends AdminController
                         'icon_filename'    => isset($params['filename']) ? $params['filename'] : null,
                         'icon_mimetype'    => isset($params['mimetype']) ? $params['mimetype'] : null,
                         'icon_data'        => isset($params['data']) ? $params['data'] : null,
+                        'ordering'         => $request->offsetGet('ordering'),
                     ]
                 ]);
                 $api = new ApiCategory($rq);
@@ -186,7 +190,7 @@ class ThemeController extends AdminController
                         'icon_filename'    => isset($params['filename']) ? $params['filename'] : null,
                         'icon_mimetype'    => isset($params['mimetype']) ? $params['mimetype'] : null,
                         'icon_data'        => isset($params['data']) ? $params['data'] : null,
-                        'ordering'         => $request->offsetGet('order'),
+                        'ordering'         => $request->offsetGet('ordering'),
                     ]
                 ]);
 

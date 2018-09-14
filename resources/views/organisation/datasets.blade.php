@@ -126,7 +126,6 @@
                 @endif
                 </div>
             </div>
-            @include('partials.pagination')
             <div class="articles">
             @if ($resultsCount > 0)
                 <div class="col-lg-12 p-h-xxs p-l-r-none">
@@ -164,21 +163,14 @@
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
                                 <div class="col-sm-2 col-xs-4 logo">
-                                    <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">
-                                        <img
-                                            alt="{{ $organisation->name }}"
-                                            class="img-responsive"
-                                            src="{{ $organisation->logo }}"
-                                        >
+                                    <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" title="{{ $organisation->name }}">
+                                        <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
                                     </a>
                                 </div>
                                 <div class="socialPadding p-w-sm">
                                     <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
                                     <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
                                     <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
-                                </div>
-                                <div class="sendMail m-r-sm">
-                                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
                                 </div>
                                 @if ($approved)
                                     <div class="status p-w-sm">
@@ -208,7 +200,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <h2><a href="{{ url('/organisation/'. $organisation->uri .'/dataset/'. $dataset->uri) }}">{{ $dataset->name }}</a></h2>
+                            <h2><a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">{{ $dataset->name }}</a></h2>
                             <p>{{ $dataset->descript }}</p>
                             <div class="col-sm-12 p-l-none">
                                 <div class="tags pull-left">
@@ -222,7 +214,7 @@
                                 </div>
                                 <div class="pull-right">
                                     <span class="badge badge-pill">
-                                        <a href="{{ url('/organisation/'. $organisation->uri .'/dataset/'. $dataset->uri) }}">{{ uctrans('custom.see_more') }}</a>
+                                        <a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">{{ uctrans('custom.see_more') }}</a>
                                     </span>
                                 </div>
                             </div>

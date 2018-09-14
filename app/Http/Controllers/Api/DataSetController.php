@@ -566,8 +566,13 @@ class DataSetController extends ApiController
                     if (!empty($criteria['status'])) {
                         $query->where('status', $criteria['status']);
                     }
+
+                    if (!empty($criteria['visibility'])) {
+                        $query->where('visibility', $criteria['visibility']);
+                    }
                 } else {
-                    $query->where('status', Dataset::STATUS_PUBLISHED);
+                    $query->where('status', DataSet::STATUS_PUBLISHED);
+                    $query->where('visibility', DataSet::VISIBILITY_PUBLIC);
                 }
 
                 if (!empty($criteria['dataset_ids'])) {
@@ -577,10 +582,6 @@ class DataSetController extends ApiController
                 if (!empty($criteria['keywords'])) {
                     $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
                     $query->whereIn('id', $ids);
-                }
-
-                if (!empty($criteria['visibility'])) {
-                    $query->where('visibility', $criteria['visibility']);
                 }
 
                 if (isset($criteria['user_datasets_only']) && $criteria['user_datasets_only']) {

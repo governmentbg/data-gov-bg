@@ -45,19 +45,14 @@ class DataRequestController extends ApiController
                 'org_id'           => 'required|integer|digits_between:1,10',
                 'description'      => 'required|string|max:191',
                 'published_url'    => 'nullable|string|max:191',
+                'email'            => 'sometimes|email|max:191',
                 'contact_name'     => 'nullable|string|max:191',
                 'notes'            => 'nullable|string|max:8000',
                 'status'           => 'nullable|integer|digits_between:1,3',
             ]);
         }
 
-        if (isset($requestData['data']['email']) && $requestData['data']['email'] != null) {
-            if (!$validator->fails()) {
-                $validator = Validator::make($requestData['data'], [
-                    'email' => 'sometimes|email|max:191'
-                ]);
-            }
-        } else {
+        if (!isset($requestData['data']['email'])) {
             $requestData['data']['email'] = '';
         }
 

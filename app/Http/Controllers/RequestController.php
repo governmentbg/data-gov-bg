@@ -29,10 +29,13 @@ class RequestController extends Controller {
     public function sendDataRequest(Request $request)
     {
         if ($request->has('save')) {
+
             $requestData['description'] = $request['description'];
             $requestData['published_url'] = isset($request['published_url']) ? $request['published_url'] : null;
             $requestData['contact_name'] = isset($request['contact_name']) ? $request['contact_name'] : null;
-            $requestData['email'] = isset($request['email']) ? $request['email'] : null;
+            if (!is_null($request['email'])) {
+                $requestData['email'] = $request['email'];
+            }
             $requestData['notes'] = isset($request['notes']) ? $request['notes'] : null;
             $requestData['org_id'] = $request['org_id'];
 

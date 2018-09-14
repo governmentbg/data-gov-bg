@@ -679,4 +679,11 @@ return [
     'signal_title' => 'Signal for a problem',
     'you_have_received_signal' => 'a problem with resource "%s" published to your dataset has been reported',
     'valid_file_types' => 'Valid types',
+    'success_data_request' => 'Data request sent successfully',
+    'new_data_request' => 'New Data Request',
+    'your_org' => 'The organisation you are administrating has received a data request with the following data',
+    'no_contact_provided' => 'No contact name provided',
+    'no_email_provided' => 'No email provided',
+    'no_info_provided' => 'No information provided',
+    'published_url' => 'Published url',
 ];

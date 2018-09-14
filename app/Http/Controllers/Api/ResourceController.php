@@ -584,6 +584,7 @@ class ResourceController extends ApiController
 
             foreach ($query->get() as $result) {
                 $results[] = [
+                    'id'                    => $result->id,
                     'uri'                   => $result->uri,
                     'dataset_uri'           => isset($result->dataSet->uri) ? $result->dataSet->uri : null,
                     'name'                  => $result->name,
@@ -649,6 +650,7 @@ class ResourceController extends ApiController
 
             if ($resource) {
                 $data = [
+                    'id'                    => $resource->id,
                     'uri'                   => $resource->uri,
                     'dataset_uri'           => $resource->dataSet->uri,
                     'name'                  => $resource->name,

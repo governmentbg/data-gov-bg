@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\RoleRight;
 use App\Signal;
 use \Validator;
@@ -13,6 +15,7 @@ use App\Module;
 use App\DataSet;
 use App\Resource;
 use App\ActionsHistory;
+use App\User;
 
 class SignalController extends ApiController
 {
@@ -39,17 +42,19 @@ class SignalController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($signalData['data'], [
-                'resource_id'  => 'required|integer|digits_between:1,10',
+                'resource_id'  => 'required|integer|digits_between:1,10|exists:resources,id',
                 'description'  => 'required|string|max:8000',
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
                 'email'        => 'required|email|max:191',
-                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses())),
+                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses()))
             ]);
         }
 
         if (!$validator->fails()) {
             try {
+                DB::beginTransaction();
+
                 $newSignal = new Signal;
 
                 $newSignal->resource_id = $signalData['data']['resource_id'];
@@ -71,8 +76,10 @@ class SignalController extends ApiController
                 if ($saved) {
                     $resource = Resource::where('id', $newSignal->resource_id)->first();
                     $resource->is_reported = Resource::REPORTED_TRUE;
-                    $resource->save();
+                    $saved = $resource->save();
                 }
+
+                DB::commit();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
@@ -82,10 +89,35 @@ class SignalController extends ApiController
                 ];
 
                 Module::add($logData);
+            } catch (QueryException $e) {
+                $saved = false;
+
+                DB::rollback();
+
+                Log::error($e->getMessage());
+            }
+
+            if ($saved) {
+                try {
+                    if (($user = User::find($resource->created_by)) && !empty($user->email)) {
+                        $mailData = [
+                            'user'          => $user->firstname ?: $user->username,
+                            'resource_name' => $resource->name,
+                            'dataset_uri'   => $resource->dataSet->uri,
+                            'dataset_name'  => $resource->dataSet->name,
+                        ];
+
+                        Mail::send('mail/signalMail', $mailData, function ($m) use ($user) {
+                            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                            $m->to($user->email, $user->firstname);
+                            $m->subject(__('custom.signal_subject'));
+                        });
+                    }
+                } catch (\Exception $ex) {
+                    Log::error($ex->getMessage());
+                }
 
                 return $this->successResponse(['signal_id :' . $newSignal->id]);
-            } catch (QueryException $e) {
-                Log::error($e->getMessage());
             }
         }
 

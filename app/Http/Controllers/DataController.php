@@ -19,15 +19,13 @@ class DataController extends Controller {
     }
 
     /**
-     * Show the application dashboard.
+     * List datasets
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     *
+     * @return view for browsing datasets
      */
-    public function index() {
-
-    }
-
-    public function view(Request $request)
+    public function list(Request $request)
     {
         $class = 'data';
 
@@ -45,6 +43,42 @@ class DataController extends Controller {
         $filter = $request->offsetGet('filter');
 
         return view('data/list', compact('class','mainCats', 'filter'));
+    }
+
+    public function view(Request $request, $uri)
+    {
+        return view('data/view', [
+            'class'     => 'data',
+            'filter'    => 'healthcare',
+            'mainCats'  => [
+                'healthcare',
+                'innovation',
+                'education',
+                'public_sector',
+                'municipalities',
+                'agriculture',
+                'justice',
+                'economy_business',
+            ],
+        ]);
+    }
+
+    public function resourceView(Request $request, $uri)
+    {
+        return view('data/view', [
+            'class'     => 'data',
+            'filter'    => 'healthcare',
+            'mainCats'  => [
+                'healthcare',
+                'innovation',
+                'education',
+                'public_sector',
+                'municipalities',
+                'agriculture',
+                'justice',
+                'economy_business',
+            ],
+        ]);
     }
 
     public function linkedData(Request $request)

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TagController as ApiTag;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
+use App\Http\Controllers\Api\SignalController as ApiSignal;
 use Illuminate\Http\Request;
 
 class OrganisationController extends Controller {
@@ -223,7 +224,7 @@ class OrganisationController extends Controller {
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
-        // get organisation details by uri
+        // get organisation details
         $params = [
             'org_uri' => $uri,
             'locale'  => $locale
@@ -498,30 +499,35 @@ class OrganisationController extends Controller {
         }
     }
 
-    public function viewDataset(Request $request, $orgUri, $uri)
+    public function viewDataset(Request $request, $uri)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
+        // get dataset details
         $params = [
-            'org_uri' => $orgUri,
+            'dataset_uri' => $uri,
             'locale'  => $locale
         ];
-        $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
-        $api = new ApiOrganisation($rq);
-        $result = $api->getOrganisationDetails($rq)->getData();
+        $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $res = $api->getDataSetDetails($rq)->getData();
+        $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
 
-        if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active && $result->data->approved) {
+        if (!empty($dataset) && isset($dataset->org_id) &&
+            $dataset->status == DataSet::STATUS_PUBLISHED &&
+            $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
 
+            // get organisation details
             $params = [
-                'dataset_uri' => $uri
+                'org_id' => $dataset->org_id,
+                'locale'  => $locale
             ];
-            $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
-            $api = new ApiDataSet($rq);
-            $res = $api->getDataSetDetails($rq)->getData();
-            $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
+            $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+            $api = new ApiOrganisation($rq);
+            $res = $api->getOrganisationDetails($rq)->getData();
+            $organisation = !empty($res->data) ? $res->data : [];
 
-            if (!empty($dataset)) {
+            if (!empty($organisation) && $organisation->active && $organisation->approved) {
                 $params = [
                     'criteria' => [
                         'dataset_uri' => $uri
@@ -562,8 +568,8 @@ class OrganisationController extends Controller {
                     'organisation/viewDataset',
                     [
                         'class'          => 'organisation',
-                        'organisation'   => $result->data,
-                        'approved'       => ($result->data->type == Organisation::TYPE_COUNTRY),
+                        'organisation'   => $organisation,
+                        'approved'       => ($organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'        => $dataset,
                         'resources'      => $resources
                     ]
@@ -572,6 +578,99 @@ class OrganisationController extends Controller {
         }
 
         return redirect()->back();
+    }
+
+    public function resourceView(Request $request, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'resource_uri' => $uri,
+            'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceMetadata($rq)->getData();
+        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+
+        if (!empty($resource) && isset($resource->dataset_uri)) {
+            // get dataset details
+            $params = [
+                'dataset_uri' => $resource->dataset_uri,
+                'locale'  => $locale
+            ];
+            $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->getDataSetDetails($rq)->getData();
+            $dataset = !empty($res->data) ? $res->data : [];
+
+            if (!empty($dataset) && isset($dataset->org_id) &&
+                $dataset->status == DataSet::STATUS_PUBLISHED &&
+                $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+
+                // get organisation details
+                $params = [
+                    'org_id' => $dataset->org_id,
+                    'locale'  => $locale
+                ];
+                $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+                $api = new ApiOrganisation($rq);
+                $res = $api->getOrganisationDetails($rq)->getData();
+                $organisation = !empty($res->data) ? $res->data : [];
+
+                if (!empty($organisation) && $organisation->active && $organisation->approved) {
+                    // set resource format code
+                    $resource->format_code = Resource::getFormatsCode($resource->file_format);
+
+                    // get resource data
+                    $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri]);
+                    $api = new ApiResource($rq);
+                    $res = $api->getResourceData($rq)->getData();
+                    $data = !empty($res->data) ? $res->data : [];
+
+                    $userData = [];
+                    if (\Auth::check()) {
+                        $userData['firstname'] =  \Auth::user()->firstname;
+                        $userData['lastname'] =  \Auth::user()->lastname;
+                        $userData['email'] =  \Auth::user()->email;
+                    }
+
+                    return view(
+                        'organisation/resourceView',
+                        [
+                            'class'          => 'organisation',
+                            'organisation'   => $organisation,
+                            'approved'       => ($organisation->type == Organisation::TYPE_COUNTRY),
+                            'dataset'        => $dataset,
+                            'resource'       => $resource,
+                            'data'           => $data,
+                            'userData'       => $userData
+                        ]
+                    );
+                }
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Send signal for resource
+     *
+     * @param Request $request
+     *
+     * @return json response with result
+     */
+    public function sendSignal(Request $request)
+    {
+        $params = [
+            'data' => $request->only(['resource_id', 'firstname', 'lastname', 'email', 'description'])
+        ];
+        $sendRequest = Request::create('api/sendSignal', 'POST', $params);
+        $api = new ApiSignal($sendRequest);
+        $result = $api->sendSignal($sendRequest)->getData();
+
+        return json_encode($result);
     }
 
     public function chronology(Request $request, $uri)

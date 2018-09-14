@@ -27,6 +27,17 @@
         @endif
     </div>
     <div class="row">
+        <div class="org col-sm-3 col-xs-12 m-t-lg">
+            <img src="{{ $organisation->logo }}">
+            <h2 class="elipsis-1">{{ $organisation->name }}</h2>
+            <h4>{{ truncate($organisation->descript, 150) }}</h4>
+            <p class="text-right show-more">
+                <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+            </p>
+        </div>
+        <div class="col-sm-9 col-xs-12"></div>
+    </div>
+    <div class="row">
         <div class="col-xs-12 m-t-md">
             <div class="row">
                 <div class="col-xs-12">

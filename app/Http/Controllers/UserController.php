@@ -269,6 +269,8 @@ class UserController extends Controller {
             return back();
         }
 
+        $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
+
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_VIEW,

@@ -89,7 +89,7 @@ class ActionsHistoryController extends ApiController
         }
 
         $history = ActionsHistory::select(
-            'id',
+            'actions_history.id',
             'occurrence',
             'module_name',
             'action',
@@ -97,7 +97,7 @@ class ActionsHistoryController extends ApiController
             'action_msg',
             'user_id',
             'ip_address'
-        )->with('user:id,username,firstname,lastname');
+        )->join('users', 'users.id', '=', 'actions_history.user_id');
 
         if (isset($criteria['period_from'])) {
             $history->where('occurrence', '>=', $criteria['period_from']);
@@ -180,7 +180,7 @@ class ActionsHistoryController extends ApiController
 
         $count = $history->count();
 
-        if (!empty($order) && $order['field'] != 'username') {
+        if (!empty($order)) {
             $history->orderBy($order['field'], $order['type']);
         }
 
@@ -210,14 +210,6 @@ class ActionsHistoryController extends ApiController
                         'ip_address'     => $record->ip_address,
                     ];
                 }
-            }
-
-            if ($order && $order['field'] == 'username') {
-                usort($results, function($a, $b) use ($order) {
-                    return strtolower($order['type']) == 'asc'
-                        ? strcmp($a['user'], $b['user'])
-                        : strcmp($b['user'], $a['user']);
-                });
             }
         }
 

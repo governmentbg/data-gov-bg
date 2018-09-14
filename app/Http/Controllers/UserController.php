@@ -3118,6 +3118,7 @@ class UserController extends Controller {
 
                 if (!empty($userFollows['org_id'])) {
                     $params = [
+                        'api_key'  => $user->api_key,
                         'criteria' => [
                             'org_ids' => $userFollows['org_id'],
                             'locale' => $locale

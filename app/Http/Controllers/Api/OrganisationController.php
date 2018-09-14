@@ -1031,7 +1031,10 @@ class OrganisationController extends ApiController
                     foreach ($relations as $v) {
                         $ids[] = $v->id;
                     }
-                    $count = DataSet::whereIn('id', $ids)->where('status', DataSet::STATUS_PUBLISHED)->count();
+                    $count = DataSet::whereIn('id', $ids)
+                        ->where('status', DataSet::STATUS_PUBLISHED)
+                        ->where('visibility', DataSet::VISIBILITY_PUBLIC)
+                        ->count();
                     $result['datasets_count'] = $count;
 
                     return $this->successResponse($result);

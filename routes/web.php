@@ -276,41 +276,9 @@ Route::get('terms', function () {
     return view('terms', ['class' => 'index']);
 });
 
-Route::match(['get', 'post'], 'data', 'DataController@view')->name('dataView');
-
-Route::get('data/view/{uri}', function () {
-    return view('data/view', [
-        'class'     => 'data',
-        'filter'    => 'healthcare',
-        'mainCats'  => [
-            'healthcare',
-            'innovation',
-            'education',
-            'public_sector',
-            'municipalities',
-            'agriculture',
-            'justice',
-            'economy_business',
-        ],
-    ]);
-});
-
-Route::get('data/resourceView/{uri}', function () {
-    return view('data/view', [
-        'class'     => 'data',
-        'filter'    => 'healthcare',
-        'mainCats'  => [
-            'healthcare',
-            'innovation',
-            'education',
-            'public_sector',
-            'municipalities',
-            'agriculture',
-            'justice',
-            'economy_business',
-        ],
-    ]);
-});
+Route::match(['get', 'post'], 'data', 'DataController@list');
+Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
+Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView');
 
 Route::match(['get', 'post'], 'data/linkedData', 'DataController@linkedData');
 
@@ -335,11 +303,13 @@ Route::get('data/reportedView', function () {
     return view('data/reportedView', ['class' => 'data-attention']);
 });
 
-Route::match(['get', 'post'], 'organisation', 'OrganisationController@list')->name('orgList');
+Route::match(['get', 'post'], 'organisation', 'OrganisationController@list');
 Route::match(['get', 'post'], 'organisation/profile/{uri}', 'OrganisationController@view');
 
 Route::match(['get', 'post'], 'organisation/{uri}/datasets', 'OrganisationController@datasets');
-Route::match(['get', 'post'], 'organisation/{orgUri}/dataset/{uri}', 'OrganisationController@viewDataset');
+Route::match(['get', 'post'], 'organisation/dataset/{uri}', 'OrganisationController@viewDataset');
+Route::match(['get', 'post'], 'organisation/datasets/resourceView/{uri}', 'OrganisationController@resourceView');
+Route::post('organisation/resource/sendSignal', 'OrganisationController@sendSignal');
 
 Route::match(['get', 'post'], 'organisation/{uri}/chronology', 'OrganisationController@chronology');
 

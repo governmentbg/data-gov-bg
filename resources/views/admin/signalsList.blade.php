@@ -164,7 +164,7 @@
                                                 'Admin\SignalController@list',
                                                 array_merge(
                                                     ['status' => $key],
-                                                    array_except(app('request')->input(), ['status'])
+                                                    array_except(app('request')->input(), ['status', 'page'])
                                                 )
                                             )
                                         }}"
@@ -182,7 +182,7 @@
                                     href="{{
                                         action(
                                             'Admin\SignalController@list',
-                                            array_except(app('request')->input(), ['status'])
+                                            array_except(app('request')->input(), ['status', 'page'])
                                         )
                                     }}"
                                 >{{ uctrans('custom.all') }}</a>

@@ -3,7 +3,11 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'setting'])
+    @if (App\Role::isAdmin())
+        @include('partials.admin-nav-bar', ['view' => 'setting'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'setting'])
+    @endif
     <div class="col-xs-12 m-t-lg">
         <form class="m-t-lg p-sm" method="post">
             {{ csrf_field() }}

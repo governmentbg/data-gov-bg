@@ -39,6 +39,7 @@ class OrganisationController extends AdminController
         if (Role::isAdmin()) {
             $perPage = 6;
             $params = [
+                'api_key'          => Auth::user()->api_key,
                 'records_per_page' => $perPage,
                 'page_number'      => !empty($request->page) ? $request->page : 1,
             ];

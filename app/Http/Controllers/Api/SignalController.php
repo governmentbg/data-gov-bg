@@ -79,8 +79,6 @@ class SignalController extends ApiController
                     $saved = $resource->save();
                 }
 
-                DB::commit();
-
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
                     'action'           => ActionsHistory::TYPE_ADD,
@@ -89,6 +87,8 @@ class SignalController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
             } catch (QueryException $e) {
                 $saved = false;
 

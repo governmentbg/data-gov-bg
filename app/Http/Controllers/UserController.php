@@ -2488,6 +2488,10 @@ class UserController extends Controller {
                     return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
+                if(empty($roleId)) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
+                }
+
                 $rq = Request::create('/api/editMember', 'POST', [
                     'org_id'    => $org->id,
                     'user_id'   => $userId,
@@ -4981,6 +4985,10 @@ class UserController extends Controller {
 
                 if (!$rightCheck) {
                     return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
+
+                if(empty($roleId)) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
                 }
 
                 $rq = Request::create('/api/editMember', 'POST', [

@@ -89,7 +89,7 @@
                                                 'Admin\TermsOfUseRequestController@list',
                                                 array_merge(
                                                     ['status' => $key],
-                                                    array_except(app('request')->input(), ['status'])
+                                                    array_except(app('request')->input(), ['status', 'page'])
                                                 )
                                             )
                                         }}"
@@ -107,7 +107,7 @@
                                     href="{{
                                         action(
                                             'Admin\TermsOfUseRequestController@list',
-                                            array_except(app('request')->input(), ['status'])
+                                            array_except(app('request')->input(), ['status', 'page'])
                                         )
                                     }}"
                                 >{{ uctrans('custom.all') }}</a>
@@ -128,18 +128,15 @@
                                 value="{{ isset($search) ? $search : '' }}"
                                 name="q"
                             >
-                            @if (isset(app('request')->input()['status']))
-                                <input type="hidden" name="status" value="{{ app('request')->input()['status'] }}">
-                            @endif
-                            @if (isset(app('request')->input()['order']))
-                                <input type="hidden" name="order" value="{{ app('request')->input()['order'] }}">
-                            @endif
-                            @if (isset(app('request')->input()['from']))
-                                <input type="hidden" name="from" value="{{ app('request')->input()['from'] }}">
-                            @endif
-                            @if (isset(app('request')->input()['to']))
-                                <input type="hidden" name="to" value="{{ app('request')->input()['to'] }}">
-                            @endif
+                            @foreach (app('request')->except(['q', 'page']) as $key => $value)
+                                @if (is_array($value))
+                                    @foreach ($value as $innerValue)
+                                        <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
+                                    @endforeach
+                                @else
+                                    <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                                @endif
+                            @endforeach
                         </form>
                     </div>
                 </div>

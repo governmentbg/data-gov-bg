@@ -195,19 +195,21 @@ class ActionsHistoryController extends ApiController
 
         if (!empty($history)) {
             foreach ($history as $key => $record) {
-                $results[] = [
-                    'id'             => $record->id,
-                    'user_id'        => $record->user->id,
-                    'user'           => $record->user->username,
-                    'user_firstname' => $record->user->firstname,
-                    'user_lastname'  => $record->user->lastname,
-                    'occurrence'     => $record->occurrence,
-                    'module'         => $record->module_name,
-                    'action'         => $record->action,
-                    'action_object'  => $record->action_object,
-                    'action_msg'     => $record->action_msg,
-                    'ip_address'     => $record->ip_address,
-                ];
+                if (!empty($record->user)) {
+                    $results[] = [
+                        'id'             => $record->id,
+                        'user_id'        => $record->user->id,
+                        'user'           => $record->user->username,
+                        'user_firstname' => $record->user->firstname,
+                        'user_lastname'  => $record->user->lastname,
+                        'occurrence'     => $record->occurrence,
+                        'module'         => $record->module_name,
+                        'action'         => $record->action,
+                        'action_object'  => $record->action_object,
+                        'action_msg'     => $record->action_msg,
+                        'ip_address'     => $record->ip_address,
+                    ];
+                }
             }
 
             if ($order && $order['field'] == 'username') {

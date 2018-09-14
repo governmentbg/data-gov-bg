@@ -494,6 +494,7 @@ class DataSetController extends ApiController
      * @param array criteria[formats] - optional
      * @param integer criteria[reported] - optional
      * @param integer criteria[created_by] - optional
+     * @param array criteria[user_ids] - optional
      * @param boolean criteria[user_datasets_only] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
@@ -521,19 +522,27 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
                 'dataset_ids'         => 'nullable|array',
+                'dataset_ids.*'       => 'int|digits_between:1,10',
                 'locale'              => 'nullable|string|max:5',
                 'org_ids'             => 'nullable|array',
+                'org_ids.*'           => 'int|digits_between:1,10',
                 'group_ids'           => 'nullable|array',
+                'group_ids.*'         => 'int|digits_between:1,10',
                 'category_ids'        => 'nullable|array',
+                'category_ids.*'      => 'int|digits_between:1,10',
                 'tag_ids'             => 'nullable|array',
+                'tag_ids.*'           => 'int|digits_between:1,10',
                 'formats'             => 'nullable|array|min:1',
                 'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
                 'terms_of_use_ids'    => 'nullable|array',
+                'terms_of_use_ids.*'  => 'int|digits_between:1,10',
                 'keywords'            => 'nullable|string|max:191',
                 'status'              => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
                 'visibility'          => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
                 'reported'            => 'nullable|int|digits_between:1,10',
                 'created_by'          => 'nullable|int|digits_between:1,10',
+                'user_ids'            => 'nullable|array',
+                'user_ids.*'          => 'int|digits_between:1,10',
                 'user_datasets_only'  => 'nullable|bool',
                 'order'               => 'nullable|array',
             ]);
@@ -630,7 +639,9 @@ class DataSetController extends ApiController
                     });
                 }
 
-                if (!empty($criteria['created_by'])) {
+                if (!empty($criteria['user_ids'])) {
+                    $query->whereIn('created_by', $criteria['user_ids']);
+                } elseif (!empty($criteria['created_by'])) {
                     $query->where('created_by', $criteria['created_by']);
                 }
 

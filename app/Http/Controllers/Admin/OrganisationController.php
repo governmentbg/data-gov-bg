@@ -367,6 +367,10 @@ class OrganisationController extends AdminController
 
             if ($org) {
                 if ($request->has('edit_member')) {
+                    if(empty($roleId)) {
+                        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
+                    }
+
                     $rq = Request::create('/api/editMember', 'POST', [
                         'org_id'    => $org->id,
                         'user_id'   => $userId,
@@ -520,7 +524,7 @@ class OrganisationController extends AdminController
                         ],
                     ];
 
-                    $rq = Request::create('/api/addUser', 'POST', $post);
+                    $rq = Request::create('/api/register', 'POST', $post);
                     $api = new ApiUser($rq);
                     $result = $api->register($rq)->getData();
 

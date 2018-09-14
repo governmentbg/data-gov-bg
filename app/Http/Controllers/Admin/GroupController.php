@@ -302,6 +302,10 @@ class GroupController extends AdminController
 
             if ($group) {
                 if ($request->has('edit_member')) {
+                    if(empty($roleId)) {
+                        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
+                    }
+
                     $rq = Request::create('/api/editMember', 'POST', [
                         'org_id'    => $group->id,
                         'user_id'   => $userId,
@@ -455,7 +459,7 @@ class GroupController extends AdminController
                         ],
                     ];
 
-                    $rq = Request::create('/api/addUser', 'POST', $post);
+                    $rq = Request::create('/api/register', 'POST', $post);
                     $api = new ApiUser($rq);
                     $result = $api->register($rq)->getData();
 

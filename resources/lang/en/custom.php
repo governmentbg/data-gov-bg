@@ -686,4 +686,5 @@ return [
     'no_email_provided' => 'No email provided',
     'no_info_provided' => 'No information provided',
     'published_url' => 'Published url',
+    'empty_role' => 'Role field can not be empty!'
 ];

@@ -340,13 +340,9 @@ Route::get('news/view', function () {
     return view('news/view', ['class' => 'news']);
 });
 
-Route::get('document', function () {
-    return view('document/list', ['class' => 'documents']);
-});
-
-Route::get('document/view', function () {
-    return view('document/view', ['class' => 'documents']);
-});
+Route::match(['get', 'post'], 'document', 'DocumentController@listDocuments');
+Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocuments');
+Route::match(['get', 'post'], 'document/view/{id}', 'DocumentController@viewDocument');
 
 Route::get('contact', function () {
     return view('contact/contact', ['class' => 'contact']);

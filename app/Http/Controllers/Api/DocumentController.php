@@ -333,15 +333,6 @@ class DocumentController extends ApiController
             return $this->errorResponse(__('custom.list_document_fail'), $validator->errors()->messages());
         }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::DOCUMENTS,
-            RoleRight::RIGHT_VIEW
-        );
-
-        if (!$rightCheck) {
-            return $this->errorResponse(__('custom.access_denied'));
-        }
-
         $result = [];
 
         $columns = [
@@ -497,15 +488,6 @@ class DocumentController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::DOCUMENTS,
-                RoleRight::RIGHT_VIEW
-            );
-
-            if (!$rightCheck) {
-                return $this->errorResponse(__('custom.access_denied'));
-            }
-
             $data = [];
             $criteria = $post['criteria'];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';

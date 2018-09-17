@@ -2,20 +2,6 @@
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg" enctype="multipart/form-data">
         {{ csrf_field() }}
-        @foreach ($fields as $field)
-            @if ($field['view'] == 'translation')
-                @include(
-                    'components.form_groups.translation_input',
-                    ['field' => $field, 'result' => session('result')]
-                )
-            @elseif ($field['view'] == 'translation_txt')
-                @include(
-                    'components.form_groups.translation_textarea',
-                    ['field' => $field, 'result' => session('result')]
-                )
-            @endif
-        @endforeach
-
         <div class="form-group row required">
             <label for="type" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.type', 1) }}:</label>
             <div class="col-sm-9">
@@ -23,12 +9,13 @@
                     id="type"
                     class="js-select js-ress-type input-border-r-12 form-control"
                     name="type"
+                    disabled
                 >
                     <option value=""> {{ utrans('custom.type') }}</option>
                     @foreach ($types as $id => $type)
                         <option
                             value="{{ $id }}"
-                            {{ $id == old('type') ? 'selected' : '' }}
+                            {{ $id == $resource->resource_type ? 'selected' : '' }}
                         >{{ $type }}</option>
                     @endforeach
                 </select>
@@ -38,7 +25,7 @@
 
         <div
             class="form-group row required js-ress-file"
-            {{ old('type') == \App\Resource::TYPE_FILE ? null : 'hidden' }}
+            {{ $resource->resource_type == \App\Resource::TYPE_FILE ? null : 'hidden' }}
         >
             <label for="file" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file', 1) }}:</label>
             <div class="col-sm-9">
@@ -53,7 +40,10 @@
 
         <div
             class="form-group row required js-ress-url js-ress-api"
-            {{ old('type') == \App\Resource::TYPE_HYPERLINK ? null : 'hidden' }}
+            {{
+                ($resource->resource_type == \App\Resource::TYPE_HYPERLINK)
+                || ($resource->resource_type == \App\Resource::TYPE_API)
+                ? null : 'hidden' }}
         >
             <label for="url" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.url') }}:</label>
             <div class="col-sm-9">
@@ -62,13 +52,16 @@
                     class="input-border-r-12 form-control"
                     name="resource_url"
                     type="text"
-                    value="{{ old('resource_url') }}"
+                    value="{{ $resource->resource_url }}"
                 >
                 <span class="error">{{ $errors->first('resource_url') }}</span>
             </div>
         </div>
 
-        <div class="js-ress-api " hidden>
+        <div
+            class="js-ress-api"
+            {{ ($resource->resource_type == \App\Resource::TYPE_API) ? null : 'hidden' }}
+        >
             <div class="js-ress-api form-group row required">
                 <label
                     for="rqtype"
@@ -84,7 +77,7 @@
                         @foreach ($reqTypes as $id => $rqType)
                             <option
                                 value="{{ $rqType }}"
-                                {{ $rqType == old('http_rq_type') ? 'selected' : '' }}
+                                {{ $rqType == $resource->http_rq_type ? 'selected' : '' }}
                             >{{ $rqType }}</option>
                         @endforeach
                     </select>
@@ -98,7 +91,7 @@
                         id="headers"
                         class="input-border-r-12 form-control"
                         name="http_headers"
-                    >{{ old('http_headers') }}</textarea>
+                    >{{ $resource->http_headers }}</textarea>
                     <span class="error">{{ $errors->first('http_headers') }}</span>
                 </div>
             </div>
@@ -109,7 +102,7 @@
                         id="request"
                         class="input-border-r-12 form-control"
                         name="post_data"
-                    >{{ old('post_data') }}</textarea>
+                    >{{ $resource->post_data }}</textarea>
                     <span class="error">{{ $errors->first('post_data') }}</span>
                 </div>
             </div>
@@ -122,11 +115,10 @@
                     id="schema_desc"
                     class="input-border-r-12 form-control"
                     name="schema_description"
-                >{{ old('schema_description') }}</textarea>
+                >{{ $resource->schema_descript }}</textarea>
                 <span class="error">{{ $errors->first('schema_description') }}</span>
             </div>
         </div>
-
         <div class="form-group row ">
             <label for="schema_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_url') }}:</label>
             <div class="col-sm-9">
@@ -135,12 +127,11 @@
                     class="input-border-r-12 form-control"
                     name="schema_url"
                     type="text"
-                    value="{{ old('schema_url') }}"
+                    value="{{ $resource->schema_url }}"
                 >
                 <span class="error">{{ $errors->first('schema_url') }}</span>
             </div>
         </div>
-
         <div class="form-group row">
             <div class="col-sm-12 text-right">
                 <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>

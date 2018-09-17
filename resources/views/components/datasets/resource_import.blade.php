@@ -43,12 +43,12 @@
                         <input type="hidden" name="admin" value="1">
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
-                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                     <a
                         type="button"
                         href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
-                        class="m-l-md btn btn-danger">{{ __('custom.cancel') }}
+                        class="btn del-btn btn-primary">{{ __('custom.cancel') }}
                     </a>
+                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                 </div>
             </div>
         </form>
@@ -66,12 +66,12 @@
                         <input type="hidden" name="admin" value="1">
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
-                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                     <a
                         type="button"
                         href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
-                        class="m-l-md btn btn-danger">{{ __('custom.cancel') }}
+                        class="btn del-btn btn-primary">{{ __('custom.cancel') }}
                     </a>
+                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
                 </div>
             </div>
         </form>
@@ -89,16 +89,16 @@
                         <input type="hidden" name="admin" value="1">
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
+                    <a
+                        type="button"
+                        href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
+                        class="btn del-btn btn-primary">{{ __('custom.cancel') }}
+                    </a>
                     <button
                         name="ready_data"
                         type="submit"
                         class="m-l-md btn btn-primary"
                     >{{ __('custom.save') }}</button>
-                    <a
-                        type="button"
-                        href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
-                        class="m-l-md btn btn-danger">{{ __('custom.cancel') }}
-                    </a>
                 </div>
             </div>
         </form>

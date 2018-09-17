@@ -169,8 +169,10 @@ Route::middleware('auth')->group(function() {
             'Admin\DataSetController@resourceCreate'
         );
 
-        Route::match(['get', 'post'], 'user/resourceView/{uri}', 'UserController@resourceView')->name('resourceView');
-        Route::match(['get', 'post'], 'admin/resourceView/{uri}', 'Admin\DataSetController@resourceView');
+        Route::match(['get', 'post'], 'user/resource/view/{uri}', 'UserController@resourceView')->name('resourceView');
+        Route::match(['get', 'post'], 'admin/resource/view/{uri}', 'Admin\DataSetController@resourceView');
+        Route::match(['get', 'post'], 'user/resource/edit/{uri}', 'UserController@resourceEditMeta');
+        Route::match(['get', 'post'], 'admin/resource/edit/{uri}', 'Admin\DataSetController@resourceEditMeta');
         Route::match(['get', 'post'], 'user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
         Route::match(['get', 'post'], 'importCSV', 'ResourceController@importCsvData');
         Route::match(['get', 'post'], 'importElastic', 'ResourceController@importElasticData');
@@ -230,9 +232,10 @@ Route::middleware('auth')->group(function() {
             'UserController@delOrgMember'
         )->name('delOrgMember');
 
-        Route::match(['get', 'post'], '/admin/signals/list', 'Admin\SignalController@list');
-        Route::match(['get', 'post'], '/admin/signal/edit/{id}', 'Admin\SignalController@edit');
-        Route::match(['get', 'post'], '/admin/signal/delete/{id}', 'Admin\SignalController@delete');
+        Route::match(['get', 'post'], 'admin/signals/list', 'Admin\SignalController@list');
+        Route::match(['get', 'post'], 'admin/signal/edit/{id}', 'Admin\SignalController@edit');
+        Route::match(['get', 'post'], 'admin/signal/delete/{id}', 'Admin\SignalController@delete');
+        Route::match(['get', 'post'], 'signal/remove', 'UserController@removeSignal');
 
         Route::match(['get', 'post'], '/admin/sections/list', 'Admin\SectionController@list');
         Route::match(['get', 'post'], '/admin/sections/add', 'Admin\SectionController@add');

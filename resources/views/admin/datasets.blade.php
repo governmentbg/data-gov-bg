@@ -581,7 +581,7 @@
                             <div>{{ __('custom.date_added') }}: {{ $set->created_at }}</div>
                             <div class="col-sm-12 p-l-none">
                                 <a href="{{ url('/admin/dataset/view/'. $set->uri) }}">
-                                    <h2 class="m-t-xs">{{ $set->name }}</h2>
+                                    <h2 class="m-t-xs {{$set->reported ? 'error' : '' }}">{{ $set->name }}</h2>
                                 </a>
                                 @if ($set->status == App\DataSet::STATUS_DRAFT)
                                     <span>({{ __('custom.draft') }})</span>

@@ -313,13 +313,8 @@
             <div class="col-xs-12 text-right mng-btns">
                 <a
                     class="btn btn-primary"
-                    href="{{ url('/'. $root .'/resource/create/'. $dataSet->uri) }}"
+                    href="{{ url('/'. $root .'/dataset/resource/create/'. $dataSet->uri) }}"
                 >{{ uctrans('custom.add_resource') }}</a>
-                <a
-                    type="button"
-                    class="btn btn-primary"
-                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
-                >{{ uctrans('custom.preview') }}</a>
                 @if ($hasResources)
                     <button
                         type="submit"
@@ -327,6 +322,11 @@
                         class="btn btn-primary"
                     >{{ uctrans('custom.publish') }}</button>
                 @endif
+                <a
+                    type="button"
+                    class="btn btn-primary"
+                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                >{{ uctrans('custom.preview') }}</a>
                 <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
             </div>
         </div>

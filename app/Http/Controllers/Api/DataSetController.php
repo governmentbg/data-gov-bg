@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use Uuid;
 use App\Tags;
 use App\Module;
+use App\Signal;
 use App\DataSet;
 use App\Category;
 use App\Resource;
@@ -920,14 +921,36 @@ class DataSetController extends ApiController
 
                     $hasRes = $data->resource()->count();
 
+                    $allSignals = [];
                     if ($hasRes) {
-                        foreach ($data->resource as $resourse) {
-                            if ($resourse->is_reported) {
+                        foreach ($data->resource as $resource) {
+                            if ($resource->is_reported) {
                                 $data['reported'] = 1;
+                                $signals = Signal::where('resource_id', $resource->id)
+                                        ->where('status', Signal::STATUS_NEW)->get();
+                                if ($signals) {
+                                    foreach ($signals as $signal) {
+                                        $allSignals[] = [
+                                            'id'            => $signal->id,
+                                            'resource_name' => $resource->name,
+                                            'resource_uri'  => $resource->uri,
+                                            'description'   => $signal->descript,
+                                            'firstname'     => $signal->firstname,
+                                            'lastname'      => $signal->lastname,
+                                            'email'         => $signal->email,
+                                            'status'        => $signal->status,
+                                            'created_at'    => date($signal->created_at),
+                                            'updated_at'    => date($signal->updated_at),
+                                            'created_by'    => $signal->created_by,
+                                            'updated_by'    => $signal->updated_by,
+                                        ];
+                                    }
+                                }
                             }
                         }
                     }
 
+                    $data['signals'] = $allSignals;
                     unset($data['resource']);
 
                     $logData = [

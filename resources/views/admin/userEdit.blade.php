@@ -106,50 +106,84 @@
                 @foreach ($orgRoles as $org => $orgRole)
                     @if ($org != 0 && isset($organisations[$org]))
                         <div class="form-group row">
-                                <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
-                                <span class="col-sm-3 col-xs-12">{{ $organisations[$org]->name }} </span>
-                                <label for="role[{{ $org }}]" class="col-sm-1 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
-                                <div class="col-sm-3">
-                                    <select
-                                        multiple="multiple"
-                                        class="js-select form-control"
-                                        name="{{ 'role_id['. $org .'][]' }}"
-                                        data-placeholder="{{ __('custom.select_role') }}"
-                                        id="role[{{ $org }}]"
-                                    >
-                                        <option></option>
-                                        @foreach ($roles as $role)
-                                            @if (
-                                                (
-                                                    $organisations[$org]->type != \App\Organisation::TYPE_GROUP
-                                                    && $role->for_org
-                                                )
-                                                || (
-                                                    $organisations[$org]->type == \App\Organisation::TYPE_GROUP
-                                                    && $role->for_group
-                                                )
+                            <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
+                            <span class="col-sm-3 col-xs-12">{{ $organisations[$org]->name }} </span>
+                            <label for="role[{{ $org }}]" class="col-sm-1 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
+                            <div class="col-sm-3">
+                                <select
+                                    multiple="multiple"
+                                    class="js-select form-control"
+                                    name="{{ 'role_id['. $org .'][]' }}"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    id="role[{{ $org }}]"
+                                >
+                                    <option></option>
+                                    @foreach ($roles as $role)
+                                        @if (
+                                            (
+                                                $organisations[$org]->type != \App\Organisation::TYPE_GROUP
+                                                && $role->for_org
                                             )
-                                                <option
-                                                    value="{{ $role->id }}"
-                                                    {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
-                                                >{{ $role->name }}</option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                    <span class="error">{{ $errors->first('role_id') }}</span>
-                                </div>
-                                <div class="col-sm-2 col-xs-12">
-                                    <button
-                                        type="submit"
-                                        name="remove_role"
-                                        class="btn btn-primary pull-right del-btn"
-                                    >{{ utrans('custom.remove') }}</button>
-                                    <input type="hidden" name="org_id" value="{{ $org }}">
-                                </div>
+                                            || (
+                                                $organisations[$org]->type == \App\Organisation::TYPE_GROUP
+                                                && $role->for_group
+                                            )
+                                        )
+                                            <option
+                                                value="{{ $role->id }}"
+                                                {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
+                                            >{{ $role->name }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <span class="error">{{ $errors->first('role_id') }}</span>
                             </div>
-                        @endif
-                    @endforeach
-                @endif
+                            <div class="col-sm-2 col-xs-12">
+                                <button
+                                    type="submit"
+                                    name="remove_role"
+                                    class="btn btn-primary pull-right del-btn"
+                                >{{ utrans('custom.remove') }}</button>
+                                <input type="hidden" name="org_id" value="{{ $org }}">
+                            </div>
+                        </div>
+                    @elseif ($org != 0 && isset($groups[$org]))
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-xs-12 col-form-label">{{ trans_choice(utrans('custom.groups'), 1) }}: </label>
+                            <span class="col-sm-3 col-xs-12">{{ $groups[$org]->name }} </span>
+                            <label for="role[{{ $org }}]" class="col-sm-1 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
+                            <div class="col-sm-3">
+                                <select
+                                    multiple="multiple"
+                                    class="js-select form-control"
+                                    name="{{ 'role_id['. $org .'][]' }}"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    id="grp_role[{{ $org }}]"
+                                >
+                                    <option></option>
+                                    @foreach ($roles as $role)
+                                        @if ($role->for_group)
+                                            <option
+                                                value="{{ $role->id }}"
+                                                {{ in_array($role->id, $orgRole) ? 'selected' : '' }}
+                                            >{{ $role->name }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <span class="error">{{ $errors->first('role_id') }}</span>
+                            </div>
+                            <div class="col-sm-2 col-xs-12">
+                                <button
+                                    type="submit"
+                                    name="remove_role"
+                                    class="btn btn-primary pull-right del-btn"
+                                >{{ utrans('custom.remove') }}</button>
+                                <input type="hidden" name="org_id" value="{{ $org }}">
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            @endif
             <div class="form-group row">
                 <label for="apiKey" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.api_key') }}:</label>
                 <div class="col-sm-9">

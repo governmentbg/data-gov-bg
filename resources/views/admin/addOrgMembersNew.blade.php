@@ -115,8 +115,8 @@
                                     <option></option>
                                     @foreach ($roles as $role)
                                         <option
-                                            {{ $role->id == old('role_id') ? 'selected' : '' }}
                                             value="{{ $role->id }}"
+                                            {{ old('role_id') && in_array($role->id, old('role_id'))  ? 'selected' : '' }}
                                         >{{ $role->name }}</option>
                                     @endforeach
                                 </select>

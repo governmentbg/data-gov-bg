@@ -67,9 +67,15 @@ class DocumentController extends AdminController
                 $params['criteria']['date_type'] = $request->dtype;
             }
 
+            $params['criteria']['order']['field'] = 'created_at';
+            $params['criteria']['order']['type'] = 'asc';
+
             if (isset($request->order)) {
                 $params['criteria']['order']['field'] = $request->order;
-                $params['criteria']['order']['type'] = 'asc';
+            }
+
+            if (isset($request->order_type)) {
+                $params['criteria']['order']['type'] = $request->order_type;
             }
 
             $req = Request::create('/api/listDocuments', 'POST', $params);

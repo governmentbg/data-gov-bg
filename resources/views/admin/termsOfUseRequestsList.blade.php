@@ -10,7 +10,7 @@
             <div class="col-sm-3 hidden-xs"></div>
             <div class="col-sm-9 col-xs-12 m-t-lg m-b-md p-l-lg">{{ __('custom.order_by') }}</div>
             <div class="col-sm-3 hidden-xs"></div>
-            <div class="col-sm-9 col-xs-12 p-l-lg order-terms-req">
+            <div class="col-sm-9 col-xs-12 p-l-lg order-documents">
                 <a
                     href="{{
                         action(
@@ -47,6 +47,42 @@
                             : ''
                     }}"
                 >{{ __('custom.status') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\TermsOfUseRequestController@list',
+                            array_merge(
+                                ['order_type' => 'asc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'asc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_asc') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\TermsOfUseRequestController@list',
+                            array_merge(
+                                ['order_type' => 'desc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'desc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_desc') }}</a>
             </div>
         </div>
         <div class="row m-b-lg">

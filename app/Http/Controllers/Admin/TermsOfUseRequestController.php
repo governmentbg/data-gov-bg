@@ -46,9 +46,15 @@ class TermsOfUseRequestController extends AdminController
                 $params['criteria']['search'] = $request->q;
             }
 
+            $params['criteria']['order']['field'] = 'created_at';
+            $params['criteria']['order']['type'] = 'desc';
+
             if (isset($request->order)) {
                 $params['criteria']['order']['field'] = $request->order;
-                $params['criteria']['order']['type'] = 'asc';
+            }
+
+            if (isset($request->order_type)) {
+                $params['criteria']['order']['type'] = $request->order_type;
             }
 
             $rq = Request::create('/api/listTermsOfUseRequest', 'POST', $params);

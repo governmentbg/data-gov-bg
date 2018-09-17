@@ -38,7 +38,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row m-b-lg m-t-md">
+                                <div class="form-group row m-b-lg m-t-md hidden">
                                     <label for="read_only" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.read_only') }}</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
@@ -66,13 +66,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="theme" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_topic') }}:</label>
+                                    <label for="theme" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.theme') }}:</label>
                                     <div class="col-sm-9">
                                         <select
                                             id="theme"
                                             name="theme"
                                             class="js-select form-control"
-                                            data-placeholder="{{ __('custom.select_main_topic') }}"
+                                            data-placeholder="{{ __('custom.select_theme') }}"
                                         >
                                             <option></option>
                                             @foreach ($themes as $id => $theme)

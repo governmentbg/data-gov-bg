@@ -19,7 +19,7 @@
                     </li>
                     <li>
                         <a
-                            href=""
+                        href="{{ url('/admin/pages/list') }}"
                         >{{ __('custom.topics_pages') }}</a>
                     </li>
                 </ul>

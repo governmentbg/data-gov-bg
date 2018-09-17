@@ -699,4 +699,6 @@ return [
     'content' => 'Content',
     'page_edit' => 'Edit page',
     'page_add' => 'Add page',
+    'theme' => 'Theme',
+    'select_theme' => 'Select theme',
 ];

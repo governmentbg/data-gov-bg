@@ -1210,6 +1210,10 @@ class UserController extends ApiController
                     'mail'  => $user->email
                 ];
 
+                if (Role::isAdmin()) {
+                    $mailData = array_merge($mailData, ['pass' => $request->data['password']]);
+                }
+
                 Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
                     $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
                     $m->to($user->email, $user->firstname);

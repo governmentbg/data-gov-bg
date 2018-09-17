@@ -245,6 +245,12 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/subsections/view/{id}', 'Admin\SubsectionController@view');
         Route::match(['get', 'post'], '/admin/subsections/edit/{id}', 'Admin\SubsectionController@edit');
         Route::match(['get', 'post'], '/admin/subsections/delete/{id}', 'Admin\SubsectionController@delete');
+
+        Route::match(['get', 'post'], '/admin/pages/list', 'Admin\PageController@list');
+        Route::match(['get', 'post'], '/admin/pages/view/{id}', 'Admin\PageController@view');
+        Route::match(['get', 'post'], '/admin/pages/delete/{id}', 'Admin\PageController@delete');
+        Route::match(['get', 'post'], '/admin/pages/edit/{id}', 'Admin\PageController@edit');
+        Route::match(['get', 'post'], '/admin/pages/add', 'Admin\PageController@add');
     });
 });
 

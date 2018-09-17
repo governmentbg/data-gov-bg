@@ -12,7 +12,6 @@ class Page extends Model implements TranslatableInterface
 {
     use Translatable;
     use RecordSignature;
-    use Translatable;
     use Searchable;
 
     protected $guarded = ['id'];
@@ -21,6 +20,9 @@ class Page extends Model implements TranslatableInterface
     const DATE_TYPE_CREATED = 'created';
     const DATE_TYPE_VALID = 'valid';
     const ACTIVE_FALSE = 0;
+
+    const TYPE_NEWS = 1;
+    const TYPE_PAGE = 2;
 
     protected static $translatable = [
         'title'             => 'label',

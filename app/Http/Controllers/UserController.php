@@ -1307,6 +1307,20 @@ class UserController extends Controller {
                     'id'        => $user['id'],
                 ];
 
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $user->created_by,
+                        'object_id'  => $user->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $newKey = Request::create('api/generateAPIKey', 'POST', $data);
                 $api = new ApiUser($newKey);
                 $result = $api->generateAPIKey($newKey)->getData();
@@ -1326,6 +1340,20 @@ class UserController extends Controller {
                     'id'        => $user['id'],
                 ];
 
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $user->created_by,
+                        'object_id'  => $user->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $delUser = Request::create('api/deleteUser', 'POST', $data);
                 $api = new ApiUser($delUser);
                 $result = $api->deleteUser($delUser)->getData();
@@ -1340,6 +1368,20 @@ class UserController extends Controller {
             }
 
             if (!empty($saveData)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $user->created_by,
+                        'object_id'  => $user->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $editPost = Request::create('api/editUser', 'POST', $saveData);
                 $api = new ApiUser($editPost);
                 $result = $api->editUser($editPost)->getData();

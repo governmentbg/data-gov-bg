@@ -686,5 +686,17 @@ return [
     'no_email_provided' => 'No email provided',
     'no_info_provided' => 'No information provided',
     'published_url' => 'Published url',
-    'empty_role' => 'Role field can not be empty!'
+    'empty_role' => 'Role field can not be empty!',
+    'pages' => 'Pages',
+    'valid_from' => 'Valid from',
+    'valid_to' => 'Valid to',
+    'page_preview' => 'Page preview',
+    'browser_head' => 'Browser header',
+    'browser_desc' => 'Browser description',
+    'browser_keywords' => 'Browser keywords',
+    'valid' => 'Valid',
+    'short_txt' => 'Short text',
+    'content' => 'Content',
+    'page_edit' => 'Edit page',
+    'page_add' => 'Add page',
 ];

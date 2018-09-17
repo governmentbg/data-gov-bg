@@ -6,6 +6,7 @@ use App\Role;
 use App\Module;
 use App\UserSetting;
 use App\Organisation;
+use App\UserToOrgRole;
 use App\ActionsHistory;
 use App\TermsOfUseRequest;
 use Illuminate\Http\Request;
@@ -58,8 +59,13 @@ class HistoryController extends AdminController
         }
 
         if (!empty($selectedOrgs)) {
-            $selectedOrgs = array_unique($selectedOrgs);
-            $params['criteria']['org_ids'] = $selectedOrgs;
+            if ($view == 'login') {
+                $userIds = UserToOrgRole::whereIn('org_id', $selectedOrgs)->pluck('user_id')->toArray();
+                $selectedUser = $userIds;
+            } else {
+                $selectedOrgs = array_unique($selectedOrgs);
+                $params['criteria']['org_ids'] = $selectedOrgs;
+            }
         }
 
         if (!empty($selectedUser)) {

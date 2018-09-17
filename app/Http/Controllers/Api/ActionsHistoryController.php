@@ -54,7 +54,7 @@ class ActionsHistoryController extends ApiController
                 'period_from'     => 'nullable|date',
                 'period_to'       => 'nullable|date',
                 'username'        => 'nullable|string',
-                'user_id'         => 'nullable|integer',
+                'user_id'         => 'nullable',
                 'module'          => 'nullable',
                 'actions'         => 'nullable|array',
                 'actions.*'       => 'int|in:'. implode(',', array_keys(ActionsHistory::getTypes())),
@@ -114,7 +114,11 @@ class ActionsHistoryController extends ApiController
         }
 
         if (isset($criteria['user_id'])) {
-            $history->where('user_id', $criteria['user_id']);
+            if (is_array($criteria['user_id'])){
+                $history->whereIn('user_id', $criteria['user_id']);
+            } else {
+                $history->where('user_id', $criteria['user_id']);
+            }
         }
 
         if (isset($criteria['module'])) {

@@ -89,7 +89,7 @@ class DocumentController extends Controller {
         $search = $request->offsetGet('q');
 
         if (empty($search)) {
-            return redirect('document/list');
+            return redirect('document');
         }
 
         $params = [

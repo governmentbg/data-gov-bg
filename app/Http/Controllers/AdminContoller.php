@@ -15,7 +15,12 @@ class AdminController extends Controller
 {
     public function getOrgDropdown($userId = null, $count = null, $fullData = false)
     {
-        $request = Request::create('/api/listOrganisations', 'POST', ['criteria' => ['user_id' => $userId]]);
+        $request = Request::create('/api/listOrganisations', 'POST', [
+            'api_key'   => \Auth::user()->api_key,
+            'criteria'  => [
+                'user_id'   => $userId,
+            ],
+        ]);
         $api = new ApiOrganisation($request);
         $result = $api->listOrganisations($request)->getData();
         $organisations = [];

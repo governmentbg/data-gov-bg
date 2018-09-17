@@ -25,6 +25,46 @@
                 </ul>
             </div>
         </div>
+        <div class="row">
+            <div class="col-xs-12 p-l-lg m-b-lg text-left">{{ __('custom.order_by') }}</div>
+            <div class="col-xs-12 p-l-lg order-documents">
+                <a
+                    href="{{
+                        action(
+                            'Admin\SectionController@list',
+                            array_merge(
+                                ['order' => 'asc'],
+                                array_except(app('request')->input(), ['order'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order'])
+                        && app('request')->input()['order'] == 'asc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_asc') }}</a><a
+                    href="{{
+                        action(
+                            'Admin\SectionController@list',
+                            array_merge(
+                                ['order' => 'desc'],
+                                array_except(app('request')->input(), ['order'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order'])
+                        && app('request')->input()['order'] == 'desc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_desc') }}</a>
+            </div>
+        </div>
         <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">

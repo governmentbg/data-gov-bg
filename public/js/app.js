@@ -61962,6 +61962,39 @@ $(function () {
     });
 });
 
+$(function () {
+    if ($('#js-code').length > 0) {
+        var updateTextarea = function updateTextarea(width, height) {
+            var code = '<iframe width="' + width + '" height="' + height;
+            code += '" src="' + window.location.href + '"';
+            code += '></iframe>';
+            $('#js-code').val(code);
+        };
+
+        var width = $("#js-width").val();
+        var height = $("#js-height").val();
+
+        $("#js-width").on("change paste keyup", function (width, height) {
+            width = $(this).val();
+            height = $("#js-height").val();
+            updateTextarea(width, height);
+        });
+
+        $("#js-height").on("change paste keyup", function (width, height) {
+            height = $(this).val();
+            width = $("#js-width").val();
+            updateTextarea(width, height);
+        });
+
+        updateTextarea(width, height);
+
+        $(".js-copy").on("click", function () {
+            $('#js-code').select();
+            document.execCommand("copy");
+        });
+    }
+});
+
 /***/ }),
 /* 50 */
 /***/ (function(module, exports) {

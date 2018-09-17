@@ -21,7 +21,7 @@ class PageController extends ApiController
      * Requires a json $request
      *
      * @param array data - required
-     * @param string data[locale] - required
+     * @param string data[locale] - optional
      * @param integer data[section_id] - optional
      * @param string data[title] - required
      * @param string data[body] - optional
@@ -38,23 +38,62 @@ class PageController extends ApiController
 
         $validator = Validator::make($pageData, [
             'data'      => 'required|array',
-            'locale'    => 'required|string',
+            'locale'    => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($pageData['data'], [
-                'section_id'       => 'nullable|integer',
-                'title'            => 'required|string|max:191',
-                'body'             => 'required|string|max:8000',
-                'head_title'       => 'nullable|string|max:191',
-                'meta_description' => 'nullable|string|max:8000',
-                'meta_keywords'    => 'nullable|string|max:191',
-                'forum_link'       => 'nullable|string|max:191',
-                'active'           => 'required|boolean',
-                'valid_from'       => 'nullable|date',
-                'valid_to'         => 'nullable|date',
+                'section_id'          => 'required|integer|digits_between:1,10',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'required_with:locale|max:8000',
+                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'required_with:locale|max:191',
+                'head_title.bg'       => 'required_without:locale|string|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'required_with:locale|max:191',
+                'meta_description.bg' => 'required_without:locale|string|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'required_with:locale|max:191',
+                'meta_keywords.bg'    => 'required_without:locale|string|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'active'              => 'required|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
             ]);
         }
+
+        $validator->after(function ($validator) {
+            if (
+                $validator->errors()->has('meta_description.*')
+                || $validator->errors()->has('meta_keywords.*')
+            ) {
+                foreach ($validator->errors()->getMessages() as $key => $value) {
+
+                    if (str_contains($key, 'meta_description')) {
+                        $newKey = str_replace_last('meta_description', 'meta_descript', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+
+                    if (str_contains($key, 'meta_keywords')) {
+                        $newKey = str_replace_last('meta_keywords', 'meta_key_words', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+                }
+            }
+        });
 
         if (!$validator->fails()) {
             $rightCheck = RoleRight::checkUserRight(
@@ -68,36 +107,51 @@ class PageController extends ApiController
 
             try {
                 DB::beginTransaction();
-                $locale = $pageData['locale'];
 
                 $newPage = new Page;
-                $newPage->title = $this->trans($locale, $pageData['data']['title']);
+                $newPage->title = $this->trans($pageData['locale'], $pageData['data']['title']);
 
                 if (isset($pageData['data']['section_id'])) {
                     $newPage->section_id = $pageData['data']['section_id'];
                 }
 
                 if (isset($pageData['data']['body'])) {
-                    $newPage->body = $this->trans($locale, $pageData['data']['body']);
+                    $newPage->body = $this->trans($pageData['locale'], $pageData['data']['body']);
                 }
 
                 if (isset($pageData['data']['head_title'])) {
-                    $newPage->head_title = $this->trans($locale, $pageData['data']['head_title']);
+                    $newPage->head_title = $this->trans($pageData['locale'], $pageData['data']['head_title']);
                 }
 
                 if (isset($pageData['data']['meta_description'])) {
-                    $newPage->meta_descript = $this->trans($locale, $pageData['data']['meta_description']);
+                    $newPage->meta_descript = $this->trans($pageData['locale'], $pageData['data']['meta_description']);
                 }
 
                 if (isset($pageData['data']['meta_keywords'])) {
-                    $newPage->meta_key_words = $this->trans($locale, $pageData['data']['meta_keywords']);
+                    $newPage->meta_key_words = $this->trans($pageData['locale'], $pageData['data']['meta_keywords']);
                 }
 
                 if (isset($pageData['data']['forum_link'])) {
                     $newPage->forum_link = $pageData['data']['forum_link'];
                 }
 
-                $newPage->active = $pageData['data']['active'];
+                if (isset($pageData['data']['valid_from'])) {
+                    $newPage->valid_from = $pageData['data']['valid_from'];
+                }
+
+                if (isset($pageData['data']['valid_to'])) {
+                    $newPage->valid_to = $pageData['data']['valid_to'];
+                }
+
+                if (isset($pageData['data']['abstract'])) {
+                    $newPage->abstract = $this->trans($pageData['locale'], $pageData['data']['abstract']);
+                }
+
+                if (isset($pageData['data']['active'])) {
+                    $newPage->active = $pageData['data']['active'];
+                } else {
+                    $newPage->active = Page::ATIVE_FALSE;
+                }
 
                 $newPage->save();
                 DB::commit();
@@ -126,7 +180,7 @@ class PageController extends ApiController
      *
      * @param integer page_id - required
      * @param array data - required
-     * @param string data[locale] - required
+     * @param string data[locale] - optional
      * @param integer data[section_id] - optional
      * @param string data[title] - required
      * @param string data[body] - optional
@@ -148,23 +202,62 @@ class PageController extends ApiController
         $validator = Validator::make($editData, [
             'page_id'    => 'required|integer|exists:pages,id|digits_between:1,10',
             'data'       => 'required|array',
-            'locale'     => 'required|string|max:5',
+            'locale'     => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
-                'section_id'       => 'nullable|integer|digits_between:1,10',
-                'title'            => 'nullable|string|max:191',
-                'body'             => 'nullable|string|max:8000',
-                'head_title'       => 'nullable|string|max:191',
-                'meta_description' => 'nullable|string|max:8000',
-                'meta_keywords'    => 'nullable|string|max:191',
-                'forum_link'       => 'nullable|string|max:191',
-                'active'           => 'required|boolean',
-                'valid_from'       => 'nullable|date',
-                'valid_to'         => 'nullable|date',
+                'section_id'          => 'nullable|integer|digits_between:1,10',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'required_with:locale|max:8000',
+                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'required_with:locale|max:191',
+                'head_title.bg'       => 'required_without:locale|string|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'required_with:locale|max:191',
+                'meta_description.bg' => 'required_without:locale|string|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'required_with:locale|max:191',
+                'meta_keywords.bg'    => 'required_without:locale|string|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'active'              => 'required|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
             ]);
         }
+
+        $validator->after(function ($validator) {
+            if (
+                $validator->errors()->has('meta_description.*')
+                || $validator->errors()->has('meta_keywords.*')
+            ) {
+                foreach ($validator->errors()->getMessages() as $key => $value) {
+
+                    if (str_contains($key, 'meta_description')) {
+                        $newKey = str_replace_last('meta_description', 'meta_descript', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+
+                    if (str_contains($key, 'meta_keywords')) {
+                        $newKey = str_replace_last('meta_keywords', 'meta_key_words', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+                }
+            }
+        });
 
         if (!$validator->fails()) {
             try {
@@ -184,30 +277,40 @@ class PageController extends ApiController
 
                 DB::beginTransaction();
 
-                $locale = $editData['locale'];
-
                 if (isset($editData['data']['title'])) {
-                    $pageToEdit->title = $this->trans($locale, $editData['data']['title']);
+                    $pageToEdit->title = $this->trans($editData['locale'], $editData['data']['title']);
                 }
 
                 if (isset($editData['data']['section_id'])) {
                     $pageToEdit->section_id = $editData['data']['section_id'];
                 }
 
+                if (isset($editData['data']['valid_from'])) {
+                    $pageToEdit->valid_from = $editData['data']['valid_from'];
+                }
+
+                if (isset($editData['data']['valid_to'])) {
+                    $pageToEdit->valid_to = $editData['data']['valid_to'];
+                }
+
                 if (isset($editData['data']['body'])) {
-                    $pageToEdit->body = $this->trans($locale, $editData['data']['body']);
+                    $pageToEdit->body = $this->trans($editData['locale'], $editData['data']['body']);
                 }
 
                 if (isset($editData['data']['head_title'])) {
-                    $pageToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
+                    $pageToEdit->head_title = $this->trans($editData['locale'], $editData['data']['head_title']);
                 }
 
                 if (isset($editData['data']['meta_description'])) {
-                    $pageToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
+                    $pageToEdit->meta_descript = $this->trans($editData['locale'], $editData['data']['meta_description']);
+                }
+
+                if (isset($editData['data']['abstract'])) {
+                    $pageToEdit->abstract = $this->trans($editData['locale'], $editData['data']['abstract']);
                 }
 
                 if (isset($editData['data']['meta_keywords'])) {
-                    $pageToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
+                    $pageToEdit->meta_key_words = $this->trans($editData['locale'], $editData['data']['meta_keywords']);
                 }
 
                 if (isset($editData['data']['forum_link'])) {
@@ -216,6 +319,8 @@ class PageController extends ApiController
 
                 if (isset($editData['data']['active'])) {
                     $pageToEdit->active = $editData['data']['active'];
+                } else {
+                    $pageToEdit->active = Page::ACTIVE_FALSE;
                 }
 
                 $pageToEdit->save();
@@ -360,6 +465,7 @@ class PageController extends ApiController
             $columns = [
                 'id',
                 'section_id',
+                'abstract',
                 'title',
                 'body',
                 'head_title',
@@ -367,6 +473,8 @@ class PageController extends ApiController
                 'meta_key_words',
                 'forum_link',
                 'active',
+                'valid_from',
+                'valid_to',
                 'created_at',
                 'updated_at',
                 'created_by',
@@ -422,6 +530,9 @@ class PageController extends ApiController
                         'meta_keywords'       => $singlePage->meta_key_words,
                         'forum_link'          => $singlePage->forum_link,
                         'active'              => $singlePage->active,
+                        'abstract'            => $singlePage->abstract,
+                        'valid_from'          => date($singlePage->valid_from),
+                        'valid_to'            => date($singlePage->valid_to),
                         'created_at'          => date($singlePage->created_at),
                         'updated_at'          => date($singlePage->updated_at),
                         'created_by'          => $singlePage->created_by,
@@ -447,7 +558,7 @@ class PageController extends ApiController
                 'meta_key_words',
             ];
 
-            if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+            if (isset($criteria['order']) && in_array($criteria['order']['field'], $transFields)) {
                 usort($result, function($a, $b) use ($criteria) {
                     return strtolower($criteria['order']['type']) == 'asc'
                         ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])

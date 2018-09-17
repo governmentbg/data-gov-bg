@@ -20,6 +20,7 @@ class Page extends Model implements TranslatableInterface
     const DATE_TYPE_UPDATED = 'updated';
     const DATE_TYPE_CREATED = 'created';
     const DATE_TYPE_VALID = 'valid';
+    const ACTIVE_FALSE = 0;
 
     protected static $translatable = [
         'title'             => 'label',

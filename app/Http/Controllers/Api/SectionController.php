@@ -300,6 +300,15 @@ class SectionController extends ApiController
             ]);
         }
 
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
+
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
         }
@@ -332,6 +341,13 @@ class SectionController extends ApiController
 
         if (!empty($criteria)) {
             $query->where($criteria);
+        }
+
+        if (isset($order['type']) && isset($order['field'])) {
+            $query->orderBy(
+                $order['field'],
+                $order['type'] == 'asc' ? 'asc' : 'desc'
+            );
         }
 
         $count = $query->count();

@@ -47,14 +47,20 @@ class SectionController extends AdminController
                 'page_number'      => !empty($request->page) ? $request->page : 1,
             ];
 
+            $params['criteria']['order'] = [
+                'type'  => $request->offsetGet('order'),
+                'field' => 'created_at',
+            ];
+
             $request = Request::create('/api/listSections', 'POST', $params);
             $api = new ApiSection($request);
             $result = $api->listSections($request)->getData();
+            $getParams = array_except(app('request')->input(), ['page']);
 
             $paginationData = $this->getPaginationData(
                 isset($result->sections) ? $result->sections : [],
                 isset($result->total_records) ? $result->total_records : 0,
-                [],
+                $getParams,
                 $perPage
             );
 

@@ -97,10 +97,12 @@ class HistoryController extends AdminController
         }
 
         if ($request->has('download')) {
-            $handle = fopen($filename, 'w+');
+            $tempname = tempnam(sys_get_temp_dir(), 'csv_');
+            $temp = fopen($tempname, 'w+');
+            $path = stream_get_meta_data($temp)['uri'];
 
             if ($view == 'login') {
-                fputcsv($handle, [
+                fputcsv($temp, [
                     __('custom.date'),
                     trans_choice(utrans('custom.users'), 1),
                     utrans('custom.information'),
@@ -108,7 +110,7 @@ class HistoryController extends AdminController
                 ]);
 
                 foreach($history as $row) {
-                    fputcsv($handle, [
+                    fputcsv($temp, [
                         $row->occurrence,
                         $row->user,
                         $row->action_msg,
@@ -116,7 +118,7 @@ class HistoryController extends AdminController
                     ]);
                 }
             } else {
-                fputcsv($handle, [
+                fputcsv($temp, [
                     __('custom.date'),
                     trans_choice(utrans('custom.users'), 1),
                     __('custom.module'),
@@ -127,7 +129,7 @@ class HistoryController extends AdminController
                 ]);
 
                 foreach($history as $row) {
-                    fputcsv($handle, [
+                    fputcsv($temp, [
                         $row->occurrence,
                         $row->user,
                         $row->module,
@@ -139,13 +141,11 @@ class HistoryController extends AdminController
                 }
             }
 
-            fclose($handle);
-
             $headers = array(
                 'Content-Type' => 'text/csv',
             );
 
-            return response()->download($filename, $filename, $headers);
+            return response()->download($path, $filename, $headers)->deleteFileAfterSend(true);
         }
 
         $paginationData = $this->getPaginationData(

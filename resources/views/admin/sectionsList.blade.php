@@ -19,16 +19,56 @@
                     </li>
                     <li>
                         <a
-                            href=""
+                        href="{{ url('/admin/pages/list') }}"
                         >{{ __('custom.topics_pages') }}</a>
                     </li>
                 </ul>
             </div>
         </div>
+        <div class="row">
+            <div class="col-xs-12 p-l-lg m-b-lg text-left">{{ __('custom.order_by') }}</div>
+            <div class="col-xs-12 p-l-lg order-documents">
+                <a
+                    href="{{
+                        action(
+                            'Admin\SectionController@list',
+                            array_merge(
+                                ['order' => 'asc'],
+                                array_except(app('request')->input(), ['order'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order'])
+                        && app('request')->input()['order'] == 'asc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_asc') }}</a><a
+                    href="{{
+                        action(
+                            'Admin\SectionController@list',
+                            array_merge(
+                                ['order' => 'desc'],
+                                array_except(app('request')->input(), ['order'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order'])
+                        && app('request')->input()['order'] == 'desc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_desc') }}</a>
+            </div>
+        </div>
         <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
-                    <a href="">{{ __('custom.add') }}</a>
+                    <a href="{{ url('/admin/sections/add') }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
         </div>
@@ -55,15 +95,15 @@
                                                 <td class="buttons">
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('/admin/sections/edit/'. $section->id) }}"
                                                     >{{ utrans('custom.edit') }}</a>
                                                     <a
                                                         class="link-action"
-                                                        href=""
+                                                        href="{{ url('/admin/sections/view/'. $section->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
                                                     <a
                                                         class="link-action red"
-                                                        href=""
+                                                        href="{{ url('/admin/sections/delete/'. $section->id) }}"
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                     >{{ __('custom.delete') }}</a>
                                                     <a

@@ -1,16 +1,7 @@
+@php $root = empty($admin) ? 'user' : 'admin'; @endphp
 <div class="col-xs-12 m-t-md">
     <div class="articles">
         <div class="article m-b-md">
-            <div class="m-t-lg">
-                <div class="col-sm-12 col-xs-12 p-l-none">
-                    <ul class="p-l-none">
-                        <li>{{ __('custom.contact_support_name') }}:</li>
-                        <li>{{ __('custom.version') }}: {{ $resource->version }}</li>
-                        <li>{{ __('custom.last_update') }}: {{ $resource->updated_by }}</li>
-                        <li>{{ __('custom.created') }}: {{ $resource->created_by }}</li>
-                    </ul>
-                </div>
-            </div>
             <div class="col-sm-12 p-l-none art-heading-bar">
                 <div class="socialPadding">
                     <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
@@ -21,53 +12,96 @@
                     <span><a href="#"><i class="fa fa-envelope"></i></a></span>
                 </div>
             </div>
-            <h2>{{ $resource->name }}</h2>
-            <p>{{ $resource->description }}</p>
-        </div>
+            <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
+            <p>
+                {{ utrans('custom.version') }}:&nbsp;{{ $resource->version }}
+            </p>
+            @if (!empty($admin))
+                <p>
+                    <strong>{{ __('custom.id') }}:</strong>
+                    &nbsp;{{ $resource->id }}
+                </p>
+            @endif
+            <p>
+                <strong>{{ uctrans('custom.unique_identificator') }}:</strong>
+                &nbsp;{{ $resource->uri }}
+            </p>
+            @if (!empty($resource->type))
+                <p><strong>{{ uctrans('custom.type') }}:</strong>&nbsp;{{ $resource->type }}</p>
+            @endif
+            @if (!empty($resource->file_format))
+                <p><strong>{{ uctrans('custom.format') }}:</strong>&nbsp;{{ $resource->file_format }}</p>
+            @endif
+            @if (!empty($resource->resource_url))
+                <p><strong>{{ uctrans('custom.url') }}:</strong></p>
+                <div class="m-b-sm">
+                    {{ $resource->resource_url }}
+                </div>
+            @endif
 
+            @if (!empty($resource->http_rq_type))
+                <p><strong>{{ uctrans('custom.request_type') }}:</strong>&nbsp;{{ $resource->http_rq_type }}</p>
+            @endif
+            @if (!empty($resource->post_data))
+                <p><strong>{{ uctrans('custom.request') }}:</strong></p>
+                <div class="m-b-sm">
+                    {{ $resource->post_data }}
+                </div>
+            @endif
+            @if (!empty($resource->http_headers))
+                <p><strong>{{ uctrans('custom.headers') }}:</strong></p>
+                <div class="m-b-sm">
+                    {{ $resource->http_headers }}
+                </div>
+            @endif
+
+            @if (!empty($resource->description))
+                <p><strong>{{ uctrans('custom.description') }}:</strong></p>
+                <div class="m-b-sm">
+                    {{ $resource->description }}
+                </div>
+            @endif
+            @if (!empty($resource->schema_description))
+                <p><strong>{{ uctrans('custom.schema_description') }}:</strong></p>
+                <div class="m-b-sm">
+                    {{ $resource->schema_description }}
+                </div>
+            @endif
+            @if (!empty($resource->schema_url))
+                <p><strong>{{ uctrans('custom.schema_url') }}:</strong></p>
+                <div class="m-b-sm">
+                    {{ $resource->schema_url }}
+                </div>
+            @endif
+        </div>
+            <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
+                <ul class="p-l-none">
+                    <li>{{ __('custom.created_at') }}: {{ $resource->created_at }}</li>
+                    <li>{{ __('custom.created_by') }}: {{ $resource->created_by }}</li>
+                    @if (!empty($resource->updated_by))
+                        <li>{{ __('custom.updated_at') }}: {{ $resource->updated_at }}</li>
+                        <li>{{ __('custom.updated_by') }}: {{ $resource->updated_by }}</li>
+                    @endif
+                </ul>
+            </div>
         <div class="col-sm-12 p-l-none">
             <div class="col-sm-12 m-t-lg p-l-r-none">
-                @if (empty($data))
-                    <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
-                @else
-                    @include('partials.resource-visualisation')
-
-                    <form method="POST" action="{{ url('/user/resource/download') }}">
-                        {{ csrf_field() }}
-                        <input
-                            hidden
-                            name="es_id"
-                            type="text"
-                            value="{{ $resource->es_id }}"
-                        >
-                        <input
-                            hidden
-                            name="name"
-                            type="text"
-                            value="{{ $resource->name }}"
-                        >
-                        <input
-                            hidden
-                            name="format"
-                            type="text"
-                            value="{{ $resource->file_format }}"
-                        >
-                        <button
-                            name="download"
-                            type="submit"
-                            class="badge badge-pill pull-right"
-                        >{{ uctrans('custom.download') }}</button>
-                    </form>
-                @endif
+                @include('partials.resource-visualisation')
             </div>
 
-            @if ($buttons[$resource->uri]['delete'])
+            <div class="col-md-2 col-sm-3 text-left m-l-10">
+                <a
+                    class="btn btn-primary"
+                    href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
+                >{{ uctrans('custom.edit') }}</a>
+            </div>
+            @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
                 <div class="col-xs-12 m-t-md p-l-r-none text-right">
                     <form method="POST">
                         {{ csrf_field() }}
                         <button
                             name="delete"
-                            class="badge badge-pill m-b-sm del-btn"
+                            class="btn del-btn btn-primary"
                             data-confirm="{{ __('custom.remove_data') }}"
                         >{{ uctrans('custom.remove') }}</button>
                     </form>
@@ -91,6 +125,8 @@
                     </div>
                 </div>
             </div>
+
+            @include('components.signal-box', ['signals' => $resource->signals])
         </div>
     </div>
 </div>

@@ -6,7 +6,15 @@
     </div>
 @endif
 <div class="row">
-    <div class="col-sm-offset-3 col-xs-12 p-md">
+    <div class="org col-sm-3 col-xs-12 m-t-lg">
+        <img src="{{ $organisation->logo }}">
+        <h2 class="elipsis-1">{{ $organisation->name }}</h2>
+        <h4>{{ truncate($organisation->description, 150) }}</h4>
+        <p class="text-right show-more">
+            <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+        </p>
+    </div>
+    <div class="col-sm-9 col-xs-12 p-md">
         @if (count($chronology))
             <div class="col-xs-12 p-sm">
                 @foreach ($chronology as $actionHistory)

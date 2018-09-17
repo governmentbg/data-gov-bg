@@ -14341,6 +14341,14 @@ textarea {
   text-align: left;
 }
 
+.elipsis-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
 .container .filter-content .filter-type,
 .container .filter-content .sort-by {
   display: inline-block;
@@ -15615,6 +15623,14 @@ textarea {
   margin-right: 5px;
 }
 
+.signal-box {
+  clear: both;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #C02E54;
+}
+
 .admin .add {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -15737,19 +15753,6 @@ textarea {
 
 .long-badge {
   padding: 5px 40px;
-}
-
-.sort-links {
-  position: relative;
-  bottom: 105px;
-  left: 240px;
-}
-
-@media screen and (max-width: 1199px) {
-  .sort-links {
-    bottom: 0px;
-    left: 0px;
-  }
 }
 
 .sort-links a {

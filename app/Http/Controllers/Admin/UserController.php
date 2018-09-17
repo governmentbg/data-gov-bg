@@ -49,6 +49,7 @@ class UserController extends AdminController {
         $roles = isset($result->roles) ? $result->roles : [];
 
         $params = [
+            'api_key'          => Auth::user()->api_key,
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
@@ -217,6 +218,7 @@ class UserController extends AdminController {
             $result = $api->getUserSettings($rq)->getData();
             $userSett = isset($result->user) ? $result->user->settings : [];
             $organisations = $this->getOrgDropdown($id, null, true);
+            $groups = $this->getGroupDropdown($id, null, true);
 
             if ($request->has('remove_role')) {
                 $params = [
@@ -343,7 +345,8 @@ class UserController extends AdminController {
                 'localeList',
                 'organisations',
                 'roles',
-                'orgRoles'
+                'orgRoles',
+                'groups'
             ));
         }
 

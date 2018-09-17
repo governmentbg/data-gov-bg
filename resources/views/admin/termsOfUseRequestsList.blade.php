@@ -10,7 +10,7 @@
             <div class="col-sm-3 hidden-xs"></div>
             <div class="col-sm-9 col-xs-12 m-t-lg m-b-md p-l-lg">{{ __('custom.order_by') }}</div>
             <div class="col-sm-3 hidden-xs"></div>
-            <div class="col-sm-9 col-xs-12 p-l-lg order-terms-req">
+            <div class="col-sm-9 col-xs-12 p-l-lg order-documents">
                 <a
                     href="{{
                         action(
@@ -47,6 +47,42 @@
                             : ''
                     }}"
                 >{{ __('custom.status') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\TermsOfUseRequestController@list',
+                            array_merge(
+                                ['order_type' => 'asc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'asc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_asc') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\TermsOfUseRequestController@list',
+                            array_merge(
+                                ['order_type' => 'desc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'desc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{ __('custom.order_desc') }}</a>
             </div>
         </div>
         <div class="row m-b-lg">
@@ -89,7 +125,7 @@
                                                 'Admin\TermsOfUseRequestController@list',
                                                 array_merge(
                                                     ['status' => $key],
-                                                    array_except(app('request')->input(), ['status'])
+                                                    array_except(app('request')->input(), ['status', 'page'])
                                                 )
                                             )
                                         }}"
@@ -107,7 +143,7 @@
                                     href="{{
                                         action(
                                             'Admin\TermsOfUseRequestController@list',
-                                            array_except(app('request')->input(), ['status'])
+                                            array_except(app('request')->input(), ['status', 'page'])
                                         )
                                     }}"
                                 >{{ uctrans('custom.all') }}</a>
@@ -128,18 +164,15 @@
                                 value="{{ isset($search) ? $search : '' }}"
                                 name="q"
                             >
-                            @if (isset(app('request')->input()['status']))
-                                <input type="hidden" name="status" value="{{ app('request')->input()['status'] }}">
-                            @endif
-                            @if (isset(app('request')->input()['order']))
-                                <input type="hidden" name="order" value="{{ app('request')->input()['order'] }}">
-                            @endif
-                            @if (isset(app('request')->input()['from']))
-                                <input type="hidden" name="from" value="{{ app('request')->input()['from'] }}">
-                            @endif
-                            @if (isset(app('request')->input()['to']))
-                                <input type="hidden" name="to" value="{{ app('request')->input()['to'] }}">
-                            @endif
+                            @foreach (app('request')->except(['q', 'page']) as $key => $value)
+                                @if (is_array($value))
+                                    @foreach ($value as $innerValue)
+                                        <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
+                                    @endforeach
+                                @else
+                                    <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                                @endif
+                            @endforeach
                         </form>
                     </div>
                 </div>

@@ -24,6 +24,9 @@ class Category extends Model implements TranslatableInterface
 
     const ACTIVE_FALSE = 0;
 
+    const IMG_EXT_SVG = 'svg';
+    const IMG_MIME_SVG = 'image/svg+xml';
+
     public function userFollow()
     {
         return $this->hasMany('App\UserFollow');

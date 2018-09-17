@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Role;
 use \Validator;
 use App\Module;
-use \App\ActionsHistory;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
@@ -54,7 +54,7 @@ class ActionsHistoryController extends ApiController
                 'period_from'     => 'nullable|date',
                 'period_to'       => 'nullable|date',
                 'username'        => 'nullable|string',
-                'user_id'         => 'nullable|integer',
+                'user_id'         => 'nullable',
                 'module'          => 'nullable',
                 'actions'         => 'nullable|array',
                 'actions.*'       => 'int|in:'. implode(',', array_keys(ActionsHistory::getTypes())),
@@ -89,7 +89,7 @@ class ActionsHistoryController extends ApiController
         }
 
         $history = ActionsHistory::select(
-            'id',
+            'actions_history.id',
             'occurrence',
             'module_name',
             'action',
@@ -97,7 +97,7 @@ class ActionsHistoryController extends ApiController
             'action_msg',
             'user_id',
             'ip_address'
-        )->with('user:id,username,firstname,lastname');
+        )->join('users', 'users.id', '=', 'actions_history.user_id');
 
         if (isset($criteria['period_from'])) {
             $history->where('occurrence', '>=', $criteria['period_from']);
@@ -114,7 +114,11 @@ class ActionsHistoryController extends ApiController
         }
 
         if (isset($criteria['user_id'])) {
-            $history->where('user_id', $criteria['user_id']);
+            if (is_array($criteria['user_id'])){
+                $history->whereIn('user_id', $criteria['user_id']);
+            } else {
+                $history->where('user_id', $criteria['user_id']);
+            }
         }
 
         if (isset($criteria['module'])) {
@@ -180,7 +184,7 @@ class ActionsHistoryController extends ApiController
 
         $count = $history->count();
 
-        if (!empty($order) && $order['field'] != 'username') {
+        if (!empty($order)) {
             $history->orderBy($order['field'], $order['type']);
         }
 
@@ -195,27 +199,21 @@ class ActionsHistoryController extends ApiController
 
         if (!empty($history)) {
             foreach ($history as $key => $record) {
-                $results[] = [
-                    'id'             => $record->id,
-                    'user_id'        => $record->user->id,
-                    'user'           => $record->user->username,
-                    'user_firstname' => $record->user->firstname,
-                    'user_lastname'  => $record->user->lastname,
-                    'occurrence'     => $record->occurrence,
-                    'module'         => $record->module_name,
-                    'action'         => $record->action,
-                    'action_object'  => $record->action_object,
-                    'action_msg'     => $record->action_msg,
-                    'ip_address'     => $record->ip_address,
-                ];
-            }
-
-            if ($order && $order['field'] == 'username') {
-                usort($results, function($a, $b) use ($order) {
-                    return strtolower($order['type']) == 'asc'
-                        ? strcmp($a['user'], $b['user'])
-                        : strcmp($b['user'], $a['user']);
-                });
+                if (!empty($record->user)) {
+                    $results[] = [
+                        'id'             => $record->id,
+                        'user_id'        => $record->user->id,
+                        'user'           => $record->user->username,
+                        'user_firstname' => $record->user->firstname,
+                        'user_lastname'  => $record->user->lastname,
+                        'occurrence'     => $record->occurrence,
+                        'module'         => $record->module_name,
+                        'action'         => $record->action,
+                        'action_object'  => $record->action_object,
+                        'action_msg'     => $record->action_msg,
+                        'ip_address'     => $record->ip_address,
+                    ];
+                }
             }
         }
 
@@ -223,27 +221,6 @@ class ActionsHistoryController extends ApiController
             'total_records'     => $count,
             'actions_history'   => $results,
         ], true);
-    }
-
-    /**
-     * Lists modules from ActionsHistory model
-     *
-     * @param Request $request
-     * @return json response
-     */
-    public function listModules(Request $request)
-    {
-        $modules = Role::getModuleNames();
-
-        if (!empty($modules)) {
-            foreach ($modules as $module) {
-                $result[] = ['name' => $module];
-            }
-
-            return $this->successResponse(['modules' => $result], true);
-        }
-
-        return $this->errorResponse(__('custom.data_failure'));
     }
 
     /**

@@ -55,17 +55,17 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}</label>
+                                <label for="ordering" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}</label>
                                 <div class="col-lg-2">
                                     <input
-                                        id="order"
-                                        name="order"
+                                        id="ordering"
+                                        name="ordering"
                                         type="number"
                                         min="1"
                                         class="input-border-r-12 form-control"
-                                        value="{{ old('order') }}"
+                                        value="{{ old('ordering') }}"
                                     >
-                                    <span class="error">{{ $errors->first('order') }}</span>
+                                    <span class="error">{{ $errors->first('ordering') }}</span>
                                 </div>
                             </div>
                             <div class="form-group row">

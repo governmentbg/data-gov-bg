@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Module;
 use App\Category;
 use App\DataSet;
+use App\RoleRight;
 use App\ActionsHistory;
 use App\Resource;
 use App\Organisation;
@@ -41,13 +42,20 @@ class CategoryController extends ApiController
             'locale'            => 'nullable|string|max:5',
             'icon'              => 'nullable|string|max:191',
             'icon_filename'     => 'nullable|string|max:191',
-            'icon_mimetype'     => 'nullable|string|max:191',
+            'icon_mimetype'     => 'nullable|string|max:191|in:'. env('THEME_FILE_MIMES'),
             'icon_data'         => 'nullable|string|max:16777215',
             'active'            => 'nullable|boolean',
             'ordering'          => 'nullable|integer|digits_between:1,3',
         ]);
 
         $validator->after(function ($validator) {
+            if ($validator->errors()->has('icon_mimetype')) {
+                $validator->errors()->add(
+                    'file',
+                    $validator->errors()->first('icon_mimetype') .' '. __('custom.valid_file_types') .': '. env('THEME_FILE_MIMES')
+                );
+            }
+
             if ($validator->errors()->has('icon_filename')) {
                 $validator->errors()->add('file', $validator->errors()->first('icon_filename'));
             }
@@ -59,8 +67,17 @@ class CategoryController extends ApiController
 
         // add main category
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::MAIN_CATEGORIES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $catData = [
-                'name'              => $post['data']['name'],
+                'name'              => $this->trans($post['locale'], $post['data']['name']),
                 'icon_file_name'    => empty($post['data']['icon_filename'])
                     ? null
                     : $post['data']['icon_filename'],
@@ -156,6 +173,19 @@ class CategoryController extends ApiController
             $category = Category::find($post['category_id']);
 
             if ($category) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::MAIN_CATEGORIES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $category->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $category->name = $post['data']['name'];
 
                 // add library for image manipulation
@@ -180,6 +210,8 @@ class CategoryController extends ApiController
                 if (!empty($post['data']['ordering'])) {
                     $category->ordering = $post['data']['ordering'];
                 }
+
+                $category->updated_by = \Auth::id();
 
                 try {
                     $category->save();
@@ -219,6 +251,21 @@ class CategoryController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $category = Category::find($post['category_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::MAIN_CATEGORIES,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $category->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DataSet::withTrashed()
                     ->where('category_id', $post['category_id'])
@@ -233,7 +280,7 @@ class CategoryController extends ApiController
                 DB::table('categories')->where('parent_id', $post['category_id'])
                     ->update(['parent_id' => null]);
 
-                if (Category::find($post['category_id'])->delete()) {
+                if ($category->delete()) {
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
                         'action'           => ActionsHistory::TYPE_DEL,

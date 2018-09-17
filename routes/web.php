@@ -17,7 +17,7 @@ Route::middleware('auth')->group(function() {
 
     Route::post('/user/changePassword', 'UserController@changePassword');
 
-    Route::match(['get', 'post'], '/user/resource/download', 'UserController@resourceDownload')->name('resourceDownload');
+    Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
     Route::post('/admin/adminChangePassword', 'Admin\UserController@adminChangePassword');
 
     Route::get('/images/item/{id}', 'Admin\ImageController@viewImage');
@@ -163,7 +163,16 @@ Route::middleware('auth')->group(function() {
             'UserController@orgResourceCreate'
         )->name('orgResourceCreate');
 
-        Route::match(['get', 'post'], 'user/resourceView/{uri}', 'UserController@resourceView')->name('resourceView');
+        Route::match(
+            ['get', 'post'],
+            '/admin/dataset/resource/create/{uri}',
+            'Admin\DataSetController@resourceCreate'
+        );
+
+        Route::match(['get', 'post'], 'user/resource/view/{uri}', 'UserController@resourceView')->name('resourceView');
+        Route::match(['get', 'post'], 'admin/resource/view/{uri}', 'Admin\DataSetController@resourceView');
+        Route::match(['get', 'post'], 'user/resource/edit/{uri}', 'UserController@resourceEditMeta');
+        Route::match(['get', 'post'], 'admin/resource/edit/{uri}', 'Admin\DataSetController@resourceEditMeta');
         Route::match(['get', 'post'], 'user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
         Route::match(['get', 'post'], 'importCSV', 'ResourceController@importCsvData');
         Route::match(['get', 'post'], 'importElastic', 'ResourceController@importElasticData');
@@ -223,12 +232,28 @@ Route::middleware('auth')->group(function() {
             'UserController@delOrgMember'
         )->name('delOrgMember');
 
-        Route::match(['get', 'post'], '/admin/signals/list', 'Admin\SignalController@list');
-        Route::match(['get', 'post'], '/admin/signal/edit/{id}', 'Admin\SignalController@edit');
-        Route::match(['get', 'post'], '/admin/signal/delete/{id}', 'Admin\SignalController@delete');
+        Route::match(['get', 'post'], 'admin/signals/list', 'Admin\SignalController@list');
+        Route::match(['get', 'post'], 'admin/signal/edit/{id}', 'Admin\SignalController@edit');
+        Route::match(['get', 'post'], 'admin/signal/delete/{id}', 'Admin\SignalController@delete');
+        Route::match(['get', 'post'], 'signal/remove', 'UserController@removeSignal');
 
         Route::match(['get', 'post'], '/admin/sections/list', 'Admin\SectionController@list');
+        Route::match(['get', 'post'], '/admin/sections/add', 'Admin\SectionController@add');
+        Route::match(['get', 'post'], '/admin/sections/view/{id}', 'Admin\SectionController@view');
+        Route::match(['get', 'post'], '/admin/sections/edit/{id}', 'Admin\SectionController@edit');
+        Route::match(['get', 'post'], '/admin/sections/delete/{id}', 'Admin\SectionController@delete');
+
         Route::match(['get', 'post'], '/admin/subsections/list/{id}', 'Admin\SubsectionController@list');
+        Route::match(['get', 'post'], '/admin/subsections/add/{id}', 'Admin\SubsectionController@add');
+        Route::match(['get', 'post'], '/admin/subsections/view/{id}', 'Admin\SubsectionController@view');
+        Route::match(['get', 'post'], '/admin/subsections/edit/{id}', 'Admin\SubsectionController@edit');
+        Route::match(['get', 'post'], '/admin/subsections/delete/{id}', 'Admin\SubsectionController@delete');
+
+        Route::match(['get', 'post'], '/admin/pages/list', 'Admin\PageController@list');
+        Route::match(['get', 'post'], '/admin/pages/view/{id}', 'Admin\PageController@view');
+        Route::match(['get', 'post'], '/admin/pages/delete/{id}', 'Admin\PageController@delete');
+        Route::match(['get', 'post'], '/admin/pages/edit/{id}', 'Admin\PageController@edit');
+        Route::match(['get', 'post'], '/admin/pages/add', 'Admin\PageController@add');
     });
 });
 
@@ -267,41 +292,9 @@ Route::get('terms', function () {
     return view('terms', ['class' => 'index']);
 });
 
-Route::match(['get', 'post'], 'data', 'DataController@view')->name('dataView');
-
-Route::get('data/view/{uri}', function () {
-    return view('data/view', [
-        'class'     => 'data',
-        'filter'    => 'healthcare',
-        'mainCats'  => [
-            'healthcare',
-            'innovation',
-            'education',
-            'public_sector',
-            'municipalities',
-            'agriculture',
-            'justice',
-            'economy_business',
-        ],
-    ]);
-});
-
-Route::get('data/resourceView/{uri}', function () {
-    return view('data/view', [
-        'class'     => 'data',
-        'filter'    => 'healthcare',
-        'mainCats'  => [
-            'healthcare',
-            'innovation',
-            'education',
-            'public_sector',
-            'municipalities',
-            'agriculture',
-            'justice',
-            'economy_business',
-        ],
-    ]);
-});
+Route::match(['get', 'post'], 'data', 'DataController@list');
+Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
+Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView');
 
 Route::match(['get', 'post'], 'data/linkedData', 'DataController@linkedData');
 
@@ -326,11 +319,13 @@ Route::get('data/reportedView', function () {
     return view('data/reportedView', ['class' => 'data-attention']);
 });
 
-Route::match(['get', 'post'], 'organisation', 'OrganisationController@list')->name('orgList');
+Route::match(['get', 'post'], 'organisation', 'OrganisationController@list');
 Route::match(['get', 'post'], 'organisation/profile/{uri}', 'OrganisationController@view');
 
 Route::match(['get', 'post'], 'organisation/{uri}/datasets', 'OrganisationController@datasets');
-Route::match(['get', 'post'], 'organisation/{orgUri}/dataset/{uri}', 'OrganisationController@viewDataset');
+Route::match(['get', 'post'], 'organisation/dataset/{uri}', 'OrganisationController@viewDataset');
+Route::match(['get', 'post'], 'organisation/datasets/resourceView/{uri}', 'OrganisationController@resourceView');
+Route::post('organisation/resource/sendSignal', 'OrganisationController@sendSignal');
 
 Route::match(['get', 'post'], 'organisation/{uri}/chronology', 'OrganisationController@chronology');
 
@@ -344,9 +339,7 @@ Route::get('user/orgMembers', function () {
 Route::match(['get', 'post'], 'password/forgotten', 'UserController@forgottenPassword');
 Route::match(['get', 'post'], 'password/reset', 'UserController@passwordReset')->name('passReset');
 
-Route::get('request', function () {
-    return view('request/dataRequest', ['class' => 'request']);
-});
+Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
 
 Route::get('news', function () {
     return view('news/list', ['class' => 'news']);
@@ -356,13 +349,9 @@ Route::get('news/view', function () {
     return view('news/view', ['class' => 'news']);
 });
 
-Route::get('document', function () {
-    return view('document/list', ['class' => 'documents']);
-});
-
-Route::get('document/view', function () {
-    return view('document/view', ['class' => 'documents']);
-});
+Route::match(['get', 'post'], 'document', 'DocumentController@listDocuments');
+Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocuments');
+Route::match(['get', 'post'], 'document/view/{id}', 'DocumentController@viewDocument');
 
 Route::get('contact', function () {
     return view('contact/contact', ['class' => 'contact']);

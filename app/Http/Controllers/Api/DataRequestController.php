@@ -5,6 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Module;
 use App\DataRequest;
 use App\ActionsHistory;
+use App\RoleRight;
+use App\Organisation;
+use App\UserToOrgRole;
+use App\Role;
+use App\User;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -39,15 +45,18 @@ class DataRequestController extends ApiController
                 'org_id'           => 'required|integer|digits_between:1,10',
                 'description'      => 'required|string|max:191',
                 'published_url'    => 'nullable|string|max:191',
+                'email'            => 'sometimes|email|max:191',
                 'contact_name'     => 'nullable|string|max:191',
-                'email'            => 'required|email|max:191',
                 'notes'            => 'nullable|string|max:8000',
                 'status'           => 'nullable|integer|digits_between:1,3',
             ]);
         }
 
-        if (!$validator->fails()) {
+        if (!isset($requestData['data']['email'])) {
+            $requestData['data']['email'] = '';
+        }
 
+        if (!$validator->fails()) {
             $dataRequest = new DataRequest;
             $dataRequest->org_id = $requestData['data']['org_id'];
             $dataRequest->descript = $requestData['data']['description'];
@@ -69,6 +78,34 @@ class DataRequestController extends ApiController
                 $dataRequest->status = $requestData['data']['status'];
             } else {
                 $dataRequest->status = DataRequest::NEW_DATA_REQUEST;
+            }
+
+            if (!empty($requestData['data']['org_id'])) {
+                $organisation = Organisation::where('id', $requestData['data']['org_id'])->first();
+                $orgCreatedBy = $organisation->created_by;
+                $orgAdmins = UserToOrgRole::where('org_id', $requestData['data']['org_id'])
+                    ->where('role_id', Role::getOrgAdminRole()->id)
+                    ->pluck('user_id')->toArray();
+
+                $mailData = [
+                    'description'   => $dataRequest->descript,
+                    'email'         => $dataRequest->email,
+                    'status'        => $dataRequest->status,
+                    'published_url' => isset($dataRequest->published_url) ? $dataRequest->published_url : null,
+                    'contact_name'  => isset($dataRequest->contact_name) ? $dataRequest->contact_name : null,
+                    'notes'         => isset($dataRequest->notes) ? $dataRequest->notes : null,
+                ];
+
+                if (!empty($orgAdmins)) {
+                    foreach ($orgAdmins as $orgAdmin) {
+                        $userData = User::where('id', $orgAdmin)->first();
+                        Mail::send('mail/newDataRequest', $mailData, function ($m) use ($userData) {
+                            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                            $m->to($userData->email, $userData->firstname);
+                            $m->subject(__('custom.new_data_request'));
+                        });
+                    }
+                }
             }
 
             try {
@@ -129,6 +166,19 @@ class DataRequestController extends ApiController
 
         if (!$validator->fails()) {
             $requestToEdit = DataRequest::find($editRequestData['request_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $requestToEdit->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             if (isset($editRequestData['data']['org_id'])) {
                 $requestToEdit->org_id = $editRequestData['data']['org_id'];
@@ -196,6 +246,19 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
 
             $requestToDelete = DataRequest::find($deleteRequestData['request_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $requestToDelete->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             try {
                 $requestToDelete->delete();
@@ -267,6 +330,15 @@ class DataRequestController extends ApiController
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_request_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_REQUESTS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $result = [];
@@ -368,12 +440,14 @@ class DataRequestController extends ApiController
 
         Module::add($logData);
 
-        if ($criteria['order'] && $criteria['order']['field'] == 'description') {
-            usort($result, function($a, $b) use ($criteria) {
-                return strtolower($criteria['order']['type']) == 'asc'
-                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                    : strcmp($criteria['order']['field'], $criteria['order']['field']);
-            });
+        if(isset($criteria['order'])) {
+            if ($criteria['order'] && $criteria['order']['field'] == 'description') {
+                usort($result, function($a, $b) use ($criteria) {
+                    return strtolower($criteria['order']['type']) == 'asc'
+                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+                });
+            }
         }
 
         return $this->successResponse([

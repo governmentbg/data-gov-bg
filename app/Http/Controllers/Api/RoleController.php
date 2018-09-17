@@ -60,6 +60,15 @@ class RoleController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 $newRole = Role::create($post);
 
@@ -115,28 +124,42 @@ class RoleController extends ApiController
                 'for_group'             => 'nullable|int',
             ]);
 
-
-        if (isset($post['data']['default_user']) && $post['data']['default_user']) {
-            if (Role::where('default_user', 1)->first()) {
-               return $this->errorResponse(__('custom.edit_role_fail'));
+            if (isset($post['data']['default_user']) && $post['data']['default_user']) {
+                if (Role::where('default_user', 1)->where('id', '!=', $post['id'])->first()) {
+                    return $this->errorResponse(__('custom.edit_role_fail'));
+                }
             }
-        }
 
-        if (isset($post['data']['default_group_admin']) && $post['data']['default_group_admin']) {
-            if (Role::where('default_group_admin', 1)->first()) {
-               return $this->errorResponse(__('custom.edit_role_fail'));
+            if (isset($post['data']['default_group_admin']) && $post['data']['default_group_admin']) {
+                if (Role::where('default_group_admin', 1)->where('id', '!=', $post['id'])->first()) {
+                    return $this->errorResponse(__('custom.edit_role_fail'));
+                }
             }
-        }
 
-        if (isset($post['data']['default_org_admin']) && $post['data']['default_org_admin']) {
-            if (Role::where('default_org_admin', 1)->first()) {
-               return $this->errorResponse(__('custom.edit_role_fail'));
+            if (isset($post['data']['default_org_admin']) && $post['data']['default_org_admin']) {
+                if (Role::where('default_org_admin', 1)->where('id', '!=', $post['id'])->first()) {
+                    return $this->errorResponse(__('custom.edit_role_fail'));
+                }
             }
-        }
 
             if (!$validator->fails()) {
                 try {
-                    $role = Role::where('id', $post['id'])->update($post['data']);
+                    $role = Role::where('id', $post['id'])->first();
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::ROLES,
+                        RoleRight::RIGHT_EDIT,
+                        [],
+                        [
+                            'created_by' => $role->created_by
+                        ]
+                    );
+
+                    if (!$rightCheck) {
+                        return $this->errorResponse(__('custom.access_denied'));
+                    }
+
+                    $role->update($post['data']);
+
                     if ($role) {
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::ROLES),
@@ -174,7 +197,21 @@ class RoleController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $role = Role::find($id)->delete();
+                $role = Role::find($id);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ROLES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $role->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
+                $role = $role->delete();
 
                 if ($role) {
                     $logData = [
@@ -224,6 +261,15 @@ class RoleController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $query = Role::select();
 
             if (isset($post['role_id'])) {
@@ -281,6 +327,15 @@ class RoleController extends ApiController
         $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id|digits_between:1,10']);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $id = $request->get('id');
 
             try {
@@ -342,6 +397,15 @@ class RoleController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $role = Role::where('id', $post['id'])->first();
             $rights = $role->rights;
             $names = $request->input('data.*.module_name');

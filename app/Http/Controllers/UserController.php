@@ -2940,6 +2940,8 @@ class UserController extends Controller {
     {
         $params = [];
 
+        $params['api_key'] = \Auth::user()->api_key;
+
         if (!Role::isAdmin()) {
             $params['criteria']['user_id'] = \Auth::user()->id;
         }
@@ -3796,8 +3798,10 @@ class UserController extends Controller {
     public function userChronology(Request $request, $id)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $user = User::find($id);
         $actObjData = [];
         $criteria = [];
+
         $params = [
             'criteria'  => [
                 'id'        => $id,
@@ -3867,9 +3871,10 @@ class UserController extends Controller {
             }
 
             $rq = Request::create('/api/listOrganisations', 'POST', [
-                'criteria' => [
-                    'user_id' => $id
-                ]
+                'api_key'   => $user->api_key,
+                'criteria'  => [
+                    'user_id'   => $id,
+                ],
             ]);
             $api = new ApiOrganisation($rq);
             $res = $api->listOrganisations($rq)->getData();

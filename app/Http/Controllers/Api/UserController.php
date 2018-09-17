@@ -615,7 +615,8 @@ class UserController extends ApiController
             RoleRight::RIGHT_EDIT,
             [],
             [
-                'created_by' => $user->created_by
+                'created_by' => $user->created_by,
+                'object_id'  => $user->id
             ]
         );
 
@@ -863,7 +864,8 @@ class UserController extends ApiController
             RoleRight::RIGHT_EDIT,
             [],
             [
-                'created_by' => $user->created_by
+                'created_by' => $user->created_by,
+                'object_id'  => $user->id
             ]
         );
 

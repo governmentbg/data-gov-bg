@@ -12,9 +12,7 @@
                         <div class="article">
                             <div class="m-b-lg">
                                 <div class="col-sm-12 p-l-none article-underline">
-                                    <a href="{{ url('/news/view') }}">
-                                        <h2 class="m-t-xs">{{ $document->name }}</h2>
-                                    </a>
+                                    <h2 class="m-t-xs">{{ $document->name }}</h2>
                                     <p>{{ $document->description }}</p>
                                     <p>{{ $document->filename }}</p>
                                 </div>

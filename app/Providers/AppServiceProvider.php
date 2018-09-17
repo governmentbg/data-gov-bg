@@ -17,6 +17,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        app('url')->forceRootUrl(env('APP_URL'));
+
         Schema::defaultStringLength(191);
 
         if (!Collection::hasMacro('paginate')) {

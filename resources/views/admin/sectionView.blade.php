@@ -24,7 +24,7 @@
                                 <div>{{ !empty($section->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>
                         </div>
-                        <div class="form-group row m-b-lg m-t-md">
+                        <div class="form-group row m-b-lg m-t-md hidden">
                             <label for="read_only" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.read_only') }}</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($section->read_only) ? utrans('custom.yes') : utrans('custom.no') }}</div>
@@ -37,7 +37,7 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="theme" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.main_topic') }}</label>
+                            <label for="theme" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.theme') }}</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>
                                     {{

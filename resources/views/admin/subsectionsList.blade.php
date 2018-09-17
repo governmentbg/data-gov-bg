@@ -19,7 +19,7 @@
                     </li>
                     <li>
                         <a
-                            href=""
+                        href="{{ url('/admin/pages/list') }}"
                         >{{ __('custom.topics_pages') }}</a>
                     </li>
                 </ul>
@@ -31,7 +31,7 @@
         <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
-                    <a href="{{ url('/admin/subsections/add') }}">{{ __('custom.add') }}</a>
+                    <a href="{{ url('/admin/subsections/add/'. $sectionId) }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
         </div>

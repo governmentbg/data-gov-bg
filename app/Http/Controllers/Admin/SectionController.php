@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\SectionController as ApiSection;
+use App\Http\Controllers\Api\ThemeController as ApiTheme;
 
 class SectionController extends AdminController
 {
@@ -80,7 +81,7 @@ class SectionController extends AdminController
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
-            $themes = $this->prepareMainCategories();
+            $themes = $this->getColorThemes(true);
 
             if ($request->has('create')) {
                 $rq = Request::create('/api/addSection', 'POST', [
@@ -89,7 +90,6 @@ class SectionController extends AdminController
                         'active'     => $request->offsetGet('active'),
                         'parent_id'  => $request->offsetGet('parent_id'),
                         'ordering'   => $request->offsetGet('ordering'),
-                        'read_only'  => $request->offsetGet('read_only'),
                         'forum_link' => $request->offsetGet('forum_link'),
                         'theme'      => $request->offsetGet('theme'),
                     ]
@@ -153,7 +153,7 @@ class SectionController extends AdminController
                     [
                         'class'    => 'user',
                         'section'  => $this->getModelUsernames($section),
-                        'themes'   => $this->prepareMainCategories()
+                        'themes'   => $this->getColorThemes(true)
                     ]
                 );
             }
@@ -177,7 +177,7 @@ class SectionController extends AdminController
             $class = 'user';
             $fields = self::getSectionTransFields();
             $model = Section::find($id);
-            $themes = $this->prepareMainCategories();
+            $themes = $this->getColorThemes(true);
 
             if (!is_null($model)) {
                 $model = $this->getModelUsernames($model->loadTranslations());
@@ -191,7 +191,6 @@ class SectionController extends AdminController
                         'active'     => $request->offsetGet('active'),
                         'parent_id'  => $request->offsetGet('parent_id'),
                         'ordering'   => $request->offsetGet('ordering'),
-                        'read_only'  => $request->offsetGet('read_only'),
                         'forum_link' => $request->offsetGet('forum_link'),
                         'theme'      => $request->offsetGet('theme'),
                     ]
@@ -257,5 +256,31 @@ class SectionController extends AdminController
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+    }
+
+    /**
+     * Function for getting an array of color themes
+     *
+     * @return array of themes
+     */
+    public function getColorThemes($parse = false)
+    {
+        $request = Request::create('/api/listThemes', 'POST', []);
+        $api = new ApiTheme($request);
+        $result = $api->listThemes($request)->getData();
+
+        if ($parse) {
+            $themes = [];
+
+            if (isset($result->data)) {
+                foreach ($result->data as $theme) {
+                    $themes[$theme->id] = $theme->name;
+                }
+            }
+
+            return $themes;
+        }
+
+        return isset($result->data) ? $result->data : $result;
     }
 }

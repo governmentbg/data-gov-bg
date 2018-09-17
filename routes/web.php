@@ -241,7 +241,7 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/sections/delete/{id}', 'Admin\SectionController@delete');
 
         Route::match(['get', 'post'], '/admin/subsections/list/{id}', 'Admin\SubsectionController@list');
-        Route::match(['get', 'post'], '/admin/subsections/add', 'Admin\SubsectionController@add');
+        Route::match(['get', 'post'], '/admin/subsections/add/{id}', 'Admin\SubsectionController@add');
         Route::match(['get', 'post'], '/admin/subsections/view/{id}', 'Admin\SubsectionController@view');
         Route::match(['get', 'post'], '/admin/subsections/edit/{id}', 'Admin\SubsectionController@edit');
         Route::match(['get', 'post'], '/admin/subsections/delete/{id}', 'Admin\SubsectionController@delete');

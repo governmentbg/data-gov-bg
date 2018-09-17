@@ -58,7 +58,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group row m-b-lg m-t-md">
+                                <div class="form-group row m-b-lg m-t-md hidden">
                                     <label for="read_only" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.read_only') }}</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">

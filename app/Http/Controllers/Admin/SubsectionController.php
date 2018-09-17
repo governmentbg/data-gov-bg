@@ -71,6 +71,7 @@ class SubsectionController extends AdminController
                         'subsections'  => $paginationData['items'],
                         'pagination'   => $paginationData['paginate'],
                         'sectionName'  => $mainSection->name,
+                        'sectionId'    => $id,
                     ]
                 );
             } else {
@@ -81,7 +82,7 @@ class SubsectionController extends AdminController
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
-    public function add(Request $request)
+    public function add(Request $request, $id)
     {
         if (Role::isAdmin()) {
             $sections = $this->getMainSections();
@@ -98,7 +99,6 @@ class SubsectionController extends AdminController
                             'active'     => $request->offsetGet('active'),
                             'parent_id'  => $request->offsetGet('parent_id'),
                             'ordering'   => $request->offsetGet('ordering'),
-                            'read_only'  => $request->offsetGet('read_only'),
                             'forum_link' => $request->offsetGet('forum_link'),
                         ]
                     ]);
@@ -125,9 +125,10 @@ class SubsectionController extends AdminController
             return view(
                 'admin/subsectionAdd',
                 [
-                    'class'    => 'user',
-                    'fields'   => self::getSubsectionTransFields(),
-                    'sections' => $sections,
+                    'class'     => 'user',
+                    'fields'    => self::getSubsectionTransFields(),
+                    'sections'  => $sections,
+                    'sectionId' => $id,
                 ]
             );
         }
@@ -207,7 +208,6 @@ class SubsectionController extends AdminController
                         'active'     => $request->offsetGet('active'),
                         'parent_id'  => $request->offsetGet('parent_id'),
                         'ordering'   => $request->offsetGet('ordering'),
-                        'read_only'  => $request->offsetGet('read_only'),
                         'forum_link' => $request->offsetGet('forum_link'),
                     ]
                 ]);

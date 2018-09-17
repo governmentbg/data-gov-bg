@@ -117,6 +117,17 @@ class RoleRight extends Model
                                     }
                                 }
 
+                                if (isset($checkData['user_id']) && !empty($checkData['user_id'])
+                                    && isset($objData['object_id']) && !empty($objData['object_id'])
+                                    && $singleRight['module_name'] == Module::getModuleName(Module::USERS)) {
+                                    if ($singleRight['limit_to_own_data'] == 1) {
+                                        $check = true;
+                                        if ($checkData['user_id'] == $objData['object_id']) {
+                                            return true;
+                                        }
+                                    }
+                                }
+
                                 if (isset($checkData['org_id']) && !empty($checkData['org_id'])
                                     && isset($objData['org_id']) && !empty($objData['org_id'])) {
                                     $check = true;

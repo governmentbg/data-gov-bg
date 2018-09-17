@@ -266,7 +266,7 @@ class ResourceController extends Controller {
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect('/'. $root .'/resourceView/'. $uri);
+                    return redirect('/'. $root .'/resource/view/'. $uri);
                 }
 
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
@@ -315,7 +315,7 @@ class ResourceController extends Controller {
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect('/'. $root .'/resourceView/'. $uri);
+                    return redirect('/'. $root .'/resource/view/'. $uri);
                 }
 
                 $request->session()->flash('alert-danger', $resultElastic->error->message);

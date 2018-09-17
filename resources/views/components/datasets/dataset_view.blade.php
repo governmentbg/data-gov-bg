@@ -133,4 +133,5 @@
             @endif
         </div>
     </div>
+    @include('components.signal-box', ['signals' => $dataset->signals])
 @endif

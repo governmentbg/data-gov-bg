@@ -47,6 +47,9 @@ class ThemeController extends AdminController
                 $criteria['keywords'] = $request->q;
             }
 
+            $criteria['order']['type'] = 'asc';
+            $criteria['order']['field'] = 'ordering';
+
             $params = [
                 'records_per_page' => $perPage,
                 'page_number'      => !empty($request->page) ? $request->page : 1,

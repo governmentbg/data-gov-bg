@@ -12,7 +12,6 @@
  */
 
 Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
-    Route::post('listUsers', 'Api\UserController@listUsers');
     Route::post('searchUsers', 'Api\UserController@searchUsers');
     Route::post('getUserRoles', 'Api\UserController@getUserRoles');
     Route::post('getUserSettings', 'Api\UserController@getUserSettings');
@@ -63,7 +62,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('addDataset', 'Api\DataSetController@addDataset');
     Route::post('editDataset', 'Api\DataSetController@editDataset');
     Route::post('deleteDataset', 'Api\DataSetController@deleteDataset');
-    Route::post('listDatasets', 'Api\DataSetController@listDatasets');
     Route::post('addDatasetToGroup', 'Api\DataSetController@addDatasetToGroup');
     Route::post('removeDatasetFromGroup', 'Api\DataSetController@removeDatasetFromGroup');
     Route::post('getUsersDataSetCount', 'Api\DataSetController@getUsersDataSetCount');
@@ -87,7 +85,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
     Route::post('rights/listRights', 'Api\RightController@listRights');
 
-    Route::post('sendSignal', 'Api\SignalController@sendSignal');
     Route::post('editSignal', 'Api\SignalController@editSignal');
     Route::post('deleteSignal', 'Api\SignalController@deleteSignal');
     Route::post('listSignals', 'Api\SignalController@listSignals');
@@ -155,20 +152,26 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('toKML', 'Api\ConversionController@toKML');
     Route::post('toRDF', 'Api\ConversionController@toRDF');
 });
+Route::post('sendSignal', 'Api\SignalController@sendSignal');
 
 Route::post('register', 'Api\UserController@register');
+Route::post('listDataUsers', 'Api\UserController@listDataUsers');
+Route::post('listUsers', 'Api\UserController@listUsers');
 
 Route::post('searchNews', 'Api\NewsController@searchNews');
 Route::post('listNews', 'Api\NewsController@listNews');
 
+Route::post('listDatasets', 'Api\DataSetController@listDatasets');
 Route::post('searchDataset', 'Api\DataSetController@searchDataset');
 Route::post('getDatasetDetails', 'Api\DataSetController@getDatasetDetails');
 
 Route::post('listTags', 'Api\TagController@listTags');
 Route::post('getTagDetails', 'Api\TagController@getTagDetails');
 Route::post('searchTag', 'Api\TagController@searchTag');
+Route::post('listDataTags', 'Api\TagController@listDataTags');
 
 Route::post('listActionHistory', 'Api\ActionsHistoryController@listActionHistory');
+Route::post('listActionTypes', 'Api\ActionsHistoryController@listActionTypes');
 Route::post('userCount', 'Api\UserController@userCount');
 
 Route::post('listResources', 'Api\ResourceController@listResources');
@@ -178,6 +181,7 @@ Route::post('getResourceData', 'Api\ResourceController@getResourceData');
 Route::post('getResourceView', 'Api\ResourceController@getResourceView');
 Route::post('searchResourceData', 'Api\ResourceController@searchResourceData');
 Route::post('getLinkedData', 'Api\ResourceController@getLinkedData');
+Route::post('listDataCategories', 'Api\CategoryController@listDataCategories');
 
 Route::post('listMainCategories', 'Api\CategoryController@listMainCategories');
 Route::post('getMainCategoryDetails', 'Api\CategoryController@getMainCategoryDetails');
@@ -186,11 +190,15 @@ Route::post('listOrganisations', 'Api\OrganisationController@listOrganisations')
 Route::post('searchOrganisations', 'Api\OrganisationController@searchOrganisations');
 Route::post('getOrganisationDetails', 'Api\OrganisationController@getOrganisationDetails');
 Route::post('getMembers', 'Api\OrganisationController@getMembers');
+Route::post('listDataGroups', 'Api\OrganisationController@listDataGroups');
+Route::post('listOrganisationTypes', 'Api\OrganisationController@listOrganisationTypes');
 
 Route::post('listGroups', 'Api\OrganisationController@listGroups');
 Route::post('searchGroups', 'Api\OrganisationController@searchGroups');
+Route::post('listDataOrganisations', 'Api\OrganisationController@listDataOrganisations');
 Route::post('getGroupDetails', 'Api\OrganisationController@getGroupDetails');
 Route::post('getTermsOfUseDetails', 'Api\TermsOfUseController@getTermsOfUseDetails');
+Route::post('listDataTermsOfUse', 'Api\TermsOfUseController@listDataTermsOfUse');
 
 Route::post('listLocale', 'Api\LocaleController@listLocale');
 Route::post('getLocaleDetails', 'Api\LocaleController@getLocaleDetails');

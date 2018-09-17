@@ -2,10 +2,9 @@
 
 @section('content')
 <div class="container">
-    <div class="col-xs-12 p-l-r-none">
-        <div class="row">
-            @include('partials.sidebar')
-            <div class="col-sm-9 col-xs-11 page-content p-sm">
+    @include('partials.alerts-bar')
+    <div class="row">
+        <div class="col-sm-9 col-xs-11 page-content p-sm col-sm-offset-3">
                 <div class="filter-content">
                     <div class="col-md-12">
                         <div class="row">
@@ -153,7 +152,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 </div>

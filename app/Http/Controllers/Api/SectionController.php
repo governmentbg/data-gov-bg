@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Locale;
 use App\Module;
 use App\Section;
+use App\RoleRight;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -35,26 +36,56 @@ class SectionController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'name'          => 'required|string|max:191',
-            'locale'        => 'required|string|max:5',
-            'active'        => 'required|boolean',
+            'name'          => 'required_with:locale|max:191',
+            'name.bg'       => 'required_without:locale|string|max:191',
+            'name.*'        => 'max:191',
+            'locale'        => 'nullable|string|max:5',
+            'active'        => 'nullable|boolean',
             'parent_id'     => 'nullable|integer|exists:sections,id|digits_between:1,10',
             'ordering'      => 'nullable|integer|digits_between:1,3',
             'read_only'     => 'nullable|boolean',
             'theme'         => 'nullable|integer|digits_between:1,3',
-            'forum_link'    => 'nullable|string|digits_between:1,10',
+            'forum_link'    => 'nullable|string|max:191',
         ]);
 
         if (!$validator->fails()) {
-            $locale = Locale::where('locale', $data['locale'])->value('locale');
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             //prepare section data
             $newSection = new Section;
-            $newSection->created_by = \Auth::user()->id;
 
-            $newSection->name = $data['name'];
-            unset($data['locale']);
-            $newSection->fill($data);
+            $newSection->name = $this->trans($data['locale'], $data['name']);
+            $newSection->active = !empty($data['active']);
+            $newSection->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
+            $newSection->forum_link = isset($data['forum_link']) ? $data['forum_link'] : null;
+
+            if (isset($data['ordering'])) {
+                $newSection->ordering = $data['ordering'];
+            }
+
+            if (isset($data['read_only'])) {
+                $newSection->read_only = $data['read_only'];
+            }
+
+            if (isset($data['theme'])) {
+                $newSection->theme = $data['theme'];
+            }
+
+            if (isset($data['forum_link'])) {
+                $newSection->forum_link = $data['forum_link'];
+            }
+
+            if (isset($data['parent_id'])) {
+                $newSection->parent_id = $data['parent_id'];
+            }
 
             try {
                 $newSection->save();
@@ -98,40 +129,76 @@ class SectionController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'id'                => 'required|numeric|exists:sections,id|digits_between:1,10',
-            'data'              => 'required|array'
+            'id'   => 'required|numeric|exists:sections,id|digits_between:1,10',
+            'data' => 'required|array'
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'         => 'required|string|max:191',
-                'locale'       => 'required|string|max:5',
-                'active'       => 'required|boolean',
-                'parent_id'    => 'nullable|integer|exists:sections,id|digits_between:1,10',
-                'ordering'     => 'nullable|integer|digits_between:1,3',
-                'read_only'    => 'nullable|boolean',
-                'theme'        => 'nullable|integer|digits_between:1,3',
-                'forum_link'   => 'nullable|string|max:191',
+                'name'          => 'required_with:locale|max:191',
+                'name.bg'       => 'required_without:locale|string|max:191',
+                'name.*'        => 'max:191',
+                'locale'        => 'nullable|string|max:5',
+                'active'        => 'nullable|boolean',
+                'parent_id'     => 'nullable|integer|exists:sections,id|digits_between:1,10',
+                'ordering'      => 'nullable|integer|digits_between:1,3',
+                'read_only'     => 'nullable|boolean',
+                'theme'         => 'nullable|integer|digits_between:1,3',
+                'forum_link'    => 'nullable|string|max:191',
             ]);
         }
 
         if (!$validator->fails()) {
-            $data = $request->data;
-            $locale = Locale::where('locale', $data['locale'])->value('locale');
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => \Auth::user()->id
+                ]
+            );
 
-            // if request locale not found set default
-            if (is_null($locale)) {
-                $data['locale'] = config('app.locale');
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
             }
 
-            //prepare section data
+            $data = $request->data;
             $section = Section::find($post['id']);
 
             if ($section) {
-                $section->updated_by = \Auth::user()->id;
-                $section->name = $data['name'];
-                unset($data['locale']);
-                $section->fill($data);
+                $section->name = $this->trans($data['locale'], $data['name']);
+
+                if (!empty($data['active'])) {
+                    $section->active = $data['active'];
+                } else {
+                    $section->active = Section::ACTIVE_FALSE;
+                }
+
+                if (!empty($data['read_only'])) {
+                    $section->read_only = $data['read_only'];
+                } else {
+                    $section->read_only = Section::READ_ONLY_FALSE;
+                }
+
+                if (!empty($data['ordering'])) {
+                    $section->ordering = $data['ordering'];
+                }
+
+                if (!empty($data['parent_id'])) {
+                    $section->parent_id = $data['parent_id'];
+                }
+
+                if (!empty($data['theme'])) {
+                    $section->theme = $data['theme'];
+                }
+
+                if (!empty($data['forum_link'])) {
+                    $section->forum_link = $data['forum_link'];
+                } else {
+                    $section->forum_link = null;
+                }
+
+                $section->updated_by = \Auth::id();
 
                 try {
                     $section->save();
@@ -170,7 +237,21 @@ class SectionController extends ApiController
         $validator = \Validator::make($post, ['id' => 'required|integer|exists:sections,id|digits_between:1,10']);
 
         if (!$validator->fails()) {
-            if (Section::find($post['id'])->delete()) {
+            $section = Section::find($post['id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $section->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            if ($section->delete()) {
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SECTIONS),
                     'action'           => ActionsHistory::TYPE_DEL,
@@ -219,8 +300,26 @@ class SectionController extends ApiController
             ]);
         }
 
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
+
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SECTIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $query = Section::where('parent_id', null);
@@ -244,6 +343,13 @@ class SectionController extends ApiController
             $query->where($criteria);
         }
 
+        if (isset($order['type']) && isset($order['field'])) {
+            $query->orderBy(
+                $order['field'],
+                $order['type'] == 'asc' ? 'asc' : 'desc'
+            );
+        }
+
         $count = $query->count();
         $query->forPage(
             $request->offsetGet('page_number'),
@@ -263,8 +369,8 @@ class SectionController extends ApiController
                 'read_only'     => $section->read_only,
                 'forum_link'    => $section->forum_link,
                 'theme'         => $section->theme,
-                'created_at'    => $section->created_at,
-                'updated_at'    => $section->updated_at,
+                'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
+                'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,
                 'created_by'    => $section->created_by,
                 'updated_by'    => $section->updated_by,
             ];
@@ -318,6 +424,15 @@ class SectionController extends ApiController
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SECTIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $query = isset($criteria['section_id'])
             ? Section::where('parent_id', $criteria['section_id'])
             : Section::where('parent_id', '!=', null);
@@ -361,8 +476,8 @@ class SectionController extends ApiController
                 'read_only'     => $section->read_only,
                 'forum_link'    => $section->forum_link,
                 'theme'         => $section->theme,
-                'created_at'    => $section->created_at,
-                'updated_at'    => $section->updated_at,
+                'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
+                'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,
                 'created_by'    => $section->created_by,
                 'updated_by'    => $section->updated_by,
             ];

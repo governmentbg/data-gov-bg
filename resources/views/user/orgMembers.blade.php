@@ -25,16 +25,6 @@
                             >{{ $role->name }}</a>
                         </li>
                     @endforeach
-                    <li>
-                        <a
-                            class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                            href="{{ route('userOrgMembersView', [
-                                'uri'       => $organisation->uri,
-                                'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                'keywords'  => $keywords,
-                            ]) }}"
-                        >{{ __('custom.for_approval') }}</a>
-                    </li>
                 </ul>
             </li>
         </ul>
@@ -61,16 +51,6 @@
                                         >{{ $role->name }}</a>
                                     </li>
                                 @endforeach
-                                <li>
-                                    <a
-                                        class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                                        href="{{ route('userOrgMembersView', [
-                                            'uri'       => $organisation->uri,
-                                            'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                            'keywords'  => $keywords,
-                                        ]) }}"
-                                    >{{ uctrans('custom.for_approval') }}</a>
-                                </li>
                             </ul>
                         </li>
                     </ul>

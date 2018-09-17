@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Module;
 use App\ActionsHistory;
+use App\RoleRight;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
@@ -19,6 +20,15 @@ class RightController extends ApiController
      */
     public function listRights(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RIGHTS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $rights = RoleRight::getRights();
 
         if (!empty($rights)) {

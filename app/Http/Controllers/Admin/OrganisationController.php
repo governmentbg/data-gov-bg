@@ -39,6 +39,7 @@ class OrganisationController extends AdminController
         if (Role::isAdmin()) {
             $perPage = 6;
             $params = [
+                'api_key'          => Auth::user()->api_key,
                 'records_per_page' => $perPage,
                 'page_number'      => !empty($request->page) ? $request->page : 1,
             ];
@@ -343,12 +344,12 @@ class OrganisationController extends AdminController
             if ($result->success) {
                 session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect('/admin/groups');
+                return redirect('/admin/organisations');
             }
 
             session()->flash('alert-danger', __('custom.delete_error'));
 
-            return redirect('/admin/groups');
+            return redirect('/admin/organisations');
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
@@ -366,6 +367,10 @@ class OrganisationController extends AdminController
 
             if ($org) {
                 if ($request->has('edit_member')) {
+                    if(empty($roleId)) {
+                        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
+                    }
+
                     $rq = Request::create('/api/editMember', 'POST', [
                         'org_id'    => $org->id,
                         'user_id'   => $userId,
@@ -519,7 +524,7 @@ class OrganisationController extends AdminController
                         ],
                     ];
 
-                    $rq = Request::create('/api/addUser', 'POST', $post);
+                    $rq = Request::create('/api/register', 'POST', $post);
                     $api = new ApiUser($rq);
                     $result = $api->register($rq)->getData();
 

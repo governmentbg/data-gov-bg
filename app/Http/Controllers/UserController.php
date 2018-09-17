@@ -34,6 +34,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\TagController as ApiTags;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 use App\Http\Controllers\Api\UserController as ApiUser;
+use App\Http\Controllers\Api\SignalController as ApiSignal;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
@@ -268,6 +269,8 @@ class UserController extends Controller {
         if (!$orgId) {
             return back();
         }
+
+        $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -1305,6 +1308,20 @@ class UserController extends Controller {
                     'id'        => $user['id'],
                 ];
 
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $user->created_by,
+                        'object_id'  => $user->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $newKey = Request::create('api/generateAPIKey', 'POST', $data);
                 $api = new ApiUser($newKey);
                 $result = $api->generateAPIKey($newKey)->getData();
@@ -1324,6 +1341,20 @@ class UserController extends Controller {
                     'id'        => $user['id'],
                 ];
 
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $user->created_by,
+                        'object_id'  => $user->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $delUser = Request::create('api/deleteUser', 'POST', $data);
                 $api = new ApiUser($delUser);
                 $result = $api->deleteUser($delUser)->getData();
@@ -1338,6 +1369,20 @@ class UserController extends Controller {
             }
 
             if (!empty($saveData)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $user->created_by,
+                        'object_id'  => $user->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $editPost = Request::create('api/editUser', 'POST', $saveData);
                 $api = new ApiUser($editPost);
                 $result = $api->editUser($editPost)->getData();
@@ -1497,8 +1542,10 @@ class UserController extends Controller {
 
     /**
      * Adds resource metadata and prepares the resource elasticsearch data
+     *
      * @param Request $request - resource metadata, file with resource data
      * @param int $datasetUri - associated dataset uri
+     *
      * @return type
      */
     public function resourceCreate(Request $request, $datasetUri)
@@ -1522,7 +1569,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect()->route('resourceView', ['uri' => $response['uri']]);
+                        return redirect('/user/resource/view/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1549,11 +1596,101 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Edit resource metadata
+     *
+     * @param Request $request - resource metadata, file with resource data
+     * @param int $uri - uri of resource to be edited
+     *
+     * @return view - resource edit page
+     */
+    public function resourceEditMeta(Request $request, $uri)
+    {
+        $rq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceMetadata($rq)->getData();
+
+        if (!$res->success) {
+            return redirect()->back();
+        }
+
+        $resourceData = !empty($res->resource) ? $res->resource : null;
+
+        if (!isset($resourceData)) {
+            return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
+        }
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by'    => $resourceData->created_by,
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $class = 'user';
+        $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
+        $resource = Resource::where('uri', $uri)->first()->loadTranslations();
+
+        if ($resource) {
+            if ($request->has('ready_metadata')) {
+
+                $data = [
+                    'name'                  => $request->offsetGet('name'),
+                    'description'           => $request->offsetGet('descript'),
+                    'schema_description'    => $request->offsetGet('schema_description'),
+                    'schema_url'            => $request->offsetGet('schema_url'),
+                    'is_reported'           => is_null($request->offsetGet('reported'))
+                                                ? Resource::REPORTED_FALSE
+                                                : Resource::REPORTED_TRUE
+                    ];
+
+                $metadata = [
+                    'api_key'       => Auth::user()->api_key,
+                    'resource_uri'  => $uri,
+                    'data'          => $data,
+                ];
+
+                $savePost = Request::create('/api/editResourceMetadata', 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $response = $api->editResourceMetadata($savePost)->getData();
+
+                if ($response->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect(url('/user/resource/edit/'. $uri));
+                } else {
+                    $request->session()->flash('alert-danger', $response->error->message);
+                }
+            }
+        } else {
+            return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
+        }
+
+        return view('user/resourceEdit', [
+            'class'     => $class,
+            'resource'  => $resource,
+            'uri'       => $uri,
+            'types'     => $types,
+            'reqTypes'  => $reqTypes,
+            'fields'    => $this->getResourceTransFields()
+        ]);
+    }
+
     public function resourceCancelImport(Request $request, $uri)
     {
         // delete resource metadata record
         $resource = Resource::where('uri', $uri)->first();
-        $resource->forceDelete();
+
+        if ($resource) {
+            $resource->forceDelete();
+        }
+
         $request->session()->flash('alert-danger', uctrans('custom.cancel_resource_import'));
 
         return redirect('/user/datasets');
@@ -1797,133 +1934,87 @@ class UserController extends Controller {
      */
     public function resourceView(Request $request, $uri)
     {
-        $resourceReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
-        $apiResources = new ApiResource($resourceReq);
-        $resourceData = $apiResources->getResourceMetadata($resourceReq)->getData();
-        $resourceData = !empty($resourceData->resource) ? $resourceData->resource : null;
-
-        if (!isset($resourceData)) {
-            return back();
-        }
-
-        $rightCheck = RoleRight::checkUserRight(
-            Module::RESOURCES,
-            RoleRight::RIGHT_VIEW,
-            [],
-            ['created_by' => $resourceData->created_by]
-        );
-
-        if (!$rightCheck) {
-            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
-        }
-
-        $rightCheck = RoleRight::checkUserRight(
-            Module::RESOURCES,
-            RoleRight::RIGHT_ALL,
-            [],
-            ['created_by' => $resourceData->created_by]
-        );
-
-        $buttons[$resourceData->uri]['delete'] = $rightCheck;
-
         $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiMetadata = new ApiResource($reqMetadata);
         $result = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
         $resource = !empty($result->resource) ? $result->resource : null;
-        $data = [];
 
         if (!empty($resource)) {
-            $resource->format_code = Resource::getFormatsCode($resource->file_format);
-            $resource = $this->getModelUsernames($resource);
-
-            if ($request->has('delete')) {
-                $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_ALL,
-                    [],
-                    ['created_by' => $resourceData->created_by]
-                );
-
-                if (!$rightCheck) {
-                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
-                }
-
-                $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
-                $apiDelete = new ApiResource($reqDelete);
-                $result = $apiDelete->deleteResource($reqDelete)->getData();
-
-                if ($result->success) {
-                    $request->session()->flash('alert-success', __('custom.delete_success'));
-
-                    return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
-                }
-
-                $request->session()->flash('alert-success', __('custom.delete_error'));
-            }
-
-            $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
-            $apiEsData = new ApiResource($reqEsData);
-            $response = $apiEsData->getResourceData($reqEsData)->getData();
-
-            $data = !empty($response->data) ? $response->data : [];
-
-            if ($resource->format_code == Resource::FORMAT_XML) {
-                $convertData = [
-                    'api_key'   => \Auth::user()->api_key,
-                    'data'      => $data,
-                ];
-                $reqConvert = Request::create('/json2xml', 'POST', $convertData);
-                $apiConvert = new ApiConversion($reqConvert);
-                $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
-                $data = $resultConvert->data;
-            }
-
-            return view('user/resourceView', [
-                'class'         => 'user',
-                'resource'      => $resource,
-                'data'          => $data,
-                'buttons'       => $buttons
-            ]);
-        }
-
-        return redirect('/user/datasets');
-    }
-
-    /**
-     * Transforms resource data to donwloadable file
-     *
-     * @param Request $request - file name, file format and id for resource elastic search data
-     *
-     * @return downlodable file
-     */
-    public function resourceDownload(Request $request)
-    {
-        $fileName = $request->offsetGet('name');
-        $esid = $request->offsetGet('es_id');
-        $format = $request->offsetGet('format');
-        $method = 'to'. $format;
-        $convertReq = Request::create('/api/'. $method, 'POST', ['es_id' => $esid]);
-        $apiResources = new ApiConversion($convertReq);
-        $resource = $apiResources->$method($convertReq)->getData();
-        if (strtolower($format) == 'json') {
-            $fileData = json_encode($resource->data);
-        } else {
-            $fileData = $resource->data;
-        }
-
-        if (!empty($resource->data)) {
-            $handle = fopen('../storage/app/'. $fileName, 'w+');
-            $path = stream_get_meta_data($handle)['uri'];
-
-            fwrite($handle, $fileData);
-
-            fclose($handle);
-
-            $headers = array(
-                'Content-Type' => 'text/'. strtolower($method),
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_VIEW,
+                [],
+                ['created_by' => $resource->created_by]
             );
 
-            return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
+            if (!$rightCheck) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+            }
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_ALL,
+                [],
+                ['created_by' => $resource->created_by]
+            );
+
+            $buttons[$resource->uri]['delete'] = $rightCheck;
+
+            $data = [];
+
+            if (!empty($resource)) {
+                $resource->format_code = Resource::getFormatsCode($resource->file_format);
+                $resource = $this->getModelUsernames($resource);
+
+                if ($request->has('delete')) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                        [],
+                        ['created_by' => $resource->created_by]
+                    );
+
+                    if (!$rightCheck) {
+                        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                    }
+
+                    $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                    $apiDelete = new ApiResource($reqDelete);
+                    $result = $apiDelete->deleteResource($reqDelete)->getData();
+
+                    if ($result->success) {
+                        $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                        return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
+                    }
+
+                    $request->session()->flash('alert-success', __('custom.delete_error'));
+                }
+
+                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+                $apiEsData = new ApiResource($reqEsData);
+                $response = $apiEsData->getResourceData($reqEsData)->getData();
+
+                $data = !empty($response->data) ? $response->data : [];
+
+                if ($resource->format_code == Resource::FORMAT_XML) {
+                    $convertData = [
+                        'api_key'   => \Auth::user()->api_key,
+                        'data'      => $data,
+                    ];
+                    $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+                    $apiConvert = new ApiConversion($reqConvert);
+                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                    $data = $resultConvert->data;
+                }
+
+                return view('user/resourceView', [
+                    'class'         => 'user',
+                    'resource'      => $resource,
+                    'data'          => $data,
+                    'buttons'       => $buttons
+                ]);
+            }
         }
 
         return back();
@@ -2526,6 +2617,10 @@ class UserController extends Controller {
                     return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
+                if(empty($roleId)) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
+                }
+
                 $rq = Request::create('/api/editMember', 'POST', [
                     'org_id'    => $org->id,
                     'user_id'   => $userId,
@@ -2974,6 +3069,8 @@ class UserController extends Controller {
     {
         $params = [];
 
+        $params['api_key'] = \Auth::user()->api_key;
+
         if (!Role::isAdmin()) {
             $params['criteria']['user_id'] = \Auth::user()->id;
         }
@@ -3118,6 +3215,7 @@ class UserController extends Controller {
 
                 if (!empty($userFollows['org_id'])) {
                     $params = [
+                        'api_key'  => $user->api_key,
                         'criteria' => [
                             'org_ids' => $userFollows['org_id'],
                             'locale' => $locale
@@ -3829,8 +3927,10 @@ class UserController extends Controller {
     public function userChronology(Request $request, $id)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $user = User::find($id);
         $actObjData = [];
         $criteria = [];
+
         $params = [
             'criteria'  => [
                 'id'        => $id,
@@ -3900,9 +4000,10 @@ class UserController extends Controller {
             }
 
             $rq = Request::create('/api/listOrganisations', 'POST', [
-                'criteria' => [
-                    'user_id' => $id
-                ]
+                'api_key'   => $user->api_key,
+                'criteria'  => [
+                    'user_id'   => $id,
+                ],
             ]);
             $api = new ApiOrganisation($rq);
             $res = $api->listOrganisations($rq)->getData();
@@ -4087,11 +4188,11 @@ class UserController extends Controller {
                 Module::GROUPS,
                 RoleRight::RIGHT_VIEW,
                 [
-                    'org_id'       => $group->id
+                    'group_id'       => $group->id
                 ],
                 [
                     'created_by' => $group->created_by,
-                    'org_id'     => $group->id
+                    'group_ids'     => [$group->id]
                 ]
             );
 
@@ -4101,11 +4202,11 @@ class UserController extends Controller {
                 Module::GROUPS,
                 RoleRight::RIGHT_EDIT,
                 [
-                    'org_id'       => $group->id
+                    'group_id'       => $group->id
                 ],
                 [
-                    'created_by' => $group->created_by,
-                    'org_id'     => $group->id
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
                 ]
             );
 
@@ -4115,11 +4216,11 @@ class UserController extends Controller {
                 Module::GROUPS,
                 RoleRight::RIGHT_ALL,
                 [
-                    'org_id'       => $group->id
+                    'group_id'       => $group->id
                 ],
                 [
-                    'created_by' => $group->created_by,
-                    'org_id'     => $group->id
+                    'created_by'    => $group->created_by,
+                    'group_ids'     => [$group->id]
                 ]
             );
 
@@ -5020,6 +5121,10 @@ class UserController extends Controller {
                     return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
+                if(empty($roleId)) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
+                }
+
                 $rq = Request::create('/api/editMember', 'POST', [
                     'org_id'    => $group->id,
                     'user_id'   => $userId,
@@ -5511,5 +5616,24 @@ class UserController extends Controller {
         }
 
         return redirect('user/groups');
+    }
+
+    public function removeSignal(Request $request)
+    {
+        if ($request->has('remove_signal')) {
+            $params['signal_id'] = $request->offsetGet('signal');
+            $params['data']['status'] = \App\Signal::STATUS_PROCESSED;
+            $rq = Request::create('/api/editSignal', 'POST', $params);
+            $api = new ApiSignal($rq);
+            $response = $api->editSignal($rq)->getData();
+        }
+
+        if ($response->success) {
+            $request->session()->flash('alert-success', __('custom.edit_success'));
+        } else {
+            $request->session()->flash('alert-danger', __('custom.edit_error'));
+        }
+
+        return back();
     }
 }

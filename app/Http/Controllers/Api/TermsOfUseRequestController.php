@@ -7,6 +7,7 @@ use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Log;
 use App\TermsOfUseRequest;
+use App\RoleRight;
 use App\Module;
 use App\ActionsHistory;
 
@@ -35,10 +36,19 @@ class TermsOfUseRequestController extends ApiController
             'firstname'     => 'required|string|max:100',
             'lastname'      => 'required|string|max:100',
             'email'         => 'required|email|string|max:191',
-            'status'        => 'integer|min:1'
+            'status'        => 'integer|in:'. implode(',', array_keys(TermsOfUseRequest::getStatuses())),
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TERMS_OF_USE_REQUESTS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             // set default values to optional fields
             if (!isset($data['status'])) {
                 $data['status'] = TermsOfUseRequest::STATUS_NEW;
@@ -101,13 +111,26 @@ class TermsOfUseRequestController extends ApiController
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
                 'email'        => 'required|email|string|max:191',
-                'status'       => 'integer|min:1'
+                'status'       => 'integer|in:'. implode(',', array_keys(TermsOfUseRequest::getStatuses())),
             ]);
         }
 
         if (!$validator->fails()) {
             $data = $post['data'];
             $terms = TermsOfUseRequest::find($post['request_id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TERMS_OF_USE_REQUESTS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $terms->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $terms->descript = $data['description'];
             unset($data['description']);
             $terms->fill($data);
@@ -157,6 +180,18 @@ class TermsOfUseRequestController extends ApiController
             return $this->errorResponse(__('custom.delete_terms_request_fail'));
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::TERMS_OF_USE_REQUESTS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $terms->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
         try {
             $terms->delete();
         } catch (QueryException $ex) {
@@ -229,6 +264,15 @@ class TermsOfUseRequestController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TERMS_OF_USE_REQUESTS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $filterColumn = 'created_at';
             $criteria = $request->offsetGet('criteria');
 

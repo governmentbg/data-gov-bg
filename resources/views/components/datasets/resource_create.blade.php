@@ -15,6 +15,7 @@
                 )
             @endif
         @endforeach
+
         <div class="form-group row required">
             <label for="type" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.type', 1) }}:</label>
             <div class="col-sm-9">
@@ -50,7 +51,10 @@
             </div>
         </div>
 
-        <div class="form-group row required js-ress-url js-ress-api" hidden>
+        <div
+            class="form-group row required js-ress-url js-ress-api"
+            {{ old('type') == \App\Resource::TYPE_HYPERLINK ? null : 'hidden' }}
+        >
             <label for="url" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.url') }}:</label>
             <div class="col-sm-9">
                 <input
@@ -105,7 +109,7 @@
                         id="request"
                         class="input-border-r-12 form-control"
                         name="post_data"
-                    >{{ old('headers') }}</textarea>
+                    >{{ old('post_data') }}</textarea>
                     <span class="error">{{ $errors->first('post_data') }}</span>
                 </div>
             </div>
@@ -122,6 +126,7 @@
                 <span class="error">{{ $errors->first('schema_description') }}</span>
             </div>
         </div>
+
         <div class="form-group row ">
             <label for="schema_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_url') }}:</label>
             <div class="col-sm-9">
@@ -135,6 +140,7 @@
                 <span class="error">{{ $errors->first('schema_url') }}</span>
             </div>
         </div>
+
         <div class="form-group row">
             <div class="col-sm-12 text-right">
                 <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>

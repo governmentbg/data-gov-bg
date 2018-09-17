@@ -44,7 +44,7 @@
                                             'Admin\DocumentController@list',
                                             array_merge(
                                                 ['dtype' => \App\Document::DATE_TYPE_CREATED],
-                                                array_except(app('request')->input(), ['dtype', 'q'])
+                                                array_except(app('request')->input(), ['dtype', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -63,7 +63,7 @@
                                             'Admin\DocumentController@list',
                                             array_merge(
                                                 ['dtype' => \App\Document::DATE_TYPE_UPDATED],
-                                                array_except(app('request')->input(), ['dtype', 'q'])
+                                                array_except(app('request')->input(), ['dtype', 'q', 'page'])
                                             )
                                         )
                                     }}"
@@ -158,6 +158,42 @@
                             : ''
                     }}"
                 >{{ __('custom.date_updated') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\DocumentController@list',
+                            array_merge(
+                                ['order_type' => 'asc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'asc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{uctrans('custom.order_asc') }}</a>
+                <a
+                    href="{{
+                        action(
+                            'Admin\DocumentController@list',
+                            array_merge(
+                                ['order_type' => 'desc'],
+                                array_except(app('request')->input(), ['order_type'])
+                            )
+                        )
+                    }}"
+
+                    class="{{
+                        isset(app('request')->input()['order_type'])
+                        && app('request')->input()['order_type'] == 'desc'
+                            ? 'active'
+                            : ''
+                    }}"
+                >{{uctrans('custom.order_desc') }}</a>
             </div>
             <div class="col-sm-4 col-xs-12 text-right">
                 <span class="badge badge-pill doc-badge">

@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use \App\Signal;
+use Illuminate\Support\Facades\Mail;
+use App\RoleRight;
+use App\Signal;
 use \Validator;
 use App\Module;
 use App\DataSet;
 use App\Resource;
 use App\ActionsHistory;
+use App\User;
 
 class SignalController extends ApiController
 {
@@ -38,17 +42,19 @@ class SignalController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($signalData['data'], [
-                'resource_id'  => 'required|integer|digits_between:1,10',
+                'resource_id'  => 'required|integer|digits_between:1,10|exists:resources,id',
                 'description'  => 'required|string|max:8000',
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
                 'email'        => 'required|email|max:191',
-                'status'       => 'nullable|integer|digits_between:1,3',
+                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses()))
             ]);
         }
 
         if (!$validator->fails()) {
             try {
+                DB::beginTransaction();
+
                 $newSignal = new Signal;
 
                 $newSignal->resource_id = $signalData['data']['resource_id'];
@@ -60,10 +66,18 @@ class SignalController extends ApiController
                 if (isset($signalData['data']['status'])) {
                     $newSignal->status = $signalData['data']['status'];
                 } else {
-                    $newSignal->status = Signal::TYPE_NEW;
+                    $newSignal->status = Signal::STATUS_NEW;
                 }
 
-                $newSignal->save();
+                $saved = $newSignal->save();
+
+                // mark related resource as reported
+                // if ($saved && $newSignal->status == Signal::STATUS_NEW) {
+                if ($saved) {
+                    $resource = Resource::where('id', $newSignal->resource_id)->first();
+                    $resource->is_reported = Resource::REPORTED_TRUE;
+                    $saved = $resource->save();
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
@@ -74,9 +88,36 @@ class SignalController extends ApiController
 
                 Module::add($logData);
 
-                return $this->successResponse(['signal_id :' . $newSignal->id]);
+                DB::commit();
             } catch (QueryException $e) {
+                $saved = false;
+
+                DB::rollback();
+
                 Log::error($e->getMessage());
+            }
+
+            if ($saved) {
+                try {
+                    if (($user = User::find($resource->created_by)) && !empty($user->email)) {
+                        $mailData = [
+                            'user'          => $user->firstname ?: $user->username,
+                            'resource_name' => $resource->name,
+                            'dataset_uri'   => $resource->dataSet->uri,
+                            'dataset_name'  => $resource->dataSet->name,
+                        ];
+
+                        Mail::send('mail/signalMail', $mailData, function ($m) use ($user) {
+                            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                            $m->to($user->email, $user->firstname);
+                            $m->subject(__('custom.signal_subject'));
+                        });
+                    }
+                } catch (\Exception $ex) {
+                    Log::error($ex->getMessage());
+                }
+
+                return $this->successResponse(['signal_id :' . $newSignal->id]);
             }
         }
 
@@ -113,13 +154,25 @@ class SignalController extends ApiController
                 'firstname'    => 'sometimes|string|max:100',
                 'lastname'     => 'sometimes|string|max:100',
                 'email'        => 'sometimes|email|max:191',
-                'status'       => 'sometimes|integer|digits_between:1,3',
+                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses())),
             ]);
         }
 
         if (!$validator->fails()) {
             try {
                 $signalToEdit = Signal::find($editSignalData['signal_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::SIGNALS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $signalToEdit->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 if (isset($editSignalData['data']['resource_id'])) {
                     $signalToEdit->resource_id = $editSignalData['data']['resource_id'];
@@ -144,7 +197,7 @@ class SignalController extends ApiController
                 if (isset($editSignalData['data']['status'])) {
                     $signalToEdit->status = $editSignalData['data']['status'];
                 } else {
-                    $signalToEdit->status = Signal::TYPE_NEW;
+                    $signalToEdit->status = Signal::STATUS_NEW;
                 }
 
                 $signalToEdit->save();
@@ -184,6 +237,18 @@ class SignalController extends ApiController
         if (!$validator->fails()) {
             try {
                 $signalToBeDeleted = Signal::find($deleteData['signal_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::SIGNALS,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $signalToBeDeleted->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $signalToBeDeleted->delete();
 
@@ -259,53 +324,29 @@ class SignalController extends ApiController
             return $this->errorResponse(__('custom.list_signals_fail'), $validator->errors()->messages());
         }
 
-        $result = [];
-        $columns = [
-            'id',
-            'resource_id',
-            'descript',
-            'firstname',
-            'lastname',
-            'email',
-            'status',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by',
-        ];
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SIGNALS,
+            RoleRight::RIGHT_VIEW
+        );
 
-        $query = Signal::select($columns);
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
+        $result = [];
+        $query = Signal::select();
+
+        if (isset($criteria['search'])) {
+            $ids = Signal::search($criteria['search'])->get()->pluck('id');
+            $query->whereIn('id', $ids);
+        }
 
         if (isset($criteria['signal_id'])) {
             $query->where('id', $criteria['signal_id']);
         }
 
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
-                if (!in_array($criteria['order']['field'], $columns)) {
-                    unset($criteria['order']['field']);
-                }
-            }
-        }
-
-        if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            $query->orderBy(
-                $criteria['order']['field'],
-                $criteria['order']['type'] == 'asc' ? 'asc' : 'desc'
-            );
-        }
-
         if (isset($criteria['status'])) {
             $query->where('status', $criteria['status']);
-        }
-
-        if (isset($criteria['search'])) {
-            $search = $criteria['search'];
-
-            $query->where('firstname', 'like', '%' . $search . '%')
-                ->orWhere('lastname', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%')
-                ->orWhere('descript', 'like', '%' . $search . '%');
         }
 
         if (isset($criteria['date_from'])) {
@@ -317,6 +358,12 @@ class SignalController extends ApiController
         }
 
         $total_records = $query->count();
+        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
+
+        if (!empty($order)) {
+            $query->orderBy($order['field'], $order['type']);
+        }
 
         if ($request->has('records_per_page') || $request->has('page_number')) {
             $query->forPage($request->input('page_number'), $request->input('records_per_page'));

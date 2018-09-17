@@ -18,6 +18,15 @@
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"
                 >
+                @foreach (app('request')->except(['q', 'page']) as $key => $value)
+                    @if (is_array($value))
+                        @foreach ($value as $innerValue)
+                            <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
+                        @endforeach
+                    @else
+                        <input name="{{ $key }}" type="hidden" value="{{ $value }}">
+                    @endif
+                @endforeach
             </form>
         </div>
     </div>
@@ -60,7 +69,7 @@
                                     ? action(
                                         'Admin\DataSetController@listDatasets', array_merge(
                                             ['orgs_count' => $orgDropCount],
-                                            array_except(app('request')->input(), ['orgs_count'])
+                                            array_except(app('request')->input(), ['orgs_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -69,7 +78,7 @@
                                                 'orgs_count'    => null,
                                                 'org'           => [],
                                             ],
-                                            array_except(app('request')->input(), ['org', 'orgs_count'])
+                                            array_except(app('request')->input(), ['org', 'orgs_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -88,13 +97,13 @@
                                             ? action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['org' => array_merge([$id], $selectedOrgs)],
-                                                    array_except(app('request')->input(), ['org'])
+                                                    array_except(app('request')->input(), ['org', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['org' => array_diff($selectedOrgs, [$id])],
-                                                    array_except(app('request')->input(), ['org'])
+                                                    array_except(app('request')->input(), ['org', 'page'])
                                                 )
                                             )
                                     }}"
@@ -120,7 +129,7 @@
                                     ? action(
                                         'Admin\DataSetController@listDatasets', array_merge(
                                             ['groups_count' => $groupDropCount],
-                                            array_except(app('request')->input(), ['groups_count'])
+                                            array_except(app('request')->input(), ['groups_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -129,7 +138,7 @@
                                                 'groups_count'  => null,
                                                 'group'         => [],
                                             ],
-                                            array_except(app('request')->input(), ['group', 'groups_count'])
+                                            array_except(app('request')->input(), ['group', 'groups_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -148,13 +157,13 @@
                                             ? action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['group' => array_merge([$id], $selectedGroups)],
-                                                    array_except(app('request')->input(), ['group'])
+                                                    array_except(app('request')->input(), ['group', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['group' => array_diff($selectedGroups, [$id])],
-                                                    array_except(app('request')->input(), ['group'])
+                                                    array_except(app('request')->input(), ['group', 'page'])
                                                 )
                                             )
                                     }}"
@@ -181,7 +190,7 @@
                                     ? action(
                                         'Admin\DataSetController@listDatasets', array_merge(
                                             ['users_count' => $userDropCount],
-                                            array_except(app('request')->input(), ['users_count'])
+                                            array_except(app('request')->input(), ['users_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -190,7 +199,7 @@
                                                 'users_count'  => null,
                                                 'user'         => [],
                                             ],
-                                            array_except(app('request')->input(), ['user', 'users_count'])
+                                            array_except(app('request')->input(), ['user', 'users_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -208,7 +217,7 @@
                                         action(
                                             'Admin\DataSetController@listDatasets', array_merge(
                                                 ['user' => $id],
-                                                array_except(app('request')->input(), ['user'])
+                                                array_except(app('request')->input(), ['user', 'page'])
                                             )
                                         )
                                     }}"
@@ -235,7 +244,7 @@
                                     ? action(
                                         'Admin\DataSetController@listDatasets', array_merge(
                                             ['categories_count' => $catDropCount],
-                                            array_except(app('request')->input(), ['categories_count'])
+                                            array_except(app('request')->input(), ['categories_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -244,7 +253,7 @@
                                                 'categories_count'  => null,
                                                 'category'         => [],
                                             ],
-                                            array_except(app('request')->input(), ['category', 'categories_count'])
+                                            array_except(app('request')->input(), ['category', 'categories_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -263,13 +272,13 @@
                                             ? action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['category' => array_merge([$id], $selectedCategories)],
-                                                    array_except(app('request')->input(), ['category'])
+                                                    array_except(app('request')->input(), ['category', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['category' => array_diff($selectedCategories, [$id])],
-                                                    array_except(app('request')->input(), ['category'])
+                                                    array_except(app('request')->input(), ['category', 'page'])
                                                 )
                                             )
                                     }}"
@@ -296,7 +305,7 @@
                                     ? action(
                                         'Admin\DataSetController@listDatasets', array_merge(
                                             ['tags_count' => $tagsDropCount],
-                                            array_except(app('request')->input(), ['tags_count'])
+                                            array_except(app('request')->input(), ['tags_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -305,7 +314,7 @@
                                                 'tags_count'  => null,
                                                 'tag'         => [],
                                             ],
-                                            array_except(app('request')->input(), ['tag', 'tags_count'])
+                                            array_except(app('request')->input(), ['tag', 'tags_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -324,13 +333,13 @@
                                             ? action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['tag' => array_merge([$id], $selectedTags)],
-                                                    array_except(app('request')->input(), ['tag'])
+                                                    array_except(app('request')->input(), ['tag', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['tag' => array_diff($selectedTags, [$id])],
-                                                    array_except(app('request')->input(), ['tag'])
+                                                    array_except(app('request')->input(), ['tag', 'page'])
                                                 )
                                             )
                                     }}"
@@ -359,7 +368,7 @@
                                                 'formatsCount'  => null,
                                                 'format'         => [],
                                             ],
-                                            array_except(app('request')->input(), ['format', 'formatsCount'])
+                                            array_except(app('request')->input(), ['format', 'formatsCount', 'page'])
                                         )
                                     )
                                 }}"
@@ -378,13 +387,13 @@
                                             ? action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['format' => array_merge([$format], $selectedFormats)],
-                                                    array_except(app('request')->input(), ['format'])
+                                                    array_except(app('request')->input(), ['format', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['format' => array_diff($selectedFormats, [$format])],
-                                                    array_except(app('request')->input(), ['format'])
+                                                    array_except(app('request')->input(), ['format', 'page'])
                                                 )
                                             )
                                     }}"
@@ -411,7 +420,7 @@
                                     ? action(
                                         'Admin\DataSetController@listDatasets', array_merge(
                                             ['terms_count' => $termsDropCount],
-                                            array_except(app('request')->input(), ['terms_count'])
+                                            array_except(app('request')->input(), ['terms_count', 'page'])
                                         )
                                     )
                                     : action(
@@ -420,7 +429,7 @@
                                                 'terms_count'  => null,
                                                 'term'         => [],
                                             ],
-                                            array_except(app('request')->input(), ['term', 'terms_count'])
+                                            array_except(app('request')->input(), ['term', 'terms_count', 'page'])
                                         )
                                     )
                                 }}"
@@ -439,13 +448,13 @@
                                             ? action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['term' => array_merge([$id], $selectedTerms)],
-                                                    array_except(app('request')->input(), ['term'])
+                                                    array_except(app('request')->input(), ['term', 'page'])
                                                 )
                                             )
                                             : action(
                                                 'Admin\DataSetController@listDatasets', array_merge(
                                                     ['term' => array_diff($selectedTerms, [$id])],
-                                                    array_except(app('request')->input(), ['term'])
+                                                    array_except(app('request')->input(), ['term', 'page'])
                                                 )
                                             )
                                     }}"
@@ -473,7 +482,7 @@
                             value="1"
                             {{ $signaledFilter ? 'checked' : '' }}
                         >
-                        @foreach (app('request')->except(['signaled']) as $key => $value)
+                        @foreach (app('request')->except(['signaled', 'page']) as $key => $value)
                             @if (is_array($value))
                                 @foreach ($value as $innerValue)
                                     <input name="{{ $key }}[]" type="hidden" value="{{ $innerValue }}">
@@ -572,7 +581,7 @@
                             <div>{{ __('custom.date_added') }}: {{ $set->created_at }}</div>
                             <div class="col-sm-12 p-l-none">
                                 <a href="{{ url('/admin/dataset/view/'. $set->uri) }}">
-                                    <h2 class="m-t-xs">{{ $set->name }}</h2>
+                                    <h2 class="m-t-xs {{$set->reported ? 'error' : '' }}">{{ $set->name }}</h2>
                                 </a>
                                 @if ($set->status == App\DataSet::STATUS_DRAFT)
                                     <span>({{ __('custom.draft') }})</span>

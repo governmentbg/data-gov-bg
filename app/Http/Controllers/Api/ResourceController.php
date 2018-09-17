@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 use Uuid;
 use App\DataSet;
 use App\Resource;
+use App\Signal;
 use App\Module;
+use App\RoleRight;
 use App\ActionsHistory;
 use App\ElasticDataSet;
 use App\Organisation;
@@ -92,6 +94,16 @@ class ResourceController extends ApiController
         });
 
         if (!$validator->fails()) {
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             DB::beginTransaction();
 
             try {
@@ -161,6 +173,15 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             DB::beginTransaction();
 
             try {
@@ -244,26 +265,28 @@ class ResourceController extends ApiController
         }
 
         $validator = \Validator::make($post, [
-            'resource_uri'              => 'required|string|exists:resources,uri,deleted_at,NULL',
-            'data'                      => 'required|array',
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL',
+            'data'          => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'                 => 'nullable|string|max:191',
-                'description'          => 'nullable|string|max:8000',
-                'file_format'          => 'nullable|string|max:191',
-                'locale'               => 'nullable|string|required_with:data.name,data.description|max:5',
+                'name'                 => 'required_with:locale|max:191',
+                'name.bg'              => 'required_without:locale|string|max:191',
+                'description'          => 'nullable|max:8000',
+                'file_format'          => 'sometimes|string|max:191',
+                'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',
                 'version'              => 'nullable|string|max:15',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
-                'type'                 => 'nullable|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
-                'resource_url'         => 'nullable|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
-                'http_rq_type'         => 'nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-                'authentication'       => 'nullable|string|max:191|required_if:data.type,'. Resource::TYPE_API,
-                'http_headers'         => 'nullable|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
-                'post_data'            => 'nullable|string|max:8000',
-                'custom_fields'        => 'nullable|array',
+                'type'                 => 'sometimes|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'resource_url'         => 'sometimes|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'http_rq_type'         => 'sometimes|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+                'authentication'       => 'sometimes|string|max:191|required_if:data.type,'. Resource::TYPE_API,
+                'http_headers'         => 'sometimes|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
+                'is_reported'          => 'sometimes|boolean',
+                'post_data'            => 'sometimes|string|max:8000',
+                'custom_fields'        => 'sometimes|array',
             ]);
         }
 
@@ -277,9 +300,22 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
-            DB::beginTransaction();
 
             $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $rightCheck = RoleRight::checkUserRight(
+                Module::RESOURCES,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $resource->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            DB::beginTransaction();
 
             if (isset($post['data']['version'])) {
                 $resource->version = $post['data']['version'];
@@ -319,6 +355,14 @@ class ResourceController extends ApiController
 
             if (isset($post['data']['schema_url'])) {
                 $resource->schema_url = $post['data']['schema_url'];
+            }
+
+            if (isset($post['data']['is_reported'])) {
+                $resource->is_reported = $post['data']['is_reported'];
+
+                if ($resource->is_reported == Resource::REPORTED_FALSE) {
+                    Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                }
             }
 
             try {
@@ -375,6 +419,18 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $resource->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
@@ -422,6 +478,19 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $resource->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $resource->deleted_by = \Auth::id();
                 $resource->save();
                 $resource->delete();
@@ -526,6 +595,7 @@ class ResourceController extends ApiController
 
             foreach ($query->get() as $result) {
                 $results[] = [
+                    'id'                    => $result->id,
                     'uri'                   => $result->uri,
                     'dataset_uri'           => isset($result->dataSet->uri) ? $result->dataSet->uri : null,
                     'name'                  => $result->name,
@@ -591,6 +661,7 @@ class ResourceController extends ApiController
 
             if ($resource) {
                 $data = [
+                    'id'                    => $resource->id,
                     'uri'                   => $resource->uri,
                     'dataset_uri'           => $resource->dataSet->uri,
                     'name'                  => $resource->name,
@@ -604,6 +675,7 @@ class ResourceController extends ApiController
                     'http_rq_type'          => isset($resource->http_rq_type) ? $rqTypes[$resource->http_rq_type] : null,
                     'authentication'        => $resource->authentication,
                     'http_headers'          => $resource->http_headers,
+                    'post_data'             => $resource->post_data,
                     'file_format'           => isset($resource->file_format) ? $fileFormats[$resource->file_format] : null,
                     'es_id'                 => isset($resource->es_id) ? $resource->es_id : null,
                     'reported'              => $resource->is_reported,
@@ -612,6 +684,33 @@ class ResourceController extends ApiController
                     'updated_at'            => isset($resource->updated_at) ? $resource->updated_at->toDateTimeString() : null,
                     'updated_by'            => $resource->updated_by,
                 ];
+
+                $allSignals = [];
+                if ($resource->is_reported) {
+                    $signals = $resource->signal()->where('status', Signal::STATUS_NEW)->get();;
+
+                    if ($signals) {
+                        foreach ($signals as $signal) {
+                            $allSignals[] =
+                                [
+                                    'id'            => $signal->id,
+                                    'resource_name' => $resource->name,
+                                    'resource_uri'  => $resource->uri,
+                                    'description'   => $signal->descript,
+                                    'firstname'     => $signal->firstname,
+                                    'lastname'      => $signal->lastname,
+                                    'email'         => $signal->email,
+                                    'status'        => $signal->status,
+                                    'created_at'    => date($signal->created_at),
+                                    'updated_at'    => date($signal->updated_at),
+                                    'created_by'    => $signal->created_by,
+                                    'updated_by'    => $signal->updated_by,
+                                ];
+                        }
+                    }
+                }
+
+                $data['signals'] = $allSignals;
 
                 return $this->successResponse(['resource' => $data], true);
             }

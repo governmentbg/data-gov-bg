@@ -7,6 +7,7 @@ use App\Module;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use App\RoleRight;
 use App\DataSetTags;
 use App\DataSetGroup;
 use \App\Organisation;
@@ -60,6 +61,15 @@ class TagController extends ApiController
         }
 
         if (empty($errors)) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TAGS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 $record = Tags::create(['name' => $post['data']['name']]);
 
@@ -116,9 +126,23 @@ class TagController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TAGS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $tag->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
 
                 $tag->name = $post['data']['name'];
+                $tag->updated_by = \Auth::id();
 
                 $tag->save();
 
@@ -156,6 +180,19 @@ class TagController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::TAGS,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => \Auth::user()->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 DB::table('data_set_tags')->where('tag_id', $post['tag_id'])->delete();
                 Tags::find($post['tag_id'])->delete();
 

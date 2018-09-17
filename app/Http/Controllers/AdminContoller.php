@@ -15,7 +15,12 @@ class AdminController extends Controller
 {
     public function getOrgDropdown($userId = null, $count = null, $fullData = false)
     {
-        $request = Request::create('/api/listOrganisations', 'POST', ['criteria' => ['user_id' => $userId]]);
+        $request = Request::create('/api/listOrganisations', 'POST', [
+            'api_key'   => \Auth::user()->api_key,
+            'criteria'  => [
+                'user_id'   => $userId,
+            ],
+        ]);
         $api = new ApiOrganisation($request);
         $result = $api->listOrganisations($request)->getData();
         $organisations = [];
@@ -31,15 +36,20 @@ class AdminController extends Controller
         return $organisations;
     }
 
-    public function getGroupDropdown($userId = null, $count = null)
+    public function getGroupDropdown($userId = null, $count = null, $fullData = false)
     {
-        $request = Request::create('/api/listGroups', 'POST', ['criteria' => ['user_id' => $userId]]);
+        $request = Request::create('/api/listGroups', 'POST', [
+            'api_key'  => \Auth::user()->api_key,
+            'criteria' => [
+                'user_id' => $userId,
+            ],
+        ]);
         $api = new ApiOrganisation($request);
         $result = $api->listGroups($request)->getData();
         $groups = [];
 
         foreach ($result->groups as $index => $row) {
-            $groups[$row->id] = $row->name;
+            $groups[$row->id] = $fullData ? $row : $row->name;
 
             if ($count && $index + 1 == $count) {
                 break;

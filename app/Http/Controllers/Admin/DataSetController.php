@@ -11,6 +11,7 @@ use App\CustomSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 
@@ -416,5 +417,195 @@ class DataSetController extends AdminController
         }
 
         return redirect('/admin/datasets');
+    }
+
+    /**
+     * Adds resource metadata and prepares the resource elasticsearch data
+     *
+     * @param Request $request - resource metadata, file with resource data
+     * @param int $datasetUri - associated dataset uri
+     *
+     * @return type
+     */
+    public function resourceCreate(Request $request, $datasetUri)
+    {
+        $class = 'user';
+        $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
+
+        if (DataSet::where('uri', $datasetUri)->count()) {
+            if ($request->has('ready_metadata')) {
+                $data = $request->except('file');
+                $file = $request->file('file');
+
+                $response = ResourceController::addMetadata($datasetUri, $data, $file);
+
+                if ($response['success']) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                        return redirect('/admin/resource/view/'. $response['uri']);
+                    }
+
+                    return view('admin/resourceImport', array_merge([
+                        'class'         => $class,
+                        'types'         => $types,
+                        'resourceUri'   => $response['uri'],
+                    ], $response['data']));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+
+                    return redirect()->back()->withInput()->withErrors($response['errors']);
+                }
+            }
+        } else {
+            return redirect('/admin/datasets');
+        }
+
+        return view('admin/resourceCreate', [
+            'class'     => $class,
+            'uri'       => $datasetUri,
+            'types'     => $types,
+            'reqTypes'  => $reqTypes,
+            'fields'    => $this->getResourceTransFields()
+        ]);
+    }
+
+
+    /**
+     * Loads a view for checking out resource details
+     *
+     * @param Request $request
+     *
+     * @return view
+     */
+    public function resourceView(Request $request, $uri)
+    {
+        $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $apiMetadata = new ApiResource($reqMetadata);
+        $result = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
+        $resource = !empty($result->resource) ? $result->resource : null;
+
+        if (!empty($resource)) {
+            $data = [];
+
+            if (!empty($resource)) {
+                $resource->format_code = Resource::getFormatsCode($resource->file_format);
+                $resource = $this->getModelUsernames($resource);
+
+                if ($request->has('delete')) {
+                    $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                    $apiDelete = new ApiResource($reqDelete);
+                    $result = $apiDelete->deleteResource($reqDelete)->getData();
+
+                    if ($result->success) {
+                        $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                        return redirect('/admin/dataset/view/'. $resource->dataset_uri);
+                    }
+
+                    $request->session()->flash('alert-success', __('custom.delete_error'));
+                }
+
+                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+                $apiEsData = new ApiResource($reqEsData);
+                $response = $apiEsData->getResourceData($reqEsData)->getData();
+
+                $data = !empty($response->data) ? $response->data : [];
+
+                if ($resource->format_code == Resource::FORMAT_XML) {
+                    $convertData = [
+                        'api_key'   => \Auth::user()->api_key,
+                        'data'      => $data,
+                    ];
+                    $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+                    $apiConvert = new ApiConversion($reqConvert);
+                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                    $data = $resultConvert->data;
+                }
+
+                return view('admin/resourceView', [
+                    'class'         => 'user',
+                    'resource'      => $resource,
+                    'data'          => $data,
+                ]);
+            }
+        }
+
+        return back();
+    }
+
+    /**
+     * Edit resource metadata
+     *
+     * @param Request $request - resource metadata, file with resource data
+     * @param int $uri - uri of resource to be edited
+     *
+     * @return view - resource edit page
+     */
+    public function resourceEditMeta(Request $request, $uri)
+    {
+        $rq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceMetadata($rq)->getData();
+
+        if (!$res->success) {
+            return redirect()->back();
+        }
+
+        $resourceData = !empty($res->resource) ? $res->resource : null;
+
+        if (!isset($resourceData)) {
+            return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
+        }
+
+        $class = 'user';
+        $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
+        $resource = Resource::where('uri', $uri)->first()->loadTranslations();
+
+        if ($resource) {
+            if ($request->has('ready_metadata')) {
+
+                $data = [
+                    'name'                  => $request->offsetGet('name'),
+                    'description'           => $request->offsetGet('descript'),
+                    'schema_description'    => $request->offsetGet('schema_description'),
+                    'schema_url'            => $request->offsetGet('schema_url'),
+                    'is_reported'           => is_null($request->offsetGet('reported'))
+                                                ? Resource::REPORTED_FALSE
+                                                : Resource::REPORTED_TRUE
+                    ];
+
+                $metadata = [
+                    'api_key'       => Auth::user()->api_key,
+                    'resource_uri'  => $uri,
+                    'data'          => $data,
+                ];
+
+                $savePost = Request::create('/api/editResourceMetadata', 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $response = $api->editResourceMetadata($savePost)->getData();
+
+                if ($response->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    return redirect(url('/admin/resource/edit/'. $uri));
+                } else {
+                    $request->session()->flash('alert-danger', $response->error->message);
+                }
+            }
+        } else {
+            return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
+        }
+
+        return view('admin/resourceEdit', [
+            'class'     => $class,
+            'resource'  => $resource,
+            'uri'       => $uri,
+            'types'     => $types,
+            'reqTypes'  => $reqTypes,
+            'fields'    => $this->getResourceTransFields()
+        ]);
     }
 }

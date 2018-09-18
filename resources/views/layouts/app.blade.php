@@ -18,6 +18,9 @@
     <link href="{{ asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/nanoscroller.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/summernote/summernote-bs4.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
 </head>
 <body class="theme-{{ $class }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">

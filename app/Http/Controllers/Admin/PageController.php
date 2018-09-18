@@ -52,18 +52,12 @@ class PageController extends AdminController
                 'required' => false,
             ],
             [
-                'label'    => 'custom.short_txt',
-                'name'     => 'abstract',
-                'type'     => 'text',
-                'view'     => 'translation_txt',
-                'required' => false,
-            ],
-            [
                 'label'    => 'custom.content',
                 'name'     => 'body',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
-                'required' => false,
+                'addClass' => 'js-summernote',
+                'required' => true,
             ],
         ];
     }
@@ -84,13 +78,13 @@ class PageController extends AdminController
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-
         $sections = Section::whereExists(function ($query) {
                 $query->select()
                     ->from('pages')
+                    ->whereRaw('pages.type = '. Page::TYPE_PAGE)
                     ->whereRaw('sections.id = pages.section_id');
             })
-            ->where('parent_id', null)->get();
+            ->get();
 
         $sections = $this->prepareSections($sections);
 
@@ -172,14 +166,14 @@ class PageController extends AdminController
 
         if (!is_null($model)) {
             $model = $this->getModelUsernames($model->loadTranslations());
-            $model->valid_from = date_create($model->valid_from)
+            $model->valid_from = !is_null($model->valid_from) && date_create($model->valid_from)
                 ? date_format(date_create($model->valid_from), 'd-m-Y')
                 : $model->valid_from;
-            $model->valid_to = date_create($model->valid_to)
+            $model->valid_to = !is_null($model->valid_to) && date_create($model->valid_to)
                 ? date_format(date_create($model->valid_to), 'd-m-Y')
                 : $model->valid_to;
 
-            $sections = Section::where('parent_id', null)->get();
+            $sections = Section::select()->get();
             $sections = $this->prepareSections($sections);
         } else {
             return redirect('admin/pages/list');
@@ -188,11 +182,11 @@ class PageController extends AdminController
         $from = null;
         $to = null;
 
-        if (date_create($request->offsetGet('valid_from'))) {
+        if (!is_null($request->offsetGet('valid_from')) && date_create($request->offsetGet('valid_from'))) {
             $from = date_format(date_create($request->offsetGet('valid_from')), 'Y-m-d H:i:s');
         }
 
-        if (date_create($request->offsetGet('valid_to'))) {
+        if (!is_null($request->offsetGet('valid_to')) && date_create($request->offsetGet('valid_to'))) {
             $to = date_format(date_create($request->offsetGet('valid_to')), 'Y-m-d H:i:s');
         }
 
@@ -233,19 +227,19 @@ class PageController extends AdminController
 
     public function add(Request $request)
     {
-        $sections = Section::where('parent_id', null)->get();
+        $sections = Section::select()->get();
         $sections = $this->prepareSections($sections);
-
+//dd($request->all());
         if ($request->has('create')) {
 
             $from = null;
             $to = null;
 
-            if (date_create($request->offsetGet('valid_from'))) {
+            if (date_create($request->offsetGet('valid_from')) && !is_null($request->offsetGet('valid_from')) ) {
                 $from = date_format(date_create($request->offsetGet('valid_from')), 'Y-m-d H:i:s');
             }
 
-            if (date_create($request->offsetGet('valid_to'))) {
+            if (date_create($request->offsetGet('valid_to')) && !is_null($request->offsetGet('valid_to'))) {
                 $to = date_format(date_create($request->offsetGet('valid_to')), 'Y-m-d H:i:s');
             }
 

@@ -74,7 +74,7 @@ class Module extends Model
             self::IMAGES                 => 'Image',
             self::CUSTOM_SETTINGS        => 'CustomSetting',
             self::RIGHTS                 => 'Right',
-            self::THEMES                 => 'Theme'
+            self::THEMES                 => 'Theme',
         ];
     }
 

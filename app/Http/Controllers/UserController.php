@@ -5021,14 +5021,14 @@ class UserController extends Controller {
             if ($request->has('delete')) {
 
                 $rightCheck = RoleRight::checkUserRight(
-                            Module::RESOURCES,
-                            RoleRight::RIGHT_ALL,
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
                     [
-                                'group_id'       => $dataset->org_id
+                        'group_id'       => $dataset->org_id
                     ],
                     [
-                                'created_by'     => $dataset->created_by,
-                                'groups_ids'     => [$dataset->org_id]
+                        'created_by'     => $dataset->created_by,
+                        'groups_ids'     => [$dataset->org_id]
                     ]
                 );
 

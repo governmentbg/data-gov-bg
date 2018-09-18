@@ -140,8 +140,8 @@ class ResourceController extends Controller {
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->csv2json($reqConvert)->getData();
 
-                            if ($resultConvert['success']) {
-                                $elasticData = $resultConvert['data'];
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
                                 Session::put('elasticData', $elasticData);
                                 $data['csvData'] = $elasticData;
                             }

@@ -119,6 +119,7 @@ return [
     'contacts' => 'Contact|Contacts',
     'copyright' => 'Open data portal of the Republic of Bulgaria',
     'copyright_title' => 'Open data portal of the RB',
+    'copy' => 'copy',
     'confirm' => 'Confirm',
     'to_activate' => 'To activate your acount please click here',
     'register_success' => 'You have successfully registered at the Opendata Portal',
@@ -704,4 +705,7 @@ return [
     'page_add' => 'Add page',
     'theme' => 'Theme',
     'select_theme' => 'Select theme',
+    'embed' => 'embed',
+    'embed_resource' => 'embed resource',
+    'embed_info' => 'You can copy and paste the embed code into a CMS or blog software that supports raw HTML',
 ];

@@ -78,13 +78,17 @@
                             <div class="col-xs-12 p-l-none">
                                 <div>
                                     <h3>{{ $organisation->name }} </h3><br/>
-                                    <p>{{ $organisation->description }}</p><br/>
+                                    <p>{!! nl2br($organisation->description) !!}</p><br/>
                                 </div>
+                            </div>
+                            <div class="col-xs-12 p-l-none">
+                                <span><b>{{ __('custom.activity') }}:</b></span><br/><br/>
+                                <p>{!! nl2br($organisation->activity_info) !!}</p><br/>
                             </div>
                             <div class="col-xs-12 p-l-r-none articles">
                                 <div class="col-sm-8 col-xs-12 p-l-none article pull-left">
-                                    <span>{{ __('custom.contact_person') }}</span><br/><br/>
-                                    <p>{{ $organisation->contacts }}</p><br/>
+                                    <span><b>{{ __('custom.contact_person') }}:</b></span><br/><br/>
+                                    <p>{!! nl2br($organisation->contacts) !!}</p><br/>
                                 </div>
                                 <div class="col-sm-4 col-xs-12 pull-right text-right">
                                     @auth

@@ -296,6 +296,7 @@ Route::match(['get', 'post'], 'data', 'DataController@list');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
 Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView');
 Route::post('data/resource/sendSignal', 'DataController@sendSignal');
+Route::match(['get', 'post'], 'data/resource/embed/{uri}', 'VisualisationController@resourceEmbed');
 
 Route::match(['get', 'post'], 'data/linkedData', 'DataController@linkedData');
 

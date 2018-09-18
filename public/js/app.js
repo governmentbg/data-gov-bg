@@ -61966,13 +61966,13 @@ $(function () {
     if ($('#js-code').length > 0) {
         var updateTextarea = function updateTextarea(width, height) {
             var code = '<iframe width="' + width + '" height="' + height;
-            code += '" src="' + window.location.href + '"';
-            code += '></iframe>';
+            code += '" src="' + window.location.origin + '/data/resource/embed/' + uri + '"></iframe>';
             $('#js-code').val(code);
         };
 
         var width = $("#js-width").val();
         var height = $("#js-height").val();
+        var uri = $(".js-res-uri").data('uri');
 
         $("#js-width").on("change paste keyup", function (width, height) {
             width = $(this).val();

@@ -8,15 +8,16 @@ use App\Locale;
 use App\Module;
 use App\DataSet;
 use App\Resource;
-use App\ActionsHistory;
+use App\RoleRight;
 use App\Organisation;
 use App\CustomSetting;
 use App\UserToOrgRole;
-use App\RoleRight;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 
@@ -143,7 +144,7 @@ class OrganisationController extends ApiController
                 if (!empty($data['approved'])) {
                     $organisation->approved = $data['approved'];
                 } else {
-                    $organisation->approved = Organisation::APPROVED_FALSE;
+                    $organisation->approved = \Auth::user()->approved;
                 }
 
                 if (!empty($data['custom_fields'])) {

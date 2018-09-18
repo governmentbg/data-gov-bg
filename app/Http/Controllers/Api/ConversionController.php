@@ -550,9 +550,7 @@ class ConversionController extends ApiController
             foreach ($cellIterator as $cell) {
                 $value = trim($cell->getFormattedValue());
 
-                if ($value != '') {
-                    $cells[] = $value;
-                }
+                $cells[] = $value;
             }
 
             if (!empty($cells)) {
@@ -561,6 +559,22 @@ class ConversionController extends ApiController
         }
 
         fclose($temp);
+
+        $rowCount = count($rows);
+
+        foreach ($rows[0] as $cellIndex => $cell) {
+            if ($cell == '') {
+                foreach ($rows as $row) {
+                    if ($row[$cellIndex] != '') {
+                        continue 2;
+                    }
+                }
+
+                foreach ($rows as &$row) {
+                    unset($row[$cellIndex]);
+                }
+            }
+        }
 
         return $rows;
     }

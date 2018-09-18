@@ -91,29 +91,28 @@
         </div>
         <div class="col-sm-12 p-l-none">
             <div class="col-sm-12 text-left">
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    data-toggle="modal"
-                    data-target="#embed-resource"
-                >{{ uctrans('custom.embed') }}</button>
-                <a
-                    class="btn btn-primary"
-                    href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
-                >{{ uctrans('custom.edit') }}</a>
-            </div>
-            @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
-                <div class="col-sm-12 m-t-md p-l-r-none text-right">
+                @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
                     <form method="POST">
                         {{ csrf_field() }}
+                        <button
+                            type="button"
+                            class="btn btn-primary js-res-uri"
+                            data-toggle="modal"
+                            data-target="#embed-resource"
+                            data-uri ="{{ $resource->uri }}"
+                        >{{ uctrans('custom.embed') }}</button>
+                        <a
+                            class="btn btn-primary"
+                            href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
+                        >{{ uctrans('custom.edit') }}</a>
                         <button
                             name="delete"
                             class="btn del-btn btn-primary"
                             data-confirm="{{ __('custom.remove_data') }}"
                         >{{ uctrans('custom.remove') }}</button>
                     </form>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
         <!-- IF there are old versions of this article -->

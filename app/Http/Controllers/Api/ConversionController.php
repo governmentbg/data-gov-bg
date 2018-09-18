@@ -290,11 +290,17 @@ class ConversionController extends ApiController
                 $im->clear();
                 $im->destroy();
 
+                unlink($path);
                 fclose($temp);
 
                 return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+
+                $validator->errors()->add('data', __('custom.no_text_found'));
             } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
+
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
             }
         }
@@ -328,6 +334,10 @@ class ConversionController extends ApiController
                 fclose($temp);
 
                 return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+
+                $validator->errors()->add('data', __('custom.no_text_found'));
             } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'img']));

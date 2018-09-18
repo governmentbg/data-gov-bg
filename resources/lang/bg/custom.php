@@ -668,6 +668,7 @@ return [
     'section_add' => 'Добавяне на секция',
     'section_edit' => 'Корекция на секция',
     'section_pages_delete_error' => 'Неуспешно изтриване! Първо трябва да бъдат изтрити добавените страници!',
+    'section_subsections_delete_error' => 'Неуспешно изтриване! Първо трябва да бъдат изтрити подсекциите!',
     'subsection_add' => 'Добавяне на подсекция',
     'subsection_edit' => 'Корекция на подсекция',
     'subsection_preview' => 'Преглед на подсекция',

@@ -93,7 +93,6 @@ class UserController extends ApiController
 
             if (isset($data['api_key'])) {
                 $user = User::where('api_key', $data['api_key'])->first();
-                \Auth::loginUsingId($user->id);
                 $rightCheck = RoleRight::checkUserRight(
                     Module::USERS,
                     RoleRight::RIGHT_VIEW

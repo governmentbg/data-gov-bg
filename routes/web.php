@@ -300,26 +300,9 @@ Route::match(['get', 'post'], 'data/resource/embed/{uri}', 'VisualisationControl
 
 Route::match(['get', 'post'], 'data/linkedData', 'DataController@linkedData');
 
-Route::get('data/reportedList', function () {
-    return view('data/reportedList', [
-        'class'     => 'data-attention',
-        'filter'    => 'healthcare',
-        'mainCats'  => [
-            'healthcare',
-            'innovation',
-            'education',
-            'public_sector',
-            'municipalities',
-            'agriculture',
-            'justice',
-            'economy_business',
-        ],
-    ]);
-});
-
-Route::get('data/reportedView', function () {
-    return view('data/reportedView', ['class' => 'data-attention']);
-});
+Route::match(['get', 'post'], 'data/reported', 'DataController@reportedList');
+Route::match(['get', 'post'], 'data/reported/view/{uri}', 'DataController@reportedView');
+Route::match(['get', 'post'], 'data/reported/resourceView/{uri}', 'DataController@reportedResourceView');
 
 Route::match(['get', 'post'], 'organisation', 'OrganisationController@list');
 Route::match(['get', 'post'], 'organisation/profile/{uri}', 'OrganisationController@view');

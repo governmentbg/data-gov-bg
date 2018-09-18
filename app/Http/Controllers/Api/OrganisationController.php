@@ -2233,6 +2233,7 @@ class OrganisationController extends ApiController
      * @param array criteria[dataset_criteria][tag_ids] - optional
      * @param array criteria[dataset_criteria][formats] - optional
      * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
+     * @param boolean criteria[dataset_criteria][reported] - optional
      * @param array criteria[dataset_ids] - optional
      * @param string criteria[type] - optional
      * @param string criteria[locale] - optional
@@ -2277,6 +2278,7 @@ class OrganisationController extends ApiController
                 'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
                 'formats'             => 'nullable|array|min:1',
                 'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
+                'reported'            => 'nullable|boolean',
             ]);
         }
 
@@ -2331,6 +2333,12 @@ class OrganisationController extends ApiController
                         DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
                     );
                 }
+                if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
+                    $data->whereIn(
+                        'data_sets.id',
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                    );
+                }
 
                 if (!empty($criteria['dataset_ids'])) {
                     $data->whereIn('data_sets.id', $criteria['dataset_ids']);
@@ -2377,6 +2385,7 @@ class OrganisationController extends ApiController
      * @param array criteria[dataset_criteria][tag_ids] - optional
      * @param array criteria[dataset_criteria][formats] - optional
      * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
+     * @param boolean criteria[dataset_criteria][reported] - optional
      * @param array criteria[dataset_ids] - optional
      * @param string criteria[locale] - optional
      * @param int criteria[records_limit] - optional
@@ -2419,6 +2428,7 @@ class OrganisationController extends ApiController
                 'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
                 'formats'             => 'nullable|array|min:1',
                 'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
+                'reported'            => 'nullable|boolean',
             ]);
         }
 
@@ -2465,6 +2475,12 @@ class OrganisationController extends ApiController
                     $data->whereIn(
                         'data_sets.id',
                         DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                    );
+                }
+                if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
+                    $data->whereIn(
+                        'data_sets.id',
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
                     );
                 }
 

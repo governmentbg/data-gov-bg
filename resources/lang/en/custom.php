@@ -14,7 +14,7 @@ return [
     'register_subject' => 'Your account was created successfully!',
     'confirm_mail_sent' => 'A confirmation email is sent to the specified email address.',
     'send_mail_failed' => 'A problem occured while sending e-mail!',
-    'invite_subject' => 'Invite received for Open Data!',
+    'invite_subject' => 'You are invited to register an account!',
     'invite_fail' => 'Invite sent failure!',
     'invite_success' => 'Invite sent successfully!',
     'confirm_mail_sent' => 'Confirmation mail is sent to the specified e-mail address.',
@@ -122,7 +122,7 @@ return [
     'copy' => 'copy',
     'confirm' => 'Confirm',
     'to_activate' => 'To activate your acount please click here',
-    'register_success' => 'You have successfully registered at the Opendata Portal',
+    'register_success' => 'Your registration was successful!',
     'greetings' => 'Hello',
     'to_confirm' => 'To confirm it please click here',
     'have_changed' => 'You have changed your e-mail',
@@ -709,4 +709,7 @@ return [
     'embed' => 'embed',
     'embed_resource' => 'embed resource',
     'embed_info' => 'You can copy and paste the embed code into a CMS or blog software that supports raw HTML',
+    'news' => 'news',
+    'news_preview' => 'News preview',
+    'news_edit' => 'Edit news'
 ];

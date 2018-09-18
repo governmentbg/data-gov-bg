@@ -14349,6 +14349,11 @@ textarea {
   -webkit-line-clamp: 1;
 }
 
+.full-size {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .container .filter-content .filter-type,
 .container .filter-content .sort-by {
   display: inline-block;

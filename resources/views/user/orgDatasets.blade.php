@@ -9,7 +9,7 @@
     <div class="row">
         @if ($buttons['add'])
             <div class="col-sm-3 col-xs-12 text-left">
-                <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/organisations/dataset/create') }}">{{ __('custom.add_new_dataset') }}</a></span>
+                <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/organisations/dataset/create/'. $organisation->uri) }}">{{ __('custom.add_new_dataset') }}</a></span>
             </div>
         @endif
         @if ($buttons['view'])
@@ -28,7 +28,7 @@
     </div>
     <div class="row">
         <div class="org col-sm-3 col-xs-12 m-t-lg">
-            <img src="{{ $organisation->logo }}">
+            <div><img class="full-size" src="{{ $organisation->logo }}"></div>
             <h2 class="elipsis-1">{{ $organisation->name }}</h2>
             <h4>{{ truncate($organisation->descript, 150) }}</h4>
             <p class="text-right show-more">

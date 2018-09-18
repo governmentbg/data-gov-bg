@@ -471,7 +471,6 @@ class DataSetController extends AdminController
         ]);
     }
 
-
     /**
      * Loads a view for checking out resource details
      *

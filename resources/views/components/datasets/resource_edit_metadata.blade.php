@@ -18,7 +18,7 @@
         @endforeach
 
         <div class="form-group row">
-            <label for="schema_desc" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.schema_description') }}:</label>
+            <label for="schema_desc" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_description') }}:</label>
             <div class="col-sm-9">
                 <textarea
                     id="schema_desc"

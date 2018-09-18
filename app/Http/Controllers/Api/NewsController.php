@@ -7,6 +7,7 @@ use \Validator;
 use App\Module;
 use App\RoleRight;
 use App\ActionsHistory;
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -72,6 +73,7 @@ class NewsController extends ApiController
             try {
                 DB::beginTransaction();
                 $newNews = new Page;
+                $newNews->type = Page::TYPE_NEWS;
                 $locale = $newsData['data']['locale'];
                 $newNews->title = $this->trans($locale, $newsData['data']['title']);
                 $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
@@ -365,6 +367,7 @@ class NewsController extends ApiController
         $newsListData = $request->all();
 
         $validator = Validator::make($newsListData, [
+            'api_key'               => 'nullable|string|exists:users,api_key',
             'locale'                => 'nullable|string|max:5',
             'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|integer|digits_between:1,10',
@@ -397,7 +400,7 @@ class NewsController extends ApiController
             $result = [];
             $criteria = $request->offsetGet('criteria');
             $locale = \LaravelLocalization::getCurrentLocale();
-            $newsList = Page::select();
+            $newsList = Page::select()->where('type', Page::TYPE_NEWS);
 
             $filterColumn = 'created_at';
 
@@ -423,48 +426,63 @@ class NewsController extends ApiController
                 $newsList->where($filterColumn, '<=', $criteria['date_to']);
             }
 
-            if (isset($criteria['active'])) {
-                $newsList->where('active', $criteria['active']);
-            }
+            if (isset($newsListData['api_key'])) {
+                if (!\Auth::user()->is_admin) {
+                    if (isset($criteria['active'])) {
+                        $newsList->where('active', $criteria['active']);
+                    }
 
-            if (isset($criteria['valid'])) {
-                if ($criteria['valid'] == 1) {
-                    $newsList->where(function ($newsList) {
-                        $newsList->where('valid_to', '>=', date(now()))
-                            ->where('valid_from', '<=', date(now()))
+                    if (isset($criteria['valid'])) {
+                        if ($criteria['valid'] == 1) {
+                            $newsList->where(function ($m) {
+                                $m->where('valid_to', '>=', date(now()))
+                                    ->where('valid_from', '<=', date(now()))
 
-                            ->orWhere('valid_from', null)
-                            ->where('valid_to', '>=', date(now()))
+                                    ->orWhere('valid_from', null)
+                                    ->where('valid_to', '>=', date(now()))
 
-                            ->orWhere('valid_to', null)
-                            ->where('valid_from', '>=', date(now()));
-                    });
+                                    ->orWhere('valid_to', null)
+                                    ->where('valid_from', '>=', date(now()))
+
+                                    ->orWhere('valid_to', null)
+                                    ->where('valid_from', null);
+                            });
+                        }
+
+                        if ($criteria['valid'] == 0) {
+                            $newsList->where(function ($m) {
+                                $m->where('valid_to', '<', date(now()))
+                                    ->where('valid_from', '>', date(now()))
+
+                                    ->orWhere('valid_from', null)
+                                    ->where('valid_to', '<', date(now()))
+
+                                    ->orWhere('valid_from', '>', date(now()))
+                                    ->where('valid_to', null)
+
+                                    ->orWhere('valid_from', '>', date(now()))
+                                    ->where('valid_to', '>', date(now()))
+
+                                    ->orWhere('valid_from', '<', date(now()))
+                                    ->where('valid_to', '<', date(now()));
+                            });
+                        }
+                    }
                 }
-
-                if ($criteria['valid'] == 0) {
-                    $newsList->where(function ($newsList) {
-                        $newsList->where('valid_to', '<', date(now()))
-                            ->where('valid_from', '>', date(now()))
-
-                            ->orWhere('valid_from', null)
-                            ->where('valid_to', '<', date(now()))
-
-                            ->orWhere('valid_from', '>', date(now()))
+            } else if (!\Auth::check()) {
+                $newsList->where('active', 1);
+                $newsList->where(function ($m){
+                        $m->where('valid_from', null)
                             ->where('valid_to', null)
-
-                            ->orWhere('valid_from', '>', date(now()))
-                            ->where('valid_to', '>', date(now()))
-
-                            ->orWhere('valid_from', '<', date(now()))
-                            ->where('valid_to', '<', date(now()));
-                    });
-                }
+                            ->orWhere('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                });
             }
 
             $count = $newsList->count();
 
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
+                $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);
             }
 
             $newsList->forPage(
@@ -506,12 +524,14 @@ class NewsController extends ApiController
                 'meta_key_words',
             ];
 
-            if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
-                usort($results, function($a, $b) use ($criteria) {
-                    return strtolower($criteria['order']['type']) == 'asc'
-                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
-                });
+            if (isset($criteria['order'])) {
+                if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+                    usort($results, function($a, $b) use ($criteria) {
+                        return strtolower($criteria['order']['type']) == 'asc'
+                            ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                            : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+                    });
+                }
             }
 
             return $this->successResponse([
@@ -574,8 +594,19 @@ class NewsController extends ApiController
             $criteria = $request->offsetGet('criteria');
             $search = $criteria['keywords'];
 
-            $ids = Page::search($search)->get()->pluck('id');
+            $ids = Page::search($search)->where('type', Page::TYPE_NEWS)->get()->pluck('id');
             $newsList = Page::whereIn('id', $ids);
+
+            if(!\Auth::check() || !Role::isAdmin()) {
+                $newsList
+                    ->where('active', 1)
+                    ->where(function ($m){
+                        $m->where('valid_from', null)
+                            ->where('valid_to', null)
+                            ->orWhere('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                });
+            }
 
             $total_records = $newsList->count();
 
@@ -635,28 +666,29 @@ class NewsController extends ApiController
         $newsSearchData = $request->all();
 
         $validator = Validator::make($newsSearchData, [
-            'locale' => 'string|max:5',
+            'locale'  => 'string|max:5',
             'news_id' => 'integer|required|exists:pages,id|digits_between:1,10',
         ]);
+
         $locale = \LaravelLocalization::getCurrentLocale();
         if (!$validator->fails()) {
-            $singleNews = Page::find($newsSearchData['news_id']);
+            $singleNews = Page::select()->where('type', 1)->where('id', $newsSearchData['news_id']);
 
-            $rightCheck = RoleRight::checkUserRight(
-                Module::NEWS,
-                RoleRight::RIGHT_VIEW,
-                [],
-                [
-                    'created_by' => $singleNews->created_by
-                ]
-            );
-
-            if (!$rightCheck) {
-                return $this->errorResponse(__('custom.access_denied'));
+            if(!\Auth::check() || !Role::isAdmin()) {
+                $singleNews
+                    ->where('active', 1)
+                    ->where(function ($m){
+                        $m->where('valid_from', null)
+                            ->where('valid_to', null)
+                            ->orWhere('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                });
             }
 
+            $singleNews = $singleNews->first();
+
             if ($singleNews) {
-                $result[] = [
+                $result = [
                     'id'                => $singleNews->id,
                     'locale'            => $locale,
                     'title'             => $singleNews->title,

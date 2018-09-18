@@ -12,6 +12,8 @@
                     <span><a href="#"><i class="fa fa-envelope"></i></a></span>
                 </div>
             </div>
+        </div>
+        <div class="col-sm-12 p-l-none">
             <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
             <p>
                 {{ utrans('custom.version') }}:&nbsp;{{ $resource->version }}
@@ -74,29 +76,34 @@
                 </div>
             @endif
         </div>
-            <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
-                <ul class="p-l-none">
-                    <li>{{ __('custom.created_at') }}: {{ $resource->created_at }}</li>
-                    <li>{{ __('custom.created_by') }}: {{ $resource->created_by }}</li>
-                    @if (!empty($resource->updated_by))
-                        <li>{{ __('custom.updated_at') }}: {{ $resource->updated_at }}</li>
-                        <li>{{ __('custom.updated_by') }}: {{ $resource->updated_by }}</li>
-                    @endif
-                </ul>
-            </div>
+        <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
+            <ul class="p-l-none">
+                <li>{{ __('custom.created_at') }}: {{ $resource->created_at }}</li>
+                <li>{{ __('custom.created_by') }}: {{ $resource->created_by }}</li>
+                @if (!empty($resource->updated_by))
+                    <li>{{ __('custom.updated_at') }}: {{ $resource->updated_at }}</li>
+                    <li>{{ __('custom.updated_by') }}: {{ $resource->updated_by }}</li>
+                @endif
+            </ul>
+        </div>
+        <div class="col-sm-12 m-t-lg p-l-r-none">
+            @include('partials.resource-visualisation')
+        </div>
         <div class="col-sm-12 p-l-none">
-            <div class="col-sm-12 m-t-lg p-l-r-none">
-                @include('partials.resource-visualisation')
-            </div>
-
-            <div class="col-md-2 col-sm-3 text-left m-l-10">
+            <div class="col-sm-12 text-left">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-toggle="modal"
+                    data-target="#embed-resource"
+                >{{ uctrans('custom.embed') }}</button>
                 <a
                     class="btn btn-primary"
                     href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
                 >{{ uctrans('custom.edit') }}</a>
             </div>
             @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
-                <div class="col-xs-12 m-t-md p-l-r-none text-right">
+                <div class="col-sm-12 m-t-md p-l-r-none text-right">
                     <form method="POST">
                         {{ csrf_field() }}
                         <button
@@ -107,26 +114,26 @@
                     </form>
                 </div>
             @endif
+        </div>
 
-            <!-- IF there are old versions of this article -->
-            <div class="col-sm-12 pull-left m-t-md p-l-none">
-                <div class="pull-left history">
-                    <div>
-                        <a href="#">
-                            <span class="version-heading">{{ __('custom.title') }}</span>
-                            <span class="version">&nbsp;&#8211;&nbsp;версия 1</span>
-                        </a>
-                    </div>
-                    <div>
-                        <a href="#">
-                            <span class="version-heading">{{ __('custom.title') }}</span>
-                            <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
-                        </a>
-                    </div>
+        <!-- IF there are old versions of this article -->
+        <div class="col-sm-12 pull-left m-t-md p-l-none">
+            <div class="pull-left history">
+                <div>
+                    <a href="#">
+                        <span class="version-heading">{{ __('custom.title') }}</span>
+                        <span class="version">&nbsp;&#8211;&nbsp;версия 1</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="#">
+                        <span class="version-heading">{{ __('custom.title') }}</span>
+                        <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
+                    </a>
                 </div>
             </div>
-
-            @include('components.signal-box', ['signals' => $resource->signals])
         </div>
+        @include('components.signal-box', ['signals' => $resource->signals])
     </div>
 </div>
+@include('partials.resource-embed')

@@ -3,6 +3,24 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.user-nav-bar', ['view' => $activeMenu])
+        @if (isset($dataset))
+            <div class="sidenav text-center">
+                <div class="profile-name m-l-lg">{{ $dataset }}</div>
+            </div>
+        @endif
+        @if (isset($fromOrg) && !is_null($fromOrg))
+            @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
+            <div class="row">
+                <div class="org col-sm-3 col-xs-12 m-t-lg m-l-md">
+                    <div><img class="full-size" src="{{ $fromOrg->logo }}"></div>
+                    <h2 class="elipsis-1">{{ $fromOrg->name }}</h2>
+                    <h4>{{ truncate($fromOrg->descript, 150) }}</h4>
+                    <p class="text-right show-more">
+                        <a href="{{ url('/admin/organisations/view/'. $fromOrg->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                    </p>
+                </div>
+            </div>
+        @endif
         @if (isset($resource->name))
             <div class="row">
                 <div class="col-sm-10 col-xs-12 m-t-lg m-l-10">
@@ -62,15 +80,19 @@
                                                 @endif
                                             @endforeach
                                         </table>
-                                        <a
-                                           class="badge badge-pill pull-right"
-                                           href="{{ url('/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
-                                        >{{ __('custom.download') }}</a>
                                     @endif
                                 </div>
                             </div>
+                            @if (!empty($data))
+                                <div class="{{ !empty($buttons['deleteResource']) ? 'col-xs-10' : 'col-xs-12' }} p-l-r-none text-right">
+                                    <a
+                                        class="badge badge-pill pull-right"
+                                        href="{{ url('/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
+                                    >{{ __('custom.download') }}</a>
+                                </div>
+                            @endif
                             @if ($buttons['deleteResource'])
-                                <div class="col-xs-12 m-t-md p-l-r-none text-right">
+                                <div class="{{ !empty($data) ? 'col-xs-2' : 'col-xs-12' }} m-t-md p-l-r-none text-right">
                                     <form method="POST">
                                         {{ csrf_field() }}
                                         <button

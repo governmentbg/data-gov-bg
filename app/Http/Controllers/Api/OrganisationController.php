@@ -1951,6 +1951,7 @@ class OrganisationController extends ApiController
                         ];
                     }
 
+
                     $result = [
                         'id'              => $group->id,
                         'name'            => $group->name,

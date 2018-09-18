@@ -1,18 +1,6 @@
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
 <div class="col-xs-12 m-t-md">
     <div class="articles">
-        <div class="article m-b-md">
-            <div class="col-sm-12 p-l-none art-heading-bar">
-                <div class="socialPadding">
-                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
-                </div>
-                <div class="sendMail p-w-sm">
-                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
-                </div>
-            </div>
-        </div>
         <div class="col-sm-12 p-l-none">
             <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
             <p>

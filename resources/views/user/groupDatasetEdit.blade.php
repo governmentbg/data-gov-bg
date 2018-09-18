@@ -3,8 +3,16 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'group'])
-    <div class="col-xs-12 m-t-lg">
+    @if (Auth::user()->is_admin)
+        @include('partials.admin-nav-bar', ['view' => 'group'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'group'])
+    @endif
+    @include('partials.group-nav-bar', ['view' => 'datasets', 'group' => $group])
+    <div class="col-sm-3 col-xs-12 text-left sidenav">
+        @include('partials.group-info', ['group' => $group])
+    </div>
+    <div class="col-sm-9 col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST">
             {{ csrf_field() }}
@@ -112,11 +120,11 @@
                         multiple="multiple"
                     >
                         <option></option>
-                        @foreach ($groups as $id => $group)
+                        @foreach ($groups as $id => $grp)
                             <option
                                 value="{{ $id }}"
                                 {{ !empty($setGroups) && in_array($id, $setGroups) ? 'selected' : '' }}
-                            >{{ $group }}</option>
+                            >{{ $grp }}</option>
                         @endforeach
                     </select>
                     <span class="error">{{ $errors->first('org_id') }}</span>
@@ -240,13 +248,13 @@
                     <div class="row">
                         @if ($buttons['addResource'])
                         <a
-                            href="{{ route('orgResourceCreate', ['uri' => $dataSet->uri]) }}"
+                            href="{{ route('groupResourceCreate', ['uri' => $dataSet->uri, 'grpUri' => $group->uri]) }}"
                             class="btn btn-primary"
                         >{{ uctrans('custom.add_resource') }}</a>
                         @endif
                         <a
                             class="btn btn-primary"
-                            href="{{ url('/user/groups/dataset/'. $dataSet->uri) }}"
+                            href="{{ url('/user/group/'. $group->uri .'/dataset/'. $dataSet->uri) }}"
                         >{{ uctrans('custom.preview') }}</a>
                         @if ($hasResources)
                             <button

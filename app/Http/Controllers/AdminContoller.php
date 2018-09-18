@@ -25,11 +25,13 @@ class AdminController extends Controller
         $result = $api->listOrganisations($request)->getData();
         $organisations = [];
 
-        foreach ($result->organisations as $index => $row) {
-            $organisations[$row->id] = $fullData ? $row : $row->name;
+        if (isset($result->organisations)) {
+            foreach ($result->organisations as $index => $row) {
+                $organisations[$row->id] = $fullData ? $row : $row->name;
 
-            if ($count && $index + 1 == $count) {
-                break;
+                if ($count && $index + 1 == $count) {
+                    break;
+                }
             }
         }
 
@@ -48,11 +50,13 @@ class AdminController extends Controller
         $result = $api->listGroups($request)->getData();
         $groups = [];
 
-        foreach ($result->groups as $index => $row) {
-            $groups[$row->id] = $fullData ? $row : $row->name;
+        if (isset($result->groups)) {
+            foreach ($result->groups as $index => $row) {
+                $groups[$row->id] = $fullData ? $row : $row->name;
 
-            if ($count && $index + 1 == $count) {
-                break;
+                if ($count && $index + 1 == $count) {
+                    break;
+                }
             }
         }
 
@@ -66,12 +70,14 @@ class AdminController extends Controller
         $result = $api->listUsers($request)->getData();
         $users = [];
 
-        foreach ($result->users as $index => $row) {
-            if ($row->id !== 1) {
-                $users[$row->id] = $row->firstname .' '. $row->lastname;
+        if (isset($result->users)) {
+            foreach ($result->users as $index => $row) {
+                if ($row->id !== 1) {
+                    $users[$row->id] = $row->firstname .' '. $row->lastname;
 
-                if ($count && $index == $count) {
-                    break;
+                    if ($count && $index == $count) {
+                        break;
+                    }
                 }
             }
         }
@@ -86,11 +92,13 @@ class AdminController extends Controller
         $result = $api->listTermsOfUse($request)->getData();
         $terms = [];
 
-        foreach ($result->terms_of_use as $index => $row) {
-            $terms[$row->id] = $row->name;
+        if (isset($result->terms_of_use)) {
+            foreach ($result->terms_of_use as $index => $row) {
+                $terms[$row->id] = $row->name;
 
-            if ($count && $index + 1 == $count) {
-                break;
+                if ($count && $index + 1 == $count) {
+                    break;
+                }
             }
         }
 
@@ -104,11 +112,13 @@ class AdminController extends Controller
         $result = $api->listTags($request)->getData();
         $tags = [];
 
-        foreach ($result->tags as $index => $row) {
-            $tags[$row->id] = $row->name;
+        if (isset($result->tags)) {
+            foreach ($result->tags as $index => $row) {
+                $tags[$row->id] = $row->name;
 
-            if ($count && $index + 1 == $count) {
-                break;
+                if ($count && $index + 1 == $count) {
+                    break;
+                }
             }
         }
 
@@ -122,11 +132,13 @@ class AdminController extends Controller
         $result = $api->listMainCategories($request)->getData();
         $categories = [];
 
-        foreach ($result->categories as $index => $row) {
-            $categories[$row->id] = $row->name;
+        if (isset($result->categories)) {
+            foreach ($result->categories as $index => $row) {
+                $categories[$row->id] = $row->name;
 
-            if ($count && $index + 1 == $count) {
-                break;
+                if ($count && $index + 1 == $count) {
+                    break;
+                }
             }
         }
 

@@ -245,9 +245,6 @@ trait Translatable
         foreach (self::$translatable as $key => $type) {
             if (!isset($translations[$key]) || $translations[$key] == []) {
                 $value = $type == 'bool' ? null : '';
-                $translations[$key] = [
-                    'xx' => $value, // Dummy
-                ];
             }
         }
 

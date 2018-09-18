@@ -317,6 +317,7 @@ return [
     'search_tags_fail' => 'Грешка при търсене на информация за тагове',
     'converse_fail' => 'Грешка при конверсия',
     'invalid_xml' => 'Невалиден xml синтаксис!',
+    'no_text_found' => 'Няма намерен текст!',
     'invalid_file' => 'Невалиден :type файл!',
     'invalid_json' => 'Невалиден json синтаксис!',
     'invalid_csv' => 'Невалиден csv сингаксис!',

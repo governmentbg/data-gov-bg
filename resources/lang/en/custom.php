@@ -317,6 +317,7 @@ return [
     'get_tags_fail' => 'Get tag details failure',
     'search_tags_fail' => 'Search tag details failure',
     'converse_fail' => 'Conversion failure',
+    'no_text_found' => 'No text found!',
     'invalid_file' => 'Invalid :type file!',
     'invalid_xml' => 'Invalid xml syntax!',
     'invalid_json' => 'Invalid json syntax!',

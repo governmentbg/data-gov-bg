@@ -270,7 +270,9 @@ class ConversionController extends ApiController
             try {
                 $path = storage_path('app/pdf-resource-'. uniqid());
 
-                $temp = fopen($path, 'w+');
+                touch($path);
+                chmod($path, 0775);
+                $temp = fopen($path, 'w');
 
                 file_put_contents($path, base64_decode($post['data']));
 

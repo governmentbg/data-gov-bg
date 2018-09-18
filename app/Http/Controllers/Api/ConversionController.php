@@ -282,6 +282,8 @@ class ConversionController extends ApiController
                 $im->setBackgroundColor('white');
                 $im->writeImage($path);
 
+                chmod($path, 0755);
+
                 $result = (new TesseractOCR($path))->lang('bul', 'eng')->run();
 
                 $im->clear();

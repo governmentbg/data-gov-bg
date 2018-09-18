@@ -559,7 +559,6 @@ class OrganisationController extends ApiController
             $criteria = [];
             if (isset($post['api_key'])) {
                 $user = \App\User::where('api_key', $post['api_key'])->first();
-                \Auth::loginUsingId($user->id);
                 $rightCheck = RoleRight::checkUserRight(
                     Module::ORGANISATIONS,
                     RoleRight::RIGHT_VIEW

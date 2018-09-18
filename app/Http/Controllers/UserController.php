@@ -3927,7 +3927,7 @@ class UserController extends Controller {
     public function userChronology(Request $request, $id)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
-        $user = User::find($id);
+        // $user = User::find($id);
         $actObjData = [];
         $criteria = [];
 
@@ -4000,7 +4000,7 @@ class UserController extends Controller {
             }
 
             $rq = Request::create('/api/listOrganisations', 'POST', [
-                'api_key'   => $user->api_key,
+                'api_key'   => $result->users[0]->api_key,
                 'criteria'  => [
                     'user_id'   => $id,
                 ],

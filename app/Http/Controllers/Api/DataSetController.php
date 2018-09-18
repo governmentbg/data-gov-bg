@@ -563,7 +563,6 @@ class DataSetController extends ApiController
 
                 if (isset($post['api_key'])) {
                     $user = \App\User::where('api_key', $post['api_key'])->first();
-                    \Auth::loginUsingId($user->id);
                     $rightCheck = RoleRight::checkUserRight(
                         Module::DATA_SETS,
                         RoleRight::RIGHT_VIEW

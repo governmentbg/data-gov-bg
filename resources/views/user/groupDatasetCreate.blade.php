@@ -207,7 +207,7 @@
                         @foreach ($groups as $id => $group)
                             <option
                                 value="{{ $id }}"
-                                {{ $id == old('group_id') ? 'selected' : '' }}
+                                {{ $id == old('group_id') || $id == $groupId ? 'selected' : '' }}
                             >{{ $group }}</option>
                         @endforeach
                     </select>

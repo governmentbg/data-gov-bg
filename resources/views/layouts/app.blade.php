@@ -193,7 +193,7 @@
                     <div class="row">
                         <strong>Copyright &copy; 2018 </strong>
                         {{ __('custom.by') }}
-                        <a target="_blank" href="https://opendata.government.bg/"> {{ __('custom.copyright') }}</a>
+                        <a target="_blank" href="http://data.egov.bg/"> {{ __('custom.copyright') }}</a>
                     </div>
                 </div>
             </footer>

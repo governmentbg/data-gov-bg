@@ -1346,7 +1346,7 @@ class UserController extends Controller {
                 );
 
                 if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
                 $newKey = Request::create('api/generateAPIKey', 'POST', $data);
@@ -1379,7 +1379,7 @@ class UserController extends Controller {
                 );
 
                 if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
                 $delUser = Request::create('api/deleteUser', 'POST', $data);
@@ -1407,7 +1407,7 @@ class UserController extends Controller {
                 );
 
                 if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
                 $editPost = Request::create('api/editUser', 'POST', $saveData);

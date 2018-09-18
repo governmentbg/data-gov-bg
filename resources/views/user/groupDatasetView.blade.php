@@ -61,7 +61,7 @@
                 </div>
                 @endif
                 @if ($buttons[$dataset->uri]['delete'])
-                <div class="col-md-9 col-sm-8 text-left m-l-10">
+                <div class="col-md-9 col-sm-8 text-left m-l-10 m-t-sm">
                     <form method="POST">
                         {{ csrf_field() }}
                         <button

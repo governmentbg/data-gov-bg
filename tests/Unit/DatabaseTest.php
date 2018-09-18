@@ -328,7 +328,6 @@ class DatabaseTest extends TestCase
                 'bg'    => true,
                 'en'    => true,
                 'ru'    => false,
-                'xx'    => false,
             ];
             // Test creation
             foreach ($languages as $language => $active) {

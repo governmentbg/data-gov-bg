@@ -227,27 +227,32 @@ class SectionController extends AdminController
     {
         if (Role::isAdmin()) {
             $pages = Page::where('section_id', $id)->first();
+            $subSections = Section::where('parent_id', $id)->first();
 
             if (is_null($pages)) {
-                Section::where('parent_id', $id)->update(['parent_id' => null]);
+                if (is_null($subSections)) {
+                    $class = 'user';
 
-                $class = 'user';
+                    $rq = Request::create('/api/deleteSection', 'POST', [
+                        'id' => $id,
+                    ]);
 
-                $rq = Request::create('/api/deleteSection', 'POST', [
-                    'id' => $id,
-                ]);
+                    $api = new ApiSection($rq);
+                    $result = $api->deleteSection($rq)->getData();
 
-                $api = new ApiSection($rq);
-                $result = $api->deleteSection($rq)->getData();
+                    if ($result->success) {
+                        $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                if ($result->success) {
-                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                        return redirect('/admin/sections/list');
+                    } else {
+                        $request->session()->flash('alert-danger', __('custom.delete_error'));
+
+                        return redirect('/admin/sections/list')->withErrors(isset($result->errors) ? $result->errors : []);
+                    }
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.section_subsections_delete_error'));
 
                     return redirect('/admin/sections/list');
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.delete_error'));
-
-                    return redirect('/admin/sections/list')->withErrors(isset($result->errors) ? $result->errors : []);
                 }
             } else {
                 $request->session()->flash('alert-danger', __('custom.section_pages_delete_error'));

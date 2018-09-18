@@ -671,6 +671,7 @@ return [
     'section_add' => 'Add section',
     'section_edit' => 'Section edit',
     'section_pages_delete_error' => 'Unsuccessful deletion! The added pages should be deleted first!',
+    'section_subsections_delete_error' => 'Unsuccessful deletion! The subsections should be deleted first!',
     'subsection_add' => 'Add subsection',
     'subsection_edit' => 'Edit subsection',
     'subsection_preview' => 'Preview subsection',

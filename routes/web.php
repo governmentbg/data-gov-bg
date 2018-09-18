@@ -341,9 +341,9 @@ Route::match(['get', 'post'], 'password/reset', 'UserController@passwordReset')-
 
 Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
 
-Route::get('news', function () {
-    return view('news/list', ['class' => 'news']);
-});
+Route::match(['get', 'post'], 'news', 'NewsController@listNews');
+Route::match(['get', 'post'], 'news/search', 'NewsController@searchNews');
+Route::match(['get', 'post'], 'news/view/{id}', 'NewsController@viewNews');
 
 Route::get('news/view', function () {
     return view('news/view', ['class' => 'news']);

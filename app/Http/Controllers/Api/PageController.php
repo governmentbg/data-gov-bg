@@ -105,30 +105,33 @@ class PageController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
+            $locale = isset($pageData['data']['locale']) ? $pageData['data']['locale'] : null;
+
             try {
                 DB::beginTransaction();
 
                 $newPage = new Page;
-                $newPage->title = $this->trans($pageData['locale'], $pageData['data']['title']);
+                $newPage->type = Page::TYPE_PAGE;
+                $newPage->title = $this->trans($locale, $pageData['data']['title']);
 
                 if (isset($pageData['data']['section_id'])) {
                     $newPage->section_id = $pageData['data']['section_id'];
                 }
 
                 if (isset($pageData['data']['body'])) {
-                    $newPage->body = $this->trans($pageData['locale'], $pageData['data']['body']);
+                    $newPage->body = $this->trans($locale, $pageData['data']['body']);
                 }
 
                 if (isset($pageData['data']['head_title'])) {
-                    $newPage->head_title = $this->trans($pageData['locale'], $pageData['data']['head_title']);
+                    $newPage->head_title = $this->trans($locale, $pageData['data']['head_title']);
                 }
 
                 if (isset($pageData['data']['meta_description'])) {
-                    $newPage->meta_descript = $this->trans($pageData['locale'], $pageData['data']['meta_description']);
+                    $newPage->meta_descript = $this->trans($locale, $pageData['data']['meta_description']);
                 }
 
                 if (isset($pageData['data']['meta_keywords'])) {
-                    $newPage->meta_key_words = $this->trans($pageData['locale'], $pageData['data']['meta_keywords']);
+                    $newPage->meta_key_words = $this->trans($locale, $pageData['data']['meta_keywords']);
                 }
 
                 if (isset($pageData['data']['forum_link'])) {
@@ -144,7 +147,7 @@ class PageController extends ApiController
                 }
 
                 if (isset($pageData['data']['abstract'])) {
-                    $newPage->abstract = $this->trans($pageData['locale'], $pageData['data']['abstract']);
+                    $newPage->abstract = $this->trans($locale, $pageData['data']['abstract']);
                 }
 
                 if (isset($pageData['data']['active'])) {
@@ -481,7 +484,7 @@ class PageController extends ApiController
                 'updated_by',
             ];
 
-            $pageList = Page::select($columns);
+            $pageList = Page::select($columns)->where('type', Page::TYPE_PAGE);
 
             if (isset($criteria['order'])) {
                 if (is_array($criteria['order'])) {

@@ -268,7 +268,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $temp = tmpfile();
+                $temp = fopen(sys_get_temp_dir() .'/'. uniqid(), 'w+');
                 $path = stream_get_meta_data($temp)['uri'];
 
                 file_put_contents($path, base64_decode($post['data']));
@@ -281,8 +281,6 @@ class ConversionController extends ApiController
                 $im->stripImage();
                 $im->setBackgroundColor('white');
                 $im->writeImage($path);
-
-                chmod($path, 0755);
 
                 $result = (new TesseractOCR($path))->lang('bul', 'eng')->run();
 

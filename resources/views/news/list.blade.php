@@ -18,24 +18,24 @@
         @endif
         <div class="col-xs-12">
             <div class=" m-t-lg">
-            @if ($newsList)
-                @foreach ($newsList as $news)
-                    <div class="m-b-lg">
-                        <div> {{ __('custom.date_added') }} : {{ $news->created_at }}</div>
-                        <div class="col-sm-12 p-l-none article-underline">
-                            <a href="{{ url('/news/view/' . $news->id ) }}">
-                                <h2 class="m-t-xs">{{ $news->title}}</h2>
-                            </a>
-                            <p>
-                                {{ $news->abstract }}
-                            </p>
-                            <div class="col-sm-12 p-l-none text-right">
-                                <span><a href="{{ url('/news/view/' . $news->id ) }}">{{ __('custom.see_more') }}</a></span>
+                @if ($newsList)
+                    @foreach ($newsList as $news)
+                        <div class="m-b-lg">
+                            <div> {{ __('custom.date_added') }} : {{ $news->created_at }}</div>
+                            <div class="col-sm-12 p-l-none article-underline">
+                                <a href="{{ url('/news/view/' . $news->id ) }}">
+                                    <h2 class="m-t-xs">{{ $news->title}}</h2>
+                                </a>
+                                <p>
+                                    {{ $news->abstract }}
+                                </p>
+                                <div class="col-sm-12 p-l-none text-right">
+                                    <span><a href="{{ url('/news/view/' . $news->id ) }}">{{ __('custom.see_more') }}</a></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-            @else
+                    @endforeach
+                @else
                 <div class="col-sm-12 m-t-xl text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>

@@ -101,34 +101,34 @@
                 </div>
             @endif
         </div>
-        @if (!empty($admin))
+        <div class="form-group row">
+            <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
+            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                <div class="js-check">
+                    <input
+                        type="checkbox"
+                        name="active"
+                        value="1"
+                        {{ !empty($model['active']) ? 'checked' : '' }}
+                    >
+                </div>
+            </div>
+        </div>
+        @if (\Auth::user()->is_admin)
             <div class="form-group row">
-                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
+                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.org_approved') }}:</label>
                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                     <div class="js-check">
                         <input
                             type="checkbox"
-                            name="active"
+                            name="approved"
                             value="1"
-                            {{ !empty($model['active']) ? 'checked' : '' }}
+                            {{ !empty($model['approved']) ? 'checked' : '' }}
                         >
                     </div>
                 </div>
             </div>
         @endif
-        <div class="form-group row">
-            <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.org_approved') }}:</label>
-            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                <div class="js-check">
-                    <input
-                        type="checkbox"
-                        name="approved"
-                        value="1"
-                        {{ !empty($model['approved']) ? 'checked' : '' }}
-                    >
-                </div>
-            </div>
-        </div>
         <div class="form-group row">
             <div class="col-sm-12 text-right">
                 <button type="submit" name="save" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>

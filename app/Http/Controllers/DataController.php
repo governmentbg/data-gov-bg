@@ -788,13 +788,598 @@ class DataController extends Controller {
         );
     }
 
-    public function reportedList()
+    /**
+     * List reported datasets
+     *
+     * @param Request $request
+     *
+     * @return view for browsing reported datasets
+     */
+    public function reportedList(Request $request)
     {
+        $locale = \LaravelLocalization::getCurrentLocale();
 
+        $criteria = [
+            'reported' => Resource::REPORTED_TRUE
+        ];
+
+        // filters
+        $organisations = [];
+        $users = [];
+        $groups = [];
+        $categories = [];
+        $tags = [];
+        $formats = [];
+        $termsOfUse = [];
+        $getParams = [];
+        $display = [];
+
+        // organisations / users filter
+        $userDatasetsOnly = false;
+        if ($request->filled('org') && is_array($request->org)) {
+            $criteria['org_ids'] = $request->org;
+            $getParams['org'] = $request->org;
+            $getParams['user'] = [];
+        } else {
+            $getParams['org'] = [];
+            if ($request->filled('user') && is_array($request->user)) {
+                $criteria['user_ids'] = $request->user;
+                $userDatasetsOnly = true;
+                $getParams['user'] = $request->user;
+            } else {
+                $getParams['user'] = [];
+            }
+        }
+
+        // groups filter
+        if ($request->filled('group') && is_array($request->group)) {
+            $criteria['group_ids'] = $request->group;
+            $getParams['group'] = $request->group;
+        } else {
+            $getParams['group'] = [];
+        }
+
+        // main categories filter
+        if ($request->filled('category') && is_array($request->category)) {
+            $criteria['category_ids'] = $request->category;
+            $getParams['category'] = $request->category;
+        } else {
+            $getParams['category'] = [];
+        }
+
+        // tags filter
+        if ($request->filled('tag') && is_array($request->tag)) {
+            $criteria['tag_ids'] = $request->tag;
+            $getParams['tag'] = $request->tag;
+        } else {
+            $getParams['tag'] = [];
+        }
+
+        // data formats filter
+        if ($request->filled('format') && is_array($request->format)) {
+            $criteria['formats'] = array_map('strtoupper', $request->format);
+            $getParams['format'] = $request->format;
+        } else {
+            $getParams['format'] = [];
+        }
+
+        // terms of use filter
+        if ($request->filled('license') && is_array($request->license)) {
+            $criteria['terms_of_use_ids'] = $request->license;
+            $getParams['license'] = $request->license;
+        } else {
+            $getParams['license'] = [];
+        }
+
+        // prepare datasets parameters
+        $perPage = 6;
+        $params = [
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+            'criteria'         => $criteria,
+        ];
+        $params['criteria']['locale'] = $locale;
+        $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
+        $params['criteria']['visibility'] = DataSet::VISIBILITY_PUBLIC;
+        $params['criteria']['user_datasets_only'] = $userDatasetsOnly;
+
+        // apply search
+        if ($request->filled('q') && !empty(trim($request->q))) {
+            $getParams['q'] = trim($request->q);
+            $params['criteria']['keywords'] = $getParams['q'];
+        }
+
+        // apply sort parameters
+        if ($request->has('sort')) {
+            $getParams['sort'] = $request->sort;
+            if ($request->sort != 'relevance') {
+                $params['criteria']['order']['field'] = $request->sort;
+                if ($request->has('order')) {
+                    $params['criteria']['order']['type'] = $request->order;
+                }
+                $getParams['order'] = $request->order;
+            }
+        }
+
+        // list datasets
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $res = $api->listDatasets($rq)->getData();
+
+        $datasets = !empty($res->datasets) ? $res->datasets : [];
+        $count = !empty($res->total_records) ? $res->total_records : 0;
+
+        $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
+
+        $datasetOrgs = [];
+        $buttons = [];
+
+        if (!empty($paginationData['items'])) {
+            // get organisation ids
+            $orgIds = array_where(array_pluck($paginationData['items'], 'org_id'), function ($value, $key) {
+                return !is_null($value);
+            });
+
+            // list organisations
+            $params = [
+                'criteria'  => [
+                    'org_ids'  => array_unique($orgIds),
+                    'locale'   => $locale
+                ]
+            ];
+            $rq = Request::create('/api/listOrganisations', 'POST', $params);
+            $api = new ApiOrganisation($rq);
+            $res = $api->listOrganisations($rq)->getData();
+            $datasetOrgs = !empty($res->organisations) ? $res->organisations : [];
+
+            $recordsLimit = 10;
+
+            if (empty($getParams['user'])) {
+                // check for organisation records limit
+                $hasLimit = !($request->filled('org_limit') && $request->org_limit == 0);
+
+                // list data organisations
+                $params = [
+                    'criteria' => [
+                        'dataset_criteria' => $criteria,
+                        'locale' => $locale
+                    ],
+                ];
+                if ($hasLimit) {
+                    $params['criteria']['records_limit'] = $recordsLimit;
+                }
+
+                $rq = Request::create('/api/listDataOrganisations', 'POST', $params);
+                $api = new ApiOrganisation($rq);
+                $res = $api->listDataOrganisations($rq)->getData();
+
+                $organisations = !empty($res->organisations) ? $res->organisations : [];
+                $getParams['org'] = array_intersect($getParams['org'], array_pluck($organisations, 'id'));
+
+                $this->prepareDisplayParams(count($organisations), $hasLimit, $recordsLimit, 'org', $display);
+            }
+
+            if (empty($getParams['org'])) {
+                // check for user records limit
+                $hasLimit = !($request->filled('user_limit') && $request->user_limit == 0);
+
+                // list data users
+                $params = [
+                    'criteria' => [
+                        'dataset_criteria' => $criteria
+                    ],
+                ];
+                if ($hasLimit) {
+                    $params['criteria']['records_limit'] = $recordsLimit;
+                }
+
+                $rq = Request::create('/api/listDataUsers', 'POST', $params);
+                $api = new ApiUser($rq);
+                $res = $api->listDataUsers($rq)->getData();
+
+                $users = !empty($res->users) ? $res->users : [];
+                $getParams['user'] = array_intersect($getParams['user'], array_pluck($users, 'id'));
+
+                $this->prepareDisplayParams(count($users), $hasLimit, $recordsLimit, 'user', $display);
+            }
+
+            // check for group records limit
+            $hasLimit = !($request->filled('group_limit') && $request->group_limit == 0);
+
+            // list data groups
+            $params = [
+                'criteria' => [
+                    'dataset_criteria' => $criteria,
+                    'locale' => $locale
+                ],
+            ];
+            if ($hasLimit) {
+                $params['criteria']['records_limit'] = $recordsLimit;
+            }
+
+            $rq = Request::create('/api/listDataGroups', 'POST', $params);
+            $api = new ApiOrganisation($rq);
+            $res = $api->listDataGroups($rq)->getData();
+
+            $groups = !empty($res->groups) ? $res->groups : [];
+            $getParams['group'] = array_intersect($getParams['group'], array_pluck($groups, 'id'));
+
+            $this->prepareDisplayParams(count($groups), $hasLimit, $recordsLimit, 'group', $display);
+
+            // check for category records limit
+            $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
+
+            // check for category records limit
+            $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
+
+            // list data categories
+            $params = [
+                'criteria' => [
+                    'dataset_criteria' => $criteria,
+                    'locale' => $locale
+                ],
+            ];
+            if ($hasLimit) {
+                $params['criteria']['records_limit'] = $recordsLimit;
+            }
+
+            $rq = Request::create('/api/listDataCategories', 'POST', $params);
+            $api = new ApiCategory($rq);
+            $res = $api->listDataCategories($rq)->getData();
+
+            $categories = !empty($res->categories) ? $res->categories : [];
+            $getParams['category'] = array_intersect($getParams['category'], array_pluck($categories, 'id'));
+
+            $this->prepareDisplayParams(count($categories), $hasLimit, $recordsLimit, 'category', $display);
+
+            // check for tag records limit
+            $hasLimit = !($request->filled('tag_limit') && $request->tag_limit == 0);
+
+            // list data tags
+            $params = [
+                'criteria' => [
+                    'dataset_criteria' => $criteria
+                ],
+            ];
+            if ($hasLimit) {
+                $params['criteria']['records_limit'] = $recordsLimit;
+            }
+
+            $rq = Request::create('/api/listDataTags', 'POST', $params);
+            $api = new ApiTag($rq);
+            $res = $api->listDataTags($rq)->getData();
+
+            $tags = !empty($res->tags) ? $res->tags : [];
+            $getParams['tag'] = array_intersect($getParams['tag'], array_pluck($tags, 'id'));
+
+            $this->prepareDisplayParams(count($tags), $hasLimit, $recordsLimit, 'tag', $display);
+
+            // check for format records limit
+            $hasLimit = !($request->filled('format_limit') && $request->format_limit == 0);
+
+            // list data formats
+            $params = [
+                'criteria' => [
+                    'dataset_criteria' => $criteria,
+                ],
+            ];
+            if ($hasLimit) {
+                $params['criteria']['records_limit'] = $recordsLimit;
+            }
+
+            $rq = Request::create('/api/listDataFormats', 'POST', $params);
+            $api = new ApiResource($rq);
+            $res = $api->listDataFormats($rq)->getData();
+
+            $formats = !empty($res->data_formats) ? $res->data_formats : [];
+            $getParams['format'] = array_intersect($getParams['format'], array_map('strtolower', array_pluck($formats, 'format')));
+
+            $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
+
+            // check for terms of use records limit
+            $hasLimit = !($request->filled('license_limit') && $request->license_limit == 0);
+
+            // list data terms of use
+            $params = [
+                'criteria' => [
+                    'dataset_criteria' => $criteria,
+                    'locale' => $locale
+                ],
+            ];
+            if ($hasLimit) {
+                $params['criteria']['records_limit'] = $recordsLimit;
+            }
+
+            $rq = Request::create('/api/listDataTermsOfUse', 'POST', $params);
+            $api = new ApiTermsOfUse($rq);
+            $res = $api->listDataTermsOfUse($rq)->getData();
+
+            $termsOfUse = !empty($res->terms_of_use) ? $res->terms_of_use : [];
+            $getParams['license'] = array_intersect($getParams['license'], array_pluck($termsOfUse, 'id'));
+
+            $this->prepareDisplayParams(count($termsOfUse), $hasLimit, $recordsLimit, 'license', $display);
+
+            if ($user = \Auth::user()) {
+                $objData = ['object_id' => $user->id];
+                $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+                if ($rightCheck) {
+                    $userData = [
+                        'api_key' => $user->api_key,
+                        'id'      => $user->id
+                    ];
+
+                    // get followed datasets
+                    $followed = [];
+                    if ($this->getFollowedDatasets($userData, $followed)) {
+                        $datasetIds = array_pluck($paginationData['items'], 'id');
+                        foreach ($datasetIds as $datasetId) {
+                            $buttons[$datasetId] = [
+                                'follow'   => false,
+                                'unfollow' => false,
+                            ];
+                            if (!in_array($datasetId, $followed)) {
+                                $buttons[$datasetId]['follow'] = true;
+                            } else {
+                                $buttons[$datasetId]['unfollow'] = true;
+                            }
+                        }
+
+                        // follow / unfollow dataset
+                        $followResult = $this->followDataset($request, $userData, $followed, $datasetIds);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+                }
+            }
+        }
+
+        return view(
+            'data/reportedList',
+            [
+                'class'              => 'data-attention',
+                'datasetOrgs'        => $datasetOrgs,
+                'datasets'           => $paginationData['items'],
+                'resultsCount'       => $count,
+                'pagination'         => $paginationData['paginate'],
+                'organisations'      => $organisations,
+                'users'              => $users,
+                'groups'             => $groups,
+                'categories'         => $categories,
+                'tags'               => $tags,
+                'formats'            => $formats,
+                'termsOfUse'         => $termsOfUse,
+                'getParams'          => $getParams,
+                'display'            => $display,
+                'buttons'            => $buttons
+            ]
+        );
     }
 
-    public function reportedView()
+    public function reportedView(Request $request, $uri)
     {
+        $locale = \LaravelLocalization::getCurrentLocale();
 
+        // get dataset details
+        $params = [
+            'dataset_uri' => $uri,
+            'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $res = $api->getDataSetDetails($rq)->getData();
+        $dataset = !empty($res->data) ? $res->data : [];
+
+        if (!empty($dataset) && $dataset->reported &&
+            $dataset->status == DataSet::STATUS_PUBLISHED &&
+            $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+
+            $organisation = [];
+            $user = [];
+            if (!is_null($dataset->org_id)) {
+                // get organisation details
+                $params = [
+                    'org_id' => $dataset->org_id,
+                    'locale'  => $locale
+                ];
+                $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+                $api = new ApiOrganisation($rq);
+                $res = $api->getOrganisationDetails($rq)->getData();
+                $organisation = !empty($res->data) ? $res->data : [];
+            } else {
+                // get user details
+                $params = [
+                    'criteria' => ['id' => $dataset->created_by]
+                ];
+                $rq = Request::create('/api/listUsers', 'POST', $params);
+                $api = new ApiUser($rq);
+                $res = $api->listUsers($rq)->getData();
+                $user = !empty($res->users) ? $res->users[0] : [];
+            }
+
+            $dataset = $this->getModelUsernames($dataset);
+
+            // list resources
+            $params = [
+                'criteria' => [
+                    'dataset_uri' => $uri
+                ]
+            ];
+            $rq = Request::create('/api/listResources', 'POST', $params);
+            $apiResources = new ApiResource($rq);
+            $res = $apiResources->listResources($rq)->getData();
+            $resources = !empty($res->resources) ? $res->resources : [];
+
+            // get category details
+            if (!empty($dataset->category_id)) {
+                $params = [
+                    'category_id' => $dataset->category_id,
+                    'locale'  => $locale
+                ];
+                $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
+                $api = new ApiCategory($rq);
+                $res = $api->getMainCategoryDetails($rq)->getData();
+
+                $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
+            }
+
+            // get terms of use details
+            if (!empty($dataset->terms_of_use_id)) {
+                $params = [
+                    'terms_id' => $dataset->terms_of_use_id,
+                    'locale'  => $locale
+                ];
+                $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
+                $api = new ApiTermsOfUse($rq);
+                $res = $api->getTermsOfUseDetails($rq)->getData();
+
+                $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
+            }
+
+            $buttons = [
+                'follow'   => false,
+                'unfollow' => false,
+                'edit'     => false,
+                'delete'   => false,
+            ];
+
+            if ($user = \Auth::user()) {
+                $objData = ['object_id' => $user->id];
+                $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+                if ($rightCheck) {
+                    $userData = [
+                        'api_key' => $user->api_key,
+                        'id'      => $user->id
+                    ];
+
+                    // get followed datasets
+                    $followed = [];
+                    if ($this->getFollowedDatasets($userData, $followed)) {
+                        if (!in_array($dataset->id, $followed)) {
+                            $buttons['follow'] = true;
+                        } else {
+                            $buttons['unfollow'] = true;
+                        }
+
+                        // follow / unfollow dataset
+                        $followResult = $this->followDataset($request, $userData, $followed, [$dataset->id]);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+                }
+
+                /*$objData = ['created_by' => $dataset->created_by];
+
+                // check rights for edit button
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, [], $objData);
+                $buttons['edit'] = $rightCheck;
+
+                // check rights for delete button
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, [], $objData);
+                $buttons['delete'] = $rightCheck;*/
+            }
+
+            return view(
+                'data/reportedView',
+                [
+                    'class'          => 'data-attention',
+                    'organisation'   => $organisation,
+                    'user'           => $user,
+                    'approved'       => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
+                    'dataset'        => $dataset,
+                    'resources'      => $resources,
+                    'buttons'        => $buttons
+                ]
+            );
+        }
+
+        return redirect()->back();
+    }
+
+    public function reportedResourceView(Request $request, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+            'resource_uri' => $uri,
+            'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceMetadata($rq)->getData();
+        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+
+        if (!empty($resource) && isset($resource->dataset_uri)) {
+            // get dataset details
+            $params = [
+                'dataset_uri' => $resource->dataset_uri,
+                'locale'  => $locale
+            ];
+            $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+            $api = new ApiDataSet($rq);
+            $res = $api->getDataSetDetails($rq)->getData();
+            $dataset = !empty($res->data) ? $res->data : [];
+
+            if (!empty($dataset) && $dataset->reported &&
+                $dataset->status == DataSet::STATUS_PUBLISHED &&
+                $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+
+                $organisation = [];
+                $user = [];
+                if (!is_null($dataset->org_id)) {
+                    // get organisation details
+                    $params = [
+                        'org_id' => $dataset->org_id,
+                        'locale'  => $locale
+                    ];
+                    $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+                    $api = new ApiOrganisation($rq);
+                    $res = $api->getOrganisationDetails($rq)->getData();
+                    $organisation = !empty($res->data) ? $res->data : [];
+                } else {
+                    // get user details
+                    $params = [
+                        'criteria' => ['id' => $dataset->created_by]
+                    ];
+                    $rq = Request::create('/api/listUsers', 'POST', $params);
+                    $api = new ApiUser($rq);
+                    $res = $api->listUsers($rq)->getData();
+                    $user = !empty($res->users) ? $res->users[0] : [];
+                }
+
+                // set resource format code
+                $resource->format_code = Resource::getFormatsCode($resource->file_format);
+
+                // get resource data
+                $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri]);
+                $api = new ApiResource($rq);
+                $res = $api->getResourceData($rq)->getData();
+                $data = !empty($res->data) ? $res->data : [];
+
+                $userData = [];
+                if (\Auth::check()) {
+                    $userData['firstname'] =  \Auth::user()->firstname;
+                    $userData['lastname'] =  \Auth::user()->lastname;
+                    $userData['email'] =  \Auth::user()->email;
+                }
+
+                return view(
+                    'data/reportedResourceView',
+                    [
+                        'class'          => 'data-attention',
+                        'organisation'   => $organisation,
+                        'user'           => $user,
+                        'approved'       => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
+                        'dataset'        => $dataset,
+                        'resource'       => $resource,
+                        'data'           => $data,
+                        'userData'       => $userData
+                    ]
+                );
+            }
+        }
+
+        return redirect()->back();
     }
 }

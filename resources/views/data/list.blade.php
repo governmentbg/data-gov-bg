@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row">
-        @include('partials.sidebar')
+        @include('partials.sidebar', ['action' => 'list'])
         <div class="col-sm-9 col-xs-12 p-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">

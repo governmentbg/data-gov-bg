@@ -14943,6 +14943,37 @@ textarea {
   right: 0px;
 }
 
+.theme-data .history .version-heading,
+.theme-data-attention .history .version-heading {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.theme-data .history .version,
+.theme-data-attention .history .version {
+  font-size: 17px;
+}
+
+.theme-data .history span > svg,
+.theme-data-attention .history span > svg {
+  height: 20px;
+  width: 20px;
+}
+
+.theme-data .history .signaled span,
+.theme-data-attention .history .signaled span {
+  color: #d32a31;
+}
+
+.theme-data .history .signaled a:hover svg,
+.theme-data .history .signaled a:focus svg,
+.theme-data .history .signaled a:active svg,
+.theme-data-attention .history .signaled a:hover svg,
+.theme-data-attention .history .signaled a:focus svg,
+.theme-data-attention .history .signaled a:active svg {
+  fill: #d32a31;
+}
+
 .theme-user .container > .sidenav {
   margin-left: -15px;
 }

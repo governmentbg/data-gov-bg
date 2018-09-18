@@ -397,4 +397,10 @@ $(function() {
             $('#js-code').val(code);
         }
     }
+
+    $(document).ready(function() {
+        if ($('.js-summernote').length) {
+            $('.js-summernote').summernote();
+        }
+    });
 });

@@ -657,7 +657,7 @@ class UserController extends Controller {
      * @return view with dataset information
      *
      */
-    public function orgDatasetView(Request $request, $uri)
+    public function orgDatasetView(Request $request, $uri, $orgUri = null)
     {
         $params['dataset_uri'] = $uri;
 
@@ -665,9 +665,14 @@ class UserController extends Controller {
         $apiDatasets = new ApiDataset($datasetReq);
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
         $datasetData = !empty($dataset->data) ? $dataset->data : null;
+        $fromOrg = Organisation::where('uri', $orgUri)->first();
 
         if (!isset($datasetData)) {
             return back();
+        }
+
+        if (!is_null($fromOrg)) {
+            $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
         }
 
         $rightCheck = RoleRight::checkUserRight(
@@ -775,7 +780,8 @@ class UserController extends Controller {
                 'resources'    => $resources->resources,
                 'activeMenu'   => 'organisation',
                 'organisation' => isset($organisation) ? $organisation : null,
-                'buttons'      => $buttons
+                'buttons'      => $buttons,
+                'fromOrg'      => $fromOrg,
             ]
         );
     }
@@ -943,7 +949,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function orgDatasetCreate(Request $request)
+    public function orgDatasetCreate(Request $request, $uri = null)
     {
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
@@ -962,9 +968,14 @@ class UserController extends Controller {
         $organisations = $this->prepareOrganisations();
         $groups = $this->prepareGroups();
         $data = $request->all();
+        $fromOrg = Organisation::where('uri', $uri)->first();
         $errors = [];
 
         if ($data) {
+            if (!empty($data['org_uri']) && is_null($fromOrg)) {
+                $fromOrg = Organisation::where('uri', $data['org_uri'])->first();
+            }
+
             // prepare post data for API request
             $data = $this->prepareTags($data);
 
@@ -977,6 +988,11 @@ class UserController extends Controller {
             // make request to API
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
+
+            if (!empty($data['org_id'])) {
+                $params['org_id'] = $data['org_id'];
+            }
+
             $savePost = Request::create('/api/addDataset', 'POST', $params);
             $api = new ApiDataSet($savePost);
             $save = $api->addDataset($savePost)->getData();
@@ -993,15 +1009,25 @@ class UserController extends Controller {
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                 if ($request->has('add_resource')) {
-                    return redirect()->route('orgResourceCreate', ['uri' => $save->uri]);
+                    return redirect()->route(
+                        'orgResourceCreate',
+                        ['uri' => $save->uri, 'orguri' => !is_null($fromOrg) ? $fromOrg->uri : $fromOrg]);
                 }
 
-                return redirect('/user/organisations/dataset/view/'. $save->uri);
+                if (!is_null($fromOrg)) {
+                    return redirect('/user/organisations/dataset/view/'. $save->uri .'/'. $fromOrg->uri);
+                } else {
+                    return redirect('/user/organisations/dataset/view/'. $save->uri);
+                }
             } else {
                 $request->session()->flash('alert-danger', $save->error->message);
 
                 return redirect()->back()->withInput()->withErrors($save->errors);
             }
+        }
+
+        if (!is_null($fromOrg)) {
+            $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
         }
 
         return view('user/orgDatasetCreate', [
@@ -1013,6 +1039,7 @@ class UserController extends Controller {
             'groups'        => $groups,
             'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
+            'fromOrg'       => $fromOrg,
         ]);
     }
 
@@ -1319,7 +1346,7 @@ class UserController extends Controller {
                 );
 
                 if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
                 $newKey = Request::create('api/generateAPIKey', 'POST', $data);
@@ -1352,7 +1379,7 @@ class UserController extends Controller {
                 );
 
                 if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
                 $delUser = Request::create('api/deleteUser', 'POST', $data);
@@ -1380,7 +1407,7 @@ class UserController extends Controller {
                 );
 
                 if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
                 }
 
                 $editPost = Request::create('api/editUser', 'POST', $saveData);
@@ -1810,7 +1837,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function orgResourceCreate(Request $request, $datasetUri)
+    public function orgResourceCreate(Request $request, $datasetUri, $orgUri = null)
     {
         $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT);
 
@@ -1821,8 +1848,15 @@ class UserController extends Controller {
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
+        $fromOrg = Organisation::where('uri', $orgUri)->first();
 
         if (DataSet::where('uri', $datasetUri)->count()) {
+            if (!is_null($fromOrg)) {
+                $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
+            }
+
+            $dataSetName = DataSet::where('uri', $datasetUri)->value('name');
+
             if ($request->has('ready_metadata')) {
                 $data = $request->all();
                 $metadata['api_key'] = $apiKey;
@@ -1869,11 +1903,12 @@ class UserController extends Controller {
                                     'csvData'       => $csvData,
                                     'types'         => $types,
                                     'resourceUri'   => $result->data->uri,
+                                    'fromOrg'       => $fromOrg,
                                 ]);
                         }
                     }
 
-                    return redirect()->route('orgDatasetView', ['uri' => $datasetUri]);
+                    return redirect()->route('orgDatasetView', ['uri' => $datasetUri, 'orguri' => $orgUri]);
                 }
 
                 return redirect()->back()->withInput()->withErrors($result->errors);
@@ -1909,7 +1944,7 @@ class UserController extends Controller {
 
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect()->route('orgDatasetView', ['uri' => $datasetUri]);
+                    return redirect()->route('orgDatasetView', ['uri' => $datasetUri, 'orguri' => $orgUri]);
                 }
             }
         } else {
@@ -1917,11 +1952,13 @@ class UserController extends Controller {
         }
 
         return view('user/resourceCreate', [
-            'class'     => 'user',
-            'uri'       => $datasetUri,
-            'types'     => $types,
-            'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'class'       => 'user',
+            'uri'         => $datasetUri,
+            'types'       => $types,
+            'reqTypes'    => $reqTypes,
+            'fields'      => $this->getResourceTransFields(),
+            'fromOrg'     => $fromOrg,
+            'dataSetName' => isset($dataSetName) ? $dataSetName : null,
         ]);
     }
 
@@ -2027,7 +2064,7 @@ class UserController extends Controller {
      *
      * @return view for browsing org resources
      */
-    public function orgResourceView(Request $request, $uri)
+    public function orgResourceView(Request $request, $uri, $orgUri = null)
     {
         $uri = $request->uri;
 
@@ -2038,6 +2075,12 @@ class UserController extends Controller {
 
         if (!$rightCheck) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $fromOrg = Organisation::where('uri', $orgUri)->first();
+
+        if (!is_null($fromOrg)) {
+            $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
         }
 
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
@@ -2107,7 +2150,9 @@ class UserController extends Controller {
                 'resource'      => $resource,
                 'data'          => $data,
                 'buttons'       => $buttons,
-                'activeMenu'    => 'organisation'
+                'activeMenu'    => 'organisation',
+                'fromOrg'       => $fromOrg,
+                'dataset'       => !is_null($dataset) ? $dataset->name : null,
             ]);
         }
 

@@ -229,6 +229,7 @@ class SectionController extends AdminController
             $pages = Page::where('section_id', $id)->first();
 
             if (is_null($pages)) {
+                Section::where('parent_id', $id)->update(['parent_id' => null]);
 
                 $class = 'user';
 

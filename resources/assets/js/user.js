@@ -125,7 +125,7 @@ function initSelect2() {
                         return {
                             results: $.map(data.users, function (item) {
                                 return {
-                                    text: item.firstname + ' ' + item.lastname,
+                                    text: item.username + ' | ' + item.firstname + ' ' + item.lastname,
                                     id: item.id
                                 }
                             })

@@ -476,7 +476,7 @@ class NewsController extends ApiController
                             ->where('valid_to', null)
                             ->orWhere('valid_from', '<=', date(now()))
                             ->where('valid_to', '>=', date(now()));
-                    });
+                });
             }
 
             $count = $newsList->count();
@@ -599,13 +599,13 @@ class NewsController extends ApiController
 
             if(!\Auth::check() || !Role::isAdmin()) {
                 $newsList
-                ->where('active', 1)
+                    ->where('active', 1)
                     ->where(function ($m){
                         $m->where('valid_from', null)
                             ->where('valid_to', null)
                             ->orWhere('valid_from', '<=', date(now()))
                             ->where('valid_to', '>=', date(now()));
-                    });
+                });
             }
 
             $total_records = $newsList->count();
@@ -676,13 +676,13 @@ class NewsController extends ApiController
 
             if(!\Auth::check() || !Role::isAdmin()) {
                 $singleNews
-                ->where('active', 1)
+                    ->where('active', 1)
                     ->where(function ($m){
                         $m->where('valid_from', null)
                             ->where('valid_to', null)
                             ->orWhere('valid_from', '<=', date(now()))
                             ->where('valid_to', '>=', date(now()));
-                    });
+                });
             }
 
             $singleNews = $singleNews->first();

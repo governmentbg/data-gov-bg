@@ -6,17 +6,19 @@
         <div class="col-xs-12">
             <div class=" m-t-md">
                 <div class="col-xs-12 m-b-md">
+                @if (!empty($documents))
                     <div class="col-sm-5 col-xs-12 pull-right">
-                    <form method="GET" action="{{ url('/document/search') }}">
-                    <input
-                        type="text"
-                        class="input-border-r-12 form-control"
-                        placeholder="{{ __('custom.search') }}"
-                        value="{{ isset($search) ? $search : '' }}"
-                        name="q"
-                    >
-                </form>
+                        <form method="GET" action="{{ url('/document/search') }}">
+                        <input
+                            type="text"
+                            class="input-border-r-12 form-control"
+                            placeholder="{{ __('custom.search') }}"
+                            value="{{ isset($search) ? $search : '' }}"
+                            name="q"
+                        >
+                        </form>
                     </div>
+                @endif
                 </div>
                 @if (isset($documents))
                     @foreach ($documents as $document)
@@ -36,15 +38,20 @@
                     </div>
                     @endforeach
                 @endif
+                @if (empty($documents))
+                <div class="col-sm-12 m-t-xl text-center no-info">
+                    {{ __('custom.no_info') }}
+                </div>
+                @endif
             </div>
         </div>
     </div>
     @if (isset($pagination))
-            <div class="row">
-                <div class="col-xs-12 text-center">
-                    {{ $pagination->render() }}
-                </div>
+        <div class="row">
+            <div class="col-xs-12 text-center">
+                {{ $pagination->render() }}
             </div>
-        @endif
+        </div>
+    @endif
 </div>
 @endsection

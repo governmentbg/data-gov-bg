@@ -10,9 +10,7 @@
                         @if (isset($document))
                             <div class="m-b-lg">
                                 <div class="col-sm-12 p-l-none article-underline">
-                                    <a href="{{ url('/news/view') }}">
-                                        <h2 class="m-t-xs">{{$document->name}}</h2>
-                                    </a>
+                                    <h2 class="m-t-xs">{{$document->name}}</h2>
                                     <p>
                                         {{$document->description}}
                                     </p>
@@ -34,7 +32,7 @@
                             </div>
                         @endif
                         <!-- IF there are commnets -->
-                        <div class="col-sm-12 pull-left m-t-md p-l-none">
+                        <!-- <div class="col-sm-12 pull-left m-t-md p-l-none">
                             <div class="comments p-lg">
                                 @for ($i=0; $i<2; $i++)
                                     <div class="comment-box p-lg m-b-lg">
@@ -49,7 +47,7 @@
                                     </div>
                                 @endfor
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

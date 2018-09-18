@@ -298,9 +298,9 @@ class UserController extends Controller {
 
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
 
-        if (!is_null($orgId) && $hasRole) {
+        if (!is_null($orgId) && ($hasRole || Role::isAdmin())) {
+            $params['api_key'] = \Auth::user()->api_key;
             $params['criteria']['org_ids'] = [$orgId];
-            $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
             $rq = Request::create('/api/listDatasets', 'POST', $params);
             $api = new ApiDataSet($rq);
             $datasets = $api->listDatasets($rq)->getData();
@@ -403,14 +403,19 @@ class UserController extends Controller {
         );
     }
 
-    public function orgDatasetEdit(Request $request, DataSet $datasetModel, $uri)
+    public function orgDatasetEdit(Request $request, DataSet $datasetModel, $orgUri, $uri)
     {
         $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
         $apiDatasets = new ApiDataset($datasetReq);
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
         $dataset = !empty($dataset->data) ? $dataset->data : null;
 
-        if (!isset($dataset)) {
+        $orgReq = Request::create('/api/getOrganisationDetails', 'POST', ['org_uri' => $orgUri]);
+        $apiOrg = new ApiOrganisation($orgReq);
+        $orgData = $apiOrg->getOrganisationDetails($orgReq)->getData();
+        $organisation = !empty($orgData->data) ? $orgData->data : null;
+
+        if (!isset($dataset) || !isset($organisation)) {
             return back();
         }
 
@@ -523,7 +528,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect(url('/user/organisations/datasets/edit/'. $newURI));
+                return redirect(url('/user/organisation/'. $organisation->uri .'/datasets/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -540,6 +545,7 @@ class UserController extends Controller {
             'categories'    => $categories,
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
+            'organisation'  => $organisation,
             'groups'        => $groups,
             'hasResources'  => $hasResources,
             'buttons'       => $buttons,
@@ -748,6 +754,7 @@ class UserController extends Controller {
 
         if (isset($dataset->data->name)) {
             $organisation = Organisation::where('id', $dataset->data->org_id)->first();
+            $organisation->logo = $this->getImageData($organisation->logo_data, $organisation->logo_mime_type);
 
             if (
                 $dataset->data->updated_by == $dataset->data->created_by
@@ -1048,6 +1055,7 @@ class UserController extends Controller {
     public function groupDatasetCreate(Request $request, $uri)
     {
         $group = Organisation::where('uri', $uri)->first();
+        $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type, 'group');
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
@@ -1100,10 +1108,10 @@ class UserController extends Controller {
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                 if ($request->has('add_resource')) {
-                    return redirect()->route('groupResourceCreate', ['uri' => $save->uri]);
+                    return redirect()->route('groupResourceCreate', ['uri' => $save->uri, 'grpUri' => $group->uri]);
                 }
 
-                return redirect()->route('groupDatasetView', ['uri' => $save->uri]);
+                return redirect()->route('groupDatasetView', ['uri' => $save->uri, 'grpUri' => $group->uri]);
             }
 
             $request->session()->flash('alert-danger', $save->error->message);
@@ -1121,6 +1129,7 @@ class UserController extends Controller {
             'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
             'groupId'       => $group->id,
+            'group'         => $group,
         ]);
     }
 
@@ -1728,7 +1737,7 @@ class UserController extends Controller {
         return redirect('/user/datasets');
     }
 
-    public function groupResourceCreate(Request $request, $datasetUri)
+    public function groupResourceCreate(Request $request, $grpUri, $datasetUri)
     {
         $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT);
 
@@ -1740,7 +1749,12 @@ class UserController extends Controller {
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
 
-        if (DataSet::where('uri', $datasetUri)->count()) {
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $grpUri]);
+        $apiOrganisation = new ApiOrganisation($groupReq);
+        $groupData = $apiOrganisation->getGroupDetails($groupReq)->getData();
+        $group = !empty($groupData->data) ? $groupData->data : null;
+
+        if (DataSet::where('uri', $datasetUri)->count() && isset($group)) {
             if ($request->has('ready_metadata')) {
                 $data = $request->all();
                 $metadata['api_key'] = $apiKey;
@@ -1788,11 +1802,12 @@ class UserController extends Controller {
                                     'types'         => $types,
                                     'reqTypes'      => $reqTypes,
                                     'resourceUri'   => $result->data->uri,
+                                    'group'         => $group,
                                 ]);
                         }
                     }
 
-                    return redirect()->route('groupDatasetView', ['uri' => $datasetUri]);
+                    return redirect()->route('groupDatasetView', ['uri' => $datasetUri, 'grpUri' => $group->uri]);
                 }
 
                 return redirect()->back()->withInput()->withErrors($result->errors);
@@ -1829,11 +1844,11 @@ class UserController extends Controller {
 
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect()->route('groupDatasetView', ['uri' => $datasetUri]);
+                    return redirect()->route('groupDatasetView', ['uri' => $datasetUri, 'grpUri' => $group->uri]);
                 }
             }
         } else {
-            return redirect('/user/groups/datasets');
+            return redirect('/user/groups');
         }
 
         return view('user/resourceCreate', [
@@ -1841,7 +1856,8 @@ class UserController extends Controller {
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'fields'    => $this->getResourceTransFields(),
+            'group'     => $group,
         ]);
     }
 
@@ -4717,14 +4733,19 @@ class UserController extends Controller {
         ]);
     }
 
-    public function groupDatasetView(Request $request, $uri)
+    public function groupDatasetView(Request $request, $grpUri, $uri)
     {
         $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
         $apiDatasets = new ApiDataset($datasetReq);
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
         $datasetData = !empty($dataset->data) ? $dataset->data : null;
 
-        if (!isset($datasetData)) {
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $grpUri]);
+        $apiOrganisation = new ApiOrganisation($groupReq);
+        $groupData = $apiOrganisation->getGroupDetails($groupReq)->getData();
+        $group = !empty($groupData->data) ? $groupData->data : null;
+
+        if (!isset($datasetData) || !isset($group)) {
             return back();
         }
 
@@ -4801,19 +4822,26 @@ class UserController extends Controller {
                 'dataset'    => $dataset->data,
                 'resources'  => $resources->resources,
                 'activeMenu' => 'group',
-                'buttons'    => $buttons
+                'buttons'    => $buttons,
+                'group'      => $group,
             ]
         );
     }
 
-    public function groupDatasetEdit(Request $request, DataSet $datasetModel, $uri)
+    public function groupDatasetEdit(Request $request, DataSet $datasetModel, $grpUri, $uri)
     {
         $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
         $apiDatasets = new ApiDataset($datasetReq);
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
         $datasetData = !empty($dataset->data) ? $dataset->data : null;
 
-        if (!isset($datasetData)) {
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $grpUri]);
+        $apiOrganisation = new ApiOrganisation($groupReq);
+        $groupData = $apiOrganisation->getGroupDetails($groupReq)->getData();
+        $group = !empty($groupData->data) ? $groupData->data : null;
+
+
+        if (!isset($datasetData) || !isset($group)) {
             return back();
         }
 
@@ -4926,7 +4954,7 @@ class UserController extends Controller {
             if ($success->success) {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return redirect(url('/user/groups/dataset/edit/'. $newURI));
+                return redirect(url('/user/group/'. $group->uri .'/dataset/edit/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -4947,18 +4975,24 @@ class UserController extends Controller {
             'hasResources'  => $hasResources,
             'buttons'       => $buttons,
             'setGroups'     => $setGroups,
+            'group'         => $group,
             'fields'        => $this->getDatasetTransFields(),
         ]);
     }
 
-    public function groupResourceView(Request $request, $uri)
+    public function groupResourceView(Request $request, $grpUri, $uri)
     {
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
         $resource = !empty($resource->resource) ? $resource->resource : null;
 
-        if (!isset($resource)) {
+        $groupReq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $grpUri]);
+        $apiOrganisation = new ApiOrganisation($groupReq);
+        $groupData = $apiOrganisation->getGroupDetails($groupReq)->getData();
+        $group = !empty($groupData->data) ? $groupData->data : null;
+
+        if (!isset($resource) || !isset($resource)) {
             return back();
         }
 
@@ -4985,21 +5019,22 @@ class UserController extends Controller {
 
         if (!empty($resource)) {
             if ($request->has('delete')) {
-        $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_ALL,
-            [
+
+                $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                    [
                         'group_id'       => $dataset->org_id
-            ],
-            [
+                    ],
+                    [
                         'created_by'     => $dataset->created_by,
                         'groups_ids'     => [$dataset->org_id]
-            ]
-        );
+                    ]
+                );
 
-        if (!$rightCheck) {
-            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
-        }
+                if (!$rightCheck) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+                }
 
                 $rq = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
                 $api = new ApiResource($rq);
@@ -5008,7 +5043,7 @@ class UserController extends Controller {
                 if ($result->success) {
                     $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                    return redirect()->route('groupDatasetView', ['uri' => $resource->dataset_uri]);
+                    return redirect()->route('groupDatasetView', ['uri' => $resource->dataset_uri, 'grpUri' => $group->uri]);
                 }
 
                 $request->session()->flash('alert-success', __('custom.delete_error'));
@@ -5023,7 +5058,8 @@ class UserController extends Controller {
                 'class'         => 'user',
                 'resource'      => $resource,
                 'data'          => $data,
-                'buttons'       => $buttons
+                'buttons'       => $buttons,
+                'group'         => $group,
             ]);
         }
 

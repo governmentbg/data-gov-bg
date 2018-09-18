@@ -3,7 +3,11 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => $activeMenu])
+    @if (Auth::user()->is_admin)
+        @include('partials.admin-nav-bar', ['view' => 'organisation'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'organisation'])
+    @endif
     @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $organisation])
     @include('partials.pagination')
     <div class="row">
@@ -27,18 +31,8 @@
         @endif
     </div>
     <div class="row">
-        <div class="org col-sm-3 col-xs-12 m-t-lg">
-            <div><img class="full-size" src="{{ $organisation->logo }}"></div>
-            <h2 class="elipsis-1">{{ $organisation->name }}</h2>
-            <h4>{{ truncate($organisation->descript, 150) }}</h4>
-            <p class="text-right show-more">
-                <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-            </p>
-        </div>
-        <div class="col-sm-9 col-xs-12"></div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12 m-t-md">
+        @include('partials.org-info', ['organisation' => $organisation])
+        <div class="col-sm-9 col-xs-12 m-t-md">
             <div class="row">
                 <div class="col-xs-12">
                     <div class="articles m-t-lg">
@@ -58,7 +52,9 @@
                                                 @if ($buttons[$set->uri]['edit'])
                                                     <div class="col-xs-6">
                                                         <span class="badge badge-pill m-r-md m-b-sm">
-                                                            <a href="{{ url('/user/organisations/datasets/edit/'. $set->uri) }}">{{ uctrans('custom.edit') }}</a>
+                                                            <a
+                                                                href="{{ url('/user/organisation/'. $organisation->uri .'/datasets/edit/'. $set->uri) }}"
+                                                            >{{ uctrans('custom.edit') }}</a>
                                                         </span>
                                                     </div>
                                                 @endif

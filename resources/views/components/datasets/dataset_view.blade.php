@@ -100,7 +100,6 @@
                         <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
                         <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
                     @endif
-                    <li>.....................................</li>
                 </ul>
             </div>
         </div>

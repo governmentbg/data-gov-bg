@@ -2,7 +2,11 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.user-nav-bar', ['view' => $activeMenu])
+        @if (Auth::user()->is_admin)
+            @include('partials.admin-nav-bar', ['view' => 'organisation'])
+        @else
+            @include('partials.user-nav-bar', ['view' => 'organisation'])
+        @endif
         @if (isset($dataset))
             <div class="sidenav text-center">
                 <div class="profile-name m-l-lg">{{ $dataset }}</div>
@@ -10,21 +14,14 @@
         @endif
         @if (isset($fromOrg) && !is_null($fromOrg))
             @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
-            <div class="row">
-                <div class="org col-sm-3 col-xs-12 m-t-lg m-l-md">
-                    <div><img class="full-size" src="{{ $fromOrg->logo }}"></div>
-                    <h2 class="elipsis-1">{{ $fromOrg->name }}</h2>
-                    <h4>{{ truncate($fromOrg->descript, 150) }}</h4>
-                    <p class="text-right show-more">
-                        <a href="{{ url('/admin/organisations/view/'. $fromOrg->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                    </p>
-                </div>
-            </div>
         @endif
         @if (isset($resource->name))
             <div class="row">
-                <div class="col-sm-10 col-xs-12 m-t-lg m-l-10">
-                    <div class="articles">
+                @if (isset($fromOrg) && !is_null($fromOrg))
+                    @include('partials.org-info', ['organisation' => $fromOrg])
+                @endif
+                <div class="col-sm-9 col-xs-12">
+                    <div class="articles m-t-lg">
                         <div class="article m-b-md">
                             <div>
                                 <div class="info-bar-sm col-sm-12 col-xs-12 p-l-none m-b-md">
@@ -38,24 +35,11 @@
                                     </ul>
                                 </div>
                             </div>
-                            <div class="col-sm-12 p-l-none art-heading-bar">
-                                <div class="socialPadding">
-                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
-                                </div>
-                                <div class="sendMail p-w-sm">
-                                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
-                                </div>
-                            </div>
                             <div class="col-sm-12 p-l-none">
                                 <h2>{{ $resource->name }}</h2>
                                 <p>{{ $resource->description }}</p>
                                 <div class="col-sm-12 p-l-none">
                                     <div class="tags pull-left">
-                                        <span class="badge badge-pill">ТАГ</span>
-                                        <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                                        <span class="badge badge-pill">ТАГ</span>
                                     </div>
                                 </div>
 

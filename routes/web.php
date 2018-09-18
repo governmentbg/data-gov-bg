@@ -155,7 +155,7 @@ Route::middleware('auth')->group(function() {
         )->name('resourceCreate');
         Route::match(
             ['get', 'post'],
-            '/user/group/dataset/resource/create/{uri}',
+            '/user/group/{grpUri}/dataset/resource/create/{uri}',
             'UserController@groupResourceCreate'
         )->name('groupResourceCreate');
         Route::match(
@@ -181,9 +181,9 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], 'user/settings', 'UserController@settings')->name('settings');
 
         Route::match(['get', 'post'], 'user/groups/datasets/{uri}', 'UserController@groupDatasets');
-        Route::match(['get', 'post'], 'user/groups/dataset/edit/{uri}', 'UserController@groupDatasetEdit');
-        Route::match(['get', 'post'], 'user/groups/dataset/{uri}', 'UserController@groupDatasetView')->name('groupDatasetView');
-        Route::match(['get', 'post'], 'user/groups/resource/{uri}', 'UserController@groupResourceView');
+        Route::match(['get', 'post'], 'user/group/{grpUri}/dataset/edit/{uri}', 'UserController@groupDatasetEdit');
+        Route::match(['get', 'post'], 'user/group/{grpUri}/dataset/{uri}', 'UserController@groupDatasetView')->name('groupDatasetView');
+        Route::match(['get', 'post'], 'user/group/{grpUri}/resource/{uri}', 'UserController@groupResourceView');
 
         Route::match(['get', 'post'], 'user/groups/register', 'UserController@registerGroup');
         Route::get('user/groups/search', 'UserController@searchGroups');
@@ -202,7 +202,7 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], 'user/organisations/search', 'UserController@searchOrg');
         Route::get('user/organisations/view/{uri}', 'UserController@viewOrg')->name('userOrgView');
         Route::match(['get', 'post'], 'user/organisations/edit/{uri}', 'UserController@editOrg');
-        Route::match(['get', 'post'], 'user/organisations/datasets/edit/{uri}', 'UserController@orgDatasetEdit');
+        Route::match(['get', 'post'], 'user/organisation/{orgUri}/datasets/edit/{uri}', 'UserController@orgDatasetEdit');
         Route::get('user/organisations/datasets/search', 'UserController@searchDataset');
 
         Route::match(['get', 'post'], 'user/organisations/members/{uri}', 'UserController@viewOrgMembers')->name('userOrgMembersView');

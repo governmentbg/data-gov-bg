@@ -836,6 +836,8 @@ class UserController extends Controller {
      */
     public function removeDataset($groupId, $uri)
     {
+        $dataset = DataSet::where('uri', $uri)->first();
+
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_ALL,
@@ -1043,8 +1045,10 @@ class UserController extends Controller {
         ]);
     }
 
-    public function groupDatasetCreate(Request $request)
+    public function groupDatasetCreate(Request $request, $uri)
     {
+        $group = Organisation::where('uri', $uri)->first();
+
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_EDIT
@@ -1116,6 +1120,7 @@ class UserController extends Controller {
             'groups'        => $groups,
             'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
+            'groupId'       => $group->id,
         ]);
     }
 
@@ -1733,6 +1738,7 @@ class UserController extends Controller {
 
         $apiKey = \Auth::user()->api_key;
         $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
@@ -1780,6 +1786,7 @@ class UserController extends Controller {
                                     'uri'           => $datasetUri,
                                     'csvData'       => $csvData,
                                     'types'         => $types,
+                                    'reqTypes'      => $reqTypes,
                                     'resourceUri'   => $result->data->uri,
                                 ]);
                         }
@@ -1833,6 +1840,7 @@ class UserController extends Controller {
             'class'     => 'user',
             'uri'       => $datasetUri,
             'types'     => $types,
+            'reqTypes'  => $reqTypes,
             'fields'    => $this->getResourceTransFields()
         ]);
     }
@@ -4609,7 +4617,9 @@ class UserController extends Controller {
                 'datasets'      => [],
                 'activeMenu'    => 'group',
                 'buttons'       => $buttons,
-                'organisation'  => $orgId
+                'organisation'  => $orgId,
+                'uri'           => $uri,
+                'group'         => $groupData,
             ]);
         }
 
@@ -4625,7 +4635,6 @@ class UserController extends Controller {
         ];
 
         $params['criteria']['group_ids'] = [$orgId];
-        $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
         $dataRq = Request::create('/api/listDatasets', 'POST', $params);
         $dataApi = new ApiDataSet($dataRq);
         $datasets = $dataApi->listDatasets($dataRq)->getData();
@@ -4702,7 +4711,9 @@ class UserController extends Controller {
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => $actMenu,
-                'buttons'       => $buttons
+                'buttons'       => $buttons,
+                'uri'           => $uri,
+                'group'         => $groupData
         ]);
     }
 
@@ -4780,7 +4791,7 @@ class UserController extends Controller {
                 $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
 
-            return redirect('/user/groups/datasets');
+            return redirect('/user/groups');
         }
 
         return view(
@@ -5288,7 +5299,7 @@ class UserController extends Controller {
                 return back();
             }
 
-            $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type);
+            $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type, 'group');
 
             $criteria = ['org_id' => $group->id];
 

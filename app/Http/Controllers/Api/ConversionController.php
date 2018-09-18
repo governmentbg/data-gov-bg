@@ -268,8 +268,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $temp = fopen(sys_get_temp_dir() .'/'. uniqid(), 'w+');
-                $path = stream_get_meta_data($temp)['uri'];
+                $path = storage_path('app/pdf-resource-'. uniqid());
+
+                $temp = fopen($path, 'w+');
 
                 file_put_contents($path, base64_decode($post['data']));
 

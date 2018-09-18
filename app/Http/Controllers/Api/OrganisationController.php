@@ -748,7 +748,7 @@ class OrganisationController extends ApiController
             }
 
             try {
-                $query = Organisation::with('CustomSetting')->with('UserToOrgRole')->where('type', '!=', Organisation::TYPE_GROUP);
+                $query = Organisation::with('CustomSetting')->with('UserToOrgRole')->with('dataSet')->where('type', '!=', Organisation::TYPE_GROUP);
                 $query = $query->whereIn('type', array_flip(Organisation::getPublicTypes()));
 
                 $userId = \Auth::user()->id;
@@ -990,7 +990,7 @@ class OrganisationController extends ApiController
                     $orgKey = 'uri';
                     $orgVal = $post['org_uri'];
                 }
-                $org = Organisation::where($orgKey, $orgVal)
+                $org = Organisation::with('dataSet')->where($orgKey, $orgVal)
                     ->where('type', '!=', Organisation::TYPE_GROUP)
                     ->first();
 

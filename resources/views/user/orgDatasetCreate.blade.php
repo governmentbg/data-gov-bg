@@ -86,10 +86,26 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'organisation'])
+    @if (isset($fromOrg) && !is_null($fromOrg))
+        @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
+        <div class="row">
+            <div class="org col-sm-3 col-xs-12 m-t-lg m-l-md">
+                <div><img class="full-size" src="{{ $fromOrg->logo }}"></div>
+                <h2 class="elipsis-1">{{ $fromOrg->name }}</h2>
+                <h4>{{ truncate($fromOrg->descript, 150) }}</h4>
+                <p class="text-right show-more">
+                    <a href="{{ url('/admin/organisations/view/'. $fromOrg->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                </p>
+            </div>
+        </div>
+    @endif
     <div class="col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST">
             {{ csrf_field() }}
+            @if (isset($fromOrg) && !is_null($fromOrg))
+                <input type="hidden" name="org_uri" value="{{ $fromOrg->uri }}">
+            @endif
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
                 @if($buttons['addResource'])
@@ -185,7 +201,11 @@
                         @foreach ($organisations as $id => $org)
                             <option
                                 value="{{ $id }}"
-                                {{ $id == old('org_id') ? 'selected' : '' }}
+                                @if ($id == old('org_id'))
+                                    {{ 'selected' }}
+                                @elseif (!is_null($fromOrg) && $fromOrg->id == $id )
+                                    {{ 'selected' }}
+                                @endif
                             >{{ $org }}</option>
                         @endforeach
                     </select>

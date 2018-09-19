@@ -126,6 +126,12 @@
                                 href="{{ url('/admin/pages/list') }}"
                             >{{ ultrans('custom.pages') }}</a>
                         </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'news' ? 'active' : '' }}"
+                                href="{{ url('/admin/news/list') }}"
+                            >{{ ultrans('custom.news') }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>

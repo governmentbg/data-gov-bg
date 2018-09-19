@@ -7,11 +7,6 @@
         @else
             @include('partials.user-nav-bar', ['view' => 'organisation'])
         @endif
-        @if (isset($dataset))
-            <div class="sidenav text-center">
-                <div class="profile-name m-l-lg">{{ $dataset }}</div>
-            </div>
-        @endif
         @if (isset($fromOrg) && !is_null($fromOrg))
             @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
         @endif
@@ -26,7 +21,8 @@
                             <div>
                                 <div class="info-bar-sm col-sm-12 col-xs-12 p-l-none m-b-md">
                                     <ul class="p-l-none">
-                                        <li>{{ __('custom.contact_support_name') }}:</li>
+                                        <li>{{ uctrans('custom.dataset') }}: {{ isset($dataset) ? $dataset : '' }}</li>
+                                        <li>{{ __('custom.contact_support_name') }}: {{ isset($supportName) ? $supportName : '' }}</li>
                                         <li>{{ utrans('custom.version') }}:&nbsp;{{ $resource->version }}</li>
                                         <li>{{ __('custom.created_at') }}: {{ $resource->created_at }}</li>
                                         <li>{{ __('custom.created_by') }}: {{ $resource->created_by }}</li>
@@ -75,18 +71,26 @@
                                     >{{ __('custom.download') }}</a>
                                 </div>
                             @endif
-                            @if ($buttons['deleteResource'])
-                                <div class="{{ !empty($data) ? 'col-xs-2' : 'col-xs-12' }} m-t-md p-l-r-none text-right">
-                                    <form method="POST">
-                                        {{ csrf_field() }}
-                                        <button
-                                            name="delete"
-                                            class="badge badge-pill m-b-sm del-btn"
-                                            data-confirm="{{ __('custom.remove_data') }}"
-                                        >{{ uctrans('custom.remove') }}</button>
-                                    </form>
-                                </div>
-                            @endif
+                            <div class="{{ !empty($data) ? 'col-xs-2' : 'col-xs-12' }} m-t-lg p-l-r-none text-right">
+                                @if ($buttons['editResource'])
+                                    <a
+                                        class="badge badge-pill m-b-sm m-r-sm"
+                                        href="{{ url(\Auth::user()->is_admin
+                                            ? '/admin/resource/edit/'. $resource->uri .'/'. $fromOrg->uri
+                                            : '/user/resource/edit/'. $resource->uri .'/'. $fromOrg->uri) }}"
+                                    >{{ uctrans('custom.edit') }}</a>
+                                @endif
+                                @if ($buttons['deleteResource'])
+                                        <form method="POST" class="inline-block">
+                                            {{ csrf_field() }}
+                                            <button
+                                                name="delete"
+                                                class="badge badge-pill m-b-sm del-btn"
+                                                data-confirm="{{ __('custom.remove_data') }}"
+                                            >{{ uctrans('custom.remove') }}</button>
+                                        </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

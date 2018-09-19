@@ -1,4 +1,16 @@
-@php $root = empty($admin) ? 'user' : 'admin'; @endphp
+@php
+    $root = empty($admin) ? 'user' : 'admin';
+
+    if (empty($parent)):
+        $uri = '/'. $root .'/resource/view/'. $resource->uri;
+    else:
+        if ($parent->type == App\Organisation::TYPE_GROUP):
+            $uri = '/user/group/'. $parent->uri .'/resource/'. $resource->uri;
+        else:
+            $uri = '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $parent->uri;
+        endif;
+    endif;
+@endphp
 <div class="col-xs-12 m-t-lg">
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg">
@@ -58,7 +70,7 @@
             <a
                 type="button"
                 class="btn btn-primary"
-                href="{{ url('/'. $root .'/resource/view/'. $resource->uri) }}"
+                href="{{ url($uri) }}"
             >{{ uctrans('custom.preview') }}</a>
             <button name="ready_metadata" type="submit" class="btn btn-custom">{{ uctrans('custom.save') }}</button>
         </div>

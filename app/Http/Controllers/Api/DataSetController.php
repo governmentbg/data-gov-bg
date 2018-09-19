@@ -559,7 +559,7 @@ class DataSetController extends ApiController
         if (!$validator->fails()) {
 
             try {
-                $query = DataSet::select();
+                $query = DataSet::select()->with('resource');
 
                 if (isset($post['api_key'])) {
                     $user = \App\User::where('api_key', $post['api_key'])->first();
@@ -691,6 +691,9 @@ class DataSetController extends ApiController
 
                     if ($hasRes) {
                         foreach ($set->resource as $resourse) {
+                            $result['resource'][$resourse->uri] = $resourse;
+                            $result['resource'][$resourse->uri]['name'] = $resourse->name;
+
                             if (!empty($resourse->file_format)) {
                                 $formats[$formatList[$resourse->file_format]] = $formatList[$resourse->file_format];
                             }

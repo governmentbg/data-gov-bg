@@ -7,6 +7,10 @@
         <h4>{!! nl2br(truncate(e($organisation->description), 150)) !!}</h4>
     @endif
     <p class="text-right show-more">
-        <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+        @if (\Auth::user()->is_admin)
+            <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+        @else
+            <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+        @endif
     </p>
 </div>

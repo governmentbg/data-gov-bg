@@ -172,8 +172,8 @@ Route::middleware('auth')->group(function() {
 
         Route::match(['get', 'post'], 'user/resource/view/{uri}', 'UserController@resourceView')->name('resourceView');
         Route::match(['get', 'post'], 'admin/resource/view/{uri}', 'Admin\DataSetController@resourceView');
-        Route::match(['get', 'post'], 'user/resource/edit/{uri}', 'UserController@resourceEditMeta');
-        Route::match(['get', 'post'], 'admin/resource/edit/{uri}', 'Admin\DataSetController@resourceEditMeta');
+        Route::match(['get', 'post'], 'user/resource/edit/{uri}/{parentUri?}', 'UserController@resourceEditMeta');
+        Route::match(['get', 'post'], 'admin/resource/edit/{uri}/{parentUri?}', 'Admin\DataSetController@resourceEditMeta');
         Route::match(['get', 'post'], 'user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
         Route::match(['get', 'post'], 'importCSV', 'ResourceController@importCsvData');
         Route::match(['get', 'post'], 'importElastic', 'ResourceController@importElasticData');

@@ -485,6 +485,7 @@ class GroupController extends AdminController
     {
         $class = 'user';
         $group = Organisation::where('uri', $uri)->first();
+        $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type, 'group');
         $locale = \LaravelLocalization::getCurrentLocale();
 
         $params = [
@@ -498,8 +499,9 @@ class GroupController extends AdminController
 
         if ($result->success && !empty($result->data)) {
             $params = [
-                'criteria' => [
-                    'group_ids' => [$result->data->id],
+                'api_key'   => \Auth::user()->api_key,
+                'criteria'  => [
+                    'group_ids' => [$group->id],
                     'locale'    => $locale
                 ]
             ];
@@ -509,17 +511,17 @@ class GroupController extends AdminController
             $res = $api->listDataSets($rq)->getData();
 
             $criteria = [
-                'group_ids' => [$result->data->id]
+                'group_ids' => [$group->id]
             ];
 
             $objType = Module::getModules()[Module::GROUPS];
             $actObjData[$objType] = [];
-            $actObjData[$objType][$result->data->id] = [
-                'obj_id'        => $result->data->uri,
-                'obj_name'      => $result->data->name,
+            $actObjData[$objType][$group->id] = [
+                'obj_id'        => $group->uri,
+                'obj_name'      => $group->name,
                 'obj_module'    => Str::lower(utrans('custom.organisations')),
                 'obj_type'      => 'org',
-                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'obj_view'      => '/admin/groups/view/'. $group->uri,
                 'parent_obj_id' => ''
             ];
 
@@ -535,7 +537,7 @@ class GroupController extends AdminController
                         'obj_name'      => $dataset->name,
                         'obj_module'    => Str::lower(__('custom.dataset')),
                         'obj_type'      => 'dataset',
-                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'obj_view'      => '/user/group/'. $group->uri .'/dataset/'. $dataset->uri,
                         'parent_obj_id' => ''
                     ];
 
@@ -547,7 +549,7 @@ class GroupController extends AdminController
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'obj_view'          => '/user/group/'. $group->uri .'/resource/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),
@@ -596,7 +598,7 @@ class GroupController extends AdminController
                 'user/groupChronology',
                 [
                     'class'          => $class,
-                    'organisation'   => $result->data,
+                    'organisation'   => $group,
                     'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
                     'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,

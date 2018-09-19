@@ -543,7 +543,7 @@ class DataSetController extends AdminController
      *
      * @return view - resource edit page
      */
-    public function resourceEditMeta(Request $request, $uri)
+    public function resourceEditMeta(Request $request, $uri, $parentUri = null)
     {
         $rq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $api = new ApiResource($rq);
@@ -563,6 +563,11 @@ class DataSetController extends AdminController
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $uri)->first()->loadTranslations();
+
+        if ($parentUri) {
+            $parent = Organisation::where('uri', $parentUri)->first();
+            $parent->logo = $this->getImageData($parent->logo_data, $parent->logo_mime_type, $parent->type == Organisation::TYPE_GROUP ? 'group' : 'org');
+        }
 
         if ($resource) {
             if ($request->has('ready_metadata')) {
@@ -590,7 +595,7 @@ class DataSetController extends AdminController
                 if ($response->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect(url('/admin/resource/edit/'. $uri));
+                    return back();
                 } else {
                     $request->session()->flash('alert-danger', $response->error->message);
                 }
@@ -605,7 +610,8 @@ class DataSetController extends AdminController
             'uri'       => $uri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'fields'    => $this->getResourceTransFields(),
+            'parent'    => isset($parent) ? $parent : false,
         ]);
     }
 }

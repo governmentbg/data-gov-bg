@@ -116,7 +116,27 @@ class DataSetController extends ApiController
 
         if (empty($errors)) {
             $data = $post['data'];
+            $created_by = null;
+            $updayed_by = null;
             $locale = isset($data['locale']) ? $data['locale'] : null;
+
+            if (isset($data['migrated_data'])) {
+                if (!empty($data['created_by'])) {
+                    $created_by = $data['created_by'];
+                }
+
+                if (!empty($data['updated_by'])) {
+                    $updayed_by = $data['updated_by'];
+                }
+
+                if (!empty($data['status'])) {
+                    $status = $data['status'];
+                }
+
+                if (!empty($data['visibility'])) {
+                    $visibility = $data['visibility'];
+                }
+            }
 
             $dbData = [
                 'uri'               => empty($data['uri']) ? Uuid::generate(4)->string : $data['uri'],
@@ -124,9 +144,9 @@ class DataSetController extends ApiController
                 'descript'          => empty($data['description']) ? null : $this->trans($locale, $data['description']),
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
                 'org_id'            => empty($post['org_id']) ? null : $post['org_id'],
-                'visibility'        => DataSet::VISIBILITY_PRIVATE,
+                'visibility'        => isset($visibility) ? $visibility : DataSet::VISIBILITY_PRIVATE,
                 'version'           => empty($data['version']) ? 1 : $data['version'],
-                'status'            => DataSet::STATUS_DRAFT,
+                'status'            => isset($status) ? $status : DataSet::STATUS_DRAFT,
                 'category_id'       => $data['category_id'],
                 'terms_of_use_id'   => empty($data['terms_of_use_id']) ? null : $data['terms_of_use_id'],
                 'source'            => empty($data['source']) ? null : $data['source'],
@@ -134,6 +154,8 @@ class DataSetController extends ApiController
                 'author_email'      => empty($data['author_email']) ? null : $data['author_email'],
                 'support_name'      => empty($data['support_name']) ? null : $data['support_name'],
                 'support_email'     => empty($data['support_email']) ? null : $data['support_email'],
+                'created_by'        => $created_by,
+                'updated_by'        => $updayed_by
             ];
 
             if (!empty($data['custom_fields'])) {

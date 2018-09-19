@@ -72,7 +72,14 @@ class TermsOfUseController extends ApiController
         $newTerms = new TermsOfUse;
         $newTerms->name = $data['name'];
         $newTerms->descript = $data['description'];
-        unset($data['locale'], $data['name'], $data['description']);
+
+        if (isset($data['migrated_data'])) {
+            if (!empty($data['created_by'])) {
+                $newTerms->created_by = $data['created_by'];
+            }
+        }
+
+        unset($data['locale'], $data['name'], $data['description'], $data['migrated_data']);
         $newTerms->fill($data);
 
         try {

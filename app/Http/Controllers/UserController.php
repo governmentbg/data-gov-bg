@@ -10,6 +10,7 @@ use App\Module;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use App\TermsOfUse;
 use App\UserSetting;
 use App\DataSetGroup;
 use App\Organisation;

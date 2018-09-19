@@ -63,17 +63,14 @@
                     &nbsp;{{ $dataset->support_email }}
                 </p>
             @endif
-            @if (!empty($dataset->descript))
                 <p><strong>{{ __('custom.description') }}:</strong></p>
                 <div class="m-b-sm">
-                    {!! nl2br(e($dataset->descript)) !!}
+                    @if (!empty($dataset->description))
+                        {!! nl2br(e($dataset->description)) !!}
+                    @elseif (!empty($dataset->descript))
+                        {!! nl2br(e($dataset->descript)) !!}
+                    @endif
                 </div>
-            @elseif (!empty($dataset->description))
-                <p><strong>{{ __('custom.description') }}:</strong></p>
-                <div class="m-b-sm">
-                    {!! nl2br(e($dataset->description)) !!}
-                </div>
-            @endif
             @if (!empty($dataset->sla))
                 <p><strong>{{ __('custom.sla_agreement') }}:</strong></p>
                 <div class="m-b-sm">

@@ -54,14 +54,7 @@
                             </ul>
                         </li>
                     </ul>
-                    <div class="org m-t-lg">
-                        <img src="{{ $group->logo }}">
-                        <h2>{{ $group->name }}</h2>
-                        <h4>{{ truncate($group->descript, 150) }}</h4>
-                        <p class="text-right show-more">
-                            <a href="{{ url('/user/groups/view/'. $group->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                        </p>
-                    </div>
+                    @include('partials.group-info', ['group' => $group])
                 </div>
                 <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
                     <button

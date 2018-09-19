@@ -675,3 +675,30 @@ textarea {
     width: 100% !important;
     height: 100% !important;
 }
+
+.note-btn-group {
+    button {
+        &:not(.note-color-btn) {
+            color: #636b6f !important;
+            background-color: #fff !important;
+            border-color: #ccc !important;
+            &:hover {
+                color: #636b6f !important;
+            }
+        }
+    }
+}
+
+.input-group {
+    .note-editor {
+        margin-bottom: 0px !important;
+    }
+}
+
+.select2-container {
+    width: 100% !important;
+}
+
+.page-cont {
+    word-break: break-all;
+}

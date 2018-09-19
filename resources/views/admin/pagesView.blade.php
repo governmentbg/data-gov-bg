@@ -58,7 +58,7 @@
                                     <div>{{ __('custom.to') .': '. $page->valid_to }}</div>
                                 </div>
                             </div>
-                            <div class="form-group row m-b-lg m-t-md">
+                            <div class="form-group row m-b-lg m-t-md hidden">
                                 <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.short_txt') }}</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $page->abstract }}</div>
@@ -67,7 +67,7 @@
                             <div class="form-group row m-b-lg m-t-md">
                                 <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.content') }}</label>
                                 <div class="col-sm-6 col-xs-12">
-                                    <div>{{ $page->body }}</div>
+                                    <div class="page-cont">{!! $page->body !!}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">

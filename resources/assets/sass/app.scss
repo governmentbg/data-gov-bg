@@ -49,3 +49,8 @@
 
 // Data tables
 @import 'datatables';
+
+// Summernote wysiwyg editor
+@import 'node_modules/summernote/src/less/summernote';
+@import 'node_modules/summernote/src/less/summernote-bs4';
+@import 'node_modules/summernote/src/less/elements';

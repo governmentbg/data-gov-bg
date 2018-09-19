@@ -10,13 +10,13 @@
                             href="{{
                                     !in_array($organisation->id, $getParams['org'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['org', 'page']),
                                                 ['org' => array_merge([$organisation->id], $getParams['org'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['org', 'page']),
                                                 ['org' => array_diff($getParams['org'], [$organisation->id])]
                                             )
@@ -43,13 +43,13 @@
                         href="{{
                                 !isset(app('request')->input()['org_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['org_limit']),
                                         ['org_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['org_limit']),
                                         []
                                     )
@@ -70,13 +70,13 @@
                             href="{{
                                     !in_array($user->id, $getParams['user'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['user', 'page']),
                                                 ['user' => array_merge([$user->id], $getParams['user'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['user', 'page']),
                                                 ['user' => array_diff($getParams['user'], [$user->id])]
                                             )
@@ -104,13 +104,13 @@
                         href="{{
                                 !isset(app('request')->input()['user_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['user_limit']),
                                         ['user_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['user_limit']),
                                         []
                                     )
@@ -131,13 +131,13 @@
                             href="{{
                                     !in_array($group->id, $getParams['group'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['group', 'page']),
                                                 ['group' => array_merge([$group->id], $getParams['group'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['group', 'page']),
                                                 ['group' => array_diff($getParams['group'], [$group->id])]
                                             )
@@ -164,13 +164,13 @@
                         href="{{
                                 !isset(app('request')->input()['group_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['group_limit']),
                                         ['group_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['group_limit']),
                                         []
                                     )
@@ -191,13 +191,13 @@
                             href="{{
                                     !in_array($category->id, $getParams['category'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['category', 'page']),
                                                 ['category' => array_merge([$category->id], $getParams['category'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['category', 'page']),
                                                 ['category' => array_diff($getParams['category'], [$category->id])]
                                             )
@@ -224,13 +224,13 @@
                         href="{{
                                 !isset(app('request')->input()['category_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['category_limit']),
                                         ['category_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['category_limit']),
                                         []
                                     )
@@ -251,13 +251,13 @@
                             href="{{
                                     !in_array($tag->id, $getParams['tag'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['tag', 'page']),
                                                 ['tag' => array_merge([$tag->id], $getParams['tag'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['tag', 'page']),
                                                 ['tag' => array_diff($getParams['tag'], [$tag->id])]
                                             )
@@ -284,13 +284,13 @@
                         href="{{
                                 !isset(app('request')->input()['tag_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['tag_limit']),
                                         ['tag_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['tag_limit']),
                                         []
                                     )
@@ -311,13 +311,13 @@
                             href="{{
                                     !in_array(strtolower($format->format), $getParams['format'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['format', 'page']),
                                                 ['format' => array_merge([strtolower($format->format)], $getParams['format'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['format', 'page']),
                                                 ['format' => array_diff($getParams['format'], [strtolower($format->format)])]
                                             )
@@ -344,13 +344,13 @@
                         href="{{
                                 !isset(app('request')->input()['format_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['format_limit']),
                                         ['format_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['format_limit']),
                                         []
                                     )
@@ -375,13 +375,13 @@
                             href="{{
                                     !in_array($termOfUse->id, $getParams['license'])
                                         ? action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['license', 'page']),
                                                 ['license' => array_merge([$termOfUse->id], $getParams['license'])]
                                             )
                                         )
                                         : action(
-                                            'DataController@list', array_merge(
+                                            'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['license', 'page']),
                                                 ['license' => array_diff($getParams['license'], [$termOfUse->id])]
                                             )
@@ -408,13 +408,13 @@
                         href="{{
                                 !isset(app('request')->input()['license_limit'])
                                 ? action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['license_limit']),
                                         ['license_limit' => 0]
                                     )
                                 )
                                 : action(
-                                    'DataController@list', array_merge(
+                                    'DataController@'. $action, array_merge(
                                         array_except(app('request')->input(), ['license_limit']),
                                         []
                                     )

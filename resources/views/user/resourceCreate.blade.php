@@ -3,7 +3,11 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'datasets'])
+    @if (Auth::user()->is_admin)
+        @include('partials.admin-nav-bar', ['view' => 'group'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'group'])
+    @endif
     @if (isset($fromOrg) && !is_null($fromOrg))
         @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
         @if (isset($dataSetName))
@@ -12,16 +16,21 @@
             </div>
         @endif
         <div class="row">
-            <div class="org col-sm-3 col-xs-12 m-t-lg m-l-md">
-                <div><img class="full-size" src="{{ $fromOrg->logo }}"></div>
-                <h2 class="elipsis-1">{{ $fromOrg->name }}</h2>
-                <h4>{{ truncate($fromOrg->descript, 150) }}</h4>
-                <p class="text-right show-more">
-                    <a href="{{ url('/admin/organisations/view/'. $fromOrg->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                </p>
+            @include('partials.org-info', ['organisation' => $fromOrg])
+            <div class="col-sm-9 col-xs-12">
+                @include('components.datasets.resource_create')
+            </div>
+        </div>
+    @elseif (isset($group))
+        @include('partials.group-nav-bar', ['view' => 'datasets', 'group' => $group])
+        <div class="row">
+            <div class="col-sm-3 col-xs-12">
+                @include('partials.group-info', ['group' => $group])
+            </div>
+            <div class="col-sm-9 col-xs-12">
+                @include('components.datasets.resource_create')
             </div>
         </div>
     @endif
-    @include('components.datasets.resource_create')
 </div>
 @endsection

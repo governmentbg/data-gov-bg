@@ -6,14 +6,7 @@
     </div>
 @endif
 <div class="row">
-    <div class="org col-sm-3 col-xs-12 m-t-lg">
-        <div><img class="full-size" src="{{ $organisation->logo }}"></div>
-        <h2 class="elipsis-1">{{ $organisation->name }}</h2>
-        <h4>{{ truncate($organisation->description, 150) }}</h4>
-        <p class="text-right show-more">
-            <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-        </p>
-    </div>
+    @include('partials.org-info', ['organisation' => $organisation])
     <div class="col-sm-9 col-xs-12 p-md">
         @if (count($chronology))
             <div class="col-xs-12 p-sm">

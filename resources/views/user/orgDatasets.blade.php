@@ -45,7 +45,7 @@
                                                 <h2 class="m-t-xs">{{ $set->name }}</h2>
                                             </a>
                                             <div class="desc">
-                                                {!! nl2br(truncate($set->descript, 150)) !!}
+                                                {!! nl2br(truncate(e($set->descript), 150)) !!}
                                             </div>
                                             <div class="col-sm-12 p-l-none btns">
                                                 <div class="pull-left row">

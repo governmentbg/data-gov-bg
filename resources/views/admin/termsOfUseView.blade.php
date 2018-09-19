@@ -21,7 +21,7 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.description') }}</label>
                             <div class="col-sm-6 col-xs-12">
-                                <div>{!! nl2br($term->descript) !!}</div>
+                                <div>{!! nl2br(e($term->descript)) !!}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">

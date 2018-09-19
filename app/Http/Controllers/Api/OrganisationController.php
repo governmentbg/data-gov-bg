@@ -1440,7 +1440,7 @@ class OrganisationController extends ApiController
 
                 try {
                     $newGroup->name = $this->trans($post['locale'], $post['name']);
-                    $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
+                    $newGroup->descript = !empty($post['description']) ? $this->trans($post['locale'], $post['description']) : null;
                     $newGroup->uri = !empty($post['uri'])
                         ? $post['uri']
                         : $this->generateOrgUri();

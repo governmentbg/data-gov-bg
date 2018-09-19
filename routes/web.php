@@ -298,7 +298,7 @@ Route::get('terms', function () {
     return view('terms', ['class' => 'index']);
 });
 
-Route::match(['get', 'post'], 'data', 'DataController@list');
+Route::match(['get', 'post'], 'data', 'DataController@list')->name('data');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
 Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView');
 Route::post('data/resource/sendSignal', 'DataController@sendSignal');
@@ -335,10 +335,6 @@ Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
 Route::match(['get', 'post'], 'news', 'NewsController@listNews');
 Route::match(['get', 'post'], 'news/search', 'NewsController@searchNews');
 Route::match(['get', 'post'], 'news/view/{id}', 'NewsController@viewNews');
-
-Route::get('news/view', function () {
-    return view('news/view', ['class' => 'news']);
-});
 
 Route::match(['get', 'post'], 'document', 'DocumentController@listDocuments');
 Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocuments');

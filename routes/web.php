@@ -254,6 +254,12 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/pages/delete/{id}', 'Admin\PageController@delete');
         Route::match(['get', 'post'], '/admin/pages/edit/{id}', 'Admin\PageController@edit');
         Route::match(['get', 'post'], '/admin/pages/add', 'Admin\PageController@add');
+
+        Route::match(['get', 'post'], '/admin/news/list', 'Admin\NewsController@list');
+        Route::match(['get', 'post'], '/admin/news/view/{id}', 'Admin\NewsController@view');
+        Route::match(['get', 'post'], '/admin/news/delete/{id}', 'Admin\NewsController@delete');
+        Route::match(['get', 'post'], '/admin/news/edit/{id}', 'Admin\NewsController@edit');
+        Route::match(['get', 'post'], '/admin/news/add', 'Admin\NewsController@add');
     });
 });
 

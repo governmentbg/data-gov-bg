@@ -61,7 +61,7 @@
                         <h2>{{ $dataset->name }}</h2>
                         @if (!empty($dataset->description))
                             <p><strong>{{ __('custom.description') }}:</strong></p>
-                            <p>{{ $dataset->description }}</p>
+                            <p>{!! nl2br($dataset->description) !!}</p>
                         @endif
                         @if (!empty($dataset->terms_of_use_id))
                             <p>
@@ -133,7 +133,7 @@
                             <p>
                                 <strong>{{ __('custom.sla_agreement') }}:&nbsp;</strong>
                             </p>
-                            <div class="m-b-sm">{{ $dataset->sla }}</div>
+                            <div class="m-b-sm"><p>{!! nl2br($dataset->sla) !!}</p></div>
                         @endif
                         <div class="info-bar-sm col-sm-12 col-xs-12 p-l-none">
                             <ul class="p-l-none p-h-sm">

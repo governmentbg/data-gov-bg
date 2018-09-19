@@ -13,7 +13,7 @@
                             <div class="m-b-lg">
                                 <div class="col-sm-12 p-l-none article-underline">
                                     <h2 class="m-t-xs">{{ $document->name }}</h2>
-                                    <p>{{ $document->description }}</p>
+                                    <p>{!! nl2br($document->description) !!}</p>
                                     <p>{{ $document->filename }}</p>
                                 </div>
                             </div>

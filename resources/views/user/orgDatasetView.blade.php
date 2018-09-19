@@ -74,11 +74,11 @@
                     </p>
                     <p><strong>{{ __('custom.description') }}:</strong></p>
                     <div class="m-b-sm">
-                        {{ $dataset->description }}
+                        {!! nl2br(e($dataset->description)) !!}
                     </div>
                     <p><strong>{{ __('custom.sla_agreement') }}:</strong></p>
                     <div class="m-b-sm">
-                        {{ $dataset->sla }}
+                        {!! nl2br(e($dataset->sla)) !!}
                     </div>
                     @if (
                         isset($dataset->custom_settings[0])

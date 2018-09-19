@@ -42,15 +42,15 @@
                                         <h3>{{ $group->name }}</h3>
                                         @if (!empty($group->description))
                                             <p><b>{{ utrans('custom.description') }}:</b></p>
-                                            <p>{{ $group->description }}</p>
+                                            <p>{!! nl2br(e($group->description)) !!}</p>
                                         @endif
                                         @if (!empty($group->activity_info))
                                             <p><b>{{ utrans('custom.activity') }}:</b></p>
-                                            <p>{{ $group->activity_info }}</p>
+                                            <p>{!! nl2br(e($group->activity_info)) !!}</p>
                                         @endif
                                         @if (!empty($group->contacts))
                                             <p><b>{{ utrans('custom.contacts') }}:</b></p>
-                                            <p>{{ $group->contacts }}</p>
+                                            <p>{!! nl2br(e($group->contacts)) !!}</p>
                                         @endif
                                         @if (
                                             isset($group->custom_fields[0])

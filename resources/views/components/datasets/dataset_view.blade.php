@@ -68,7 +68,7 @@
                 <div class="m-b-sm">
                     {!! nl2br(e($dataset->descript)) !!}
                 </div>
-            @esleif (!empty($dataset->description))
+            @elseif (!empty($dataset->description))
                 <p><strong>{{ __('custom.description') }}:</strong></p>
                 <div class="m-b-sm">
                     {!! nl2br(e($dataset->description)) !!}

@@ -12,7 +12,11 @@ class InsertBaseRightsInRights extends Migration
     public function __construct()
     {
         $organisation = Role::where('default_org_admin', 1)->first();
+        $organisationModerator = Role::where('name', 'Редактор на организация')->first();
+        $organisationMember = Role::where('name', 'Член на организация')->first();
         $group = Role::where('default_group_admin', 1)->first();
+        $groupModerator = Role::where('name', 'Редактор на група')->first();
+        $groupMember = Role::where('name', 'Член на група')->first();
         $user = Role::where('default_user', 1)->first();
 
         $this->rights = [
@@ -49,6 +53,70 @@ class InsertBaseRightsInRights extends Migration
                 ],
                 [
                     'module_name'       => Module::ACTIONSHISTORY,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+            ],
+            $organisationModerator->id => [
+                [
+                    'module_name'       => Module::ORGANISATIONS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::DATA_SETS,
+                    'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::RESOURCES,
+                    'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::ACTIONSHISTORY,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::CUSTOM_SETTINGS,
+                    'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+            ],
+            $organisationMember->id => [
+                [
+                    'module_name'       => Module::ORGANISATIONS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::DATA_SETS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::RESOURCES,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::ACTIONSHISTORY,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::CUSTOM_SETTINGS,
                     'right'             => RoleRight::RIGHT_VIEW,
                     'limit_to_own_data' => 0,
                     'api'               => 0,
@@ -100,6 +168,88 @@ class InsertBaseRightsInRights extends Migration
                 [
                     'module_name'       => Module::CUSTOM_SETTINGS,
                     'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::ACTIONSHISTORY,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+            ],
+            $groupModerator->id => [
+                [
+                    'module_name'       => Module::GROUPS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::DATA_SETS,
+                    'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::RESOURCES,
+                    'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::USERS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::ACTIONSHISTORY,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::TERMS_OF_USE,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::TERMS_OF_USE_REQUESTS,
+                    'right'             => RoleRight::RIGHT_EDIT,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::CUSTOM_SETTINGS,
+                    'right'             => RoleRight::RIGHT_ALL,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+            ],
+            $groupMember->id => [
+                [
+                    'module_name'       => Module::GROUPS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::DATA_SETS,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::RESOURCES,
+                    'right'             => RoleRight::RIGHT_VIEW,
+                    'limit_to_own_data' => 0,
+                    'api'               => 0,
+                ],
+                [
+                    'module_name'       => Module::USERS,
+                    'right'             => RoleRight::RIGHT_VIEW,
                     'limit_to_own_data' => 0,
                     'api'               => 0,
                 ],
@@ -207,7 +357,7 @@ class InsertBaseRightsInRights extends Migration
                 $rightData = array_merge(['role_id' => $roleId], $rightData);
 
                 if (RoleRight::where($rightData)->count()) {
-                    RoleRight::delete($rightData);
+                    RoleRight::where($rightData)->get()->delete();
                 }
             }
         }

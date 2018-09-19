@@ -104,6 +104,11 @@ class OrganisationController extends ApiController
             } catch (\Exception $ex) {
                 $imageError = true;
 
+                if (isset($data['migrated_data'])) {
+                    $imageError = false;
+                    $data['logo'] = null;
+                }
+
                 $validator->errors()->add('logo', $this->getImageTypeError());
             }
 
@@ -141,6 +146,12 @@ class OrganisationController extends ApiController
                 $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
                 $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
                 $organisation->active = isset($data['active']) ? $data['active'] : 0;
+
+                if (isset($data['migrated_data'])) {
+                    if (!empty($data['created_by'])) {
+                        $organisation->created_by = $data['created_by'];
+                    }
+                }
 
                 if (!empty($data['approved'])) {
                     $organisation->approved = $data['approved'];
@@ -1433,6 +1444,12 @@ class OrganisationController extends ApiController
         }
 
         $errors = $validator->errors()->messages();
+
+        if (isset($post['migrated_data'])) {
+            if (!empty($post['created_by'])) {
+                $newGroup->created_by = $post['created_by'];
+            }
+        }
 
         if (!$validator->fails()) {
 

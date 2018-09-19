@@ -71,7 +71,17 @@ class TagController extends ApiController
             }
 
             try {
-                $record = Tags::create(['name' => $post['data']['name']]);
+                //prepare model data
+                $newTag = [];
+                $newTag['name'] = $post['data']['name'];
+
+                if (isset($post['data']['migrated_data'])) {
+                    if (!empty($post['data']['created_by'])) {
+                        $newTag['created_by'] = $post['data']['created_by'];
+                    }
+                }
+
+                $record = Tags::create($newTag);
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::TAGS),

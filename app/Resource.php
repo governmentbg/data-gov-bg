@@ -21,6 +21,7 @@ class Resource extends Model implements TranslatableInterface
     const TYPE_FILE = 1;
     const TYPE_HYPERLINK = 2;
     const TYPE_API = 3;
+    const TYPE_MIGRATED = 4;
 
     const FORMAT_CSV = 1;
     const FORMAT_JSON = 2;
@@ -46,6 +47,7 @@ class Resource extends Model implements TranslatableInterface
             self::TYPE_FILE         => uctrans('custom.file'),
             self::TYPE_HYPERLINK    => __('custom.hyperlink'),
             self::TYPE_API          => __('custom.api'),
+            self::TYPE_MIGRATED     => __('custom.mifrared'),
         ];
     }
 
@@ -116,5 +118,12 @@ class Resource extends Model implements TranslatableInterface
     public function searchableAs()
     {
         return 'resources';
+    }
+
+    public static function getAllowedFormats()
+    {
+        return [
+            'CSV', 'JSON', 'KML','RDF','WMS','XML','XLSX', 'XLS', 'TXT',
+        ];
     }
 }

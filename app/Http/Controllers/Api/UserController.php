@@ -466,6 +466,14 @@ class UserController extends ApiController
             try {
                 DB::beginTransaction();
 
+                $created_by = null;
+
+                if (isset($request->data['migrated_data'])) {
+                    if (!empty($request->data['created_by'])) {
+                        $created_by= $request->data['created_by'];
+                    }
+                }
+
                 $apiKey = Uuid::generate(4)->string;
                 $user = new User;
 
@@ -487,6 +495,7 @@ class UserController extends ApiController
                 $user->api_key = $apiKey;
                 $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
                 $user->remember_token = null;
+                $user->created_by = $created_by;
 
                 $registered = $user->save();
 
@@ -501,6 +510,7 @@ class UserController extends ApiController
 
                 $userSettings->user_id = $user->id;
                 $userSettings->locale = $userLocale;
+                $userSettings->created_by = $created_by;
 
                 if (
                     isset($data['user_settings']['newsletter_digest'])

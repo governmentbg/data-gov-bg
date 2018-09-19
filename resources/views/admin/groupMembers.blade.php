@@ -67,7 +67,7 @@
                     <div class="org m-t-lg">
                         <img src="{{ $group->logo }}">
                         <h2>{{ $group->name }}</h2>
-                        <h4>{!! nl2br(truncate(e($group->descript, 150))) !!}</h4>
+                        <h4>{!! nl2br(truncate(e($group->descript), 150)) !!}</h4>
                         <p class="text-right show-more">
                             <a href="{{ url('/admin/groups/view/'. $group->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                         </p>

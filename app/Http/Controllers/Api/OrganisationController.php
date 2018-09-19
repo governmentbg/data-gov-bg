@@ -14,6 +14,7 @@ use App\CustomSetting;
 use App\UserToOrgRole;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -2515,5 +2516,44 @@ class OrganisationController extends ApiController
         }
 
         return $this->errorResponse(__('custom.list_data_groups_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Get most active organisation
+     *
+     * @param string criteria[locale] - optional
+     *
+     * @return json response
+     */
+    public function getMostActiveOrganisation(Request $request)
+    {
+        $validator = \Validator::make($request->all(), ['locale' => 'nullable|string|max:5']);
+
+        if (!$validator->fails()) {
+            try {
+                $result = DB::table('actions_history')
+                    ->select('organisations.uri', DB::raw('count(organisations.id) as count'))
+                    ->leftJoin('user_to_org_role', 'user_to_org_role.user_id', '=', 'actions_history.user_id')
+                    ->leftJoin('organisations', 'organisations.id', '=', 'user_to_org_role.org_id')
+                    ->where('organisations.type', '!=', Organisation::TYPE_GROUP)
+                    ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
+                    ->groupBy('organisations.id')
+                    ->orderBy('count', 'desc')
+                    ->limit(1)
+                    ->first();
+
+                if (!empty($result)) {
+                    $result->name = Organisation::where('uri', $result->uri)->first()->name;
+                } else {
+                    $result = ['uri' => null, 'name' => __('custom.missing_most_active_org'), 'count' => 0];
+                }
+
+                return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.get_most_active_org_fail'), $validator->errors()->messages());
     }
 }

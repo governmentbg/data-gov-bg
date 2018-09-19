@@ -127,6 +127,12 @@ class ResourceController extends ApiController
                     'is_reported'       => 0,
                 ];
 
+                if (isset($data['migrated_data'])) {
+                    if (!empty($data['created_by'])) {
+                        $dbData['created_by'] = $data['created_by'];
+                    }
+                }
+
                 $resource = Resource::create($dbData);
                 $resource->searchable();
 

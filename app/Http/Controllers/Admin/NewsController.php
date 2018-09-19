@@ -277,9 +277,10 @@ class NewsController extends AdminController
         }
 
         return view(
-            'admin/newsAdd',
-            ['class' => 'user', 'fields' => self::getPageTransFields()]
-        );
+            'admin/newsAdd', [
+                'class' => 'user',
+                'fields' => self::getPageTransFields()
+            ]);
     }
 
     /**

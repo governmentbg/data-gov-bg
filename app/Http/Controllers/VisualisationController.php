@@ -47,7 +47,7 @@ class VisualisationController extends Controller {
                     $data = $resultConvert->data;
                 }
 
-                return view('visualisation/visualisation', [
+                return view('resourceiframe', [
                     'class'         => 'user',
                     'resource'      => $resource,
                     'data'          => $data,

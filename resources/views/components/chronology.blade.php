@@ -6,7 +6,13 @@
     </div>
 @endif
 <div class="row">
-    @include('partials.org-info', ['organisation' => $organisation])
+    @if ($organisation->type == App\Organisation::TYPE_GROUP)
+        <div class="col-sm-3 col-xs-12">
+            @include('partials.group-info', ['group' => $organisation])
+        </div>
+    @else
+        @include('partials.org-info', ['organisation' => $organisation])
+    @endif
     <div class="col-sm-9 col-xs-12 p-md">
         @if (count($chronology))
             <div class="col-xs-12 p-sm">

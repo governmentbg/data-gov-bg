@@ -4,7 +4,6 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'topicsSubtopics'])
-        @include('partials.pagination')
         <div class="col-xs-12 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{ __('custom.main_themes_list') }}</span>
         </div>
@@ -35,6 +34,7 @@
         </div>
         <div class="row m-b-lg">
             @if (count($themes))
+                @include('partials.pagination')
                 <form method="POST" class="form-horizontal">
                     {{ csrf_field() }}
                     <div class="col-xs-12 m-l-sm">

@@ -18,7 +18,7 @@
 
                                 <div class="col-xs-12 m-t-sm p-l-none text-right">
                                 @if (\App\Role::isAdmin())
-                                    <span class="badge badge-pill"><a href="#">{{ uctrans('custom.edit') }}</a></span>
+                                    <span class="badge badge-pill"><a href="{{ url('/admin/news/edit/' . $newsList->id) }}">{{ uctrans('custom.edit') }}</a></span>
                                 @endif
                                 <span class="badge badge-pill"><a href="#">{{ uctrans('custom.comment') }}</a></span>
                                 </div>

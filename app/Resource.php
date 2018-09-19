@@ -117,4 +117,11 @@ class Resource extends Model implements TranslatableInterface
     {
         return 'resources';
     }
+
+    public static function getAllowedFormats()
+    {
+        return [
+            'CSV', 'JSON', 'KML','RDF','WMS','XML','XLSX', 'XLS', 'TXT',
+        ];
+    }
 }

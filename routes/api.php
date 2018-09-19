@@ -197,6 +197,8 @@ Route::post('listGroups', 'Api\OrganisationController@listGroups');
 Route::post('searchGroups', 'Api\OrganisationController@searchGroups');
 Route::post('listDataOrganisations', 'Api\OrganisationController@listDataOrganisations');
 Route::post('getGroupDetails', 'Api\OrganisationController@getGroupDetails');
+Route::post('getMostActiveOrganisation', 'Api\OrganisationController@getMostActiveOrganisation');
+
 Route::post('getTermsOfUseDetails', 'Api\TermsOfUseController@getTermsOfUseDetails');
 Route::post('listDataTermsOfUse', 'Api\TermsOfUseController@listDataTermsOfUse');
 

@@ -19,7 +19,8 @@
                             <div>
                                 <div class="info-bar-sm col-sm-12 col-xs-12 p-l-none m-b-md">
                                     <ul class="p-l-none">
-                                        <li>{{ __('custom.contact_support_name') }}:</li>
+                                        <li>{{ uctrans('custom.dataset') }}: {{ isset($dataset) ? $dataset : '' }}</li>
+                                        <li>{{ __('custom.contact_support_name') }}: {{ isset($supportName) ? $supportName : '' }}</li>
                                         <li>{{ utrans('custom.version') }}:&nbsp;{{ $resource->version }}</li>
                                         <li>{{ __('custom.created_at') }}: {{ $resource->created_at }}</li>
                                         <li>{{ __('custom.created_by') }}: {{ $resource->created_by }}</li>
@@ -64,18 +65,26 @@
                                     @endif
                                 </div>
                             </div>
-                            @if ($buttons['delResource'])
-                                <div class="col-xs-12 m-t-md p-l-r-none text-right">
-                                    <form method="POST">
-                                        {{ csrf_field() }}
-                                        <button
-                                            name="delete"
-                                            class="badge badge-pill m-b-sm del-btn"
-                                            data-confirm="{{ __('Изтриване на данните?') }}"
-                                        >{{ uctrans('custom.remove') }}</button>
-                                    </form>
-                                </div>
-                            @endif
+                            <div class="col-xs-12 m-t-md p-l-r-none text-right">
+                                @if ($buttons['editResource'])
+                                    <a
+                                        class="badge badge-pill m-b-sm m-r-sm"
+                                        href="{{ url(\Auth::user()->is_admin
+                                            ? '/admin/resource/edit/'. $resource->uri .'/'. $group->uri
+                                            : '/user/resource/edit/'. $resource->uri .'/'. $group->uri) }}"
+                                    >{{ uctrans('custom.edit') }}</a>
+                                @endif
+                                @if ($buttons['delResource'])
+                                        <form method="POST" class="inline-block">
+                                            {{ csrf_field() }}
+                                            <button
+                                                name="delete"
+                                                class="badge badge-pill m-b-sm del-btn"
+                                                data-confirm="{{ __('Изтриване на данните?') }}"
+                                            >{{ uctrans('custom.remove') }}</button>
+                                        </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

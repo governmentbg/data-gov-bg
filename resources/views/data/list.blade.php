@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row">
-        @include('partials.sidebar')
+        @include('partials.sidebar', ['action' => 'list'])
         <div class="col-sm-9 col-xs-12 p-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">
@@ -13,7 +13,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a class="active p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
                                     <li><a href="{{ url('/data/linkedData') }}">{{ __('custom.linked_data') }}</a></li>
-                                    <li><a href="{{ url('/data/reportedList') }}">{{ __('custom.signal_data') }}</a></li>
+                                    <li><a href="{{ url('/data/reported') }}">{{ __('custom.signal_data') }}</a></li>
                                 </ul>
                             </div>
                             <div>
@@ -188,20 +188,18 @@
                                 @endif
                             </div>
                             <div class="follow pull-right">
-                                @auth
-                                    <form method="post">
-                                        {{ csrf_field() }}
-                                        @if (!in_array($dataset->id, $followed))
-                                            <div>
-                                                <button class="badge badge-pill" type="submit" name="follow" value="{{ $dataset->id }}">{{ utrans('custom.follow') }}</button>
-                                            </div>
-                                        @else
-                                            <div>
-                                                <button class="badge badge-pill" type="submit" name="unfollow" value="{{ $dataset->id }}">{{ uctrans('custom.stop_follow') }}</button>
-                                            </div>
-                                        @endif
-                                    </form>
-                                @endauth
+                                <form method="post">
+                                    {{ csrf_field() }}
+                                    @if (isset($buttons[$dataset->id]['follow']) && $buttons[$dataset->id]['follow'])
+                                        <div>
+                                            <button class="badge badge-pill" type="submit" name="follow" value="{{ $dataset->id }}">{{ utrans('custom.follow') }}</button>
+                                        </div>
+                                    @elseif (isset($buttons[$dataset->id]['unfollow']) && $buttons[$dataset->id]['unfollow'])
+                                        <div>
+                                            <button class="badge badge-pill" type="submit" name="unfollow" value="{{ $dataset->id }}">{{ uctrans('custom.stop_follow') }}</button>
+                                        </div>
+                                    @endif
+                                </form>
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">

@@ -38,3 +38,9 @@ require('icheck');
 require('./custom');
 require('./admin');
 require('./user');
+
+// Codemirror
+require('codemirror');
+
+// Summernote wysiwyg editor
+require('summernote');

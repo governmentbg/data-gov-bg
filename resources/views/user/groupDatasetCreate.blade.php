@@ -85,8 +85,16 @@
 
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'group'])
-    <div class="col-xs-12 m-t-lg">
+    @if (Auth::user()->is_admin)
+        @include('partials.admin-nav-bar', ['view' => 'group'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'group'])
+    @endif
+    @include('partials.group-nav-bar', ['view' => 'datasets', 'group' => $group])
+    <div class="col-sm-3 col-xs-12 text-left sidenav">
+        @include('partials.group-info', ['group' => $group])
+    </div>
+    <div class="col-sm-9 col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST">
             {{ csrf_field() }}

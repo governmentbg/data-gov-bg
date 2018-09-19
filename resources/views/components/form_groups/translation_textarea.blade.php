@@ -17,17 +17,29 @@
                 @if (isset($model) && empty(old($field['name'])))
                     <textarea
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
-                        class="input-border-r-12 form-control"
+                        class="
+                            input-border-r-12
+                            form-control
+                            {{ !empty($field['addClass']) ? $field['addClass'] : '' }}
+                        "
                     >{{ $model->translate($active['locale'], $active['locale'])->{ $field['name'] } }}</textarea>
                 @elseif (is_array(old($field['name'])) && !empty(old($field['name'])[$active['locale']]))
                     <textarea
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
-                        class="input-border-r-12 form-control"
+                        class="
+                            input-border-r-12
+                            form-control
+                            {{ !empty($field['addClass']) ? $field['addClass'] : '' }}
+                        "
                     >{{ old($field['name'])[$active['locale']] }}</textarea>
                 @else
                     <textarea
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
-                        class="input-border-r-12 form-control"
+                        class="
+                            input-border-r-12
+                            form-control
+                            {{ !empty($field['addClass']) ? $field['addClass'] : '' }}
+                        "
                     ></textarea>
                 @endif
                 <span class="input-group-addon">

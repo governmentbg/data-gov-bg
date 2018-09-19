@@ -128,6 +128,8 @@ class ResourceController extends Controller {
                         'data'      => $content,
                     ];
 
+                    Session::forget('elasticData');
+
                     switch ($extension) {
                         case 'json':
                             Session::put('elasticData', json_decode($content, true));
@@ -137,9 +139,12 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/csv2json', 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->csv2json($reqConvert)->getData();
-                            $elasticData = $resultConvert->data;
-                            Session::put('elasticData', $elasticData);
-                            $data['csvData'] = $elasticData;
+
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['csvData'] = $elasticData;
+                            }
 
                             break;
                         case 'xml':
@@ -151,9 +156,12 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/xml2json', 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->xml2json($reqConvert)->getData(true);
-                            $elasticData = $resultConvert['data'];
-                            Session::put('elasticData', $elasticData);
-                            $data['xmlData'] = $content;
+
+                            if ($resultConvert['success']) {
+                                $elasticData = $resultConvert['data'];
+                                Session::put('elasticData', $elasticData);
+                                $data['xmlData'] = $content;
+                            }
 
                             break;
                         case 'kml':
@@ -161,8 +169,11 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->$method($reqConvert)->getData(true);
-                            $elasticData = $resultConvert['data'];
-                            Session::put('elasticData', $elasticData);
+
+                            if ($resultConvert['success']) {
+                                $elasticData = $resultConvert['data'];
+                                Session::put('elasticData', $elasticData);
+                            }
 
                             break;
                         case 'rdf':
@@ -170,9 +181,12 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->$method($reqConvert)->getData(true);
-                            $elasticData = $resultConvert['data'];
-                            Session::put('elasticData', $elasticData);
-                            $data['xmlData'] = $content;
+
+                            if ($resultConvert['success']) {
+                                $elasticData = $resultConvert['data'];
+                                Session::put('elasticData', $elasticData);
+                                $data['xmlData'] = $content;
+                            }
 
                             break;
                         case 'pdf':
@@ -182,8 +196,11 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->$method($reqConvert)->getData(true);
-                            Session::put('elasticData', ['text' => $resultConvert['data']]);
-                            $data['text'] = $resultConvert['data'];
+
+                            if ($resultConvert['success']) {
+                                Session::put('elasticData', ['text' => $resultConvert['data']]);
+                                $data['text'] = $resultConvert['data'];
+                            }
 
                             break;
                         case 'xls':
@@ -193,8 +210,11 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->$method($reqConvert)->getData(true);
-                            Session::put('elasticData', $resultConvert['data']);
-                            $data['csvData'] = $resultConvert['data'];
+
+                            if ($resultConvert['success']) {
+                                Session::put('elasticData', $resultConvert['data']);
+                                $data['csvData'] = $resultConvert['data'];
+                            }
 
                             break;
                         case 'txt':
@@ -209,9 +229,12 @@ class ResourceController extends Controller {
                             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);
                             $resultConvert = $api->$method($reqConvert)->getData(true);
-                            Session::put('elasticData', ['text' => $resultConvert['data']]);
-                            $data['text'] = $resultConvert['data'];
-                    }
+
+                            if ($resultConvert['success']) {
+                                Session::put('elasticData', ['text' => $resultConvert['data']]);
+                                $data['text'] = $resultConvert['data'];
+                            }
+                        }
                 }
 
                 if (Session::has('elasticData')) {

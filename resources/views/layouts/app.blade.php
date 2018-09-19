@@ -18,6 +18,9 @@
     <link href="{{ asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/nanoscroller.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/summernote/summernote-bs4.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
 </head>
 <body class="theme-{{ $class }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">
@@ -193,7 +196,7 @@
                     <div class="row">
                         <strong>Copyright &copy; 2018 </strong>
                         {{ __('custom.by') }}
-                        <a target="_blank" href="https://opendata.government.bg/"> {{ __('custom.copyright') }}</a>
+                        <a target="_blank" href="http://data.egov.bg/"> {{ __('custom.copyright') }}</a>
                     </div>
                 </div>
             </footer>

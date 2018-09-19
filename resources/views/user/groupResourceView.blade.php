@@ -2,10 +2,18 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.user-nav-bar', ['view' => 'group'])
+        @if (Auth::user()->is_admin)
+            @include('partials.admin-nav-bar', ['view' => 'group'])
+        @else
+            @include('partials.user-nav-bar', ['view' => 'group'])
+        @endif
+        @include('partials.group-nav-bar', ['view' => 'datasets', 'group' => $group])
         @if (isset($resource->name))
-            <div class="row">
-                <div class="col-sm-10 col-xs-12 m-t-lg m-l-10">
+            <div class="row m-t-md">
+                <div class="col-sm-3 col-xs-12 sidenav">
+                    @include('partials.group-info', ['group' => $group])
+                </div>
+                <div class="col-sm-9 col-xs-12">
                     <div class="articles">
                         <div class="article m-b-md">
                             <div>
@@ -20,24 +28,11 @@
                                     </ul>
                                 </div>
                             </div>
-                            <div class="col-sm-12 p-l-none art-heading-bar">
-                                <div class="socialPadding">
-                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
-                                </div>
-                                <div class="sendMail p-w-sm">
-                                    <span><a href="#"><i class="fa fa-envelope"></i></a></span>
-                                </div>
-                            </div>
                             <div class="col-sm-12 p-l-none">
                                 <h2>{{ $resource->name }}</h2>
                                 <p>{{ $resource->description }}</p>
                                 <div class="col-sm-12 p-l-none">
                                     <div class="tags pull-left">
-                                        <span class="badge badge-pill">ТАГ</span>
-                                        <span class="badge badge-pill">ДЪЛЪГ ТАГ</span>
-                                        <span class="badge badge-pill">ТАГ</span>
                                     </div>
                                 </div>
 

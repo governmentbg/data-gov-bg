@@ -268,8 +268,11 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $temp = tmpfile();
-                $path = stream_get_meta_data($temp)['uri'];
+                $path = storage_path('app/pdf-resource-'. uniqid());
+
+                touch($path);
+                chmod($path, 0775);
+                $temp = fopen($path, 'w');
 
                 file_put_contents($path, base64_decode($post['data']));
 
@@ -287,11 +290,17 @@ class ConversionController extends ApiController
                 $im->clear();
                 $im->destroy();
 
+                unlink($path);
                 fclose($temp);
 
                 return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+
+                $validator->errors()->add('data', __('custom.no_text_found'));
             } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
+
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
             }
         }
@@ -325,6 +334,10 @@ class ConversionController extends ApiController
                 fclose($temp);
 
                 return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+
+                $validator->errors()->add('data', __('custom.no_text_found'));
             } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'img']));
@@ -550,9 +563,7 @@ class ConversionController extends ApiController
             foreach ($cellIterator as $cell) {
                 $value = trim($cell->getFormattedValue());
 
-                if ($value != '') {
-                    $cells[] = $value;
-                }
+                $cells[] = $value;
             }
 
             if (!empty($cells)) {
@@ -561,6 +572,22 @@ class ConversionController extends ApiController
         }
 
         fclose($temp);
+
+        $rowCount = count($rows);
+
+        foreach ($rows[0] as $cellIndex => $cell) {
+            if ($cell == '') {
+                foreach ($rows as $row) {
+                    if ($row[$cellIndex] != '') {
+                        continue 2;
+                    }
+                }
+
+                foreach ($rows as &$row) {
+                    unset($row[$cellIndex]);
+                }
+            }
+        }
 
         return $rows;
     }

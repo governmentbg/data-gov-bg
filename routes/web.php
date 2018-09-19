@@ -155,7 +155,7 @@ Route::middleware('auth')->group(function() {
         )->name('resourceCreate');
         Route::match(
             ['get', 'post'],
-            '/user/group/dataset/resource/create/{uri}',
+            '/user/group/{grpUri}/dataset/resource/create/{uri}',
             'UserController@groupResourceCreate'
         )->name('groupResourceCreate');
         Route::match(
@@ -181,9 +181,9 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], 'user/settings', 'UserController@settings')->name('settings');
 
         Route::match(['get', 'post'], 'user/groups/datasets/{uri}', 'UserController@groupDatasets');
-        Route::match(['get', 'post'], 'user/groups/dataset/edit/{uri}', 'UserController@groupDatasetEdit');
-        Route::match(['get', 'post'], 'user/groups/dataset/{uri}', 'UserController@groupDatasetView')->name('groupDatasetView');
-        Route::match(['get', 'post'], 'user/groups/resource/{uri}', 'UserController@groupResourceView');
+        Route::match(['get', 'post'], 'user/group/{grpUri}/dataset/edit/{uri}', 'UserController@groupDatasetEdit');
+        Route::match(['get', 'post'], 'user/group/{grpUri}/dataset/{uri}', 'UserController@groupDatasetView')->name('groupDatasetView');
+        Route::match(['get', 'post'], 'user/group/{grpUri}/resource/{uri}', 'UserController@groupResourceView');
 
         Route::match(['get', 'post'], 'user/groups/register', 'UserController@registerGroup');
         Route::get('user/groups/search', 'UserController@searchGroups');
@@ -202,7 +202,7 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], 'user/organisations/search', 'UserController@searchOrg');
         Route::get('user/organisations/view/{uri}', 'UserController@viewOrg')->name('userOrgView');
         Route::match(['get', 'post'], 'user/organisations/edit/{uri}', 'UserController@editOrg');
-        Route::match(['get', 'post'], 'user/organisations/datasets/edit/{uri}', 'UserController@orgDatasetEdit');
+        Route::match(['get', 'post'], 'user/organisation/{orgUri}/datasets/edit/{uri}', 'UserController@orgDatasetEdit');
         Route::get('user/organisations/datasets/search', 'UserController@searchDataset');
 
         Route::match(['get', 'post'], 'user/organisations/members/{uri}', 'UserController@viewOrgMembers')->name('userOrgMembersView');
@@ -295,29 +295,14 @@ Route::get('terms', function () {
 Route::match(['get', 'post'], 'data', 'DataController@list');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
 Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView');
+Route::post('data/resource/sendSignal', 'DataController@sendSignal');
+Route::match(['get', 'post'], 'data/resource/embed/{uri}', 'VisualisationController@resourceEmbed');
 
 Route::match(['get', 'post'], 'data/linkedData', 'DataController@linkedData');
 
-Route::get('data/reportedList', function () {
-    return view('data/reportedList', [
-        'class'     => 'data-attention',
-        'filter'    => 'healthcare',
-        'mainCats'  => [
-            'healthcare',
-            'innovation',
-            'education',
-            'public_sector',
-            'municipalities',
-            'agriculture',
-            'justice',
-            'economy_business',
-        ],
-    ]);
-});
-
-Route::get('data/reportedView', function () {
-    return view('data/reportedView', ['class' => 'data-attention']);
-});
+Route::match(['get', 'post'], 'data/reported', 'DataController@reportedList');
+Route::match(['get', 'post'], 'data/reported/view/{uri}', 'DataController@reportedView');
+Route::match(['get', 'post'], 'data/reported/resourceView/{uri}', 'DataController@reportedResourceView');
 
 Route::match(['get', 'post'], 'organisation', 'OrganisationController@list');
 Route::match(['get', 'post'], 'organisation/profile/{uri}', 'OrganisationController@view');

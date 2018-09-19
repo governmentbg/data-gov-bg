@@ -14,6 +14,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class DataSetController extends AdminController
 {

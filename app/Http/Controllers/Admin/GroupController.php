@@ -379,7 +379,7 @@ class GroupController extends AdminController
                     return back();
                 }
 
-                $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type);
+                $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type, 'group');
 
                 $criteria = ['org_id' => $group->id];
 

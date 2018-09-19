@@ -47,23 +47,19 @@ class PageController extends ApiController
                 'title'               => 'required_with:locale|max:191',
                 'title.bg'            => 'required_without:locale|string|max:191',
                 'title.*'             => 'max:191',
-                'abstract'            => 'required_with:locale|max:8000',
-                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract'            => 'nullable|max:8000',
                 'abstract.*'          => 'max:8000',
                 'body'                => 'required_with:locale|max:8000',
                 'body.bg'             => 'required_without:locale|string|max:8000',
                 'body.*'              => 'max:8000',
-                'head_title'          => 'required_with:locale|max:191',
-                'head_title.bg'       => 'required_without:locale|string|max:191',
+                'head_title'          => 'nullable|max:191',
                 'head_title.*'        => 'max:191',
-                'meta_description'    => 'required_with:locale|max:191',
-                'meta_description.bg' => 'required_without:locale|string|max:191',
+                'meta_description'    => 'nullable|max:191',
                 'meta_description.*'  => 'max:191',
-                'meta_keywords'       => 'required_with:locale|max:191',
-                'meta_keywords.bg'    => 'required_without:locale|string|max:191',
+                'meta_keywords'       => 'nullable|max:191',
                 'meta_keywords.*'     => 'max:191',
                 'forum_link'          => 'nullable|string|max:191',
-                'active'              => 'required|boolean',
+                'active'              => 'nullable|boolean',
                 'valid_from'          => 'nullable|date',
                 'valid_to'            => 'nullable|date',
             ]);
@@ -210,27 +206,23 @@ class PageController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
-                'section_id'          => 'nullable|integer|digits_between:1,10',
+                'section_id'          => 'required|integer|digits_between:1,10',
                 'title'               => 'required_with:locale|max:191',
                 'title.bg'            => 'required_without:locale|string|max:191',
                 'title.*'             => 'max:191',
-                'abstract'            => 'required_with:locale|max:8000',
-                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract'            => 'nullable|max:8000',
                 'abstract.*'          => 'max:8000',
                 'body'                => 'required_with:locale|max:8000',
                 'body.bg'             => 'required_without:locale|string|max:8000',
                 'body.*'              => 'max:8000',
-                'head_title'          => 'required_with:locale|max:191',
-                'head_title.bg'       => 'required_without:locale|string|max:191',
+                'head_title'          => 'nullable|max:191',
                 'head_title.*'        => 'max:191',
-                'meta_description'    => 'required_with:locale|max:191',
-                'meta_description.bg' => 'required_without:locale|string|max:191',
+                'meta_description'    => 'nullable|max:191',
                 'meta_description.*'  => 'max:191',
-                'meta_keywords'       => 'required_with:locale|max:191',
-                'meta_keywords.bg'    => 'required_without:locale|string|max:191',
+                'meta_keywords'       => 'nullable|max:191',
                 'meta_keywords.*'     => 'max:191',
                 'forum_link'          => 'nullable|string|max:191',
-                'active'              => 'required|boolean',
+                'active'              => 'nullable|boolean',
                 'valid_from'          => 'nullable|date',
                 'valid_to'            => 'nullable|date',
             ]);
@@ -290,10 +282,14 @@ class PageController extends ApiController
 
                 if (isset($editData['data']['valid_from'])) {
                     $pageToEdit->valid_from = $editData['data']['valid_from'];
+                } else {
+                    $pageToEdit->valid_from = null;
                 }
 
                 if (isset($editData['data']['valid_to'])) {
                     $pageToEdit->valid_to = $editData['data']['valid_to'];
+                } else {
+                    $pageToEdit->valid_to = null;
                 }
 
                 if (isset($editData['data']['body'])) {

@@ -45,7 +45,7 @@
                                             <span>({{ __('custom.published') }})</span>
                                         @endif
                                         <div class="desc">
-                                            {!! nl2br($set->descript) !!}
+                                            {!! nl2br(e($set->descript)) !!}
                                         </div>
                                         <div class="col-sm-12 p-l-none btns">
                                             <div class="pull-left row">

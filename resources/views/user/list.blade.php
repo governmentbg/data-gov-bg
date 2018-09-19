@@ -40,7 +40,7 @@
                     @foreach ($users as $user)
                         <div class="col-md-4 col-xs-12 user-col">
                             <a href="{{ url('/user/profile/'. $user->id) }}"><h3 class="user-name">{{ $user->username }}</h3></a>
-                            <div class="user-desc">{!! nl2br($user->add_info) !!}</div>
+                            <div class="user-desc">{!! nl2br(e($user->add_info)) !!}</div>
                             <p class="text-right show-more"><a href="{{ url('/user/profile/'. $user->id) }}" class="view-profile">{{ __('custom.see_more') }}</a></p>
                         </div>
                     @endforeach

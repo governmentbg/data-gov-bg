@@ -12,7 +12,7 @@
                                 <div class="col-sm-12 p-l-none article-underline">
                                     <h2 class="m-t-xs">{{$document->name}}</h2>
                                     <p>
-                                        {!! nl2br($document->description) !!}
+                                        {!! nl2br(e($document->description)) !!}
                                     </p>
                                     <div class="col-xs-12 m-t-sm p-l-none text-right">
                                         <span class="badge badge-pill"><button class="badge badge-pill">{{ uctrans('custom.comment') }}</button></span>

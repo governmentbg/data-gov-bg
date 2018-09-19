@@ -42,15 +42,15 @@
                                         <h3>{{ $organisation->name }}</h3>
                                         @if (!empty($organisation->description))
                                             <p><b>{{ utrans('custom.description') }}:</b></p>
-                                            <p>{!! nl2br($organisation->description) !!}</p>
+                                            <p>{!! nl2br(e($organisation->description)) !!}</p>
                                         @endif
                                         @if (!empty($organisation->activity_info))
                                             <p><b>{{ utrans('custom.activity') }}:</b></p>
-                                            <p>{!! nl2br($organisation->activity_info) !!}</p>
+                                            <p>{!! nl2br(e($organisation->activity_info)) !!}</p>
                                         @endif
                                         @if (!empty($organisation->contacts))
                                             <p><b>{{ utrans('custom.contacts') }}:</b></p>
-                                            <p>{!! nl2br($organisation->contacts) !!}</p>
+                                            <p>{!! nl2br(e($organisation->contacts)) !!}</p>
                                         @endif
                                         @if (
                                             isset($organisation->custom_fields[0])

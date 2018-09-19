@@ -712,5 +712,6 @@ return [
     'embed_info' => 'You can copy and paste the embed code into a CMS or blog software that supports raw HTML',
     'news' => 'news',
     'news_preview' => 'News preview',
-    'news_edit' => 'Edit news'
+    'news_edit' => 'Edit news',
+    'news_add' => 'Add news',
 ];

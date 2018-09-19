@@ -23,7 +23,7 @@ class NewsController extends ApiController
      *
      * @param string api_key - required
      * @param array data - required
-     * @param string data[locale] - required
+     * @param string data[locale] - optional
      * @param string data[title] - required
      * @param string data[abstract] -required
      * @param string data[body] - required
@@ -46,17 +46,26 @@ class NewsController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($newsData['data'], [
-                'locale'           => 'required|string|max:5',
-                'title'            => 'required|string|max:191',
-                'abstract'         => 'required|string|max:8000',
-                'body'             => 'required|string|max:8000',
-                'head_title'       => 'nullable|string|max:191',
-                'meta_description' => 'nullable|string|max:8000',
-                'meta_keywords'    => 'nullable|string|max:191',
-                'forum_link'       => 'nullable|string|max:191',
-                'active'           => 'required|boolean',
-                'valid_from'       => 'nullable|date',
-                'valid_to'         => 'nullable|date',
+                'locale'              => 'nullable|string|max:5',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'required_with:locale|max:8000',
+                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'nullable|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'nullable|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'nullable|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'active'              => 'required|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
             ]);
         }
 
@@ -70,11 +79,12 @@ class NewsController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
+            $locale = isset($newsData['data']['locale']) ? $newsData['data']['locale'] : null;
+
             try {
                 DB::beginTransaction();
                 $newNews = new Page;
                 $newNews->type = Page::TYPE_NEWS;
-                $locale = $newsData['data']['locale'];
                 $newNews->title = $this->trans($locale, $newsData['data']['title']);
                 $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
                 $newNews->body = $this->trans($locale, $newsData['data']['body']);
@@ -87,8 +97,8 @@ class NewsController extends ApiController
                     $newNews->meta_descript = $this->trans($locale, $newsData['data']['meta_description']);
                 }
 
-                if (isset($newsData['data']['meta_key_words'])) {
-                    $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_key_words']);
+                if (isset($newsData['data']['meta_keywords'])) {
+                    $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_keywords']);
                 }
 
                 if (isset($newsData['data']['forum_link'])) {
@@ -153,65 +163,38 @@ class NewsController extends ApiController
         $editData = $request->all();
 
         $validator = Validator::make($editData, [
-            'news_id'               => 'required|integer|exists:pages,id|digits_between:1,10',
-            'data'                  => 'required|array',
+            'news_id'   => 'required|integer|exists:pages,id|digits_between:1,10',
+            'data'      => 'required|array',
+            'locale'    => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($editData['data'], [
-                'locale'           => 'nullable|string|max:5',
-                'title'            => 'nullable|string|max:191',
-                'abstract'         => 'nullable|string|max:8000',
-                'body'             => 'nullable|string|max:8000',
-                'head_title'       => 'nullable|string|max:191',
-                'meta_description' => 'nullable|string|max:8000',
-                'meta_key_words'   => 'nullable|string|max:191',
-                'forum_link'       => 'nullable|string|max:191',
-                'active'           => 'nullable|boolean',
-                'valid_from'       => 'nullable|date',
-                'valid_to'         => 'nullable|date',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'required_with:locale|max:8000',
+                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'nullable|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'nullable|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'nullable|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'active'              => 'nullable|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
             ]);
-        }
-
-        if (isset($editData['data']['title'])) {
-            $validator->sometimes('locale', 'required', function ($editData) {
-                return $editData['data']['title'] != '';
-            });
-        }
-
-        if (isset($editData['data']['abstract'])) {
-            $validator->sometimes('locale', 'required', function ($editData) {
-                return $editData['data']['abstract'] != '';
-            });
-        }
-
-        if (isset($editData['data']['body'])) {
-            $validator->sometimes('locale', 'required', function ($editData) {
-                return $editData['data']['body'] != '';
-            });
-        }
-
-        if (isset($editData['data']['head_title'])) {
-            $validator->sometimes('locale', 'required', function ($editData) {
-                return $editData['data']['head_title'] != '';
-            });
-        }
-
-        if (isset($editData['data']['meta_description'])) {
-            $validator->sometimes('locale', 'required', function ($editData) {
-                return $editData['data']['meta_description'] != '';
-            });
-        }
-
-        if (isset($editData['data']['meta_key_words'])) {
-            $validator->sometimes('locale', 'required', function ($editData) {
-                return $editData['data']['meta_key_words'] != '';
-            });
         }
 
         if (!$validator->fails()) {
             try {
-                $locale = $editData['data']['locale'];
+                $locale = isset($newsData['locale']) ? $newsData['locale'] : null;
                 $newsToEdit = Page::find($editData['news_id']);
                 $rightCheck = RoleRight::checkUserRight(
                     Module::NEWS,
@@ -405,13 +388,13 @@ class NewsController extends ApiController
             $filterColumn = 'created_at';
 
             if (!empty($criteria['date_type'])) {
-                if (strtolower($criteria['date_type']) == Page::DATE_TYPE_UPDATED) {
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_UPDATED) {
                     $filterColumn = 'updated_at';
                 }
             }
 
             if (!empty($criteria['date_from'])) {
-                if (strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     $filterColumn = 'valid_from';
                 }
 
@@ -419,7 +402,7 @@ class NewsController extends ApiController
             }
 
             if (!empty($criteria['date_to'])) {
-                if (strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     $filterColumn = 'valid_to';
                 }
 
@@ -467,6 +450,10 @@ class NewsController extends ApiController
                                     ->where('valid_to', '<', date(now()));
                             });
                         }
+                    }
+                } else {
+                    if (isset($criteria['active'])) {
+                        $newsList->where('active', $criteria['active']);
                     }
                 }
             } else if (!\Auth::check()) {

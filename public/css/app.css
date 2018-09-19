@@ -14797,9 +14797,9 @@ textarea {
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -webkit-box-pack: left;
+      -ms-flex-pack: left;
+          justify-content: left;
   max-width: 680px;
   margin: 0 auto;
   font-size: 0;
@@ -14816,7 +14816,8 @@ textarea {
   }
 }
 
-.picks-box a svg {
+.picks-box a svg,
+.picks-box a .home-icon {
   width: 65px;
   height: 65px;
   margin: 0 auto;
@@ -14824,18 +14825,23 @@ textarea {
 }
 
 .picks-box a svg .cls-1,
-.picks-box a svg .cls-2 {
+.picks-box a svg .cls-2,
+.picks-box a .home-icon .cls-1,
+.picks-box a .home-icon .cls-2 {
   -webkit-transition: 0.5s ease-in;
   transition: 0.5s ease-in;
   fill: #c02e54;
 }
 
-.picks-box a svg .cls-1 {
+.picks-box a svg .cls-1,
+.picks-box a .home-icon .cls-1 {
   fill-rule: evenodd;
 }
 
 .picks-box a svg:hover .cls-1,
-.picks-box a svg:hover .cls-2 {
+.picks-box a svg:hover .cls-2,
+.picks-box a .home-icon:hover .cls-1,
+.picks-box a .home-icon:hover .cls-2 {
   -webkit-transition: 0.2s ease-out;
   transition: 0.2s ease-out;
   fill: #12c999;

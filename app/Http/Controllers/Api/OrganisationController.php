@@ -14,6 +14,7 @@ use App\CustomSetting;
 use App\UserToOrgRole;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -103,6 +104,11 @@ class OrganisationController extends ApiController
             } catch (\Exception $ex) {
                 $imageError = true;
 
+                if (isset($data['migrated_data'])) {
+                    $imageError = false;
+                    $data['logo'] = null;
+                }
+
                 $validator->errors()->add('logo', $this->getImageTypeError());
             }
 
@@ -140,6 +146,12 @@ class OrganisationController extends ApiController
                 $organisation->contacts = !empty($data['contacts']) ? $this->trans($data['locale'], $data['contacts']) : null;
                 $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
                 $organisation->active = isset($data['active']) ? $data['active'] : 0;
+
+                if (isset($data['migrated_data'])) {
+                    if (!empty($data['created_by'])) {
+                        $organisation->created_by = $data['created_by'];
+                    }
+                }
 
                 if (!empty($data['approved'])) {
                     $organisation->approved = $data['approved'];
@@ -1433,6 +1445,12 @@ class OrganisationController extends ApiController
 
         $errors = $validator->errors()->messages();
 
+        if (isset($post['migrated_data'])) {
+            if (!empty($post['created_by'])) {
+                $newGroup->created_by = $post['created_by'];
+            }
+        }
+
         if (!$validator->fails()) {
 
             if (!isset($newGroup->logo_data) || !$imageError) {
@@ -1440,7 +1458,7 @@ class OrganisationController extends ApiController
 
                 try {
                     $newGroup->name = $this->trans($post['locale'], $post['name']);
-                    $newGroup->descript = !empty($post['description']) ? $this->trans($empty, $post['description']) : null;
+                    $newGroup->descript = !empty($post['description']) ? $this->trans($post['locale'], $post['description']) : null;
                     $newGroup->uri = !empty($post['uri'])
                         ? $post['uri']
                         : $this->generateOrgUri();
@@ -2515,5 +2533,44 @@ class OrganisationController extends ApiController
         }
 
         return $this->errorResponse(__('custom.list_data_groups_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Get most active organisation
+     *
+     * @param string criteria[locale] - optional
+     *
+     * @return json response
+     */
+    public function getMostActiveOrganisation(Request $request)
+    {
+        $validator = \Validator::make($request->all(), ['locale' => 'nullable|string|max:5']);
+
+        if (!$validator->fails()) {
+            try {
+                $result = DB::table('actions_history')
+                    ->select('organisations.uri', DB::raw('count(organisations.id) as count'))
+                    ->leftJoin('user_to_org_role', 'user_to_org_role.user_id', '=', 'actions_history.user_id')
+                    ->leftJoin('organisations', 'organisations.id', '=', 'user_to_org_role.org_id')
+                    ->where('organisations.type', '!=', Organisation::TYPE_GROUP)
+                    ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
+                    ->groupBy('organisations.uri')
+                    ->orderBy('count', 'desc')
+                    ->limit(1)
+                    ->first();
+
+                if (!empty($result)) {
+                    $result->name = Organisation::where('uri', $result->uri)->first()->name;
+                } else {
+                    $result = ['uri' => null, 'name' => __('custom.missing_most_active_org'), 'count' => 0];
+                }
+
+                return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.get_most_active_org_fail'), $validator->errors()->messages());
     }
 }

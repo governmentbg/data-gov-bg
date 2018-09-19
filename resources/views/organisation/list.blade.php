@@ -110,7 +110,7 @@
                                 </div>
                                 <div class="col-xs-12">
                                     <h3 class="org-name"><a href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ $organisation->name }}</a></h3>
-                                    <div class="org-desc">{{ $organisation->description }}</div>
+                                    <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
                                     <p class="text-right show-more">
                                         <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                                     </p>

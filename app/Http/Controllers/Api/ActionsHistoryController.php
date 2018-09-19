@@ -168,15 +168,15 @@ class ActionsHistoryController extends ApiController
         }
 
         if (!empty($actObjCriteria)) {
-            $history->where(function ($history) use ($actObjCriteria) {
+            $history->where(function($query) use ($actObjCriteria) {
                 $isFirst = true;
 
                 foreach ($actObjCriteria as $moduleName => $actionObjects) {
                     if ($isFirst) {
                         $isFirst = false;
-                        $history->whereIn('action_object', $actionObjects)->where('module_name', $moduleName);
+                        $query->whereIn('action_object', $actionObjects)->where('module_name', $moduleName);
                     } else {
-                        $history->orWhereIn('action_object', $actionObjects)->where('module_name', $moduleName);
+                        $query->orWhereIn('action_object', $actionObjects)->where('module_name', $moduleName);
                     }
                 }
             });

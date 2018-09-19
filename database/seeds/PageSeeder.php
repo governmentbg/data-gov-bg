@@ -30,6 +30,7 @@ class PageSeeder extends Seeder
             Page::create([
                 'section_id'      => $section,
                 'title'           => $this->faker->word(),
+                'type'            => Page::TYPE_PAGE,
                 'abstract'        => $this->faker->word(),
                 'body'            => $this->faker->word(),
                 'head_title'      => $this->faker->word(),

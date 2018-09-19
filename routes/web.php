@@ -172,8 +172,8 @@ Route::middleware('auth')->group(function() {
 
         Route::match(['get', 'post'], 'user/resource/view/{uri}', 'UserController@resourceView')->name('resourceView');
         Route::match(['get', 'post'], 'admin/resource/view/{uri}', 'Admin\DataSetController@resourceView');
-        Route::match(['get', 'post'], 'user/resource/edit/{uri}', 'UserController@resourceEditMeta');
-        Route::match(['get', 'post'], 'admin/resource/edit/{uri}', 'Admin\DataSetController@resourceEditMeta');
+        Route::match(['get', 'post'], 'user/resource/edit/{uri}/{parentUri?}', 'UserController@resourceEditMeta');
+        Route::match(['get', 'post'], 'admin/resource/edit/{uri}/{parentUri?}', 'Admin\DataSetController@resourceEditMeta');
         Route::match(['get', 'post'], 'user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
         Route::match(['get', 'post'], 'importCSV', 'ResourceController@importCsvData');
         Route::match(['get', 'post'], 'importElastic', 'ResourceController@importElasticData');
@@ -254,6 +254,12 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/pages/delete/{id}', 'Admin\PageController@delete');
         Route::match(['get', 'post'], '/admin/pages/edit/{id}', 'Admin\PageController@edit');
         Route::match(['get', 'post'], '/admin/pages/add', 'Admin\PageController@add');
+
+        Route::match(['get', 'post'], '/admin/news/list', 'Admin\NewsController@list');
+        Route::match(['get', 'post'], '/admin/news/view/{id}', 'Admin\NewsController@view');
+        Route::match(['get', 'post'], '/admin/news/delete/{id}', 'Admin\NewsController@delete');
+        Route::match(['get', 'post'], '/admin/news/edit/{id}', 'Admin\NewsController@edit');
+        Route::match(['get', 'post'], '/admin/news/add', 'Admin\NewsController@add');
     });
 });
 
@@ -292,7 +298,7 @@ Route::get('terms', function () {
     return view('terms', ['class' => 'index']);
 });
 
-Route::match(['get', 'post'], 'data', 'DataController@list');
+Route::match(['get', 'post'], 'data', 'DataController@list')->name('data');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
 Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView');
 Route::post('data/resource/sendSignal', 'DataController@sendSignal');
@@ -329,10 +335,6 @@ Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
 Route::match(['get', 'post'], 'news', 'NewsController@listNews');
 Route::match(['get', 'post'], 'news/search', 'NewsController@searchNews');
 Route::match(['get', 'post'], 'news/view/{id}', 'NewsController@viewNews');
-
-Route::get('news/view', function () {
-    return view('news/view', ['class' => 'news']);
-});
 
 Route::match(['get', 'post'], 'document', 'DocumentController@listDocuments');
 Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocuments');

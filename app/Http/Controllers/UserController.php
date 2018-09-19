@@ -10,6 +10,7 @@ use App\Module;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use App\TermsOfUse;
 use App\UserSetting;
 use App\DataSetGroup;
 use App\Organisation;
@@ -1645,7 +1646,7 @@ class UserController extends Controller {
      *
      * @return view - resource edit page
      */
-    public function resourceEditMeta(Request $request, $uri)
+    public function resourceEditMeta(Request $request, $uri, $parentUri = null)
     {
         $rq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $api = new ApiResource($rq);
@@ -1678,6 +1679,11 @@ class UserController extends Controller {
         $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $uri)->first()->loadTranslations();
 
+        if ($parentUri) {
+            $parent = Organisation::where('uri', $parentUri)->first();
+            $parent->logo = $this->getImageData($parent->logo_data, $parent->logo_mime_type, $parent->type == Organisation::TYPE_GROUP ? 'group' : 'org');
+        }
+
         if ($resource) {
             if ($request->has('ready_metadata')) {
 
@@ -1704,7 +1710,7 @@ class UserController extends Controller {
                 if ($response->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
-                    return redirect(url('/user/resource/edit/'. $uri));
+                    return back();
                 } else {
                     $request->session()->flash('alert-danger', $response->error->message);
                 }
@@ -1719,7 +1725,8 @@ class UserController extends Controller {
             'uri'       => $uri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'fields'    => $this->getResourceTransFields(),
+            'parent'    => isset($parent) ? $parent : false,
         ]);
     }
 
@@ -2121,6 +2128,20 @@ class UserController extends Controller {
 
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $dataset->org_id
+            ],
+            [
+                'created_by'     => $dataset->created_by,
+                'org_id'         => $dataset->org_id
+            ]
+        );
+
+        $buttons['editResource'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
             RoleRight::RIGHT_ALL,
             [
                 'org_id'       => $dataset->org_id
@@ -2177,6 +2198,7 @@ class UserController extends Controller {
                 'activeMenu'    => 'organisation',
                 'fromOrg'       => $fromOrg,
                 'dataset'       => !is_null($dataset) ? $dataset->name : null,
+                'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             ]);
         }
 
@@ -5009,6 +5031,21 @@ class UserController extends Controller {
 
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [
+                'org_id'       => $dataset->org_id
+            ],
+            [
+                'created_by'     => $dataset->created_by,
+                'org_id'         => $dataset->org_id
+            ]
+        );
+
+        $buttons['editResource'] = $rightCheck;
+
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
             RoleRight::RIGHT_ALL,
             [
                 'group_id'       => $dataset->org_id
@@ -5064,6 +5101,8 @@ class UserController extends Controller {
                 'data'          => $data,
                 'buttons'       => $buttons,
                 'group'         => $group,
+                'dataset'       => !is_null($dataset) ? $dataset->name : null,
+                'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             ]);
         }
 
@@ -5464,6 +5503,7 @@ class UserController extends Controller {
     {
         $class = 'user';
         $group = Organisation::where('uri', $uri)->first();
+        $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type, 'group');
         $locale = \LaravelLocalization::getCurrentLocale();
 
         $params = [
@@ -5477,7 +5517,8 @@ class UserController extends Controller {
 
         if ($result->success && !empty($result->data)) {
             $params = [
-                'criteria' => [
+                'api_key'   => \Auth::user()->api_key,
+                'criteria'  => [
                     'group_ids' => [$result->data->id],
                     'locale'    => $locale
                 ]
@@ -5493,12 +5534,12 @@ class UserController extends Controller {
 
             $objType = Module::getModules()[Module::GROUPS];
             $actObjData[$objType] = [];
-            $actObjData[$objType][$result->data->id] = [
-                'obj_id'        => $result->data->uri,
-                'obj_name'      => $result->data->name,
+            $actObjData[$objType][$group->id] = [
+                'obj_id'        => $group->uri,
+                'obj_name'      => $group->name,
                 'obj_module'    => Str::lower(utrans('custom.organisations')),
                 'obj_type'      => 'org',
-                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'obj_view'      => '/user/groups/view/'. $group->uri,
                 'parent_obj_id' => ''
             ];
 
@@ -5514,7 +5555,7 @@ class UserController extends Controller {
                         'obj_name'      => $dataset->name,
                         'obj_module'    => Str::lower(__('custom.dataset')),
                         'obj_type'      => 'dataset',
-                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'obj_view'      => '/user/group/'. $group->uri .'/dataset/'. $dataset->uri,
                         'parent_obj_id' => ''
                     ];
 
@@ -5526,7 +5567,7 @@ class UserController extends Controller {
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'obj_view'          => '/user/group/'. $group->uri .'/resource/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),
@@ -5566,8 +5607,9 @@ class UserController extends Controller {
                     $rq = Request::create('/api/listActionHistory', 'POST', $params);
                     $api = new ApiActionsHistory($rq);
                     $res = $api->listActionHistory($rq)->getData();
-                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
-                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                    $history = isset($res->actions_history) ? $res->actions_history : [];
+
+                    $paginationData = $this->getPaginationData($history, $res->total_records, [], $perPage);
                 }
             }
 
@@ -5575,7 +5617,7 @@ class UserController extends Controller {
                 'user/groupChronology',
                 [
                     'class'          => $class,
-                    'organisation'   => $result->data,
+                    'organisation'   => $group,
                     'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
                     'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
@@ -5590,7 +5632,7 @@ class UserController extends Controller {
     public function orgChronology(Request $request, $uri)
     {
         $class = 'user';
-        $group = Organisation::where('uri', $uri)->first();
+        $org = Organisation::where('uri', $uri)->first();
         $locale = \LaravelLocalization::getCurrentLocale();
 
         $params = [
@@ -5604,6 +5646,7 @@ class UserController extends Controller {
 
         if ($result->success && !empty($result->data)) {
             $params = [
+                'api_key'   => \Auth::user()->api_key,
                 'criteria' => [
                     'org_ids' => [$result->data->id],
                     'locale'    => $locale
@@ -5615,17 +5658,17 @@ class UserController extends Controller {
             $res = $api->listDataSets($rq)->getData();
 
             $criteria = [
-                'org_ids' => [$result->data->id]
+                'org_ids' => [$org->id]
             ];
 
             $objType = Module::getModules()[Module::ORGANISATIONS];
             $actObjData[$objType] = [];
-            $actObjData[$objType][$result->data->id] = [
-                'obj_id'        => $result->data->uri,
-                'obj_name'      => $result->data->name,
+            $actObjData[$objType][$org->id] = [
+                'obj_id'        => $org->uri,
+                'obj_name'      => $org->name,
                 'obj_module'    => Str::lower(utrans('custom.organisations')),
                 'obj_type'      => 'org',
-                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'obj_view'      => '/user/organisations/view/'. $org->uri,
                 'parent_obj_id' => ''
             ];
 
@@ -5636,12 +5679,12 @@ class UserController extends Controller {
 
                 foreach ($res->datasets as $dataset) {
                     $criteria['dataset_ids'][] = $dataset->id;
-                    $actObjData[$objType][$dataset->uri] = [
+                    $actObjData[$objType][$dataset->id] = [
                         'obj_id'        => $dataset->uri,
                         'obj_name'      => $dataset->name,
                         'obj_module'    => Str::lower(__('custom.dataset')),
                         'obj_type'      => 'dataset',
-                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'obj_view'      => '/user/organisations/dataset/view/'. $dataset->uri,
                         'parent_obj_id' => ''
                     ];
 
@@ -5653,7 +5696,7 @@ class UserController extends Controller {
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'obj_view'          => '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $org->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),

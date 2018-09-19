@@ -549,7 +549,6 @@ class OrganisationController extends AdminController
     public function chronology(Request $request, $uri)
     {
         $class = 'user';
-        $group = Organisation::where('uri', $uri)->first();
         $locale = \LaravelLocalization::getCurrentLocale();
 
         $params = [
@@ -563,8 +562,9 @@ class OrganisationController extends AdminController
 
         if ($result->success && !empty($result->data)) {
             $params = [
-                'criteria' => [
-                    'org_ids' => [$result->data->id],
+                'api_key'   => \Auth::user()->api_key,
+                'criteria'  => [
+                    'org_ids'   => [$result->data->id],
                     'locale'    => $locale
                 ]
             ];
@@ -584,7 +584,7 @@ class OrganisationController extends AdminController
                 'obj_name'      => $result->data->name,
                 'obj_module'    => Str::lower(utrans('custom.organisations')),
                 'obj_type'      => 'org',
-                'obj_view'      => '/organisation/profile/'. $result->data->uri,
+                'obj_view'      => '/admin/organisations/view/'. $result->data->uri,
                 'parent_obj_id' => ''
             ];
 
@@ -600,7 +600,7 @@ class OrganisationController extends AdminController
                         'obj_name'      => $dataset->name,
                         'obj_module'    => Str::lower(__('custom.dataset')),
                         'obj_type'      => 'dataset',
-                        'obj_view'      => '/data/view/'. $dataset->uri,
+                        'obj_view'      => '/user/organisations/dataset/view/'. $dataset->uri,
                         'parent_obj_id' => ''
                     ];
 
@@ -612,7 +612,7 @@ class OrganisationController extends AdminController
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/data/resourceView/'. $resource->uri,
+                                'obj_view'          => '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $result->data->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),

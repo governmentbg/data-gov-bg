@@ -51,11 +51,11 @@
         </div>
     </div>
     <div class="col-md-4 most-active">
-        <a href="#">
+        <a href="{{ isset($mostActiveOrg->uri) ? url('organisation/profile/'. $mostActiveOrg->uri) : '#' }}">
             <img src="{{ asset('/img/medal.svg') }}">
-            <p>{{ __('custom.most_active_agency') }}</p>
+            <p>{{ __('custom.most_active_agency') }} {{ $lastMonth }}</p>
             <hr>
-            <span>Агенция за ядрено регулиране</span>
+            <span>{{ isset($mostActiveOrg->name) ? $mostActiveOrg->name : null }}</span>
             <img src="{{ asset('img/open-data.png') }}">
         </a>
     </div>

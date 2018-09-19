@@ -2537,7 +2537,7 @@ class OrganisationController extends ApiController
                     ->leftJoin('organisations', 'organisations.id', '=', 'user_to_org_role.org_id')
                     ->where('organisations.type', '!=', Organisation::TYPE_GROUP)
                     ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
-                    ->groupBy('organisations.id')
+                    ->groupBy('organisations.uri')
                     ->orderBy('count', 'desc')
                     ->limit(1)
                     ->first();

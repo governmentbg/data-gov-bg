@@ -204,7 +204,7 @@
                         </div>
                         <div class="col-sm-12 p-l-r-none">
                             <h2><a href="{{ url('/data/view/'. $dataset->uri) }}">{{ $dataset->name }}</a></h2>
-                            <p>{{ $dataset->descript }}</p>
+                            <p>{!! nl2br($dataset->descript) !!}</p>
                             <div class="col-sm-12 p-l-none">
                                 <div class="tags pull-left">
                                     @if (isset($dataset->tags) && count($dataset->tags) > 0)

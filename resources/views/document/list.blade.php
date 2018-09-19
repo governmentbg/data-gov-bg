@@ -29,7 +29,7 @@
                                 <h2 class="m-t-xs">{{$document->name}}</h2>
                             </a>
                             <p>
-                                {{$document->description}}
+                                {!! nl2br($document->description) !!}
                             </p>
                             <div class="col-sm-12 p-l-none text-right">
                                 <span><a href="{{ url('/document/view/' . $document->id) }}">{{ __('custom.see_more') }}</a></span>

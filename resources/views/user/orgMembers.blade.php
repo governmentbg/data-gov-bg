@@ -57,7 +57,7 @@
                     <div class="org m-t-lg">
                         <img src="{{ $organisation->logo }}">
                         <h2>{{ $organisation->name }}</h2>
-                        <h4>{{ truncate($organisation->descript, 150) }}</h4>
+                        <h4>{!! nl2br(truncate($organisation->descript, 150)) !!}</h4>
                         <p class="text-right show-more">
                             <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                         </p>

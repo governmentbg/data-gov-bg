@@ -66,13 +66,18 @@
             @if (!empty($dataset->descript))
                 <p><strong>{{ __('custom.description') }}:</strong></p>
                 <div class="m-b-sm">
-                    {{ $dataset->description }}
+                    {!! nl2br($dataset->descript) !!}
+                </div>
+            @esleif (!empty($dataset->description))
+                <p><strong>{{ __('custom.description') }}:</strong></p>
+                <div class="m-b-sm">
+                    {!! nl2br($dataset->description) !!}
                 </div>
             @endif
             @if (!empty($dataset->sla))
                 <p><strong>{{ __('custom.sla_agreement') }}:</strong></p>
                 <div class="m-b-sm">
-                    {{ $dataset->sla }}
+                    {!! nl2br($dataset->sla) !!}
                 </div>
             @endif
             <div class="col-sm-12 pull-left m-t-md p-l-none">

@@ -54,7 +54,7 @@
                     <h2>{{ $user->firstname .' '. $user->lastname}}</h2>
                 </div>
                 <div class="row">
-                    <span class="user-info">{{ $user->add_info }}</span>
+                    <span class="user-info">{!! nl2br($user->add_info) !!}</span>
                 </div>
                 @if (!$ownProfile && \Auth::user() !== null)
                     <form method="post">

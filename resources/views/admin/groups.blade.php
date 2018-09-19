@@ -35,7 +35,7 @@
                             </div>
                             <div class="col-xs-12">
                                 <a href="{{ url('/admin/groups/view/'. $group->uri) }}"><h3 class="org-name">{{ $group->name }}</h3></a>
-                                <div class="org-desc">{{ $group->description }}</div>
+                                <div class="org-desc">{!! nl2br($group->description) !!}</div>
                                 <p class="text-right show-more">
                                     <a href="{{ url('/admin/groups/view/'. $group->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                                 </p>

@@ -38,11 +38,11 @@ class PageController extends ApiController
 
         $validator = Validator::make($pageData, [
             'data'      => 'required|array',
-            'locale'    => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($pageData['data'], [
+                'locale'              => 'nullable|string|max:5',
                 'section_id'          => 'required|integer|digits_between:1,10',
                 'title'               => 'required_with:locale|max:191',
                 'title.bg'            => 'required_without:locale|string|max:191',
@@ -149,7 +149,7 @@ class PageController extends ApiController
                 if (isset($pageData['data']['active'])) {
                     $newPage->active = $pageData['data']['active'];
                 } else {
-                    $newPage->active = Page::ATIVE_FALSE;
+                    $newPage->active = Page::ACTIVE_FALSE;
                 }
 
                 $newPage->save();

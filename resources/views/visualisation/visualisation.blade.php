@@ -1,45 +1,26 @@
-@extends('layouts.empty')
+@extends('layouts.app')
 
 @section('content')
-    @if ($resource->type == App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
-        <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
-    @else
-        @if (empty($data))
-            <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
-        @else
-            @if ($resource->format_code == App\Resource::FORMAT_CSV)
-                <div class="m-b-lg overflow-x-auto js-show-on-load">
-                    <table class="data-table">
-                        <thead>
-                            @foreach ($data as $index => $row)
-                                @if ($index == 0)
-                                    @foreach ($row as $key => $value)
-                                        <th><p>{{ $value }}</p></th>
-                                    @endforeach
-                                    </thead>
-                                    <tbody>
-                                @else
-                                    <tr>
-                                        @foreach ($row as $key => $value)
-                                            <td>{{ $value }}</td>
-                                        @endforeach
-                                    </tr>
-                                @endif
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @elseif ($resource->format_code == App\Resource::FORMAT_XML)
-                <textarea
-                    class="js-xml-prev col-xs-12 m-b-md"
-                    data-xml-data="{{ $data }}"
-                    rows="20"
-                ></textarea>
-            @elseif ($resource->format_code == App\Resource::FORMAT_JSON && isset($data->text))
-                <p>@php echo nl2br(e($data->text)) @endphp</p>
-            @else
-                <p>{{ uctrans('custom.resource_no_visualization') }}</p>
-            @endif
-        @endif
-    @endif
+<div class="container">
+    <div class="col-xs-12 p-lg">
+        <div>
+            <h3>Lorem ipsum</h3><br>
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                incididunt ut labore et  <a href="#">dolore</a> magna aliqua. Adipiscing commodo elit at imperdiet.
+                Nec nam aliquam sem et tortor consequat. Placerat duis ultricies lacus sed turpis
+                tincidunt id. Eu mi bibendum neque egestas congue quisque egestas diam. Hac habitasse
+                platea dictumst quisque sagittis purus sit. Tristique senectus et netus et malesuada fames.
+                Maecenas sed enim ut sem viverra aliquet eget sit. Scelerisque viverra mauris in aliquam sem fringilla.
+                Nullam ac tortor vitae purus faucibus ornare suspendisse. Adipiscing elit duis tristique sollicitudin.
+                Ornare arcu dui vivamus arcu felis bibendum ut. Sit amet risus nullam eget felis eget nunc. Lobortis elementum
+                nibh tellus molestie nunc non blandit massa enim. Augue eget arcu dictum varius duis. Viverra accumsan in nisl
+                nisi scelerisque. Etiam erat velit scelerisque in dictum non. Pulvinar mattis nunc sed <a href="#">blandit</a>.
+            </p>
+        </div>
+        <div>
+            <img class="img-responsive" src="{{ asset('img/test-img/visualisation.png') }}">
+        </div>
+    </div>
+</div>
 @endsection

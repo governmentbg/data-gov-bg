@@ -205,7 +205,7 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('source')) ? $dataSet->source : old('source') }}"
                     type="text"
-                    placeholder="{{ __('source') }}"
+                    placeholder="{{ __('custom.source') }}"
                 >
                 <span class="error">{{ $errors->first('source') }}</span>
             </div>
@@ -223,7 +223,7 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('version')) ? $dataSet->version : old('version') }}"
                     type="text"
-                    placeholder="{{ __('version') }}"
+                    placeholder="{{ __('custom.version') }}"
                 >
                 <span class="error">{{ $errors->first('version') }}</span>
             </div>
@@ -241,7 +241,7 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('author_name')) ? $dataSet->author_name : old('author_name') }}"
                     type="text"
-                    placeholder="{{ __('author') }}">
+                    placeholder="{{ __('custom.author') }}">
                 <span class="error">{{ $errors->first('author_name') }}</span>
             </div>
         </div>
@@ -258,7 +258,7 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('author_email')) ? $dataSet->author_email : old('author_email') }}"
                     type="email"
-                    placeholder="{{ __('author_email') }}"
+                    placeholder="{{ __('custom.author_email') }}"
                 >
                 <span class="error">{{ $errors->first('author_email') }}</span>
             </div>

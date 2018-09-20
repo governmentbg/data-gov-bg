@@ -1039,17 +1039,7 @@ class UserController extends Controller {
         if (!is_null($fromOrg)) {
             $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
         }
-error_log('label: '. print_r([
-    'class'         => 'user',
-    'visibilityOpt' => $visibilityOptions,
-    'categories'    => $categories,
-    'termsOfUse'    => $termsOfUse,
-    'organisations' => $organisations,
-    'groups'        => $groups,
-    'buttons'       => $buttons,
-    'fields'        => $this->getDatasetTransFields(),
-    'fromOrg'       => $fromOrg,
-], true));
+
         return view('user/orgDatasetCreate', [
             'class'         => 'user',
             'visibilityOpt' => $visibilityOptions,

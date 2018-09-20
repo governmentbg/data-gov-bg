@@ -2,17 +2,18 @@
 namespace App\Http\Controllers\Api;
 
 use Uuid;
+use App\Module;
+use App\Signal;
 use App\DataSet;
 use App\Resource;
-use App\Signal;
-use App\Module;
 use App\RoleRight;
+use App\Organisation;
 use App\ActionsHistory;
 use App\ElasticDataSet;
-use App\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 

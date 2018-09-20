@@ -149,7 +149,7 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($data['created_at'])) {
-                    $dbData['created_at'] = $data['created_at'];
+                    $dbData['created_at'] = date('Y-m-d H:i:s', strtotime($data['created_at']));
                 }
 
                 if (!empty($data['status'])) {

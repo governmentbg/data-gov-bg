@@ -41,12 +41,12 @@
                             <li>
                                 @if ($isAdmin)
                                     <a
-                                        class="{{ $view == 'datasets' ? 'active' : null }}"
-                                        href="{{ url('/user/organisations/datasets/'. $organisation->uri) }}"
+                                        class="{{ $view == 'dataset' ? 'active' : null }}"
+                                        href="{{ url('/admin/organisations/datasets/'. $organisation->uri) }}"
                                     >{{ ultrans('custom.datasets') }}</a>
                                 @else
                                     <a
-                                        class="{{ $view == 'datasets' ? 'active' : null }}"
+                                        class="{{ $view == 'dataset' ? 'active' : null }}"
                                         href="{{ url('/user/organisations/datasets/'. $organisation->uri) }}"
                                     >{{ ultrans('custom.datasets') }}</a>
                                 @endif

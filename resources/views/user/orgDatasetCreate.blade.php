@@ -91,15 +91,15 @@
         @include('partials.user-nav-bar', ['view' => 'organisation'])
     @endif
     <div class="row">
-        @if (isset($fromOrg) && !is_null($fromOrg))
-            @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
+        @if (isset($fromOrg))
+            @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $fromOrg])
             @include('partials.org-info', ['organisation' => $fromOrg])
         @endif
         <div class="col-sm-9 col-xs-12 m-t-lg">
             <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
             <form method="POST">
                 {{ csrf_field() }}
-                @if (isset($fromOrg) && !is_null($fromOrg))
+                @if (isset($fromOrg))
                     <input type="hidden" name="org_uri" value="{{ $fromOrg->uri }}">
                 @endif
                 <div class="form-group row">

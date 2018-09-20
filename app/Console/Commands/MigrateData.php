@@ -630,10 +630,6 @@ class MigrateData extends Command
 
                 $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
 
-                if (isset($res['num_followers']) && $res['num_followers'] > 0) {
-                    $userWithFollowers[] = $res['id'];
-                }
-
                 //TO DO check categories
                 $newData['data']['category_id'] = 1;
 

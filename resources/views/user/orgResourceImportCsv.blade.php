@@ -4,8 +4,8 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'organisation'])
-    @if (isset($fromOrg) && !is_null($fromOrg))
-        @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
+    @if (isset($fromOrg))
+        @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $fromOrg])
         <div class="row">
             <div class="org col-sm-3 col-xs-12 m-t-lg m-l-md">
                 <div><img class="full-size" src="{{ $fromOrg->logo }}"></div>
@@ -21,7 +21,7 @@
         <form
             class="form-horizontal"
             method="POST"
-            @if (isset($fromOrg) && !is_null($fromOrg))
+            @if (isset($fromOrg))
                 action="{{ route('orgResourceCreate', ['uri' => $uri, 'orguri' => $fromOrg->uri]) }}"
             @else
                 action="{{ route('orgResourceCreate', ['uri' => $uri]) }}"

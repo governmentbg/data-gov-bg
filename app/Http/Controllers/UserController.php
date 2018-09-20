@@ -255,7 +255,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function orgDatasets(Request $request)
+    public function orgDatasets(Request $request, $uri)
     {
         $perPage = 6;
         $params = [
@@ -264,7 +264,7 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $org = Organisation::where('uri', $request->uri)->first();
+        $org = Organisation::where('uri', $uri)->first();
         $orgId = !is_null($org) ? $org->id : null;
 
         if (!$orgId) {
@@ -734,10 +734,10 @@ class UserController extends Controller {
             Module::RESOURCES,
             RoleRight::RIGHT_EDIT,
             [
-                'org_id'       => $datasetData->org_id
+                'org_id'    => $datasetData->org_id
             ],
             [
-                'org_id'        => $datasetData->org_id
+                'org_id'    => $datasetData->org_id
             ]
         );
 
@@ -959,7 +959,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function orgDatasetCreate(Request $request, $uri = null)
+    public function orgDatasetCreate(Request $request, $uri)
     {
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
@@ -4286,7 +4286,7 @@ class UserController extends Controller {
                     'group_id'       => $group->id
                 ],
                 [
-                    'created_by' => $group->created_by,
+                    'created_by'    => $group->created_by,
                     'group_ids'     => [$group->id]
                 ]
             );
@@ -4359,10 +4359,10 @@ class UserController extends Controller {
             Module::GROUPS,
             RoleRight::RIGHT_EDIT,
             [
-                'org_id'       => $groupData->id
+                'group_id'       => $groupData->id
             ],
             [
-                'org_id'     => $groupData->id
+                'group_ids'      => [$groupData->id]
             ]
         );
 
@@ -4372,10 +4372,10 @@ class UserController extends Controller {
             Module::GROUPS,
             RoleRight::RIGHT_ALL,
             [
-                'org_id'       => $groupData->id
+                'group_id'       => $groupData->id
             ],
             [
-                'org_id'     => $groupData->id
+                'group_ids'      => [$groupData->id]
             ]
         );
 

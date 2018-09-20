@@ -1,4 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.app', [
+'title'            => isset($newsList->head_title) ? $newsList->head_title : null,
+'keywords'         => isset($newsList->meta_keywords) ? $newsList->meta_keywords : null,
+'description'      => isset($newsList->meta_description) ? $newsList->meta_description : null
+])
 
 @section('content')
 <div class="container">
@@ -10,9 +14,9 @@
                         <div class="m-b-lg">
                             <div class="col-sm-12 p-l-none article-underline">
                                 @if (isset($newsList))
-                                    <h2 class="m-t-xs">{{$newsList->title}}</h2>
+                                    <h2 class="m-t-xs">{!! $newsList->title !!}</h2>
                                     <p>
-                                        {{$newsList->body}}
+                                        {!! $newsList->body !!}
                                     </p>
                                 @endif
 

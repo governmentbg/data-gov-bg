@@ -9,7 +9,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Open Data Portal') }}</title>
+    @if ( !empty($description))
+        <meta name="description" content="{{$description}}">
+    @endif
+    @if ( !empty($keywords))
+        <meta name="keywords" content="{{$keywords}}">
+    @endif
+    <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Roboto&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
     <link rel="stylesheet" href="/css/custom.css">

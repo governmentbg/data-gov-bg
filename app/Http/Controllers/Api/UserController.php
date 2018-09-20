@@ -466,14 +466,6 @@ class UserController extends ApiController
             try {
                 DB::beginTransaction();
 
-                $created_by = null;
-
-                if (isset($request->data['migrated_data'])) {
-                    if (!empty($request->data['created_by'])) {
-                        $created_by= $request->data['created_by'];
-                    }
-                }
-
                 $apiKey = Uuid::generate(4)->string;
                 $user = new User;
 
@@ -495,7 +487,15 @@ class UserController extends ApiController
                 $user->api_key = $apiKey;
                 $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
                 $user->remember_token = null;
-                $user->created_by = $created_by;
+
+                if (
+                    isset($request->data['migrated_data'])
+                    && Auth::user()->username == 'migrate_data'
+                ) {
+                    if (!empty($request->data['created_by'])) {
+                        $user->created_by = $request->data['created_by'];
+                    }
+                }
 
                 $registered = $user->save();
 
@@ -510,7 +510,6 @@ class UserController extends ApiController
 
                 $userSettings->user_id = $user->id;
                 $userSettings->locale = $userLocale;
-                $userSettings->created_by = $created_by;
 
                 if (
                     isset($data['user_settings']['newsletter_digest'])
@@ -531,11 +530,13 @@ class UserController extends ApiController
                     $mailData = array_merge($mailData, ['pass' => $request->data['password']]);
                 }
 
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject(__('custom.register_subject'));
-                });
+                if (!isset($request->data['migrated_data'])) {
+                    Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                        $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                        $m->to($user->email, $user->firstname);
+                        $m->subject(__('custom.register_subject'));
+                    });
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::USERS),

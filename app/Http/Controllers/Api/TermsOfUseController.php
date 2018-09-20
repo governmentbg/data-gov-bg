@@ -73,7 +73,10 @@ class TermsOfUseController extends ApiController
         $newTerms->name = $data['name'];
         $newTerms->descript = $data['description'];
 
-        if (isset($data['migrated_data'])) {
+        if (
+            isset($data['migrated_data'])
+            && Auth::user()->username == 'migrate_data'
+        ) {
             if (!empty($data['created_by'])) {
                 $newTerms->created_by = $data['created_by'];
             }

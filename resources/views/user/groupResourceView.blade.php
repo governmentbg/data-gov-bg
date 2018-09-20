@@ -7,7 +7,7 @@
         @else
             @include('partials.user-nav-bar', ['view' => 'group'])
         @endif
-        @include('partials.group-nav-bar', ['view' => 'datasets', 'group' => $group])
+        @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $group])
         @if (isset($resource->name))
             <div class="row m-t-md">
                 <div class="col-sm-3 col-xs-12 sidenav">

@@ -67,8 +67,6 @@
                 <div class="m-b-sm">
                     @if (!empty($dataset->description))
                         {!! nl2br(e($dataset->description)) !!}
-                    @elseif (!empty($dataset->descript))
-                        {!! nl2br(e($dataset->descript)) !!}
                     @endif
                 </div>
             @if (!empty($dataset->sla))

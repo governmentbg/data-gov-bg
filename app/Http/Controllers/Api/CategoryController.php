@@ -387,7 +387,7 @@ class CategoryController extends ApiController
                         'locale'        => \LaravelLocalization::getCurrentLocale(),
                         'active'        => $category->active,
                         'ordering'      => $category->ordering,
-                        'icon'          => $this->getImageData($category->icon_data, $category->icon_mime_type),
+                        'icon'          => $this->getImageData($category->icon_data, $category->icon_mime_type, 'theme'),
                         'created_at'    => date($category->created_at),
                         'created_by'    => $category->created_by,
                         'updated_at'    => date($category->updated_at),

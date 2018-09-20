@@ -383,34 +383,84 @@ class NewsController extends ApiController
             $result = [];
             $criteria = $request->offsetGet('criteria');
             $locale = \LaravelLocalization::getCurrentLocale();
-            $newsList = Page::select()->where('type', Page::TYPE_NEWS);
-
-            $filterColumn = 'created_at';
+            $newsList = Page::select();
 
             if (!empty($criteria['date_type'])) {
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_UPDATED) {
-                    $filterColumn = 'updated_at';
+                    $newsList->whereBetween('updated_at', [$criteria['date_from'],$criteria['date_to']]);
                 }
             }
 
-            if (!empty($criteria['date_from'])) {
-                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
-                    $filterColumn = 'valid_from';
+            if (!empty($criteria['date_type'])) {
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_CREATED) {
+                    $newsList->whereBetween('created_at', [$criteria['date_from'],$criteria['date_to']]);
                 }
-
-                $newsList->where($filterColumn, '>=', $criteria['date_from']);
             }
 
-            if (!empty($criteria['date_to'])) {
+            if (!empty($criteria['date_from']) && empty($criteria['date_to'])) {
+                $datecreate = date_create($criteria['date_from']);
+                $date = date_format($datecreate, 'Y-m-d');
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
-                    $filterColumn = 'valid_to';
+                    $newsList->where(function($c) use ($date) {
+                            $c->where('valid_from', null)->where('valid_to', '>=', $date);})
+                        ->orWhere(function($m) use ($date){
+                            $m->where('valid_from', '<=', $date)->where('valid_to', '>=', $date);
+                        })->orWhere(function ($a) use ($date) {
+                            $a->where('valid_from', '>=', $date)->where('valid_to', '>=', $date);
+                        })->orWhere(function($b) use ($date) {
+                            $b->where('valid_from', '<=', $date)->where('valid_to', null);
+                        })->orWhere(function($d) use ($date) {
+                            $d->where('valid_from', null)->where('valid_to', null);
+                        })->orWhere(function ($g) use ($date) {
+                            $g->where('valid_from', '>=', $date)->where('valid_to', null);
+                        });
                 }
-
-                $newsList->where($filterColumn, '<=', $criteria['date_to']);
+            } else if (!empty($criteria['date_to']) && empty($criteria['date_from'])) {
+                $datecreated = date_create($criteria['date_to']);
+                $dated = date_format($datecreated, 'Y-m-d');
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                    $newsList->where(function($c) use ($dated) {
+                            $c->where('valid_from', null)->where('valid_to', '<=', $dated);
+                        })->orWhere(function($m) use ($dated){
+                            $m->where('valid_from', '<=', $dated)->where('valid_to', '<=', $dated);
+                        })->orWhere(function ($a) use ($dated) {
+                            $a->where('valid_from', '<=', $dated)->where('valid_to', '>=', $dated);
+                        })->orWhere(function($b) use ($dated) {
+                            $b->where('valid_from', '<=', $dated)->where('valid_to', null);
+                        })->orWhere(function($d) use ($dated) {
+                            $d->where('valid_from', null)->where('valid_to', null);
+                        })->orWhere(function ($e) use ($dated) {
+                            $e->where('valid_from',null)->where('valid_to','>=', $dated);
+                        });
+                }
+            } else if (!empty($criteria['date_from']) && !empty($criteria['date_to']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                $datecreatedfrom = date_create($criteria['date_from']);
+                $datefrom = date_format($datecreatedfrom, 'Y-m-d');
+                $datecreatedto = date_create($criteria['date_to']);
+                $dateto = date_format($datecreatedto, 'Y-m-d');
+                $newsList->orWhere(function($a) use ($datefrom, $dateto) {
+                    $a->where('valid_from', null)->where('valid_to', null);
+                })->orWhere(function($b) use ($datefrom, $dateto) {
+                    $b->where('valid_from', null)->where('valid_to', '>=', $datefrom)->where('valid_to', '<=', $dateto);
+                })->orWhere(function($c) use ($datefrom, $dateto) {
+                    $c->where('valid_to', null)->where('valid_from', '>=', $datefrom)->where('valid_to', '<=', $dateto);
+                })->orWhere(function($d) use ($datefrom, $dateto) {
+                    $d->where('valid_from', '<=', $datefrom)->where('valid_to', '>=', $datefrom)->where('valid_to', '<=', $dateto);
+                })->orWhere(function($e) use ($datefrom, $dateto) {
+                    $e->where('valid_to', '>=', $datefrom)->where('valid_from', '>=', $datefrom)->where('valid_to', '<=', $dateto);
+                })->orWhere(function($f) use ($datefrom, $dateto) {
+                    $f->where('valid_from', '<=', $datefrom)->where('valid_to', '>=', $dateto);
+                })->orWhere(function($g) use ($datefrom, $dateto) {
+                    $g->where('valid_from', '>=', $datefrom)->where('valid_to', '<=', $dateto);
+                })->orWhere(function($h) use ($datefrom, $dateto) {
+                    $h->where('valid_from', '>=', $datefrom)->where('valid_to', '>=', $dateto);
+                })->orWhere(function($i) use ($datefrom, $dateto) {
+                    $i->where('valid_from', '>=', $datefrom)->where('valid_to', null);
+                });
             }
 
             if (isset($newsListData['api_key'])) {
-                if (!\Auth::user()->is_admin) {
+                if (\Auth::check() && !\Auth::user()->is_admin) {
                     if (isset($criteria['active'])) {
                         $newsList->where('active', $criteria['active']);
                     }
@@ -477,7 +527,7 @@ class NewsController extends ApiController
                 $this->getRecordsPerPage($request->offsetGet('records_per_page'))
             );
 
-            $newsList = $newsList->get();
+            $newsList = $newsList->where('type', Page::TYPE_NEWS)->get();
 
             if ($newsList) {
                 foreach ($newsList as $singleNews) {

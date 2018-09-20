@@ -8,7 +8,7 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'organisation'])
     @endif
-    @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $organisation])
+    @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $organisation])
     @include('partials.pagination')
     <div class="row">
         @if ($buttons['add'])

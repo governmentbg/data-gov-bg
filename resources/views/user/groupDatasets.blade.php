@@ -8,7 +8,7 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'group'])
     @endif
-    @include('partials.group-nav-bar', ['view' => 'datasets', 'group' => $group])
+    @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $group])
     @include('partials.pagination')
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left sidenav">

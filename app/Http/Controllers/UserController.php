@@ -255,7 +255,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function orgDatasets(Request $request)
+    public function orgDatasets(Request $request, $uri)
     {
         $perPage = 6;
         $params = [
@@ -264,7 +264,7 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $org = Organisation::where('uri', $request->uri)->first();
+        $org = Organisation::where('uri', $uri)->first();
         $orgId = !is_null($org) ? $org->id : null;
 
         if (!$orgId) {
@@ -734,10 +734,10 @@ class UserController extends Controller {
             Module::RESOURCES,
             RoleRight::RIGHT_EDIT,
             [
-                'org_id'       => $datasetData->org_id
+                'org_id'    => $datasetData->org_id
             ],
             [
-                'org_id'        => $datasetData->org_id
+                'org_id'    => $datasetData->org_id
             ]
         );
 
@@ -959,7 +959,7 @@ class UserController extends Controller {
         ]);
     }
 
-    public function orgDatasetCreate(Request $request, $uri = null)
+    public function orgDatasetCreate(Request $request, $uri)
     {
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
@@ -1039,7 +1039,17 @@ class UserController extends Controller {
         if (!is_null($fromOrg)) {
             $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
         }
-
+error_log('label: '. print_r([
+    'class'         => 'user',
+    'visibilityOpt' => $visibilityOptions,
+    'categories'    => $categories,
+    'termsOfUse'    => $termsOfUse,
+    'organisations' => $organisations,
+    'groups'        => $groups,
+    'buttons'       => $buttons,
+    'fields'        => $this->getDatasetTransFields(),
+    'fromOrg'       => $fromOrg,
+], true));
         return view('user/orgDatasetCreate', [
             'class'         => 'user',
             'visibilityOpt' => $visibilityOptions,

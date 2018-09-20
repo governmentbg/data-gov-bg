@@ -398,8 +398,8 @@ class NewsController extends ApiController
             }
 
             if (!empty($criteria['date_from']) && empty($criteria['date_to'])) {
-                $datecreate = date_create($criteria['date_from']);
-                $date = date_format($datecreate, 'Y-m-d');
+                $dateCreate = date_create($criteria['date_from']);
+                $date = date_format($dateCreate, 'Y-m-d');
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     $newsList->where(function($c) use ($date) {
                             $c->where('valid_from', null)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);})
@@ -416,8 +416,8 @@ class NewsController extends ApiController
                         });
                 }
             } else if (!empty($criteria['date_to']) && empty($criteria['date_from'])) {
-                $datecreated = date_create($criteria['date_to']);
-                $dated = date_format($datecreated, 'Y-m-d');
+                $dateCreate = date_create($criteria['date_to']);
+                $dated = date_format($dateCreate, 'Y-m-d');
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     $newsList->where(function($c) use ($dated) {
                             $c->where('valid_from', null)->where('valid_to', '<=', $dated)->where('type', Page::TYPE_NEWS);
@@ -434,28 +434,28 @@ class NewsController extends ApiController
                         });
                 }
             } else if (!empty($criteria['date_from']) && !empty($criteria['date_to']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
-                $datecreatedfrom = date_create($criteria['date_from']);
-                $datefrom = date_format($datecreatedfrom, 'Y-m-d');
-                $datecreatedto = date_create($criteria['date_to']);
-                $dateto = date_format($datecreatedto, 'Y-m-d');
-                $newsList->orWhere(function($a) use ($datefrom, $dateto) {
+                $dateCreatedFrom = date_create($criteria['date_from']);
+                $dateFrom = date_format($dateCreatedFrom, 'Y-m-d');
+                $dateCreatedTo = date_create($criteria['date_to']);
+                $dateTo = date_format($dateCreatedTo, 'Y-m-d');
+                $newsList->orWhere(function($a) use ($dateFrom, $dateTo) {
                     $a->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($b) use ($datefrom, $dateto) {
-                    $b->where('valid_from', null)->where('valid_to', '>=', $datefrom)->where('valid_to', '<=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($c) use ($datefrom, $dateto) {
-                    $c->where('valid_to', null)->where('valid_from', '>=', $datefrom)->where('valid_to', '<=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($d) use ($datefrom, $dateto) {
-                    $d->where('valid_from', '<=', $datefrom)->where('valid_to', '>=', $datefrom)->where('valid_to', '<=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($e) use ($datefrom, $dateto) {
-                    $e->where('valid_to', '>=', $datefrom)->where('valid_from', '>=', $datefrom)->where('valid_to', '<=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($f) use ($datefrom, $dateto) {
-                    $f->where('valid_from', '<=', $datefrom)->where('valid_to', '>=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($g) use ($datefrom, $dateto) {
-                    $g->where('valid_from', '>=', $datefrom)->where('valid_to', '<=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($h) use ($datefrom, $dateto) {
-                    $h->where('valid_from', '>=', $datefrom)->where('valid_to', '>=', $dateto)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($i) use ($datefrom, $dateto) {
-                    $i->where('valid_from', '>=', $datefrom)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($b) use ($dateFrom, $dateTo) {
+                    $b->where('valid_from', null)->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($c) use ($dateFrom, $dateTo) {
+                    $c->where('valid_to', null)->where('valid_from', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($d) use ($dateFrom, $dateTo) {
+                    $d->where('valid_from', '<=', $dateFrom)->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($e) use ($dateFrom, $dateTo) {
+                    $e->where('valid_to', '>=', $dateFrom)->where('valid_from', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($f) use ($dateFrom, $dateTo) {
+                    $f->where('valid_from', '<=', $dateFrom)->where('valid_to', '>=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($g) use ($dateFrom, $dateTo) {
+                    $g->where('valid_from', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($h) use ($dateFrom, $dateTo) {
+                    $h->where('valid_from', '>=', $dateFrom)->where('valid_to', '>=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($i) use ($dateFrom, $dateTo) {
+                    $i->where('valid_from', '>=', $dateFrom)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
                 });
             }
 

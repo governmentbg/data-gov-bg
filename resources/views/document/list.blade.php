@@ -21,11 +21,11 @@
                 @endif
                 </div>
                 @if (isset($pagination))
-                <div class="row">
-                    <div class="col-xs-12 text-center">
-                        {{ $pagination->render() }}
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            {{ $pagination->render() }}
+                        </div>
                     </div>
-                </div>
                 @endif
                 @if (isset($documents))
                     @foreach ($documents as $document)

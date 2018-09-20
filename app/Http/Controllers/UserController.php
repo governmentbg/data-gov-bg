@@ -4286,7 +4286,7 @@ class UserController extends Controller {
                     'group_id'       => $group->id
                 ],
                 [
-                    'created_by' => $group->created_by,
+                    'created_by'    => $group->created_by,
                     'group_ids'     => [$group->id]
                 ]
             );
@@ -4362,7 +4362,7 @@ class UserController extends Controller {
                 'group_id'       => $groupData->id
             ],
             [
-                'group_ids'     => [$groupData->id]
+                'group_ids'      => [$groupData->id]
             ]
         );
 
@@ -4375,7 +4375,7 @@ class UserController extends Controller {
                 'group_id'       => $groupData->id
             ],
             [
-                'group_ids'     => [$groupData->id]
+                'group_ids'      => [$groupData->id]
             ]
         );
 

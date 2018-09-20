@@ -4359,10 +4359,10 @@ class UserController extends Controller {
             Module::GROUPS,
             RoleRight::RIGHT_EDIT,
             [
-                'org_id'       => $groupData->id
+                'group_id'       => $groupData->id
             ],
             [
-                'org_id'     => $groupData->id
+                'group_ids'     => [$groupData->id]
             ]
         );
 
@@ -4372,10 +4372,10 @@ class UserController extends Controller {
             Module::GROUPS,
             RoleRight::RIGHT_ALL,
             [
-                'org_id'       => $groupData->id
+                'group_id'       => $groupData->id
             ],
             [
-                'org_id'     => $groupData->id
+                'group_ids'     => [$groupData->id]
             ]
         );
 

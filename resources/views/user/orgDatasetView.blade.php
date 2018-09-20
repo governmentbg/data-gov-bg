@@ -8,10 +8,10 @@
         @else
             @include('partials.user-nav-bar', ['view' => 'organisation'])
         @endif
-        @if (isset($fromOrg) && !is_null($fromOrg))
-            @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
+        @if (isset($fromOrg))
+            @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $fromOrg])
         @elseif (isset($organisation))
-            @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $organisation])
+            @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $organisation])
         @endif
 
         @if (isset($dataset->name))
@@ -97,7 +97,7 @@
                             @foreach ($resources as $resource)
                                 @if ($buttons['view'])
                                 <div class="{{ $resource->reported ? 'signaled' : '' }}">
-                                @if (isset($fromOrg) && !is_null($fromOrg))
+                                @if (isset($fromOrg))
                                     <a href="{{ url('/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $fromOrg->uri ) }}">
                                 @else
                                     <a href="{{ url('/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $organisation->uri) }}">

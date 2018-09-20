@@ -8,7 +8,7 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'organisation'])
     @endif
-    @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $organisation])
+    @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $organisation])
     @include('partials.org-info', ['organisation' => $organisation])
     <div class="col-sm-9 col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>

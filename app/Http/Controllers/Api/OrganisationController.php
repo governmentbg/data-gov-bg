@@ -104,7 +104,10 @@ class OrganisationController extends ApiController
             } catch (\Exception $ex) {
                 $imageError = true;
 
-                if (isset($data['migrated_data'])) {
+                if (
+                    isset($data['migrated_data'])
+                    && Auth::user()->username == 'migrate_data'
+                ) {
                     $imageError = false;
                     $data['logo'] = null;
                 }
@@ -147,7 +150,10 @@ class OrganisationController extends ApiController
                 $organisation->parent_org_id = !empty($data['parent_org_id']) ? $data['parent_org_id'] : null;
                 $organisation->active = isset($data['active']) ? $data['active'] : 0;
 
-                if (isset($data['migrated_data'])) {
+                if (
+                    isset($data['migrated_data'])
+                    && Auth::user()->username == 'migrate_data'
+                ) {
                     if (!empty($data['created_by'])) {
                         $organisation->created_by = $data['created_by'];
                     }
@@ -1445,7 +1451,10 @@ class OrganisationController extends ApiController
 
         $errors = $validator->errors()->messages();
 
-        if (isset($post['migrated_data'])) {
+        if (
+            isset($post['migrated_data'])
+            && Auth::user()->username == 'migrate_data'
+        ) {
             if (!empty($post['created_by'])) {
                 $newGroup->created_by = $post['created_by'];
             }

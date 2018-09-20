@@ -75,7 +75,10 @@ class TagController extends ApiController
                 $newTag = [];
                 $newTag['name'] = $post['data']['name'];
 
-                if (isset($post['data']['migrated_data'])) {
+                if (
+                    isset($post['data']['migrated_data'])
+                    && Auth::user()->username == 'migrate_data'
+                ) {
                     if (!empty($post['data']['created_by'])) {
                         $newTag['created_by'] = $post['data']['created_by'];
                     }

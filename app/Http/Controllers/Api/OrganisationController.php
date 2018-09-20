@@ -1506,7 +1506,7 @@ class OrganisationController extends ApiController
 
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::GROUPS),
-                            'action'           => ActionsHistory::TYPE_ADD_GROUP,
+                            'action'           => ActionsHistory::TYPE_ADD,
                             'action_object'    => $newGroup->id,
                             'action_msg'       => 'Added group',
                         ];
@@ -1678,7 +1678,7 @@ class OrganisationController extends ApiController
 
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::GROUPS),
-                            'action'           => ActionsHistory::TYPE_EDIT_GROUP,
+                            'action'           => ActionsHistory::TYPE_MOD,
                             'action_object'    => $group->id,
                             'action_msg'       => 'Edited group',
                         ];
@@ -1760,7 +1760,7 @@ class OrganisationController extends ApiController
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::GROUPS),
-                    'action'           => ActionsHistory::TYPE_DEL_GROUP,
+                    'action'           => ActionsHistory::TYPE_DEL,
                     'action_object'    => $group->id,
                     'action_msg'       => 'Deleted group',
                 ];

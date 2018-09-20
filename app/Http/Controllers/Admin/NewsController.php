@@ -56,6 +56,7 @@ class NewsController extends AdminController
                 'name'     => 'abstract',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
+                'addClass' => 'js-summernote',
                 'required' => true,
             ],
             [
@@ -63,6 +64,7 @@ class NewsController extends AdminController
                 'name'     => 'body',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
+                'addClass' => 'js-summernote',
                 'required' => true,
             ],
         ];

@@ -24,10 +24,10 @@
                             <div> {{ __('custom.date_added') }} : {{ $news->created_at }}</div>
                             <div class="col-sm-12 p-l-none article-underline">
                                 <a href="{{ url('/news/view/' . $news->id ) }}">
-                                    <h2 class="m-t-xs">{{ $news->title}}</h2>
+                                    <h2 class="m-t-xs">{!! $news->title !!}</h2>
                                 </a>
                                 <p>
-                                    {{ $news->abstract }}
+                                    {!! $news->abstract !!}
                                 </p>
                                 <div class="col-sm-12 p-l-none text-right">
                                     <span><a href="{{ url('/news/view/' . $news->id ) }}">{{ __('custom.see_more') }}</a></span>

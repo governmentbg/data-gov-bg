@@ -7,12 +7,12 @@
         @else
             @include('partials.user-nav-bar', ['view' => 'organisation'])
         @endif
-        @if (isset($fromOrg) && !is_null($fromOrg))
-            @include('partials.org-nav-bar', ['view' => 'datasets', 'organisation' => $fromOrg])
+        @if (isset($fromOrg))
+            @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $fromOrg])
         @endif
         @if (isset($resource->name))
             <div class="row">
-                @if (isset($fromOrg) && !is_null($fromOrg))
+                @if (isset($fromOrg))
                     @include('partials.org-info', ['organisation' => $fromOrg])
                 @endif
                 <div class="col-sm-9 col-xs-12">

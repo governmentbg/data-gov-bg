@@ -19,6 +19,7 @@ use App\Translator\Translation;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 
@@ -503,6 +504,7 @@ class TagController extends ApiController
                 $data = $data->get();
 
                 $results = [];
+
                 if (!empty($data)) {
                     foreach ($data as $item) {
                         $results[] = [

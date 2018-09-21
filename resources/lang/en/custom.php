@@ -737,4 +737,7 @@ return [
     'name_exists' => 'There is an already existing page with that name',
     'delete_help_page_fail' => 'Help page deletion failure',
     'lsit_help_page_fail' => 'List Help pages failure',
+    'data_request_edit' => 'Edit data request',
+    'organisation' => 'Organisation',
+    'contact_person_org' => 'Contact person/Organisation',
 ];

@@ -99,11 +99,13 @@ class DataRequestController extends ApiController
                 if (!empty($orgAdmins)) {
                     foreach ($orgAdmins as $orgAdmin) {
                         $userData = User::where('id', $orgAdmin)->first();
-                        Mail::send('mail/newDataRequest', $mailData, function ($m) use ($userData) {
-                            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                            $m->to($userData->email, $userData->firstname);
-                            $m->subject(__('custom.new_data_request'));
-                        });
+                        if (!empty($userData->email)) {
+                            Mail::send('mail/newDataRequest', $mailData, function ($m) use ($userData) {
+                                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                                $m->to($userData->email, $userData->firstname);
+                                $m->subject(__('custom.new_data_request'));
+                            });
+                        }
                     }
                 }
             }
@@ -221,7 +223,7 @@ class DataRequestController extends ApiController
                 Module::add($logData);
 
                 return $this->successResponse();
-            } catch (QueryException $e) {
+            } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
         }

@@ -71,11 +71,11 @@ class NewsController extends AdminController
     }
 
     /**
-     * Lists pages
+     * Lists news
      *
      * @param Request $request
      *
-     * @return view with list of pages
+     * @return view with list of news
      */
     public function list(Request $request)
     {
@@ -126,7 +126,7 @@ class NewsController extends AdminController
     }
 
     /**
-     * Displays information for a given page
+     * Displays information for a given piece of news
      *
      * @param Request $request
      * @param integer $id
@@ -157,7 +157,7 @@ class NewsController extends AdminController
     }
 
     /**
-     * Edit a page based on id
+     * Edit a piece of news based on id
      *
      * @param Request $request
      * @param integer $id
@@ -230,6 +230,13 @@ class NewsController extends AdminController
         return view('admin/newsEdit', compact('class', 'fields', 'model'));
     }
 
+    /**
+     * Add a piece of news
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return view on success with messages
+     */
     public function add(Request $request)
     {
         if ($request->has('create')) {
@@ -286,7 +293,7 @@ class NewsController extends AdminController
     }
 
     /**
-     * Delete a page based on id
+     * Delete a piece of news based on id
      *
      * @param Request $request
      * @param integer $id

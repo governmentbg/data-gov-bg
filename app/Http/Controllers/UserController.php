@@ -1308,6 +1308,9 @@ class UserController extends Controller {
         $localeList = $locale->listLocale($localePost)->getData()->locale_list;
 
         if ($user) {
+            $result = User::getUserRoles($user->id);
+            session()->put('roles', $result);
+
             if ($request->has('save')) {
                 $validator = \Validator::make($request->all(), [
                     'firstname' => 'required|string|max:191',
@@ -2922,6 +2925,7 @@ class UserController extends Controller {
                         'password_confirm'  => $request->offsetGet('password_confirm'),
                         'role_id'           => $request->offsetGet('role_id'),
                         'org_id'            => $organisation->id,
+                        'invite'            => true,
                     ],
                 ];
 
@@ -5463,6 +5467,7 @@ class UserController extends Controller {
                         'password_confirm'  => $request->offsetGet('password_confirm'),
                         'role_id'           => $request->offsetGet('role_id'),
                         'org_id'            => $group->id,
+                        'invite'            => true,
                     ],
                 ];
 

@@ -521,6 +521,7 @@ class OrganisationController extends AdminController
                             'password_confirm'  => $request->offsetGet('password_confirm'),
                             'role_id'           => $request->offsetGet('role_id'),
                             'org_id'            => $organisation->id,
+                            'invite'            => true,
                         ],
                     ];
 

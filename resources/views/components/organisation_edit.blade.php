@@ -38,7 +38,7 @@
                                 <option
                                     value="{{ $parent->id }}"
                                     {{ !empty($model['parent_org_id']) && $parent->id == $model['parent_org_id']
-                                        ? ' selected'
+                                        ? 'selected'
                                         : ''
                                     }}
                                 >{{ $parent->name }}</option>

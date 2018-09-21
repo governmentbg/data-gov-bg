@@ -524,11 +524,8 @@ class UserController extends ApiController
                     'user'  => $user->firstname,
                     'hash'  => $user->hash_id,
                     'id'    => $user->id,
+                    'pass' => $request->data['password'],
                 ];
-
-                if (Role::isAdmin()) {
-                    $mailData = array_merge($mailData, ['pass' => $request->data['password']]);
-                }
 
                 if (!isset($request->data['migrated_data'])) {
                     Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
@@ -1220,7 +1217,7 @@ class UserController extends ApiController
                     'mail'  => $user->email
                 ];
 
-                if (Role::isAdmin()) {
+                if (!empty($data['invite'])) {
                     $mailData = array_merge($mailData, ['pass' => $request->data['password']]);
                 }
 

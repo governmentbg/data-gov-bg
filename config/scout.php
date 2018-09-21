@@ -55,8 +55,8 @@ return [
     */
 
     'chunk' => [
-        'searchable' => 500,
-        'unsearchable' => 500,
+        'searchable'    => 500,
+        'unsearchable'  => 500,
     ],
 
     /*
@@ -84,8 +84,8 @@ return [
     */
 
     'algolia' => [
-        'id' => env('ALGOLIA_APP_ID', ''),
-        'secret' => env('ALGOLIA_SECRET', ''),
+        'id'        => env('ALGOLIA_APP_ID', ''),
+        'secret'    => env('ALGOLIA_SECRET', ''),
     ],
 
     /*
@@ -99,7 +99,7 @@ return [
 
     'tntsearch' => [
         'storage'       => storage_path(), // place where the index files will be stored
-        'fuzziness'     => env('TNTSEARCH_FUZZINESS', true),
+        'fuzziness'     => env('TNTSEARCH_FUZZINESS', false),
         'fuzzy'         => [
             'prefix_length'     => 2,
             'max_expansions'    => 50,

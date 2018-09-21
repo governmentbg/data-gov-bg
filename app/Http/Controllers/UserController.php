@@ -2925,6 +2925,7 @@ class UserController extends Controller {
                         'password_confirm'  => $request->offsetGet('password_confirm'),
                         'role_id'           => $request->offsetGet('role_id'),
                         'org_id'            => $organisation->id,
+                        'invite'            => true,
                     ],
                 ];
 
@@ -5466,6 +5467,7 @@ class UserController extends Controller {
                         'password_confirm'  => $request->offsetGet('password_confirm'),
                         'role_id'           => $request->offsetGet('role_id'),
                         'org_id'            => $group->id,
+                        'invite'            => true,
                     ],
                 ];
 

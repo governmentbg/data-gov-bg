@@ -203,7 +203,9 @@
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <h2><a href="{{ url('/data/view/'. $dataset->uri) }}">{{ $dataset->name }}</a></h2>
+                            <a href="{{ url('/data/view/'. $dataset->uri) }}">
+                                <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
+                            </a>
                             <p>{!! nl2br(e($dataset->descript)) !!}</p>
                             <div class="col-sm-12 p-l-none">
                                 <div class="tags pull-left">

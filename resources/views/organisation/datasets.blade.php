@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         @include('partials.sidebar-org')
-        <div class="col-sm-9 col-xs-12 p-sm page-content">
+        <div class="col-sm-9 col-xs-12 p-h-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">
                     <div class="row">
@@ -200,8 +200,10 @@
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <h2><a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">{{ $dataset->name }}</a></h2>
-                            <p>{{ $dataset->descript }}</p>
+                            <a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">
+                                <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
+                            </a>
+                            <p>{!! nl2br(e($dataset->descript)) !!}</p>
                             <div class="col-sm-12 p-l-none">
                                 <div class="tags pull-left">
                                     @if (isset($dataset->tags) && count($dataset->tags) > 0)

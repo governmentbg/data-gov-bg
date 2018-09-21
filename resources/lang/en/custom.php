@@ -728,4 +728,13 @@ return [
     'november' => 'November',
     'december' => 'December',
     'missing_most_active_org' => 'No such organisation yet',
+    'add_help_section_fail' => 'Add Help section failure',
+    'edit_help_section_fail' => 'Help section edit failure',
+    'delete_help_section_fail' => 'Help section deletion failure',
+    'list_help_section_fail' => 'List Help sections failure',
+    'add_help_page_fail' => 'Add Help page failure',
+    'edit_help_page_fail' => 'Help page edit failure',
+    'name_exists' => 'There is an already existing page with that name',
+    'delete_help_page_fail' => 'Help page deletion failure',
+    'lsit_help_page_fail' => 'List Help pages failure',
 ];

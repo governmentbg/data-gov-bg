@@ -107,7 +107,7 @@
                                                     <option
                                                         value="{{ $organisation->id }}"
                                                         {{ $organisation->id == $dataRequest->org_id
-                                                            ? ' selected'
+                                                            ? 'selected'
                                                             : ''
                                                         }}
                                                     >{{ $organisation->name }}</option>
@@ -135,7 +135,7 @@
                                                     <option
                                                         value="{{ $key }}"
                                                         {{ $key == $dataRequest->status
-                                                            ? ' selected'
+                                                            ? 'selected'
                                                             : ''
                                                         }}
                                                     >{{ uctrans('custom.'. $status) }}</option>

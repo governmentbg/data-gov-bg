@@ -39,7 +39,7 @@
                                 <option
                                     value="{{ $parent->id }}"
                                     {{ $parent->id == old('parent_org_id')
-                                        ? ' selected'
+                                        ? 'selected'
                                         : ''
                                     }}
                                 >{{ $parent->name }}</option>

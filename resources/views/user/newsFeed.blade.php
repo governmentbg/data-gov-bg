@@ -41,7 +41,7 @@
                             >
                                 <option value="">{{  __($filterData['label']) }}</option>
                                 @foreach ($filterData['data'] as $id => $name)
-                                    <option value="{{ $id }}"{{ ($id == $objIdFilter) ? ' selected' : ''}}>{{ $name }}</option>
+                                    <option value="{{ $id }}"{{ ($id == $objIdFilter) ? 'selected' : ''}}>{{ $name }}</option>
                                 @endforeach
                             </select>
                         </div>

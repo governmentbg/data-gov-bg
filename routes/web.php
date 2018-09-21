@@ -344,6 +344,11 @@ Route::post('organisation/resource/sendSignal', 'OrganisationController@sendSign
 
 Route::match(['get', 'post'], 'organisation/{uri}/chronology', 'OrganisationController@chronology');
 
+Route::match(['get', 'post'], 'groups', 'GroupController@list')->name('groups');
+Route::match(['get', 'post'], 'groups/view/{uri}', 'GroupController@view');
+Route::post('groups/delete/{id}', 'GroupController@delete');
+Route::match(['get', 'post'], 'groups/chronology/{uri}', 'GroupController@chronology');
+
 Route::get('user', 'UserController@index');
 Route::post('user', 'UserController@index');
 

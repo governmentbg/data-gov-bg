@@ -373,6 +373,7 @@ return [
     'delete_group_fail' => 'Delete group failure',
     'get_group_fail' => 'Get group details failure',
     'search_group_fail' => 'Search groups failure',
+    'list_groups_fail' => 'List groups failure',
     'list_org_types_fail' => 'List organisation types failure',
     'add_page_fail' => 'Page add failure',
     'edit_page_fail' => 'Page edit failure',
@@ -760,4 +761,5 @@ return [
     'main_cat' => 'Main category',
     'edit_subcategory' => 'Edit subcategory',
     'add_category' => 'Add category',
+    'groups_list' => 'Groups list',
 ];

@@ -27,8 +27,10 @@
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/summernote/summernote-bs4.css') }}" rel="stylesheet">
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
+    @yield('css')
 </head>
-<body class="theme-{{ $class }}">
+<body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">
         <div class="nano-content">
             <nav class="navbar navbar-default navbar-static-top js-head">
@@ -213,5 +215,7 @@
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
+    <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
+    @yield('js')
 </body>
 </html>

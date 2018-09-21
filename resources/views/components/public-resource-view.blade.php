@@ -12,21 +12,25 @@
                                 </a>
                             </div>
                         </div>
-                    @elseif (!empty($user))
+                    @else
                         <div class="col-sm-12 col-xs-12 p-l-r-none">
                             <div class="pull-left">
                                 <h2>
                                     {{ utrans('custom.author') }}:
-                                    <a href="{{ url('/user/profile/'. $user->id) }}">
-                                        {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
-                                    </a>
+                                    @if (!empty($user))
+                                        <a href="{{ url('/user/profile/'. $user->id) }}">
+                                            {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
+                                        </a>
+                                    @else
+                                        <span>{{ $dataset->created_by }}</span>
+                                    @endif
                                 </h2>
                             </div>
                         </div>
                     @endif
                     </div>
                     <div>
-                        <div class="col-sm-7 col-xs-12 p-l-none">
+                        <div class="col-xs-12 p-l-none">
                             <h3>
                                 {{ uctrans('custom.dataset') }}:&nbsp;
                                 <a href="{{ url($rootUrl .'/'. $dataset->uri) }}">{{ $dataset->name }}</a>
@@ -118,7 +122,7 @@
                 <div class="article col-xs-12 m-t-md m-b-md">
                     <div class="col-sm-12 p-l-none">
                         <!-- signals -->
-                        @if ($showSignals && !empty($resource->signals))
+                        @if (!empty($resource->signals))
                             @foreach ($resource->signals as $signal)
                                 <div class="col-sm-12 pull-left m-t-md p-l-none">
                                     <div class="comments">

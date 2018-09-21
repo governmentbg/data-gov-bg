@@ -5,6 +5,6 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.public-dataset-reported-nav-bar')
-        @include('components.public-resource-view', ['rootUrl' => '/data/reported/view', 'showSignals' => true])
+        @include('components.public-resource-view', ['rootUrl' => '/data/reported/view'])
     </div>
 @endsection

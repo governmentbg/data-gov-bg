@@ -4,9 +4,7 @@
     <div class="container">
         @include('partials.alerts-bar')
         <div class="row">
-            <div class="col-sm-3 sidenav p-l-r-none">
-            </div>
-            <div class="col-sm-9 col-xs-12 p-l-r-none">
+            <div class="col-sm-9 col-xs-12 col-md-offset-3 p-h-sm p-l-r-none">
                 <div class="filter-content">
                     <div class="col-md-12">
                         <div class="row">

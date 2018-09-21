@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <div class="col-xs-12 col-lg-10 m-t-md col-lg-offset-1">
+    <div class="col-xs-12 m-t-md col-lg-offset-1">
         <div class="col-xs-12 col-sm-12">
             <div class="filter-content">
                 <div class="col-md-12 col-lg-offset-2">
@@ -12,7 +12,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a href="{{ url('/users/list') }}">{{ trans_choice(__('custom.users'), 2) }}</a></li>
                                     <li><a href="{{ url('/user/profile/'. $user->id) }}">{{ trans_choice(__('custom.users'), 1) }}</a></li>
-                                    <li><a href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ route('data', ['user' => [$user->id]]) }}">{{ __('custom.data') }}</a></li>
                                     <li><a class="active" href="{{ url('/user/profile/'. $user->id .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>

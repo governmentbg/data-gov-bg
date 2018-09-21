@@ -1308,6 +1308,9 @@ class UserController extends Controller {
         $localeList = $locale->listLocale($localePost)->getData()->locale_list;
 
         if ($user) {
+            $result = User::getUserRoles($user->id);
+            session()->put('roles', $result);
+
             if ($request->has('save')) {
                 $validator = \Validator::make($request->all(), [
                     'firstname' => 'required|string|max:191',

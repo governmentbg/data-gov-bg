@@ -179,7 +179,7 @@ return [
 
         Mcamara\LaravelLocalization\LaravelLocalizationServiceProvider::class,
         Laravel\Scout\ScoutServiceProvider::class,
-        TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
+        App\Providers\TNTSearchScoutServiceProvider::class,
     ],
 
     /*
@@ -229,6 +229,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'LaravelLocalization' => Mcamara\LaravelLocalization\Facades\LaravelLocalization::class,
+        DevDojo\Chatter\ChatterServiceProvider::class,
 
     ],
 

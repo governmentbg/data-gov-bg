@@ -13,7 +13,7 @@
             {{ csrf_field() }}
             <div class="form-group">
                 <span class="required"> {{ __('custom.required') }} *</span>
-                <h4>{{ __('custom.short_data_descr') }}&nbsp;<span class="required">*</span></h4>
+                <h4>{{ __('custom.short_data_descr') }} <span class="required">*</span></h4>
                 <span class="info">{{ __('custom.user_data_descr') }}</span>
                 <textarea class="form-control" name="description" required maxlength="191"></textarea>
             </div>
@@ -44,7 +44,7 @@
                 <textarea class="form-control" name="notes"></textarea>
             </div>
             <div class="form-group">
-            <h4> {{ __('custom.organisation') }} </h4>
+            <h4> {{ __('custom.organisation') }} <span class="required">*</span></h4>
                 <select
                     class="js-autocomplete form-control"
                     name="org_id"
@@ -58,7 +58,7 @@
                             <option
                                 value="{{ $organisation->id }}"
                                 {{ $organisation->id == old('organisation->id')
-                                    ? ' selected'
+                                    ? 'selected'
                                     : ''
                                 }}
                             >{{ $organisation->name }}</option>

@@ -151,7 +151,22 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('toCSV', 'Api\ConversionController@toCSV');
     Route::post('toKML', 'Api\ConversionController@toKML');
     Route::post('toRDF', 'Api\ConversionController@toRDF');
+
+    Route::post('addHelpSection', 'Api\HelpController@addHelpSection');
+    Route::post('editHelpSection', 'Api\HelpController@editHelpSection');
+    Route::post('deleteHelpSection', 'Api\HelpController@deleteHelpSection');
+    Route::post('isSectionParent', 'Api\HelpController@isParent');
+
+    Route::post('addHelpPage', 'Api\HelpController@addHelpPage');
+    Route::post('editHelpPage', 'Api\HelpController@editHelpPage');
+    Route::post('deleteHelpPage', 'Api\HelpController@deleteHelpPage');
 });
+Route::post('listHelpSections', 'Api\HelpController@listHelpSections');
+Route::post('listHelpSubsections', 'Api\HelpController@listHelpSubsections');
+
+Route::post('listHelpPages', 'Api\HelpController@listHelpPages');
+Route::post('getHelpPageDetails', 'Api\HelpController@getHelpPageDetails');
+
 Route::post('sendSignal', 'Api\SignalController@sendSignal');
 
 Route::post('register', 'Api\UserController@register');

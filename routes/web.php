@@ -116,6 +116,24 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/documents/edit/{id}', 'Admin\DocumentController@edit');
         Route::match(['get', 'post'], '/admin/documents/delete/{id}', 'Admin\DocumentController@delete');
 
+        Route::match(['get', 'post'], '/admin/forum/discussions/list', 'Admin\ForumController@listDiscussions');
+        Route::match(['get', 'post'], '/admin/forum/discussions/add', 'Admin\ForumController@addDiscussion');
+        Route::match(['get', 'post'], '/admin/forum/discussions/view/{id}', 'Admin\ForumController@viewDiscussion');
+        Route::match(['get', 'post'], '/admin/forum/discussions/edit/{id}', 'Admin\ForumController@editDiscussion');
+        Route::match(['get', 'post'], '/admin/forum/discussions/delete/{id}', 'Admin\ForumController@deleteDiscussion');
+
+        Route::match(['get', 'post'], '/admin/forum/categories/list', 'Admin\ForumController@listCategories');
+        Route::match(['get', 'post'], '/admin/forum/categories/add', 'Admin\ForumController@addCategory');
+        Route::match(['get', 'post'], '/admin/forum/categories/view/{id}', 'Admin\ForumController@viewCategory');
+        Route::match(['get', 'post'], '/admin/forum/categories/edit/{id}', 'Admin\ForumController@editCategory');
+        Route::match(['get', 'post'], '/admin/forum/categories/delete/{id}', 'Admin\ForumController@deleteCategory');
+
+        Route::match(['get', 'post'], '/admin/forum/subcategories/list/{id}', 'Admin\ForumController@listSubcategories');
+        Route::match(['get', 'post'], '/admin/forum/subcategories/add/{id}', 'Admin\ForumController@addSubcategory');
+        Route::match(['get', 'post'], '/admin/forum/subcategories/view/{id}', 'Admin\ForumController@viewSubcategory');
+        Route::match(['get', 'post'], '/admin/forum/subcategories/edit/{id}', 'Admin\ForumController@editSubcategory');
+        Route::match(['get', 'post'], '/admin/forum/subcategories/delete/{id}', 'Admin\ForumController@deleteSubcategory');
+
         Route::match(['get', 'post'], '/admin/roles', 'Admin\RoleController@list');
         Route::match(['get', 'post'], '/admin/roles/add', 'Admin\RoleController@addRole');
         Route::match(['get', 'post'], '/admin/roles/edit/{id}', 'Admin\RoleController@editRole');
@@ -262,6 +280,10 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/news/delete/{id}', 'Admin\NewsController@delete');
         Route::match(['get', 'post'], '/admin/news/edit/{id}', 'Admin\NewsController@edit');
         Route::match(['get', 'post'], '/admin/news/add', 'Admin\NewsController@add');
+
+        Route::match(['get', 'post'], '/admin/data-requests/list', 'Admin\DataRequestController@listDataRequests');
+        Route::match(['get', 'post'], '/admin/data-request/edit/{id}', 'Admin\DataRequestController@editDataRequest');
+        Route::match(['get', 'post'], '/admin/data-request/delete/{id}', 'Admin\DataRequestController@deleteDataRequest');
     });
 });
 

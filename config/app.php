@@ -179,7 +179,7 @@ return [
 
         Mcamara\LaravelLocalization\LaravelLocalizationServiceProvider::class,
         Laravel\Scout\ScoutServiceProvider::class,
-        TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
+        App\Providers\TNTSearchScoutServiceProvider::class,
     ],
 
     /*

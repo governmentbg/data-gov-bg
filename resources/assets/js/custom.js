@@ -404,3 +404,30 @@ $(function() {
         }
     });
 });
+
+// Colorpicker functionality
+$(function() {
+    $(document).ready(function() {
+        if ($('.color-picker').length) {
+            $('.color-picker').colorpicker({ format: 'hex' });
+
+            $('.color-picker').colorpicker().on('changeColor', function() {
+                var $picker = $('.colorpicker').find('.colorpicker-color').children();
+
+                if ($picker.length) {
+                    $('.js-input-color').val(rgb2hex($picker.css('background-color')));
+                }
+            });
+        }
+    });
+
+    function rgb2hex(rgb) {
+        rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+
+        return (rgb && rgb.length === 4)
+            ? "#" + ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+              ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+              ("0" + parseInt(rgb[3],10).toString(16)).slice(-2)
+            : '';
+    }
+});

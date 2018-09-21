@@ -138,6 +138,12 @@
                                 href="{{ url('/admin/data-requests/list') }}"
                             >{{ ultrans('custom.data_requests') }}</a>
                         </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'forum' ? 'active' : '' }}"
+                                href="{{ url('/admin/forum/discussions/list') }}"
+                            >{{ ultrans('custom.forum') }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>

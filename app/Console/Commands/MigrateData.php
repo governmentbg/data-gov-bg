@@ -4,9 +4,11 @@ namespace App\Console\Commands;
 
 use Illuminate\Http\Request;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use App\User;
 use App\Tags;
 use App\DataSet;
+use App\Category;
 use App\Resource;
 use App\TermsOfUse;
 use App\UserFollow;
@@ -19,6 +21,7 @@ use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
+use App\Http\Controllers\Api\CategoryController as ApiCategories;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
@@ -57,19 +60,27 @@ class MigrateData extends Command
      */
     public function handle()
     {
-        if ($this->argument('direction') == 'up') {
-            if ($this->argument('source') == null) {
-                $this->error('No source given');
-            } else {
-                $this->up();
-            }
-        } else if ($this->argument('direction') == 'down') {
-            $this->down();
-        } else {
-            $this->error('No direction given');
-        }
+        try {
+            $this->info('Data migration has started.');
+            $this->line('');
 
-        $this->error($this->argument('direction'));
+            if ($this->argument('direction') == 'up') {
+                if ($this->argument('source') == null) {
+                    $this->error('No source given.');
+                } else {
+                    $this->up();
+                }
+            } else if ($this->argument('direction') == 'down') {
+                $this->down();
+            } else {
+                $this->error('No direction given.');
+            }
+
+            $this->info('Data migration finished successfully!');
+        } catch (\Exception $ex) {
+            $this->error('Data migration failed!');
+            Log::error($ex->getMessage());
+        }
     }
 
     private function up ()
@@ -94,73 +105,63 @@ class MigrateData extends Command
     private function down ()
     {
         $migrateUser = User::where('username', 'migrate_data')->value('id');
-        $users = User::where('created_by',User::where('username', 'migrate_data')->value('id'))->get();
+        $users = User::where('created_by', $migrateUser)->get();
 
         foreach ($users as $user) {
             $userIds[] = $user->id;
         }
 
-        $organisations = Organisation::where('created_by', User::where('username', 'migrate_data')->value('id'))->get();
+        $organisations = Organisation::where('created_by', $migrateUser)->get();
 
         foreach ($organisations as $org) {
             $orgIds[] = $org->id;
         }
 
-        $dataSets = DataSet::where('updated_by', User::where('username', 'migrate_data')->value('id'))->get();
+        $dataSets = DataSet::whereIn('created_by', $userIds)->get();
 
         foreach ($dataSets as $dataSet) {
             $dataSetIds[] = $dataSet->id;
         }
 
-        $tags = Tags::where('created_by', User::where('username', 'migrate_data')->value('id'))->get();
+        $tags = Tags::where('created_by', $migrateUser)->get();
 
         foreach ($tags as $tag) {
             $tagsIds[] = $tag->id;
         }
 
-        $termsOfUse = TermsOfUse::where('created_by', User::where('username', 'migrate_data')->value('id'))->get();
+        $termsOfUse = TermsOfUse::where('created_by', $migrateUser)->get();
 
         foreach ($termsOfUse as $term) {
             $termsIds[] = $term->id;
         }
 
-        $resources = Resource::whereIn('data_set_id', $dataSetIds)->get();
-
-        foreach ($resources as $res) {
-            $resourcesIds[] = $res->id;
+        if (isset($dataSetIds)) {
+            Resource::whereIn('data_set_id', $dataSetIds)->forceDelete();
+            DataSetTags::whereIn('data_set_id', $dataSetIds)->delete();
+            UserFollow::whereIn('data_set_id', $dataSetIds)->delete();
         }
 
-        $dataSetTags = DataSetTags::whereIn('data_set_id', $dataSetIds)->get();
-
-        foreach ($dataSetTags as $dataSetTag) {
-            $dataSetTagsIds[] = $dataSetTag->id;
+        if (isset($userIds)) {
+            UserToOrgRole::whereIn('user_id', $userIds)->delete();
+            UserFollow::whereIn('user_id', $userIds)->delete();
+            UserSetting::whereIn('user_id', $userIds)->delete();
+            DataSet::whereIn('created_by', $userIds)->forceDelete();
+            User::whereIn('id', $userIds)->forceDelete();
         }
 
-        $userToOrgRole = UserToOrgRole::whereIn('user_id', $userIds)->get();
-
-        foreach ($userToOrgRole as $usrToOrg) {
-            $userToOrgIds[] = $usrToOrg->id;
+        if (isset($orgIds)) {
+            UserToOrgRole::whereIn('org_id', $orgIds)->delete();
+            UserFollow::whereIn('org_id', $orgIds)->delete();
+            Organisation::whereIn('id', $orgIds)->forceDelete();
         }
 
-        $userSettings = UserSetting::whereIn('user_id', $userIds)->get();
-
-        foreach ($userSettings as $setting) {
-            $settingsIds[] = $setting->id;
+        if (isset($tagsIds)) {
+            Tags::whereIn('id', $tagsIds)->delete();
         }
 
-        Resource::whereIn('data_set_id', $dataSetIds)->forceDelete();
-        DataSetTags::whereIn('data_set_id', $dataSetIds)->delete();
-        DataSet::whereIn('id', $dataSetIds)->forceDelete();
-        UserToOrgRole::whereIn('user_id', $userIds)->delete();
-        UserToOrgRole::whereIn('org_id', $orgIds)->delete();
-        UserFollow::whereIn('user_id', $userIds)->delete();
-        UserFollow::whereIn('org_id', $orgIds)->delete();
-        UserFollow::whereIn('data_set_id', $dataSetIds)->delete();
-        UserSetting::whereIn('user_id', $userIds)->delete();
-        User::whereIn('id', $userIds)->forceDelete();
-        Organisation::whereIn('id', $orgIds)->forceDelete();
-        Tags::whereIn('id', $tagsIds)->delete();
-        TermsOfUse::whereIn('id', $termsIds)->delete();
+        if (isset($termsIds)) {
+            TermsOfUse::whereIn('id', $termsIds)->delete();
+        }
     }
 
     private function requestUrl($uri, $params = null, $header = null)
@@ -532,7 +533,8 @@ class MigrateData extends Command
         $this->line('Users total: '. (isset($response['result']) ? count($response['result']) : '0'));
         $this->info('Users successful: '. (isset($users['success']) ? count($users['success']) : '0'));
         $this->error('Users failed: '.(isset($users['error']) ? count($users['error']) : '0'));
-        $this->line('Users` dataset total: '. $numPackage);
+        $this->line('Users` dataset total count: '. $numPackage);
+        $this->line('Users with data sets '. count($usersWithDataSets));
         $this->line('');
 
         $userData = [
@@ -606,6 +608,7 @@ class MigrateData extends Command
         if (!empty($output)) {
             foreach ($output as $res) {
                 $alreadySaved = DataSet::where('uri', $res['id'])->first();
+                $defaultCategory = 14;
 
                 if ($alreadySaved) {
                     continue;
@@ -626,12 +629,14 @@ class MigrateData extends Command
                     foreach ($res['tags'] as $tag) {
                         array_push($tags, $tag['display_name']);
                     }
+
+                    $category = $this->pickCategory($tags);
                 }
 
                 $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
 
                 //TO DO check categories
-                $newData['data']['category_id'] = 1;
+                $newData['data']['category_id'] = $category;
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = "bg";
@@ -1031,5 +1036,278 @@ class MigrateData extends Command
         $this->line('User to role total: '. $total);
         $this->info('User to role successful: '. $success);
         $this->error('User to role failed: '. $errors);
+    }
+
+    private function pickCategory($tags)
+    {
+        $categories = [
+            '1' => 0,  // 1 => 'Селско стопанство, риболов и аква култури, горско стопанство, храни',
+            '2' => 0,  // 2 => 'Образование, култура и спорт',
+            '3' => 0,  // 3 => 'Околна среда',
+            '4' => 0,  // 4 => 'Енергетика',
+            '5' => 0,  // 5 => 'Транспорт',
+            '6' => 0,  // 6 => 'Наука и технологии',
+            '7' => 0,  // 7 => 'Икономика и финанси',
+            '8' => 0,  // 8 => 'Население и социални условия',
+            '9' => 0,  // 9 => 'Правителство, публичен сектор',
+            '10' => 0, // 10 => 'Здравеопазване',
+            '11' => 0, // 11 => 'Региони, градове',
+            '12' => 0, // 12 => 'Правосъдие, правна система, обществена безопасност',
+            '13' => 0, // 13 => 'Международни въпроси'
+            '14' => 0, // 14 => 'Некатегоризирани'
+        ];
+
+        foreach($tags as $tag) {
+            $tag = strtolower($tag);
+
+            switch ($tag) {
+                case strpos($tag, 'животн'):
+                case strpos($tag, 'храни'):
+                case strpos($tag, 'горс'):
+                case strpos($tag, 'горa'):
+                case strpos($tag, 'стопанс'):
+                case strpos($tag, 'аренд'):
+                case strpos($tag, 'земедел'):
+                case strpos($tag, 'аренд'):
+                case strpos($tag, 'извор'):
+                case strpos($tag, 'селско'):
+                case strpos($tag, 'кладен'):
+                case strpos($tag, 'рент'):
+                case strpos($tag, 'комбайн'):
+                case strpos($tag, 'стопанск'):
+                case strpos($tag, 'язовир'):
+                case strpos($tag, 'язовирите'):
+                case strpos($tag, 'нив'):
+                case strpos($tag, 'лесоустройство'):
+                case strpos($tag, 'лов'):
+                case strpos($tag, 'мери'):
+                case strpos($tag, 'минералн'):
+                case strpos($tag, 'паша'):
+                case strpos($tag, 'пасища'):
+                case strpos($tag, 'пчел'):
+                case 'renta':
+                case 'agriculture':
+                case 'мери и пасища':
+                case 'zemedelska tehnika':
+                case 'агростатистика':
+                case 'земеделска и горска техника':
+                    $categories['1']++; //Селско стопанство, риболов и аква култури, горско стопанство, храни
+
+                    break;
+                case strpos($tag, 'гимназии'):
+                case strpos($tag, 'образование'):
+                case strpos($tag, 'кандидатства'):
+                case strpos($tag, 'училищ'):
+                case strpos($tag, 'читалищ'):
+                case strpos($tag, 'ученици'):
+                case strpos($tag, 'ясли'):
+                case strpos($tag, 'ученик'):
+                case strpos($tag, 'стипенд'):
+                case strpos($tag, 'оцен'):
+                case strpos($tag, 'клас'):
+                case strpos($tag, 'изпит'):
+                case strpos($tag, 'градини'):
+                case strpos($tag, 'култур'):
+                case strpos($tag, 'спорт'):
+                case strpos($tag, 'футбол'):
+                case strpos($tag, 'карате'):
+                case strpos($tag, 'атлетика'):
+                case strpos($tag, 'паметни'):
+                case strpos($tag, 'резултат'):
+                case strpos($tag, 'турист'):
+                case strpos($tag, 'туризъм'):
+                case 'академични длъжности':
+                case 'военни':
+                case 'план прием':
+                case 'лека атлетика':
+                case 'паметници на културата':
+                    $categories['2']++; //Образование, култура и спорт
+
+                    break;
+                case strpos($tag, 'вуздух'):
+                case strpos($tag, 'въглероден'):
+                case strpos($tag, 'диоксид'):
+                case strpos($tag, 'дървета'):
+                case strpos($tag, 'отпадъци'):
+                case strpos($tag, 'прахови'):
+                case strpos($tag, 'отпадъ'):
+                case strpos($tag, 'битови'):
+                case strpos($tag, 'замърсяване'):
+                case strpos($tag, 'води'):
+                case strpos($tag, 'метролог'):
+                case strpos($tag, 'еколог'):
+                case strpos($tag, 'околна'):
+                case strpos($tag, 'пречиств'):
+                case strpos($tag, 'разделно'):
+                case strpos($tag, 'хартия'):
+                case strpos($tag, 'картон'):
+                case strpos($tag, 'пластмас'):
+                case strpos($tag, 'пунктове'):
+                case 'агенция по геодезия':
+                case 'атмосферен вуздух':
+                case 'площадки отпадъци':
+                case 'битови отпадъци':
+                case 'фини прахови частици':
+                case 'фпч':
+                case 'въглероден оксид':
+                     $categories['3']++; //Околна среда
+
+                     break;
+                case strpos($tag, 'електромери'):
+                case strpos($tag, 'белене'):
+                    $categories['4']++; //Eнергетика
+
+                    break;
+                case strpos($tag, 'автобус'):
+                case strpos($tag, 'транспорт'):
+                case strpos($tag, 'инфраструктур'):
+                case strpos($tag, 'летищ'):
+                case strpos($tag, 'маршрут'):
+                case strpos($tag, 'линии'):
+                case strpos($tag, 'мпс'):
+                case strpos($tag, 'път'):
+                case strpos($tag, 'превоз'):
+                case strpos($tag, 'железопътен'):
+                case strpos($tag, 'влак'):
+                case strpos($tag, 'такси'):
+                case strpos($tag, 'разписан'):
+                case 'моторни-превозни средства':
+                case 'автогара':
+                case 'автомобил':
+                    $categories['5']++; //Tранспорт
+
+                    break;
+                case strpos($tag, 'изследвания'):
+                case strpos($tag, 'експерименти'):
+                case strpos($tag, 'авторски'):
+                case strpos($tag, 'информацион'):
+                case strpos($tag, 'нау'):
+                case 'Hackathon':
+                case 'авторски права':
+                    $categories['6']++; //Наука и технологии
+
+                    break;
+                case strpos($tag, 'икономическ'):
+                case strpos($tag, 'финанс'):
+                case strpos($tag, 'кредит'):
+                case strpos($tag, 'данъчн'):
+                case strpos($tag, 'потребление'):
+                case strpos($tag, 'търговия'):
+                case strpos($tag, 'данъчн'):
+                case strpos($tag, 'икономи'):
+                case strpos($tag, 'бюджет'):
+                case strpos($tag, 'себра'):
+                case strpos($tag, 'дарен'):
+                case 'SEBRA':
+                    $categories['7']++; //Икономика и финанси
+
+                    break;
+                case strpos($tag, 'пенсии'):
+                case strpos($tag, 'осигуряване'):
+                case strpos($tag, 'обезщетения'):
+                case strpos($tag, 'безработица'):
+                case strpos($tag, 'настаняване'):
+                case strpos($tag, 'заетост'):
+                case strpos($tag, 'социал'):
+                case strpos($tag, 'инвалид'):
+                case strpos($tag, 'Професионална'):
+                case strpos($tag, 'увреждан'):
+                case 'census':
+                case 'Агенция за хората с увреждания специализирани предприятия':
+                case 'Агенция по заетостта':
+                case 'Бюро по труда':
+                    $categories['8']++; //Население и социални условия
+
+                    break;
+                case strpos($tag, 'избори'):
+                case strpos($tag, 'elections'):
+                case strpos($tag, 'законодателство'):
+                case strpos($tag, 'гласуване'):
+                case strpos($tag, 'изборни'):
+                case strpos($tag, 'политически'):
+                case strpos($tag, 'народ'):
+                case strpos($tag, 'референдум'):
+                case strpos($tag, 'президент'):
+                case strpos($tag, 'разрешител'):
+                case strpos($tag, 'цик'):
+                case 'proekti':
+                    $categories['9']++; //Правителство, публичен сектор
+
+                    break;
+                case strpos($tag, 'зъбо'):
+                case strpos($tag, 'аптеки'):
+                case strpos($tag, 'лекар'):
+                case strpos($tag, 'дрогерии'):
+                case strpos($tag, 'помощ'):
+                case strpos($tag, 'дентал'):
+                case strpos($tag, 'медицин'):
+                case strpos($tag, 'фармацевтич'):
+                case strpos($tag, 'хоспис'):
+                case strpos($tag, 'болести'):
+                case strpos($tag, 'боличн'):
+                case strpos($tag, 'здрав'):
+                case strpos($tag, 'лечеб'):
+                case strpos($tag, 'медико'):
+                case 'здравеопазване':
+                case 'магистър-фармацевти':
+                    $categories['10']++; //Здравеопазване
+
+                    break;
+                case strpos($tag, 'общин'):
+                case strpos($tag, 'област'):
+                case strpos($tag, 'домашни'):
+                case strpos($tag, 'градоустройств'):
+                case strpos($tag, 'бездомни'):
+                case strpos($tag, 'регион'):
+                case strpos($tag, 'география'):
+                case strpos($tag, 'безстопанствени'):
+                case strpos($tag, 'кадаст'):
+                case strpos($tag, 'населени'):
+                case strpos($tag, 'общинска'):
+                case strpos($tag, 'кмет'):
+                case strpos($tag, 'столич'):
+                case strpos($tag, 'общ.'):
+                case strpos($tag, 'обл.'):
+                case strpos($tag, 'обс'):
+                case strpos($tag, 'община'):
+                    $categories['11']++; //Региони, градове, общини
+
+                    break;
+                case strpos($tag, 'юрист'):
+                case strpos($tag, 'юридически'):
+                case strpos($tag, 'правни'):
+                case strpos($tag, 'право'):
+                case strpos($tag, 'закон'):
+                case strpos($tag, 'убийств'):
+                case strpos($tag, 'престъпления'):
+                case 'prestupleniya_sreshtu_lichnostta _sobstvenostta_ikonomicheski':
+                    $categories['12']++; //Правосъдие, правна система, обществена безопасност
+
+                    break;
+                case strpos($tag, 'европ'):
+                case strpos($tag, 'ЕС'):
+                case strpos($tag, 'досиета'):
+                case strpos($tag, 'нато'):
+                case strpos($tag, 'война'):
+                case strpos($tag, 'военно оборудване'):
+                case strpos($tag, 'международни споразумения'):
+                case strpos($tag, 'външна политика'):
+                case strpos($tag, 'международ'):
+                case 'european elections':
+                    $categories['13']++; //Международни въпроси
+
+                    break;
+            }
+        }
+
+        $categoriesIndex = array_flip($categories);
+        $selectedCategory = $categoriesIndex[max($categories)];
+
+        if (max($categories) == 0) {
+            $selectedCategory = $categories['14'];
+        }
+
+        return $selectedCategory;
+
     }
 }

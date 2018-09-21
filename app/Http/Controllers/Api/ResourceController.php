@@ -202,17 +202,16 @@ class ResourceController extends ApiController
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
                     'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                    'doc'           => $id,
+                    'doc'           => $id .'_1',
+                    'version'       => 1,
+                    'resource_id'   => $id
                 ]);
 
-                $resource->es_id = $elasticDataSet->id;
-                $resource->save();
-
                 \Elasticsearch::index([
-                    'body'  => ['rows' => $post['data']],
-                    'index' => $index,
-                    'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id,
+                    'body'      => ['rows' => $post['data']],
+                    'index'     => $index,
+                    'type'      => ElasticDataSet::ELASTIC_TYPE,
+                    'id'        => $id .'_1',
                 ]);
 
                 DB::commit();
@@ -281,8 +280,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'                 => 'required_with:locale|max:191',
-                'name.bg'              => 'required_without:locale|string|max:191',
+                'name'                 => 'sometimes|required_with:locale|max:191',
+                'name.bg'              => 'sometimes|required_without:locale|string|max:191',
                 'description'          => 'nullable|max:8000',
                 'file_format'          => 'sometimes|string|max:191',
                 'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',
@@ -290,12 +289,12 @@ class ResourceController extends ApiController
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
                 'type'                 => 'sometimes|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
-                'resource_url'         => 'sometimes|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
-                'http_rq_type'         => 'sometimes|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-                'authentication'       => 'sometimes|string|max:191|required_if:data.type,'. Resource::TYPE_API,
-                'http_headers'         => 'sometimes|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
+                'resource_url'         => 'sometimes|nullable|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'http_rq_type'         => 'sometimes|nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+                'authentication'       => 'sometimes|nullable|string|max:191|required_if:data.type,'. Resource::TYPE_API,
+                'http_headers'         => 'sometimes|nullable|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
+                'post_data'            => 'sometimes|nullable|string|max:8000',
                 'is_reported'          => 'sometimes|boolean',
-                'post_data'            => 'sometimes|string|max:8000',
                 'custom_fields'        => 'sometimes|array',
             ]);
         }
@@ -444,12 +443,21 @@ class ResourceController extends ApiController
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
+                $type = $resource->version;
+
+                $elasticDataSet = ElasticDataSet::create([
+                    'index'         => $index,
+                    'index_type'    => ElasticDataSet::ELASTIC_TYPE,
+                    'doc'           => $id .'_'. $resource->version,
+                    'version'       => $resource->version,
+                    'resource_id'   => $id
+                ]);
 
                 $update = \Elasticsearch::index([
-                    'body'  => ['rows' => $post['data']],
-                    'index' => $index,
-                    'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id,
+                    'body'      => ['rows' => $post['data']],
+                    'index'     => $index,
+                    'type'      => ElasticDataSet::ELASTIC_TYPE,
+                    'id'        => $id .'_'. $resource->version,
                 ]);
 
                 $logData = [
@@ -697,7 +705,7 @@ class ResourceController extends ApiController
 
                 $allSignals = [];
                 if ($resource->is_reported) {
-                    $signals = $resource->signal()->where('status', Signal::STATUS_NEW)->get();;
+                    $signals = $resource->signal()->where('status', Signal::STATUS_NEW)->get();
 
                     if ($signals) {
                         foreach ($signals as $signal) {
@@ -790,16 +798,20 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
+        $validator = \Validator::make($post, [
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
+            'version'       => 'sometimes|int',
+        ]);
 
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $version = !is_null($request->offsetGet('version')) ? $request->offsetGet('version') : $resource->version;
 
                 return $this->successResponse(
-                    empty($resource->es_id)
+                    ($resource->resource_type == Resource::TYPE_HYPERLINK)
                     ? []
-                    : ElasticDataSet::getElasticData($resource->es_id)
+                    : ElasticDataSet::getElasticData($resource->id, $version)
                 );
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());

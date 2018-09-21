@@ -251,6 +251,7 @@ return [
         'img_url' => 'url to file',
         'comment' => 'comment',
         'mime_type' => 'mime type',
+        'color' => 'color'
     ],
 
 ];

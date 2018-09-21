@@ -7,6 +7,7 @@
     "require": {
         "php": ">=7.0.0",
         "cviebrock/laravel-elasticsearch": "^3.1",
+        "devdojo/chatter": "0.2.*",
         "doctrine/dbal": "^2.5",
         "easyrdf/easyrdf": "*",
         "elasticsearch/elasticsearch": "^6.0",

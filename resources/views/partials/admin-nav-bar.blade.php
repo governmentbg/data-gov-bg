@@ -132,6 +132,12 @@
                                 href="{{ url('/admin/news/list') }}"
                             >{{ ultrans('custom.news') }}</a>
                         </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'dataRequests' ? 'active' : '' }}"
+                                href="{{ url('/admin/data-requests/list') }}"
+                            >{{ ultrans('custom.data_requests') }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>

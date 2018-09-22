@@ -1701,6 +1701,11 @@ class UserController extends Controller {
                                                 : Resource::REPORTED_TRUE
                     ];
 
+                if ($resource->resource_type == Resource::TYPE_HYPERLINK) {
+                    $data['type'] = $resource->resource_type;
+                    $data['resource_url'] = $request->offsetGet('resource_url');
+                }
+
                 $metadata = [
                     'api_key'       => Auth::user()->api_key,
                     'resource_uri'  => $uri,

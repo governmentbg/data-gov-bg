@@ -791,6 +791,7 @@ class ResourceController extends ApiController
      *
      * @param string api_key - optional
      * @param string resource_uri - required
+     * @param int version - optional
      *
      * @return json with success or error
      */

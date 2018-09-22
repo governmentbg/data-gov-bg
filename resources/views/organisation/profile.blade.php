@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <div class="col-xs-12">
+    <div class="col-xs-12 p-h-sm">
         <div class="row">
              <div class="col-sm-offset-3 filter-content">
                 <div class="col-md-12">
@@ -62,7 +62,6 @@
                                 {{ __('custom.main_org') }}:
                                 <a href="{{ url('/organisation/profile/'. $parentOrg->uri) }}">{{ $parentOrg->name }}</a>
                             </h3>
-
                         </div>
                     </div>
                 @endif
@@ -78,18 +77,34 @@
                             <div class="col-xs-12 p-l-none">
                                 <div>
                                     <h3>{{ $organisation->name }} </h3><br/>
-                                    <p>{!! nl2br($organisation->description) !!}</p><br/>
+                                    <p>{!! nl2br(e($organisation->description)) !!}</p><br/>
                                 </div>
                             </div>
-                            <div class="col-xs-12 p-l-none">
-                                <span><b>{{ __('custom.activity') }}:</b></span><br/><br/>
-                                <p>{!! nl2br($organisation->activity_info) !!}</p><br/>
-                            </div>
+                            @if (!empty($organisation->activity_info))
+                                <div class="col-xs-12 p-l-none">
+                                    <span><b>{{ __('custom.activity') }}:</b></span><br/><br/>
+                                    <p>{!! nl2br(e($organisation->activity_info)) !!}</p><br/>
+                                </div>
+                            @endif
                             <div class="col-xs-12 p-l-r-none articles">
-                                <div class="col-sm-8 col-xs-12 p-l-none article pull-left">
-                                    <span><b>{{ __('custom.contact_person') }}:</b></span><br/><br/>
-                                    <p>{!! nl2br($organisation->contacts) !!}</p><br/>
-                                </div>
+                                @if (!empty($organisation->contacts))
+                                    <div class="col-sm-8 col-xs-12 p-l-none article pull-left">
+                                        <span><b>{{ __('custom.contact_person') }}:</b></span><br/><br/>
+                                        <p>{!! nl2br(e($organisation->contacts)) !!}</p><br/>
+                                    </div>
+                                @endif
+                                @if (isset($organisation->custom_fields[0]) && !empty($organisation->custom_fields[0]->key))
+                                    <div class="col-sm-8 col-xs-12 p-l-none article pull-left">
+                                        <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                                        @foreach ($organisation->custom_fields as $field)
+                                            <div class="row">
+                                                <div class="col-xs-6">{{ $field->key }}</div>
+                                                <div class="col-xs-6 text-left">{{ $field->value }}</div>
+                                            </div>
+                                        @endforeach
+                                        <br/>
+                                    </div>
+                                @endif
                                 <div class="col-sm-4 col-xs-12 pull-right text-right">
                                     @auth
                                         <form method="post">

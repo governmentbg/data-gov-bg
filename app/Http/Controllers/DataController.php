@@ -348,13 +348,13 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($termsOfUse), $hasLimit, $recordsLimit, 'license', $display);
 
-            if ($user = \Auth::user()) {
-                $objData = ['object_id' => $user->id];
+            if ($authUser = \Auth::user()) {
+                $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
                 if ($rightCheck) {
                     $userData = [
-                        'api_key' => $user->api_key,
-                        'id'      => $user->id
+                        'api_key' => $authUser->api_key,
+                        'id'      => $authUser->id
                     ];
 
                     // get followed datasets
@@ -494,7 +494,7 @@ class DataController extends Controller {
             if (!is_null($dataset->org_id)) {
                 // get organisation details
                 $params = [
-                    'org_id' => $dataset->org_id,
+                    'org_id'  => $dataset->org_id,
                     'locale'  => $locale
                 ];
                 $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
@@ -551,20 +551,14 @@ class DataController extends Controller {
                 $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
             }
 
-            $buttons = [
-                'follow'   => false,
-                'unfollow' => false,
-                'edit'     => false,
-                'delete'   => false,
-            ];
-
-            if ($user = \Auth::user()) {
-                $objData = ['object_id' => $user->id];
+            $buttons = [];
+            if ($authUser = \Auth::user()) {
+                $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
                 if ($rightCheck) {
                     $userData = [
-                        'api_key' => $user->api_key,
-                        'id'      => $user->id
+                        'api_key' => $authUser->api_key,
+                        'id'      => $authUser->id
                     ];
 
                     // get followed datasets
@@ -645,7 +639,7 @@ class DataController extends Controller {
                 if (!is_null($dataset->org_id)) {
                     // get organisation details
                     $params = [
-                        'org_id' => $dataset->org_id,
+                        'org_id'  => $dataset->org_id,
                         'locale'  => $locale
                     ];
                     $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
@@ -663,6 +657,8 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
+                $dataset = $this->getModelUsernames($dataset);
+
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
 
@@ -673,10 +669,10 @@ class DataController extends Controller {
                 $data = !empty($res->data) ? $res->data : [];
 
                 $userData = [];
-                if (\Auth::check()) {
-                    $userData['firstname'] =  \Auth::user()->firstname;
-                    $userData['lastname'] =  \Auth::user()->lastname;
-                    $userData['email'] =  \Auth::user()->email;
+                if ($authUser = \Auth::user()) {
+                    $userData['firstname'] = $authUser->firstname;
+                    $userData['lastname'] = $authUser->lastname;
+                    $userData['email'] = $authUser->email;
                 }
 
                 return view(
@@ -1099,13 +1095,13 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($termsOfUse), $hasLimit, $recordsLimit, 'license', $display);
 
-            if ($user = \Auth::user()) {
-                $objData = ['object_id' => $user->id];
+            if ($authUser = \Auth::user()) {
+                $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
                 if ($rightCheck) {
                     $userData = [
-                        'api_key' => $user->api_key,
-                        'id'      => $user->id
+                        'api_key' => $authUser->api_key,
+                        'id'      => $authUser->id
                     ];
 
                     // get followed datasets
@@ -1179,7 +1175,7 @@ class DataController extends Controller {
             if (!is_null($dataset->org_id)) {
                 // get organisation details
                 $params = [
-                    'org_id' => $dataset->org_id,
+                    'org_id'  => $dataset->org_id,
                     'locale'  => $locale
                 ];
                 $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
@@ -1243,13 +1239,13 @@ class DataController extends Controller {
                 'delete'   => false,
             ];
 
-            if ($user = \Auth::user()) {
-                $objData = ['object_id' => $user->id];
+            if ($authUser = \Auth::user()) {
+                $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
                 if ($rightCheck) {
                     $userData = [
-                        'api_key' => $user->api_key,
-                        'id'      => $user->id
+                        'api_key' => $authUser->api_key,
+                        'id'      => $authUser->id
                     ];
 
                     // get followed datasets
@@ -1330,7 +1326,7 @@ class DataController extends Controller {
                 if (!is_null($dataset->org_id)) {
                     // get organisation details
                     $params = [
-                        'org_id' => $dataset->org_id,
+                        'org_id'  => $dataset->org_id,
                         'locale'  => $locale
                     ];
                     $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
@@ -1348,6 +1344,8 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
+                $dataset = $this->getModelUsernames($dataset);
+
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
 
@@ -1358,10 +1356,10 @@ class DataController extends Controller {
                 $data = !empty($res->data) ? $res->data : [];
 
                 $userData = [];
-                if (\Auth::check()) {
-                    $userData['firstname'] =  \Auth::user()->firstname;
-                    $userData['lastname'] =  \Auth::user()->lastname;
-                    $userData['email'] =  \Auth::user()->email;
+                if ($authUser = \Auth::user()) {
+                    $userData['firstname'] = $authUser->firstname;
+                    $userData['lastname'] = $authUser->lastname;
+                    $userData['email'] = $authUser->email;
                 }
 
                 return view(

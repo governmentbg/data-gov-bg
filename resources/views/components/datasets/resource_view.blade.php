@@ -28,7 +28,7 @@
             @if (!empty($resource->resource_url))
                 <p><strong>{{ uctrans('custom.url') }}:</strong></p>
                 <div class="m-b-sm">
-                    {{ $resource->resource_url }}
+                    <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
                 </div>
             @endif
 
@@ -85,18 +85,20 @@
                 @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
                     <form method="POST">
                         {{ csrf_field() }}
-                        <button
-                            type="button"
-                            class="btn btn-primary js-res-uri"
-                            data-toggle="modal"
-                            data-target="#embed-resource"
-                            data-uri ="{{ $resource->uri }}"
-                        >{{ uctrans('custom.embed') }}</button>
-                        @if ($resource->version == $versionView)
-                            <a
-                                class="btn btn-primary"
-                                href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
-                            >{{ uctrans('custom.update') }}</a>
+                        @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
+                            <button
+                                type="button"
+                                class="btn btn-primary js-res-uri"
+                                data-toggle="modal"
+                                data-target="#embed-resource"
+                                data-uri ="{{ $resource->uri }}"
+                            >{{ uctrans('custom.embed') }}</button>
+                            @if ($resource->version == $versionView)
+                                <a
+                                    class="btn btn-primary"
+                                    href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
+                                >{{ uctrans('custom.update') }}</a>
+                            @endif
                         @endif
                         <a
                             class="btn btn-primary"

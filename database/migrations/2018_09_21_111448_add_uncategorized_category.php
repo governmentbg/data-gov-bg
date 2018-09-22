@@ -11,9 +11,9 @@ class AddUncategorizedCategory extends Migration
     {
         $this->categories = [
             [
-                'name'              => [
-                    'bg'                => 'Некатегоризирани',
-                    'en'                => 'Uncategorized',
+                'name'  => [
+                    'bg'    => 'Некатегоризирани',
+                    'en'    => 'Uncategorized',
                 ]
             ],
         ];
@@ -27,6 +27,7 @@ class AddUncategorizedCategory extends Migration
     public function up()
     {
         $currCount = Category::count();
+
         foreach ($this->categories as $catData) {
             $catData['active'] = true;
             $catData['ordering'] = $currCount + 1;

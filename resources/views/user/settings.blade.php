@@ -8,6 +8,9 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'setting'])
     @endif
+    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <span class="my-profile m-l-sm">{{uctrans('custom.settings')}}</span>
+    </div>
     <div class="col-xs-12 m-t-lg">
         <form class="m-t-lg p-sm" method="post">
             {{ csrf_field() }}

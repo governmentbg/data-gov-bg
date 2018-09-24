@@ -4,7 +4,9 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'dataset'])
-    @include('partials.pagination')
+    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <span class="my-profile m-l-sm">{{uctrans('custom.datasets_list')}}</span>
+    </div>
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left">
             <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/admin/dataset/add') }}">{{ __('custom.add_new_dataset') }}</a></span>
@@ -30,6 +32,7 @@
             </form>
         </div>
     </div>
+    @include('partials.pagination')
     <div class="row">
         <div class="col-sm-3 sidenav col-xs-12 m-t-md">
             <form

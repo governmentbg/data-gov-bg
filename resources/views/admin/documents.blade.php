@@ -15,13 +15,13 @@
                     action="{{ action('Admin\DocumentController@list', []) }}"
                 >
                     <div class="row m-b-sm">
-                        <div class="col-xs-3 p-l-lg from-to">{{ __('custom.from') }}:</div>
+                        <div class="col-xs-3 p-l-lg from-to">{{ uctrans('custom.from') }}:</div>
                         <div class="col-md-7 col-sm-8 text-left search-field admin">
                             <input class="js-from-filter datepicker input-border-r-12 form-control" name="from" value="{{ isset($range['from']) ? $range['from'] : '' }}">
                         </div>
                     </div>
                     <div class="row m-b-sm">
-                        <div class="col-xs-3 p-l-lg from-to">{{ __('custom.to') }}:</div>
+                        <div class="col-xs-3 p-l-lg from-to">{{ uctrans('custom.to') }}:</div>
                         <div class="col-md-7 col-sm-8 text-left search-field admin">
                             <input class="js-to-filter datepicker input-border-r-12 form-control" name="to" value="{{ isset($range['to']) ? $range['to'] : '' }}">
                         </div>

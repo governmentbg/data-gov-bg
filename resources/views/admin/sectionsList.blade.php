@@ -4,11 +4,11 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'sections'])
-        @include('partials.pagination')
-        <div class="col-xs-2 m-t-lg m-b-lg">
-            <span class="my-profile head">{{ utrans('custom.sections') }}</span>
+        <div class="col-xs-5 sidenav m-t-lg m-b-lg">
+            <span class="my-profile m-l-sm">{{uctrans('custom.sections')}}</span>
         </div>
-        <div class="col-xs-10 m-t-lg text-right section">
+        @include('partials.pagination')
+        <div class="col-xs-12 m-t-lg text-right section">
             <div class="filter-content section-nav-bar">
                 <ul class="nav filter-type right-border">
                     <li>
@@ -45,7 +45,7 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.order_asc') }}</a><a
+                >{{ uctrans('custom.order_asc') }}</a><a
                     href="{{
                         action(
                             'Admin\SectionController@list',
@@ -62,7 +62,7 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.order_desc') }}</a>
+                >{{ uctrans('custom.order_desc') }}</a>
             </div>
         </div>
         <div class="row m-b-sm">
@@ -109,7 +109,7 @@
                                                     <a
                                                         class="link-action"
                                                         href="{{ url('/admin/subsections/list/'. $section->id) }}"
-                                                    >{{ utrans('custom.subsections') }}</a>
+                                                    >{{ uctrans('custom.subsections') }}</a>
                                                 </td>
                                             </tr>
                                         @endforeach

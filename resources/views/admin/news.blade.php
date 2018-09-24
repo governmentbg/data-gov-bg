@@ -4,15 +4,15 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'news'])
-        @include('partials.pagination')
         <div class="col-xs-12 sidenav m-t-lg">
-            <span class="my-profile m-l-sm">{{ uctrans('custom.news') }}</span>
+            <span class="my-profile m-l-sm">{{ uctrans('custom.news_list') }}</span>
         </div>
+        @include('partials.pagination')
         <div class="row">
             <div class="col-md-3 col-sm-5 sidenav p-l-r-none col-xs-12 m-t-md m-l-md">
                 <ul class="nav">
                     <li class="js-show-submenu">
-                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.active') }}</a>
+                        <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.active_side') }}</a>
                         <ul class="sidebar-submenu m-b-md">
                             <li>
                                 <a

@@ -5,6 +5,9 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'termsConditionsReq'])
+        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+            <span class="my-profile m-l-sm">{{uctrans('custom.terms_of_use_list')}}</span>
+        </div>
         @include('partials.pagination')
         <div class="row m-b-lg">
             <div class="col-sm-3 hidden-xs"></div>

@@ -13,31 +13,31 @@
                     </div>
                     <div class="body">
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $term->name }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.description') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.description') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{!! nl2br(e($term->descript)) !!}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}</label>
+                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($term->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="default" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.by_default') }}</label>
+                            <label for="default" class="col-sm-6 col-xs-12 col-form-label">{{ uctrans('custom.by_default') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($term->is_default) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $term->ordering }}</div>
                             </div>

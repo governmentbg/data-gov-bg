@@ -4,10 +4,10 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'termsConditions'])
-    @include('partials.pagination')
     <div class="col-xs-12 sidenav m-t-lg">
-        <span class="my-profile m-l-sm">{{ __('custom.terms_and_conditions') }}</span>
+        <span class="my-profile m-l-sm">{{ uctrans('custom.terms_and_conditions_list') }}</span>
     </div>
+    @include('partials.pagination')
     <div class="row m-b-lg">
         <form method="POST" class="form-horizontal">
             {{ csrf_field() }}

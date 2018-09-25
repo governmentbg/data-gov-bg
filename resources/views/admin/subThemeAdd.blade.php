@@ -15,7 +15,7 @@
                     <div class="body">
                         <form method="POST" class="form-horisontal">
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}</label>
+                                <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"

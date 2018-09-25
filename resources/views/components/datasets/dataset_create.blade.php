@@ -1,3 +1,6 @@
+<div class="col-xs-12 sidenav m-t-lg m-b-lg">
+    <span class="my-profile m-l-sm">{{uctrans('custom.dataset_add')}}</span>
+</div>
 <div class="col-xs-12 m-t-lg">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
     <form method="POST">

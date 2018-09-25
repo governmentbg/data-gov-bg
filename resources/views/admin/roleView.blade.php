@@ -11,13 +11,13 @@
                 <h3 class="col-lg-12">{{ __('custom.view_role') }}</h3>
             </div>
             <div class="form-group row">
-                <label class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.name') }}</label>
+                <label class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.name') }}:</label>
                 <div class="col-sm-9">
                     {{ $role[0]->name }}
                 </div>
             </div>
             <div class="form-group row">
-                <label for="role_active" class="col-sm-11 col-form-label">{{ utrans('custom.active') }}</label>
+                <label for="role_active" class="col-sm-11 col-form-label">{{ utrans('custom.active') }}:</label>
                 <div class="col-sm-1 text-right">
                     <div class="js-check">
                         <input
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="for_org" class="col-sm-11 col-form-label">{{ utrans('custom.for_org') }}</label>
+                <label for="for_org" class="col-sm-11 col-form-label">{{ utrans('custom.for_org') }}:</label>
                 <div class="col-sm-1 text-right">
                     <div class="js-check">
                         <input
@@ -47,7 +47,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="for_group" class="col-sm-11 col-form-label">{{ utrans('custom.for_group') }}</label>
+                <label for="for_group" class="col-sm-11 col-form-label">{{ utrans('custom.for_group') }}:</label>
                 <div class="col-sm-1 text-right">
                     <div class="js-check">
                         <input
@@ -65,7 +65,7 @@
                 <label
                     for="default_user"
                     class="col-sm-11 col-form-label"
-                >{{ __('custom.by_default') }} {{ __('custom.for') }} {{ ultrans('custom.users') }}</label>
+                >{{ __('custom.by_default') }} {{ __('custom.for') }} {{ ultrans('custom.users') }}:</label>
                 <div class="col-sm-1 text-right">
                     <div class="js-check">
                         <input
@@ -87,7 +87,7 @@
                     {{ __('custom.by_default') }}
                     {{ __('custom.for') }}
                     {{ __('custom.admin_of') }}
-                    {{ ultrans('custom.organisations') }}
+                    {{ ultrans('custom.organisations') }}:
                 </label>
                 <div class="col-sm-1 text-right">
                     <div class="js-check">
@@ -110,7 +110,7 @@
                     {{ __('custom.by_default') }}
                     {{ __('custom.for') }}
                     {{ __('custom.admin_of') }}
-                    {{ ultrans('custom.groups') }}
+                    {{ ultrans('custom.groups') }}:
                 </label>
                 <div class="col-sm-1 text-right">
                     <div class="js-check">

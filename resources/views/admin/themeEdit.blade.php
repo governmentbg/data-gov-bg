@@ -25,7 +25,7 @@
                                 @endif
                             @endforeach
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="file" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}</label>
+                                <label for="file" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}:</label>
                                 <div class="col-sm-6">
                                     <input
                                         type="text"
@@ -43,7 +43,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}</label>
+                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <div class="js-check">
                                         <input
@@ -57,7 +57,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="ordering" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}</label>
+                                <label for="ordering" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
                                 <div class="col-lg-2">
                                     <input
                                         id="ordering"
@@ -71,29 +71,29 @@
                                 </div>
                             </div>
                             <div class="text-center m-b-lg terms-hr">
-                                    <hr>
+                                <hr>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ !empty($model->created_by) ? $model->created_by : '' }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ !empty($model->created_at) ? $model->created_at : '' }}</div>
                                 </div>
                             </div>
                             @if (!empty($model->updated_by))
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->updated_by }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->updated_at }}</div>
                                     </div>

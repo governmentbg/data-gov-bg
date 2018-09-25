@@ -13,31 +13,31 @@
                     </div>
                     <div class="body">
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->name }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}</label>
+                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($section->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md hidden">
-                            <label for="read_only" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.read_only') }}</label>
+                            <label for="read_only" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.read_only') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($section->read_only) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="forum_link" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.forum_link') }}</label>
+                            <label for="forum_link" class="col-sm-6 col-xs-12 col-form-label">{{ uctrans('custom.forum_link') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->forum_link }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="theme" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.theme') }}</label>
+                            <label for="theme" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.theme') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>
                                     {{
@@ -49,7 +49,7 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->ordering }}</div>
                             </div>
@@ -58,26 +58,26 @@
                             <hr>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->created_by }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->created_at }}</div>
                             </div>
                         </div>
                         @if (!empty($section->updated_by))
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $section->updated_by }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $section->updated_at }}</div>
                                 </div>

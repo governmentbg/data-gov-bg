@@ -13,7 +13,7 @@
                     </div>
                     <div class="body">
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->name }}</div>
                             </div>
@@ -22,26 +22,26 @@
                             <hr>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->created_by }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->created_at }}</div>
                             </div>
                         </div>
                         @if (!empty($theme->updated_by))
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $theme->updated_by }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $theme->updated_at }}</div>
                                 </div>

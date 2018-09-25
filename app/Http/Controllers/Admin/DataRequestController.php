@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 class DataRequestController extends AdminController
 {
     /**
-     * Lists datareuqests
+     * Lists datarequests
      *
      * @param Request $request
      * @return view with a list of data requests
@@ -137,6 +137,13 @@ class DataRequestController extends AdminController
         return view('admin/dataRequestEdit', compact('class', 'dataRequest', 'organisations', 'statuses'));
     }
 
+    /**
+     * Deletes a datarequest based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return success messsage or failure
+     */
     public function deleteDataRequest(Request $request, $id)
     {
         $rq = Request::create('/api/deleteDataRequest', 'POST', [

@@ -18845,7 +18845,7 @@ table.dataTable td {
   margin-left: 10px;
 }
 
-.config-form .data-query input[type="submit"]:nth-child(3) {
+.config-form .data-query input[type="submit"]:nth-child(2) {
   margin-right: 15px;
 }
 

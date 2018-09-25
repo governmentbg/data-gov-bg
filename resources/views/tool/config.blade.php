@@ -289,25 +289,24 @@
 
                 @foreach ($dataQueries as $dataQuery)
                     <div class="data-query">
-                        <input type="hidden" name="query_id" value="{{ $dataQuery->id }}">
                         <span>{{ $dataQuery->name }}</span>
                         <input
                             type="submit"
                             class="btn btn-primary pull-right"
-                            name="delete_query"
+                            name="delete_query[{{ $dataQuery->id }}]"
                             value="{{ uctrans('custom.delete') }}"
                             data-confirm="{{ __('custom.remove_data') }}"
                         >
                         <input
                             type="submit"
                             class="btn btn-primary pull-right"
-                            name="edit_query"
+                            name="edit_query[{{ $dataQuery->id }}]"
                             value="{{ uctrans('custom.edit') }}"
                         >
                         <input
                             type="submit"
                             class="btn btn-primary save-btn pull-right"
-                            name="send_query"
+                            name="send_query[{{ $dataQuery->id }}]"
                             value="{{ uctrans('custom.send') }}"
                         >
                     </div>

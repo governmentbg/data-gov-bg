@@ -63,7 +63,7 @@ class ToolController extends Controller
         $post = $request->all();
         $sourceTypes = $this->getSourceTypes();
         $freqTypes = $this->getFreqTypes();
-error_log('post0: '. print_r($post, true));
+
         if (
             empty($request->get('source_type'))
             || $request->get('source_type') == $this->getSourceTypes()[self::SOURCE_TYPE_DB]
@@ -173,7 +173,9 @@ error_log('post0: '. print_r($post, true));
 
                     if ($request->has('delete_query')) {
                         try {
-                            DataQuery::find($post['query_id'])->delete();
+                            $queryId = array_keys($post['delete_query'])[0];
+
+                            DataQuery::find($queryId)->delete();
 
                             session()->flash('alert-success', __('custom.query_delete_success'));
                         } catch (QueryException $e) {
@@ -182,28 +184,27 @@ error_log('post0: '. print_r($post, true));
                     }
 
                     if ($request->has('send_query')) {
-                        // try {
+                        try {
                             $username = $dbData['source_db_user'];
                             $host = $dbData['source_db_host'];
                             $dbName = $dbData['source_db_name'];
                             $password = $dbData['source_db_pass'];
                             $driver = $dbData['source_db_type'];
-                            $query = DataQuery::find($post['query_id'])->first()->query;
+                            $queryId = array_keys($post['send_query'])[0];
+                            $dataQuery = DataQuery::find($queryId);
 
-                            $data = $this->fetchData($query, $driver, $host, $dbName, $username, $password);
+                            $data = $this->fetchData($dataQuery->query, $driver, $host, $dbName, $username, $password);
 
-                            if (empty($data)) {
-                                session()->flash('alert-danger', __('custom.query_send_error'));
+                            $response = $this->callApi($data, $dataQuery->api_key, $dataQuery->resource_key);
+
+                            if ($response['success']) {
+                                session()->flash('alert-success', __('custom.query_send_success'));
                             } else {
-                                $response = $this->callApi('addResourceData', ['data' => $data]);
-
-                                error_log('response: '. print_r($response, true));
+                                session()->flash('alert-danger', __('custom.query_send_error') .' ('. $response['error']['message'] .')');
                             }
-
-                            session()->flash('alert-success', __('custom.query_send_success'));
-                        // } catch (\Exception $e) {
-                        //     session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
-                        // }
+                        } catch (\Exception $e) {
+                            session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
+                        }
                     }
 
                     $dataQueries = DataQuery::where('connection_id', $dbData['id'])->get();
@@ -223,12 +224,6 @@ error_log('post0: '. print_r($post, true));
                 ]);
 
                 if (!$validator->fails()) {
-                    // $extension = $file->getClientOriginalExtension();
-
-                    // if (!empty($extension)) {
-                    //     $content = file_get_contents($file->getRealPath());
-                    // }
-
                     if ($request->has('save_file')) {
                         try {
                             $this->saveFile($file, $post);
@@ -240,6 +235,8 @@ error_log('post0: '. print_r($post, true));
                     } elseif ($request->has('send_file')) {
                         try {
                             $foundData = $this->fetchFileData($file, $post);
+
+                            // $response = $this->callApi($data, $dataQuery->api_key, $dataQuery->resource_key);
 
                             session()->flash('alert-success', __('custom.conn_success'));
                         } catch (\PDOException $e) {
@@ -381,6 +378,11 @@ error_log('post0: '. print_r($post, true));
         return empty($result) ? [] : $result;
     }
 
+    private function fetchFileData($file, $post)
+    {
+        return empty($result) ? [] : $result;
+    }
+
     private function getConnection($driver, $host, $dbName, $username, $password)
     {
         $connection = new \PDO($driver .':host='. $host .';dbname='. $dbName, $username, $password);
@@ -389,14 +391,12 @@ error_log('post0: '. print_r($post, true));
         return $connection;
     }
 
-    private function callApi($uri, $params = null, $header = null)
+    private function callApi($data, $apiKey, $resourceUri)
     {
-        $requestUrl = env('TOOL_API_URL') . $uri;
+        $requestUrl = env('TOOL_API_URL') . 'addResourceData';
         $ch = curl_init($requestUrl);
 
-        if ($header) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        }
+        $params = ['api_key' => $apiKey, 'resource_uri' => $resourceUri, 'data' => $data];
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));

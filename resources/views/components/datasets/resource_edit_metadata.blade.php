@@ -29,6 +29,41 @@
             @endif
         @endforeach
 
+        @if ($resource->resource_type == App\Resource::TYPE_HYPERLINK)
+            <div class="form-group row required">
+                <label for="type" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.type', 1) }}:</label>
+                <div class="col-sm-9">
+                    <select
+                        id="type"
+                        class="js-select js-ress-type input-border-r-12 form-control"
+                        name="type"
+                        disabled
+                    >
+                        <option value=""> {{ utrans('custom.type') }}</option>
+                        @foreach ($types as $id => $type)
+                            <option
+                                value="{{ $id }}"
+                                {{ $id == $resource->resource_type ? 'selected' : '' }}
+                            >{{ $type }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error">{{ $errors->first('type') }}</span>
+                </div>
+            </div>
+            <div class="form-group row required">
+            <label for="url" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.url') }}:</label>
+            <div class="col-sm-9">
+                <input
+                    id="url"
+                    class="input-border-r-12 form-control"
+                    name="resource_url"
+                    type="text"
+                    value="{{ $resource->resource_url }}"
+                >
+                <span class="error">{{ $errors->first('resource_url') }}</span>
+            </div>
+        </div>
+        @endif
         <div class="form-group row">
             <label for="schema_desc" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_description') }}:</label>
             <div class="col-sm-9">

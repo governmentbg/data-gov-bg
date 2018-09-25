@@ -1,6 +1,3 @@
-@if ($resource->type == App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
-    <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
-@else
     @if (empty($data))
         <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
     @else
@@ -64,6 +61,3 @@
             >{{ uctrans('custom.download') }}</button>
         </form>
     @endif
-@endif
-
-

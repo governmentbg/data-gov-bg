@@ -13,9 +13,11 @@ class AddColorRowToChatterDiscussions extends Migration
      */
     public function up()
     {
-        Schema::table('chatter_discussion', function (Blueprint $table) {
-            $table->string('color', 20)->nullable()->default('#232629');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_discussion', function (Blueprint $table) {
+                $table->string('color', 20)->nullable()->default('#232629');
+            });
+        }
     }
 
     /**
@@ -25,8 +27,10 @@ class AddColorRowToChatterDiscussions extends Migration
      */
     public function down()
     {
-        Schema::table('chatter_discussion', function ($table) {
-            $table->dropColumn('color');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_discussion', function ($table) {
+                $table->dropColumn('color');
+            });
+        }
     }
 }

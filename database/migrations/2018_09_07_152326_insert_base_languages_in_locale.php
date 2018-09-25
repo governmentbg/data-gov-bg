@@ -22,12 +22,14 @@ class InsertBaseLanguagesInLocale extends Migration
      */
     public function up()
     {
-        if (!Locale::all()->count()) {
-            foreach ($this->languages as $language => $active) {
-                Locale::create([
-                    'locale'    => $language,
-                    'active'    => $active,
-                ]);
+        if (!env('IS_TOOL')) {
+            if (!Locale::all()->count()) {
+                foreach ($this->languages as $language => $active) {
+                    Locale::create([
+                        'locale'    => $language,
+                        'active'    => $active,
+                    ]);
+                }
             }
         }
     }
@@ -39,9 +41,11 @@ class InsertBaseLanguagesInLocale extends Migration
      */
     public function down()
     {
-        foreach ($this->languages as $language) {
-            if (!Locale::where('locale', $language)->count()) {
-                Locale::where(['locale' => $language['name']])->get()->delete();
+        if (!env('IS_TOOL')) {
+            foreach ($this->languages as $language) {
+                if (!Locale::where('locale', $language)->count()) {
+                    Locale::where(['locale' => $language['name']])->get()->delete();
+                }
             }
         }
     }

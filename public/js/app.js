@@ -52825,7 +52825,7 @@ var Component = normalizeComponent(
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "resources/assets/js/components/ExampleComponent.vue"
+Component.options.__file = "resources\\assets\\js\\components\\ExampleComponent.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -52834,9 +52834,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-7168fb6a", Component.options)
+    hotAPI.createRecord("data-v-0ca92eac", Component.options)
   } else {
-    hotAPI.reload("data-v-7168fb6a", Component.options)
+    hotAPI.reload("data-v-0ca92eac", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -53023,7 +53023,7 @@ module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-7168fb6a", module.exports)
+    require("vue-hot-reload-api")      .rerender("data-v-0ca92eac", module.exports)
   }
 }
 
@@ -71329,8 +71329,10 @@ $(function () {
 // data tables functionality
 $(function () {
     $(document).ready(function () {
-        $('.data-table').DataTable({
-            pageLength: 25,
+        var $dataTable = $('.data-table');
+
+        $dataTable.DataTable({
+            pageLength: $dataTable.data('page-length') ? $dataTable.data('page-length') : 25,
             responsive: true,
             language: {
                 search: $('.js-translations').data('search'),
@@ -71355,7 +71357,7 @@ $(function () {
 
     if ($checkboxes.length) {
         $checkboxes.each(function () {
-            var $checkbox = $(this);
+            var $checkbox = $(this).css('visibility', 'visible');
 
             $checkbox.iCheck({
                 checkboxClass: 'icheckbox_square-green',
@@ -71684,27 +71686,27 @@ $(function () {
             $('#js-code').val(code);
         };
 
-        var width = $("#js-width").val();
-        var height = $("#js-height").val();
-        var uri = $(".js-res-uri").data('uri');
+        var width = $('#js-width').val();
+        var height = $('#js-height').val();
+        var uri = $('.js-res-uri').data('uri');
 
-        $("#js-width").on("change paste keyup", function (width, height) {
+        $('#js-width').on('change paste keyup', function (width, height) {
             width = $(this).val();
-            height = $("#js-height").val();
+            height = $('#js-height').val();
             updateTextarea(width, height);
         });
 
-        $("#js-height").on("change paste keyup", function (width, height) {
+        $('#js-height').on('change paste keyup', function (width, height) {
             height = $(this).val();
-            width = $("#js-width").val();
+            width = $('#js-width').val();
             updateTextarea(width, height);
         });
 
         updateTextarea(width, height);
 
-        $(".js-copy").on("click", function () {
+        $('.js-copy').on('click', function () {
             $('#js-code').select();
-            document.execCommand("copy");
+            document.execCommand('copy');
         });
     }
 
@@ -71734,8 +71736,14 @@ $(function () {
     function rgb2hex(rgb) {
         rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
 
-        return rgb && rgb.length === 4 ? "#" + ("0" + parseInt(rgb[1], 10).toString(16)).slice(-2) + ("0" + parseInt(rgb[2], 10).toString(16)).slice(-2) + ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2) : '';
+        return rgb && rgb.length === 4 ? '#' + ('0' + parseInt(rgb[1], 10).toString(16)).slice(-2) + ('0' + parseInt(rgb[2], 10).toString(16)).slice(-2) + ('0' + parseInt(rgb[3], 10).toString(16)).slice(-2) : '';
     }
+});
+
+// Hide target with button functionality
+$('.js-hide-button').click(function () {
+    $($(this).data('target')).hide();
+    $(this).hide();
 });
 
 /***/ }),

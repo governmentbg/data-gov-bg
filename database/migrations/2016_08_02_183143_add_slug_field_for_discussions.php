@@ -13,9 +13,11 @@ class AddSlugFieldForDiscussions extends Migration
      */
     public function up()
     {
-        Schema::table('chatter_discussion', function (Blueprint $table) {
-            $table->string('slug')->unique();
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_discussion', function (Blueprint $table) {
+                $table->string('slug')->unique();
+            });
+        }
     }
 
     /**
@@ -25,8 +27,10 @@ class AddSlugFieldForDiscussions extends Migration
      */
     public function down()
     {
-        Schema::table('chatter_discussion', function ($table) {
-            $table->dropColumn('slug');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_discussion', function ($table) {
+                $table->dropColumn('slug');
+            });
+        }
     }
 }

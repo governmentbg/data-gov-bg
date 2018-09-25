@@ -15,8 +15,12 @@ class CreateActionsHistoryTable extends Migration
     {
         Schema::create('actions_history', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users');
+
+            if (!env('IS_TOOL')) {
+                $table->integer('user_id')->unsigned();
+                $table->foreign('user_id')->references('id')->on('users');
+            }
+
             $table->timestamp('occurrence');
             $table->string('module_name');
             $table->unsignedTinyInteger('action');
@@ -24,6 +28,10 @@ class CreateActionsHistoryTable extends Migration
             $table->string('action_msg');
             $table->string('ip_address', 15);
             $table->string('user_agent');
+
+            if (env('IS_TOOL')) {
+                $table->tinyInteger('status')->nullable();
+            }
         });
     }
 

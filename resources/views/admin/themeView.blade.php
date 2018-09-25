@@ -13,13 +13,13 @@
                     </div>
                     <div class="body">
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.name') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->name }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}</label>
+                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($theme->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>
@@ -31,7 +31,7 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="filename" class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.filename') }}</label>
+                            <label for="filename" class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.filename') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->icon_file_name }}</div>
                             </div>
@@ -50,26 +50,26 @@
                             <hr>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->created_by }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $theme->created_at }}</div>
                             </div>
                         </div>
                         @if (!empty($theme->updated_by))
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $theme->updated_by }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $theme->updated_at }}</div>
                                 </div>

@@ -13,6 +13,11 @@
                     'components.form_groups.translation_textarea',
                     ['field' => $field, 'result' => session('result')]
                 )
+            @elseif($field['view'] == 'translation_custom')
+                @include(
+                    'components.form_groups.translation_custom_fields',
+                    ['field' => $field, 'result' => session('result')]
+                )
             @endif
         @endforeach
 

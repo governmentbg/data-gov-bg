@@ -113,6 +113,11 @@ class Resource extends Model implements TranslatableInterface
         return $this->belongsTo('App\DataSet');
     }
 
+    public function customFields()
+    {
+        return $this->hasMany('App\CustomSetting');
+    }
+
     public function searchableAs()
     {
         return 'resources';

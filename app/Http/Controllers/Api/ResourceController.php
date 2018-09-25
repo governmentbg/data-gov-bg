@@ -8,6 +8,7 @@ use App\DataSet;
 use App\Resource;
 use App\RoleRight;
 use App\Organisation;
+use App\CustomSetting;
 use App\ActionsHistory;
 use App\ElasticDataSet;
 use Illuminate\Http\Request;
@@ -53,8 +54,8 @@ class ResourceController extends ApiController
         }
 
         $validator = \Validator::make($post, [
-            'dataset_uri'               => 'required|string|exists:data_sets,uri,deleted_at,NULL',
-            'data'                      => 'required|array',
+            'dataset_uri'   => 'required|string|exists:data_sets,uri,deleted_at,NULL',
+            'data'          => 'required|array',
         ]);
 
         if ($validator->fails()) {
@@ -140,7 +141,22 @@ class ResourceController extends ApiController
                 $resource = Resource::create($dbData);
                 $resource->searchable();
 
-                DB::commit();
+                if (!empty($post['data']['custom_fields'])) {
+                    foreach ($post['data']['custom_fields'] as $fieldSet) {
+                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            $customFields[] = [
+                                'value' => $fieldSet['value'],
+                                'label' => $fieldSet['label'],
+                            ];
+                        }
+                    }
+
+                    if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                        DB::rollback();
+
+                        return $this->errorResponse(__('custom.add_resource_meta_fail'));
+                    }
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -150,6 +166,8 @@ class ResourceController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse(['uri' => $resource->uri]);
             } catch (QueryException $ex) {
@@ -386,7 +404,22 @@ class ResourceController extends ApiController
 
                 $resource->save();
 
-                DB::commit();
+                if (!empty($post['data']['custom_fields'])) {
+                    foreach ($post['data']['custom_fields'] as $fieldSet) {
+                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            $customFields[] = [
+                                'value' => $fieldSet['value'],
+                                'label' => $fieldSet['label'],
+                            ];
+                        }
+                    }
+
+                    if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                        DB::rollback();
+
+                        return $this->errorResponse(__('custom.add_resource_meta_fail'));
+                    }
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -396,6 +429,8 @@ class ResourceController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -664,7 +699,7 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            $resource = Resource::with('DataSet')->where('uri', $post['resource_uri'])->first();
+            $resource = Resource::with('DataSet')->with('customFields')->where('uri', $post['resource_uri'])->first();
             $fileFormats = Resource::getFormats();
             $rqTypes = Resource::getRequestTypes();
             $types = Resource::getTypes();
@@ -681,6 +716,7 @@ class ResourceController extends ApiController
                     'schema_description'    => $resource->schema_descript,
                     'schema_url'            => $resource->schema_url,
                     'type'                  => $types[$resource->resource_type],
+                    'resource_type'         => $resource->resource_type,
                     'resource_url'          => $resource->resource_url,
                     'http_rq_type'          => isset($resource->http_rq_type) ? $rqTypes[$resource->http_rq_type] : null,
                     'authentication'        => $resource->authentication,
@@ -694,6 +730,16 @@ class ResourceController extends ApiController
                     'updated_at'            => isset($resource->updated_at) ? $resource->updated_at->toDateTimeString() : null,
                     'updated_by'            => $resource->updated_by,
                 ];
+
+                $customSett = $resource->customFields()->get()->loadTranslations();
+                if (!empty($customSett)) {
+                    foreach ($customSett as $sett) {
+                        $data['custom_settings'][] = [
+                            'key'   => $sett->key,
+                            'value' => $sett->value,
+                        ];
+                    }
+                }
 
                 $allSignals = [];
                 if ($resource->is_reported) {
@@ -1138,5 +1184,54 @@ class ResourceController extends ApiController
         }
 
         return $this->errorResponse(__('custom.search_reported_fail'), $validator->errors()->messages());
+    }
+
+    public function checkAndCreateCustomSettings($customFields, $resourceId)
+    {
+        if (!empty($resourceId)) {
+            try {
+                DB::beginTransaction();
+
+                CustomSetting::where('resource_id', $resourceId)->delete();
+
+                foreach ($customFields as $field) {
+                    if (!empty($field['label']) && !empty($field['value'])) {
+                        foreach ($field['label'] as $locale => $label) {
+                            if (
+                                (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                                || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
+
+                            ) {
+                                DB::rollback();
+
+                                return false;
+                            }
+                        }
+
+                        $saveField = new CustomSetting;
+                        $saveField->resource_id = $resourceId;
+                        $saveField->created_by = \Auth::user()->id;
+                        $saveField->key = $this->trans($empty, $field['label']);
+                        $saveField->value = $this->trans($empty, $field['value']);
+
+                        $saveField->save();
+                    } else {
+                        DB::rollback();
+
+                        return false;
+                    }
+                }
+
+                DB::commit();
+
+                return true;
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return false;
     }
 }

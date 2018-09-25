@@ -63,6 +63,15 @@
                     {{ $resource->schema_url }}
                 </div>
             @endif
+            @if (!empty($resource->custom_settings))
+                <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                @foreach ($resource->custom_settings as $field)
+                    <div class="row m-b-lg">
+                        <div class="col-xs-6">{{ $field->key }}</div>
+                        <div class="col-xs-6 text-left">{{ $field->value }}</div>
+                    </div>
+                @endforeach
+            @endif
         </div>
         <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
             <ul class="p-l-none">
@@ -74,9 +83,11 @@
                 @endif
             </ul>
         </div>
-        <div class="col-sm-12 m-t-lg p-l-r-none">
-            @include('partials.resource-visualisation')
-        </div>
+        @if ($resource->resource_type !== \App\Resource::TYPE_HYPERLINK)
+            <div class="col-sm-12 m-t-lg p-l-r-none">
+                @include('partials.resource-visualisation')
+            </div>
+        @endif
         <div class="col-sm-12 p-l-none">
             <div class="col-sm-12 text-left">
                 @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))

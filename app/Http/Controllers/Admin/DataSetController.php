@@ -571,6 +571,7 @@ class DataSetController extends AdminController
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $uri)->first()->loadTranslations();
+        $custFields = CustomSetting::where('resource_id', $resource->id)->get()->loadTranslations();
 
         if ($parentUri) {
             $parent = Organisation::where('uri', $parentUri)->first();
@@ -585,6 +586,7 @@ class DataSetController extends AdminController
                     'description'           => $request->offsetGet('descript'),
                     'schema_description'    => $request->offsetGet('schema_description'),
                     'schema_url'            => $request->offsetGet('schema_url'),
+                    'custom_fields'         => $request->offsetGet('custom_fields'),
                     'is_reported'           => is_null($request->offsetGet('reported'))
                                                 ? Resource::REPORTED_FALSE
                                                 : Resource::REPORTED_TRUE
@@ -613,13 +615,14 @@ class DataSetController extends AdminController
         }
 
         return view('admin/resourceEdit', [
-            'class'     => $class,
-            'resource'  => $resource,
-            'uri'       => $uri,
-            'types'     => $types,
-            'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields(),
-            'parent'    => isset($parent) ? $parent : false,
+            'class'         => $class,
+            'resource'      => $resource,
+            'uri'           => $uri,
+            'types'         => $types,
+            'reqTypes'      => $reqTypes,
+            'fields'        => $this->getResourceTransFields(),
+            'parent'        => isset($parent) ? $parent : false,
+            'custFields'    => $custFields,
         ]);
     }
 }

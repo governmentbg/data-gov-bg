@@ -26,6 +26,11 @@
                     'components.form_groups.translation_textarea',
                     ['field' => $field, 'model' => $resource]
                 )
+            @elseif($field['view'] == 'translation_custom')
+                @include(
+                    'components.form_groups.translation_custom_fields',
+                    ['field' => $field, 'model' => $custFields]
+                )
             @endif
         @endforeach
 

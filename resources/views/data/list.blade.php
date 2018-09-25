@@ -126,6 +126,13 @@
                 @endif
                 </div>
             </div>
+            @if (isset($buttons['add']) && $buttons['add'])
+                <div class="col-lg-12 text-right">
+                    <span class="badge badge-pill m-t-md">
+                        <a href="{{ url($buttons['addUrl']) }}">{{ __('custom.add_new_dataset') }}</a>
+                    </span>
+                </div>
+            @endif
             <div class="articles">
             @if ($resultsCount > 0)
                 <div class="col-lg-12 p-h-xxs p-l-r-none">
@@ -203,7 +210,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <a href="{{ url('/data/view/'. $dataset->uri) }}">
+                            <a href="{{ route('dataView', array_merge(array_except($getParams, ['page']), ['uri' => $dataset->uri])) }}">
                                 <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                             </a>
                             <p>{!! nl2br(e($dataset->descript)) !!}</p>
@@ -219,7 +226,9 @@
                                 </div>
                                 <div class="pull-right">
                                     <span class="badge badge-pill">
-                                        <a href="{{ url('/data/view/'. $dataset->uri) }}">{{ uctrans('custom.see_more') }}</a>
+                                        <a href="{{ route('dataView', array_merge(array_except($getParams, ['page']), ['uri' => $dataset->uri])) }}">
+                                            {{ uctrans('custom.see_more') }}
+                                        </a>
                                     </span>
                                 </div>
                             </div>

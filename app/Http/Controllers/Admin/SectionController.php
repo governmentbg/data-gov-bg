@@ -81,6 +81,10 @@ class SectionController extends AdminController
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminSections');
+            }
+
             $themes = $this->getColorThemes(true);
 
             if ($request->has('create')) {
@@ -132,6 +136,10 @@ class SectionController extends AdminController
     public function view(Request $request, $id)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminSections');
+            }
+
             $perPage = 10;
             $params = [
                 'records_per_page' => $perPage,

@@ -41,6 +41,10 @@ class TermsOfUseController extends AdminController
 
     public function add(Request $request)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminTermsOfUse');
+        }
+
         if ($request->has('create')) {
             $rq = Request::create('/api/addTermsOfUse', 'POST', [
                 'data' => [
@@ -79,6 +83,10 @@ class TermsOfUseController extends AdminController
     public function view(Request $request, $id)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminTermsOfUse');
+            }
+
             $request = Request::create('/api/getTermsOfUseDetails', 'POST', [
                 'terms_id'  => $id,
                 'locale'    => \LaravelLocalization::getCurrentLocale(),

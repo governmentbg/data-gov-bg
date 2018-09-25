@@ -773,4 +773,5 @@ return [
     'dataset_edit' => 'edit a dataset',
     'users_edit' => 'edit user',
     'terms_and_conditions_list' => 'terms and conditions list',
+    'delete_theme_confirm' => 'Delete theme?',
 ];

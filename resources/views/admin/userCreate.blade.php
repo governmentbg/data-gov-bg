@@ -194,10 +194,14 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div class="reg-btns">
+                            <div class="col-xs-12 text-right mng-btns">
+                                <button
+                                    name="back"
+                                    class="btn btn-primary"
+                                >{{ uctrans('custom.close') }}</button>
                                 <button
                                     type="submit"
-                                    class="m-l-md btn pull-right btn-primary m-b-sm"
+                                    class="btn btn-primary"
                                 >{{ uctrans('custom.save') }}</button>
                             </div>
                         </div>

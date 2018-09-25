@@ -49,6 +49,10 @@ class RoleController extends AdminController {
         $class = 'user';
         $errors = [];
 
+        if ($request->has('back')) {
+            return redirect()->route('adminRoles');
+        }
+
         if ($request->has('save')) {
             $rq = Request::create('/api/addRole', 'POST', [
                 'api_key'   => Auth::user()->api_key,
@@ -135,6 +139,10 @@ class RoleController extends AdminController {
     {
         $class = 'user';
 
+        if ($request->has('back')) {
+            return redirect()->route('adminRoles');
+        }
+
         $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['role_id' => $id]]);
         $api = new ApiRole($rq);
         $result = $api->listRoles($rq)->getData();
@@ -182,6 +190,9 @@ class RoleController extends AdminController {
         $api = new ApiRole($rq);
         $result = $api->getRoleRights($rq)->getData();
         $rights = isset($result->rights) ? $result->rights : [];
+        $nameReq = Request::create('/api/listRoles', 'POST', ['criteria' => ['role_id' => $id]]);
+        $resultName = $api->listRoles($nameReq)->getData();
+        $roleName = isset($resultName->roles) ? $resultName->roles : [];
         $modules = Module::getModules();
         $moduleKeys = array_flip($modules);
         $rightTypes = RoleRight::getRights();
@@ -235,6 +246,6 @@ class RoleController extends AdminController {
             return back()->withInput()->withErrors($errors);
         }
 
-        return view('admin/roleRights', compact('class', 'rights', 'modules', 'rightTypes'));
+        return view('admin/roleRights', compact('class', 'rights', 'modules', 'rightTypes', 'roleName'));
     }
 }

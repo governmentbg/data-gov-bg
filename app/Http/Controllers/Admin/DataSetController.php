@@ -192,7 +192,7 @@ class DataSetController extends AdminController
             $groups = $this->getGroupDropdown();
 
             if ($request->has('back')) {
-                return redirect()->back();
+                return redirect()->route('adminDataSets');
             }
 
             if ($request->isMethod('post') && $request->has('create')) {
@@ -268,10 +268,14 @@ class DataSetController extends AdminController
     {
         $params['dataset_uri'] = $uri;
 
+        if ($request->has('back')) {
+            return redirect()->route('adminDataSets');
+        }
+
         $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
         $dataset = $api->getDatasetDetails($detailsReq)->getData();
-        // prepera request for resources
+        // prepare request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
 

@@ -32,10 +32,6 @@
                                             class="link-action"
                                             href="{{ url('/admin/languages/edit/'. $lang->locale) }}"
                                         >{{ utrans('custom.edit') }}</a>
-                                        <button
-                                            class="link-action"
-                                            href="#"
-                                        >{{ utrans('custom.preview') }}</button>
                                         <a
                                             class="link-action red"
                                             href="{{ url('/admin/languages/delete/'. $lang->locale) }}"

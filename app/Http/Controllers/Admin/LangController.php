@@ -52,6 +52,10 @@ class LangController extends AdminController {
      */
     public function addLang(Request $request)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminLangs');
+        }
+
         $class = 'user';
         $locales = \LaravelLocalization::getSupportedLocales();
         $errors = [];

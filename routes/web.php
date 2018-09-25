@@ -188,15 +188,11 @@ Route::middleware('auth')->group(function() {
             'Admin\DataSetController@resourceCreate'
         );
 
-        Route::match(['get', 'post'], 'user/resource/view/{uri}/{version?}', 'UserController@resourceView')->name('resourceView');
-        Route::match(['get', 'post'], 'admin/resource/view/{uri}/{version?}', 'Admin\DataSetController@resourceView');
+        Route::match(['get', 'post'], 'user/resource/view/{uri}', 'UserController@resourceView')->name('resourceView');
+        Route::match(['get', 'post'], 'admin/resource/view/{uri}', 'Admin\DataSetController@resourceView');
         Route::match(['get', 'post'], 'user/resource/edit/{uri}/{parentUri?}', 'UserController@resourceEditMeta');
         Route::match(['get', 'post'], 'admin/resource/edit/{uri}/{parentUri?}', 'Admin\DataSetController@resourceEditMeta');
-
-        Route::match(['get', 'post'], 'user/resource/update/{uri}', 'UserController@resourceUpdate');
-        Route::match(['get', 'post'], 'admin/resource/update/{uri}', 'Admin\DataSetController@resourceUpdate');
-        Route::match(['get', 'post'], 'resource/import/cancel/{uri}/{action}', 'ResourceController@resourceCancelImport');
-
+        Route::match(['get', 'post'], 'user/resourceCancelImport/{uri}', 'UserController@resourceCancelImport')->name('cancelImport');
         Route::match(['get', 'post'], 'importCSV', 'ResourceController@importCsvData');
         Route::match(['get', 'post'], 'importElastic', 'ResourceController@importElasticData');
         Route::match(['get', 'post'], 'user/invite', 'UserController@inviteUser');

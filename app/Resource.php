@@ -105,7 +105,7 @@ class Resource extends Model implements TranslatableInterface
 
     public function elasticDataSet()
     {
-        return $this->hasMany('App\ElasticDataSet');
+        return $this->hasOne('App\ElasticDataSet', 'id', 'es_id');
     }
 
     public function dataSet()

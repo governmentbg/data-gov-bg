@@ -17,11 +17,7 @@ class CreateElasticDataSetTable extends Migration
             $table->increments('id');
             $table->string('index');
             $table->string('index_type');
-            $table->string('doc');
-            $table->string('version', 15)->nullable();
-            $table->integer('resource_id')->unsigned()->nullable();
-            $table->foreign('resource_id')->references('id')->on('resources');
-            $table->unique(['resource_id', 'version']);
+            $table->integer('doc')->unsigned();
         });
     }
 

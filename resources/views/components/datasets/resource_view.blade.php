@@ -4,10 +4,7 @@
         <div class="col-sm-12 p-l-none">
             <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
             <p>
-                {{ utrans('custom.version_current') }}:&nbsp;{{ $resource->version }}
-            </p>
-            <p>
-                {{ utrans('custom.version_displayed') }}:&nbsp;{{ $versionView }}
+                {{ utrans('custom.version') }}:&nbsp;{{ $resource->version }}
             </p>
             @if (!empty($admin))
                 <p>
@@ -28,7 +25,7 @@
             @if (!empty($resource->resource_url))
                 <p><strong>{{ uctrans('custom.url') }}:</strong></p>
                 <div class="m-b-sm">
-                    <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
+                    {{ $resource->resource_url }}
                 </div>
             @endif
 
@@ -85,21 +82,13 @@
                 @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
                     <form method="POST">
                         {{ csrf_field() }}
-                        @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
-                            <button
-                                type="button"
-                                class="btn btn-primary js-res-uri"
-                                data-toggle="modal"
-                                data-target="#embed-resource"
-                                data-uri ="{{ $resource->uri }}"
-                            >{{ uctrans('custom.embed') }}</button>
-                            @if ($resource->version == $versionView)
-                                <a
-                                    class="btn btn-primary"
-                                    href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
-                                >{{ uctrans('custom.update') }}</a>
-                            @endif
-                        @endif
+                        <button
+                            type="button"
+                            class="btn btn-primary js-res-uri"
+                            data-toggle="modal"
+                            data-target="#embed-resource"
+                            data-uri ="{{ $resource->uri }}"
+                        >{{ uctrans('custom.embed') }}</button>
                         <a
                             class="btn btn-primary"
                             href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
@@ -115,20 +104,22 @@
         </div>
 
         <!-- IF there are old versions of this article -->
-        @if (!empty($versions))
-            <div class="col-sm-12 pull-left m-t-md p-l-none">
-                <div class="pull-left history">
-                    @foreach ($versions as $version)
-                    <div>
-                        <a href="{{ url('/'. $root .'/resource/view/'. $resource->uri .'/'. $version) }}">
-                            <span class="version-heading">{{ uctrans('custom.version') }}</span>
-                            <span class="version">&nbsp;&#8211;&nbsp;{{ $version }}</span>
-                        </a>
-                    </div>
-                    @endforeach
+        <div class="col-sm-12 pull-left m-t-md p-l-none">
+            <div class="pull-left history">
+                <div>
+                    <a href="#">
+                        <span class="version-heading">{{ __('custom.title') }}</span>
+                        <span class="version">&nbsp;&#8211;&nbsp;версия 1</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="#">
+                        <span class="version-heading">{{ __('custom.title') }}</span>
+                        <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
+                    </a>
                 </div>
             </div>
-        @endif
+        </div>
         @include('components.signal-box', ['signals' => $resource->signals])
     </div>
 </div>

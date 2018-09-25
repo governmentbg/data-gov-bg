@@ -156,6 +156,10 @@ class DocumentController extends AdminController
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminDocs');
+            }
+
             if ($request->has('create')) {
                 $params = [];
 

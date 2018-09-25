@@ -70,6 +70,10 @@ class GroupController extends AdminController
     public function register(Request $request)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminGroups');
+            }
+
             $class = 'user';
             $fields = $this->getGroupTransFields();
 
@@ -119,6 +123,10 @@ class GroupController extends AdminController
     public function view(Request $request, $uri)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminGroups');
+            }
+
             $orgId = Organisation::where('uri', $uri)
                 ->where('type', Organisation::TYPE_GROUP)
                 ->value('id');

@@ -287,6 +287,10 @@
 
         <div class="form-group row">
             <div class="col-xs-12 text-right mng-btns">
+                <button
+                    name="back"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</button>
                 @if (!empty($admin) || !empty($buttons['add']))
                     <button
                         name="add_resource"

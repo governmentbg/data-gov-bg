@@ -98,6 +98,10 @@ class SubThemeController extends AdminController
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminCategories');
+            }
+
             if ($request->has('create')) {
 
                 $rq = Request::create('/api/addTag', 'POST', [
@@ -136,10 +140,15 @@ class SubThemeController extends AdminController
     public function view(Request $request, $id)
     {
         if (Role::isAdmin()) {
-            $req = Request::create('/api/getTagDetails', 'POST', ['tag_id' => $id]);
-            $api = new ApiTag($req);
-            $result = $api->getTagDetails($req)->getData();
-            $theme = isset($result->tag) ? $result->tag : null;
+            if ($request->has('back')) {
+                return redirect()->route('adminCategories');
+            }
+
+            $request = Request::create('/api/listTags', 'POST', ['criteria' => ['tag_ids' => [$id]]]);
+            $api = new ApiTag($request);
+            $result = $api->listTags($request)->getData();
+
+            $theme = isset($result->tags[0]) ? $result->tags[0] : null;
 
             if (!is_null($theme)) {
 

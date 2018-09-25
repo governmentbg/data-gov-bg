@@ -130,6 +130,10 @@
                 </div>
                 <div class="form-group row">
                     <div class="col-lg-12 text-right">
+                        <button
+                            name="back"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.close') }}</button>
                         <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                     </div>
                 </div>

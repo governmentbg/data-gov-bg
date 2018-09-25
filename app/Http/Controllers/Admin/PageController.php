@@ -126,6 +126,9 @@ class PageController extends AdminController
      */
     public function view(Request $request, $id)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminPages');
+        }
 
         $req = Request::create('/api/listPages', 'POST', ['criteria' => ['page_id' => $id]]);
         $api = new ApiPage($req);
@@ -229,7 +232,11 @@ class PageController extends AdminController
     {
         $sections = Section::select()->get();
         $sections = $this->prepareSections($sections);
-//dd($request->all());
+
+        if ($request->has('back')) {
+            return redirect()->route('adminPages');
+        }
+
         if ($request->has('create')) {
 
             $from = null;

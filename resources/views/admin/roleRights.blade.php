@@ -6,7 +6,9 @@
     @include('partials.admin-nav-bar', ['view' => 'manageRoles'])
 
     <h3 class="m-b-xl">{{ __('custom.edit_rights') }}</h3>
-
+    @if ($roleName)
+        <h3 class="m-b-xl">{{ $roleName[0]->name }}</h3>
+    @endif
     <form method="POST" class="form-horizontal m-b-xl">
         {{ csrf_field() }}
         <div class="table-responsive opn-tbl text-center">

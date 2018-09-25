@@ -19,6 +19,7 @@
                             </div>
                         </div>
                         <div class="col-xs-12 m-t-sm p-l-none text-right">
+                        <a href="{{ url('admin/documents/list') }}" class="badge badge-pill">{{ __('custom.back') }}</a>
                             <form
                                 method="POST"
                                 class="inline-block"

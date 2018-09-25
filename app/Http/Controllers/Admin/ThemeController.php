@@ -83,6 +83,10 @@ class ThemeController extends AdminController
     public function add(Request $request)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminThemes');
+            }
+
             if ($request->has('create')) {
                 $params = [];
 
@@ -136,6 +140,10 @@ class ThemeController extends AdminController
     public function view(Request $request, $id)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminThemes');
+            }
+
             $req = Request::create('/api/getMainCategoryDetails', 'POST', ['category_id' => $id]);
             $api = new ApiCategory($req);
             $result = $api->getMainCategoryDetails($req)->getData();

@@ -602,7 +602,7 @@ return [
     'id' => 'ИД',
     'tags_h' => 'Eтикети',
     'main_themes_list' => 'Списък основни теми',
-    'categories_list' => 'Списък с категории',
+    'categories_list' => 'Списък категории',
     'error' => 'Възникна грешка',
     'filename' => 'Име на файл',
     'theme_preview' => 'Преглед на тема',
@@ -771,5 +771,5 @@ return [
     'dataset_edit' => 'редактиране на набор данни',
     'users_edit' => 'редактиране на потребител',
     'terms_and_conditions_list' => 'списък условия за ползване',
-
+    'delete_theme_confirm' => 'Изтриване на тема',
 ];

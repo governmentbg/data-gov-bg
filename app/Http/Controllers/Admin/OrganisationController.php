@@ -154,6 +154,10 @@ class OrganisationController extends AdminController
     public function register(Request $request)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminOrgs');
+            }
+
             $post = [
                 'data' => $request->all()
             ];
@@ -219,6 +223,10 @@ class OrganisationController extends AdminController
     public function view(Request $request, $uri)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminOrgs');
+            }
+
             $orgId = Organisation::where('uri', $uri)
                 ->whereIn('type', array_flip(Organisation::getPublicTypes()))
                 ->value('id');

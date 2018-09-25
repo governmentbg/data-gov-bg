@@ -197,7 +197,7 @@
                                 <div class="hidden {{ 'js-terms-req-cont-'. $dataRequest->id }}">
                                     <div class="col-xs-12">{{ $dataRequest->contact_name }}</div>
                                     <div class="col-xs-12 m-t-md">{{ $dataRequest->email }}</div>
-                                    <div class="col-xs-12 m-t-xs">{{ $dataRequest->description }}</div>
+                                    <div class="col-xs-12 m-t-xs">{!! nl2br($dataRequest->description) !!}</div>
                                     <div class="col-md-3 col-sm-4 col-xs-6 terms-hr"><hr/></div>
                                     <div class="col-xs-12">{{ __('custom.created_at') }}: &nbsp; {{ $dataRequest->created_at }}</div>
                                     <div class="col-xs-12">{{ __('custom.created_by') }}: &nbsp; {{ $dataRequest->created_by }}</div>

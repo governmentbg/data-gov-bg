@@ -893,6 +893,10 @@ class UserController extends Controller {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
         }
 
+        if ($request->has('back')) {
+            return redirect(url('user/datasets'));
+        }
+
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
             RoleRight::RIGHT_EDIT

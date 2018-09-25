@@ -11,6 +11,14 @@
                                 <li><a class="active" href="{{ url('/data/reported') }}">{{ __('custom.signal_data') }}</a></li>
                             </ul>
                         </div>
+                        @if (isset($extended) && $extended)
+                            <div class="m-t-sm">
+                                <ul class="nav filter-type right-border">
+                                    <li><a class="p-l-none" href="{{ url('/groups') }}">{{ untrans('custom.groups', 2) }}</a></li>
+                                    <li><a href="{{ url('/data/chronology') }}">{{ __('custom.chronology') }}</a></li>
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                     <div class="col-md-4 col-sm-2 col-xs-2 p-l-none">
                         <div class="col-lg-5 col-md-6 col-sm-12 col-xs-12 exclamation-sign">

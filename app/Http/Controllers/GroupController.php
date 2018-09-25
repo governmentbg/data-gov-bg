@@ -261,10 +261,10 @@ class GroupController extends Controller
      *
      * @return view to previous page
      */
-    public function delete(Request $request, $id)
+    public function delete(Request $request)
     {
-        if (\Auth::check()) {
-            $rq = Request::create('/api/getGroupDetails', 'POST', ['group_id' => $id]);
+        if (\Auth::check() && $request->has('delete') && $request->has('group_uri')) {
+            $rq = Request::create('/api/getGroupDetails', 'POST', ['group_uri' => $request->group_uri]);
             $api = new ApiOrganisation($rq);
             $res = $api->getGroupDetails($rq)->getData();
             $group = !empty($res->data) ? $res->data : [];
@@ -298,12 +298,12 @@ class GroupController extends Controller
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect('/groups');
+                return redirect()->route('groups', $request->query());
             }
 
             $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
 
-            return redirect('/groups');
+            return redirect()->back();
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));

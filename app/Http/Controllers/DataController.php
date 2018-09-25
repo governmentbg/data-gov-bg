@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\DataSet;
 use App\Resource;
 use App\Organisation;
+use App\Role;
 use App\RoleRight;
 use App\Module;
+use App\ActionsHistory;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
@@ -17,6 +19,7 @@ use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\SignalController as ApiSignal;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 use Illuminate\Http\Request;
 
 class DataController extends Controller {
@@ -383,6 +386,14 @@ class DataController extends Controller {
             }
         }
 
+        if  (\Auth::check()) {
+            // check rights for add button
+            $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
+            $buttons['add'] = $rightCheck;
+
+            $buttons['addUrl'] = Role::isAdmin() ? '/admin/dataset/add' : '/user/dataset/create';
+        }
+
         return view(
             'data/list',
             [
@@ -512,7 +523,36 @@ class DataController extends Controller {
                 $user = !empty($res->users) ? $res->users[0] : [];
             }
 
-            $dataset = $this->getModelUsernames($dataset);
+            if (\Auth::check() && $request->has('delete')) {
+                // check delete rights
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                if ($rightCheck) {
+                    $params = [
+                        'api_key'      => \Auth::user()->api_key,
+                        'dataset_uri'  => $dataset->uri,
+                    ];
+
+                    $delReq = Request::create('/api/deleteDataset', 'POST', $params);
+                    $api = new ApiDataSet($delReq);
+                    $result = $api->deleteDataset($delReq)->getData();
+
+                    if (isset($result->success) && $result->success) {
+                        $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+
+                        return redirect()->route('data', $request->query());
+                    }
+
+                    $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
+                }
+            }
 
             // list resources
             $params = [
@@ -578,16 +618,30 @@ class DataController extends Controller {
                     }
                 }
 
-                /*$objData = ['created_by' => $dataset->created_by];
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+
+                // check rights for add resource button
+                $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                $buttons['addResource'] = $rightCheck;
 
                 // check rights for edit button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, [], $objData);
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['edit'] = $rightCheck;
 
                 // check rights for delete button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, [], $objData);
-                $buttons['delete'] = $rightCheck;*/
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons['delete'] = $rightCheck;
+
+                $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
             }
+
+            $dataset = $this->getModelUsernames($dataset);
 
             return view(
                 'data/view',
@@ -617,7 +671,7 @@ class DataController extends Controller {
         $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
-        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+        $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
             // get dataset details
@@ -657,7 +711,36 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
-                $dataset = $this->getModelUsernames($dataset);
+                if (\Auth::check() && $request->has('delete')) {
+                    // check delete rights
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                    if ($rightCheck) {
+                        $params = [
+                            'api_key'       => \Auth::user()->api_key,
+                            'resource_uri'  => $resource->uri,
+                        ];
+
+                        $delReq = Request::create('/api/deleteResource', 'POST', $params);
+                        $api = new ApiResource($delReq);
+                        $result = $api->deleteResource($delReq)->getData();
+
+                        if (isset($result->success) && $result->success) {
+                            $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                            return redirect()->route('dataView', array_merge($request->query(), ['uri' => $dataset->uri]));
+                        }
+
+                        $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
+                    }
+                }
 
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
@@ -669,11 +752,33 @@ class DataController extends Controller {
                 $data = !empty($res->data) ? $res->data : [];
 
                 $userData = [];
+                $buttons = [];
                 if ($authUser = \Auth::user()) {
                     $userData['firstname'] = $authUser->firstname;
                     $userData['lastname'] = $authUser->lastname;
                     $userData['email'] = $authUser->email;
+
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+
+                    // check rights for edit button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                    $buttons['edit'] = $rightCheck;
+
+                    // check rights for delete button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+                    $buttons['delete'] = $rightCheck;
+
+                    $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
                 }
+
+                $dataset = $this->getModelUsernames($dataset);
+                $resource = $this->getModelUsernames($resource);
 
                 return view(
                     'data/resourceView',
@@ -685,7 +790,8 @@ class DataController extends Controller {
                         'dataset'        => $dataset,
                         'resource'       => $resource,
                         'data'           => $data,
-                        'userData'       => $userData
+                        'userData'       => $userData,
+                        'buttons'        => $buttons
                     ]
                 );
             }
@@ -1130,6 +1236,14 @@ class DataController extends Controller {
             }
         }
 
+        if  (\Auth::check()) {
+            // check rights for add button
+            $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
+            $buttons['add'] = $rightCheck;
+
+            $buttons['addUrl'] = Role::isAdmin() ? '/admin/dataset/add' : '/user/dataset/create';
+        }
+
         return view(
             'data/reportedList',
             [
@@ -1193,7 +1307,36 @@ class DataController extends Controller {
                 $user = !empty($res->users) ? $res->users[0] : [];
             }
 
-            $dataset = $this->getModelUsernames($dataset);
+            if (\Auth::check() && $request->has('delete')) {
+                // check delete rights
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                if ($rightCheck) {
+                    $params = [
+                        'api_key'      => \Auth::user()->api_key,
+                        'dataset_uri'  => $dataset->uri,
+                    ];
+
+                    $delReq = Request::create('/api/deleteDataset', 'POST', $params);
+                    $api = new ApiDataSet($delReq);
+                    $result = $api->deleteDataset($delReq)->getData();
+
+                    if (isset($result->success) && $result->success) {
+                        $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+
+                        return redirect()->route('reportedData', $request->query());
+                    }
+
+                    $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
+                }
+            }
 
             // list resources
             $params = [
@@ -1232,13 +1375,7 @@ class DataController extends Controller {
                 $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
             }
 
-            $buttons = [
-                'follow'   => false,
-                'unfollow' => false,
-                'edit'     => false,
-                'delete'   => false,
-            ];
-
+            $buttons = [];
             if ($authUser = \Auth::user()) {
                 $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
@@ -1265,16 +1402,30 @@ class DataController extends Controller {
                     }
                 }
 
-                /*$objData = ['created_by' => $dataset->created_by];
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+
+                // check rights for add resource button
+                $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                $buttons['addResource'] = $rightCheck;
 
                 // check rights for edit button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, [], $objData);
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['edit'] = $rightCheck;
 
                 // check rights for delete button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, [], $objData);
-                $buttons['delete'] = $rightCheck;*/
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons['delete'] = $rightCheck;
+
+                $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
             }
+
+            $dataset = $this->getModelUsernames($dataset);
 
             return view(
                 'data/reportedView',
@@ -1304,7 +1455,7 @@ class DataController extends Controller {
         $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
-        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+        $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
             // get dataset details
@@ -1344,7 +1495,36 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
-                $dataset = $this->getModelUsernames($dataset);
+                if (\Auth::check() && $request->has('delete')) {
+                    // check delete rights
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                    if ($rightCheck) {
+                        $params = [
+                            'api_key'       => \Auth::user()->api_key,
+                            'resource_uri'  => $resource->uri,
+                        ];
+
+                        $delReq = Request::create('/api/deleteResource', 'POST', $params);
+                        $api = new ApiResource($delReq);
+                        $result = $api->deleteResource($delReq)->getData();
+
+                        if (isset($result->success) && $result->success) {
+                            $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                            return redirect()->route('reportedView', array_merge($request->query(), ['uri' => $dataset->uri]));
+                        }
+
+                        $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
+                    }
+                }
 
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
@@ -1356,11 +1536,33 @@ class DataController extends Controller {
                 $data = !empty($res->data) ? $res->data : [];
 
                 $userData = [];
+                $buttons = [];
                 if ($authUser = \Auth::user()) {
                     $userData['firstname'] = $authUser->firstname;
                     $userData['lastname'] = $authUser->lastname;
                     $userData['email'] = $authUser->email;
+
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+
+                    // check rights for edit button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                    $buttons['edit'] = $rightCheck;
+
+                    // check rights for delete button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+                    $buttons['delete'] = $rightCheck;
+
+                    $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
                 }
+
+                $dataset = $this->getModelUsernames($dataset);
+                $resource = $this->getModelUsernames($resource);
 
                 return view(
                     'data/reportedResourceView',
@@ -1372,10 +1574,142 @@ class DataController extends Controller {
                         'dataset'        => $dataset,
                         'resource'       => $resource,
                         'data'           => $data,
-                        'userData'       => $userData
+                        'userData'       => $userData,
+                        'buttons'        => $buttons
                     ]
                 );
             }
+        }
+
+        return redirect()->back();
+    }
+
+    public function chronology(Request $request, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        // get dataset details
+        $params = [
+            'dataset_uri' => $uri,
+            'locale'      => $locale
+        ];
+        $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $res = $api->getDataSetDetails($rq)->getData();
+        $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
+
+        if (!empty($dataset) &&
+            $dataset->status == DataSet::STATUS_PUBLISHED &&
+            $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+
+            $objOwner = [];
+            if (!is_null($dataset->org_id)) {
+                // get organisation details
+                $params = [
+                    'org_id'  => $dataset->org_id,
+                    'locale'  => $locale
+                ];
+                $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+                $api = new ApiOrganisation($rq);
+                $res = $api->getOrganisationDetails($rq)->getData();
+                $organisation = !empty($res->data) ? $res->data : [];
+
+                // set object owner
+                if (!empty($organisation)) {
+                    $objOwner = [
+                        'id' => $organisation->id,
+                        'name' => $organisation->name,
+                        'logo' => $organisation->logo,
+                        'view' => '/organisation/profile/'. $organisation->uri
+                    ];
+                }
+            }
+
+            $objType = Module::getModuleName(Module::DATA_SETS);
+            $objTypeRes = Module::getModuleName(Module::RESOURCES);
+            $actObjData[$objType] = [];
+
+            $criteria = [];
+            $criteria['dataset_ids'][] = $dataset->id;
+            $actObjData[$objType][$dataset->id] = [
+                'obj_id'         => $dataset->uri,
+                'obj_name'       => $dataset->name,
+                'obj_module'     => ultrans('custom.dataset'),
+                'obj_type'       => 'dataset',
+                'obj_view'       => '/data/view/'. $dataset->uri,
+                'parent_obj_id'  => '',
+                'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
+            ];
+
+            if (!empty($dataset->resource)) {
+                foreach ($dataset->resource as $resource) {
+                    $criteria['resource_uris'][] = $resource->uri;
+                    $actObjData[$objTypeRes][$resource->uri] = [
+                        'obj_id'            => $resource->uri,
+                        'obj_name'          => $resource->name,
+                        'obj_module'        => ultrans('custom.resource'),
+                        'obj_type'          => 'resource',
+                        'obj_view'          => '/data/resourceView/'. $resource->uri,
+                        'parent_obj_id'     => $dataset->uri,
+                        'parent_obj_name'   => $dataset->name,
+                        'parent_obj_module' => ultrans('custom.dataset'),
+                        'parent_obj_type'   => 'dataset',
+                        'parent_obj_view'   => '/data/view/'. $dataset->uri,
+                        'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                        'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                        'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                        'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
+                    ];
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 10;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'data/chronology',
+                [
+                    'class'          => 'data',
+                    'dataset'        => $dataset,
+                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes
+                ]
+            );
         }
 
         return redirect()->back();

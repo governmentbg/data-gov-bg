@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class ResourceController extends Controller {
-    public static function addMetadata($datasetUri, $resourceData, $file = null)
+    public static function addMetadata($recordUri, $resourceData, $file = null, $isUpdate = false)
     {
         $data = [];
         $errors = [];
@@ -21,9 +21,14 @@ class ResourceController extends Controller {
             $apiKey = Auth::user()->api_key;
             $metadata = [
                 'api_key'       => $apiKey,
-                'dataset_uri'   => $datasetUri,
                 'data'          => $resourceData,
             ];
+
+            if ($isUpdate) {
+                $metadata['resource_uri'] = $recordUri;
+            } else {
+                $metadata['dataset_uri'] = $recordUri;
+            }
 
             if (
                 $metadata['data']['type'] == Resource::TYPE_FILE
@@ -113,12 +118,13 @@ class ResourceController extends Controller {
                 }
             }
 
-            $savePost = Request::create('/api/addResourceMetadata', 'POST', $metadata);
+            $apiFunction = $isUpdate ? 'editResourceMetadata' : 'addResourceMetadata';
+            $savePost = Request::create('/api/'. $apiFunction, 'POST', $metadata);
             $api = new ApiResource($savePost);
-            $result = $api->addResourceMetadata($savePost)->getData();
+            $result = $api->$apiFunction($savePost)->getData();
 
             if ($result->success) {
-                $uri = $result->data->uri;
+                $uri = $isUpdate ? $recordUri : $result->data->uri;
 
                 if ($metadata['data']['type'] == Resource::TYPE_HYPERLINK) {
                     $success = true;
@@ -261,6 +267,7 @@ class ResourceController extends Controller {
             $admin = $request->offsetGet('admin');
             $root = empty($admin) ? 'user' : 'admin';
             $uri = $request->offsetGet('resource_uri');
+            $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData');
             Session::forget('elasticData');
             $filtered = [];
@@ -282,9 +289,11 @@ class ResourceController extends Controller {
                     'resource_uri'  => $uri,
                     'data'          => $filtered,
                 ];
-                $reqElastic = Request::create('/addResourceData', 'POST', $saveData);
+
+                $apiFunction = $action == 'create' ? 'addResourceData' : 'updateResourceData';
+                $reqElastic = Request::create('/'. $apiFunction, 'POST', $saveData);
                 $api = new ApiResource($reqElastic);
-                $resultElastic = $api->addResourceData($reqElastic)->getData();
+                $resultElastic = $api->$apiFunction($reqElastic)->getData();
 
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -294,11 +303,13 @@ class ResourceController extends Controller {
 
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
 
-                // delete resource metadata record
-                $resource = Resource::where('uri', $uri)->first();
+                if ($action == 'create') {
+                    // delete resource metadata record
+                    $resource = Resource::where('uri', $uri)->first();
 
-                if ($resource) {
-                    $resource->forceDelete();
+                    if ($resource) {
+                        $resource->forceDelete();
+                    }
                 }
 
                 return redirect()->back()->withInput()->withErrors($resultElastic->errors);
@@ -323,6 +334,7 @@ class ResourceController extends Controller {
             $admin = $request->offsetGet('admin');
             $root = empty($admin) ? 'user' : 'admin';
             $uri = $request->offsetGet('resource_uri');
+            $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData');
             Session::forget('elasticData');
 
@@ -331,9 +343,11 @@ class ResourceController extends Controller {
                     'resource_uri'  => $uri,
                     'data'          => $elasticData,
                 ];
-                $reqElastic = Request::create('/addResourceData', 'POST', $saveData);
+
+                $apiFunction = $action == 'create' ? 'addResourceData' : 'updateResourceData';
+                $reqElastic = Request::create('/'. $apiFunction, 'POST', $saveData);
                 $api = new ApiResource($reqElastic);
-                $resultElastic = $api->addResourceData($reqElastic)->getData();
+                $resultElastic = $api->$apiFunction($reqElastic)->getData();
 
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
@@ -342,11 +356,14 @@ class ResourceController extends Controller {
                 }
 
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
-                // delete resource metadata record
-                $resource = Resource::where('uri', $uri)->first();
 
-                if ($resource) {
-                    $resource->forceDelete();
+                if ($action == 'create') {
+                    // delete resource metadata record
+                    $resource = Resource::where('uri', $uri)->first();
+
+                    if ($resource) {
+                        $resource->forceDelete();
+                    }
                 }
 
                 return redirect()->back()->withInput()->withErrors($resultElastic->errors);
@@ -398,4 +415,21 @@ class ResourceController extends Controller {
 
         return back();
     }
+
+    public function resourceCancelImport(Request $request, $uri, $action)
+    {
+        if ($action == 'create') {
+            // delete resource metadata record
+            $resource = Resource::where('uri', $uri)->first();
+
+            if ($resource) {
+                $resource->forceDelete();
+            }
+        }
+
+        $request->session()->flash('alert-danger', uctrans('custom.cancel_resource_import'));
+
+        return back();
+    }
+
 }

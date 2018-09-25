@@ -1621,6 +1621,7 @@ class UserController extends Controller {
                         'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
+                        'action'        => 'create',
                     ], $response['data']));
                 } else {
                     $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
@@ -1700,6 +1701,11 @@ class UserController extends Controller {
                                                 : Resource::REPORTED_TRUE
                     ];
 
+                if ($resource->resource_type == Resource::TYPE_HYPERLINK) {
+                    $data['type'] = $resource->resource_type;
+                    $data['resource_url'] = $request->offsetGet('resource_url');
+                }
+
                 $metadata = [
                     'api_key'       => Auth::user()->api_key,
                     'resource_uri'  => $uri,
@@ -1733,18 +1739,95 @@ class UserController extends Controller {
         ]);
     }
 
-    public function resourceCancelImport(Request $request, $uri)
+    /**
+     * Edit resource metadata
+     *
+     * @param Request $request - resource metadata, file with resource data
+     * @param int $resourceUri - uri of resource to be edited
+     *
+     * @return view - resource edit page
+     */
+    public function resourceUpdate(Request $request, $resourceUri)
     {
-        // delete resource metadata record
-        $resource = Resource::where('uri', $uri)->first();
+        $rq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $resourceUri]);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceMetadata($rq)->getData();
 
-        if ($resource) {
-            $resource->forceDelete();
+        if (!$res->success) {
+            return redirect()->back();
         }
 
-        $request->session()->flash('alert-danger', uctrans('custom.cancel_resource_import'));
+        $resourceData = !empty($res->resource) ? $res->resource : null;
 
-        return redirect('/user/datasets');
+        if (!isset($resourceData)) {
+            return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::RESOURCES,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by'    => $resourceData->created_by,
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $class = 'user';
+        $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
+        $resource = Resource::where('uri', $resourceUri)->first()->loadTranslations();
+
+        if ($resource) {
+            if ($request->has('ready_metadata')) {
+
+                $data = [
+                    'type'          => $resource->resource_type,
+                    'resource_url'  => $request->offsetGet('resource_url'),
+                    'http_rq_type'  => $request->offsetGet('http_rq_type'),
+                    'http_headers'  => $request->offsetGet('http_headers'),
+                    'post_data'     => $request->offsetGet('post_data'),
+                    'version'       => strval(intval($resource->version) + 1),
+                ];
+
+                $file = $request->file('file');
+
+                $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
+
+                if ($response['success']) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                        return redirect('/user/resource/view/'. $response['uri']);
+                    }
+
+                    return view('user/resourceImport', array_merge([
+                        'class'         => $class,
+                        'types'         => $types,
+                        'resourceUri'   => $response['uri'],
+                        'action'        => 'update',
+                    ], $response['data']));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+
+                    return redirect()->back()->withInput()->withErrors($response['errors']);
+                }
+            }
+        } else {
+            return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
+        }
+
+        return view('user/resourceUpdate', [
+            'class'     => $class,
+            'resource'  => $resource,
+            'uri'       => $resourceUri,
+            'types'     => $types,
+            'reqTypes'  => $reqTypes,
+            'fields'    => $this->getResourceTransFields()
+        ]);
     }
 
     public function groupResourceCreate(Request $request, $grpUri, $datasetUri)
@@ -2003,7 +2086,7 @@ class UserController extends Controller {
      *
      * @return view
      */
-    public function resourceView(Request $request, $uri)
+    public function resourceView(Request $request, $uri, $version = null)
     {
         $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiMetadata = new ApiResource($reqMetadata);
@@ -2037,6 +2120,10 @@ class UserController extends Controller {
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
                 $resource = $this->getModelUsernames($resource);
 
+                if (empty($version)) {
+                    $version = $resource->version;
+                }
+
                 if ($request->has('delete')) {
                     $rightCheck = RoleRight::checkUserRight(
                         Module::RESOURCES,
@@ -2062,9 +2149,15 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.delete_error'));
                 }
 
-                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri]);
+                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri, 'version' => $version]);
                 $apiEsData = new ApiResource($reqEsData);
                 $response = $apiEsData->getResourceData($reqEsData)->getData();
+
+                $versions = [];
+                $versionsList = Resource::where('id', $resource->id)->first()->elasticDataSet()->get();
+                foreach ($versionsList as $row) {
+                    $versions[] = $row->version;
+                }
 
                 $data = !empty($response->data) ? $response->data : [];
 
@@ -2076,13 +2169,15 @@ class UserController extends Controller {
                     $reqConvert = Request::create('/json2xml', 'POST', $convertData);
                     $apiConvert = new ApiConversion($reqConvert);
                     $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
-                    $data = $resultConvert->data;
+                    $data = isset($resultConvert->data) ? $resultConvert->data : [];
                 }
 
                 return view('user/resourceView', [
                     'class'         => 'user',
                     'resource'      => $resource,
                     'data'          => $data,
+                    'versionView'   => $version,
+                    'versions'      => $versions,
                     'buttons'       => $buttons
                 ]);
             }

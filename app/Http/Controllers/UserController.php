@@ -1681,6 +1681,7 @@ class UserController extends Controller {
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $uri)->first()->loadTranslations();
+        $custFields = CustomSetting::where('resource_id', $resource->id)->get()->loadTranslations();
 
         if ($parentUri) {
             $parent = Organisation::where('uri', $parentUri)->first();
@@ -1696,9 +1697,10 @@ class UserController extends Controller {
                     'schema_description'    => $request->offsetGet('schema_description'),
                     'schema_url'            => $request->offsetGet('schema_url'),
                     'is_reported'           => is_null($request->offsetGet('reported'))
-                                                ? Resource::REPORTED_FALSE
-                                                : Resource::REPORTED_TRUE
-                    ];
+                        ? Resource::REPORTED_FALSE
+                        : Resource::REPORTED_TRUE,
+                    'custom_fields'         => $request->offsetGet('custom_fields'),
+                ];
 
                 $metadata = [
                     'api_key'       => Auth::user()->api_key,
@@ -1723,13 +1725,14 @@ class UserController extends Controller {
         }
 
         return view('user/resourceEdit', [
-            'class'     => $class,
-            'resource'  => $resource,
-            'uri'       => $uri,
-            'types'     => $types,
-            'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields(),
-            'parent'    => isset($parent) ? $parent : false,
+            'class'         => $class,
+            'resource'      => $resource,
+            'uri'           => $uri,
+            'types'         => $types,
+            'reqTypes'      => $reqTypes,
+            'custFields'    => $custFields,
+            'fields'        => $this->getResourceTransFields(),
+            'parent'        => isset($parent) ? $parent : false,
         ]);
     }
 

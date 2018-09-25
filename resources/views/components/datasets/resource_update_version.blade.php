@@ -109,12 +109,31 @@
         </div>
 
         <div class="form-group row">
+            <label for="schema_desc" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.schema_description') }}:</label>
+            <div class="col-sm-9">
+                <textarea
+                    id="schema_desc"
+                    class="input-border-r-12 form-control"
+                    name="schema_description"
+                >{{ $resource->schema_descript }}</textarea>
+                <span class="error">{{ $errors->first('schema_description') }}</span>
+            </div>
+        </div>
+        <div class="form-group row ">
+            <label for="schema_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_url') }}:</label>
+            <div class="col-sm-9">
+                <input
+                    id="schema_url"
+                    class="input-border-r-12 form-control"
+                    name="schema_url"
+                    type="text"
+                    value="{{ $resource->schema_url }}"
+                >
+                <span class="error">{{ $errors->first('schema_url') }}</span>
+            </div>
+        </div>
+        <div class="form-group row">
             <div class="col-sm-12 text-right">
-                <a
-                    type="button"
-                    class="btn btn-primary"
-                    href="{{ url($uri) }}"
-                >{{ uctrans('custom.preview') }}</a>
                 <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
             </div>
         </div>

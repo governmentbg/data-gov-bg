@@ -17,10 +17,9 @@ class ElasticDataSet extends Model
         $this->belongsTo('App\Resource');
     }
 
-    public static function getElasticData($id, $version)
+    public static function getElasticData($id)
     {
-        $elasticData = ElasticDataSet::where('resource_id', $id)
-                        ->where('version', $version)->first();
+        $elasticData = ElasticDataSet::find($id);
 
         if (!empty($elasticData)) {
             $data = \Elasticsearch::get([

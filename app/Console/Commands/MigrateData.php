@@ -83,7 +83,7 @@ class MigrateData extends Command
         }
     }
 
-    private function up ()
+    private function up()
     {
         $migrateUserId = User::where('username', 'migrate_data')->value('id');
         \Auth::loginUsingId($migrateUserId);
@@ -102,7 +102,7 @@ class MigrateData extends Command
         $this->migrateFollowers($userData['users']);
     }
 
-    private function down ()
+    private function down()
     {
         $migrateUser = User::where('username', 'migrate_data')->value('id');
         $users = User::where('created_by', $migrateUser)->get();

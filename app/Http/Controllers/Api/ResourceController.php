@@ -310,7 +310,6 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
-
             $resource = Resource::where('uri', $post['resource_uri'])->first();
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,

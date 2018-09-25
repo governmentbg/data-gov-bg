@@ -13,9 +13,11 @@ class AddChatterLastReplyAtDiscussion extends Migration
      */
     public function up()
     {
-        Schema::table('chatter_discussion', function (Blueprint $table) {
-            $table->timestamp('last_reply_at')->useCurrent();
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_discussion', function (Blueprint $table) {
+                $table->timestamp('last_reply_at')->useCurrent();
+            });
+        }
     }
 
     /**

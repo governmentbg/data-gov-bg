@@ -107,7 +107,6 @@ class Module extends Model
             $validator = \Validator::make($request, [
                 'module_name'   => 'required|string|max:191',
                 'action'        => 'required|int|digits_between:1,3|in:'. implode(',', array_flip($actions)),
-                'action_object' => 'max:191',
                 'action_msg'    => 'required|string|max:191',
             ]);
 
@@ -125,6 +124,10 @@ class Module extends Model
                         'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
                         'occurrence'    => date('Y-m-d H:i:s'),
                     ];
+
+                    if (isset($request['status'])) {
+                        $dbData['status'] = $request['status'];
+                    }
 
                     ActionsHistory::create($dbData);
                 } catch (QueryException $ex) {

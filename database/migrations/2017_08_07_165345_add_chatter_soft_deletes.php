@@ -13,12 +13,15 @@ class AddChatterSoftDeletes extends Migration
      */
     public function up()
     {
-        Schema::table('chatter_discussion', function (Blueprint $table) {
-            $table->softDeletes();
-        });
-        Schema::table('chatter_post', function (Blueprint $table) {
-            $table->softDeletes();
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_discussion', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+
+            Schema::table('chatter_post', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+        }
     }
 
     /**

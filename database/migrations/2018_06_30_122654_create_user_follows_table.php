@@ -13,38 +13,40 @@ class CreateUserFollowsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_follows', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('org_id')->unsigned()->nullable();
-            $table->foreign('org_id')->references('id')->on('organisations');
-            $table->integer('group_id')->unsigned()->nullable();
-            $table->foreign('group_id')->references('id')->on('organisations');
-            $table->integer('data_set_id')->unsigned()->nullable();
-            $table->foreign('data_set_id')->references('id')->on('data_sets');
-            $table->integer('category_id')->unsigned()->nullable();
-            $table->foreign('category_id')->references('id')->on('categories');
-            $table->integer('tag_id')->unsigned()->nullable();
-            $table->foreign('tag_id')->references('id')->on('categories');
-            $table->integer('follow_user_id')->unsigned()->nullable();
-            $table->foreign('follow_user_id')->references('id')->on('users');
-            $table->boolean('news');
-            $table->unique(['user_id', 'org_id', 'group_id', 'data_set_id', 'category_id', 'tag_id', 'follow_user_id', 'news'], 'user_follows_unique');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('user_follows', function (Blueprint $table) {
+                $table->increments('id');
+                $table->integer('user_id')->unsigned();
+                $table->foreign('user_id')->references('id')->on('users');
+                $table->integer('org_id')->unsigned()->nullable();
+                $table->foreign('org_id')->references('id')->on('organisations');
+                $table->integer('group_id')->unsigned()->nullable();
+                $table->foreign('group_id')->references('id')->on('organisations');
+                $table->integer('data_set_id')->unsigned()->nullable();
+                $table->foreign('data_set_id')->references('id')->on('data_sets');
+                $table->integer('category_id')->unsigned()->nullable();
+                $table->foreign('category_id')->references('id')->on('categories');
+                $table->integer('tag_id')->unsigned()->nullable();
+                $table->foreign('tag_id')->references('id')->on('categories');
+                $table->integer('follow_user_id')->unsigned()->nullable();
+                $table->foreign('follow_user_id')->references('id')->on('users');
+                $table->boolean('news');
+                $table->unique(['user_id', 'org_id', 'group_id', 'data_set_id', 'category_id', 'tag_id', 'follow_user_id', 'news'], 'user_follows_unique');
+            });
 
-        DB::unprepared("
-            CREATE TRIGGER check_user_follows_insert BEFORE INSERT ON user_follows
-            FOR EACH ROW
-            BEGIN
-                ". $this->preventUserFollowsQuery() ."
-            END;
-            CREATE TRIGGER check_user_follows_update BEFORE UPDATE ON user_follows
-            FOR EACH ROW
-            BEGIN
-                ". $this->preventUserFollowsQuery() ."
-            END;
-        ");
+            DB::unprepared("
+                CREATE TRIGGER check_user_follows_insert BEFORE INSERT ON user_follows
+                FOR EACH ROW
+                BEGIN
+                    ". $this->preventUserFollowsQuery() ."
+                END;
+                CREATE TRIGGER check_user_follows_update BEFORE UPDATE ON user_follows
+                FOR EACH ROW
+                BEGIN
+                    ". $this->preventUserFollowsQuery() ."
+                END;
+            ");
+        }
     }
 
     /**

@@ -26,15 +26,17 @@ class AddUncategorizedCategory extends Migration
      */
     public function up()
     {
-        $currCount = Category::count();
+        if (!env('IS_TOOL')) {
+            $currCount = Category::count();
 
-        foreach ($this->categories as $catData) {
-            $catData['active'] = true;
-            $catData['ordering'] = $currCount + 1;
-            $catData['icon_mime_type'] = 'image/svg+xml';
+            foreach ($this->categories as $catData) {
+                $catData['active'] = true;
+                $catData['ordering'] = $currCount + 1;
+                $catData['icon_mime_type'] = 'image/svg+xml';
 
-            if (!Category::where($catData)->count()) {
-                Category::create($catData);
+                if (!Category::where($catData)->count()) {
+                    Category::create($catData);
+                }
             }
         }
     }
@@ -46,9 +48,11 @@ class AddUncategorizedCategory extends Migration
      */
     public function down()
     {
-        foreach ($this->categories as $catData) {
-            if (Category::where($catData)->count()) {
-                Category::where($catData)->get()->delete();
+        if (!env('IS_TOOL')) {
+            foreach ($this->categories as $catData) {
+                if (Category::where($catData)->count()) {
+                    Category::where($catData)->get()->delete();
+                }
             }
         }
     }

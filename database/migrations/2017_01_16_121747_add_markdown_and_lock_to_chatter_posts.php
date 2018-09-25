@@ -13,10 +13,12 @@ class AddMarkdownAndLockToChatterPosts extends Migration
      */
     public function up()
     {
-        Schema::table('chatter_post', function (Blueprint $table) {
-            $table->boolean('markdown')->default(0);
-            $table->boolean('locked')->default(0);
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_post', function (Blueprint $table) {
+                $table->boolean('markdown')->default(0);
+                $table->boolean('locked')->default(0);
+            });
+        }
     }
 
     /**
@@ -26,8 +28,10 @@ class AddMarkdownAndLockToChatterPosts extends Migration
      */
     public function down()
     {
-        Schema::table('chatter_post', function ($table) {
-            $table->dropColumn(['markdown', 'locked']);
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('chatter_post', function ($table) {
+                $table->dropColumn(['markdown', 'locked']);
+            });
+        }
     }
 }

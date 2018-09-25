@@ -5,8 +5,8 @@
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'users'])
     <div class="row">
-        <div class="col-sm-3 col-xs-12 text-left">
-            <h3>{{ __('custom.users_list') }}<h3>
+        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+            <span class="my-profile m-l-sm">{{uctrans('custom.users_list')}}</span>
         </div>
         <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field admin">
             <form method="GET">

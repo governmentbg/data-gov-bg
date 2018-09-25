@@ -12,14 +12,23 @@
                                 </a>
                             </div>
                         </div>
-                    @elseif (!empty($user))
+                        <div class="col-sm-12 col-xs-12 p-l-r-none">
+                            <h3>
+                                <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ $organisation->name }}</a>
+                            </h3>
+                        </div>
+                    @else
                         <div class="col-sm-12 col-xs-12 p-l-r-none">
                             <div class="pull-left">
                                 <h2>
                                     {{ utrans('custom.author') }}:
-                                    <a href="{{ url('/user/profile/'. $user->id) }}">
-                                        {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
-                                    </a>
+                                    @if (!empty($user))
+                                        <a href="{{ url('/user/profile/'. $user->id) }}">
+                                            {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
+                                        </a>
+                                    @else
+                                        <span>{{ $dataset->created_by }}</span>
+                                    @endif
                                 </h2>
                             </div>
                         </div>

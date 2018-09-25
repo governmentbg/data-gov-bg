@@ -4,6 +4,9 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.user-nav-bar', ['view' => 'organisation'])
+        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+            <span class="my-profile m-l-sm">{{uctrans('custom.organisations_list')}}</span>
+        </div>
         @include('partials.pagination')
         <div class="row">
             <div class="col-sm-3 col-xs-12 text-left">

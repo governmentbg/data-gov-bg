@@ -128,6 +128,13 @@
                     </div>
                     <div class="col-xs-12 page-content text-left p-l-none">
                         @if (!empty($members))
+                            @if (isset($pagination))
+                                <div class="row">
+                                    <div class="col-xs-12 text-center pagination">
+                                        {{ $pagination->links(null, app('request')->except(['page'])) }}
+                                    </div>
+                                </div>
+                            @endif
                             @foreach ($members as $member)
                                 <div class="col-xs-12 p-l-none">
                                     <h3 class="m-b-md"><a href="{{ url('/admin/users/edit/'. $member->id) }}">{{

@@ -22,7 +22,7 @@
                             <div class="form-group row m-b-lg m-t-md">
                                 <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
-                                    <div>{{ !empty($news->active) ? utrans('custom.yes') : utrans('custom.no') }}:</div>
+                                    <div>{{ !empty($news->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">

@@ -50,7 +50,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-9">
                                     <input
                                         name="forum_link"
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}</label>
+                                <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}:</label>
                                 <div class="col-sm-4 m-b-sm">
                                     <div class="col-xs-3">{{ __('custom.from') .': ' }}</div>
                                     <div class="col-xs-9 text-left search-field admin">
@@ -84,7 +84,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.active') }}</label>
+                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.activef') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <div class="js-check">
                                         <input

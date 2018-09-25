@@ -17,7 +17,7 @@
                             {{ csrf_field() }}
 
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}</label>
+                                <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"
@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="comment" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.comment') }}</label>
+                                <label for="comment" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.comment') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"
@@ -45,7 +45,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}</label>
+                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <div class="js-check">
                                         <input
@@ -59,7 +59,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="image" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.image') }}</label>
+                                <label for="image" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.image') }}:</label>
                                 <div class="col-sm-6">
                                     <input
                                         type="file"

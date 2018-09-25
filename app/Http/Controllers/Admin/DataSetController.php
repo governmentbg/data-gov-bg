@@ -191,6 +191,10 @@ class DataSetController extends AdminController
             $organisations = $this->getOrgDropdown();
             $groups = $this->getGroupDropdown();
 
+            if ($request->has('back')) {
+                return redirect()->back();
+            }
+
             if ($request->isMethod('post') && $request->has('create')) {
                 $data = $request->all();
 

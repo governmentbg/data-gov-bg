@@ -380,18 +380,27 @@ class DataRequestController extends ApiController
             $dataRequestList = $dataRequestList->where('status', $criteria['status']);
         }
 
-        $total_records = $dataRequestList->count();
-
-        if (isset($request->records_per_page) && isset($request->page_number)) {
-            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
-        }
-
         if (isset($criteria['date_from'])) {
             $dataRequestList = $dataRequestList->where('created_at', '>=', $criteria['date_from']);
         }
 
         if (isset($criteria['date_to'])) {
             $dataRequestList = $dataRequestList->where('created_at', '<=', $criteria['date_to']);
+        }
+
+        if (isset($criteria['search'])) {
+            $search = $criteria['search'];
+            $dataRequestList = $dataRequestList->where('descript', 'like', '%' . $search . '%')
+                ->orWhere('published_url', 'like', '%' . $search . '%')
+                ->orWhere('contact_name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('notes', 'like', '%' . $search . '%');
+        }
+
+        $total_records = $dataRequestList->count();
+
+        if (isset($request->records_per_page) && isset($request->page_number)) {
+            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
@@ -402,15 +411,6 @@ class DataRequestController extends ApiController
             if ($criteria['order']['type'] == 'asc') {
                 $dataRequestList = $dataRequestList->orderBy($criteria['order']['field'], 'asc');
             }
-        }
-
-        if (isset($criteria['search'])) {
-            $search = $criteria['search'];
-            $dataRequestList = $dataRequestList->where('descript', 'like', '%' . $search . '%')
-                ->orWhere('published_url', 'like', '%' . $search . '%')
-                ->orWhere('contact_name', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%')
-                ->orWhere('notes', 'like', '%' . $search . '%');
         }
 
         $dataRequestList = $dataRequestList->get();

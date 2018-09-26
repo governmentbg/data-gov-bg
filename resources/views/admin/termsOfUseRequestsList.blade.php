@@ -31,7 +31,7 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.req_creation_date') }}</a>
+                >{{ uctrans('custom.req_creation_date') }}</a>
                 <a
                     href="{{
                         action(
@@ -49,7 +49,7 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.status') }}</a>
+                >{{ uctrans('custom.status') }}</a>
                 <a
                     href="{{
                         action(
@@ -67,7 +67,7 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.order_asc') }}</a>
+                >{{ uctrans('custom.order_asc') }}</a>
                 <a
                     href="{{
                         action(
@@ -85,7 +85,7 @@
                             ? 'active'
                             : ''
                     }}"
-                >{{ __('custom.order_desc') }}</a>
+                >{{ uctrans('custom.order_desc') }}</a>
             </div>
         </div>
         <div class="row m-b-lg">

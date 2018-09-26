@@ -9,7 +9,7 @@
                         <div class="row">
                             <div class="col-xs-12 p-l-r-none">
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="active p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a class="{{ $reported ? '' : 'active '}} p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
                                     <li><a href="{{ url('/data/linkedData') }}">{{ __('custom.linked_data') }}</a></li>
                                     <li><a href="{{ url('/data/reported') }}">{{ __('custom.signal_data') }}</a></li>
                                 </ul>
@@ -17,7 +17,14 @@
                             <div class="col-xs-12 p-l-r-none m-t-sm">
                                 <ul class="nav filter-type right-border">
                                     <li><a class="p-l-none" href="{{ route('groups', ['dataset' => $dataset->uri]) }}">{{ untrans('custom.groups', 2) }}</a></li>
-                                    <li><a class="active" href="{{ url('/data/chronology/'. $dataset->uri) }}">{{ __('custom.chronology') }}</a></li>
+                                    <li>
+                                        <a
+                                            class="{{ $reported ? 'active' : ''}}"
+                                            href="{{ route('dataChronology',  ($reported
+                                                    ? ['uri' => $dataset->uri, 'type' => 'reported']
+                                                    : ['uri' => $dataset->uri]
+                                            )) }}"
+                                        >{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
                         </div>

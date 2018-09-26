@@ -43,9 +43,10 @@
                         <input type="hidden" name="admin" value="1">
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
+                    <input type="hidden" name="action" value="{{ $action }}">
                     <a
                         type="button"
-                        href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
+                        href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ __('custom.cancel') }}
                     </a>
                     <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
@@ -66,9 +67,10 @@
                         <input type="hidden" name="admin" value="1">
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
+                    <input type="hidden" name="action" value="{{ $action }}">
                     <a
                         type="button"
-                        href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
+                        href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ __('custom.cancel') }}
                     </a>
                     <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ __('custom.save') }}</button>
@@ -89,9 +91,10 @@
                         <input type="hidden" name="admin" value="1">
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
+                    <input type="hidden" name="action" value="{{ $action }}">
                     <a
                         type="button"
-                        href="{{ route('cancelImport', ['uri' => $resourceUri]) }}"
+                        href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ __('custom.cancel') }}
                     </a>
                     <button

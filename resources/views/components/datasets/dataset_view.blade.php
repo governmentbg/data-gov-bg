@@ -122,10 +122,6 @@
                 <form method="POST" class="inline-block" action="{{ url('/'. $root .'/dataset/delete') }}">
                     {{ csrf_field() }}
                     <button
-                        name="back"
-                        class="btn btn-primary"
-                    >{{ uctrans('custom.close') }}</button>
-                    <button
                         class="btn del-btn btn-primary"
                         type="submit"
                         name="delete"
@@ -134,6 +130,13 @@
                     <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                 </form>
             @endif
+            <form method="POST" class="inline-block">
+            {{ csrf_field() }}
+                <button
+                    name="back"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</button>
+            </form>
         </div>
     </div>
     @include('components.signal-box', ['signals' => $dataset->signals])

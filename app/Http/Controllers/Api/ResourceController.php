@@ -96,11 +96,24 @@ class ResourceController extends ApiController
         });
 
         if (!$validator->fails()) {
-
-            $rightCheck = RoleRight::checkUserRight(
-                Module::RESOURCES,
-                RoleRight::RIGHT_EDIT
-            );
+            $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id' => $dataset->org_id
+                    ],
+                    [
+                        'org_id' => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT
+                );
+            }
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
@@ -203,10 +216,26 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::RESOURCES,
-                RoleRight::RIGHT_EDIT
-            );
+            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $dataset = DataSet::where('id', $resource->data_set_id);
+
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id' => $dataset->org_id
+                    ],
+                    [
+                        'org_id' => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT
+                );
+            }
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
@@ -215,7 +244,6 @@ class ResourceController extends ApiController
             DB::beginTransaction();
 
             try {
-                $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $id = $resource->id;
                 $index = $resource->data_set_id;
 
@@ -330,16 +358,31 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
-
             $resource = Resource::where('uri', $post['resource_uri'])->first();
-            $rightCheck = RoleRight::checkUserRight(
-                Module::RESOURCES,
-                RoleRight::RIGHT_EDIT,
-                [],
-                [
-                    'created_by' => $resource->created_by
-                ]
-            );
+            $dataset = DataSet::where('id', $resource->data_set_id);
+
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id' => $dataset->org_id
+                    ],
+                    [
+                        'created_by' => $dataset->created_by,
+                        'org_id'     => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $resource->created_by
+                    ]
+                );
+            }
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
@@ -468,14 +511,30 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_EDIT,
-                    [],
-                    [
-                        'created_by' => $resource->created_by
-                    ]
-                );
+                $dataset = DataSet::where('id', $resource->data_set_id);
+
+                if (isset($dataset->org_id)) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id' => $dataset->org_id
+                        ],
+                        [
+                            'created_by' => $dataset->created_by,
+                            'org_id'     => $dataset->org_id
+                        ]
+                    );
+                } else {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_EDIT,
+                        [],
+                        [
+                            'created_by' => $resource->created_by
+                        ]
+                    );
+                }
 
                 if (!$rightCheck) {
                     return $this->errorResponse(__('custom.access_denied'));
@@ -527,14 +586,30 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_ALL,
-                    [],
-                    [
-                        'created_by' => $resource->created_by
-                    ]
-                );
+                $dataset = DataSet::where('id', $resource->data_set_id);
+
+                if (isset($dataset->org_id)) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                        [
+                            'org_id' => $dataset->org_id
+                        ],
+                        [
+                            'created_by' => $dataset->created_by,
+                            'org_id'     => $dataset->org_id
+                        ]
+                    );
+                } else {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                        [],
+                        [
+                            'created_by' => $resource->created_by
+                        ]
+                    );
+                }
 
                 if (!$rightCheck) {
                     return $this->errorResponse(__('custom.access_denied'));

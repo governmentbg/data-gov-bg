@@ -99,8 +99,7 @@ class DataSetController extends ApiController
                     'org_id' => $organisation->id
                 ],
                 [
-                    'created_by' => $organisation->created_by,
-                    'org_id'     => $organisation->id
+                    'org_id' => $organisation->id
                 ]
             );
         } else {
@@ -300,7 +299,7 @@ class DataSetController extends ApiController
                         'org_id' => $organisation->id
                     ],
                     [
-                        'created_by' => $organisation->created_by,
+                        'created_by' => $dataSet->created_by,
                         'org_id'     => $organisation->id
                     ]
                 );
@@ -440,7 +439,7 @@ class DataSetController extends ApiController
     }
 
     /**
-     * API function for eleting an existing Data Set
+     * API function for deleting an existing Data Set
      *
      * @param string api_key - required
      * @param integer dataset_uri - required
@@ -461,14 +460,28 @@ class DataSetController extends ApiController
             return $this->errorResponse(__('custom.delete_dataset_fail'));
         }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::DATA_SETS,
-            RoleRight::RIGHT_ALL,
-            [],
-            [
-                'created_by' => $dataset->created_by,
-            ]
-        );
+        if (isset($dataset->org_id)) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id' => $dataset->org_id
+                ],
+                [
+                    'created_by' => $dataset->created_by,
+                    'org_id'     => $dataset->org_id
+                ]
+            );
+        } else {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $dataset->created_by,
+                ]
+            );
+        }
 
         if (!$rightCheck) {
             return $this->errorResponse(__('custom.access_denied'));

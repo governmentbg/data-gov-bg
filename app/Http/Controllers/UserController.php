@@ -567,6 +567,10 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
+        if ($request->has('back')) {
+            return redirect(url('user/datasets'));
+        }
+
         $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
         $apiDatasets = new ApiDataset($datasetReq);
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();

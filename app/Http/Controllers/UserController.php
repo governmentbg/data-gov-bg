@@ -18,7 +18,6 @@ use App\CustomSetting;
 use App\UserToOrgRole;
 use App\RoleRight;
 use App\ActionsHistory;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -3356,13 +3355,16 @@ class UserController extends Controller {
                             $actObjData[$objType][$org->id] = $this->getActObjectData(
                                 $org->id,
                                 $org->name,
-                                Str::lower(utrans('custom.organisations')),
+                                ultrans('custom.organisations'),
                                 'org',
                                 '/organisation/profile/'. $org->uri
                             );
 
                             $params = [
-                                'criteria' => ['org_id' => $org->id, 'locale' => $locale]
+                                'criteria' => [
+                                    'org_ids' => [$org->id],
+                                    'locale'  => $locale
+                                ]
                             ];
 
                             $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
@@ -3401,13 +3403,16 @@ class UserController extends Controller {
                             $actObjData[$objType][$group->id] = $this->getActObjectData(
                                 $group->id,
                                 $group->name,
-                                Str::lower(utrans('custom.groups')),
+                                ultrans('custom.groups'),
                                 'group',
                                 '/groups/view/'. $group->uri
                             );
 
                             $params = [
-                                'criteria' => ['group_id' => $group->id, 'locale' => $locale]
+                                'criteria' => [
+                                    'group_ids' => [$group->id],
+                                    'locale'    => $locale
+                                ]
                             ];
 
                             $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
@@ -3447,12 +3452,15 @@ class UserController extends Controller {
                             $actObjData[$objType][$category->id] = $this->getActObjectData(
                                 $category->id,
                                 $category->name,
-                                Str::lower(__('custom.main_topic')),
+                                ultrans('custom.main_topic'),
                                 'category'
                             );
 
                             $params = [
-                                'criteria' => ['category_id' => $category->id, 'locale' => $locale]
+                                'criteria' => [
+                                    'category_ids' => [$category->id],
+                                    'locale'       => $locale
+                                ]
                             ];
 
                             $this->prepareNewsFeedDatasets($params, $criteria, $actObjData, $filters, $filter, $objIdFilter);
@@ -3491,14 +3499,14 @@ class UserController extends Controller {
                             $actObjData[$objType][$tag->id] = $this->getActObjectData(
                                 $tag->id,
                                 $tag->name,
-                                Str::lower(utrans('custom.tags')),
+                                ultrans('custom.tags'),
                                 'tag'
                             );
 
                             $params = [
                                 'criteria' => [
-                                    'tag_id' => $tag->id,
-                                    'locale' => $locale
+                                    'tag_ids' => [$tag->id],
+                                    'locale'  => $locale
                                 ]
                             ];
 
@@ -3538,7 +3546,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$followUser->id] = $this->getActObjectData(
                                 $followUser->id,
                                 $followUser->firstname .' '. $followUser->lastname,
-                                Str::lower(utrans('custom.users')),
+                                ultrans('custom.users'),
                                 'user',
                                 '/user/profile/'. $followUser->id
                             );
@@ -3546,7 +3554,7 @@ class UserController extends Controller {
                             $params = [
                                 'criteria' => [
                                     'created_by' => $followUser->id,
-                                    'locale' => $locale
+                                    'locale'     => $locale
                                 ]
                             ];
 
@@ -3559,7 +3567,7 @@ class UserController extends Controller {
                     $params = [
                         'criteria' => [
                             'dataset_ids' => $userFollows['dataset_id'],
-                            'locale' => $locale
+                            'locale'      => $locale
                         ]
                     ];
 
@@ -3574,7 +3582,7 @@ class UserController extends Controller {
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
                     $user->firstname .' '. $user->lastname,
-                    Str::lower(utrans('custom.users')),
+                    ultrans('custom.users'),
                     'user',
                     '/user/profile/'. $user->id
                 );
@@ -3706,7 +3714,7 @@ class UserController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'         => $dataset->uri,
                         'obj_name'       => $dataset->name,
-                        'obj_module'     => Str::lower(__('custom.dataset')),
+                        'obj_module'     => ultrans('custom.dataset'),
                         'obj_type'       => 'dataset',
                         'obj_view'       => '/data/view/'. $dataset->uri,
                         'parent_obj_id'  => '',
@@ -3725,12 +3733,12 @@ class UserController extends Controller {
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,
-                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_module'        => ultrans('custom.resource'),
                                 'obj_type'          => 'resource',
                                 'obj_view'          => '/data/resourceView/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
-                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_module' => ultrans('custom.dataset'),
                                 'parent_obj_type'   => 'dataset',
                                 'parent_obj_view'   => '/data/view/'. $dataset->uri,
                                 'obj_owner_id'      => $objOwner['id'],
@@ -4083,7 +4091,7 @@ class UserController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'        => $dataset->uri,
                         'obj_name'      => $dataset->name,
-                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_module'    => ultrans('custom.dataset'),
                         'obj_type'      => 'dataset',
                         'obj_view'      => '/data/view/'. $dataset->uri,
                         'parent_obj_id' => ''
@@ -4095,12 +4103,12 @@ class UserController extends Controller {
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,
-                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_module'        => ultrans('custom.resource'),
                                 'obj_type'          => 'resource',
                                 'obj_view'          => '/data/resourceView/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
-                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_module' => ultrans('custom.dataset'),
                                 'parent_obj_type'   => 'dataset',
                                 'parent_obj_view'   => '/data/view/'. $dataset->uri
                             ];
@@ -4127,7 +4135,7 @@ class UserController extends Controller {
                     $actObjData[$objType][$organisations->id] = [
                         'obj_id'        => $organisations->uri,
                         'obj_name'      => $organisations->name,
-                        'obj_module'    => Str::lower(__('custom.organisation')),
+                        'obj_module'    => ultrans('custom.organisation'),
                         'obj_type'      => 'org',
                         'obj_view'      => '/organisation/profile/'. $organisations->uri,
                         'parent_obj_id' => ''
@@ -5553,7 +5561,7 @@ class UserController extends Controller {
             $actObjData[$objType][$group->id] = [
                 'obj_id'        => $group->uri,
                 'obj_name'      => $group->name,
-                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_module'    => ultrans('custom.organisations'),
                 'obj_type'      => 'org',
                 'obj_view'      => '/user/groups/view/'. $group->uri,
                 'parent_obj_id' => ''
@@ -5561,7 +5569,7 @@ class UserController extends Controller {
 
             if (isset($res->success) && $res->success && !empty($res->datasets)) {
                 $objType = Module::getModules()[Module::DATA_SETS];
-                $objTypeRes =Module::getModules()[Module::RESOURCES];
+                $objTypeRes = Module::getModules()[Module::RESOURCES];
                 $actObjData[$objType] = [];
 
                 foreach ($res->datasets as $dataset) {
@@ -5569,7 +5577,7 @@ class UserController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'        => $dataset->uri,
                         'obj_name'      => $dataset->name,
-                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_module'    => ultrans('custom.dataset'),
                         'obj_type'      => 'dataset',
                         'obj_view'      => '/user/group/'. $group->uri .'/dataset/'. $dataset->uri,
                         'parent_obj_id' => ''
@@ -5581,12 +5589,12 @@ class UserController extends Controller {
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,
-                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_module'        => ultrans('custom.resource'),
                                 'obj_type'          => 'resource',
                                 'obj_view'          => '/user/group/'. $group->uri .'/resource/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
-                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_module' => ultrans('custom.dataset'),
                                 'parent_obj_type'   => 'dataset',
                                 'parent_obj_view'   => '/data/view/'. $dataset->uri
                             ];
@@ -5665,7 +5673,7 @@ class UserController extends Controller {
                 'api_key'   => \Auth::user()->api_key,
                 'criteria' => [
                     'org_ids' => [$result->data->id],
-                    'locale'    => $locale
+                    'locale'  => $locale
                 ]
             ];
 
@@ -5682,7 +5690,7 @@ class UserController extends Controller {
             $actObjData[$objType][$org->id] = [
                 'obj_id'        => $org->uri,
                 'obj_name'      => $org->name,
-                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_module'    => ultrans('custom.organisations'),
                 'obj_type'      => 'org',
                 'obj_view'      => '/user/organisations/view/'. $org->uri,
                 'parent_obj_id' => ''
@@ -5698,7 +5706,7 @@ class UserController extends Controller {
                     $actObjData[$objType][$dataset->id] = [
                         'obj_id'        => $dataset->uri,
                         'obj_name'      => $dataset->name,
-                        'obj_module'    => Str::lower(__('custom.dataset')),
+                        'obj_module'    => ultrans('custom.dataset'),
                         'obj_type'      => 'dataset',
                         'obj_view'      => '/user/organisations/dataset/view/'. $dataset->uri,
                         'parent_obj_id' => ''
@@ -5710,12 +5718,12 @@ class UserController extends Controller {
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,
-                                'obj_module'        => Str::lower(__('custom.resource')),
+                                'obj_module'        => ultrans('custom.resource'),
                                 'obj_type'          => 'resource',
                                 'obj_view'          => '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $org->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
-                                'parent_obj_module' => Str::lower(__('custom.dataset')),
+                                'parent_obj_module' => ultrans('custom.dataset'),
                                 'parent_obj_type'   => 'dataset',
                                 'parent_obj_view'   => '/data/view/'. $dataset->uri
                             ];

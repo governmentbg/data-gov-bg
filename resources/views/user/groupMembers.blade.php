@@ -199,7 +199,7 @@
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="role" class="col-lg-2 col-form-label">{{ __('custom.name') }}: </label>
+                            <label for="role" class="col-lg-2 col-form-label">{{ uctrans('custom.name') }}: </label>
                             <div class="col-lg-10">
                                 <select
                                     class="js-ajax-autocomplete form-control"

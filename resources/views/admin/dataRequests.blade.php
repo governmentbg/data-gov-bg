@@ -120,8 +120,7 @@
                     <li class="js-show-submenu">
                         <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.status') }}</a>
                         <ul class="sidebar-submenu m-b-md">
-                        @foreach ($statuses as $key => $status)
-
+                            @foreach ($statuses as $key => $status)
                                 <li>
                                     <a
                                         href="{{

@@ -2343,6 +2343,7 @@ class OrganisationController extends ApiController
                 }
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
                 $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
@@ -2487,6 +2488,7 @@ class OrganisationController extends ApiController
                 $data->where('organisations.type', Organisation::TYPE_GROUP);
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
                 $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);

@@ -86,7 +86,28 @@
                     @include('partials.resource-visualisation')
                 </div>
 
-                <div class="col-sm-12 m-t-lg m-b-md p-l-none">
+                <div class="col-sm-12 m-t-lg p-l-r-none">
+                    <div class="col-sm-12 text-left p-l-r-none">
+                        <form method="POST">
+                            {{ csrf_field() }}
+                            @if (isset($buttons['edit']) && $buttons['edit'])
+                                <a
+                                    class="btn btn-primary badge badge-pill"
+                                    href="{{ url('/'. $buttons['rootUrl'] .'/resource/edit/'. $resource->uri) }}"
+                                >{{ uctrans('custom.edit') }}</a>
+                            @endif
+                            @if (isset($buttons['delete']) && $buttons['delete'])
+                                <button
+                                    name="delete"
+                                    class="btn del-btn btn-primary badge badge-pill"
+                                    data-confirm="{{ __('custom.remove_data') }}"
+                                >{{ uctrans('custom.remove') }}</button>
+                            @endif
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 m-t-lg m-b-md p-l-r-none">
                     <div class="col-xs-12 pull-left m-t-md p-l-r-none">
                         <div class="col-md-6 col-xs-12 text-left p-l-r-none m-b-md">
                             <div class="badge-info m-r-md pull-left">

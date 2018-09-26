@@ -151,10 +151,12 @@ class ResourceController extends ApiController
                         }
                     }
 
-                    if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
-                        DB::rollback();
+                    if (!empty($customFields)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                            DB::rollback();
 
-                        return $this->errorResponse(__('custom.add_resource_meta_fail'));
+                            return $this->errorResponse(__('custom.add_resource_meta_fail'));
+                        }
                     }
                 }
 

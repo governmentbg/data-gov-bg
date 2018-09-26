@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         @include('partials.sidebar-org')
-        <div class="col-sm-9 col-xs-12 p-h-sm page-content">
+        <div class="col-sm-9 col-xs-12 p-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">
                     <div class="row">
@@ -126,6 +126,13 @@
                 @endif
                 </div>
             </div>
+            @if (isset($buttons['add']) && $buttons['add'])
+                <div class="col-lg-12 text-right">
+                    <span class="badge badge-pill m-t-md">
+                        <a href="{{ url($buttons['addUrl']) }}">{{ __('custom.add_new_dataset') }}</a>
+                    </span>
+                </div>
+            @endif
             <div class="articles">
             @if ($resultsCount > 0)
                 <div class="col-lg-12 p-h-xxs p-l-r-none">
@@ -177,30 +184,28 @@
                                         <span>{{ __('custom.approved') }} </span>
                                     </div>
                                 @else
-                                    <div class="status notApproved p-w-sm">
+                                    <div class="status notApproved p-w-sm p-l-r-none">
                                         <span>{{ __('custom.unapproved') }}</span>
                                     </div>
                                 @endif
                             </div>
                             <div class="follow pull-right">
-                                @auth
-                                    <form method="post">
-                                        {{ csrf_field() }}
-                                        @if (!in_array($dataset->id, $followed))
-                                            <div>
-                                                <button class="badge badge-pill" type="submit" name="follow" value="{{ $dataset->id }}">{{ utrans('custom.follow') }}</button>
-                                            </div>
-                                        @else
-                                            <div>
-                                                <button class="badge badge-pill" type="submit" name="unfollow" value="{{ $dataset->id }}">{{ uctrans('custom.stop_follow') }}</button>
-                                            </div>
-                                        @endif
-                                    </form>
-                                @endauth
+                                <form method="post">
+                                    {{ csrf_field() }}
+                                    @if (isset($buttons[$dataset->id]['follow']) && $buttons[$dataset->id]['follow'])
+                                        <div>
+                                            <button class="badge badge-pill" type="submit" name="follow" value="{{ $dataset->id }}">{{ utrans('custom.follow') }}</button>
+                                        </div>
+                                    @elseif (isset($buttons[$dataset->id]['unfollow']) && $buttons[$dataset->id]['unfollow'])
+                                        <div>
+                                            <button class="badge badge-pill" type="submit" name="unfollow" value="{{ $dataset->id }}">{{ uctrans('custom.stop_follow') }}</button>
+                                        </div>
+                                    @endif
+                                </form>
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">
+                            <a href="{{ route('orgViewDataset', array_merge(array_except($getParams, ['page']), ['uri' => $dataset->uri])) }}">
                                 <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                             </a>
                             <p>{!! nl2br(e($dataset->descript)) !!}</p>
@@ -216,7 +221,9 @@
                                 </div>
                                 <div class="pull-right">
                                     <span class="badge badge-pill">
-                                        <a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">{{ uctrans('custom.see_more') }}</a>
+                                        <a href="{{ route('orgViewDataset', array_merge(array_except($getParams, ['page']), ['uri' => $dataset->uri])) }}">
+                                            {{ uctrans('custom.see_more') }}
+                                        </a>
                                     </span>
                                 </div>
                             </div>

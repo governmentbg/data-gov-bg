@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="container">
-    <div class="col-xs-12">
+    <div class="col-xs-12 m-l-sm">
         <div class="row">
-             <div class="col-sm-offset-3 filter-content">
-                <div class="col-md-12">
+            <div class="col-sm-9 col-xs-12 p-sm col-sm-offset-3">
+                <div class="filter-content">
                     <div class="row">
                         <div class="col-xs-12 p-l-r-none">
                             <div>
@@ -124,15 +124,16 @@
                                             <form
                                                 method="POST"
                                                 class="inline-block"
-                                                action="{{ url('/groups/delete/'. $group->id) }}"
+                                                action="{{ route('groupDelete', array_except(app('request')->input(), ['page'])) }}"
                                             >
                                                 {{ csrf_field() }}
-                                                    <button
-                                                        class="btn del-btn btn-primary del-btn"
-                                                        type="submit"
-                                                        name="delete"
-                                                        data-confirm="{{ __('custom.delete_group_confirm') }}"
-                                                    >{{ uctrans('custom.remove') }}</button>
+                                                <button
+                                                    class="btn del-btn btn-primary del-btn"
+                                                    type="submit"
+                                                    name="delete"
+                                                    data-confirm="{{ __('custom.delete_group_confirm') }}"
+                                                >{{ uctrans('custom.remove') }}</button>
+                                                <input class="user-org-del" type="hidden" name="group_uri" value="{{ $group->uri }}">
                                             </form>
                                         @endif
                                     </div>

@@ -14976,6 +14976,18 @@ textarea {
   right: 0px;
 }
 
+.theme-data .inline-block,
+.theme-data-attention .inline-block {
+  display: inline-block;
+}
+
+.theme-data .new-data,
+.theme-data-attention .new-data {
+  padding: 8px 28px;
+  margin-top: 25px;
+  width: 230px;
+}
+
 .theme-data .history .version-heading,
 .theme-data-attention .history .version-heading {
   font-size: 22px;
@@ -15005,6 +15017,81 @@ textarea {
 .theme-data-attention .history .signaled a:focus svg,
 .theme-data-attention .history .signaled a:active svg {
   fill: #d32a31;
+}
+
+.theme-data .chronology > .row .info-icon,
+.theme-data-attention .chronology > .row .info-icon {
+  border: none !important;
+  position: relative;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  bottom: 10px;
+}
+
+.theme-data .chronology > .row .info-icon img,
+.theme-data-attention .chronology > .row .info-icon img {
+  max-height: 70px !important;
+}
+
+.theme-data .chronology > .row .info-icon:after,
+.theme-data-attention .chronology > .row .info-icon:after {
+  content: '';
+  display: block;
+  border: 5px solid #76AE41;
+  border-radius: 40px;
+  bottom: -15px;
+  position: absolute;
+  left: 45px;
+}
+
+@media screen and (max-width: 767px) {
+  .theme-data .chronology > .row .info-icon img,
+  .theme-data-attention .chronology > .row .info-icon img {
+    margin-top: 20px;
+    max-width: 30px;
+  }
+
+  .theme-data .chronology > .row .info-icon:after,
+  .theme-data-attention .chronology > .row .info-icon:after {
+    left: 30px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .theme-data .chronology > .row .info-icon,
+  .theme-data-attention .chronology > .row .info-icon {
+    padding: 10px 0;
+  }
+
+  .theme-data .chronology > .row .info-icon img,
+  .theme-data-attention .chronology > .row .info-icon img {
+    margin-top: 0;
+  }
+
+  .theme-data .chronology > .row .info-icon:after,
+  .theme-data-attention .chronology > .row .info-icon:after {
+    left: 59%;
+  }
+}
+
+.theme-data .chronology > .row:last-of-type .info-icon:after,
+.theme-data-attention .chronology > .row:last-of-type .info-icon:after {
+  display: none;
+}
+
+@media screen and (max-width: 767px) {
+  .theme-data .chronology > .row .logo-img > img,
+  .theme-data-attention .chronology > .row .logo-img > img {
+    margin: 15px 10px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .theme-data .chronology > .row .logo-img > img,
+  .theme-data-attention .chronology > .row .logo-img > img {
+    display: none;
+  }
 }
 
 .theme-user .container > .sidenav {
@@ -15117,6 +15204,10 @@ textarea {
 .theme-user a.btn:focus,
 .theme-user a.btn:hover {
   color: white;
+}
+
+.theme-user a.active {
+  color: #108f9e;
 }
 
 .theme-user .term-use {
@@ -15915,6 +16006,16 @@ textarea {
   font-weight: 600;
 }
 
+.theme-organisation .inline-block {
+  display: inline-block;
+}
+
+.theme-organisation .new-data {
+  padding: 8px 28px;
+  margin-top: 25px;
+  width: 230px;
+}
+
 .theme-organisation .list-orgs {
   padding: 50px;
 }
@@ -15932,7 +16033,7 @@ textarea {
 .theme-organisation .list-orgs .ch-del-btns div div button {
   border-radius: 10px;
   padding: 7px;
-  background-color: #108f9e;
+  background-color: #76ad3f;
   color: white;
   border: none;
   min-width: 80px;

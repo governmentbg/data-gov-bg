@@ -424,6 +424,7 @@ class TermsOfUseController extends ApiController
                 $data->where('terms_of_use.active', 1);
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
                 $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);

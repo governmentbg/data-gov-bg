@@ -620,7 +620,6 @@ return [
     'default_org_admin_role' => 'The default admin role for organisations is already set',
     'default_group_admin_role' => 'The default admin role for groups is already set',
     'default_user_role' => 'The default role for users is already set',
-    'date' => 'date',
     'list_data_categories_fail' => 'List data main categories failure',
     'list_data_tags_fail' => 'List data tags failure',
     'list_data_formats_fail' => 'List data formats failure',

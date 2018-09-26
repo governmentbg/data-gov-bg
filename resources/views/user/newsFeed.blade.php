@@ -94,7 +94,7 @@
                                     @endif
                                     </div>
                                     <div class="col-md-10 col-xs-10">
-                                        <div>{{ __('custom.date_added') }}: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
+                                        <div>{{ __('custom.date') }}: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
                                         <h3><a href="{{ url($objOwnerView) }}">{{ $objOwnerName }}</a></h3>
                                         <p>
                                             {{ $actionTypes[$actionHistory->action]['name'] .' '. $objModule }}

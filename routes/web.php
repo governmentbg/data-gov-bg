@@ -334,7 +334,7 @@ Route::match(['get', 'post'], 'data/reported', 'DataController@reportedList')->n
 Route::match(['get', 'post'], 'data/reported/view/{uri}', 'DataController@reportedView')->name('reportedView');
 Route::match(['get', 'post'], 'data/reported/resourceView/{uri}', 'DataController@reportedResourceView')->name('reportedResourceView');
 
-Route::match(['get', 'post'], 'data/chronology/{uri}', 'DataController@chronology');
+Route::match(['get', 'post'], 'data/chronology/{uri}', 'DataController@chronology')->name('dataChronology');
 
 Route::match(['get', 'post'], 'organisation', 'OrganisationController@list')->name('organisations');
 Route::match(['get', 'post'], 'organisation/profile/{uri}', 'OrganisationController@view')->name('orgProfile');

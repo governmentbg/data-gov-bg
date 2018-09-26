@@ -1598,7 +1598,14 @@ class DataController extends Controller {
         $res = $api->getDataSetDetails($rq)->getData();
         $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
 
-        if (!empty($dataset) &&
+        $typeChecked = true;
+        $class = 'data';
+        if ($reported = ($request->filled('type') && $request->type == 'reported')) {
+            $typeChecked = $dataset->reported;
+            $class = 'data-attention';
+        }
+
+        if (!empty($dataset) && $typeChecked &&
             $dataset->status == DataSet::STATUS_PUBLISHED &&
             $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
 
@@ -1702,7 +1709,8 @@ class DataController extends Controller {
             return view(
                 'data/chronology',
                 [
-                    'class'          => 'data',
+                    'class'          => $class,
+                    'reported'       => $reported,
                     'dataset'        => $dataset,
                     'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
                     'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],

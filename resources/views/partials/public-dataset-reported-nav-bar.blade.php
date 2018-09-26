@@ -14,8 +14,8 @@
                         @if (isset($extended) && $extended)
                             <div class="m-t-sm">
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="p-l-none" href="{{ url('/groups') }}">{{ untrans('custom.groups', 2) }}</a></li>
-                                    <li><a href="{{ url('/data/chronology') }}">{{ __('custom.chronology') }}</a></li>
+                                    <li><a class="p-l-none" href="{{ route('groups', ['dataset' => $dataset->uri]) }}">{{ untrans('custom.groups', 2) }}</a></li>
+                                    <li><a href="{{ route('dataChronology', ['uri' => $dataset->uri, 'type' => 'reported']) }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
                         @endif

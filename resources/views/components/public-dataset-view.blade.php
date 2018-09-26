@@ -21,12 +21,13 @@
                         <div class="col-sm-12 col-xs-12 p-l-r-none">
                             <div class="pull-left">
                                 <h2>
-                                    {{ utrans('custom.author') }}:
                                     @if (!empty($user))
+                                        {{ utrans('custom.author') }}:
                                         <a href="{{ url('/user/profile/'. $user->id) }}">
                                             {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
                                         </a>
-                                    @else
+                                    @elseif (!empty($dataset->created_by))
+                                        {{ utrans('custom.author') }}:
                                         <span>{{ $dataset->created_by }}</span>
                                     @endif
                                 </h2>
@@ -68,6 +69,10 @@
                             </div>
                         </div>
                         <h2>{{ $dataset->name }}</h2>
+                        <p>
+                            <strong>{{ __('custom.unique_identificator') }}:</strong>
+                            &nbsp;{{ $dataset->uri }}
+                        </p>
                         @if (!empty($dataset->description))
                             <p><strong>{{ __('custom.description') }}:</strong></p>
                             <p>{!! nl2br(e($dataset->description)) !!}</p>
@@ -156,9 +161,13 @@
                         <div class="info-bar-sm col-sm-12 col-xs-12 p-l-none">
                             <ul class="p-l-none p-h-sm">
                                 <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
-                                <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
-                                @if (!empty($dataset->updated_by))
+                                @if (!empty($dataset->created_by))
+                                    <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
+                                @endif
+                                @if (!empty($dataset->updated_at))
                                     <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
+                                @endif
+                                @if (!empty($dataset->updated_by))
                                     <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
                                 @endif
                             </ul>

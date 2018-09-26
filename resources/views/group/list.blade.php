@@ -4,8 +4,8 @@
     <div class="container">
         @include('partials.alerts-bar')
         <div class="row">
-            <div class="col-sm-3 p-w-md">
-                <h4 class="m-l-lg">{{ __('custom.groups_list') }}</h4>
+            <div class="col-sm-3 p-sm">
+                <h4 class="m-l-lg">{{ uctrans('custom.groups_list') }}</h4>
             </div>
         </div>
         <div class="row">
@@ -87,10 +87,14 @@
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <h3 class="org-name"><a href="{{ url('/groups/view/'. $group->uri) }}">{{ $group->name }}</a></h3>
+                                    <a href="{{ route('groupView', array_merge(array_except($getParams, ['page']), ['uri' => $group->uri])) }}">
+                                        <h3 class="org-name">{{ $group->name }}</h3>
+                                    </a>
                                     <div class="org-desc">{!! nl2br(e($group->description)) !!}</div>
                                     <p class="text-right show-more">
-                                        <a href="{{ url('/groups/view/'. $group->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                                        <a href="{{ route('groupView', array_merge(array_except($getParams, ['page']), ['uri' => $group->uri])) }}" class="view-profile">
+                                            {{ __('custom.see_more') }}
+                                        </a>
                                     </p>
                                 </div>
                                 <div class="col-xs-12 ch-del-btns">
@@ -104,7 +108,7 @@
                                             </form>
                                         @endif
                                         @if (isset($buttons[$group->id]['delete']) && $buttons[$group->id]['delete'])
-                                            <form method="POST" action="{{ url('/groups/delete/'. $group->id) }}">
+                                            <form method="POST" action="{{ route('groupDelete', array_except($getParams, ['page'])) }}">
                                                 {{ csrf_field() }}
                                                 <div class="col-xs-6 text-right">
                                                     <button
@@ -114,7 +118,7 @@
                                                         data-confirm="{{ __('custom.delete_group_confirm') }}"
                                                     >{{ uctrans('custom.remove') }}</button>
                                                 </div>
-                                                <input class="user-org-del" type="hidden" name="org_id" value="{{ $group->id }}">
+                                                <input class="user-org-del" type="hidden" name="group_uri" value="{{ $group->uri }}">
                                             </form>
                                         @endif
                                     </div>

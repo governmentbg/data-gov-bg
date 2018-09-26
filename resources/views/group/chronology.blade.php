@@ -3,8 +3,8 @@
 @section('content')
     <div class="container">
         <div class="row">
-            <div class="col-xs-12">
-                <div class="col-sm-offset-3 filter-content">
+            <div class="col-sm-9 col-xs-11 p-sm col-sm-offset-3">
+                <div class="filter-content">
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-xs-12 p-l-r-none">

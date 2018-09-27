@@ -774,4 +774,9 @@ return [
     'users_edit' => 'edit user',
     'terms_and_conditions_list' => 'terms and conditions list',
     'delete_theme_confirm' => 'Delete theme?',
+    'help_sections' => 'Help sections',
+    'parent_section' => 'Subsection of',
+    'add_help_sections' => 'Add Help Section',
+    'edit_help_sections' => 'Edit Help Section',
+    'help_section_preview' => 'Preview Help Section',
 ];

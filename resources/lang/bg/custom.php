@@ -772,4 +772,9 @@ return [
     'users_edit' => 'редактиране на потребител',
     'terms_and_conditions_list' => 'списък условия за ползване',
     'delete_theme_confirm' => 'Изтриване на тема',
+    'help_sections' => 'Технически насоки',
+    'parent_section' => 'Подсекция на',
+    'add_help_sections' => 'Добавяне на технически насоки / Секция',
+    'edit_help_sections' => 'Редакция на технически насоки / Секция',
+    'help_section_preview' => 'Преглед на помощна секция',
 ];

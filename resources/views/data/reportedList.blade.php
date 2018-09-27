@@ -184,7 +184,7 @@
                                 {{ csrf_field() }}
                                 @foreach ($getParams['tag'] as $selTag)
                                     <span class="badge badge-pill">
-                                    {{ array_pluck($tags, 'name', 'id')[$selTag] }}&nbsp;
+                                        {{ array_pluck($tags, 'name', 'id')[$selTag] }}&nbsp;
                                         @if (isset($buttons[$selTag]['followTag']) && $buttons[$selTag]['followTag'])
                                             <button class="badge badge-follow" type="submit" name="followTag" value="{{ $selTag }}"
                                             title="{{ uctrans('custom.follow') }}">
@@ -201,7 +201,7 @@
                                                     ['tag' => array_diff($getParams['tag'], [$selTag])]
                                                 )) }}"
                                         ><i class="fa fa-remove"></i></a>
-                                </span>
+                                    </span>
                                 @endforeach
                             </form>
                         </div>

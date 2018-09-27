@@ -37,7 +37,7 @@ class HelpController extends ApiController
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
                 'active'    => 'required|boolean',
-                'oredring'  => 'nullable|int'
+                'ordering'  => 'nullable|int'
             ]);
 
             if (!$validator->fails()) {
@@ -95,7 +95,7 @@ class HelpController extends ApiController
                 'locale'    => 'required|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
                 'active'    => 'required|boolean',
-                'oredring'  => 'nullable|int'
+                'ordering'  => 'nullable|int'
             ]);
 
             if (!$validator->fails()) {
@@ -306,7 +306,7 @@ class HelpController extends ApiController
                 'locale'        => 'required|string|max:5',
                 'title'         => 'required|string|max:191',
                 'body'          => 'required|string|max:191',
-                'oredring'      => 'nullable|int',
+                'ordering'      => 'nullable|int',
                 'active'        => 'required|boolean',
             ]);
 
@@ -378,7 +378,7 @@ class HelpController extends ApiController
                 'keywords'      => 'nullable|string|max:191',
                 'title'         => 'required|string|max:191',
                 'body'          => 'required|string|max:191',
-                'oredring'      => 'nullable|int',
+                'ordering'      => 'nullable|int',
                 'active'        => 'required|boolean',
             ]);
 
@@ -506,6 +506,26 @@ class HelpController extends ApiController
 
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
+
+        $columns = [
+            'id',
+            'name',
+            'keywords',
+            'title',
+            'body',
+            'active',
+            'ordering',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ];
+
+        if (isset($criteria['order']['field'])) {
+            if (!in_array($criteria['order']['field'], $columns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
+            }
+        }
 
         $pages->orderBy($order['field'], $order['type']);
 

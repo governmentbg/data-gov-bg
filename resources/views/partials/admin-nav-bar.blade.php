@@ -144,6 +144,12 @@
                                 href="{{ url('/admin/forum/discussions/list') }}"
                             >{{ ultrans('custom.forum') }}</a>
                         </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'help' ? 'active' : '' }}"
+                                href="{{ url('/admin/help/list') }}"
+                            >{{ ultrans('custom.help_sections') }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>

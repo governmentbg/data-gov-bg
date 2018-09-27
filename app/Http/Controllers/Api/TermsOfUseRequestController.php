@@ -301,6 +301,25 @@ class TermsOfUseRequestController extends ApiController
 
             $total_records = $query->count();
 
+            $columns = [
+                'id',
+                'description',
+                'firstname',
+                'lastname',
+                'email',
+                'status',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($order['field'])) {
+                if (!in_array($order['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
             }

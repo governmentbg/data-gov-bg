@@ -717,6 +717,30 @@ class ResourceController extends ApiController
             $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
             $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
+            $columns = [
+                'id',
+                'name',
+                'descript',
+                'version',
+                'schema_description',
+                'resource_url',
+                'type',
+                'file_format',
+                'http_rq_type',
+                'schema_url',
+                'reported',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($request->criteria['order']['field'])) {
+                if (!in_array($request->criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             $query->orderBy($field, $type);
 
             $locale = \LaravelLocalization::getCurrentLocale();

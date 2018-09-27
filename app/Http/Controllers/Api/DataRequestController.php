@@ -364,7 +364,7 @@ class DataRequestController extends ApiController
 
         if (isset($criteria['order']['field'])) {
             if (!in_array($criteria['order']['field'], $orderColumns)) {
-                unset($criteria['order']['field']);
+                return $this->errorResponse(__('custom.invalid_sort_field'));
             }
         }
 
@@ -397,12 +397,6 @@ class DataRequestController extends ApiController
                 ->orWhere('notes', 'like', '%' . $search . '%');
         }
 
-        $total_records = $dataRequestList->count();
-
-        if (isset($request->records_per_page) && isset($request->page_number)) {
-            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
-        }
-
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
             if ($criteria['order']['type'] == 'desc') {
 
@@ -411,6 +405,12 @@ class DataRequestController extends ApiController
             if ($criteria['order']['type'] == 'asc') {
                 $dataRequestList = $dataRequestList->orderBy($criteria['order']['field'], 'asc');
             }
+        }
+
+        $total_records = $dataRequestList->count();
+
+        if (isset($request->records_per_page) && isset($request->page_number)) {
+            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
 
         $dataRequestList = $dataRequestList->get();
@@ -442,7 +442,7 @@ class DataRequestController extends ApiController
 
         Module::add($logData);
 
-        if(isset($criteria['order'])) {
+        if(isset($criteria['order']) && isset($criteria['order']['field'])) {
             if ($criteria['order'] && $criteria['order']['field'] == 'description') {
                 usort($result, function($a, $b) use ($criteria) {
                     return strtolower($criteria['order']['type']) == 'asc'

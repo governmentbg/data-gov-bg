@@ -28,13 +28,11 @@ class HelpController extends AdminController
         ];
     }
 
-    /* show list of help sections */
+    /**
+     *  show list of help sections
+     */
     public function listSections(Request $request)
     {
-        if (!Role::isAdmin()) {
-            return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
-        }
-
         $rq = Request::create('/api/listHelpSections', 'POST', [
             'api_key' => Auth::user()->api_key,
         ]);
@@ -46,13 +44,11 @@ class HelpController extends AdminController
         return view('admin/helpList', compact('helpSections'));
     }
 
-    /* show form for creation of help sections */
+    /**
+     * show form for creation of help sections
+     */
     public function addHelpSecton(Request $request)
     {
-        if (!Role::isAdmin()) {
-            return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
-        }
-
         if ($request->has('back')) {
             return redirect('admin/help/list');
         }
@@ -99,13 +95,11 @@ class HelpController extends AdminController
         return redirect('admin/help/list');
     }
 
-    /* show form for help section edit page*/
+    /**
+     * show form for help section edit page
+     */
     public function editHelpSection(Request $request, $id)
     {
-        if (!Role::isAdmin()) {
-            return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
-        }
-
         $section = HelpSection::find($id);
 
         return view('admin/editHelpSection', [
@@ -116,13 +110,11 @@ class HelpController extends AdminController
         ]);
     }
 
-    /* show view of help section */
+    /**
+     * show view of help section
+     */
     public function viewHelpSection(Request $request, $id)
     {
-        if (!Role::isAdmin()) {
-            return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
-        }
-
         $rq = Request::create('/api/listHelpSections', 'POST', [
             'api_key'   => Auth::user()->api_key,
             'criteria'  => [

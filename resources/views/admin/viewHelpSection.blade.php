@@ -59,24 +59,22 @@
                                 </div>
                             </div>
                         @endif
-                        @if (\App\Role::isAdmin())
-                            <div class="form-group row">
-                                <div class="col-sm-12 text-right">
-                                    <a
-                                        href="{{ url('admin/help/list') }}"
-                                        class="m-l-md btn btn-custom"
-                                    >{{ __('custom.close') }}</a>
-                                    <a
-                                        href="{{ url('/admin/helpSection/edit/'. $section->id) }}"
-                                        class="m-l-md btn btn-custom"
-                                    >{{ __('custom.edit') }}</a>
-                                    <a
-                                        href="{{ url('/admin/helpSection/delete/'. $section->id) }}"
-                                        class="m-l-md btn btn-custom del-btn"
-                                    >{{ __('custom.delete') }}</a>
-                                </div>
+                        <div class="form-group row">
+                            <div class="col-sm-12 text-right">
+                                <a
+                                    href="{{ url('admin/help/list') }}"
+                                    class="m-l-md btn btn-custom"
+                                >{{ __('custom.close') }}</a>
+                                <a
+                                    href="{{ url('/admin/helpSection/edit/'. $section->id) }}"
+                                    class="m-l-md btn btn-custom"
+                                >{{ __('custom.edit') }}</a>
+                                <a
+                                    href="{{ url('/admin/helpSection/delete/'. $section->id) }}"
+                                    class="m-l-md btn btn-custom del-btn"
+                                >{{ __('custom.delete') }}</a>
                             </div>
-                        @endif
+                        </div>
                     </div>
                 </div>
             </div>

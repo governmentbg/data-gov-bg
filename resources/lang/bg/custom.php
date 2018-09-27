@@ -774,6 +774,7 @@ return [
     'users_edit' => 'редактиране на потребител',
     'terms_and_conditions_list' => 'списък условия за ползване',
     'delete_theme_confirm' => 'Изтриване на тема',
+    'invalid_sort_field' => 'Невалидно поле за сортиране',
     'help_sections' => 'Технически насоки',
     'parent_section' => 'Подсекция на',
     'add_help_sections' => 'Добавяне на технически насоки / Секция',

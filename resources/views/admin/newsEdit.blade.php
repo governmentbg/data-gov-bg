@@ -81,7 +81,7 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ __('custom.edit') }}</button>
+                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
                                 </div>
                             </div>
                         </form>

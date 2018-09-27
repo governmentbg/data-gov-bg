@@ -190,7 +190,7 @@ class DataSetController extends AdminController
             return redirect()->route('adminDataSets');
         }
 
-        if ($request->isMethod('post') && $request->has('create')) {
+        if ($request->isMethod('post') && ($request->has('create') || $request->has('add_resource'))){
             $data = $request->all();
 
             // prepare post data for API request
@@ -227,7 +227,7 @@ class DataSetController extends AdminController
                 $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                 if ($request->has('add_resource')) {
-                    return redirect()->route('resourceCreate', ['uri' => $save->uri]);
+                    return redirect(url('/admin/dataset/resource/create/'. $save->uri));
                 }
 
                 return redirect(url('/admin/dataset/view/'. $save->uri));

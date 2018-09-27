@@ -61,7 +61,7 @@
                                                 </div>
                                                 <div class="col-xs-6">
                                                 @if ($buttons[$set->uri]['delete'])
-                                                    <form method="POST">
+                                                    <form method="POST" action="{{ url('/user/dataset/delete') }}">
                                                         {{ csrf_field() }}
                                                         <div class="col-xs-6 text-right">
                                                             <button

@@ -293,6 +293,7 @@
                 >{{ uctrans('custom.close') }}</button>
                 @if (!empty($admin) || !empty($buttons['add']))
                     <button
+                        type="submit"
                         name="add_resource"
                         class="btn btn-primary"
                     >{{ uctrans('custom.add_resource') }}</button>

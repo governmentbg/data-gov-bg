@@ -250,7 +250,15 @@ class SignalController extends ApiController
                     return $this->errorResponse(__('custom.access_denied'));
                 }
 
+                $reportedResourceId = $signalToBeDeleted->resource_id;
                 $signalToBeDeleted->delete();
+                $reportedResource = Resource::find($reportedResourceId);
+
+                // update reported status of resource if we delete the last of its signals
+                if ($reportedResource->signal()->count() == 0) {
+                    $reportedResource->is_reported = Resource::REPORTED_FALSE;
+                    $reportedResource->save();
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),

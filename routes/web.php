@@ -151,7 +151,7 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/user/newsFeed/{filter?}/{objId?}', 'UserController@newsFeed');
 
         Route::match(['get', 'post'], '/user/dataset/view/{uri}', 'UserController@datasetView')->name('datasetView');
-        Route::match(['get', 'post'], '/user/datasetDelete', 'UserController@datasetDelete');
+        Route::match(['get', 'post'], '/user/dataset/delete', 'UserController@datasetDelete');
         Route::match(['get', 'post'], '/user/datasets', 'UserController@datasets');
         Route::match(['get', 'post'], '/user/dataset/search', 'UserController@datasetSearch');
         Route::match(['get', 'post'], '/user/dataset/create', 'UserController@datasetCreate');

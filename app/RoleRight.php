@@ -69,7 +69,7 @@ class RoleRight extends Model
         }
 
         // return true if user is portal admin
-        if (Role::isAdmin() || $checkData['user']->is_admin) {
+        if (Role::isAdmin() || (!empty($checkData['user']) && $checkData['user']->is_admin)) {
             return true;
         }
 

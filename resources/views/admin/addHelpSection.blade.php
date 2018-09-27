@@ -29,14 +29,14 @@
                                 id="parent"
                                 data-placeholder="{{ __('custom.select') }}"
                             >
-                            <option><option>
-                            <option value="0"><option>
-                            @foreach ($parents as $parent)
-                                <option
-                                    value="{{ $parent->id }}"
-                                    {{ !empty(old('parent')) && old('parent') == $parent->id ? 'selected' : '' }}
-                                >{{ $parent->name }}</option>
-                            @endforeach
+                                <option><option>
+                                <option value="0"><option>
+                                @foreach ($parents as $parent)
+                                    <option
+                                        value="{{ $parent->id }}"
+                                        {{ !empty(old('parent')) && old('parent') == $parent->id ? 'selected' : '' }}
+                                    >{{ $parent->name }}</option>
+                                @endforeach
                             </select>
                             <span class="error">{{ $errors->first('parent') }}</span>
                     </div>

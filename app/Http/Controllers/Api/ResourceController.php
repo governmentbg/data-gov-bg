@@ -883,6 +883,17 @@ class ResourceController extends ApiController
 
                 $data['signals'] = $allSignals;
 
+                // get resource versions
+                $versionsList = [];
+                $versions = $resource->elasticDataSet()->get();
+                if ($versions) {
+                    foreach ($versions as $row) {
+                        $versionsList[] = $row->version;
+                    }
+                }
+
+                $data['versions_list'] = $versionsList;
+
                 return $this->successResponse(['resource' => $data], true);
             }
         }

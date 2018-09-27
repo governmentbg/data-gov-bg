@@ -95,7 +95,10 @@ class UserController extends ApiController
                 $user = User::where('api_key', $data['api_key'])->first();
                 $rightCheck = RoleRight::checkUserRight(
                     Module::USERS,
-                    RoleRight::RIGHT_VIEW
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'user' => $user
+                    ]
                 );
 
                 if (!$rightCheck) {
@@ -144,6 +147,30 @@ class UserController extends ApiController
             }
 
             $count = $query->count();
+
+            $columns = [
+                'id',
+                'add_info',
+                'username',
+                'firstname',
+                'lastname',
+                'email',
+                'is_admin',
+                'active',
+                'approved',
+                'deleted_by',
+                'deleted_at',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($order['field'])){
+                if (!in_array($order['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
 
             if (isset($criteria['order']['field']) && isset($criteria['order']['type'])) {
                 $query->orderBy($criteria['order']['field'], $criteria['order']['type']);

@@ -365,6 +365,25 @@ class CategoryController extends ApiController
                 $query->whereIn('id', $ids);
             }
 
+            $orderColumns = [
+                'id',
+                'name',
+                'locale',
+                'active',
+                'ordering',
+                'icon',
+                'created_at',
+                'created_by',
+                'updated_at',
+                'updated_by'
+            ];
+
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             if ($order) {
                 $query->orderBy($order['field'], $order['type']);
             }

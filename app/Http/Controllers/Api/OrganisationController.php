@@ -580,7 +580,10 @@ class OrganisationController extends ApiController
                 $user = \App\User::where('api_key', $post['api_key'])->first();
                 $rightCheck = RoleRight::checkUserRight(
                     Module::ORGANISATIONS,
-                    RoleRight::RIGHT_VIEW
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'user' => $user
+                    ]
                 );
 
                 if (!$rightCheck) {
@@ -644,6 +647,25 @@ class OrganisationController extends ApiController
 
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $columns = [
+                    'id',
+                    'name',
+                    'type',
+                    'descript',
+                    'contacts',
+                    'activity_info',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($request->criteria['order']['field'])) {
+                    if (!in_array($request->criteria['order']['field'], $columns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
 
                 $query->orderBy($field, $type);
 
@@ -924,6 +946,25 @@ class OrganisationController extends ApiController
 
                 $field = empty($criteria['order']['field']) ? 'created_at' : $criteria['order']['field'];
                 $type = empty($criteria['order']['type']) ? 'desc' : $criteria['order']['type'];
+
+                $columns = [
+                    'id',
+                    'name',
+                    'type',
+                    'descript',
+                    'contacts',
+                    'activity_info',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $columns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
 
                 $query->orderBy($field, $type);
 
@@ -1885,7 +1926,7 @@ class OrganisationController extends ApiController
 
                 if (isset($criteria['order']['field'])) {
                     if (!in_array($criteria['order']['field'], $orderColumns)) {
-                        unset($criteria['order']['field']);
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
                     }
                 }
 
@@ -2104,6 +2145,27 @@ class OrganisationController extends ApiController
 
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $orderColumns = [
+                    'id',
+                    'type',
+                    'name',
+                    'descript',
+                    'activity_info',
+                    'contacts',
+                    'active',
+                    'approved',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $orderColumns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
 
                 $query->orderBy($field, $type);
 

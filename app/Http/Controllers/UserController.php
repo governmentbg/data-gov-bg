@@ -143,6 +143,16 @@ class UserController extends Controller {
             $buttons[$dataset->uri]['delete'] = $rightCheck;
         }
 
+        $hasReported = false;
+
+        $reportedReq = Request::create('/api/hasReportedResource', 'POST', ['user_id' => \Auth::user()->id]);
+        $apiReported = new ApiResource($rq);
+        $resultReported = $apiReported->hasReportedResource($reportedReq)->getData();
+
+        if ($resultReported->flag) {
+            $hasReported = true;
+        }
+
         $paginationData = $this->getPaginationData($datasets, $count, [], $perPage);
 
         if ($request->has('delete')) {
@@ -161,7 +171,8 @@ class UserController extends Controller {
             'class'         => 'user',
             'datasets'      => $paginationData['items'],
             'pagination'    => $paginationData['paginate'],
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
+            'hasReported'   => $hasReported
         ]);
     }
 

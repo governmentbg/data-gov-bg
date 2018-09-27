@@ -147,7 +147,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'help' ? 'active' : '' }}"
-                                href="{{ url('/admin/help/list') }}"
+                                href="{{ url('/admin/help/sections/list') }}"
                             >{{ ultrans('custom.help_sections') }}</a>
                         </li>
                     </ul>

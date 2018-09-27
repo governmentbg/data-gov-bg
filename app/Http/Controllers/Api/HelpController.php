@@ -91,8 +91,10 @@ class HelpController extends ApiController
             $data = $request->data;
 
             $validator = \Validator::make($data, [
-                'name'      => 'required|string|max:191',
-                'locale'    => 'required|string|max:5',
+                'name'      => 'required_with:locale|max:191',
+                'name.bg'   => 'required_without:locale|string|max:191',
+                'name.*'    => 'max:191',
+                'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
                 'active'    => 'required|boolean',
                 'ordering'  => 'nullable|int'
@@ -303,9 +305,13 @@ class HelpController extends ApiController
                 'section_id'    => 'nullable|exists:help_sections,id',
                 'name'          => 'required|string|unique:help_pages|max:191',
                 'keywords'      => 'nullable|string|max:191',
-                'locale'        => 'required|string|max:5',
-                'title'         => 'required|string|max:191',
-                'body'          => 'required|string|max:191',
+                'locale'        => 'nullable|string|max:5',
+                'title'         => 'required_with:locale|max:191',
+                'title.bg'      => 'required_without:locale|string|max:191',
+                'title.*'       => 'max:191',
+                'body'          => 'required_with:locale|max:191',
+                'body.bg'       => 'required_without:locale|string|max:191',
+                'body.*'        => 'max:8000',
                 'ordering'      => 'nullable|int',
                 'active'        => 'required|boolean',
             ]);
@@ -372,12 +378,16 @@ class HelpController extends ApiController
             $data = $request->data;
 
             $validator = \Validator::make($data, [
-                'locale'        => 'required|string|max:5',
                 'name'          => 'required|string|max:191',
                 'section_id'    => 'nullable|exists:help_sections,id',
                 'keywords'      => 'nullable|string|max:191',
-                'title'         => 'required|string|max:191',
-                'body'          => 'required|string|max:191',
+                'locale'        => 'nullable|string|max:5',
+                'title'         => 'required_with:locale|max:191',
+                'title.bg'      => 'required_without:locale|string|max:191',
+                'title.*'       => 'max:191',
+                'body'          => 'required_with:locale|max:191',
+                'body.bg'       => 'required_without:locale|string|max:191',
+                'body.*'        => 'max:8000',
                 'ordering'      => 'nullable|int',
                 'active'        => 'required|boolean',
             ]);
@@ -491,9 +501,9 @@ class HelpController extends ApiController
 
         if (!empty($criteria['keywords'])) {
             $ids = HelpPage::search($criteria['keywords'])->get()->pluck('id');
-            $pages = HelpPage::whereIn('id', $ids);
+            $pages = HelpPage::whereIn('id', $ids)->with('section');
         } else {
-            $pages = HelpPage::select();
+            $pages = HelpPage::select()->with('section');
         }
 
         if (!empty($criteria['active'])) {
@@ -553,10 +563,11 @@ class HelpController extends ApiController
                 'created_at'    => $page->created_at->toDateTimeString(),
                 'updated_by'    => $page->updated_by,
                 'updated_at'    => isset($page->updated_at) ? $page->updated_at->toDateTimeString() : null,
+                'section_name'  => isset($page->section->name) ? $page->section->name : null,
             ];
         }
 
-        return $this->successResponse(['total_records' => $count, 'pages' => $results]);
+        return $this->successResponse(['total_records' => $count, 'pages' => $results], true);
     }
 
     /**
@@ -581,9 +592,9 @@ class HelpController extends ApiController
 
         if (!$validator->fails()) {
             if (!empty($criteria['page_id'])) {
-                $page = HelpPage::find($criteria['page_id']);
+                $page = HelpPage::with('section')->find($criteria['page_id']);
             } else {
-                $page = HelpPage::where('name', $criteria['name'])->first();
+                $page = HelpPage::with('section')->where('name', $criteria['name'])->first();
             }
 
             if (!empty($page)) {
@@ -601,6 +612,7 @@ class HelpController extends ApiController
                     'created_at'    => $page->created_at->toDateTimeString(),
                     'updated_by'    => $page->updated_by,
                     'updated_at'    => isset($page->updated_at) ? $page->updated_at->toDateTimeString() : null,
+                    'section_name'  => isset($page->section->name) ? $page->section->name : null,
                 ];
 
                 return $this->successResponse(['page' => $result], true);

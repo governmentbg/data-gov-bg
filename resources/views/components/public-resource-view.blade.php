@@ -135,6 +135,15 @@
                     <div class="col-sm-8 text-left p-l-r-none">
                         <form method="POST">
                             {{ csrf_field() }}
+                            @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
+                                <button
+                                    type="button"
+                                    class="btn btn-primary badge badge-pill js-res-uri"
+                                    data-toggle="modal"
+                                    data-target="#embed-resource"
+                                    data-uri ="{{ $resource->uri }}"
+                                >{{ uctrans('custom.embed') }}</button>
+                            @endif
                             @if (isset($buttons['edit']) && $buttons['edit'])
                                 <a
                                     class="btn btn-primary badge badge-pill"
@@ -177,3 +186,5 @@
         </div>
     </div>
 @endif
+
+@include('partials.resource-embed')

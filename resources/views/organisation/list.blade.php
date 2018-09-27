@@ -114,12 +114,12 @@
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ route('orgProfile', array_merge(array_except($getParams, ['page']), ['uri' => $organisation->uri])) }}">
+                                    <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}">
                                         <h3 class="org-name">{{ $organisation->name }}</h3>
                                     </a>
                                     <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
                                     <p class="text-right show-more">
-                                        <a href="{{ route('orgProfile', array_merge(array_except($getParams, ['page']), ['uri' => $organisation->uri])) }}" class="view-profile">
+                                        <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}" class="view-profile">
                                             {{ __('custom.see_more') }}
                                         </a>
                                     </p>
@@ -135,7 +135,7 @@
                                             </form>
                                         @endif
                                         @if (isset($buttons[$organisation->id]['delete']) && $buttons[$organisation->id]['delete'])
-                                            <form method="POST" action="{{ route('orgDelete', array_except($getParams, ['page'])) }}">
+                                            <form method="POST" action="{{ route('orgDelete', app('request')->input()) }}">
                                                 {{ csrf_field() }}
                                                 <div class="col-xs-6 text-right">
                                                     <button

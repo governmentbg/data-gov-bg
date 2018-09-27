@@ -298,7 +298,7 @@ class GroupController extends Controller
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect()->route('groups', $request->query());
+                return redirect()->route('groups', array_except($request->query(), ['page']));
             }
 
             $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));

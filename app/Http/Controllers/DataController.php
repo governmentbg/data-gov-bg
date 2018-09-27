@@ -596,7 +596,7 @@ class DataController extends Controller {
                     if (isset($result->success) && $result->success) {
                         $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
 
-                        return redirect()->route('data', $request->query());
+                        return redirect()->route('data', array_except($request->query(), ['page']));
                     }
 
                     $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
@@ -1443,7 +1443,7 @@ class DataController extends Controller {
                     if (isset($result->success) && $result->success) {
                         $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
 
-                        return redirect()->route('reportedData', $request->query());
+                        return redirect()->route('reportedData', array_except($request->query(), ['page']));
                     }
 
                     $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));

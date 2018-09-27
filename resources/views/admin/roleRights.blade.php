@@ -20,7 +20,7 @@
                 <tbody>
                     @foreach ($modules as $i => $module)
                         <tr>
-                            <td>{{ $module }}</td>
+                            <td>{{ __('custom.' . $module) }}</td>
                             <td>
                                 @foreach ($rightTypes as $key => $rightType)
                                     <label class="m-l-r-xs">
@@ -72,7 +72,7 @@
         </div>
         <div class="form-group row m-t-md">
             <div class="col-lg-12 text-right">
-                <button type="submit" name="edit" class="btn btn-primary">{{ __('custom.save') }}</button>
+                <button type="submit" name="edit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
             </div>
         </div>
     </form>

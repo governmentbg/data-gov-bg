@@ -23,7 +23,7 @@ class ModulesController extends ApiController
 
         if (!empty($modules)) {
             foreach ($modules as $module) {
-                $result[] = ['name' => $module];
+                $result[] = ['name' => __('custom.' . $module)];
             }
 
             return $this->successResponse(['modules' => $result], true);

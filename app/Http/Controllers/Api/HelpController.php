@@ -31,8 +31,10 @@ class HelpController extends ApiController
             $data = $request->data;
 
             $validator = \Validator::make($data, [
-                'name'      => 'required|string|max:191',
-                'locale'    => 'required|string|max:5',
+                'name'      => 'required_with:locale|max:191',
+                'name.bg'   => 'required_without:locale|string|max:191',
+                'name.*'    => 'max:191',
+                'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
                 'active'    => 'required|boolean',
                 'ordering'  => 'nullable|int'
@@ -59,7 +61,6 @@ class HelpController extends ApiController
                 } catch (\QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
-
             }
         }
 

@@ -27,152 +27,148 @@ class DataSetController extends AdminController
      */
     public function listDatasets(Request $request)
     {
-        if (Role::isAdmin()) {
-            $perPage = 10;
-            $search = $request->has('q') ? $request->offsetGet('q') : '';
+        $perPage = 10;
+        $search = $request->has('q') ? $request->offsetGet('q') : '';
 
-            $orgDropCount = $request->offsetGet('orgs_count') ? $request->offsetGet('orgs_count') : Organisation::INIT_FILTER;
-            $selectedOrgs = $request->offsetGet('org') ? $request->offsetGet('org') : [];
-            $organisations = $this->getOrgDropdown(null, $orgDropCount);
+        $orgDropCount = $request->offsetGet('orgs_count') ? $request->offsetGet('orgs_count') : Organisation::INIT_FILTER;
+        $selectedOrgs = $request->offsetGet('org') ? $request->offsetGet('org') : [];
+        $organisations = $this->getOrgDropdown(null, $orgDropCount);
 
-            $groupDropCount = $request->offsetGet('groups_count') ? $request->offsetGet('groups_count') : Organisation::INIT_FILTER;
-            $selectedGroups = $request->offsetGet('group') ? $request->offsetGet('group') : [];
-            $groups = $this->getGroupDropdown(null, $groupDropCount);
+        $groupDropCount = $request->offsetGet('groups_count') ? $request->offsetGet('groups_count') : Organisation::INIT_FILTER;
+        $selectedGroups = $request->offsetGet('group') ? $request->offsetGet('group') : [];
+        $groups = $this->getGroupDropdown(null, $groupDropCount);
 
-            $userDropCount = $request->offsetGet('users_count') ? $request->offsetGet('users_count') : Organisation::INIT_FILTER;
-            $selectedUser = $request->offsetGet('user') ? $request->offsetGet('user') : '';
-            $users = $this->getUserDropdown($userDropCount);
+        $userDropCount = $request->offsetGet('users_count') ? $request->offsetGet('users_count') : Organisation::INIT_FILTER;
+        $selectedUser = $request->offsetGet('user') ? $request->offsetGet('user') : '';
+        $users = $this->getUserDropdown($userDropCount);
 
-            $termsDropCount = $request->offsetGet('terms_count') ? $request->offsetGet('terms_count') : Organisation::INIT_FILTER;
-            $selectedTerms = $request->offsetGet('term') ? $request->offsetGet('term') : [];
-            $terms = $this->getTermsDropdown($termsDropCount);
+        $termsDropCount = $request->offsetGet('terms_count') ? $request->offsetGet('terms_count') : Organisation::INIT_FILTER;
+        $selectedTerms = $request->offsetGet('term') ? $request->offsetGet('term') : [];
+        $terms = $this->getTermsDropdown($termsDropCount);
 
-            $tagsDropCount = $request->offsetGet('tags_count') ? $request->offsetGet('tags_count') : Organisation::INIT_FILTER;
-            $selectedTags = $request->offsetGet('tag') ? $request->offsetGet('tag') : [];
-            $tags = $this->getTagsDropdown($tagsDropCount);
+        $tagsDropCount = $request->offsetGet('tags_count') ? $request->offsetGet('tags_count') : Organisation::INIT_FILTER;
+        $selectedTags = $request->offsetGet('tag') ? $request->offsetGet('tag') : [];
+        $tags = $this->getTagsDropdown($tagsDropCount);
 
-            $catDropCount = $request->offsetGet('categories_count') ? $request->offsetGet('categories_count') : Organisation::INIT_FILTER;
-            $selectedCategories = $request->offsetGet('category') ? $request->offsetGet('category') : [];
-            $categories = $this->getMainCategoriesDropdown($catDropCount);
+        $catDropCount = $request->offsetGet('categories_count') ? $request->offsetGet('categories_count') : Organisation::INIT_FILTER;
+        $selectedCategories = $request->offsetGet('category') ? $request->offsetGet('category') : [];
+        $categories = $this->getMainCategoriesDropdown($catDropCount);
 
-            $formats = Resource::getFormats();
-            $formatsCount = count($formats);
-            $selectedFormats = $request->offsetGet('format') ? $request->offsetGet('format') : [];
+        $formats = Resource::getFormats();
+        $formatsCount = count($formats);
+        $selectedFormats = $request->offsetGet('format') ? $request->offsetGet('format') : [];
 
-            $signaledFilter = $request->offsetGet('signaled', false);
+        $signaledFilter = $request->offsetGet('signaled', false);
 
-            $params = [
-                'api_key'           => \Auth::user()->api_key,
-                'records_per_page'  => $perPage,
-                'page_number'       => !empty($request->page) ? $request->page : 1,
-            ];
+        $params = [
+            'api_key'           => \Auth::user()->api_key,
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+        ];
 
-            if (!empty($request->from)) {
-                $params['criteria']['date_from'] = date_format(date_create($request->from), 'Y-m-d H:i:s');
-            }
-
-            if (!empty($request->to)) {
-                $params['criteria']['date_to'] = date_format(date_create($request->to .' 23:59'), 'Y-m-d H:i:s');
-            }
-
-            if (!empty($search)) {
-                $params['criteria']['keywords'] = $search;
-            }
-
-            if ($request->has('order_field') && !empty($request->order_field)) {
-                $params['criteria']['order']['field'] = $request->order_field;
-            }
-
-            if ($request->has('order_type') && !empty($request->order_type)) {
-                $params['criteria']['order']['type'] = $request->order_type;
-            }
-
-            if (!empty($selectedOrgs)) {
-                $selectedOrgs = array_unique($selectedOrgs);
-                $params['criteria']['org_ids'] = $selectedOrgs;
-            }
-
-            if (!empty($selectedGroups)) {
-                $selectedGroups = array_unique($selectedGroups);
-                $params['criteria']['group_ids'] = $selectedGroups;
-            }
-
-            if (!empty($selectedUser)) {
-                $params['criteria']['created_by'] = $selectedUser;
-            }
-
-            if (!empty($selectedCategories)) {
-                $selectedCategories = array_unique($selectedCategories);
-                $params['criteria']['category_ids'] = $selectedCategories;
-            }
-
-            if (!empty($selectedTags)) {
-                $selectedTags = array_unique($selectedTags);
-                $params['criteria']['tag_ids'] = $selectedTags;
-            }
-
-            if (!empty($selectedFormats)) {
-                $selectedFormats = array_unique($selectedFormats);
-                $params['criteria']['formats'] = $selectedFormats;
-            }
-
-            if (!empty($selectedTerms)) {
-                $selectedTerms = array_unique($selectedTerms);
-                $params['criteria']['terms_of_use_ids'] = $selectedTerms;
-            }
-
-            if (!empty($signaledFilter)) {
-                $params['criteria']['reported'] = $signaledFilter;
-            }
-
-            $rq = Request::create('/api/listDatasets', 'POST', $params);
-            $api = new ApiDataSet($rq);
-            $result = $api->listDatasets($rq)->getData();
-            $datasets = !empty($result->datasets) ? $result->datasets : [];
-            $count = !empty($result->total_records) ? $result->total_records : 0;
-
-            $paginationData = $this->getPaginationData(
-                $datasets,
-                $count,
-                array_except(app('request')->input(), ['q', 'page',]),
-                $perPage
-            );
-
-            return view('admin/datasets', [
-                'class'                 => 'user',
-                'search'                => $search,
-                'datasets'              => $paginationData['items'],
-                'pagination'            => $paginationData['paginate'],
-                'organisations'         => $organisations,
-                'orgDropCount'          => count($this->getOrgDropdown()),
-                'selectedOrgs'          => $selectedOrgs,
-                'groups'                => $groups,
-                'groupDropCount'        => count($this->getGroupDropdown()),
-                'selectedGroups'        => $selectedGroups,
-                'users'                 => $users,
-                'userDropCount'         => count($this->getUserDropdown()),
-                'selectedUser'          => $selectedUser,
-                'terms'                 => $terms,
-                'termsDropCount'        => count($this->getTermsDropdown()),
-                'selectedTerms'         => $selectedTerms,
-                'tags'                  => $tags,
-                'tagsDropCount'         => count($this->getTagsDropdown()),
-                'selectedTags'          => $selectedTags,
-                'categories'            => $categories,
-                'catDropCount'          => count($this->getMainCategoriesDropdown()),
-                'selectedCategories'    => $selectedCategories,
-                'formats'               => $formats,
-                'formatsCount'          => $formatsCount,
-                'selectedFormats'       => $selectedFormats,
-                'signaledFilter'        => $signaledFilter,
-                'range'      => [
-                    'from' => isset($request->from) ? $request->from : null,
-                    'to'   => isset($request->to) ? $request->to : null
-                ],
-            ]);
+        if (!empty($request->from)) {
+            $params['criteria']['date_from'] = date_format(date_create($request->from), 'Y-m-d H:i:s');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        if (!empty($request->to)) {
+            $params['criteria']['date_to'] = date_format(date_create($request->to .' 23:59'), 'Y-m-d H:i:s');
+        }
+
+        if (!empty($search)) {
+            $params['criteria']['keywords'] = $search;
+        }
+
+        if ($request->has('order_field') && !empty($request->order_field)) {
+            $params['criteria']['order']['field'] = $request->order_field;
+        }
+
+        if ($request->has('order_type') && !empty($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
+
+        if (!empty($selectedOrgs)) {
+            $selectedOrgs = array_unique($selectedOrgs);
+            $params['criteria']['org_ids'] = $selectedOrgs;
+        }
+
+        if (!empty($selectedGroups)) {
+            $selectedGroups = array_unique($selectedGroups);
+            $params['criteria']['group_ids'] = $selectedGroups;
+        }
+
+        if (!empty($selectedUser)) {
+            $params['criteria']['created_by'] = $selectedUser;
+        }
+
+        if (!empty($selectedCategories)) {
+            $selectedCategories = array_unique($selectedCategories);
+            $params['criteria']['category_ids'] = $selectedCategories;
+        }
+
+        if (!empty($selectedTags)) {
+            $selectedTags = array_unique($selectedTags);
+            $params['criteria']['tag_ids'] = $selectedTags;
+        }
+
+        if (!empty($selectedFormats)) {
+            $selectedFormats = array_unique($selectedFormats);
+            $params['criteria']['formats'] = $selectedFormats;
+        }
+
+        if (!empty($selectedTerms)) {
+            $selectedTerms = array_unique($selectedTerms);
+            $params['criteria']['terms_of_use_ids'] = $selectedTerms;
+        }
+
+        if (!empty($signaledFilter)) {
+            $params['criteria']['reported'] = $signaledFilter;
+        }
+
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $result = $api->listDatasets($rq)->getData();
+        $datasets = !empty($result->datasets) ? $result->datasets : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $paginationData = $this->getPaginationData(
+            $datasets,
+            $count,
+            array_except(app('request')->input(), ['q', 'page',]),
+            $perPage
+        );
+
+        return view('admin/datasets', [
+            'class'                 => 'user',
+            'search'                => $search,
+            'datasets'              => $paginationData['items'],
+            'pagination'            => $paginationData['paginate'],
+            'organisations'         => $organisations,
+            'orgDropCount'          => count($this->getOrgDropdown()),
+            'selectedOrgs'          => $selectedOrgs,
+            'groups'                => $groups,
+            'groupDropCount'        => count($this->getGroupDropdown()),
+            'selectedGroups'        => $selectedGroups,
+            'users'                 => $users,
+            'userDropCount'         => count($this->getUserDropdown()),
+            'selectedUser'          => $selectedUser,
+            'terms'                 => $terms,
+            'termsDropCount'        => count($this->getTermsDropdown()),
+            'selectedTerms'         => $selectedTerms,
+            'tags'                  => $tags,
+            'tagsDropCount'         => count($this->getTagsDropdown()),
+            'selectedTags'          => $selectedTags,
+            'categories'            => $categories,
+            'catDropCount'          => count($this->getMainCategoriesDropdown()),
+            'selectedCategories'    => $selectedCategories,
+            'formats'               => $formats,
+            'formatsCount'          => $formatsCount,
+            'selectedFormats'       => $selectedFormats,
+            'signaledFilter'        => $signaledFilter,
+            'range'      => [
+                'from' => isset($request->from) ? $request->from : null,
+                'to'   => isset($request->to) ? $request->to : null
+            ],
+        ]);
     }
 
     /**
@@ -184,77 +180,73 @@ class DataSetController extends AdminController
      */
     public function add(Request $request)
     {
-        if (Role::isAdmin()) {
-            $visibilityOptions = DataSet::getVisibility();
-            $categories = $this->prepareMainCategories();
-            $termsOfUse = $this->prepareTermsOfUse();
-            $organisations = $this->getOrgDropdown();
-            $groups = $this->getGroupDropdown();
+        $visibilityOptions = DataSet::getVisibility();
+        $categories = $this->prepareMainCategories();
+        $termsOfUse = $this->prepareTermsOfUse();
+        $organisations = $this->getOrgDropdown();
+        $groups = $this->getGroupDropdown();
 
-            if ($request->has('back')) {
-                return redirect()->route('adminDataSets');
-            }
-
-            if ($request->isMethod('post') && $request->has('create')) {
-                $data = $request->all();
-
-                // prepare post data for API request
-                $data = $this->prepareTags($data);
-
-                if (!empty($data['group_id'])) {
-                    $groupId = $data['group_id'];
-                }
-
-                unset($data['group_id'], $data['add_resource'], $data['create']);
-
-                // make request to API
-                $params['api_key'] = \Auth::user()->api_key;
-                $params['data'] = $data;
-
-                $savePost = Request::create('/api/addDataset', 'POST', $params);
-                $api = new ApiDataSet($savePost);
-                $save = $api->addDataset($savePost)->getData();
-
-                if ($save->success) {
-                    if (isset($groupId)) {
-                        $groupParams['group_id'] = $groupId;
-                        $groupParams['data_set_uri'] = $save->uri;
-                        $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
-                        $res = $api->addDatasetToGroup($addGroup)->getData();
-
-                        if (!$res->success) {
-                            $request->session()->flash('alert-danger', __('custom.add_error'));
-
-                            return redirect()->back()->withInput()->withErrors($res->errors);
-                        }
-                    }
-
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
-                    if ($request->has('add_resource')) {
-                        return redirect()->route('resourceCreate', ['uri' => $save->uri]);
-                    }
-
-                    return redirect(url('/admin/dataset/view/'. $save->uri));
-                }
-
-                $request->session()->flash('alert-danger', $save->error->message);
-
-                return redirect()->back()->withInput()->withErrors($save->errors);
-            }
-
-            return view('admin/datasetCreate', [
-                'class'         => 'user',
-                'visibilityOpt' => $visibilityOptions,
-                'categories'    => $categories,
-                'termsOfUse'    => $termsOfUse,
-                'organisations' => $organisations,
-                'groups'        => $groups,
-                'fields'        => $this->getDatasetTransFields(),
-            ]);
+        if ($request->has('back')) {
+            return redirect()->route('adminDataSets');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        if ($request->isMethod('post') && $request->has('create')) {
+            $data = $request->all();
+
+            // prepare post data for API request
+            $data = $this->prepareTags($data);
+
+            if (!empty($data['group_id'])) {
+                $groupId = $data['group_id'];
+            }
+
+            unset($data['group_id'], $data['add_resource'], $data['create']);
+
+            // make request to API
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['data'] = $data;
+
+            $savePost = Request::create('/api/addDataset', 'POST', $params);
+            $api = new ApiDataSet($savePost);
+            $save = $api->addDataset($savePost)->getData();
+
+            if ($save->success) {
+                if (isset($groupId)) {
+                    $groupParams['group_id'] = $groupId;
+                    $groupParams['data_set_uri'] = $save->uri;
+                    $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $groupParams);
+                    $res = $api->addDatasetToGroup($addGroup)->getData();
+
+                    if (!$res->success) {
+                        $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                        return redirect()->back()->withInput()->withErrors($res->errors);
+                    }
+                }
+
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                if ($request->has('add_resource')) {
+                    return redirect()->route('resourceCreate', ['uri' => $save->uri]);
+                }
+
+                return redirect(url('/admin/dataset/view/'. $save->uri));
+            }
+
+            $request->session()->flash('alert-danger', $save->error->message);
+
+            return redirect()->back()->withInput()->withErrors($save->errors);
+        }
+
+        return view('admin/datasetCreate', [
+            'class'         => 'user',
+            'visibilityOpt' => $visibilityOptions,
+            'categories'    => $categories,
+            'termsOfUse'    => $termsOfUse,
+            'organisations' => $organisations,
+            'groups'        => $groups,
+            'fields'        => $this->getDatasetTransFields(),
+        ]);
     }
 
     /**

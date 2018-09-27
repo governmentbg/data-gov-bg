@@ -775,4 +775,9 @@ return [
     'terms_and_conditions_list' => 'списък условия за ползване',
     'delete_theme_confirm' => 'Изтриване на тема',
     'invalid_sort_field' => 'Невалидно поле за сортиране',
+    'help_sections' => 'Технически насоки',
+    'parent_section' => 'Подсекция на',
+    'add_help_sections' => 'Добавяне на технически насоки / Секция',
+    'edit_help_sections' => 'Редакция на технически насоки / Секция',
+    'help_section_preview' => 'Преглед на помощна секция',
 ];

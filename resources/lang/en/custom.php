@@ -777,4 +777,9 @@ return [
     'terms_and_conditions_list' => 'terms and conditions list',
     'delete_theme_confirm' => 'Delete theme?',
     'invalid_sort_field' => 'Invalid sorting field',
+    'help_sections' => 'Help sections',
+    'parent_section' => 'Subsection of',
+    'add_help_sections' => 'Add Help Section',
+    'edit_help_sections' => 'Edit Help Section',
+    'help_section_preview' => 'Preview Help Section',
 ];

@@ -60,6 +60,7 @@ class Kernel extends HttpKernel
         'guest'             => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle'          => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'auth.api'          => \App\Http\Middleware\CheckApiKey::class,
+        'admin'             => \App\Http\Middleware\AdminAuth::class,
         'locale'            => \App\Http\Middleware\SetLocale::class,
         'check.resources'   => \App\Http\Middleware\CheckReportedResources::class,
     ];

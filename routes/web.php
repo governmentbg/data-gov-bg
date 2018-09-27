@@ -286,6 +286,12 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/data-requests/list', 'Admin\DataRequestController@listDataRequests');
         Route::match(['get', 'post'], '/admin/data-request/edit/{id}', 'Admin\DataRequestController@editDataRequest');
         Route::match(['get', 'post'], '/admin/data-request/delete/{id}', 'Admin\DataRequestController@deleteDataRequest');
+
+        Route::match(['get', 'post'], 'admin/help/list', 'Admin\HelpController@listSections');
+        Route::match(['get', 'post'], 'admin/helpSection/add', 'Admin\HelpController@addHelpSecton');
+        Route::match(['get', 'post'], 'admin/helpSection/edit/{id}', 'Admin\HelpController@editHelpSection');
+        Route::match(['get', 'post'], 'admin/helpSection/view/{id}', 'Admin\HelpController@viewHelpSection');
+        Route::get('admin/helpSection/delete/{id}', 'Admin\HelpController@deleteHelpSection');
     });
 });
 

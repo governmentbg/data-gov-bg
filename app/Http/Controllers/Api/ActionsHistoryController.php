@@ -183,6 +183,22 @@ class ActionsHistoryController extends ApiController
         }
 
         $count = $history->count();
+        $orderColumns = [
+            'username',
+            'occurrence',
+            'module_name',
+            'action',
+            'action_object',
+            'action_msg',
+            'user_id',
+            'ip_address'
+        ];
+
+        if (isset($criteria['order']['field'])) {
+            if (!in_array($criteria['order']['field'], $orderColumns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
+            }
+        }
 
         if (!empty($order)) {
             $history->orderBy($order['field'], $order['type']);

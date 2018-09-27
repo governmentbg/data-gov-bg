@@ -350,11 +350,9 @@ class DocumentController extends ApiController
 
         $query = Document::select($columns);
 
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
-                if (!in_array($criteria['order']['field'], $columns)) {
-                    unset($criteria['order']['field']);
-                }
+        if (isset($criteria['order']['field'])) {
+            if (!in_array($criteria['order']['field'], $columns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
             }
         }
 
@@ -428,7 +426,7 @@ class DocumentController extends ApiController
 
         $transFields = ['description', 'name'];
 
-        if (isset($criteria['order']) && $criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+        if (isset($criteria['order']) && $criteria['order'] && isset($criteria['order']['field']) && in_array($criteria['order']['field'], $transFields)) {
             usort($results, function($a, $b) use ($criteria) {
                 return strtolower($criteria['order']['type']) == 'asc'
                     ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
@@ -508,7 +506,7 @@ class DocumentController extends ApiController
 
             if (isset($order['field'])) {
                 if (!in_array($order['field'], $orderColumns)) {
-                    unset($order['field']);
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
                 }
             }
 

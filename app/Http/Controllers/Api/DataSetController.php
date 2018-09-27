@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 
 use Uuid;
+use App\User;
 use App\Tags;
 use App\Module;
 use App\Signal;
@@ -603,7 +604,10 @@ class DataSetController extends ApiController
                     $user = \App\User::where('api_key', $post['api_key'])->first();
                     $rightCheck = RoleRight::checkUserRight(
                         Module::DATA_SETS,
-                        RoleRight::RIGHT_VIEW
+                        RoleRight::RIGHT_VIEW,
+                        [
+                            'user' => $user
+                        ]
                     );
 
                     if (!$rightCheck) {
@@ -681,6 +685,30 @@ class DataSetController extends ApiController
                     $query->whereIn('created_by', $criteria['user_ids']);
                 } elseif (!empty($criteria['created_by'])) {
                     $query->where('created_by', $criteria['created_by']);
+                }
+
+                $orderColumns = [
+                    'org_id',
+                    'name',
+                    'descript',
+                    'visibility',
+                    'source',
+                    'version',
+                    'author_name',
+                    'author_email',
+                    'support_name',
+                    'sla',
+                    'status',
+                    'created_at',
+                    'created_by',
+                    'updated_at',
+                    'updated_by'
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $orderColumns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
                 }
 
                 if (!empty($order)) {

@@ -361,6 +361,26 @@ class SignalController extends ApiController
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
 
+        $orderColumns = [
+            'id',
+            'resource_id',
+            'descript',
+            'firstname',
+            'lastname',
+            'status',
+            'email',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ];
+
+        if (isset($criteria['order']['field'])) {
+            if (!in_array($criteria['order']['field'], $orderColumns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
+            }
+        }
+
         if (!empty($order)) {
             $query->orderBy($order['field'], $order['type']);
         }

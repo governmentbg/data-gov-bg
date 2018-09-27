@@ -776,6 +776,7 @@ return [
     'users_edit' => 'edit user',
     'terms_and_conditions_list' => 'terms and conditions list',
     'delete_theme_confirm' => 'Delete theme?',
+    'invalid_sort_field' => 'Invalid sorting field',
     'help_sections' => 'Help sections',
     'parent_section' => 'Subsection of',
     'add_help_sections' => 'Add Help Section',

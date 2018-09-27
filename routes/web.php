@@ -332,7 +332,7 @@ Route::get('terms', function () {
 
 Route::match(['get', 'post'], 'data', 'DataController@list')->name('data');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
-Route::match(['get', 'post'], 'data/resourceView/{uri}', 'DataController@resourceView')->name('dataResourceView');
+Route::match(['get', 'post'], 'data/resourceView/{uri}/{version?}', 'DataController@resourceView')->name('dataResourceView');
 Route::post('data/resource/sendSignal', 'DataController@sendSignal');
 Route::match(['get', 'post'], 'data/resource/embed/{uri}', 'VisualisationController@resourceEmbed');
 
@@ -340,7 +340,7 @@ Route::match(['get', 'post'], 'data/linkedData', 'DataController@linkedData');
 
 Route::match(['get', 'post'], 'data/reported', 'DataController@reportedList')->name('reportedData');
 Route::match(['get', 'post'], 'data/reported/view/{uri}', 'DataController@reportedView')->name('reportedView');
-Route::match(['get', 'post'], 'data/reported/resourceView/{uri}', 'DataController@reportedResourceView')->name('reportedResourceView');
+Route::match(['get', 'post'], 'data/reported/resourceView/{uri}/{version?}', 'DataController@reportedResourceView')->name('reportedResourceView');
 
 Route::match(['get', 'post'], 'data/chronology/{uri}', 'DataController@chronology')->name('dataChronology');
 
@@ -350,7 +350,7 @@ Route::post('organisation/delete', 'OrganisationController@delete')->name('orgDe
 
 Route::match(['get', 'post'], 'organisation/{uri}/datasets', 'OrganisationController@datasets')->name('orgDatasets');
 Route::match(['get', 'post'], 'organisation/dataset/{uri}', 'OrganisationController@viewDataset')->name('orgViewDataset');
-Route::match(['get', 'post'], 'organisation/datasets/resourceView/{uri}', 'OrganisationController@resourceView')->name('orgDataResourceView');
+Route::match(['get', 'post'], 'organisation/datasets/resourceView/{uri}/{version?}', 'OrganisationController@resourceView')->name('orgDataResourceView');
 Route::post('organisation/resource/sendSignal', 'OrganisationController@sendSignal');
 
 Route::match(['get', 'post'], 'organisation/{uri}/chronology', 'OrganisationController@chronology');

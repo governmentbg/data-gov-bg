@@ -1281,7 +1281,7 @@ class ResourceController extends ApiController
     /**
      * Check if user has reported resources
      *
-     * @param int user_id - required
+     * @param int user_id - optional
      * @return json with results or error
      */
     public function hasReportedResource(Request $request)

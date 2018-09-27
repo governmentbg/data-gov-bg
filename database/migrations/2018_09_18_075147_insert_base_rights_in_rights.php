@@ -357,7 +357,7 @@ class InsertBaseRightsInRights extends Migration
                 $rightData = array_merge(['role_id' => $roleId], $rightData);
 
                 if (RoleRight::where($rightData)->count()) {
-                    RoleRight::where($rightData)->get()->delete();
+                    RoleRight::where($rightData)->delete();
                 }
             }
         }

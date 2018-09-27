@@ -69,7 +69,7 @@ class InsertBaseRolesInRoles extends Migration
     {
         foreach ($this->roles as $role) {
             if (Role::where(['name' => $role['name']])->count()) {
-                Role::where(['name' => $role['name']])->get()->delete();
+                Role::where(['name' => $role['name']])->delete();
             }
         }
     }

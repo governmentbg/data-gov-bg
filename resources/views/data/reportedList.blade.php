@@ -149,9 +149,30 @@
                             <span class="h4">{{ __('custom.selected_topics') }}:</span>
                         </div>
                         <div class="col-lg-9 p-h-xs">
-                            @foreach ($getParams['category'] as $selCategory)
-                                <span class="badge badge-pill">{{ array_pluck($categories, 'name', 'id')[$selCategory] }}</span>
-                            @endforeach
+                            <form method="post">
+                                {{ csrf_field() }}
+                                @foreach ($getParams['category'] as $selCategory)
+                                    <span class="badge badge-pill">
+                                        {{ array_pluck($categories, 'name', 'id')[$selCategory] }}&nbsp;
+                                        @if (isset($buttons[$selCategory]['followCategory']) && $buttons[$selCategory]['followCategory'])
+                                            <button class="badge badge-pill badge-follow" type="submit" name="followCategory" value="{{ $selCategory }}"
+                                                title="{{ uctrans('custom.follow') }}">
+                                                <i class="fa fa-plus-circle"></i>
+                                            </button>
+                                        @elseif (isset($buttons[$selCategory]['unfollowCategory']) && $buttons[$selCategory]['unfollowCategory'])
+                                            <button class="badge badge-pill badge-follow" type="submit" name="unfollowCategory" value="{{ $selCategory }}"
+                                            title="{{ uctrans('custom.stop_follow') }}">
+                                                <i class="fa fa-minus-circle"></i>
+                                            </button>
+                                        @endif
+                                        <a href="{{ action('DataController@reportedList', array_merge(
+                                                    array_except(app('request')->input(), ['category', 'page']),
+                                                    ['category' => array_diff($getParams['category'], [$selCategory])]
+                                                )) }}"
+                                        ><i class="fa fa-remove"></i></a>
+                                    </span>
+                                @endforeach
+                            </form>
                         </div>
                     @endif
                     @if (isset($getParams['tag']) && count($getParams['tag']) > 0)
@@ -159,9 +180,30 @@
                             <span class="h4">{{ __('custom.selected_tags') }}:</span>
                         </div>
                         <div class="col-lg-9 p-h-xs">
-                            @foreach ($getParams['tag'] as $selTag)
-                                <span class="badge badge-pill">{{ array_pluck($tags, 'name', 'id')[$selTag] }}</span>
-                            @endforeach
+                            <form method="post">
+                                {{ csrf_field() }}
+                                @foreach ($getParams['tag'] as $selTag)
+                                    <span class="badge badge-pill">
+                                    {{ array_pluck($tags, 'name', 'id')[$selTag] }}&nbsp;
+                                        @if (isset($buttons[$selTag]['followTag']) && $buttons[$selTag]['followTag'])
+                                            <button class="badge badge-follow" type="submit" name="followTag" value="{{ $selTag }}"
+                                            title="{{ uctrans('custom.follow') }}">
+                                                <i class="fa fa-plus-circle"></i>
+                                            </button>
+                                        @elseif (isset($buttons[$selTag]['unfollowTag']) && $buttons[$selTag]['unfollowTag'])
+                                            <button class="badge badge-follow" type="submit" name="unfollowTag" value="{{ $selTag }}"
+                                            title="{{ uctrans('custom.stop_follow') }}">
+                                                <i class="fa fa-minus-circle"></i>
+                                            </button>
+                                        @endif
+                                        <a href="{{ action('DataController@reportedList', array_merge(
+                                                    array_except(app('request')->input(), ['tag', 'page']),
+                                                    ['tag' => array_diff($getParams['tag'], [$selTag])]
+                                                )) }}"
+                                        ><i class="fa fa-remove"></i></a>
+                                </span>
+                                @endforeach
+                            </form>
                         </div>
                     @endif
                 </div>

@@ -360,9 +360,57 @@ class DataController extends Controller {
                         'id'      => $authUser->id
                     ];
 
+                    // get followed categories
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'category_id', $followed)) {
+                        foreach ($getParams['category'] as $selCategory) {
+                            if (!in_array($selCategory, $followed)) {
+                                $buttons[$selCategory]['followCategory'] = true;
+                            } else {
+                                $buttons[$selCategory]['unfollowCategory'] = true;
+                            }
+                        }
+
+                        // follow / unfollow category
+                        $followReq = [];
+                        if ($request->has('followCategory')) {
+                            $followReq['follow'] = $request->followCategory;
+                        } elseif ($request->has('unfollowCategory')) {
+                            $followReq['unfollow'] = $request->unfollowCategory;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'category_id', $getParams['category']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
+                    // get followed tags
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'tag_id', $followed)) {
+                        foreach ($getParams['tag'] as $selTag) {
+                            if (!in_array($selTag, $followed)) {
+                                $buttons[$selTag]['followTag'] = true;
+                            } else {
+                                $buttons[$selTag]['unfollowTag'] = true;
+                            }
+                        }
+
+                        // follow / unfollow tag
+                        $followReq = [];
+                        if ($request->has('followTag')) {
+                            $followReq['follow'] = $request->followTag;
+                        } elseif ($request->has('unfollowTag')) {
+                            $followReq['unfollow'] = $request->unfollowTag;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'tag_id', $getParams['tag']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         $datasetIds = array_pluck($paginationData['items'], 'id');
                         foreach ($datasetIds as $datasetId) {
                             $buttons[$datasetId] = [
@@ -377,7 +425,8 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, $datasetIds);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
@@ -430,7 +479,7 @@ class DataController extends Controller {
         }
     }
 
-    private function getFollowedDatasets($userData, &$followed)
+    private function getFollowed($userData, $followType, &$followed)
     {
         $followed = [];
 
@@ -440,7 +489,7 @@ class DataController extends Controller {
 
         if (isset($res->user) && !empty($res->user)) {
             if (!empty($res->user->follows)) {
-                $followed = array_where(array_pluck($res->user->follows, 'dataset_id'), function ($value, $key) {
+                $followed = array_where(array_pluck($res->user->follows, $followType), function ($value, $key) {
                     return !is_null($value);
                 });
             }
@@ -451,28 +500,28 @@ class DataController extends Controller {
         return false;
     }
 
-    private function followDataset(Request $request, $userData, $followed, $datasetIds)
+    private function followObject($followReq, $userData, $followed, $followType, $objIds)
     {
         $followResult = null;
 
-        if ($request->has('follow')) {
-            // follow dataset
-            if (in_array($request->follow, $datasetIds) && !in_array($request->follow, $followed)) {
+        if (isset($followReq['follow'])) {
+            // follow object
+            if (in_array($followReq['follow'], $objIds) && !in_array($followReq['follow'], $followed)) {
                 $followRq = Request::create('api/addFollow', 'POST', [
-                    'api_key' => $userData['api_key'],
-                    'user_id' => $userData['id'],
-                    'data_set_id' => $request->follow,
+                    'api_key'    => $userData['api_key'],
+                    'user_id'    => $userData['id'],
+                    $followType  => $followReq['follow'],
                 ]);
                 $apiFollow = new ApiFollow($followRq);
                 $followResult = $apiFollow->addFollow($followRq)->getData();
             }
-        } elseif ($request->has('unfollow')) {
-            // unfollow dataset
-            if (in_array($request->unfollow, $datasetIds) && in_array($request->unfollow, $followed)) {
+        } elseif (isset($followReq['unfollow'])) {
+            // unfollow object
+            if (in_array($followReq['unfollow'], $objIds) && in_array($followReq['unfollow'], $followed)) {
                 $followRq = Request::create('api/unFollow', 'POST', [
-                    'api_key' => $userData['api_key'],
-                    'user_id' => $userData['id'],
-                    'data_set_id' => $request->unfollow,
+                    'api_key'    => $userData['api_key'],
+                    'user_id'    => $userData['id'],
+                    $followType  => $followReq['unfollow'],
                 ]);
                 $apiFollow = new ApiFollow($followRq);
                 $followResult = $apiFollow->unFollow($followRq)->getData();
@@ -603,7 +652,7 @@ class DataController extends Controller {
 
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         if (!in_array($dataset->id, $followed)) {
                             $buttons['follow'] = true;
                         } else {
@@ -611,7 +660,8 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, [$dataset->id]);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
@@ -1210,9 +1260,57 @@ class DataController extends Controller {
                         'id'      => $authUser->id
                     ];
 
+                    // get followed categories
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'category_id', $followed)) {
+                        foreach ($getParams['category'] as $selCategory) {
+                            if (!in_array($selCategory, $followed)) {
+                                $buttons[$selCategory]['followCategory'] = true;
+                            } else {
+                                $buttons[$selCategory]['unfollowCategory'] = true;
+                            }
+                        }
+
+                        // follow / unfollow category
+                        $followReq = [];
+                        if ($request->has('followCategory')) {
+                            $followReq['follow'] = $request->followCategory;
+                        } elseif ($request->has('unfollowCategory')) {
+                            $followReq['unfollow'] = $request->unfollowCategory;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'category_id', $getParams['category']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
+                    // get followed tags
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'tag_id', $followed)) {
+                        foreach ($getParams['tag'] as $selTag) {
+                            if (!in_array($selTag, $followed)) {
+                                $buttons[$selTag]['followTag'] = true;
+                            } else {
+                                $buttons[$selTag]['unfollowTag'] = true;
+                            }
+                        }
+
+                        // follow / unfollow tag
+                        $followReq = [];
+                        if ($request->has('followTag')) {
+                            $followReq['follow'] = $request->followTag;
+                        } elseif ($request->has('unfollowTag')) {
+                            $followReq['unfollow'] = $request->unfollowTag;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'tag_id', $getParams['tag']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         $datasetIds = array_pluck($paginationData['items'], 'id');
                         foreach ($datasetIds as $datasetId) {
                             $buttons[$datasetId] = [
@@ -1227,7 +1325,8 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, $datasetIds);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
@@ -1387,7 +1486,7 @@ class DataController extends Controller {
 
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         if (!in_array($dataset->id, $followed)) {
                             $buttons['follow'] = true;
                         } else {
@@ -1395,7 +1494,8 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, [$dataset->id]);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }

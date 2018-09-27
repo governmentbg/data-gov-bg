@@ -557,6 +557,11 @@ class ResourceController extends ApiController
                     'id'    => $id .'_'. $resource->version,
                 ]);
 
+                // update signals status after resource version update and mark resource as not reported
+                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                $resource->is_reported = Resource::REPORTED_FALSE;
+                $resource->save();
+
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,

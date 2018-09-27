@@ -103,12 +103,7 @@
                             <div class="pull-left history">
                                 @foreach ($resources as $resource)
                                     <div class="{{ $resource->reported ? 'signaled' : '' }}">
-                                        <a href="{{ route($routeName,
-                                            array_merge(
-                                                array_except(app('request')->input(), ['page']),
-                                                ['uri' => $resource->uri, 'version' => '']
-                                            )
-                                        )}}">
+                                        <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => ''])) }}">
                                             <span>
                                                 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><path d="M26.72,29.9H3.33V0H26.72ZM4.62,28.61H25.43V1.29H4.62Z"/><path d="M11.09,6.18V9.12H8.14V6.18h2.95m1.29-1.3H6.85v5.53h5.53V4.88Z"/><path d="M11.09,13.48v2.94H8.14V13.48h2.95m1.29-1.29H6.85v5.52h5.53V12.19Z"/><path d="M11.09,20.78v2.94H8.14V20.78h2.95m1.29-1.29H6.85V25h5.53V19.49Z"/><rect x="14.34" y="21.38" width="7.57" height="1.74"/><rect x="14.34" y="14.08" width="7.57" height="1.74"/><rect x="14.34" y="6.78" width="7.57" height="1.74"/></svg>
                                             </span>

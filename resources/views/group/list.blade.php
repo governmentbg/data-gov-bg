@@ -87,12 +87,12 @@
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ route('groupView', array_merge(array_except($getParams, ['page']), ['uri' => $group->uri])) }}">
+                                    <a href="{{ route('groupView', array_merge(app('request')->input(), ['uri' => $group->uri])) }}">
                                         <h3 class="org-name">{{ $group->name }}</h3>
                                     </a>
                                     <div class="org-desc">{!! nl2br(e($group->description)) !!}</div>
                                     <p class="text-right show-more">
-                                        <a href="{{ route('groupView', array_merge(array_except($getParams, ['page']), ['uri' => $group->uri])) }}" class="view-profile">
+                                        <a href="{{ route('groupView', array_merge(app('request')->input(), ['uri' => $group->uri])) }}" class="view-profile">
                                             {{ __('custom.see_more') }}
                                         </a>
                                     </p>
@@ -108,7 +108,7 @@
                                             </form>
                                         @endif
                                         @if (isset($buttons[$group->id]['delete']) && $buttons[$group->id]['delete'])
-                                            <form method="POST" action="{{ route('groupDelete', array_except($getParams, ['page'])) }}">
+                                            <form method="POST" action="{{ route('groupDelete', app('request')->input()) }}">
                                                 {{ csrf_field() }}
                                                 <div class="col-xs-6 text-right">
                                                     <button

@@ -162,7 +162,9 @@
                                         @endif
                                         <a href="{{ action('DataController@list', array_merge(
                                                     array_except(app('request')->input(), ['category', 'page']),
-                                                    ['category' => array_diff($getParams['category'], [$selCategory])]
+                                                    (array_diff($getParams['category'], [$selCategory])
+                                                        ? ['category' => array_diff($getParams['category'], [$selCategory])]
+                                                        : [])
                                                 )) }}"
                                         ><i class="fa fa-remove"></i></a>
                                     </span>
@@ -193,7 +195,9 @@
                                         @endif
                                         <a href="{{ action('DataController@list', array_merge(
                                                     array_except(app('request')->input(), ['tag', 'page']),
-                                                    ['tag' => array_diff($getParams['tag'], [$selTag])]
+                                                    (array_diff($getParams['tag'], [$selTag])
+                                                        ? ['tag' => array_diff($getParams['tag'], [$selTag])]
+                                                        : [])
                                                 )) }}"
                                         ><i class="fa fa-remove"></i></a>
                                     </span>
@@ -252,7 +256,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <a href="{{ route('dataView', array_merge(array_except($getParams, ['page']), ['uri' => $dataset->uri])) }}">
+                            <a href="{{ route('dataView', array_merge(app('request')->input(), ['uri' => $dataset->uri])) }}">
                                 <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                             </a>
                             <p>{!! nl2br(e($dataset->descript)) !!}</p>
@@ -268,7 +272,7 @@
                                 </div>
                                 <div class="pull-right">
                                     <span class="badge badge-pill">
-                                        <a href="{{ route('dataView', array_merge(array_except($getParams, ['page']), ['uri' => $dataset->uri])) }}">
+                                        <a href="{{ route('dataView', array_merge(app('request')->input(), ['uri' => $dataset->uri])) }}">
                                             {{ uctrans('custom.see_more') }}
                                         </a>
                                     </span>

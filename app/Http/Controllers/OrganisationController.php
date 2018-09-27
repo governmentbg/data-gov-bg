@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TagController as ApiTag;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\SignalController as ApiSignal;
 use Illuminate\Http\Request;
 
@@ -357,7 +358,7 @@ class OrganisationController extends Controller {
             if (isset($result->success) && $result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect()->route('organisations', $request->query());
+                return redirect()->route('organisations', array_except($request->query(), ['page']));
             }
 
             $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
@@ -749,7 +750,7 @@ class OrganisationController extends Controller {
                         if (isset($result->success) && $result->success) {
                             $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
 
-                            return redirect()->route('orgDatasets', array_merge($request->query(), ['uri' => $organisation->uri]));
+                            return redirect()->route('orgDatasets', array_merge(array_except($request->query(), ['page']), ['uri' => $organisation->uri]));
                         }
 
                         $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));

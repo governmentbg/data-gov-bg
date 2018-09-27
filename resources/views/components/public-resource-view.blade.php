@@ -182,12 +182,7 @@
                             @foreach ($resource->versions_list as $version)
                                 @if ($version != $versionView)
                                     <div>
-                                        <a href="{{ route($routeName,
-                                            array_merge(
-                                                array_except(app('request')->input(), ['page']),
-                                                ['uri' => $resource->uri, 'version' => $version]
-                                            )
-                                        ) }}">
+                                        <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => $version])) }}">
                                             <span class="version-heading">{{ uctrans('custom.version') }}</span>
                                             <span class="version">&nbsp;&#8211;&nbsp;{{ $version }}</span>
                                         </a>

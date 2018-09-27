@@ -81,7 +81,10 @@
                             </div>
                         </div>
                         <p>
-                            <strong>{{ utrans('custom.version') }}:</strong>&nbsp;{{ $resource->version }}
+                            <strong>{{ uctrans('custom.version_current') }}:</strong>&nbsp;{{ $resource->version }}
+                        </p>
+                        <p>
+                            <strong>{{ uctrans('custom.version_displayed') }}:</strong>&nbsp;{{ $versionView }}
                         </p>
                         @if (!empty($resource->file_format))
                             <p><strong>{{ uctrans('custom.format') }}:</strong>&nbsp;{{ $resource->file_format }}</p>
@@ -143,6 +146,14 @@
                                     data-target="#embed-resource"
                                     data-uri ="{{ $resource->uri }}"
                                 >{{ uctrans('custom.embed') }}</button>
+                                @if ($resource->version == $versionView)
+                                    @if (isset($buttons['update']) && $buttons['update'])
+                                        <a
+                                            class="btn btn-primary badge badge-pill"
+                                            href="{{ url('/'. $buttons['rootUrl'] .'/resource/update/'. $resource->uri) }}"
+                                        >{{ uctrans('custom.update') }}</a>
+                                    @endif
+                                @endif
                             @endif
                             @if (isset($buttons['edit']) && $buttons['edit'])
                                 <a
@@ -163,6 +174,29 @@
                         <button type="button" class="badge badge-pill m-b-sm" data-toggle="modal" data-target="#addSignal">{{ __('custom.signal') }}</button>
                     </div>
                 </div>
+
+                <!-- IF there are old versions of this article -->
+                @if (!empty($resource->versions_list))
+                    <div class="col-sm-12 pull-left p-l-none m-b-md">
+                        <div class="pull-left history">
+                            @foreach ($resource->versions_list as $version)
+                                @if ($version != $versionView)
+                                    <div>
+                                        <a href="{{ route($routeName,
+                                            array_merge(
+                                                array_except(app('request')->input(), ['page']),
+                                                ['uri' => $resource->uri, 'version' => $version]
+                                            )
+                                        ) }}">
+                                            <span class="version-heading">{{ uctrans('custom.version') }}</span>
+                                            <span class="version">&nbsp;&#8211;&nbsp;{{ $version }}</span>
+                                        </a>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <div class="article col-xs-12 m-t-md m-b-md">
                     <div class="col-sm-12 p-l-none">

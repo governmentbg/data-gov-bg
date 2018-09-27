@@ -13891,6 +13891,10 @@ ul > li {
   clear: both;
 }
 
+.badge-follow {
+  padding: 0px 0px 1px 0px !important;
+}
+
 .rounded-input {
   border-radius: 30px;
   padding-left: 10px;

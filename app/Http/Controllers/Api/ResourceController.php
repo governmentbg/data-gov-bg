@@ -1292,7 +1292,7 @@ class ResourceController extends ApiController
     /**
      * Check if user has reported resources
      *
-     * @param int user_id - required
+     * @param int user_id - optional
      * @return json with results or error
      */
     public function hasReportedResource(Request $request)
@@ -1300,13 +1300,18 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'user_id'   => 'required|int|exists:users,id|digits_between:1,10',
+            'user_id'   => 'nullable|int|exists:users,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             try {
-                $hasReported = Resource::where('created_by', $post['user_id'])
-                        ->where('is_reported', 1)->count();
+                $hasReported = Resource::where('is_reported', 1);
+
+                if (isset($post['user_id'])) {
+                    $hasReported = $hasReported->where('created_by', $post['user_id']);
+                }
+
+                $hasReported = $hasReported->count();
 
                 return $this->successResponse(['flag' => ($hasReported) ? true : false], true);
             } catch (Exception $ex) {

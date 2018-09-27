@@ -130,6 +130,16 @@ class DataSetController extends AdminController
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
+        $hasReported = false;
+
+        $reportedReq = Request::create('/api/hasReportedResource', 'POST');
+        $apiReported = new ApiResource($rq);
+        $resultReported = $apiReported->hasReportedResource($reportedReq)->getData();
+
+        if ($resultReported->flag) {
+            $hasReported = true;
+        }
+
         $paginationData = $this->getPaginationData(
             $datasets,
             $count,
@@ -164,6 +174,7 @@ class DataSetController extends AdminController
             'formatsCount'          => $formatsCount,
             'selectedFormats'       => $selectedFormats,
             'signaledFilter'        => $signaledFilter,
+            'hasReported'           => $hasReported,
             'range'      => [
                 'from' => isset($request->from) ? $request->from : null,
                 'to'   => isset($request->to) ? $request->to : null

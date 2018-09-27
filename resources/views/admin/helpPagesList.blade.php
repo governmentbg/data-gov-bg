@@ -5,18 +5,18 @@
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'help'])
     <div class="row">
-        <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.sections') }}</h3>
+        <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.pages') }}</h3>
         <div class="col-xs-12 m-t-lg m-b-lg text-right section">
             <div class="filter-content section-nav-bar">
                 <ul class="nav filter-type right-border">
                     <li>
                         <a
-                            class="active"
                             href="{{ url('/admin/help/sections/list') }}"
                         >{{ __('custom.topics_sections') }}</a>
                     </li>
                     <li>
                         <a
+                            class="active"
                             href="{{ url('/admin/help/pages/list') }}"
                         >{{ __('custom.topics_pages') }}</a>
                     </li>
@@ -27,7 +27,7 @@
     <div class="row m-b-sm">
         <div class="col-xs-12 text-right">
             <span class="badge badge-pill long-badge">
-                <a href="{{ url('/admin/help/section/add') }}">{{ __('custom.add') }}</a>
+                <a href="{{ url('/admin/help/pages/add') }}">{{ __('custom.add') }}</a>
             </span>
         </div>
     </div>
@@ -36,33 +36,37 @@
             @include('partials.pagination')
             {{ csrf_field() }}
             <div class="col-lg-12">
-                @if (!empty($helpSections))
+                @if (!empty($helpPages))
                     <div class="table-responsive opn-tbl text-center">
                         <table class="table">
                             <thead>
+                                <th>{{ utrans('custom.name') }}</th>
+                                <th>{{ utrans('custom.unique_identificator') }}</th>
                                 <th>{{ utrans('custom.section') }}</th>
                                 <th>{{ utrans('custom.active') }}</th>
                                 <th>{{ utrans('custom.ordering') }}</th>
                                 <th>{{ __('custom.action') }}</th>
                             </thead>
                             <tbody>
-                                @foreach ($helpSections as $record)
+                                @foreach ($helpPages as $record)
                                     <tr>
+                                        <td>{{ $record->title }}</td>
                                         <td>{{ $record->name }}</td>
+                                        <td>{{ $record->section_name }}</td>
                                         <td>{{ $record->active ? __('custom.yes') : __('custom.no') }}</td>
                                         <td>{{ App\Category::getOrdering()[$record->ordering] }}</td>
                                         <td class="buttons">
                                             <a
                                                 class="link-action"
-                                                href="{{ url('admin/help/section/edit/'. $record->id) }}"
+                                                href="{{ url('admin/help/page/edit/'. $record->id) }}"
                                             >{{ utrans('custom.edit') }}</a>
                                             <a
                                                 class="link-action"
-                                                href="{{ url('admin/help/section/view/'. $record->id) }}"
+                                                href="{{ url('admin/help/page/view/'. $record->id) }}"
                                             >{{ utrans('custom.preview') }}</a>
                                             <a
                                                 class="link-action red"
-                                                href="{{ url('/admin/help/section/delete/'. $record->id) }}"
+                                                href="{{ url('/admin/help/page/delete/'. $record->id) }}"
                                                 data-confirm="{{ __('custom.remove_data') }}"
                                             >{{ __('custom.delete') }}</a>
                                         </td>

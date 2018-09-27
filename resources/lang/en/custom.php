@@ -807,4 +807,8 @@ return [
     'CustomSetting' => 'Custom settings',
     'Right' => 'Rights',
     'Theme' => 'Themes',
+    'keywords' => 'keywords',
+    'add_help_паге' => 'Add Help Page',
+    'edit_help_паге' => 'Edit Help Page',
+    'help_page_preview' => 'Preview Help Page',
 ];

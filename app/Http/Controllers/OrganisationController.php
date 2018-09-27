@@ -862,7 +862,7 @@ class OrganisationController extends Controller {
         return redirect()->back();
     }
 
-    public function resourceView(Request $request, $uri)
+    public function resourceView(Request $request, $uri, $version = null)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
@@ -904,6 +904,13 @@ class OrganisationController extends Controller {
                     $organisation->active == Organisation::ACTIVE_TRUE &&
                     $organisation->approved == Organisation::APPROVED_TRUE) {
 
+                    // set resource format code
+                    $resource->format_code = Resource::getFormatsCode($resource->file_format);
+
+                    if (empty($version)) {
+                        $version = $resource->version;
+                    }
+
                     if (\Auth::check() && $request->has('delete')) {
                         // check delete rights
                         $checkData = [
@@ -935,14 +942,18 @@ class OrganisationController extends Controller {
                         }
                     }
 
-                    // set resource format code
-                    $resource->format_code = Resource::getFormatsCode($resource->file_format);
-
                     // get resource data
-                    $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri]);
+                    $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri, 'version' => $version]);
                     $api = new ApiResource($rq);
                     $res = $api->getResourceData($rq)->getData();
                     $data = !empty($res->data) ? $res->data : [];
+
+                    if ($resource->format_code == Resource::FORMAT_XML) {
+                        $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
+                        $apiConvert = new ApiConversion($reqConvert);
+                        $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                        $data = isset($resultConvert->data) ? $resultConvert->data : [];
+                    }
 
                     $userData = [];
                     $buttons = [];
@@ -959,8 +970,9 @@ class OrganisationController extends Controller {
                             'created_by'  => $resource->created_by
                         ];
 
-                        // check rights for edit button
+                        // check rights for update / edit buttons
                         $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                        $buttons['update'] = $rightCheck;
                         $buttons['edit'] = $rightCheck;
 
                         // check rights for delete button
@@ -982,6 +994,7 @@ class OrganisationController extends Controller {
                             'dataset'        => $dataset,
                             'resource'       => $resource,
                             'data'           => $data,
+                            'versionView'    => $version,
                             'userData'       => $userData,
                             'buttons'        => $buttons
                         ]

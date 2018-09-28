@@ -225,10 +225,11 @@
                                     </a>
                                 </div>
                                 @endif
-                                <div class="socialPadding p-w-sm">
-                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
+                                <div class="p-w-sm">
+                                    @include(
+                                        'partials.social-icons',
+                                        ['shareUrl' => route('dataView', ['uri' => $dataset->uri])]
+                                    )
                                 </div>
                                 @if (!empty($datasetOrg) && $datasetOrg->type == App\Organisation::TYPE_COUNTRY)
                                     <div class="status p-w-sm">

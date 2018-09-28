@@ -708,6 +708,13 @@
                     padding-right: 3px;
                 }
             }
+
+            &.in {
+                span {
+                    padding-left: 6px;
+                    padding-right: 6px;
+                }
+            }
         }
     }
 }

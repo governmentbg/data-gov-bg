@@ -220,10 +220,11 @@
                                         <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
                                     </a>
                                 </div>
-                                <div class="socialPadding p-w-sm">
-                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
+                                <div class="p-w-sm">
+                                    @include(
+                                        'partials.social-icons',
+                                        ['shareUrl' => route('orgViewDataset', ['uri' => $dataset->uri])]
+                                    )
                                 </div>
                                 @if ($approved)
                                     <div class="status p-w-sm">

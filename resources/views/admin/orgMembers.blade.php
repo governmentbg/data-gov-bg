@@ -74,7 +74,7 @@
                             </ul>
                         </li>
                     </ul>
-                    <div class="org m-t-lg">
+                    <div class="org m-t-lg side-info">
                         <img src="{{ $organisation->logo }}">
                         <h2>{{ $organisation->name }}</h2>
                         <h4>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h4>

@@ -576,8 +576,8 @@ class GroupController extends AdminController
                 [
                     'class'          => $class,
                     'organisation'   => $group,
-                    'chronology'     => $paginationData['items'],
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

@@ -1163,8 +1163,8 @@ class OrganisationController extends Controller {
                 [
                     'class'          => 'organisation',
                     'organisation'   => $organisation,
-                    'chronology'     => $paginationData['items'],
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes
                 ]
@@ -1294,8 +1294,8 @@ class OrganisationController extends Controller {
                         'class'          => 'organisation',
                         'organisation'   => $organisation,
                         'dataset'        => $dataset,
-                        'chronology'     => $paginationData['items']
-                        'pagination'     => $paginationData['paginate'],
+                        'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                        'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                         'actionObjData'  => $actObjData,
                         'actionTypes'    => $actTypes
                     ]

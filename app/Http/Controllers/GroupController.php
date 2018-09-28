@@ -454,8 +454,8 @@ class GroupController extends Controller
                 [
                     'class'          => 'user',
                     'group'          => $group,
-                    'chronology'     => $paginationData['items'],
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

@@ -1838,8 +1838,8 @@ class DataController extends Controller {
                     'class'          => $class,
                     'reported'       => $reported,
                     'dataset'        => $dataset,
-                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'chronology'     => $paginationData['items'],
+                    'pagination'     => $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes
                 ]

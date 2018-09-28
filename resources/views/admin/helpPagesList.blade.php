@@ -4,9 +4,9 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'help'])
+    <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.pages') }}</h3>
     <div class="row">
-        <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.pages') }}</h3>
-        <div class="col-xs-12 m-t-lg m-b-lg text-right section">
+        <div class="col-xs-12 m-t-lg m-b-md text-right section">
             <div class="filter-content section-nav-bar">
                 <ul class="nav filter-type right-border">
                     <li>
@@ -22,6 +22,19 @@
                     </li>
                 </ul>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 col-sm-12 pull-right m-b-md search-field">
+            <form method="GET" action="{{ url('admin/help/pages/list') }}">
+                <input
+                    type="text"
+                    class="m-t-md input-border-r-12 form-control"
+                    placeholder="{{ __('custom.search') }}"
+                    value="{{ isset($getParams['search']) ? $getParams['search'] : '' }}"
+                    name="search"
+                >
+            </form>
         </div>
     </div>
     <div class="row m-b-sm">

@@ -8,6 +8,19 @@
         <div class="col-xs-12 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{uctrans('custom.users_list')}}</span>
         </div>
+        <div class="col-sm-3 col-xs-12 text-left">
+            <span class="badge badge-pill m-t-lg new-data user-add-btn">
+                <a
+                    href="{{ url('/admin/users/create') }}"
+                >{{ uctrans('custom.new_user') }}</a>
+            </span>
+            <span class="badge badge-pill m-t-lg new-data user-add-btn">
+            <a
+                data-toggle="modal"
+                data-target="#invite"
+            >{{ uctrans('custom.invite_by_mail') }}</a>
+            </span>
+        </div>
         <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field admin">
             <form method="GET">
                 <input
@@ -260,15 +273,6 @@
             </form>
         </div>
         <div class="col-xs-9 m-t-md list-orgs user-orgs">
-            <a
-                class="pull-right badge cust-btn badge-pill m-b-sm"
-                data-toggle="modal"
-                data-target="#invite"
-            >{{ __('custom.invite_by_mail') }}</a>
-            <a
-                class="pull-right badge cust-btn badge-pill m-b-sm"
-                href="{{ url('/admin/users/create') }}"
-            >{{ __('custom.new_user') }}</a>
 
             @if (!empty($users))
                 @include('partials.pagination')

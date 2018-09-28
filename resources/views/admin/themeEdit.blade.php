@@ -101,6 +101,12 @@
                             @endif
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
+                                    <a
+                                        href="{{ url('admin/themes/list/') }}"
+                                        class="btn btn-primary"
+                                    >
+                                        {{ uctrans('custom.close') }}
+                                    </a>
                                     <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
                                 </div>
                             </div>

@@ -189,6 +189,7 @@ class GroupController extends AdminController
 
         $class = 'user';
         $fields = $this->getGroupTransFields();
+        $root = 'admin';
 
         $model = Organisation::find($org->id)->loadTranslations();
         $withModel = CustomSetting::where('org_id', $org->id)->get()->loadTranslations();
@@ -227,7 +228,7 @@ class GroupController extends AdminController
             return back()->withErrors(isset($result->errors) ? $result->errors : []);
         }
 
-        return view('admin/groupEdit', compact('class', 'fields', 'model', 'withModel'));
+        return view('admin/groupEdit', compact('class', 'fields', 'model', 'withModel', 'root'));
     }
 
     /**

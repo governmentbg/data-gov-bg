@@ -238,7 +238,7 @@
 
             <ul class="nav">
                 <li class="js-show-submenu">
-                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ utrans('custom.main_topic') }}</a>
+                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.main_topic') }}</a>
                     <ul class="sidebar-submenu">
                         <li>
                             <a
@@ -414,7 +414,7 @@
 
             <ul class="nav">
                 <li class="js-show-submenu">
-                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ utrans('custom.terms_and_conditions') }}</a>
+                    <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.terms_and_conditions') }}</a>
                     <ul class="sidebar-submenu">
                         <li>
                             <a
@@ -475,7 +475,7 @@
 
             <form method="GET" class="inline-block">
                 <div class="form-group adm-filter">
-                    <label for="signaled" class="col-lg-8 col-sm-8 col-xs-12">{{ __('custom.signaled') }}:</label>
+                    <label for="signaled" class="col-lg-8 col-sm-8 col-xs-12">{{ uctrans('custom.signaled') }}:</label>
                     <div class="col-lg-4 col-sm-4 col-xs-12">
                         <input
                             type="checkbox"

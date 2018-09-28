@@ -444,6 +444,7 @@ class DataSetController extends AdminController
         $class = 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
+        $root = 'admin';
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
@@ -480,7 +481,8 @@ class DataSetController extends AdminController
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'fields'    => $this->getResourceTransFields(),
+            'root'      => $root
         ]);
     }
 

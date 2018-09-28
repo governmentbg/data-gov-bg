@@ -249,13 +249,15 @@ class OrganisationController extends AdminController
         $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
         $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
         $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+        $root = 'admin';
 
         $viewData = [
             'class'      => 'user',
             'model'      => $orgModel,
             'withModel'  => $customModel,
             'fields'     => $this->getTransFields(),
-            'parentOrgs' => $parentOrgs
+            'parentOrgs' => $parentOrgs,
+            'root'       => $root
         ];
 
         if (isset($request->view)) {

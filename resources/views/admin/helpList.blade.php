@@ -42,7 +42,7 @@
                             <thead>
                                 <th>{{ utrans('custom.section') }}</th>
                                 <th>{{ utrans('custom.active') }}</th>
-                                <th>{{ utrans('custom.ordering') }}</th>
+                                <th>{{ uctrans('custom.ordering') }}</th>
                                 <th>{{ __('custom.action') }}</th>
                             </thead>
                             <tbody>

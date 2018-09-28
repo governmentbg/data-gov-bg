@@ -7,35 +7,39 @@
         <div class="col-xs-12 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{ __('custom.main_themes_list') }}</span>
         </div>
-        <div class="row m-b-md">
-            <div class="col-md-6 col-sm-8 col-xs-12 pull-right">
-                    <form method="GET" action="{{ url('/admin/themes/list') }}">
-                        <input
-                            type="text"
-                            class="input-border-r-12 form-control"
-                            placeholder="{{ __('custom.search') }}"
-                            value="{{ isset($search) ? $search : '' }}"
-                            name="q"
-                        >
-                    </form>
+        <div class="m-b-md col-xs-12 m-t-lg text-right section">
+            <div class="filter-content section-nav-bar">
+                <ul class="nav filter-type right-border">
+                    <li>
+                        <a href="{{ url('admin/categories/list/') }}">
+                            {{ __('custom.categories') }}
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
+        <div class="row m-b-md">
+            <div class="col-md-6 col-sm-8 col-xs-12 pull-right">
+                <form method="GET" action="{{ url('/admin/themes/list') }}">
+                    <input
+                        type="text"
+                        class="input-border-r-12 form-control"
+                        placeholder="{{ __('custom.search') }}"
+                        value="{{ isset($search) ? $search : '' }}"
+                        name="q"
+                    >
+                </form>
+            </div>
+        </div>
+        @include('partials.pagination')
         <div class="row m-b-lg">
-            <div class="col-xs-12 text-right">
+            <div class="col-xs-12 m-t-md text-right section">
                 <span class="badge badge-pill long-badge">
                     <a href="{{ url('/admin/themes/add') }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
-            <div class="col-xs-12 text-right m-t-md">
-                <span class="badge badge-pill long-badge">
-                    <a href="{{ url('admin/categories/list/') }}">{{ __('custom.categories') }}</a>
-                </span>
-            </div>
-        </div>
-        <div class="row m-b-lg">
             @if (count($themes))
-                @include('partials.pagination')
-                <form method="POST" class="form-horizontal">
+                <form method="POST" class="form-horizontal inline-block">
                     {{ csrf_field() }}
                     <div class="col-xs-12 m-l-sm">
                         <div class="m-t-md">

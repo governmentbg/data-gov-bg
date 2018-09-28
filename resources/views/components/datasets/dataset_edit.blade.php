@@ -330,6 +330,12 @@
                     class="btn btn-primary"
                     href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
                 >{{ uctrans('custom.preview') }}</a>
+                <a
+                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
                 <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
             </div>
         </div>

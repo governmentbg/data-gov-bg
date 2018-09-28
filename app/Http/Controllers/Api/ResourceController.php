@@ -142,12 +142,20 @@ class ResourceController extends ApiController
                     'is_reported'       => 0,
                 ];
 
-                if (
-                    isset($data['migrated_data'])
+                 if (
+                    isset($post['data']['migrated_data'])
                     && Auth::user()->username == 'migrate_data'
-                ) {
-                    if (!empty($data['created_by'])) {
-                        $dbData['created_by'] = $data['created_by'];
+                ){
+                    if (!empty($post['data']['created_by'])) {
+                        $dbData['created_by'] = $post['data']['created_by'];
+                    }
+
+                    if (!empty($post['data']['updated_by'])) {
+                        $dbData['updated_by'] = $post['data']['updated_by'];
+                    }
+
+                    if (!empty($post['data']['created_at'])) {
+                        $dbData['created_at'] = date('Y-m-d H:i:s', strtotime($post['data']['created_at']));
                     }
                 }
 

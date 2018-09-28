@@ -4287,7 +4287,7 @@ class UserController extends Controller {
                     'class'          => 'user',
                     'user'           => $result->users[0],
                     'chronology'     => $paginationData['items']
-                    'pagination'     =>  $paginationData['paginate'],
+                    'pagination'     => $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]
@@ -5747,7 +5747,7 @@ class UserController extends Controller {
                     'class'          => $class,
                     'organisation'   => $group,
                     'chronology'     => $paginationData['items']
-                    'pagination'     =>  $paginationData['paginate'],
+                    'pagination'     => $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]
@@ -5875,7 +5875,7 @@ class UserController extends Controller {
                     'class'          => $class,
                     'organisation'   => $result->data,
                     'chronology'     => $paginationData['items']
-                    'pagination'     =>  $paginationData['paginate'],
+                    'pagination'     => $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

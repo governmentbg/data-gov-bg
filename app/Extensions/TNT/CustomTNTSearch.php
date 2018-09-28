@@ -117,7 +117,7 @@ class CustomTNTSearch extends TNTSearch
             return new Collection([]);
         }
 
-        $fuzzySearchResults = [];
+        $fuzzySearchResults = new Collection([]);
 
         if (is_null($fuzzy) && $this->fuzziness || !empty($fuzzy)) {
             $fuzzySearchResults = $this->getAllDocumentsForFuzzyKeyword($word, $noLimit);

@@ -654,7 +654,7 @@ class OrganisationController extends Controller {
                 $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
                 $buttons['add'] = $rightCheck;
 
-                $buttons['addUrl'] = Role::isAdmin() ? '/admin/dataset/add' : '/user/dataset/create';
+                $buttons['addUrl'] = 'user/organisations/dataset/create/'. $organisation->uri;
             }
 
             return view(
@@ -841,7 +841,9 @@ class OrganisationController extends Controller {
                     $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
                     $buttons['delete'] = $rightCheck;
 
-                    $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
+                    $buttons['addResourceRootUrl'] = 'user/organisation/dataset';
+                    $buttons['parentUri'] = $organisation->uri;
+                    $buttons['editRootUrl'] = 'user/organisation/'. $organisation->uri .'/datasets';
                 }
 
                 $dataset = $this->getModelUsernames($dataset);
@@ -981,6 +983,7 @@ class OrganisationController extends Controller {
                         $buttons['delete'] = $rightCheck;
 
                         $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
+                        $buttons['parentUri'] = $organisation->uri;
                     }
 
                     $dataset = $this->getModelUsernames($dataset);

@@ -536,6 +536,7 @@ class DataSetController extends ApiController
      * @param integer criteria[created_by] - optional
      * @param array criteria[user_ids] - optional
      * @param boolean criteria[user_datasets_only] - optional
+     * @param boolean criteria[keywords] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -596,7 +597,6 @@ class DataSetController extends ApiController
         }
 
         if (!$validator->fails()) {
-
             try {
                 $query = DataSet::select()->with('resource');
 
@@ -631,7 +631,7 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['keywords'])) {
-                    $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
+                    $ids = DataSet::search($criteria['keywords'], true)->get()->pluck('id');
                     $query->whereIn('id', $ids);
                 }
 
@@ -856,14 +856,12 @@ class DataSetController extends ApiController
             $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
 
             try {
-
                 if (!empty($criteria['user_id'])) {
                     $orgIds = UserToOrgRole::where('user_id', $criteria['user_id'])->get()->pluck('org_id');
-                    $ids = DataSet::search($search)->get()->pluck('id');
-                    $query = DataSet::whereIn('id', $ids)
-                        ->whereIn('org_id', $orgIds);
+                    $ids = DataSet::search($search, true)->get()->pluck('id');
+                    $query = DataSet::whereIn('id', $ids)->whereIn('org_id', $orgIds);
                 } else {
-                    $ids = DataSet::search($search)->get()->pluck('id');
+                    $ids = DataSet::search($search, true)->get()->pluck('id');
                     $query = DataSet::whereIn('id', $ids);
 
                     $query->orWhereHas('resource', function($q) use ($ids) {
@@ -1247,7 +1245,6 @@ class DataSetController extends ApiController
 
                 foreach ($customFields as $field) {
                     if (!empty($field['value'])) {
-                        // foreach ($field['value'] as $locale => $string) {
                         if (!empty($field['sett_id'])) {
                             $saveField = CustomSetting::find($field['sett_id']);
 
@@ -1277,13 +1274,13 @@ class DataSetController extends ApiController
 
                             $saveField->save();
                         }
-
                     } else {
                         DB::rollback();
 
                         return false;
                     }
                 }
+
                 DB::commit();
 
                 return true;

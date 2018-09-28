@@ -100,7 +100,9 @@
                                 </span>
                             @endif
                             <span class="search-input">
-                                <input type="text" placeholder="{{ __('custom.search') }}">
+                                <form action="{{ action('DataController@list') }}" class="inline-block">
+                                    <input type="text" name="q" placeholder="{{ __('custom.search') }}">
+                                </form>
                             </span>
                             <span class="trans-link">
                                 <a

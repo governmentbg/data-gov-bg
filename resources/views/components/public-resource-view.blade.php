@@ -44,11 +44,7 @@
                     <div class="col-xs-12 m-t-md">
                         <div class="art-heading-bar row">
                             <div class="col-sm-12 p-l-none">
-                                <div class="socialPadding">
-                                    <div class='social fb'><a href="#"><i class='fa fa-facebook'></i></a></div>
-                                    <div class='social tw'><a href="#"><i class='fa fa-twitter'></i></a></div>
-                                    <div class='social gp'><a href="#"><i class='fa fa-google-plus'></i></a></div>
-                                </div>
+                                @include('partials.social-icons', ['shareUrl' => url()->current()])
                                 @if ($approved)
                                     <div class="status p-w-sm m-l-sm">
                                         <span>{{ __('custom.approved') }} </span>

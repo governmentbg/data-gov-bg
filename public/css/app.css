@@ -12468,7 +12468,7 @@ body #app .navbar .navbar-header > div.nav-controls > span {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons {
-  width: 98px;
+  width: 130px;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons a {
@@ -12515,6 +12515,11 @@ body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.tw spa
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.gp span {
   padding-left: 3px;
   padding-right: 3px;
+}
+
+body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.in span {
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.trans-link {
@@ -14504,6 +14509,12 @@ textarea {
   padding: 6px 4px;
 }
 
+.container .articles .article .art-heading-bar div .social.in i,
+.container .articles .article .art-heading-bar h2 .social.in i,
+.container .articles .article .art-heading-bar h3 .social.in i {
+  padding: 6px 6px;
+}
+
 @media screen and (max-width: 767px) {
   .container .articles .article .art-heading-bar h2 {
     font-size: 20px;
@@ -15752,6 +15763,11 @@ textarea {
 .user-profile .social-icons a.gp span {
   padding-left: 3px;
   padding-right: 3px;
+}
+
+.user-profile .social-icons a.in span {
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 .user-group {

@@ -42,7 +42,6 @@ class DataSetController extends ApiController
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
      * @param string data[source] - optional
-     * @param string data[version] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
      * @param string data[support_name] - optional
@@ -76,7 +75,6 @@ class DataSetController extends ApiController
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10|exists:terms_of_use,id',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
                 'source'                => 'nullable|string|max:191',
-                'version'               => 'nullable|max:15',
                 'author_name'           => 'nullable|string|max:191',
                 'author_email'          => 'nullable|email|max:191',
                 'support_name'          => 'nullable|string|max:191',
@@ -125,7 +123,7 @@ class DataSetController extends ApiController
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
                 'org_id'            => empty($data['org_id']) ? null : $data['org_id'],
                 'visibility'        => DataSet::VISIBILITY_PRIVATE,
-                'version'           => empty($data['version']) ? 1 : $data['version'],
+                'version'           => 1,
                 'status'            => DataSet::STATUS_DRAFT,
                 'category_id'       => $data['category_id'],
                 'terms_of_use_id'   => empty($data['terms_of_use_id']) ? null : $data['terms_of_use_id'],
@@ -232,7 +230,6 @@ class DataSetController extends ApiController
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
      * @param string data[source] - optional
-     * @param string data[version] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
      * @param string data[support_name] - optional
@@ -271,7 +268,6 @@ class DataSetController extends ApiController
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
                 'source'                => 'nullable|string|max:255',
-                'version'               => 'nullable|max:15',
                 'author_name'           => 'nullable|string|max:191',
                 'author_email'          => 'nullable|email|max:191',
                 'support_name'          => 'nullable|string|max:191',
@@ -369,10 +365,6 @@ class DataSetController extends ApiController
 
                 if (!empty($post['data']['source'])) {
                     $dataSet->source = $post['data']['source'];
-                }
-
-                if (!empty($post['data']['version'])) {
-                    $dataSet->version = $post['data']['version'];
                 }
 
                 if (!empty($post['data']['author_name'])) {
@@ -962,7 +954,7 @@ class DataSetController extends ApiController
                     ->with(['tags' => function($query) {
                         $query->select('id', 'name');
                     }])
-                    ->with('CustomSetting')
+                    ->with('organisation')
                     ->first()
                     ->loadTranslations();
 
@@ -979,6 +971,34 @@ class DataSetController extends ApiController
                         }
                     }
 
+                    $groupLinks = $data->dataSetGroup()->get();
+                    $ids = $groups = [];
+
+                    if (count($groupLinks)) {
+                        foreach ($groupLinks as $link) {
+                            $ids[] = $link->group_id;
+                        }
+                    }
+
+                    $groupsCollection = Organisation::whereIn('id', $ids)->get()->loadTranslations();
+
+                    foreach ($groupsCollection as $value) {
+                        $groups[] = [
+                            'id'    => $value->id,
+                            'uri'   => $value->uri,
+                            'name'  => $value->name,
+                        ];
+                    }
+
+                    if (isset($data->organisation)) {
+                        $data['org'] = [
+                            'uri'   => $data->organisation->uri,
+                            'name'  => $data->organisation->name,
+                        ];
+                        unset($data->organisation);
+                    }
+
+                    $data['groups'] = $groups;
                     $data['custom_settings'] = $customFields;
                     $data['name'] = $data->name;
                     $data['sla'] = $data->sla;
@@ -1054,7 +1074,7 @@ class DataSetController extends ApiController
         $validator = \Validator::make($post, [
             'data_set_uri'  => 'required|string|exists:data_sets,uri,deleted_at,NULL|max:191',
             'group_id'      => 'nullable|array',
-            'group_id.*'     => [
+            'group_id.*'    => [
                 'required',
                 'int',
                 Rule::exists('organisations', 'id')->where(function ($query) {

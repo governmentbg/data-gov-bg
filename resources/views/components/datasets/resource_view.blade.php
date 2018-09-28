@@ -132,10 +132,10 @@
         </div>
 
         <!-- IF there are old versions of this article -->
-        @if (!empty($versions))
+        @if (!empty($resource->versions_list))
             <div class="col-sm-12 pull-left m-t-md p-l-none">
                 <div class="pull-left history">
-                    @foreach ($versions as $version)
+                    @foreach ($resource->versions_list as $version)
                     <div>
                         <a href="{{ url('/'. $root .'/resource/view/'. $resource->uri .'/'. $version) }}">
                             <span class="version-heading">{{ uctrans('custom.version') }}</span>

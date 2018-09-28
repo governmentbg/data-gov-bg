@@ -182,13 +182,20 @@
             @if (isset($buttons['addResource']) && $buttons['addResource'])
                 <a
                     class="btn btn-primary badge badge-pill"
-                    href="{{ url('/'. $buttons['rootUrl'] .'/dataset/resource/create/'. $dataset->uri) }}"
+                    href="{{ url(
+                        '/'. (isset($buttons['addResourceRootUrl']) ? $buttons['addResourceRootUrl'] : $buttons['rootUrl'] .'/dataset') .
+                        '/resource/create/'. $dataset->uri .
+                        (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                    ) }}"
                 >{{ uctrans('custom.add_resource') }}</a>
             @endif
             @if (isset($buttons['edit']) && $buttons['edit'])
                 <a
                     class="btn btn-primary badge badge-pill"
-                    href="{{ url('/'. $buttons['rootUrl'] .'/dataset/edit/'. $dataset->uri) }}"
+                    href="{{ url(
+                        '/'. (isset($buttons['editRootUrl']) ? $buttons['editRootUrl'] : $buttons['rootUrl'] .'/dataset') .
+                        '/edit/'. $dataset->uri
+                    ) }}"
                 >{{ uctrans('custom.edit') }}</a>
             @endif
             @if (isset($buttons['delete']) && $buttons['delete'])

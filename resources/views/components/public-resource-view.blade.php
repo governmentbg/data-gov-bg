@@ -160,8 +160,8 @@
                                     class="btn btn-primary badge badge-pill"
                                     href="{{ url(
                                         '/'. $buttons['rootUrl'] .'/resource/edit/'. $resource->uri .
-                                        (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : ''
-                                    )) }}"
+                                        (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                                    ) }}"
                                 >{{ uctrans('custom.edit') }}</a>
                             @endif
                             @if (isset($buttons['delete']) && $buttons['delete'])

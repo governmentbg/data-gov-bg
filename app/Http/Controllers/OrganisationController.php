@@ -1295,7 +1295,7 @@ class OrganisationController extends Controller {
                         'organisation'   => $organisation,
                         'dataset'        => $dataset,
                         'chronology'     => $paginationData['items']
-                        'pagination'     =>  $paginationData['paginate'],
+                        'pagination'     => $paginationData['paginate'],
                         'actionObjData'  => $actObjData,
                         'actionTypes'    => $actTypes
                     ]

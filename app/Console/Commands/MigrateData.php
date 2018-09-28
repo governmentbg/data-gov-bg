@@ -4,11 +4,13 @@ namespace App\Console\Commands;
 
 use Illuminate\Http\Request;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 use App\User;
 use App\Tags;
 use App\DataSet;
-use App\Category;
 use App\Resource;
 use App\TermsOfUse;
 use App\UserFollow;
@@ -16,16 +18,15 @@ use App\DataSetTags;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
+use App\ElasticDataSet;
 use App\Http\Controllers\Api\TagController as ApiTags;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
-use App\Http\Controllers\Api\CategoryController as ApiCategories;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
-use App\Http\Controllers\Api\CustomSettingsController as ApiCustomSettings;
 
 class MigrateData extends Command
 {
@@ -34,7 +35,7 @@ class MigrateData extends Command
      *
      * @var string
      */
-    protected $signature = 'migrate:data {direction} {source}';
+    protected $signature = 'migrate:data {direction} {source?}';
 
     /**
      * The console command description.
@@ -67,19 +68,22 @@ class MigrateData extends Command
             if ($this->argument('direction') == 'up') {
                 if ($this->argument('source') == null) {
                     $this->error('No source given.');
+                    $this->error('Data migration failed!');
                 } else {
                     $this->up();
+                    $this->info('Data migration finished successfully!');
                 }
             } else if ($this->argument('direction') == 'down') {
                 $this->down();
+                die();
             } else {
                 $this->error('No direction given.');
             }
-
-            $this->info('Data migration finished successfully!');
         } catch (\Exception $ex) {
             $this->error('Data migration failed!');
-            Log::error($ex->getMessage());
+            Log::error(print_r($ex->getMessage(), true));
+
+            $this->up();
         }
     }
 
@@ -88,80 +92,77 @@ class MigrateData extends Command
         $migrateUserId = User::where('username', 'migrate_data')->value('id');
         \Auth::loginUsingId($migrateUserId);
 
-        ini_set('memory_limit','4095M');
+        ini_set('memory_limit','5120M');
 
-        $tagsData = $this->migrateTags();
-        $termsData = $this->migrateLicense();
-        $organisationData = $this->migrateOrganisations();
+        $this->migrateTags();
+        $this->migrateLicense();
 
-        $groupData = $this->migrateGroups();
-        $userData = $this->migrateUsers();
-        $dataSetsData = $this->migrateDatasets($userData, $organisationData['org_with_dataSets'], $termsData);
+        $this->migrateOrganisations();
+        $this->migrateGroups();
+        $this->migrateUsers();
 
-        $this->migrateUserToOrgRole($userData['users'], $organisationData['users_to_org_role']);
-        $this->migrateFollowers($userData['users']);
+        $this->getUsersDatasets();
+        $this->getUsersDatasets();
+
+        $this->migrateUserToOrgRole();
+        $this->migrateFollowers();
     }
 
     private function down ()
     {
         $migrateUser = User::where('username', 'migrate_data')->value('id');
-        $users = User::where('created_by', $migrateUser)->get();
+        $users = User::where('created_by', $migrateUser)->get()->pluck('id');
 
-        foreach ($users as $user) {
-            $userIds[] = $user->id;
+        $organisations = Organisation::where('created_by', $migrateUser)->get()->pluck('id');
+
+        $dataSets = DataSet::whereIn('created_by', $users)->get()->pluck('id');
+
+        $tags = Tags::where('created_by', $migrateUser)->get()->pluck('id');
+
+        $termsOfUse = TermsOfUse::where('created_by', $migrateUser)->get()->pluck('id');
+
+        $resources = Resource::whereIn('data_set_id', $dataSets)->get()->pluck('id');
+
+        if (isset($resources)) {
+            ElasticDataSet::whereIn('resource_id', $resources)->forceDelete();
         }
 
-        $organisations = Organisation::where('created_by', $migrateUser)->get();
+        if (isset($dataSets)) {
+            Resource::whereIn('data_set_id', $dataSets)->forceDelete();
+            DataSetTags::whereIn('data_set_id', $dataSets)->delete();
+            UserFollow::whereIn('data_set_id', $dataSets)->delete();
 
-        foreach ($organisations as $org) {
-            $orgIds[] = $org->id;
+            foreach ($dataSets as $id) {
+                $indexParams['index'] = $id;
+                if (\Elasticsearch::indices()->exists($indexParams)) {
+                    \Elasticsearch::indices()->delete(['index' => $id]);
+                }
+            }
         }
 
-        $dataSets = DataSet::whereIn('created_by', $userIds)->get();
-
-        foreach ($dataSets as $dataSet) {
-            $dataSetIds[] = $dataSet->id;
+        if (isset($users)) {
+            UserToOrgRole::whereIn('user_id', $users)->delete();
+            UserFollow::whereIn('user_id', $users)->delete();
+            UserSetting::whereIn('user_id', $users)->delete();
+            DataSet::whereIn('created_by', $users)->forceDelete();
+            User::whereIn('id', $users)->forceDelete();
         }
 
-        $tags = Tags::where('created_by', $migrateUser)->get();
-
-        foreach ($tags as $tag) {
-            $tagsIds[] = $tag->id;
+        if (isset($organisations)) {
+            UserToOrgRole::whereIn('org_id', $organisations)->delete();
+            UserFollow::whereIn('org_id', $organisations)->delete();
+            Organisation::whereIn('id', $organisations)->forceDelete();
         }
 
-        $termsOfUse = TermsOfUse::where('created_by', $migrateUser)->get();
-
-        foreach ($termsOfUse as $term) {
-            $termsIds[] = $term->id;
+        if (isset($tags)) {
+            Tags::whereIn('id', $tags)->delete();
         }
 
-        if (isset($dataSetIds)) {
-            Resource::whereIn('data_set_id', $dataSetIds)->forceDelete();
-            DataSetTags::whereIn('data_set_id', $dataSetIds)->delete();
-            UserFollow::whereIn('data_set_id', $dataSetIds)->delete();
+        if (isset($termsOfUse)) {
+            TermsOfUse::whereIn('id', $termsOfUse)->delete();
         }
 
-        if (isset($userIds)) {
-            UserToOrgRole::whereIn('user_id', $userIds)->delete();
-            UserFollow::whereIn('user_id', $userIds)->delete();
-            UserSetting::whereIn('user_id', $userIds)->delete();
-            DataSet::whereIn('created_by', $userIds)->forceDelete();
-            User::whereIn('id', $userIds)->forceDelete();
-        }
-
-        if (isset($orgIds)) {
-            UserToOrgRole::whereIn('org_id', $orgIds)->delete();
-            UserFollow::whereIn('org_id', $orgIds)->delete();
-            Organisation::whereIn('id', $orgIds)->forceDelete();
-        }
-
-        if (isset($tagsIds)) {
-            Tags::whereIn('id', $tagsIds)->delete();
-        }
-
-        if (isset($termsIds)) {
-            TermsOfUse::whereIn('id', $termsIds)->delete();
-        }
+        Artisan::call('cache:clear');
     }
 
     private function requestUrl($uri, $params = null, $header = null)
@@ -186,8 +187,9 @@ class MigrateData extends Command
 
     private function migrateTags()
     {
-        $migrateUser = User::where('username', 'migrate_data')->get();
+        $migrateUser = User::where('username', 'migrate_data')->value('id');
         $tags = [];
+        $oldRecords = 0;
 
         $params = [
             'all_fields' => true
@@ -198,11 +200,19 @@ class MigrateData extends Command
             $tagsIds = [];
 
             foreach ($response['result'] as $res) {
-                $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
+                $alreadySaved = Tags::where('name', $res['display_name'])->first();
+
+                if ($alreadySaved) {
+                    $oldRecords++;
+
+                    continue;
+                }
+
+                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['name'] = $res['display_name'];
-                $newData['data']['created_by'] = User::where('username', 'migrate_data')->value('id');
+                $newData['data']['created_by'] = $migrateUser;
 
                 $request = Request::create('/api/addGroup', 'POST', $newData);
                 $api = new ApiTags($request);
@@ -210,17 +220,24 @@ class MigrateData extends Command
 
                 if ($result->success) {
                     $tagsIds['success'][$res['id']] = $result->id;
+                    Log::info('Tag "'. $res['display_name'] .'" added successfully!');
                 } else {
                     $tagsIds['error'][$res['id']] = $res['display_name'];
+                    Log::error('Tag "'. $res['display_name'] .'" failed!');
                 }
             }
 
             $tags = $tagsIds;
         }
 
-        $this->line('Tags total: '. (isset($response['result']) ? count($response['result']) : '0'));
-        $this->info('Tags successful: '. (isset($tags['success']) ? count($tags['success']) : '0'));
-        $this->error('Tags failed: '.(isset($tags['error']) ? count($tags['error']) : '0'));
+        if ($oldRecords > 336) {
+            $countSaved = Tags::where('created_by', $migrateUser)->count();
+            $this->line('Already saved tags: '. $countSaved);
+        } else {
+            $this->line('Tags total: '. (isset($response['result']) ? count($response['result']) : '0'));
+            $this->info('Tags successful: '. (isset($tags['success']) ? count($tags['success']) : '0'));
+            $this->error('Tags failed: '.(isset($tags['error']) ? count($tags['error']) : '0'));
+        }
         $this->line('');
 
         return $tags;
@@ -228,8 +245,8 @@ class MigrateData extends Command
 
     private function migrateLicense()
     {
-        $migrateUser = User::where('username', 'migrate_data')->get();
         $terms = [];
+        $oldRecords = 0;
 
         $params = [
             'all_fields' => true
@@ -242,6 +259,17 @@ class MigrateData extends Command
             foreach ($response['result'] as $res) {
                 $is_default = false;
 
+                $alreadySaved = DB::table('translations')
+                    ->where('label', $res['title'])
+                    ->join('terms_of_use', 'group_id', '=', 'terms_of_use.name')
+                    ->first();
+
+                if ($alreadySaved) {
+                    $oldRecords++;
+
+                    continue;
+                }
+
                 switch ($res['is_generic']) {
                     case 'True':
                         $is_default = true;
@@ -251,7 +279,7 @@ class MigrateData extends Command
                         $is_default = false;
                 }
 
-                $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
+                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = "BG";
@@ -267,26 +295,42 @@ class MigrateData extends Command
 
                 if ($result->success) {
                     $licensesIds['success'][$res['id']] = $result->id;
+                    Log::info('Term of use "'. $res['title'] .'" added successfully!');
                 } else {
                     $licensesIds['error'][$res['id']] = $res['title'];
+                    Log::error('Term of use "'. $res['title'] .'" failed!');
                 }
             }
 
             $terms = $licensesIds;
         }
 
-        $this->line('Terms of use total: '. (isset($response['result']) ? count($response['result']) : '0'));
-        $this->info('Terms of use successful: '. (isset($terms['success']) ? count($terms['success']) : '0'));
-        $this->error('Terms of use failed: '.(isset($terms['error']) ? count($terms['error']) : '0'));
+        if ($oldRecords > 0) {
+            $this->line('Already saved terms of use: '. $oldRecords);
+        } else {
+            $this->line('Terms of use total: '. (isset($response['result']) ? count($response['result']) : '0'));
+            $this->info('Terms of use successful: '. (isset($terms['success']) ? count($terms['success']) : '0'));
+            $this->error('Terms of use failed: '.(isset($terms['error']) ? count($terms['error']) : '0'));
+        }
         $this->line('');
+
+        if (Cache::has('termsData')) {
+            Cache::add('termsData', $terms, 10080);
+        } else {
+            Cache::put('termsData', $terms, 10080);
+        }
 
         return $terms;
     }
 
     private function migrateOrganisations()
     {
-        $migrateUser = User::where('username', 'migrate_data')->get();
         $organisationData = [];
+        $usersToOrgRole = [];
+        $orgs = [];
+        $orgWithDataSets = [];
+        $oldRecords = 0;
+
 
         $params = [
             'all_fields'    => true,
@@ -297,16 +341,20 @@ class MigrateData extends Command
 
         if (!empty($response['result'])) {
             $orgIds = [];
-            $usersToOrgRole = [];
-            $orgWithDataSets = [];
 
             foreach ($response['result'] as $res) {
                 $type = 0;
+                $alreadySaved = Organisation::where('uri', $res['id'])->first();
+
+                if ($alreadySaved) {
+                    $oldRecords++;
+
+                    continue;
+                }
 
                 switch ($res['type']) {
                     case 'organization':
                         $type = Organisation::TYPE_COUNTRY;
-
                         break;
                     case 'group':
                         $type = Organisation::TYPE_GROUP;
@@ -316,7 +364,7 @@ class MigrateData extends Command
                         $type = Organisation::TYPE_CIVILIAN;
                 }
 
-                $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
+                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = 'BG';
@@ -350,19 +398,25 @@ class MigrateData extends Command
                     }
 
                     $orgIds['success'][$res['id']] = $newOrgId;
+                    Log::info('Organisation "'. $res['display_name'] .'" added successfully!');
                 } else {
                     $orgIds['error'][$res['id']] = $res['display_name'];
+                    Log::error('Organisation "'. $res['display_name'] .'" with id: "'. $res['id'] .'" failed!');
                 }
             }
 
             $orgs = $orgIds;
         }
 
-        $this->line('Organisations total: '. (isset($response['result']) ? count($response['result']) : '0'));
-        $this->info('Organisations successful: '. (isset($orgs['success']) ? count($orgs['success']) : '0'));
-        $this->error('Organisations failed: '.(isset($orgs['error']) ? count($orgs['error']) : '0'));
-        $this->line('Organisations` dataset total: '. $numPackageFromOrgs);
-        $this->line('User to org role: '. count($usersToOrgRole));
+        if ($oldRecords > 0) {
+            $this->line('Already saved organisation: '. $oldRecords);
+        } else {
+            $this->line('Organisations total: '. (isset($response['result']) ? count($response['result']) : '0'));
+            $this->info('Organisations successful: '. (isset($orgs['success']) ? count($orgs['success']) : '0'));
+            $this->error('Organisations failed: '.(isset($orgs['error']) ? count($orgs['error']) : '0'));
+            $this->line('Organisations` dataset total: '. $numPackageFromOrgs);
+            $this->line('User to org role: '. count($usersToOrgRole));
+        }
         $this->line('');
 
         $organisationData = [
@@ -371,14 +425,21 @@ class MigrateData extends Command
             'org_with_dataSets' => $orgWithDataSets,
         ];
 
+        if (Cache::has('organisationData')) {
+            Cache::add('organisationData', $organisationData, 10080);
+        } else {
+            Cache::put('organisationData', $organisationData, 10080);
+        }
+
         return $organisationData;
     }
 
     private function migrateGroups()
     {
-        $migrateUser = User::where('username', 'migrate_data')->get();
         $groups = [];
         $groupsWithDataSets = [];
+        $usersToGroupRole = [];
+        $oldRecords = 0;
 
         $params = [
             'all_fields' => true
@@ -390,7 +451,15 @@ class MigrateData extends Command
             $usersToGroupRole = [];
 
             foreach ($response['result'] as $res) {
-                $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
+                $alreadySaved = Organisation::where('uri', $res['id'])->first();
+
+                if ($alreadySaved) {
+                    $oldRecords++;
+
+                    continue;
+                }
+
+                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = 'BG';
@@ -427,17 +496,23 @@ class MigrateData extends Command
                     }
 
                     $groupIds['success'][$res['id']] = $newGroupId;
+                    Log::info('Group "'. $res['display_name'] .'" added successfully!');
                 } else {
                     $groupIds['error'][$res['id']] = $res['display_name'];
+                    Log::error('Group "'. $res['display_name'] .'" with id: "'. $res['id'] .'" failed!');
                 }
             }
 
             $groups = $groupIds;
         }
 
-        $this->line('Groups total: '. (isset($response['result']) ? count($response['result']) : '0'));
-        $this->info('Groups successful: '. (isset($groups['success']) ? count($groups['success']) : '0'));
-        $this->error('Groups failed: '.(isset($groups['error']) ? count($groups['error']) : '0'));
+        if ($oldRecords > 0) {
+            $this->line('Already saved groups: '. $oldRecords);
+        } else {
+            $this->line('Groups total: '. (isset($response['result']) ? count($response['result']) : '0'));
+            $this->info('Groups successful: '. (isset($groups['success']) ? count($groups['success']) : '0'));
+            $this->error('Groups failed: '.(isset($groups['error']) ? count($groups['error']) : '0'));
+        }
         $this->line('');
 
         $groupsData = [
@@ -446,28 +521,42 @@ class MigrateData extends Command
             'groups_with_dataSets'  => $groupsWithDataSets,
         ];
 
+        if (Cache::has('groupsData')) {
+            Cache::add('groupsData', $groupsData, 10080);
+        } else {
+            Cache::put('groupsData', $groupsData, 10080);
+        }
+
         return $groupsData;
     }
 
     private function migrateUsers()
     {
         $userData = [];
-
-        $migrateUser = User::where('username', 'migrate_data')->get();
+        $users = [];
+        $usersWithDataSets = [];
+        $userIds = [];
         $header = array();
-        $header[] = 'Authorization: '. User::where('username', 'migrate_data')->value('api_key');
+        $header[] = 'Authorization: '. env('MIGRATE_USER_API_KEY');
         $params = [
             'all_fields' => true
         ];
 
         $numPackage = 0;
+        $oldRecords = 0;
         $response = $this->requestUrl('user_list', $params, $header);
 
         if (!empty($response['result'])) {
-            $userIds = [];
-            $usersWithDataSets = [];
 
             foreach ($response['result'] as $res) {
+                $alreadySaved = User::where('username', $res['name'])->first();
+
+                if ($alreadySaved) {
+                    $oldRecords++;
+
+                    continue;
+                }
+
                 //manage names
                 if (strpos($res['display_name'] , ' ') !== false) {
                     $names = explode(" ", $res['display_name']);
@@ -522,19 +611,25 @@ class MigrateData extends Command
                     }
 
                     $userIds['success'][$res['id']] = $newUserId;
+                    Log::info('User "'. $res['name'] .'" added successfully!');
                 } else {
                     $userIds['error'][$res['id']] = $res['email'];
+                    Log::error('User "'. $res['name'] .'" with id: "'. $res['id'] .'" failed!');
                 }
             }
 
             $users = $userIds;
         }
 
-        $this->line('Users total: '. (isset($response['result']) ? count($response['result']) : '0'));
-        $this->info('Users successful: '. (isset($users['success']) ? count($users['success']) : '0'));
-        $this->error('Users failed: '.(isset($users['error']) ? count($users['error']) : '0'));
-        $this->line('Users` dataset total count: '. $numPackage);
-        $this->line('Users with data sets '. count($usersWithDataSets));
+        if ($oldRecords > 0) {
+            $this->line('Already saved users: '. $oldRecords);
+        } else {
+            $this->line('Users total: '. (isset($response['result']) ? count($response['result']) : '0'));
+            $this->info('Users successful: '. (isset($users['success']) ? count($users['success']) : '0'));
+            $this->error('Users failed: '.(isset($users['error']) ? count($users['error']) : '0'));
+            $this->line('Users` dataset total count: '. $numPackage);
+            $this->line('Users with data sets '. count($usersWithDataSets));
+        }
         $this->line('');
 
         $userData = [
@@ -542,32 +637,78 @@ class MigrateData extends Command
             'users_with_dataSets'   => $usersWithDataSets,
         ];
 
+        if (Cache::has('userData')) {
+            Cache::add('userData', $userData, 10080);
+        } else {
+            Cache::put('userData', $userData, 10080);
+        }
+
         return $userData;
     }
 
-    private function getUsersDatasets($usersWithDataSets)
+    private function getUsersDatasets()
     {
+        $totalOrgDatasets = 0;
+        $totalSuccess = 0;
+        $totalFailed = 0;
+
+        $userData = Cache::get('userData');
+        $usersWithDataSets = $userData['users_with_dataSets'];
+
+        $bar = $this->output->createProgressBar(count($usersWithDataSets));
+
         if (is_array($usersWithDataSets)) {
             $userDataSets = [];
 
             foreach ($usersWithDataSets as $k => $v) {
+                $successPackages = 0;
+                $failedPacgakes = 0;
                 $params = [
                     'id'                => $k,
                     'include_datasets'  => true
                 ];
                 $response = $this->requestUrl('user_show', $params);
 
-                foreach ($response['result']['datasets'] as $res) {
-                    $userDataSets[] = $res;
+                if (isset ($response['result']['datasets'])) {
+                    foreach ($response['result']['datasets'] as $res) {
+                        if ($this->migrateDatasets($res)) {
+                            $successPackages++;
+                        } else {
+                            $failedPacgakes++;
+                        }
+
+                        $totalSuccess += $successPackages;
+                        $totalFailed += $failedPacgakes;
+                    }
+
+                    $this->line('Users total datasets : '. $response['result']['number_created_packages']);
+                    $this->info('Dataset success: '. $successPackages);
+                    $this->error('Dataset failed: '. $failedPacgakes);
+                    $this->line('');
+                    $bar->advance();
+                    $this->line('');
                 }
             }
         }
 
+        $this->line('Users Dataset Summary');
+        $this->line('Total datasets: '. $totalOrgDatasets);
+        $this->info('Total dataset success: '. $totalSuccess);
+        $this->error('Total datasets failed: '. $totalFailed);
+        $bar->finish();
+
         return $userDataSets;
     }
 
-    private function getOrgsDatasets($orgWithDataSets)
+    private function getOrgsDatasets()
     {
+        $totalOrgDatasets = 0;
+        $totalSuccess = 0;
+        $totalFailed = 0;
+        $organisationData = Cache::get('organisationData');
+        $orgWithDataSets = $organisationData['org_with_dataSets'];
+
+        $bar = $this->output->createProgressBar(count($orgWithDataSets));
         if (is_array($orgWithDataSets)) {
             $orgDataSets = [];
 
@@ -579,177 +720,228 @@ class MigrateData extends Command
                 $response = $this->requestUrl('organization_show', $params);
 
                 foreach ($response['result']['packages'] as $res) {
-                    $orgDataSets[] = $res;
+                    if ($this->migrateDatasets($res)) {
+                        $successPackages++;
+                    } else {
+                        $failedPacgakes++;
+                    }
+
+                    $totalSuccess += $successPackages;
+                    $totalFailed += $failedPacgakes;
                 }
+
+                $this->line('Organisation total datasets : '. $response['result']['"package_count']);
+                $this->info('Dataset success: '. $successPackages);
+                $this->error('Dataset failed: '. $failedPacgakes);
+                $this->line('');
+                $bar->advance();
+                $this->line('');
             }
         }
+
+        $this->line('Organisations Dataset Summary');
+        $this->line('Total datasets: '. $totalOrgDatasets);
+        $this->info('Total dataset success: '. $totalSuccess);
+        $this->error('Total datasets failed: '. $totalFailed);
+        $bar->finish();
 
         return $orgDataSets;
     }
 
-    private function migrateDatasets($userData, $orgsWithDataSets, $termsData)
+    private function migrateDatasets($dataSet)
     {
-        $datasetIds = [];
-        $migrateUser = User::where('username', 'migrate_data')->get();
-
-        $usersDataSets = $this->getUsersDatasets($userData['users_with_dataSets']);
-        $orgDataSets = $this->getOrgsDatasets($orgsWithDataSets);
-        $terms = $termsData;
-
-        $addedUsers = $userData['users']['success'];
-
         $addedResources = 0;
         $failedResources = 0;
         $addedDatasets = 0;
         $failedDatasets = 0;
+        $unsuporrtedFormat = 0;
 
-        $output = array_merge($usersDataSets, $orgDataSets);
+        $terms = Cache::get('termsData');
 
-        if (!empty($output)) {
-            foreach ($output as $res) {
-                $alreadySaved = DataSet::where('uri', $res['id'])->first();
-                $defaultCategory = 14;
+        $userData = Cache::get('userData');
+        $addedUsers = $userData['users']['success'];
 
-                if ($alreadySaved) {
-                    continue;
-                }
+        if (!empty($dataSet)) {
+            $alreadySaved = DataSet::where('uri', $dataSet['id'])->first();
+            $category = 14;
 
+            if (!$alreadySaved) {
                 $tags = [];
                 $orgId = null;
 
-                if (isset($res['owner_org'])) {
-                    $orgId = Organisation::where('uri', $res['owner_org'])->value('id');
+                if (isset($dataSet['owner_org'])) {
+                    $orgId = Organisation::where('uri', $dataSet['owner_org'])->value('id');
                 }
 
-                $termId = isset($res['license_id'])
-                    ? $terms['success'][$res['license_id']]
+                $termId = isset($dataSet['license_id'])
+                    ? $terms['success'][$dataSet['license_id']]
                     : null;
 
-                if (isset($res['tags']) && is_array($res['tags'])) {
-                    foreach ($res['tags'] as $tag) {
+                if (isset($dataSet['tags']) && !empty($dataSet['tags'])) {
+                    foreach ($dataSet['tags'] as $tag) {
                         array_push($tags, $tag['display_name']);
                     }
 
                     $category = $this->pickCategory($tags);
                 }
 
-                $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
+                if (
+                    isset($dataSet['author_email'])
+                    && !filter_var($dataSet['author_email'], FILTER_VALIDATE_EMAIL)
+                ) {
+                    $dataSet['author_email'] = '';
+                }
 
-                //TO DO check categories
+                if (
+                    isset($dataSet['maintainer_email'])
+                    && !filter_var($dataSet['maintainer_email'], FILTER_VALIDATE_EMAIL)
+                ) {
+                    $dataSet['maintainer_email'] = '';
+                }
+
+                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
+
                 $newData['data']['category_id'] = $category;
-
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = "bg";
                 $newData['data']['org_id'] = $orgId;
-                $newData['data']['uri'] = $res['id'];
-                $newData['data']['name'] = $res['title'];
-                $newData['data']['description'] = $res['notes'];
+                $newData['data']['uri'] = $dataSet['id'];
+                $newData['data']['name'] = $dataSet['title'];
+                $newData['data']['description'] = $dataSet['notes'];
                 $newData['data']['terms_of_use_id'] = $termId;
-                $newData['data']['visibility'] = $res['private'] ? DataSet::VISIBILITY_PRIVATE : DataSet::VISIBILITY_PUBLIC;
-                $newData['data']['version'] = $res['version'];
-                $newData['data']['status'] = ($res['state'] == 'active') ? DataSet::STATUS_PUBLISHED : DataSet::STATUS_DRAFT;
-                $newData['data']['author_name'] = $res['author'];
-                $newData['data']['author_email'] = $res['author_email'];
-                $newData['data']['support_name'] = $res['maintainer'];
-                $newData['data']['support_email'] = $res['maintainer_email'];
+                $newData['data']['visibility'] = $dataSet['private'] ? DataSet::VISIBILITY_PRIVATE : DataSet::VISIBILITY_PUBLIC;
+                $newData['data']['version'] = $dataSet['version'];
+                $newData['data']['status'] = ($dataSet['state'] == 'active') ? DataSet::STATUS_PUBLISHED : DataSet::STATUS_DRAFT;
+                $newData['data']['author_name'] = $dataSet['author'];
+                $newData['data']['author_email'] = $dataSet['author_email'];
+                $newData['data']['support_name'] = $dataSet['maintainer'];
+                $newData['data']['support_email'] = $dataSet['maintainer_email'];
                 $newData['data']['tags'] = $tags;
-                $newData['data']['created_at'] = $res['metadata_created'];
+                $newData['data']['created_at'] = $dataSet['metadata_created'];
                 $newData['data']['updated_by'] = User::where('username', 'migrate_data')->value('id');
-                $newData['data']['created_by'] = isset($addedUsers[$res['creator_user_id']])
-                    ? $addedUsers[$res['creator_user_id']]
+                $newData['data']['created_by'] = isset($addedUsers[$dataSet['creator_user_id']])
+                    ? $addedUsers[$dataSet['creator_user_id']]
                     : User::where('username', 'migrate_data')->value('id');
 
                 $request = Request::create('/api/addDataset', 'POST', $newData);
                 $api = new ApiDataSet($request);
                 $result = $api->addDataset($request)->getData();
 
+                $resCreatedBy = $newData['data']['created_by'];
+
                 if ($result->success) {
                     $newDataSetId = DataSet::where('uri', $result->uri)->value('id');
-                    $datasetIds['success'][$res['id']] = $newDataSetId;
+                    $datasetIds['success'][$dataSet['id']] = $newDataSetId;
 
-                    if ($res['num_resources'] > 0) {
+                    if ($dataSet['num_resources'] > 0) {
                         $fileFormats = Resource::getAllowedFormats();
+                        Log::info('Dataset "'. $dataSet['title'] .'" added successfully!');
 
                         // Add resources
-                        foreach ($res['resources'] as $resource) {
-                            if (in_array($resource['format'], $fileFormats)) {
+                        foreach ($dataSet['resources'] as $resource) {
+                            $savedResource = Resource::where('uri', $resource['id'])->first();
+                            $fileFormat = strtoupper(str_replace('.', '', $resource['format']));
+                            $resource['created_by'] = $resCreatedBy;
+
+                            if ($savedResource) {
+                                continue;
+                            }
+
+                            if (in_array($fileFormat, $fileFormats)) {
                                 if ($this->migrateDatasetsResources($newDataSetId, $resource)) {
                                     $addedResources++;
                                 } else {
-                                    $failedResources--;
+                                    $failedResources++;
                                 }
+                            } else {
+                                $unsuporrtedFormat++;
+                                Log::error('Resource format "'. $fileFormat .'" unsupported.');
                             }
                         }
                     }
-
                     $addedDatasets++;
+
+                    $this->line('Resources total: '. $dataSet['num_resources']);
+                    $this->info('Resources successful: '. $addedResources);
+                    $this->error('Resources failed: '. $failedResources);
+                    $this->line('Unsuported resource format count for the current dataset: '. $unsuporrtedFormat);
+
+                    $this->line('');
+                    return true;
                 } else {
                     $failedDatasets++;
-                    $datasetIds['error'][$res['id']] = $res['title'];
+                    $datasetIds['error'][$dataSet['id']] = $dataSet['title'];
+                    Log::error('Dataset "'. $dataSet['title'] .'" with id: "'. $dataSet['id'] .'" failed!');
+
+                    return false;
                 }
+            } else {
+                $this->line('Dataset already exists.');
+                Log::error('Dataset with id(uri): "'. $dataSet['id'] .'" already exists!');
             }
         }
-
-        $datasets = $datasetIds;
-
-        $this->info('Datasets successful: '. $addedDatasets);
-        $this->error('Datasets failed: '. $failedDatasets);
-        $this->info('Resources successful: '. $addedResources);
-        $this->error('Resources failed: '. $failedResources);
-        $this->line('');
     }
 
     private function migrateDatasetsResources($dataSetId, $resourceData)
     {
-        $migrateUser = User::where('username', 'migrate_data')->get();
-
         $datasetUri = DataSet::where('id', $dataSetId)->value('uri');
-        $newData['api_key'] = User::where('username', 'migrate_data')->value('api_key');
+        $newData['api_key'] = env('MIGRATE_USER_API_KEY');
         $newData['dataset_uri'] = $datasetUri;
 
         $newData['data']['migrated_data'] = true;
         $newData['data']['locale'] = "bg";
         $newData['data']['data_set_id'] = $dataSetId;
-        $newData['data']['name'] = isset($resourceData['name']) ? $resourceData['name'] : 'Без име';
+        $newData['data']['name'] = !empty($resourceData['name']) ? $resourceData['name'] : 'Без име';
         $newData['data']['uri'] = $resourceData['id'];
         $newData['data']['type'] = Resource::TYPE_FILE;
         $newData['data']['url'] =  $resourceData['url'];
         $newData['data']['description'] = $resourceData['description'];
         $newData['data']['resource_type'] = null;
         $newData['data']['file_format'] = $resourceData['format'];
-        $newData['data']['created_by'] = User::where('username', 'migrate_data')->value('id');
+        $newData['data']['created_by'] = $resourceData['created_by'];
+        $newData['data']['created_at'] = $resourceData['created'];
+        $newData['data']['updated_by'] = User::where('username', 'migrate_data')->value('id');
 
         // get file
         $path = pathinfo($resourceData['url']);
         $url = $resourceData['url'];
 
+        if ($path['filename'] == '') {
+            $filename = rand() . $path['basename'];
+            $url = $path['dirname']. '/' .$filename;
+        }
+
         try {
             $newData['file']['file_content'] = @file_get_contents($url);
-            $newData['file']['file_extension'] = $path['extension'];
+            $newData['file']['file_extension'] = isset($path['extension']) ? $path['extension'] : '';
         } catch (Exception $ex) {
-            Log::error($ex->getMessage());
+            Log::error('Resource get content error: '. $ex->getMessage());
 
             $newData['file'] = null;
         }
 
-        $request = Request::create('/api/addResourceMetadata', 'POST', $newData);
-        $api = new ApiResource($request);
-        $result = $api->addResourceMetadata($request)->getData();
+        if (isset($newData['file'])) {
+            $request = Request::create('/api/addResourceMetadata', 'POST', $newData);
+            $api = new ApiResource($request);
+            $result = $api->addResourceMetadata($request)->getData();
 
-        if ($result->success) {
-            $newResourceId = Resource::where('uri', $result->data->uri)->value('id');
+            if ($result->success) {
+                $newResourceId = Resource::where('uri', $result->data->uri)->value('id');
 
-            $resourceIds['success'][$result->data->uri] = $newResourceId;
+                $resourceIds['success'][$result->data->uri] = $newResourceId;
 
-            if ($newData['file'] != null) {
                 if ($this->manageMigratedFile($newData['file'], $result->data->uri)) {
+                    Log::info('Resource metadata "'. $newData['data']['name'] .'" added successfully!');
                     return true;
                 } else {
                     return false;
                 }
+            } else {
+                $resourceIds['error'] = $result->errors;
+                Log::error('Resource metadata "'. $newData['data']['name']
+                        .'" with id: "'. $resourceData['id']
+                        .'" failed! Parent Dataset id: "'. $dataSetId .'".');
             }
-        } else {
-            $resourceIds['error'] = $result->errors;
         }
 
         return false;
@@ -762,7 +954,7 @@ class MigrateData extends Command
 
         if (!empty($extension)) {
             $convertData = [
-                'api_key'   => User::where('username', 'migrate_data')->value('api_key'),
+                'api_key'   => env('MIGRATE_USER_API_KEY'),
                 'data'      => $content,
             ];
 
@@ -779,6 +971,8 @@ class MigrateData extends Command
                     if ($resultConvert->success) {
                         $elasticData = $resultConvert->data;
                         $data['csvData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert, true));
                     }
 
                     break;
@@ -786,6 +980,8 @@ class MigrateData extends Command
                     if (($pos = strpos($content, '?>')) !== false) {
                         $trimContent = substr($content, $pos + 2);
                         $convertData['data'] = trim($trimContent);
+                    } else {
+                        Log::error(print_r($resultConvert, true));
                     }
 
                     $reqConvert = Request::create('/xml2json', 'POST', $convertData);
@@ -797,6 +993,8 @@ class MigrateData extends Command
                     if ($resultConvert['success']) {;
                         $elasticData = $resultConvert['data'];
                         $data['xmlData'] = $content;
+                    } else {
+                        Log::error(print_r($resultConvert, true));
                     }
 
                     break;
@@ -808,6 +1006,8 @@ class MigrateData extends Command
 
                     if ($resultConvert['success']) {
                         $elasticData = $resultConvert['data'];
+                    } else {
+                        Log::error(print_r($resultConvert, true));
                     }
 
                     break;
@@ -820,34 +1020,29 @@ class MigrateData extends Command
                     if ($resultConvert['success']) {
                         $elasticData = $resultConvert['data'];
                         $data['xmlData'] = $content;
-                    }
-
-                    break;
-                case 'pdf':
-                case 'doc':
-                    $method = $extension .'2json';
-                    $convertData['data'] = base64_encode($convertData['data']);
-                    $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                    $api = new ApiConversion($reqConvert);
-                    $resultConvert = $api->$method($reqConvert)->getData(true);
-
-                    if ($resultConvert['success']) {
-                        $elasticData = $resultConvert['data'];
-                        $data['text'] = $resultConvert['data'];
+                    } else {
+                        Log::error(print_r($resultConvert, true));
                     }
 
                     break;
                 case 'xls':
                 case 'xlsx':
-                    $method = 'xls2json';
-                    $convertData['data'] = base64_encode($convertData['data']);
-                    $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                    $api = new ApiConversion($reqConvert);
-                    $resultConvert = $api->$method($reqConvert)->getData(true);
+                    try {
+                        $method = 'xls2json';
+                        $convertData['data'] = base64_encode($convertData['data']);
+                        $convertData['data'] = mb_convert_encoding($convertData['data'], 'UTF-8', 'UTF-8');
+                        $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                        $api = new ApiConversion($reqConvert);
+                        $resultConvert = $api->$method($reqConvert)->getData(true);
 
-                    if ($resultConvert['success']) {
-                        $elasticData = $resultConvert['data'];
-                        $data['csvData'] = $resultConvert['data'];
+                        if ($resultConvert['success']) {
+                            $elasticData = $resultConvert['data'];
+                            $data['csvData'] = $resultConvert['data'];
+                        } else {
+                            Log::error(print_r($resultConvert, true));
+                        }
+                    } catch (Exception $ex) {
+                        Log::error(print_r($ex->getMessage(),true));
                     }
 
                     break;
@@ -859,6 +1054,7 @@ class MigrateData extends Command
                 default:
                     $method = 'img2json';
                     $convertData['data'] = base64_encode($convertData['data']);
+                    $convertData['data'] = mb_convert_encoding($convertData['data'], 'UTF-8', 'UTF-8');
                     $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                     $api = new ApiConversion($reqConvert);
                     $resultConvert = $api->$method($reqConvert)->getData(true);
@@ -880,48 +1076,62 @@ class MigrateData extends Command
                 $resultElastic = $api->addResourceData($reqElastic)->getData();
 
                 if ($resultElastic->success) {
+                    Log::info('Resource with id: "'. $resourceURI .'" added successfully to elastic!');
+
                     return true;
                 } else {
                     // Delete resource metadata record if there are errors
                     $resource = Resource::where('uri', $resourceURI)->first();
+                    Log::error('Resource with id: "'. $resourceURI.'" failed on adding in elastic!');
 
                     if ($resource) {
                         $resource->forceDelete();
+                        Log::warning('Remove resource metadata with id: "'. $resourceURI.'"');
                     }
 
                     return false;
                 }
             }
+
             return false;
         }
     }
 
-    private function migrateFollowers($addedUsers)
+    private function migrateFollowers()
     {
-        $migration_user = User::where('username', 'migrate_data')->first();
+        $migrationUser = User::where('username', 'migrate_data')->first();
 
-        $api_key = User::where('username', 'migrate_data')->value('api_key');
+        $apiKey = env('MIGRATE_USER_API_KEY');
         $header = array();
-        $header[] = 'Authorization: '.$api_key;
+        $header[] = 'Authorization: '.$apiKey;
         $countFollowers = 0;
         $addedFollowers = 0;
 
-        $users = $addedUsers;
-        $userOldIds = isset($users['success']) ? $users['success'] : null;
+        $userData = Cache::get('userData');
+        $users = $userData['users'];
+        $usersOldIds = isset($users['success']) ? $users['success'] : null;
 
         //Add user followers
-        foreach ($userOldIds as $k => $v) {
+        foreach ($usersOldIds as $k => $v) {
             $params = [
                 'id' => $k
             ];
             $response = $this->requestUrl('user_follower_list', $params, $header);
 
-            if (isset($response['result'])) {
+            if (isset($response['result']) && !empty($response['result'])) {
                 foreach ($response['result'] as $res) {
-                    if (isset($userOldIds[$res['id']])) {
+                    if (isset($usersOldIds[$res['id']])) {
+                        $userFollowExists = UserFollow::where('user_id', $usersOldIds[$res['id']])
+                            ->where('follow_user_id', $v)
+                            ->first();
+
+                        if ($userFollowExists) {
+                            continue;
+                        }
+
                         $countFollowers++;
-                        $newUserFollow['api_key'] = $api_key;
-                        $newUserFollow['user_id'] = $userOldIds[$res['id']];
+                        $newUserFollow['api_key'] = $apiKey;
+                        $newUserFollow['user_id'] = $usersOldIds[$res['id']];
                         $newUserFollow['follow_user_id'] = $v;
 
                         $userReq = Request::create('/api/addFollow', 'POST', $newUserFollow);
@@ -935,7 +1145,7 @@ class MigrateData extends Command
         }
 
         //Add organisation followers
-        $organisations = Organisation::where('created_by', $migration_user->id)->get();
+        $organisations = Organisation::where('created_by', $migrationUser->id)->get();
 
         foreach ($organisations as $org) {
             $params = [
@@ -943,12 +1153,20 @@ class MigrateData extends Command
             ];
             $response = $this->requestUrl('organization_follower_list', $params, $header);
 
-            if (isset($response['result'])) {
+            if (isset($response['result']) && !empty($response['result'])) {
                 foreach ($response['result'] as $res) {
-                    if (isset($userOldIds[$res['id']])) {
+                    if (isset($usersOldIds[$res['id']])) {
+                        $orgFollowExists = UserFollow::where('user_id', $usersOldIds[$res['id']])
+                            ->where('org_id', $org->id)
+                            ->first();
+
+                        if ($orgFollowExists) {
+                            continue;
+                        }
+
                         $countFollowers++;
-                        $newOrgFollow['api_key'] = $api_key;
-                        $newOrgFollow['user_id'] = $userOldIds[$res['id']];
+                        $newOrgFollow['api_key'] = $apiKey;
+                        $newOrgFollow['user_id'] = $usersOldIds[$res['id']];
                         $newOrgFollow['org_id'] = $org->id;
 
                         $orgReq = Request::create('/api/addFollow', 'POST', $newOrgFollow);
@@ -962,7 +1180,8 @@ class MigrateData extends Command
         }
 
         //Add data sets followers
-        $dataSets = DataSet::where('created_by', $migration_user->id)->get();
+        $savedUsers = User::where('created_by', $migrationUser->id)->get()->pluck('id');
+        $dataSets = DataSet::whereIn('created_by', $savedUsers)->get();
 
         foreach ($dataSets as $dataSet) {
             $params = [
@@ -970,12 +1189,20 @@ class MigrateData extends Command
             ];
             $response = $this->requestUrl('dataset_follower_list', $params, $header);
 
-            if (isset($response['result'])) {
+            if (isset($response['result']) && !empty($response['result'])) {
                 foreach ($response['result'] as $res) {
-                    if (isset($userOldIds[$res['id']])) {
+                    if (isset($usersOldIds[$res['id']])) {
+                        $dsFollowExists = UserFollow::where('user_id', $usersOldIds[$res['id']])
+                            ->where('data_set_id', $dataSet->id)
+                            ->first();
+
+                        if ($dsFollowExists) {
+                            continue;
+                        }
+
                         $countFollowers++;
-                        $newDataSetFollow['api_key'] = $api_key;
-                        $newDataSetFollow['user_id'] = $user[$res['id']];
+                        $newDataSetFollow['api_key'] = $apiKey;
+                        $newDataSetFollow['user_id'] = $usersOldIds[$res['id']];
                         $newDataSetFollow['data_set_id'] = $dataSet->id;
 
                         $dataSetReq = Request::create('/api/addFollow', 'POST', $newDataSetFollow);
@@ -988,23 +1215,21 @@ class MigrateData extends Command
             }
         }
 
-        $migrateUser = User::where('username', 'migrate_data')->value('id');
-        $users = User::where('created_by',User::where('username', 'migrate_data')->value('id'))->get();
-
-        foreach ($users as $user) {
-            $userIds[] = $user->id;
-        }
-
-        $addedFollowers = UserFollow::whereIn('user_id', $userIds)->count()->get();
+        $addedFollowers = UserFollow::whereIn('user_id', $savedUsers)->count();
         $this->line('Followers total: '. $countFollowers);
         $this->info('Followers success: '. $addedFollowers);
+        $this->line('');
 
     }
 
-    private function migrateUserToOrgRole($addedUsers, $userToOrgData)
+    private function migrateUserToOrgRole()
     {
-        $usersOldIds = isset($addedUsers['success']) ? $addedUsers['success'] : [];
-        $userToOrgRole = $userToOrgData;
+        $userData = Cache::get('userData');
+        $users = $userData['users'];
+        $usersOldIds = isset($users['success']) ? $users['success'] : [];
+
+        $organisationData = Cache::get('organisationData');
+        $userToOrgRole = $organisationData['users_to_org_role'];
 
         $errors = 0;
         $success = 0;
@@ -1014,12 +1239,38 @@ class MigrateData extends Command
             foreach ($userToOrgRole as $orgId => $orgUsers) {
                 foreach ($orgUsers as $user) {
                     $total++;
+                    $role = 3;
+
+
+                    switch ($user['capacity']) {
+                        case 'admin':
+                            $role = 1;
+
+                            break;
+                        case 'member':
+                            $role = 5;
+
+                            break;
+                        case 'editor':
+                            $role = 4;
+
+                            break;
+                    }
 
                     if (isset($usersOldIds[$user['id']])) {
+                        $exists = UserToOrgRole::where('user_id', $usersOldIds[$user['id']])
+                                ->where('org_id', $orgId)
+                                ->where('role_id', $role)
+                                ->first();
+
+                        if ($exists) {
+                            continue;
+                        }
+
                         $userToOrgRole = new UserToOrgRole;
                         $userToOrgRole->user_id = $usersOldIds[$user['id']];
                         $userToOrgRole->org_id = $orgId;
-                        $userToOrgRole->role_id = ($user['capacity'] == 'admin') ? 1 : 3;
+                        $userToOrgRole->role_id = $role;
 
                         if ($userToOrgRole->save()) {
                             $success++;
@@ -1028,6 +1279,7 @@ class MigrateData extends Command
                         }
                     } else {
                         $errors++;
+                        Log::error('User with id "'. $user['id'] .'" was not found in saved users');
                     }
                 }
             }
@@ -1036,6 +1288,7 @@ class MigrateData extends Command
         $this->line('User to role total: '. $total);
         $this->info('User to role successful: '. $success);
         $this->error('User to role failed: '. $errors);
+        $this->line('');
     }
 
     private function pickCategory($tags)
@@ -1058,7 +1311,7 @@ class MigrateData extends Command
         ];
 
         foreach($tags as $tag) {
-            $tag = strtolower($tag);
+            $tag = mb_strtolower($tag, 'UTF-8');
 
             switch ($tag) {
                 case strpos($tag, 'животн'):
@@ -1101,6 +1354,7 @@ class MigrateData extends Command
                 case strpos($tag, 'читалищ'):
                 case strpos($tag, 'ученици'):
                 case strpos($tag, 'ясли'):
+                case strpos($tag, 'детски'):
                 case strpos($tag, 'ученик'):
                 case strpos($tag, 'стипенд'):
                 case strpos($tag, 'оцен'):
@@ -1115,9 +1369,16 @@ class MigrateData extends Command
                 case strpos($tag, 'паметни'):
                 case strpos($tag, 'резултат'):
                 case strpos($tag, 'турист'):
+                case strpos($tag, 'turizum'):
+                case strpos($tag, 'ministerstvo na turizma'):
+                case strpos($tag, 'tourism'):
+                case strpos($tag, 'училищата'):
                 case strpos($tag, 'туризъм'):
+                case strpos($tag, 'нво'):
+                case strpos($tag, 'дзи'):
                 case 'академични длъжности':
                 case 'военни':
+                case 'средно образование':
                 case 'план прием':
                 case 'лека атлетика':
                 case 'паметници на културата':
@@ -1143,8 +1404,10 @@ class MigrateData extends Command
                 case strpos($tag, 'картон'):
                 case strpos($tag, 'пластмас'):
                 case strpos($tag, 'пунктове'):
+                case strpos($tag, 'риосв'):
+                case strpos($tag, 'атмосферен'):
                 case 'агенция по геодезия':
-                case 'атмосферен вуздух':
+                case 'атмосферен въздух':
                 case 'площадки отпадъци':
                 case 'битови отпадъци':
                 case 'фини прахови частици':
@@ -1171,6 +1434,7 @@ class MigrateData extends Command
                 case strpos($tag, 'влак'):
                 case strpos($tag, 'такси'):
                 case strpos($tag, 'разписан'):
+                case strpos($tag, 'маршрутната'):
                 case 'моторни-превозни средства':
                 case 'автогара':
                 case 'автомобил':
@@ -1212,7 +1476,9 @@ class MigrateData extends Command
                 case strpos($tag, 'инвалид'):
                 case strpos($tag, 'Професионална'):
                 case strpos($tag, 'увреждан'):
+                case strpos($tag, 'увреждания'):
                 case 'census':
+                case 'хора с увреждания':
                 case 'Агенция за хората с увреждания специализирани предприятия':
                 case 'Агенция по заетостта':
                 case 'Бюро по труда':
@@ -1304,10 +1570,9 @@ class MigrateData extends Command
         $selectedCategory = $categoriesIndex[max($categories)];
 
         if (max($categories) == 0) {
-            $selectedCategory = $categories['14'];
+            $selectedCategory = 14;
         }
 
         return $selectedCategory;
-
     }
 }

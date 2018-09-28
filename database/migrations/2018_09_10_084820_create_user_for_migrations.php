@@ -29,7 +29,7 @@ class CreateUserForMigrations extends Migration
                     'is_admin'      => 1,
                     'active'        => 1,
                     'approved'      => 1,
-                    'api_key'       => 'f93d3beb-681f-427f-b608-5ea4d2635cd6',
+                    'api_key'       => Uuid::generate(4)->string,
                     'hash_id'       => '',
                     'created_at'    => gmdate('Y-m-d H:i:s'),
                     'created_by'    => 1,

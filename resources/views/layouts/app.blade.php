@@ -108,9 +108,10 @@
                                 >{{ strtoupper($altLang) }}</a>
                             </span>
                             <span class="social-icons">
-                                <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
-                                <a href="#" class="tw"><span class="fa fa-twitter"></span></a>
-                                <a href="#" class="gp"><span class="fa fa-google-plus"></span></a>
+                                <a target ="_blank" href="http://www.facebook.com/sharer.php?u={{ url('/') }}" class="fb"><span class="fa fa-facebook"></span></a>
+                                <a target ="_blank" href="http://twitter.com/home?status={{ url('/') }}" class="tw"><span class="fa fa-twitter"></span></a>
+                                <a target ="_blank" href="https://plus.google.com/share?url={{ url('/') }}" class="gp"><span class="fa fa-google-plus"></span></a>
+                                <a target ="_blank" href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"><span class="fa fa-linkedin"></span></a>
                             </span>
                         </div>
                     </div>

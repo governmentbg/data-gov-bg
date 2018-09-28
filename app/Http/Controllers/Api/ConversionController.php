@@ -24,11 +24,6 @@ include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
 
 class ConversionController extends ApiController
 {
-    public function __construct()
-    {
-        ini_set('memory_limit', '2G');
-    }
-
     /**
      * Convert from xml data and return json
      *
@@ -560,25 +555,29 @@ class ConversionController extends ApiController
         $worksheet = $spreadsheet->getActiveSheet();
         $rows = [];
 
-        foreach ($worksheet->getRowIterator() as $row) {
-            $cellIterator = $row->getCellIterator();
-            $cellIterator->setIterateOnlyExistingCells(false);
-            $cells = [];
+        try {
+            foreach ($worksheet->getRowIterator() as $row) {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                $cells = [];
 
-            foreach ($cellIterator as $cell) {
-                $value = trim($cell->getFormattedValue());
+                foreach ($cellIterator as $cell) {
+                    $value = trim($cell->getFormattedValue());
 
-                $cells[] = $value;
+                    $cells[] = $value;
+                }
+
+                if (!empty($cells)) {
+                    $rows[] = $cells;
+                }
             }
 
-            if (!empty($cells)) {
-                $rows[] = $cells;
-            }
+            fclose($temp);
+
+            $rowCount = count($rows);
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
         }
-
-        fclose($temp);
-
-        $rowCount = count($rows);
 
         foreach ($rows[0] as $cellIndex => $cell) {
             if ($cell == '') {
@@ -595,6 +594,7 @@ class ConversionController extends ApiController
         }
 
         return $rows;
+
     }
 
     /**

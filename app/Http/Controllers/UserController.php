@@ -3731,8 +3731,8 @@ class UserController extends Controller {
                 'user/newsFeed',
                 [
                     'class'          => 'user',
-                    'actionsHistory' => $paginationData['items'],
-                    'pagination'     => $paginationData['paginate'],
+                    'actionsHistory' => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                     'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
@@ -4286,8 +4286,8 @@ class UserController extends Controller {
                 [
                     'class'          => 'user',
                     'user'           => $result->users[0],
-                    'chronology'     => $paginationData['items']
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]
@@ -5746,8 +5746,8 @@ class UserController extends Controller {
                 [
                     'class'          => $class,
                     'organisation'   => $group,
-                    'chronology'     => $paginationData['items']
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]
@@ -5874,8 +5874,8 @@ class UserController extends Controller {
                 [
                     'class'          => $class,
                     'organisation'   => $result->data,
-                    'chronology'     => $paginationData['items']
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

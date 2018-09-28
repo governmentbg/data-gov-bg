@@ -635,8 +635,8 @@ class OrganisationController extends AdminController
                 [
                     'class'          => $class,
                     'organisation'   => $result->data,
-                    'chronology'     => $paginationData['items'],
-                    'pagination'     => $paginationData['paginate'],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

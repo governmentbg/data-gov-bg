@@ -3731,8 +3731,8 @@ class UserController extends Controller {
                 'user/newsFeed',
                 [
                     'class'          => 'user',
-                    'actionsHistory' => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'actionsHistory' => $paginationData['items'],
+                    'pagination'     => $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                     'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
@@ -4286,8 +4286,8 @@ class UserController extends Controller {
                 [
                     'class'          => 'user',
                     'user'           => $result->users[0],
-                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'chronology'     => $paginationData['items']
+                    'pagination'     =>  $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]
@@ -5746,8 +5746,8 @@ class UserController extends Controller {
                 [
                     'class'          => $class,
                     'organisation'   => $group,
-                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'chronology'     => $paginationData['items']
+                    'pagination'     =>  $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]
@@ -5874,8 +5874,8 @@ class UserController extends Controller {
                 [
                     'class'          => $class,
                     'organisation'   => $result->data,
-                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'chronology'     => $paginationData['items']
+                    'pagination'     =>  $paginationData['paginate'],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

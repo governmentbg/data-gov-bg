@@ -4,8 +4,8 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'help'])
+    <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.sections') }}</h3>
     <div class="row">
-        <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.sections') }}</h3>
         <div class="col-xs-12 m-t-lg m-b-lg text-right section">
             <div class="filter-content section-nav-bar">
                 <ul class="nav filter-type right-border">
@@ -32,7 +32,7 @@
         </div>
     </div>
     <div class="row">
-        <form method="POST" class="form-horizontal">
+        <form method="POST" class="form-horizontal m-t-md">
             @include('partials.pagination')
             {{ csrf_field() }}
             <div class="col-lg-12">

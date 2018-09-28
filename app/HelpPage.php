@@ -26,6 +26,7 @@ class HelpPage extends Model implements TranslatableInterface
     {
         return [
             'id'        => $this->id,
+            'name'      => $this->name,
             'keywords'  => $this->keywords,
             'title'     => $this->concatTranslations('title'),
             'body'      => $this->concatTranslations('body'),

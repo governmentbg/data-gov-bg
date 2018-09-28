@@ -179,24 +179,36 @@ class HelpController extends AdminController
      */
     public function listPages(Request $request)
     {
-        $perPage = 15;
+        $criteria = [];
+        $perPage = 3;
 
-        $rq = Request::create('api/listHelpPages', 'POST');
+        $criteria = [
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+        ];
+
+        if (isset($request->search)) {
+            $criteria['criteria']['keywords'] = $request->search;
+        }
+
+        $rq = Request::create('api/listHelpPages', 'POST', $criteria);
         $api = new ApiHelp($rq);
         $result = $api->listHelpPages($rq)->getData();
 
         $helpPages = $result->success ? $result->pages : [];
+        $getParams = array_except(app('request')->input(), ['page']);
 
         $paginationData = $this->getPaginationData(
             $helpPages,
             $result->total_records,
-            [],
+            $getParams,
             $perPage
         );
 
         return view('admin/helpPagesList', [
-            'helpPages'     => !empty($paginationData) ? $paginationData['items'] : [],
-            'pagination'    => !empty($paginationData) ? $paginationData['paginate'] : [],
+            'helpPages'     => $paginationData['items'],
+            'pagination'    => $paginationData['paginate'],
+            'getParams'     => $getParams,
         ]);
     }
 

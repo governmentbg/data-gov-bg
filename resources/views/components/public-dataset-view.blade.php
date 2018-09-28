@@ -38,10 +38,8 @@
                     <div class="col-xs-12 p-l-none m-t-md m-b-md">
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
-                                <div class="socialPadding p-w-sm">
-                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
+                                <div class="p-w-sm">
+                                    @include('partials.social-icons', ['shareUrl' => url()->current()])
                                 </div>
                                 @if ($approved)
                                     <div class="status p-w-sm">

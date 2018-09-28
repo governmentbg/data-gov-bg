@@ -25,9 +25,9 @@ class DataSet extends Model implements TranslatableInterface
     const VISIBILITY_PRIVATE = 2;
 
     protected static $translatable = [
-        'name'          => 'text',
-        'descript'      => 'text',
-        'sla'           => 'text',
+        'name'      => 'text',
+        'descript'  => 'text',
+        'sla'       => 'text',
     ];
 
     public function getDescriptionAttribute()
@@ -54,11 +54,28 @@ class DataSet extends Model implements TranslatableInterface
     public function toSearchableArray()
     {
         return [
-            'id'        => $this->id,
-            'name'      => $this->concatTranslations('name'),
-            'descript'  => $this->concatTranslations('descript'),
-            'sla'       => $this->concatTranslations('sla'),
+            'id'            => $this->id,
+            'name'          => $this->concatTranslations('name'),
+            'descript'      => $this->concatTranslations('descript'),
+            'sla'           => $this->concatTranslations('sla'),
+            'source'        => $this->source,
+            'author_name'   => $this->author_name,
+            'author_email'  => $this->author_email,
+            'support_name'  => $this->support_name,
+            'support_email' => $this->support_email,
+            'custom_fields' => $this->concatCustomSettings(),
         ];
+    }
+
+    private function concatCustomSettings()
+    {
+        $settings = '';
+
+        foreach ($this->customSetting()->get() as $setting) {
+            $settings .= $setting->concatTranslations('key') .' '. $setting->concatTranslations('value');
+        }
+
+        return $settings;
     }
 
     public function organisation()

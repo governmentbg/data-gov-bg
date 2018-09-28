@@ -307,7 +307,7 @@
             @if ($field['view'] == 'translation_custom')
                 @include(
                     'components.form_groups.translation_custom_fields',
-                    ['field' => $field]
+                    ['field' => $field, 'model' => $withModel]
                 )
             @endif
         @endforeach

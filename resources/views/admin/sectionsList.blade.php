@@ -7,7 +7,7 @@
         <div class="col-xs-5 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{uctrans('custom.sections')}}</span>
         </div>
-        @include('partials.pagination')
+
         <div class="col-xs-12 m-t-lg text-right section">
             <div class="filter-content section-nav-bar">
                 <ul class="nav filter-type right-border">
@@ -25,6 +25,7 @@
                 </ul>
             </div>
         </div>
+        @include('partials.pagination')
         <div class="row">
             <div class="col-xs-12 p-l-lg m-b-lg text-left">{{ __('custom.order_by') }}</div>
             <div class="col-xs-12 p-l-lg order-documents">

@@ -130,6 +130,12 @@
                 </div>
                 <div class="form-group row">
                     <div class="col-lg-12 text-right">
+                        <a
+                            href="{{ url('admin/roles') }}"
+                            class="btn btn-primary"
+                        >
+                            {{ uctrans('custom.close') }}
+                        </a>
                         <button type="submit" name="edit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                     </div>
                 </div>

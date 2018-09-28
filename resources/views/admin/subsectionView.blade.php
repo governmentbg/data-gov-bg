@@ -97,6 +97,16 @@
                                     </form>
                                     <form
                                         method="POST"
+                                        action="{{ url('admin/subsections/list/'. $section->parent_id) }}"
+                                        class="form-horisontal inline-block"
+                                    >
+                                        <button
+                                            name="back"
+                                            class="btn btn-primary"
+                                        >{{ uctrans('custom.close') }}</button>
+                                    </from>
+                                    <form
+                                        method="POST"
                                         class="inline-block"
                                         action="{{ url('admin/subsections/delete/'. $section->id) }}"
                                     >

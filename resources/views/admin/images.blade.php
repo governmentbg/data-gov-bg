@@ -4,10 +4,10 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'images'])
-        @include('partials.pagination')
         <div class="col-xs-12 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{ __('custom.images_list') }}</span>
         </div>
+        @include('partials.pagination')
         <div class="row m-b-lg">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill doc-badge">

@@ -54,10 +54,10 @@
                         <table class="table">
                             <thead>
                                 <th>{{ utrans('custom.name') }}</th>
-                                <th>{{ utrans('custom.unique_identificator') }}</th>
+                                <th>{{ uctrans('custom.unique_identificator') }}</th>
                                 <th>{{ utrans('custom.section') }}</th>
                                 <th>{{ utrans('custom.active') }}</th>
-                                <th>{{ utrans('custom.ordering') }}</th>
+                                <th>{{ uctrans('custom.ordering') }}</th>
                                 <th>{{ __('custom.action') }}</th>
                             </thead>
                             <tbody>

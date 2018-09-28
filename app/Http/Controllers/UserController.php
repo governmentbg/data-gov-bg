@@ -1618,6 +1618,7 @@ class UserController extends Controller {
         $class = 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
+        $root = 'user';
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if ($request->has('ready_metadata')) {
@@ -1654,7 +1655,8 @@ class UserController extends Controller {
             'uri'       => $datasetUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'fields'    => $this->getResourceTransFields(),
+            'root'      => $root
         ]);
     }
 
@@ -3214,13 +3216,15 @@ class UserController extends Controller {
             $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+            $root = 'user';
 
             $viewData = [
                 'class'      => 'user',
                 'model'      => $orgModel,
                 'withModel'  => $customModel,
                 'fields'     => $this->getTransFields(),
-                'parentOrgs' => $parentOrgs
+                'parentOrgs' => $parentOrgs,
+                'root'       => $root
             ];
 
             if (isset($request->view)) {
@@ -4596,7 +4600,7 @@ class UserController extends Controller {
         if (!empty($org) && $this->checkUserOrg($org->id)) {
             $class = 'user';
             $fields = $this->getGroupTransFields();
-
+            $root = 'user';
             $model = Organisation::find($org->id)->loadTranslations();
             $withModel = CustomSetting::where('org_id', $org->id)->get()->loadTranslations();
             $model->logo = $this->getImageData($model->logo_data, $model->logo_mime_type, 'group');
@@ -4634,7 +4638,7 @@ class UserController extends Controller {
                 return back()->withErrors(isset($result->errors) ? $result->errors : []);
             }
 
-            return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel'));
+            return view('user/groupEdit', compact('class', 'fields', 'model', 'withModel', 'root'));
         }
 
         return redirect('/user/groups');

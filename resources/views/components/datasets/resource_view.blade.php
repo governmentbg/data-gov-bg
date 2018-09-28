@@ -115,6 +115,12 @@
                             class="btn btn-primary"
                             href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
                         >{{ uctrans('custom.edit') }}</a>
+                        <a
+                            href="{{ url('/'. $root .'/dataset/view/' . $resource->dataset_uri) }}"
+                            class="btn btn-primary"
+                        >
+                            {{ uctrans('custom.close') }}
+                        </a>
                         <button
                             name="delete"
                             class="btn del-btn btn-primary"

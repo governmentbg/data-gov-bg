@@ -108,6 +108,12 @@
         </div>
         <div class="col-xs-12 text-right mng-btns">
             <a
+                href="{{ url('/'. $root .'/resource/view/' . $resource->uri) }}"
+                class="btn btn-primary"
+            >
+                {{ uctrans('custom.close') }}
+            </a>
+            <a
                 type="button"
                 class="btn btn-primary"
                 href="{{ url($uri) }}"

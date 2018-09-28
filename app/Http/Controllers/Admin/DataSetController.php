@@ -270,14 +270,40 @@ class DataSetController extends AdminController
     public function view(Request $request, $uri)
     {
         $params['dataset_uri'] = $uri;
+        $groups = $this->getGroupDropdown();
 
         if ($request->has('back')) {
             return redirect()->route('adminDataSets');
         }
 
+        if ($request->has('save')) {
+            $groupParams = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $request->input('group_id', []),
+            ];
+
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+            $api = new ApiDataset($addGroup);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
+
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
+            }
+        }
+
         $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
         $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDatasetDetails($detailsReq)->getData();
+        $result = $api->getDatasetDetails($detailsReq)->getData();
+        $dataset = !empty($result->data) ? $result->data : null;
+        $setGroups = [];
+
+        if (!empty($dataset->groups)) {
+            foreach ($dataset->groups as $record) {
+                $setGroups[] = $record->id;
+            }
+        }
+
         // prepare request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
@@ -288,7 +314,9 @@ class DataSetController extends AdminController
 
         return view('admin/datasetView', [
             'class'     => 'user',
-            'dataset'   => $this->getModelUsernames($dataset->data),
+            'dataset'   => $this->getModelUsernames($dataset),
+            'groups'    => $groups,
+            'setGroups' => $setGroups,
             'resources' => $resources->resources,
         ]);
     }
@@ -529,12 +557,6 @@ class DataSetController extends AdminController
                 $apiEsData = new ApiResource($reqEsData);
                 $response = $apiEsData->getResourceData($reqEsData)->getData();
 
-                $versions = [];
-                $versionsList = Resource::where('id', $resource->id)->first()->elasticDataSet()->get();
-                foreach ($versionsList as $row) {
-                    $versions[] = $row->version;
-                }
-
                 $data = !empty($response->data) ? $response->data : [];
 
                 if ($resource->format_code == Resource::FORMAT_XML) {
@@ -553,7 +575,6 @@ class DataSetController extends AdminController
                     'resource'      => $resource,
                     'data'          => $data,
                     'versionView'   => $version,
-                    'versions'      => $versions,
                 ]);
             }
         }
@@ -687,7 +708,6 @@ class DataSetController extends AdminController
                     'http_rq_type'  => $request->offsetGet('http_rq_type'),
                     'http_headers'  => $request->offsetGet('http_headers'),
                     'post_data'     => $request->offsetGet('post_data'),
-                    'version'       => strval(intval($resource->version) + 1),
                 ];
 
                 $file = $request->file('file');

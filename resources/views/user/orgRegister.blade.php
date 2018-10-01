@@ -129,6 +129,12 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
+                    <a
+                        href="{{ url('user/organisations') }}"
+                        class="btn btn-primary"
+                    >
+                        {{ uctrans('custom.close') }}
+                    </a>
                     <button type="submit" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>

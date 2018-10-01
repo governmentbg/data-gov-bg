@@ -269,6 +269,12 @@
                     </div>
                 </div>
                 <div class="form-group row text-right">
+                    <a
+                        href="{{ url('admin/users') }}"
+                        class="btn btn-primary"
+                    >
+                        {{ uctrans('custom.close') }}
+                    </a>
                     <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
         </form>

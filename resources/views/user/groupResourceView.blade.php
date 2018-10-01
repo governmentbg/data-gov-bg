@@ -28,6 +28,15 @@
                                         <li>{{ __('custom.updated_by') }}: {{ $resource->updated_by }}</li>
                                     </ul>
                                 </div>
+                                @if (!empty($resource->custom_settings))
+                                    <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                                    @foreach ($resource->custom_settings as $field)
+                                        <div class="row m-b-lg">
+                                            <div class="col-xs-6">{{ $field->key }}</div>
+                                            <div class="col-xs-6 text-left">{{ $field->value }}</div>
+                                        </div>
+                                    @endforeach
+                                @endif
                             </div>
                             <div class="col-sm-12 p-l-none">
                                 <h2>{{ $resource->name }}</h2>

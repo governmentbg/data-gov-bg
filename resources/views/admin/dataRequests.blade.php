@@ -120,8 +120,7 @@
                     <li class="js-show-submenu">
                         <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ uctrans('custom.status') }}</a>
                         <ul class="sidebar-submenu m-b-md">
-                        @foreach ($statuses as $key => $status)
-
+                            @foreach ($statuses as $key => $status)
                                 <li>
                                     <a
                                         href="{{
@@ -197,7 +196,7 @@
                                 <div class="hidden {{ 'js-terms-req-cont-'. $dataRequest->id }}">
                                     <div class="col-xs-12">{{ $dataRequest->contact_name }}</div>
                                     <div class="col-xs-12 m-t-md">{{ $dataRequest->email }}</div>
-                                    <div class="col-xs-12 m-t-xs">{{ $dataRequest->description }}</div>
+                                    <div class="col-xs-12 m-t-xs">{!! nl2br($dataRequest->description) !!}</div>
                                     <div class="col-md-3 col-sm-4 col-xs-6 terms-hr"><hr/></div>
                                     <div class="col-xs-12">{{ __('custom.created_at') }}: &nbsp; {{ $dataRequest->created_at }}</div>
                                     <div class="col-xs-12">{{ __('custom.created_by') }}: &nbsp; {{ $dataRequest->created_by }}</div>

@@ -135,6 +135,10 @@ class NewsController extends AdminController
      */
     public function view(Request $request, $id)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminNews');
+        }
+
         $req = Request::create('/api/getNewsDetails', 'POST', ['news_id' => $id]);
         $api = new ApiNews($req);
         $result = $api->getNewsDetails($req)->getData();
@@ -239,6 +243,10 @@ class NewsController extends AdminController
      */
     public function add(Request $request)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminNews');
+        }
+
         if ($request->has('create')) {
 
             $from = null;

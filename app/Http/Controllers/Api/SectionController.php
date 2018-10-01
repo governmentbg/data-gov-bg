@@ -343,6 +343,27 @@ class SectionController extends ApiController
             $query->where($criteria);
         }
 
+        $columns = [
+            'id',
+            'name',
+            'parent_id',
+            'ordering',
+            'active',
+            'read_only',
+            'theme',
+            'forum_link',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ];
+
+        if (isset($order['field'])) {
+            if (!in_array($order['field'], $columns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
+            }
+        }
+
         if (isset($order['type']) && isset($order['field'])) {
             $query->orderBy(
                 $order['field'],

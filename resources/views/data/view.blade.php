@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @include('partials.public-dataset-nav-bar')
-        @include('components.public-dataset-view', ['rootUrl' => '/data'])
+        @include('partials.public-dataset-nav-bar', ['extended' => true])
+        @include('components.public-dataset-view', ['routeName' => 'dataResourceView'])
     </div>
 @endsection

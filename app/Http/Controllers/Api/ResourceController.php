@@ -8,6 +8,7 @@ use App\DataSet;
 use App\Resource;
 use App\RoleRight;
 use App\Organisation;
+use App\CustomSetting;
 use App\ActionsHistory;
 use App\ElasticDataSet;
 use Illuminate\Http\Request;
@@ -53,8 +54,8 @@ class ResourceController extends ApiController
         }
 
         $validator = \Validator::make($post, [
-            'dataset_uri'               => 'required|string|exists:data_sets,uri,deleted_at,NULL',
-            'data'                      => 'required|array',
+            'dataset_uri'   => 'required|string|exists:data_sets,uri,deleted_at,NULL',
+            'data'          => 'required|array',
         ]);
 
         if ($validator->fails()) {
@@ -95,11 +96,24 @@ class ResourceController extends ApiController
         });
 
         if (!$validator->fails()) {
-
-            $rightCheck = RoleRight::checkUserRight(
-                Module::RESOURCES,
-                RoleRight::RIGHT_EDIT
-            );
+            $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id' => $dataset->org_id
+                    ],
+                    [
+                        'org_id' => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT
+                );
+            }
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
@@ -128,19 +142,44 @@ class ResourceController extends ApiController
                     'is_reported'       => 0,
                 ];
 
-                if (
-                    isset($data['migrated_data'])
+                 if (
+                    isset($post['data']['migrated_data'])
                     && Auth::user()->username == 'migrate_data'
-                ) {
-                    if (!empty($data['created_by'])) {
-                        $dbData['created_by'] = $data['created_by'];
+                ){
+                    if (!empty($post['data']['created_by'])) {
+                        $dbData['created_by'] = $post['data']['created_by'];
+                    }
+
+                    if (!empty($post['data']['updated_by'])) {
+                        $dbData['updated_by'] = $post['data']['updated_by'];
+                    }
+
+                    if (!empty($post['data']['created_at'])) {
+                        $dbData['created_at'] = date('Y-m-d H:i:s', strtotime($post['data']['created_at']));
                     }
                 }
 
                 $resource = Resource::create($dbData);
                 $resource->searchable();
 
-                DB::commit();
+                if (!empty($post['data']['custom_fields'])) {
+                    foreach ($post['data']['custom_fields'] as $fieldSet) {
+                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            $customFields[] = [
+                                'value' => $fieldSet['value'],
+                                'label' => $fieldSet['label'],
+                            ];
+                        }
+                    }
+
+                    if (!empty($customFields)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                            DB::rollback();
+
+                            return $this->errorResponse(__('custom.add_resource_meta_fail'));
+                        }
+                    }
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -150,6 +189,8 @@ class ResourceController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse(['uri' => $resource->uri]);
             } catch (QueryException $ex) {
@@ -183,10 +224,26 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::RESOURCES,
-                RoleRight::RIGHT_EDIT
-            );
+            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $dataset = DataSet::where('id', $resource->data_set_id);
+
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id' => $dataset->org_id
+                    ],
+                    [
+                        'org_id' => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT
+                );
+            }
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
@@ -195,24 +252,22 @@ class ResourceController extends ApiController
             DB::beginTransaction();
 
             try {
-                $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $id = $resource->id;
                 $index = $resource->data_set_id;
 
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
                     'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                    'doc'           => $id,
+                    'doc'           => $id .'_1',
+                    'version'       => 1,
+                    'resource_id'   => $id
                 ]);
-
-                $resource->es_id = $elasticDataSet->id;
-                $resource->save();
 
                 \Elasticsearch::index([
                     'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id,
+                    'id'    => $id .'_1',
                 ]);
 
                 DB::commit();
@@ -281,8 +336,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'                 => 'required_with:locale|max:191',
-                'name.bg'              => 'required_without:locale|string|max:191',
+                'name'                 => 'sometimes|required_with:locale|max:191',
+                'name.bg'              => 'sometimes|required_without:locale|string|max:191',
                 'description'          => 'nullable|max:8000',
                 'file_format'          => 'sometimes|string|max:191',
                 'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',
@@ -290,12 +345,12 @@ class ResourceController extends ApiController
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
                 'type'                 => 'sometimes|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
-                'resource_url'         => 'sometimes|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
-                'http_rq_type'         => 'sometimes|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
-                'authentication'       => 'sometimes|string|max:191|required_if:data.type,'. Resource::TYPE_API,
-                'http_headers'         => 'sometimes|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
+                'resource_url'         => 'sometimes|nullable|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
+                'http_rq_type'         => 'sometimes|nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
+                'authentication'       => 'sometimes|nullable|string|max:191|required_if:data.type,'. Resource::TYPE_API,
+                'http_headers'         => 'sometimes|nullable|string|max:8000|required_if:data.type,'. Resource::TYPE_API,
+                'post_data'            => 'sometimes|nullable|string|max:8000',
                 'is_reported'          => 'sometimes|boolean',
-                'post_data'            => 'sometimes|string|max:8000',
                 'custom_fields'        => 'sometimes|array',
             ]);
         }
@@ -311,14 +366,30 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
-            $rightCheck = RoleRight::checkUserRight(
-                Module::RESOURCES,
-                RoleRight::RIGHT_EDIT,
-                [],
-                [
-                    'created_by' => $resource->created_by
-                ]
-            );
+            $dataset = DataSet::where('id', $resource->data_set_id);
+
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id' => $dataset->org_id
+                    ],
+                    [
+                        'created_by' => $dataset->created_by,
+                        'org_id'     => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $resource->created_by
+                    ]
+                );
+            }
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
@@ -385,7 +456,24 @@ class ResourceController extends ApiController
 
                 $resource->save();
 
-                DB::commit();
+                if (!empty($post['data']['custom_fields'])) {
+                    foreach ($post['data']['custom_fields'] as $fieldSet) {
+                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            $customFields[] = [
+                                'value' => $fieldSet['value'],
+                                'label' => $fieldSet['label'],
+                            ];
+                        }
+                    }
+
+                    if (!empty($customFields)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                            DB::rollback();
+
+                            return $this->errorResponse(__('custom.add_resource_meta_fail'));
+                        }
+                    }
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -395,6 +483,8 @@ class ResourceController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -428,14 +518,30 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_EDIT,
-                    [],
-                    [
-                        'created_by' => $resource->created_by
-                    ]
-                );
+                $dataset = DataSet::where('id', $resource->data_set_id);
+
+                if (isset($dataset->org_id)) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id' => $dataset->org_id
+                        ],
+                        [
+                            'created_by' => $dataset->created_by,
+                            'org_id'     => $dataset->org_id
+                        ]
+                    );
+                } else {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_EDIT,
+                        [],
+                        [
+                            'created_by' => $resource->created_by
+                        ]
+                    );
+                }
 
                 if (!$rightCheck) {
                     return $this->errorResponse(__('custom.access_denied'));
@@ -444,12 +550,25 @@ class ResourceController extends ApiController
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
 
+                $elasticDataSet = ElasticDataSet::create([
+                    'index'         => $index,
+                    'index_type'    => ElasticDataSet::ELASTIC_TYPE,
+                    'doc'           => $id .'_'. $resource->version,
+                    'version'       => $resource->version,
+                    'resource_id'   => $id
+                ]);
+
                 $update = \Elasticsearch::index([
                     'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id,
+                    'id'    => $id .'_'. $resource->version,
                 ]);
+
+                // update signals status after resource version update and mark resource as not reported
+                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                $resource->is_reported = Resource::REPORTED_FALSE;
+                $resource->save();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -487,14 +606,30 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $rightCheck = RoleRight::checkUserRight(
-                    Module::RESOURCES,
-                    RoleRight::RIGHT_ALL,
-                    [],
-                    [
-                        'created_by' => $resource->created_by
-                    ]
-                );
+                $dataset = DataSet::where('id', $resource->data_set_id);
+
+                if (isset($dataset->org_id)) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                        [
+                            'org_id' => $dataset->org_id
+                        ],
+                        [
+                            'created_by' => $dataset->created_by,
+                            'org_id'     => $dataset->org_id
+                        ]
+                    );
+                } else {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::RESOURCES,
+                        RoleRight::RIGHT_ALL,
+                        [],
+                        [
+                            'created_by' => $resource->created_by
+                        ]
+                    );
+                }
 
                 if (!$rightCheck) {
                     return $this->errorResponse(__('custom.access_denied'));
@@ -595,6 +730,30 @@ class ResourceController extends ApiController
             $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
             $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
+            $columns = [
+                'id',
+                'name',
+                'descript',
+                'version',
+                'schema_description',
+                'resource_url',
+                'type',
+                'file_format',
+                'http_rq_type',
+                'schema_url',
+                'reported',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($request->criteria['order']['field'])) {
+                if (!in_array($request->criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             $query->orderBy($field, $type);
 
             $locale = \LaravelLocalization::getCurrentLocale();
@@ -663,7 +822,7 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            $resource = Resource::with('DataSet')->where('uri', $post['resource_uri'])->first();
+            $resource = Resource::with('DataSet')->with('customFields')->where('uri', $post['resource_uri'])->first();
             $fileFormats = Resource::getFormats();
             $rqTypes = Resource::getRequestTypes();
             $types = Resource::getTypes();
@@ -680,6 +839,7 @@ class ResourceController extends ApiController
                     'schema_description'    => $resource->schema_descript,
                     'schema_url'            => $resource->schema_url,
                     'type'                  => $types[$resource->resource_type],
+                    'resource_type'         => $resource->resource_type,
                     'resource_url'          => $resource->resource_url,
                     'http_rq_type'          => isset($resource->http_rq_type) ? $rqTypes[$resource->http_rq_type] : null,
                     'authentication'        => $resource->authentication,
@@ -694,9 +854,19 @@ class ResourceController extends ApiController
                     'updated_by'            => $resource->updated_by,
                 ];
 
+                $customSett = $resource->customFields()->get()->loadTranslations();
+                if (!empty($customSett)) {
+                    foreach ($customSett as $sett) {
+                        $data['custom_settings'][] = [
+                            'key'   => $sett->key,
+                            'value' => $sett->value,
+                        ];
+                    }
+                }
+
                 $allSignals = [];
                 if ($resource->is_reported) {
-                    $signals = $resource->signal()->where('status', Signal::STATUS_NEW)->get();;
+                    $signals = $resource->signal()->where('status', Signal::STATUS_NEW)->get();
 
                     if ($signals) {
                         foreach ($signals as $signal) {
@@ -720,6 +890,17 @@ class ResourceController extends ApiController
                 }
 
                 $data['signals'] = $allSignals;
+
+                // get resource versions
+                $versionsList = [];
+                $versions = $resource->elasticDataSet()->get();
+                if ($versions) {
+                    foreach ($versions as $row) {
+                        $versionsList[] = $row->version;
+                    }
+                }
+
+                $data['versions_list'] = $versionsList;
 
                 return $this->successResponse(['resource' => $data], true);
             }
@@ -782,6 +963,7 @@ class ResourceController extends ApiController
      *
      * @param string api_key - optional
      * @param string resource_uri - required
+     * @param int version - optional
      *
      * @return json with success or error
      */
@@ -789,16 +971,20 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
+        $validator = \Validator::make($post, [
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
+            'version'       => 'sometimes|int',
+        ]);
 
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $version = !is_null($request->offsetGet('version')) ? $request->offsetGet('version') : $resource->version;
 
                 return $this->successResponse(
-                    empty($resource->es_id)
+                    ($resource->resource_type == Resource::TYPE_HYPERLINK)
                     ? []
-                    : ElasticDataSet::getElasticData($resource->es_id)
+                    : ElasticDataSet::getElasticData($resource->id, $version)
                 );
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
@@ -1114,7 +1300,7 @@ class ResourceController extends ApiController
     /**
      * Check if user has reported resources
      *
-     * @param int user_id - required
+     * @param int user_id - optional
      * @return json with results or error
      */
     public function hasReportedResource(Request $request)
@@ -1122,13 +1308,18 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'user_id'   => 'required|int|exists:users,id|digits_between:1,10',
+            'user_id'   => 'nullable|int|exists:users,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             try {
-                $hasReported = Resource::where('created_by', $post['user_id'])
-                        ->where('is_reported', 1)->count();
+                $hasReported = Resource::where('is_reported', 1);
+
+                if (isset($post['user_id'])) {
+                    $hasReported = $hasReported->where('created_by', $post['user_id']);
+                }
+
+                $hasReported = $hasReported->count();
 
                 return $this->successResponse(['flag' => ($hasReported) ? true : false], true);
             } catch (Exception $ex) {
@@ -1137,5 +1328,54 @@ class ResourceController extends ApiController
         }
 
         return $this->errorResponse(__('custom.search_reported_fail'), $validator->errors()->messages());
+    }
+
+    public function checkAndCreateCustomSettings($customFields, $resourceId)
+    {
+        if (!empty($resourceId)) {
+            try {
+                DB::beginTransaction();
+
+                CustomSetting::where('resource_id', $resourceId)->delete();
+
+                foreach ($customFields as $field) {
+                    if (!empty($field['label']) && !empty($field['value'])) {
+                        foreach ($field['label'] as $locale => $label) {
+                            if (
+                                (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                                || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
+
+                            ) {
+                                DB::rollback();
+
+                                return false;
+                            }
+                        }
+
+                        $saveField = new CustomSetting;
+                        $saveField->resource_id = $resourceId;
+                        $saveField->created_by = \Auth::user()->id;
+                        $saveField->key = $this->trans($empty, $field['label']);
+                        $saveField->value = $this->trans($empty, $field['value']);
+
+                        $saveField->save();
+                    } else {
+                        DB::rollback();
+
+                        return false;
+                    }
+                }
+
+                DB::commit();
+
+                return true;
+            } catch (QueryException $ex) {
+                DB::rollback();
+
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return false;
     }
 }

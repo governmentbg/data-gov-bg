@@ -137,6 +137,10 @@ class UserController extends AdminController {
      */
     public function create(Request $request)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminUsers');
+        }
+
         $class = 'user';
         $errors = [];
         $digestFreq = UserSetting::getDigestFreq();

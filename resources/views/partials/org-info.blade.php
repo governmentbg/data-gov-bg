@@ -1,5 +1,5 @@
-<div class="col-sm-3 col-xs-12 m-t-lg">
-    <div><img class="full-size" src="{{ $organisation->logo }}"></div>
+<div class="col-sm-3 col-xs-12 m-t-lg side-info">
+    <div><img src="{{ $organisation->logo }}"></div>
     <h2 class="elipsis-1">{{ $organisation->name }}</h2>
     @if (isset($organisation->descript))
         <h4>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h4>

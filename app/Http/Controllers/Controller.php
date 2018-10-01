@@ -78,12 +78,16 @@ class Controller extends BaseController
                     $model->updated_by == $model->created_by
                     && !is_null($model->created_by)
                 ) {
-                    $username = User::find($model->created_by)->username;
+                    $username = !empty(User::find($model->created_by)) ? User::find($model->created_by)->username : null;
                     $model->updated_by = $username;
                     $model->created_by = $username;
                 } else {
-                    $model->updated_by = is_null($model->updated_by) ? null : User::find($model->updated_by)->username;
-                    $model->created_by = is_null($model->created_by) ? null : User::find($model->created_by)->username;
+                    $model->updated_by = (is_null($model->updated_by) || empty(User::find($model->updated_by)))
+                                            ? null
+                                            : User::find($model->updated_by)->username;
+                    $model->created_by = (is_null($model->created_by) || empty(User::find($model->created_by)))
+                                            ? null
+                                            : User::find($model->created_by)->username;
                 }
             } elseif (is_array($model)) {
                 $storage = [];
@@ -100,7 +104,7 @@ class Controller extends BaseController
                             $model[$key]->updated_by = $storage[$item->created_by];
                             $model[$key]->created_by = $storage[$item->created_by];
                         } else {
-                            $username = User::find($item->created_by)->username;
+                            $username = !empty(User::find($item->created_by)) ? User::find($item->created_by)->username : null;
                             $model[$key]->updated_by = $username;
                             $model[$key]->created_by = $username;
                             $storage[$createdId] = $username;
@@ -110,7 +114,9 @@ class Controller extends BaseController
                         if (!empty($storage[$item->created_by])) {
                             $model[$key]->created_by = $storage[$item->created_by];
                         } else {
-                            $username = is_null($item->created_by) ? null : User::find($item->created_by)->username;
+                            $username = (is_null($item->created_by) || empty(User::find(User::find($item->created_by))))
+                                            ? null :
+                                            User::find($item->created_by)->username;
                             $model[$key]->created_by = $username;
 
                             if (!is_null($username)) {
@@ -121,7 +127,9 @@ class Controller extends BaseController
                         if (!empty($storage[$item->updated_by])) {
                             $model[$key]->updated_by = $storage[$item->updated_by];
                         } else {
-                            $username = is_null($item->updated_by) ? null : User::find($item->updated_by)->username;
+                            $username = (is_null($item->updated_by) || empty(User::find($item->updated_by)))
+                                            ? null
+                                            : User::find($item->updated_by)->username;
                             $model[$key]->updated_by = $username;
 
                             if (!is_null($username)) {

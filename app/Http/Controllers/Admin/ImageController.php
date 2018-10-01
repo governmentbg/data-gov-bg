@@ -22,33 +22,29 @@ class ImageController extends AdminController
      */
     public function list(Request $request)
     {
-        if (Role::isAdmin()) {
-            $perPage = 10;
-            $params = [
-                'api_key'          => \Auth::user()->api_key,
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
+        $perPage = 10;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
 
-            $req = Request::create('/api/listImages', 'POST', $params);
-            $api = new ApiImage($req);
-            $result = $api->listImages($req)->getData();
+        $req = Request::create('/api/listImages', 'POST', $params);
+        $api = new ApiImage($req);
+        $result = $api->listImages($req)->getData();
 
-            $paginationData = $this->getPaginationData(
-                isset($result->images) ? $result->images : [],
-                $result->total_records,
-                [],
-                $perPage
-            );
+        $paginationData = $this->getPaginationData(
+            isset($result->images) ? $result->images : [],
+            $result->total_records,
+            [],
+            $perPage
+        );
 
-            return view('/admin/images', [
-                'class'      => 'user',
-                'images'     => $paginationData['items'],
-                'pagination' => $paginationData['paginate'],
-            ]);
-        }
-
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return view('/admin/images', [
+            'class'      => 'user',
+            'images'     => $paginationData['items'],
+            'pagination' => $paginationData['paginate'],
+        ]);
     }
 
     /**
@@ -60,45 +56,45 @@ class ImageController extends AdminController
      */
     public function add(Request $request)
     {
-        if (Role::isAdmin()) {
-            if ($request->has('create')) {
-                $params = [];
-
-                if (!empty($request->image)) {
-                    $params['filename'] = $request->image->getClientOriginalName();
-                    $path = $request->image->getPathName();
-                    $params['data'] = \File::get($path);
-                    $params['mimetype'] = $request->image->getMimeType();
-                }
-
-                $rq = Request::create('/api/addImage', 'POST', [
-                    'data' => [
-                        'name'       => $request->offsetGet('name'),
-                        'comment'    => $request->offsetGet('comment'),
-                        'img_file'   => isset($params['filename']) ? $params['filename'] : null,
-                        'mime_type'  => isset($params['mimetype']) ? $params['mimetype'] : null,
-                        'img_data'   => isset($params['data']) ? $params['data'] : null,
-                        'active'     => $request->offsetGet('active'),
-                    ]
-                ]);
-                $api = new ApiImage($rq);
-                $result = $api->addImage($rq)->getData();
-
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.add_success'));
-
-                    return redirect('/admin/images/view/'. $result->img_id);
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-
-                    return back()->withErrors($result->errors)->withInput(Input::all());
-                }
-            }
-
-            return view('admin/ImagesAdd', ['class' => 'user']);
+        if ($request->has('back')) {
+            return redirect()->route('adminImages');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        if ($request->has('create')) {
+            $params = [];
+
+            if (!empty($request->image)) {
+                $params['filename'] = $request->image->getClientOriginalName();
+                $path = $request->image->getPathName();
+                $params['data'] = \File::get($path);
+                $params['mimetype'] = $request->image->getMimeType();
+            }
+
+            $rq = Request::create('/api/addImage', 'POST', [
+                'data' => [
+                    'name'       => $request->offsetGet('name'),
+                    'comment'    => $request->offsetGet('comment'),
+                    'img_file'   => isset($params['filename']) ? $params['filename'] : null,
+                    'mime_type'  => isset($params['mimetype']) ? $params['mimetype'] : null,
+                    'img_data'   => isset($params['data']) ? $params['data'] : null,
+                    'active'     => $request->offsetGet('active'),
+                ]
+            ]);
+            $api = new ApiImage($rq);
+            $result = $api->addImage($rq)->getData();
+
+            if (!empty($result->success)) {
+                $request->session()->flash('alert-success', __('custom.add_success'));
+
+                return redirect('/admin/images/view/'. $result->img_id);
+            } else {
+                $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                return back()->withErrors($result->errors)->withInput(Input::all());
+            }
+        }
+
+        return view('admin/ImagesAdd', ['class' => 'user']);
     }
 
     /**
@@ -111,31 +107,31 @@ class ImageController extends AdminController
      */
     public function view(Request $request, $id)
     {
-        if (Role::isAdmin()) {
-            $req = Request::create('/api/getImageDetails', 'POST', ['img_id' => $id]);
-            $api = new ApiImage($req);
-            $result = $api->getImageDetails($req)->getData();
-
-            if ($result->success) {
-                $result->image->img_data = $this->getImageData(
-                    utf8_decode($result->image->img_data),
-                    $result->image->mime_type
-                );
-                $result->image = $this->appendPublicURI($result->image);
-            } else {
-                $request->session()->flash('alert-danger', __('custom.non_existing_image'));
-            }
-
-            return view(
-                'admin/imagesView',
-                [
-                    'class' => 'user',
-                    'image' => isset($result->image) ? $this->getModelUsernames($result->image) : null
-                ]
-            );
+        if ($request->has('back')) {
+            return redirect()->route('adminImages');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        $req = Request::create('/api/getImageDetails', 'POST', ['img_id' => $id]);
+        $api = new ApiImage($req);
+        $result = $api->getImageDetails($req)->getData();
+
+        if ($result->success) {
+            $result->image->img_data = $this->getImageData(
+                utf8_decode($result->image->img_data),
+                $result->image->mime_type
+            );
+            $result->image = $this->appendPublicURI($result->image);
+        } else {
+            $request->session()->flash('alert-danger', __('custom.non_existing_image'));
+        }
+
+        return view(
+            'admin/imagesView',
+            [
+                'class' => 'user',
+                'image' => isset($result->image) ? $this->getModelUsernames($result->image) : null
+            ]
+        );
     }
 
     /**
@@ -147,45 +143,41 @@ class ImageController extends AdminController
      */
     public function edit(Request $request, $id)
     {
-        if (Role::isAdmin()) {
-            $class = 'user';
-            $model = Image::where('id', $id)->first();
+        $class = 'user';
+        $model = Image::where('id', $id)->first();
 
-            if (isset($model->id)) {
-                $model = $this->appendPublicURI($model);
-                $model = $this->getModelUsernames($model);
+        if (isset($model->id)) {
+            $model = $this->appendPublicURI($model);
+            $model = $this->getModelUsernames($model);
 
-                if ($request->has('edit')) {
-                    $rq = Request::create('/api/editImage', 'POST', [
-                        'img_id' => $id,
-                        'data' => [
-                            'name'    => $request->offsetGet('name'),
-                            'comment' => $request->offsetGet('comment'),
-                            'active'  => $request->offsetGet('active'),
-                        ]
-                    ]);
+            if ($request->has('edit')) {
+                $rq = Request::create('/api/editImage', 'POST', [
+                    'img_id' => $id,
+                    'data' => [
+                        'name'    => $request->offsetGet('name'),
+                        'comment' => $request->offsetGet('comment'),
+                        'active'  => $request->offsetGet('active'),
+                    ]
+                ]);
 
-                    $api = new ApiImage($rq);
-                    $result = $api->editImage($rq)->getData();
+                $api = new ApiImage($rq);
+                $result = $api->editImage($rq)->getData();
 
-                    if ($result->success) {
-                        $request->session()->flash('alert-success', __('custom.edit_success'));
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                        return back();
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.edit_error'));
+                    return back();
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
 
-                        return back()->withErrors(isset($result->errors) ? $result->errors : []);
-                    }
+                    return back()->withErrors(isset($result->errors) ? $result->errors : []);
                 }
-            } else {
-                $request->session()->flash('alert-danger', __('custom.non_existing_image'));
             }
-
-            return view('admin/imagesEdit', compact('model', 'class'));
+        } else {
+            $request->session()->flash('alert-danger', __('custom.non_existing_image'));
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return view('admin/imagesEdit', compact('model', 'class'));
     }
 
     /**
@@ -197,28 +189,24 @@ class ImageController extends AdminController
      */
     public function delete(Request $request, $id)
     {
-        if (Role::isAdmin()) {
-            $class = 'user';
+        $class = 'user';
 
-            $rq = Request::create('/api/deleteImage', 'POST', [
-                'img_id' => $id,
-            ]);
+        $rq = Request::create('/api/deleteImage', 'POST', [
+            'img_id' => $id,
+        ]);
 
-            $api = new ApiImage($rq);
-            $result = $api->deleteImage($rq)->getData();
+        $api = new ApiImage($rq);
+        $result = $api->deleteImage($rq)->getData();
 
-            if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
+        if ($result->success) {
+            $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect('/admin/images/list');
-            } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
+            return redirect('/admin/images/list');
+        } else {
+            $request->session()->flash('alert-danger', __('custom.delete_error'));
 
-                return redirect('/admin/images/list')->withErrors(isset($result->errors) ? $result->errors : []);
-            }
+            return redirect('/admin/images/list')->withErrors(isset($result->errors) ? $result->errors : []);
         }
-
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     /**

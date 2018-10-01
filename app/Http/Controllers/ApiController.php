@@ -207,6 +207,6 @@ class ApiController extends Controller
      */
     protected function getImageTypeError()
     {
-        return __('custom.image_type_error') .' (JPEG, PNG, GIF, WebP)';
+        return __('custom.image_type_error') .' (JPEG, PNG, GIF, WebP, TIF, BMP, ICO, PSD)';
     }
 }

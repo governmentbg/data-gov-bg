@@ -6,7 +6,9 @@
     @include('partials.admin-nav-bar', ['view' => 'manageRoles'])
 
     <h3 class="m-b-xl">{{ __('custom.edit_rights') }}</h3>
-
+    @if ($roleName)
+        <h3 class="m-b-xl">{{ $roleName[0]->name }}</h3>
+    @endif
     <form method="POST" class="form-horizontal m-b-xl">
         {{ csrf_field() }}
         <div class="table-responsive opn-tbl text-center">
@@ -18,7 +20,7 @@
                 <tbody>
                     @foreach ($modules as $i => $module)
                         <tr>
-                            <td>{{ $module }}</td>
+                            <td>{{ __('custom.' . $module) }}</td>
                             <td>
                                 @foreach ($rightTypes as $key => $rightType)
                                     <label class="m-l-r-xs">
@@ -70,7 +72,7 @@
         </div>
         <div class="form-group row m-t-md">
             <div class="col-lg-12 text-right">
-                <button type="submit" name="edit" class="btn btn-primary">{{ __('custom.save') }}</button>
+                <button type="submit" name="edit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
             </div>
         </div>
     </form>

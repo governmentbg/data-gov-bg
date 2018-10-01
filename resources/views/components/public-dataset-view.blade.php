@@ -21,12 +21,13 @@
                         <div class="col-sm-12 col-xs-12 p-l-r-none">
                             <div class="pull-left">
                                 <h2>
-                                    {{ utrans('custom.author') }}:
                                     @if (!empty($user))
+                                        {{ utrans('custom.author') }}:
                                         <a href="{{ url('/user/profile/'. $user->id) }}">
                                             {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
                                         </a>
-                                    @else
+                                    @elseif (!empty($dataset->created_by))
+                                        {{ utrans('custom.author') }}:
                                         <span>{{ $dataset->created_by }}</span>
                                     @endif
                                 </h2>
@@ -37,10 +38,8 @@
                     <div class="col-xs-12 p-l-none m-t-md m-b-md">
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
-                                <div class="socialPadding p-w-sm">
-                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
+                                <div class="p-w-sm">
+                                    @include('partials.social-icons', ['shareUrl' => url()->current()])
                                 </div>
                                 @if ($approved)
                                     <div class="status p-w-sm">
@@ -68,6 +67,10 @@
                             </div>
                         </div>
                         <h2>{{ $dataset->name }}</h2>
+                        <p>
+                            <strong>{{ __('custom.unique_identificator') }}:</strong>
+                            &nbsp;{{ $dataset->uri }}
+                        </p>
                         @if (!empty($dataset->description))
                             <p><strong>{{ __('custom.description') }}:</strong></p>
                             <p>{!! nl2br(e($dataset->description)) !!}</p>
@@ -98,7 +101,7 @@
                             <div class="pull-left history">
                                 @foreach ($resources as $resource)
                                     <div class="{{ $resource->reported ? 'signaled' : '' }}">
-                                        <a href="{{ url($rootUrl .'/resourceView/'. $resource->uri) }}">
+                                        <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => ''])) }}">
                                             <span>
                                                 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><path d="M26.72,29.9H3.33V0H26.72ZM4.62,28.61H25.43V1.29H4.62Z"/><path d="M11.09,6.18V9.12H8.14V6.18h2.95m1.29-1.3H6.85v5.53h5.53V4.88Z"/><path d="M11.09,13.48v2.94H8.14V13.48h2.95m1.29-1.29H6.85v5.52h5.53V12.19Z"/><path d="M11.09,20.78v2.94H8.14V20.78h2.95m1.29-1.29H6.85V25h5.53V19.49Z"/><rect x="14.34" y="21.38" width="7.57" height="1.74"/><rect x="14.34" y="14.08" width="7.57" height="1.74"/><rect x="14.34" y="6.78" width="7.57" height="1.74"/></svg>
                                             </span>
@@ -144,12 +147,25 @@
                             </p>
                             <div class="m-b-sm"><p>{!! nl2br(e($dataset->sla)) !!}</p></div>
                         @endif
+                        @if (isset($dataset->custom_settings[0]) && !empty($dataset->custom_settings[0]->key))
+                            <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                            @foreach ($dataset->custom_settings as $field)
+                                <div class="row m-b-lg">
+                                    <div class="col-xs-6">{{ $field->key }}</div>
+                                    <div class="col-xs-6 text-left">{{ $field->value }}</div>
+                                </div>
+                            @endforeach
+                        @endif
                         <div class="info-bar-sm col-sm-12 col-xs-12 p-l-none">
                             <ul class="p-l-none p-h-sm">
                                 <li>{{ __('custom.created_at') }}: {{ $dataset->created_at }}</li>
-                                <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
-                                @if (!empty($dataset->updated_by))
+                                @if (!empty($dataset->created_by))
+                                    <li>{{ __('custom.created_by') }}: {{ $dataset->created_by }}</li>
+                                @endif
+                                @if (!empty($dataset->updated_at))
                                     <li>{{ __('custom.updated_at') }}: {{ $dataset->updated_at }}</li>
+                                @endif
+                                @if (!empty($dataset->updated_by))
                                     <li>{{ __('custom.updated_by') }}: {{ $dataset->updated_by }}</li>
                                 @endif
                             </ul>
@@ -161,14 +177,27 @@
     </div>
     <div class="row">
         <div class="col-sm-9 col-xs-11 page-content p-sm col-sm-offset-3 mng-btns">
+            @if (isset($buttons['addResource']) && $buttons['addResource'])
+                <a
+                    class="btn btn-primary badge badge-pill"
+                    href="{{ url(
+                        '/'. (isset($buttons['addResourceRootUrl']) ? $buttons['addResourceRootUrl'] : $buttons['rootUrl'] .'/dataset') .
+                        '/resource/create/'. $dataset->uri .
+                        (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                    ) }}"
+                >{{ uctrans('custom.add_resource') }}</a>
+            @endif
             @if (isset($buttons['edit']) && $buttons['edit'])
                 <a
                     class="btn btn-primary badge badge-pill"
-                    href="{{ url('/data/edit/'. $dataset->uri) }}"
+                    href="{{ url(
+                        '/'. (isset($buttons['editRootUrl']) ? $buttons['editRootUrl'] : $buttons['rootUrl'] .'/dataset') .
+                        '/edit/'. $dataset->uri
+                    ) }}"
                 >{{ uctrans('custom.edit') }}</a>
             @endif
             @if (isset($buttons['delete']) && $buttons['delete'])
-                <form method="POST" class="inline-block" action="{{ url('/dataset/delete') }}">
+                <form method="POST" class="inline-block">
                     {{ csrf_field() }}
                     <button
                         class="btn del-btn btn-primary badge badge-pill"

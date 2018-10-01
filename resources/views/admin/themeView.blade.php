@@ -37,7 +37,7 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">Преглед на файл</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.file_preview') }}:</label>
                             <div class="col-sm-6 col-xs-12 fileinput-new thumbnai form-control input-border-r-12 m-l-sm">
                                 <img
                                     class="preview js-preview {{ empty($theme->image) ? 'hidden' : '' }}"
@@ -72,6 +72,44 @@
                                 <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $theme->updated_at }}</div>
+                                </div>
+                            </div>
+                        @endif
+                        @if (\App\Role::isAdmin())
+                            <div class="text-right">
+                                <div class="row">
+                                    <form
+                                        method="POST"
+                                        class="inline-block"
+                                        action="{{ url('admin/themes/edit/'. $theme->id) }}"
+                                    >
+                                        {{ csrf_field() }}
+                                        <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                        <input type="hidden" name="view" value="1">
+                                    </form>
+                                    <form
+                                        method="POST"
+                                        class="inline-block"
+                                    >
+                                        {{ csrf_field() }}
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                    </form>
+                                    <form
+                                        method="POST"
+                                        class="inline-block"
+                                        action="{{ url('admin/themes/delete/'. $theme->id) }}"
+                                    >
+                                        {{ csrf_field() }}
+                                            <button
+                                                class="btn del-btn btn-primary del-btn"
+                                                type="submit"
+                                                name="delete"
+                                                data-confirm="{{ __('custom.delete_theme_confirm') }}"
+                                            >{{ uctrans('custom.remove') }}</button>
+                                    </form>
                                 </div>
                             </div>
                         @endif

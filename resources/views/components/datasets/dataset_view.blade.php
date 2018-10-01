@@ -75,6 +75,18 @@
                     {!! nl2br(e($dataset->sla)) !!}
                 </div>
             @endif
+            @if (
+                isset($dataset->custom_settings[0])
+                && !empty($dataset->custom_settings[0]->key)
+            )
+                <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                @foreach ($dataset->custom_settings as $field)
+                    <div class="row m-b-lg">
+                        <div class="col-xs-6">{{ $field->key }}</div>
+                        <div class="col-xs-6 text-left">{{ $field->value }}</div>
+                    </div>
+                @endforeach
+            @endif
             <div class="col-sm-12 pull-left m-t-md p-l-none">
                 <div class="pull-left history">
                     @foreach ($resources as $resource)
@@ -130,6 +142,13 @@
                     <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                 </form>
             @endif
+            <form method="POST" class="inline-block">
+            {{ csrf_field() }}
+                <button
+                    name="back"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</button>
+            </form>
         </div>
     </div>
     @include('components.signal-box', ['signals' => $dataset->signals])

@@ -80,6 +80,16 @@
                                                 <form
                                                     method="POST"
                                                     class="inline-block"
+                                                >
+                                                    {{ csrf_field() }}
+                                                    <button
+                                                        name="back"
+                                                        class="btn btn-primary"
+                                                    >{{ uctrans('custom.close') }}</button>
+                                                </form>
+                                                <form
+                                                    method="POST"
+                                                    class="inline-block"
                                                     action="{{ url('/admin/organisations/delete/'. $organisation->id) }}"
                                                 >
                                                     {{ csrf_field() }}

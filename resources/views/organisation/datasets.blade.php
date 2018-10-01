@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row">
         @include('partials.sidebar-org')
-        <div class="col-sm-9 col-xs-12 p-h-sm page-content">
+        <div class="col-sm-9 col-xs-12 p-sm page-content">
             <div class="filter-content">
                 <div class="col-md-12">
                     <div class="row">
@@ -44,7 +44,7 @@
                 <div>
                 @if ($resultsCount > 0)
                     <div class="m-r-md p-h-xs">
-                        <p>{{ __('custom.list_order_by') }}:</p>
+                        <p>{{ __('custom.order_by') }}:</p>
                         <ul class="nav sort-by p-l-r-none">
                             <li>
                                 <a
@@ -126,6 +126,13 @@
                 @endif
                 </div>
             </div>
+            @if (isset($buttons['add']) && $buttons['add'])
+                <div class="col-lg-12 text-right">
+                    <span class="badge badge-pill m-t-md">
+                        <a href="{{ url($buttons['addUrl']) }}">{{ __('custom.add_new_dataset') }}</a>
+                    </span>
+                </div>
+            @endif
             <div class="articles">
             @if ($resultsCount > 0)
                 <div class="col-lg-12 p-h-xxs p-l-r-none">
@@ -137,9 +144,32 @@
                             <span class="h4">{{ __('custom.selected_topics') }}:</span>
                         </div>
                         <div class="col-lg-9 p-h-xs">
-                            @foreach ($getParams['category'] as $selCategory)
-                                <span class="badge badge-pill">{{ array_pluck($categories, 'name', 'id')[$selCategory] }}</span>
-                            @endforeach
+                            <form method="post">
+                                {{ csrf_field() }}
+                                @foreach ($getParams['category'] as $selCategory)
+                                    <span class="badge badge-pill">
+                                        {{ array_pluck($categories, 'name', 'id')[$selCategory] }}&nbsp;
+                                        @if (isset($buttons[$selCategory]['followCategory']) && $buttons[$selCategory]['followCategory'])
+                                            <button class="badge badge-pill badge-follow" type="submit" name="followCategory" value="{{ $selCategory }}"
+                                                title="{{ uctrans('custom.follow') }}">
+                                                <i class="fa fa-plus-circle"></i>
+                                            </button>
+                                        @elseif (isset($buttons[$selCategory]['unfollowCategory']) && $buttons[$selCategory]['unfollowCategory'])
+                                            <button class="badge badge-pill badge-follow" type="submit" name="unfollowCategory" value="{{ $selCategory }}"
+                                            title="{{ uctrans('custom.stop_follow') }}">
+                                                <i class="fa fa-minus-circle"></i>
+                                            </button>
+                                        @endif
+                                        <a href="{{ action('OrganisationController@datasets', array_merge(
+                                                    array_except(app('request')->input(), ['category', 'page']),
+                                                    (array_diff($getParams['category'], [$selCategory])
+                                                        ? ['uri' => $organisation->uri, 'category' => array_diff($getParams['category'], [$selCategory])]
+                                                        : ['uri' => $organisation->uri])
+                                                )) }}"
+                                        ><i class="fa fa-remove"></i></a>
+                                    </span>
+                                @endforeach
+                            </form>
                         </div>
                     @endif
                     @if (isset($getParams['tag']) && count($getParams['tag']) > 0)
@@ -147,9 +177,32 @@
                             <span class="h4">{{ __('custom.selected_tags') }}:</span>
                         </div>
                         <div class="col-lg-9 p-h-xs">
-                            @foreach ($getParams['tag'] as $selTag)
-                                <span class="badge badge-pill">{{ array_pluck($tags, 'name', 'id')[$selTag] }}</span>
-                            @endforeach
+                            <form method="post">
+                                {{ csrf_field() }}
+                                @foreach ($getParams['tag'] as $selTag)
+                                    <span class="badge badge-pill">
+                                        {{ array_pluck($tags, 'name', 'id')[$selTag] }}&nbsp;
+                                        @if (isset($buttons[$selTag]['followTag']) && $buttons[$selTag]['followTag'])
+                                            <button class="badge badge-follow" type="submit" name="followTag" value="{{ $selTag }}"
+                                            title="{{ uctrans('custom.follow') }}">
+                                                <i class="fa fa-plus-circle"></i>
+                                            </button>
+                                        @elseif (isset($buttons[$selTag]['unfollowTag']) && $buttons[$selTag]['unfollowTag'])
+                                            <button class="badge badge-follow" type="submit" name="unfollowTag" value="{{ $selTag }}"
+                                            title="{{ uctrans('custom.stop_follow') }}">
+                                                <i class="fa fa-minus-circle"></i>
+                                            </button>
+                                        @endif
+                                        <a href="{{ action('OrganisationController@datasets', array_merge(
+                                                    array_except(app('request')->input(), ['tag', 'page']),
+                                                    (array_diff($getParams['tag'], [$selTag])
+                                                        ? ['uri' => $organisation->uri, 'tag' => array_diff($getParams['tag'], [$selTag])]
+                                                        : ['uri' => $organisation->uri])
+                                                )) }}"
+                                        ><i class="fa fa-remove"></i></a>
+                                    </span>
+                                @endforeach
+                            </form>
                         </div>
                     @endif
                 </div>
@@ -167,40 +220,39 @@
                                         <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
                                     </a>
                                 </div>
-                                <div class="socialPadding p-w-sm">
-                                    <div class="social fb"><a href="#"><i class="fa fa-facebook"></i></a></div>
-                                    <div class="social tw"><a href="#"><i class="fa fa-twitter"></i></a></div>
-                                    <div class="social gp"><a href="#"><i class="fa fa-google-plus"></i></a></div>
+                                <div class="p-w-sm">
+                                    @include(
+                                        'partials.social-icons',
+                                        ['shareUrl' => route('orgViewDataset', ['uri' => $dataset->uri])]
+                                    )
                                 </div>
                                 @if ($approved)
                                     <div class="status p-w-sm">
                                         <span>{{ __('custom.approved') }} </span>
                                     </div>
                                 @else
-                                    <div class="status notApproved p-w-sm">
+                                    <div class="status notApproved p-w-sm p-l-r-none">
                                         <span>{{ __('custom.unapproved') }}</span>
                                     </div>
                                 @endif
                             </div>
                             <div class="follow pull-right">
-                                @auth
-                                    <form method="post">
-                                        {{ csrf_field() }}
-                                        @if (!in_array($dataset->id, $followed))
-                                            <div>
-                                                <button class="badge badge-pill" type="submit" name="follow" value="{{ $dataset->id }}">{{ utrans('custom.follow') }}</button>
-                                            </div>
-                                        @else
-                                            <div>
-                                                <button class="badge badge-pill" type="submit" name="unfollow" value="{{ $dataset->id }}">{{ uctrans('custom.stop_follow') }}</button>
-                                            </div>
-                                        @endif
-                                    </form>
-                                @endauth
+                                <form method="post">
+                                    {{ csrf_field() }}
+                                    @if (isset($buttons[$dataset->id]['follow']) && $buttons[$dataset->id]['follow'])
+                                        <div>
+                                            <button class="badge badge-pill" type="submit" name="follow" value="{{ $dataset->id }}">{{ utrans('custom.follow') }}</button>
+                                        </div>
+                                    @elseif (isset($buttons[$dataset->id]['unfollow']) && $buttons[$dataset->id]['unfollow'])
+                                        <div>
+                                            <button class="badge badge-pill" type="submit" name="unfollow" value="{{ $dataset->id }}">{{ uctrans('custom.stop_follow') }}</button>
+                                        </div>
+                                    @endif
+                                </form>
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">
+                            <a href="{{ route('orgViewDataset', array_merge(app('request')->input(), ['uri' => $dataset->uri])) }}">
                                 <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                             </a>
                             <p>{!! nl2br(e($dataset->descript)) !!}</p>
@@ -216,7 +268,9 @@
                                 </div>
                                 <div class="pull-right">
                                     <span class="badge badge-pill">
-                                        <a href="{{ url('/organisation/dataset/'. $dataset->uri) }}">{{ uctrans('custom.see_more') }}</a>
+                                        <a href="{{ route('orgViewDataset', array_merge(app('request')->input(), ['uri' => $dataset->uri])) }}">
+                                            {{ uctrans('custom.see_more') }}
+                                        </a>
                                     </span>
                                 </div>
                             </div>

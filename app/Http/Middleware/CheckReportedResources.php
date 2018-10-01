@@ -20,7 +20,9 @@ class CheckReportedResources
     public function handle(Request $request, Closure $next)
     {
         $params['api_key'] = \Auth::user()->api_key;
-        $params['user_id'] = \Auth::user()->id;
+        if (!\Auth::user()->is_admin) {
+            $params['user_id'] = \Auth::user()->id;
+        }
 
         $checkReq = Request::create('/api/hasReportedResource', 'POST', $params);
         $api = new ResourceController($checkReq);

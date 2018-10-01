@@ -42,6 +42,44 @@
                                 <div>{{ $term->ordering }}</div>
                             </div>
                         </div>
+                        @if (\App\Role::isAdmin())
+                            <div class="text-right">
+                                <div class="row">
+                                    <form
+                                        method="POST"
+                                        class="inline-block"
+                                        action="{{ url('admin/terms-of-use/edit/'. $term->id) }}"
+                                    >
+                                        {{ csrf_field() }}
+                                        <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                        <input type="hidden" name="view" value="1">
+                                    </form>
+                                    <form
+                                        method="POST"
+                                        class="inline-block"
+                                    >
+                                        {{ csrf_field() }}
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                    </form>
+                                    <form
+                                        method="POST"
+                                        class="inline-block"
+                                        action="{{ url('admin/terms-of-use/delete/'. $term->id) }}"
+                                    >
+                                        {{ csrf_field() }}
+                                            <button
+                                                class="btn del-btn btn-primary del-btn"
+                                                type="submit"
+                                                name="delete"
+                                                data-confirm="{{ __('custom.remove_data') }}"
+                                            >{{ uctrans('custom.remove') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

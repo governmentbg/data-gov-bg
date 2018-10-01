@@ -18,7 +18,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['org', 'page']),
-                                                ['org' => array_diff($getParams['org'], [$organisation->id])]
+                                                (array_diff($getParams['org'], [$organisation->id])
+                                                    ? ['org' => array_diff($getParams['org'], [$organisation->id])]
+                                                    : [])
                                             )
                                         )
                             }}"
@@ -78,7 +80,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['user', 'page']),
-                                                ['user' => array_diff($getParams['user'], [$user->id])]
+                                                (array_diff($getParams['user'], [$user->id])
+                                                    ? ['user' => array_diff($getParams['user'], [$user->id])]
+                                                    : [])
                                             )
                                         )
                             }}"
@@ -139,7 +143,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['group', 'page']),
-                                                ['group' => array_diff($getParams['group'], [$group->id])]
+                                                (array_diff($getParams['group'], [$group->id])
+                                                    ? ['group' => array_diff($getParams['group'], [$group->id])]
+                                                    : [])
                                             )
                                         )
                             }}"
@@ -199,7 +205,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['category', 'page']),
-                                                ['category' => array_diff($getParams['category'], [$category->id])]
+                                                (array_diff($getParams['category'], [$category->id])
+                                                    ? ['category' => array_diff($getParams['category'], [$category->id])]
+                                                    : [])
                                             )
                                         )
                             }}"
@@ -259,7 +267,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['tag', 'page']),
-                                                ['tag' => array_diff($getParams['tag'], [$tag->id])]
+                                                (array_diff($getParams['tag'], [$tag->id])
+                                                    ? ['tag' => array_diff($getParams['tag'], [$tag->id])]
+                                                    : [])
                                             )
                                         )
                             }}"
@@ -319,7 +329,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['format', 'page']),
-                                                ['format' => array_diff($getParams['format'], [strtolower($format->format)])]
+                                                (array_diff($getParams['format'], [strtolower($format->format)])
+                                                    ? ['format' => array_diff($getParams['format'], [strtolower($format->format)])]
+                                                    : [])
                                             )
                                         )
                             }}"
@@ -383,7 +395,9 @@
                                         : action(
                                             'DataController@'. $action, array_merge(
                                                 array_except(app('request')->input(), ['license', 'page']),
-                                                ['license' => array_diff($getParams['license'], [$termOfUse->id])]
+                                                (array_diff($getParams['license'], [$termOfUse->id])
+                                                    ? ['license' => array_diff($getParams['license'], [$termOfUse->id])]
+                                                    : [])
                                             )
                                         )
                             }}"

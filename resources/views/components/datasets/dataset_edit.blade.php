@@ -307,7 +307,7 @@
             @if ($field['view'] == 'translation_custom')
                 @include(
                     'components.form_groups.translation_custom_fields',
-                    ['field' => $field]
+                    ['field' => $field, 'model' => $withModel]
                 )
             @endif
         @endforeach
@@ -330,6 +330,12 @@
                     class="btn btn-primary"
                     href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
                 >{{ uctrans('custom.preview') }}</a>
+                <a
+                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
                 <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
             </div>
         </div>

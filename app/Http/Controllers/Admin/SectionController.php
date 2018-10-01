@@ -41,84 +41,80 @@ class SectionController extends AdminController
      */
     public function list(Request $request)
     {
-        if (Role::isAdmin()) {
-            $perPage = 10;
-            $params = [
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
+        $perPage = 10;
+        $params = [
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
 
-            $params['criteria']['order'] = [
-                'type'  => $request->offsetGet('order'),
-                'field' => 'created_at',
-            ];
+        $params['criteria']['order'] = [
+            'type'  => $request->offsetGet('order'),
+            'field' => 'created_at',
+        ];
 
-            $request = Request::create('/api/listSections', 'POST', $params);
-            $api = new ApiSection($request);
-            $result = $api->listSections($request)->getData();
-            $getParams = array_except(app('request')->input(), ['page']);
+        $request = Request::create('/api/listSections', 'POST', $params);
+        $api = new ApiSection($request);
+        $result = $api->listSections($request)->getData();
+        $getParams = array_except(app('request')->input(), ['page']);
 
-            $paginationData = $this->getPaginationData(
-                isset($result->sections) ? $result->sections : [],
-                isset($result->total_records) ? $result->total_records : 0,
-                $getParams,
-                $perPage
-            );
+        $paginationData = $this->getPaginationData(
+            isset($result->sections) ? $result->sections : [],
+            isset($result->total_records) ? $result->total_records : 0,
+            $getParams,
+            $perPage
+        );
 
-            return view(
-                'admin/sectionsList',
-                [
-                    'class'      => 'user',
-                    'sections'   => $paginationData['items'],
-                    'pagination' => $paginationData['paginate'],
-                ]
-            );
-        }
-
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return view(
+            'admin/sectionsList',
+            [
+                'class'      => 'user',
+                'sections'   => $paginationData['items'],
+                'pagination' => $paginationData['paginate'],
+            ]
+        );
     }
 
     public function add(Request $request)
     {
-        if (Role::isAdmin()) {
-            $themes = $this->getColorThemes(true);
-
-            if ($request->has('create')) {
-                $rq = Request::create('/api/addSection', 'POST', [
-                    'data' => [
-                        'name'       => $request->offsetGet('name'),
-                        'active'     => $request->offsetGet('active'),
-                        'parent_id'  => $request->offsetGet('parent_id'),
-                        'ordering'   => $request->offsetGet('ordering'),
-                        'forum_link' => $request->offsetGet('forum_link'),
-                        'theme'      => $request->offsetGet('theme'),
-                    ]
-                ]);
-                $api = new ApiSection($rq);
-                $result = $api->addSection($rq)->getData();
-
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.add_success'));
-
-                    return redirect('/admin/sections/view/'. $result->id);
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-
-                    return back()->withErrors($result->errors)->withInput(Input::all());
-                }
-            }
-
-            return view(
-                'admin/sectionAdd',
-                [
-                    'class'  => 'user',
-                    'fields' => self::getSectionTransFields(),
-                    'themes' => $themes
-                ]
-            );
+        if ($request->has('back')) {
+            return redirect()->route('adminSections');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        $themes = $this->getColorThemes(true);
+
+        if ($request->has('create')) {
+            $rq = Request::create('/api/addSection', 'POST', [
+                'data' => [
+                    'name'       => $request->offsetGet('name'),
+                    'active'     => $request->offsetGet('active'),
+                    'parent_id'  => $request->offsetGet('parent_id'),
+                    'ordering'   => $request->offsetGet('ordering'),
+                    'forum_link' => $request->offsetGet('forum_link'),
+                    'theme'      => $request->offsetGet('theme'),
+                ]
+            ]);
+            $api = new ApiSection($rq);
+            $result = $api->addSection($rq)->getData();
+
+            if (!empty($result->success)) {
+                $request->session()->flash('alert-success', __('custom.add_success'));
+
+                return redirect('/admin/sections/view/'. $result->id);
+            } else {
+                $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                return back()->withErrors($result->errors)->withInput(Input::all());
+            }
+        }
+
+        return view(
+            'admin/sectionAdd',
+            [
+                'class'  => 'user',
+                'fields' => self::getSectionTransFields(),
+                'themes' => $themes
+            ]
+        );
     }
 
     /**
@@ -132,6 +128,10 @@ class SectionController extends AdminController
     public function view(Request $request, $id)
     {
         if (Role::isAdmin()) {
+            if ($request->has('back')) {
+                return redirect()->route('adminSections');
+            }
+
             $perPage = 10;
             $params = [
                 'records_per_page' => $perPage,

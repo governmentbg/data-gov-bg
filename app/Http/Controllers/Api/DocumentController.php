@@ -94,10 +94,10 @@ class DocumentController extends ApiController
                 $doc->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
                 $doc->save();
 
-                if ($this->checkFileSize($data['data'])) {
+                if ($this->checkFileSize($post['data']['data'])) {
                     $doc->save();
 
-                    file_put_contents($this->path . $doc->id, $data['data']);
+                    file_put_contents($this->path . $doc->id, $post['data']['data']);
 
                     DB::commit();
 

@@ -699,6 +699,7 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $locale = \LaravelLocalization::getCurrentLocale();
             $query = Resource::with('DataSet');
 
             if (!empty($post['criteria']['dataset_uri'])) {
@@ -716,10 +717,6 @@ class ResourceController extends ApiController
             }
 
             $count = $query->count();
-            $query->forPage(
-                $request->offsetGet('page_number'),
-                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-            );
 
             $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
             $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
@@ -748,9 +745,27 @@ class ResourceController extends ApiController
                 }
             }
 
-            $query->orderBy($field, $type);
+            $transFields = ['name', 'descript'];
 
-            $locale = \LaravelLocalization::getCurrentLocale();
+            $transCols = Resource::getTransFields();
+
+            if (isset($type) && isset($field)) {
+                if (in_array($field, $transFields)) {
+                    $col = $transCols[$field];
+                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'resources.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'resources.' . $field)
+                        ->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $type);
+                } else {
+                    $query->orderBy($field, $type);
+                }
+            }
+
+            $query->forPage(
+                $request->offsetGet('page_number'),
+                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+            );
+
             $fileFormats = Resource::getFormats();
             $rqTypes = Resource::getRequestTypes();
             $types = Resource::getTypes();
@@ -778,16 +793,6 @@ class ResourceController extends ApiController
                     'created_by'            => $result->created_by,
                     'updated_by'            => $result->updated_by,
                 ];
-            }
-
-            $transFields = ['name', 'description'];
-
-            if (in_array($field, $transFields)) {
-                usort($results, function($a, $b) use ($type, $field) {
-                    return strtolower($type) == 'asc'
-                        ? strcmp($a[$field], $b[$field])
-                        : strcmp($b[$field], $a[$field]);
-                });
             }
 
             return $this->successResponse(['resources' => $results, 'total_records' => $count], true);

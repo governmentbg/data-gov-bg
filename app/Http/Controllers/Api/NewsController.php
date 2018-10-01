@@ -541,8 +541,27 @@ class NewsController extends ApiController
                 }
             }
 
-            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);
+            $transFields = [
+                'title',
+                'abstract',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            $transCols = Page::getTransFields();
+
+            if (isset($order['type'] ) && isset($order['field'])) {
+                if (in_array($order['field'], $transFields)) {
+                    $col = $transCols[$order['field']];
+                    $newsList->select('translations.label', 'translations.group_id', 'translations.text', 'pages.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.' . $order['field'])
+                        ->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $order['type'] );
+                } else {
+                    $newsList->orderBy($order['field'], $order['type'] );
+                }
             }
 
             $newsList->forPage(
@@ -572,25 +591,6 @@ class NewsController extends ApiController
                         'valid_from'        => date($singleNews->valid_from),
                         'valid_to'          => date($singleNews->valid_to),
                     ];
-                }
-            }
-
-            $transFields = [
-                'title',
-                'abstract',
-                'body',
-                'head_title',
-                'meta_descript',
-                'meta_key_words',
-            ];
-
-            if (isset($criteria['order'])) {
-                if ($criteria['order'] && isset($criteria['order']['field']) && in_array($criteria['order']['field'], $transFields)) {
-                    usort($results, function($a, $b) use ($criteria) {
-                        return strtolower($criteria['order']['type']) == 'asc'
-                            ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                            : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
-                    });
                 }
             }
 
@@ -656,7 +656,7 @@ class NewsController extends ApiController
             $search = $criteria['keywords'];
 
             $ids = Page::search($search)->where('type', Page::TYPE_NEWS)->get()->pluck('id');
-            $newsList = Page::whereIn('id', $ids);
+            $newsList = Page::whereIn('pages.id', $ids);
             $rightCheck = false;
             if (isset($newsSearchData['api_key'])) {
                 $user = \App\User::where('api_key', $newsSearchData['api_key'])->first();
@@ -708,8 +708,27 @@ class NewsController extends ApiController
                 }
             }
 
-            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);
+            $transFields = [
+                'title',
+                'abstract',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            $transCols = Page::getTransFields();
+
+            if (isset($order['type'] ) && isset($order['field'])) {
+                if (in_array($order['field'], $transFields)) {
+                    $col = $transCols[$order['field']];
+                    $newsList->select('translations.label', 'translations.group_id', 'translations.text', 'pages.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.' . $order['field'])
+                        ->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $order['type'] );
+                } else {
+                    $newsList->orderBy($order['field'], $order['type'] );
+                }
             }
 
             $newsList->forPage(

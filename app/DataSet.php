@@ -30,6 +30,11 @@ class DataSet extends Model implements TranslatableInterface
         'sla'       => 'text',
     ];
 
+    public static function getTransFields()
+    {
+        return self::$translatable;
+    }
+
     public function getDescriptionAttribute()
     {
         return $this->descript;

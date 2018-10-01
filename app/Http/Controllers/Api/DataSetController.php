@@ -544,6 +544,9 @@ class DataSetController extends ApiController
         $criteria = !empty($post['criteria']) ? $post['criteria'] : [];
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
+        $locale = !empty($post['criteria']['locale'])
+        ? $post['criteria']['locale']
+        : \LaravelLocalization::getCurrentLocale();
 
         $validator = \Validator::make($post, [
             'api_key'                    => 'nullable|string|exists:users,api_key',
@@ -703,20 +706,27 @@ class DataSetController extends ApiController
                     }
                 }
 
-                if (!empty($order)) {
+                $count = $query->count();
+
+                $transFields = ['name', 'sla', 'descript'];
+
+                $transCols = DataSet::getTransFields();
+
+                if (in_array($order['field'], $transFields)) {
+                    $col = $transCols[$order['field']];
+                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'data_sets.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.' . $order['field'])->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $order['type']);
+                } else {
                     $query->orderBy($order['field'], $order['type']);
                 }
 
-                $count = $query->count();
                 $query->forPage(
                     $request->offsetGet('page_number'),
                     $this->getRecordsPerPage($request->offsetGet('records_per_page'))
                 );
 
                 $results = [];
-                $locale = !empty($post['criteria']['locale'])
-                    ? $post['criteria']['locale']
-                    : \LaravelLocalization::getCurrentLocale();
 
                 foreach ($query->get() as $set) {
                     $result['id'] = $set->id;
@@ -772,16 +782,6 @@ class DataSetController extends ApiController
                     $result['tags'] = $tags;
 
                     $results[] = $result;
-                }
-
-                $transFields = ['name', 'sla', 'descript'];
-
-                if ($order && in_array($order['field'], $transFields)) {
-                    usort($results, function($a, $b) use ($order) {
-                        return strtolower($order['type']) == 'asc'
-                            ? strcmp($a[$order['field']], $b[$order['field']])
-                            : strcmp($b[$order['field']], $a[$order['field']]);
-                    });
                 }
 
                 return $this->successResponse([

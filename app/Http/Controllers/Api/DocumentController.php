@@ -90,7 +90,7 @@ class DocumentController extends ApiController
                 $doc->descript = $this->trans($post['data']['locale'], $post['data']['description']);
                 $doc->file_name = $post['data']['filename'];
                 $doc->mime_type = $post['data']['mimetype'];
-                $doc->data = $post['data']['data'];
+
                 $doc->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
                 $doc->save();
 
@@ -404,7 +404,7 @@ class DocumentController extends ApiController
             return $this->errorResponse(__('custom.list_document_fail'), $validator->errors()->messages());
         }
 
-        $result = [];
+        $locale = \LaravelLocalization::getCurrentLocale();
 
         $columns = [
             'id',
@@ -450,20 +450,29 @@ class DocumentController extends ApiController
             $query->where($filterColumn, '<=', $criteria['date_to']);
         }
 
+        $count = $query->count();
+
+        $transFields = ['descript', 'name'];
+
+        $transCols = Document::getTransFields();
+
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            $query->orderBy(
-                $criteria['order']['field'],
-                $criteria['order']['type'] == 'asc' ? 'asc' : 'desc'
-            );
+            if (in_array($criteria['order']['field'], $transFields)) {
+                $col = $transCols[$criteria['order']['field']];
+                $query->select('translations.label', 'translations.group_id', 'translations.text', 'documents.*')
+                    ->leftJoin('translations', 'translations.group_id', '=', 'documents.' . $criteria['order']['field'])
+                    ->where('translations.locale', $locale)
+                    ->orderBy('translations.' . $col, $criteria['order']['type']);
+            } else {
+                $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
+            }
         }
 
-        $count = $query->count();
         $query->forPage(
             $request->offsetGet('page_number'),
             $this->getRecordsPerPage($request->offsetGet('records_per_page'))
         );
 
-        $locale = \LaravelLocalization::getCurrentLocale();
         $results = [];
 
         foreach ($query->get() as $result) {
@@ -492,16 +501,6 @@ class DocumentController extends ApiController
         ];
 
         Module::add($logData);
-
-        $transFields = ['description', 'name'];
-
-        if (isset($criteria['order']) && $criteria['order'] && isset($criteria['order']['field']) && in_array($criteria['order']['field'], $transFields)) {
-            usort($results, function($a, $b) use ($criteria) {
-                return strtolower($criteria['order']['type']) == 'asc'
-                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                    : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
-            });
-        }
 
         return $this->successResponse(
             [
@@ -557,6 +556,7 @@ class DocumentController extends ApiController
         if (!$validator->fails()) {
             $data = [];
             $criteria = $post['criteria'];
+            $locale = \LaravelLocalization::getCurrentLocale();
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
             $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
 
@@ -579,17 +579,31 @@ class DocumentController extends ApiController
             }
 
             $ids = Document::search($criteria['search'])->get()->pluck('id');
-            $query = Document::whereIn('id', $ids);
+            $query = Document::whereIn('documents.id', $ids);
 
             $count = $query->count();
+
+            $transFields = ['descript', 'name'];
+
+            $transCols = Document::getTransFields();
+
+            if (isset($order['type'] ) && isset($order['field'])) {
+                if (in_array($order['field'], $transFields)) {
+                    $col = $transCols[$order['field']];
+                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'documents.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'documents.' . $order['field'])
+                        ->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $order['type'] );
+                } else {
+                    $query->orderBy($order['field'], $order['type'] );
+                }
+            }
+
             $query->forPage(
                 $request->offsetGet('page_number'),
                 $this->getRecordsPerPage($request->offsetGet('records_per_page'))
             );
 
-            $query->orderBy($order['field'], $order['type']);
-
-            $locale = \LaravelLocalization::getCurrentLocale();
             $results = [];
 
             foreach ($query->get() as $result) {
@@ -616,16 +630,6 @@ class DocumentController extends ApiController
             ];
 
             Module::add($logData);
-
-            $transFields = ['description', 'name'];
-
-            if ($order && in_array($order['field'], $transFields)) {
-                usort($results, function($a, $b) use ($criteria) {
-                    return strtolower($order['type']) == 'asc'
-                    ? strcmp($a[$order['field']], $b[$order['field']])
-                    : strcmp($b[$order['field']], $a[$order['field']]);
-                });
-            }
 
             return $this->successResponse([
                 'documents'     => $results,

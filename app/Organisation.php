@@ -36,6 +36,11 @@ class Organisation extends Model implements TranslatableInterface
         'contacts'      => 'text',
     ];
 
+    public static function getTransFields()
+    {
+        return self::$translatable;
+    }
+
     public static function getTypes()
     {
         return [

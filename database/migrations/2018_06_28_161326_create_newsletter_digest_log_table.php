@@ -13,14 +13,16 @@ class CreateNewsletterDigestLogTable extends Migration
      */
     public function up()
     {
-        Schema::create('newsletter_digest_log', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->unsignedTinyInteger('type');
-            $table->timestamp('sent');
-            $table->unique(['user_id', 'type']);
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('newsletter_digest_log', function (Blueprint $table) {
+                $table->increments('id');
+                $table->integer('user_id')->unsigned();
+                $table->foreign('user_id')->references('id')->on('users');
+                $table->unsignedTinyInteger('type');
+                $table->timestamp('sent');
+                $table->unique(['user_id', 'type']);
+            });
+        }
     }
 
     /**

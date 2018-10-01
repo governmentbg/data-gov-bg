@@ -13,22 +13,24 @@ class CreateImagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('images', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('img_file');
-            $table->string('mime_type');
-            $table->string('comment')->nullable();
-            $table->integer('size')->unsigned();
-            $table->tinyInteger('active')->default(0);
-            $table->smallInteger('width')->unsigned();
-            $table->smallInteger('height')->unsigned();
-            $table->timestamps();
-            $table->integer('updated_by')->unsigned()->nullable();
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->integer('created_by')->unsigned();
-            $table->foreign('created_by')->references('id')->on('users');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('images', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->string('img_file');
+                $table->string('mime_type');
+                $table->string('comment')->nullable();
+                $table->integer('size')->unsigned();
+                $table->tinyInteger('active')->default(0);
+                $table->smallInteger('width')->unsigned();
+                $table->smallInteger('height')->unsigned();
+                $table->timestamps();
+                $table->integer('updated_by')->unsigned()->nullable();
+                $table->foreign('updated_by')->references('id')->on('users');
+                $table->integer('created_by')->unsigned();
+                $table->foreign('created_by')->references('id')->on('users');
+            });
+        }
     }
 
     /**

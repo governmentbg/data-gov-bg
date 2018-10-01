@@ -88,16 +88,20 @@ class ActionsHistoryController extends ApiController
             return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
         }
 
-        $history = ActionsHistory::select(
-            'actions_history.id',
-            'occurrence',
-            'module_name',
-            'action',
-            'action_object',
-            'action_msg',
-            'user_id',
-            'ip_address'
-        )->join('users', 'users.id', '=', 'actions_history.user_id');
+        if (env('IS_TOOL')) {
+            $history = ActionsHistory::select();
+        } else {
+            $history = ActionsHistory::select(
+                'actions_history.id',
+                'occurrence',
+                'module_name',
+                'action',
+                'action_object',
+                'action_msg',
+                'user_id',
+                'ip_address'
+            )->join('users', 'users.id', '=', 'actions_history.user_id');
+        }
 
         if (isset($criteria['period_from'])) {
             $history->where('occurrence', '>=', $criteria['period_from']);
@@ -182,6 +186,14 @@ class ActionsHistoryController extends ApiController
             });
         }
 
+        if (isset($criteria['query_name'])) {
+            $history->where('action_object', 'like', '%' . $criteria['query_name'] . '%');
+        }
+
+        if (isset($criteria['status'])) {
+            $history->where('status', $criteria['status']);
+        }
+
         $count = $history->count();
         $orderColumns = [
             'username',
@@ -215,7 +227,7 @@ class ActionsHistoryController extends ApiController
 
         if (!empty($history)) {
             foreach ($history as $key => $record) {
-                if (!empty($record->user)) {
+                if (!env('IS_TOOL') && !empty($record->user)) {
                     $results[] = [
                         'id'             => $record->id,
                         'user_id'        => $record->user->id,
@@ -228,6 +240,16 @@ class ActionsHistoryController extends ApiController
                         'action_object'  => $record->action_object,
                         'action_msg'     => $record->action_msg,
                         'ip_address'     => $record->ip_address,
+                    ];
+                } else {
+                    $results[] = [
+                        'id'            => $record->id,
+                        'occurrence'    => $record->occurrence,
+                        'module'        => $record->module_name,
+                        'action'        => $record->action,
+                        'action_object' => $record->action_object,
+                        'status'        => $record->status,
+                        'action_msg'    => $record->action_msg,
                     ];
                 }
             }

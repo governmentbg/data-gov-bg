@@ -13,16 +13,18 @@ class CreateElasticDataSetTable extends Migration
      */
     public function up()
     {
-        Schema::create('elastic_data_set', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('index');
-            $table->string('index_type');
-            $table->string('doc');
-            $table->string('version', 15;
-            $table->integer('resource_id')->unsigned();
-            $table->foreign('resource_id')->references('id')->on('resources');
-            $table->unique(['resource_id', 'version']);
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('elastic_data_set', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('index');
+                $table->string('index_type');
+                $table->string('doc');
+                $table->string('version', 15);
+                $table->integer('resource_id')->unsigned();
+                $table->foreign('resource_id')->references('id')->on('resources');
+                $table->unique(['resource_id', 'version']);
+            });
+        }
     }
 
     /**

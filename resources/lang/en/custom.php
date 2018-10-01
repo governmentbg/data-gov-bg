@@ -797,4 +797,8 @@ return [
     'week' => 'Week',
     'month' => 'Month',
     'check' => 'Check',
+    'File' => 'File',
+    'DBMS' => 'DBMS',
+    'successfull' => 'Successfull',
+    'unsuccessfull' => 'Unsuccessfull',
 ];

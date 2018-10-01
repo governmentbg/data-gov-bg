@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Module;
 use App\Resource;
 use App\DataQuery;
+use App\ActionsHistory;
 use App\ConnectionSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiHistory;
 
 class ToolController extends Controller
 {
@@ -90,23 +93,47 @@ class ToolController extends Controller
 
                     if ($driver) {
                         if ($request->has('save_conn')) {
+                            $logData = [
+                                'module_name'   => Module::getModuleName(Module::TOOL_DBMS),
+                                'action'        => ActionsHistory::TYPE_ADD,
+                                'action_object' => $post['connection_name'],
+                                'action_msg'    => 'Listed data request',
+                            ];
+
                             try {
                                 $this->saveConnection($driver, $post);
 
                                 $hasDb = true;
+                                $logData['status'] = true;
 
                                 session()->flash('alert-success', __('custom.conn_save_success'));
                             } catch (QueryException $e) {
+                                $logData['status'] = false;
+
                                 session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                             }
+
+                            Module::add($logData);
                         } else {
+                            $logData = [
+                                'module_name'      => Module::getModuleName(Module::TOOL_DBMS),
+                                'action'           => ActionsHistory::TYPE_SEE,
+                                'action_msg'       => 'Listed data request',
+                            ];
+
                             try {
                                 $foundData = $this->fetchData($query, $driver, $host, $dbName, $username, $password);
 
+                                $logData['status'] = true;
+
                                 session()->flash('alert-success', __('custom.conn_success'));
                             } catch (\PDOException $e) {
+                                $logData['status'] = false;
+
                                 session()->flash('alert-danger', __('custom.conn_error') .' ('. $e->getMessage() .')');
                             }
+
+                            Module::add($logData);
                         }
                     } else {
                         session()->flash('alert-danger', __('custom.conn_error'));
@@ -141,6 +168,12 @@ class ToolController extends Controller
                         ]);
 
                         if (!$validator->fails()) {
+                            $logData = [
+                                'module_name'      => Module::getModuleName(Module::TOOL_DBMS),
+                                'action'           => ActionsHistory::TYPE_ADD,
+                                'action_msg'       => 'Listed data request',
+                            ];
+
                             try {
                                 DataQuery::create([
                                     'connection_id' => $dbData['id'],
@@ -160,10 +193,16 @@ class ToolController extends Controller
                                     $post['upl_freq_type']
                                 );
 
+                                $logData['status'] = true;
+
                                 session()->flash('alert-success', __('custom.conn_save_success'));
                             } catch (QueryException $e) {
+                                $logData['status'] = true;
+
                                 session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                             }
+
+                            Module::add($logData);
                         }
 
                         if (!session()->has('alert-success')) {
@@ -172,15 +211,27 @@ class ToolController extends Controller
                     }
 
                     if ($request->has('delete_query')) {
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::TOOL_DBMS),
+                            'action'           => ActionsHistory::TYPE_DEL,
+                            'action_msg'       => 'Listed data request',
+                        ];
+
                         try {
                             $queryId = array_keys($post['delete_query'])[0];
 
                             DataQuery::find($queryId)->delete();
 
+                            $logData['status'] = true;
+
                             session()->flash('alert-success', __('custom.query_delete_success'));
                         } catch (QueryException $e) {
+                            $logData['status'] = false;
+
                             session()->flash('alert-danger', __('custom.query_delete_error') .' ('. $e->getMessage() .')');
                         }
+
+                        Module::add($logData);
                     }
 
                     if ($request->has('send_query')) {
@@ -225,13 +276,26 @@ class ToolController extends Controller
 
                 if (!$validator->fails()) {
                     if ($request->has('save_file')) {
+                        $logData = [
+                            'module_name'   => Module::getModuleName(Module::TOOL_FILE),
+                            'action'        => ActionsHistory::TYPE_ADD,
+                            'action_object' => $post['file_conn_name'],
+                            'action_msg'    => 'Listed data request',
+                        ];
+
                         try {
                             $this->saveFile($file, $post);
 
+                            $logData['status'] = true;
+
                             session()->flash('alert-success', __('custom.conn_save_success'));
                         } catch (QueryException $e) {
+                            $logData['status'] = false;
+
                             session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                         }
+
+                        Module::add($logData);
                     } elseif ($request->has('send_file')) {
                         try {
                             $foundData = $this->fetchFileData($file, $post);
@@ -243,11 +307,22 @@ class ToolController extends Controller
                             session()->flash('alert-danger', __('custom.conn_error') .' ('. $e->getMessage() .')');
                         }
                     } else {
+                        $logData = [
+                            'module_name'   => Module::getModuleName(Module::TOOL_FILE),
+                            'action'        => ActionsHistory::TYPE_SEE,
+                            'action_object' => $post['file_conn_name'],
+                            'action_msg'    => 'Listed data request',
+                        ];
+
                         try {
                             $foundData = $this->fetchFileData($file, $post);
 
+                            $logData['status'] = true;
+
                             session()->flash('alert-success', __('custom.conn_success'));
                         } catch (\PDOException $e) {
+                            $logData['status'] = false;
+
                             session()->flash('alert-danger', __('custom.conn_error') .' ('. $e->getMessage() .')');
                         }
                     }
@@ -408,5 +483,47 @@ class ToolController extends Controller
         curl_close($ch);
 
         return $response;
+    }
+
+    public function configHistory(Request $request)
+    {
+        $class = 'index';
+        $params = [];
+        $post = $request->all();
+        $modules = Module::getToolModules();
+        $actionTypes = ActionsHistory::getTypes();
+
+        $range = [
+            'from'  => isset($request->period_from) ? $request->period_from : null,
+            'to'    => isset($request->period_to) ? $request->period_to : null
+        ];
+
+        if (!empty($request->offsetGet('period_from'))) {
+            $params['criteria']['period_from'] = date_format(date_create($request->offsetGet('period_from')), 'Y-m-d H:i:s');
+        }
+
+        if (!empty($request->offsetGet('period_to'))) {
+            $params['criteria']['period_to'] = date_format(date_create($request->offsetGet('period_to') .' 23:59'), 'Y-m-d H:i:s');;
+        }
+
+        if (isset($post['status'])) {
+            $params['criteria']['status'] = $post['status'];
+        }
+
+        if (!empty($request->offsetGet('source_type'))) {
+            $params['criteria']['module'] = $request->offsetGet('source_type');
+        }
+
+        if (!empty($request->offsetGet('q'))) {
+            $params['criteria']['query_name'] = $request->offsetGet('q');
+        }
+
+        $rq = Request::create('api/listActionHistory', 'POST', $params);
+        $api = new ApiHistory($rq);
+        $res = $api->listActionHistory($rq)->getData();
+
+        $history = $res->success ? $res->actions_history : [];
+
+        return view('tool/history', compact('class', 'modules', 'range', 'history', 'actionTypes', 'post'));
     }
 }

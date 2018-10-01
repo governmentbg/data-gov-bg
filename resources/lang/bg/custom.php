@@ -797,4 +797,8 @@ return [
     'week' => 'Седмица',
     'month' => 'Месец',
     'check' => 'Провери',
+    'File' => 'Файл',
+    'DBMS' => 'СУБД',
+    'successfull' => 'Успешна',
+    'unsuccessfull' => 'Неуспешна',
 ];

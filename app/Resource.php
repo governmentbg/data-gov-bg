@@ -32,6 +32,9 @@ class Resource extends Model implements TranslatableInterface
     const HTTP_POST = 1;
     const HTTP_GET = 2;
 
+    const REPORTED_FALSE = 0;
+    const REPORTED_TRUE = 1;
+
     protected static $translatable = [
         'name'      => 'text',
         'descript'  => 'text',
@@ -40,10 +43,30 @@ class Resource extends Model implements TranslatableInterface
     public static function getTypes()
     {
         return [
-            self::TYPE_FILE         => 'File',
-            self::TYPE_HYPERLINK    => 'Hyperlink',
-            self::TYPE_API          => 'Api',
+            self::TYPE_FILE         => uctrans('custom.file'),
+            self::TYPE_HYPERLINK    => __('custom.hyperlink'),
+            self::TYPE_API          => __('custom.api'),
         ];
+    }
+
+    public static function getFormatsCode($format)
+    {
+        switch (strtoupper($format)) {
+            case 'CSV':
+            case 'XLS':
+            case 'XLSX':
+                return self::FORMAT_CSV;
+            case 'KML':
+                return self::FORMAT_KML;
+            case 'RDF':
+                return self::FORMAT_RDF;
+            case 'WMS':
+                return self::FORMAT_WMS;
+            case 'XML':
+                return self::FORMAT_XML;
+            default:
+                return self::FORMAT_JSON;
+        }
     }
 
     public static function getFormats()
@@ -82,7 +105,7 @@ class Resource extends Model implements TranslatableInterface
 
     public function elasticDataSet()
     {
-        return $this->hasOne('App\ElasticDataSet', 'id', 'es_id');
+        return $this->hasMany('App\ElasticDataSet');
     }
 
     public function dataSet()
@@ -90,8 +113,20 @@ class Resource extends Model implements TranslatableInterface
         return $this->belongsTo('App\DataSet');
     }
 
+    public function customFields()
+    {
+        return $this->hasMany('App\CustomSetting');
+    }
+
     public function searchableAs()
     {
         return 'resources';
+    }
+
+    public static function getAllowedFormats()
+    {
+        return [
+            'CSV', 'JSON', 'KML','RDF','WMS','XML','XLSX', 'XLS', 'TXT',
+        ];
     }
 }

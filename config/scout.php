@@ -55,8 +55,8 @@ return [
     */
 
     'chunk' => [
-        'searchable' => 500,
-        'unsearchable' => 500,
+        'searchable'    => 500,
+        'unsearchable'  => 500,
     ],
 
     /*
@@ -84,8 +84,8 @@ return [
     */
 
     'algolia' => [
-        'id' => env('ALGOLIA_APP_ID', ''),
-        'secret' => env('ALGOLIA_SECRET', ''),
+        'id'        => env('ALGOLIA_APP_ID', ''),
+        'secret'    => env('ALGOLIA_SECRET', ''),
     ],
 
     /*
@@ -103,9 +103,9 @@ return [
         'fuzzy'         => [
             'prefix_length'     => 2,
             'max_expansions'    => 50,
-            'distance'          => 2,
+            'distance'          => 4,
         ],
-        'asYouType'     => true,
+        'asYouType'     => false,
         'searchBoolean' => env('TNTSEARCH_BOOLEAN', false),
     ],
 ];

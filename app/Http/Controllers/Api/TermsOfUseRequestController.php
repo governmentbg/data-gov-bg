@@ -7,6 +7,9 @@ use Illuminate\Database\QueryException;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Log;
 use App\TermsOfUseRequest;
+use App\RoleRight;
+use App\Module;
+use App\ActionsHistory;
 
 class TermsOfUseRequestController extends ApiController
 {
@@ -29,14 +32,23 @@ class TermsOfUseRequestController extends ApiController
         $data = $request->get('data', []);
         //validate request data
         $validator = \validator::make($data, [
-            'description'   => 'required|string',
+            'description'   => 'required|string|max:8000',
             'firstname'     => 'required|string|max:100',
             'lastname'      => 'required|string|max:100',
             'email'         => 'required|email|string|max:191',
-            'status'        => 'integer|min:1'
+            'status'        => 'integer|in:'. implode(',', array_keys(TermsOfUseRequest::getStatuses())),
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TERMS_OF_USE_REQUESTS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             // set default values to optional fields
             if (!isset($data['status'])) {
                 $data['status'] = TermsOfUseRequest::STATUS_NEW;
@@ -53,6 +65,15 @@ class TermsOfUseRequestController extends ApiController
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+                'action'           => ActionsHistory::TYPE_ADD,
+                'action_object'    => $newTerms->id,
+                'action_msg'       => 'Sent terms of use request',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse(['id' => $newTerms->id], true);
         }
@@ -81,22 +102,50 @@ class TermsOfUseRequestController extends ApiController
 
         $validator = \Validator::make($post, [
             'request_id'        => 'required|numeric|exists:terms_of_use_requests,id',
-            'data.description'  => 'required|string',
-            'data.firstname'    => 'required|string|max:100',
-            'data.lastname'     => 'required|string|max:100',
-            'data.email'        => 'required|email|string|max:191',
-            'data.status'       => 'integer|min:1'
+            'data'              => 'required|array'
         ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'description'  => 'required|string|max:8000',
+                'firstname'    => 'required|string|max:100',
+                'lastname'     => 'required|string|max:100',
+                'email'        => 'required|email|string|max:191',
+                'status'       => 'integer|in:'. implode(',', array_keys(TermsOfUseRequest::getStatuses())),
+            ]);
+        }
 
         if (!$validator->fails()) {
             $data = $post['data'];
             $terms = TermsOfUseRequest::find($post['request_id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TERMS_OF_USE_REQUESTS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $terms->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $terms->descript = $data['description'];
             unset($data['description']);
             $terms->fill($data);
 
             try {
                 $terms->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $terms->id,
+                    'action_msg'       => 'Edited terms of use request',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $ex) {
@@ -120,7 +169,7 @@ class TermsOfUseRequestController extends ApiController
     {
         $post = $request->all();
         $validator = \Validator::make($post, [
-            'request_id'  => 'required|exists:terms_of_use_requests,id'
+            'request_id'  => 'required|exists:terms_of_use_requests,id|digits_between:1,10'
         ]);
 
         if ($validator->fails()) {
@@ -131,6 +180,18 @@ class TermsOfUseRequestController extends ApiController
             return $this->errorResponse(__('custom.delete_terms_request_fail'));
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::TERMS_OF_USE_REQUESTS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $terms->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
         try {
             $terms->delete();
         } catch (QueryException $ex) {
@@ -138,6 +199,15 @@ class TermsOfUseRequestController extends ApiController
 
             return $this->errorResponse(__('custom.delete_terms_request_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+            'action'           => ActionsHistory::TYPE_DEL,
+            'action_object'    => $post['request_id'],
+            'action_msg'       => 'Deleted terms of use request',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }
@@ -163,21 +233,46 @@ class TermsOfUseRequestController extends ApiController
      */
     public function listTermsOfUseRequests(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $data = $request->all();
+
+        $validator = \Validator::make($data, [
             'criteria'              => 'nullable|array',
-            'criteria.request_id'   => 'nullable|integer|exists:terms_of_use_requests,id',
-            'criteria.status'       => 'nullable|integer',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.search'       => 'nullable|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string|in:asc,desc',
-            'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
 
+        $criteria = isset($data['criteria']) ? $data['criteria'] : [];
+
         if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'request_id'   => 'nullable|integer|exists:terms_of_use_requests,id|digits_between:1,10',
+                'status'       => 'nullable|integer|digits_between:1,3',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'search'       => 'nullable|string|max:191',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|in:asc,desc|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::TERMS_OF_USE_REQUESTS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $filterColumn = 'created_at';
             $criteria = $request->offsetGet('criteria');
 
@@ -206,6 +301,25 @@ class TermsOfUseRequestController extends ApiController
 
             $total_records = $query->count();
 
+            $columns = [
+                'id',
+                'description',
+                'firstname',
+                'lastname',
+                'email',
+                'status',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($order['field'])) {
+                if (!in_array($order['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
             }
@@ -221,6 +335,14 @@ class TermsOfUseRequestController extends ApiController
             if (!$terms->isEmpty()) {
                 $result = $this->prepareTerms($terms);
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::TERMS_OF_USE_REQUESTS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_msg'       => 'Listed terms of use requests',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse([
                 'total_records'         => $total_records,

@@ -3,12 +3,19 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'setting'])
+    @if (App\Role::isAdmin())
+        @include('partials.admin-nav-bar', ['view' => 'setting'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'setting'])
+    @endif
+    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <span class="my-profile m-l-sm">{{uctrans('custom.settings')}}</span>
+    </div>
     <div class="col-xs-12 m-t-lg">
         <form class="m-t-lg p-sm" method="post">
             {{ csrf_field() }}
-            <div class="form-group row">
-                <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+            <div class="form-group row required">
+                <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                 <div class="col-sm-9">
                     <input
                         type="text"
@@ -17,9 +24,10 @@
                         id="fname"
                         value="{{ $user['firstname'] }}"
                     >
+                    <span class="error">{{ $errors->first('firstname') }}</span>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.family_name') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -29,9 +37,10 @@
                         id="lname"
                         value="{{ $user['lastname'] }}"
                     >
+                    <span class="error">{{ $errors->first('lastname') }}</span>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.email') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -41,9 +50,10 @@
                         id="email"
                         value="{{ $user['email'] }}"
                     >
+                    <span class="error">{{ $errors->first('email') }}</span>
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row required">
                 <label for="username" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.username') }}:</label>
                 <div class="col-sm-9">
                     <input
@@ -53,6 +63,7 @@
                         name="username"
                         value="{{ $user['username'] }}"
                     >
+                    <span class="error">{{ $errors->first('username') }}</span>
                 </div>
             </div>
             <div class="form-group row">
@@ -63,7 +74,7 @@
                         class="btn btn-primary"
                         data-toggle="modal"
                         data-target="#change-password"
-                    >{{ __('custom.change') }}</button>
+                    >{{ uctrans('custom.change') }}</button>
                 </div>
             </div>
             <div class="form-group row">
@@ -123,7 +134,7 @@
                     </select>
                 </div>
                 <div class="col-sm-5 col-xs-4 text-right">
-                    <button type="submit" name="save" class="btn btn-primary">{{ __('custom.save') }}</button>
+                    <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>
@@ -156,7 +167,24 @@
                     <h2>{{ __('custom.change_password') }}</h2>
                 </div>
                 <div class="modal-body">
-                    <form class="m-t-lg" method="post">
+                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.pass_change_succ') }}</p>
+                    </div>
+                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.pass_change_err') }}</p>
+                    </div>
+                    <form
+                        class="js-change-pass m-t-lg"
+                        method="post"
+                        action="{{ url('/user/changePassword') }}"
+                        data-url="{{ url('/user/changePassword') }}"
+                    >
                         {{ csrf_field() }}
                         <div class="form-group row required">
                             <label for="oldPass" class="col-sm-4 col-xs-12 col-form-label">{{ __('custom.password') }}:</label>
@@ -191,10 +219,10 @@
                                 >
                             </div>
                         </div>
-
+                        <input type="hidden" name="id" value="{{ $user['id'] }}">
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="submit" name="change_pass" class="m-l-md btn btn-custom">{{ __('custom.save') }}</button>
+                                <button type="submit" name="change_pass" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
                             </div>
                         </div>
                     </form>
@@ -209,7 +237,7 @@
         <div class="modal-content">
             <div class="blue-highlight">
                 <div class="modal-body">
-                    <a type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></a>
+                    <a type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{uctrans('custom.close')}}</span></a>
                     <span>
                     {{ __('custom.delete_account_message') }}
                         <p class="small-text">
@@ -220,7 +248,7 @@
                         type="submit"
                         class="m-l-md btn btn-custom pull-right conf"
                         data-dismiss="modal"
-                    >{{ __('custom.cancel') }}</button>
+                    >{{ uctrans('custom.cancel') }}</button>
                     <button
                         id="confirm"
                         type="submit"
@@ -228,7 +256,7 @@
                         class="m-l-md btn btn-custom pull-right conf del-btn"
                         data-toggle="modal"
                         data-target="#delete"
-                    >{{ __('custom.continue') }}</button>
+                    >{{ uctrans('custom.continue') }}</button>
                 </div>
             </div>
         </div>
@@ -243,7 +271,7 @@
                     <form method="post">
                         {{ csrf_field() }}
                         <a type="button" class="close" data-dismiss="modal">
-                            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                            <span aria-hidden="true">&times;</span><span class="sr-only">{{uctrans('custom.close')}}</span>
                         </a>
                         <div class="usr-delete row">
                             <span>
@@ -253,12 +281,12 @@
                                     type="submit"
                                     class="m-l-md btn btn-custom pull-right"
                                     data-dismiss="modal"
-                                >{{ __('custom.cancel') }}</button>
+                                >{{ uctrans('custom.cancel') }}</button>
                                 <button
                                     type="submit"
                                     name="delete"
                                     class="m-l-md btn btn-custom pull-right del-btn"
-                                >{{ __('custom.delete') }}</button>
+                                >{{ uctrans('custom.delete') }}</button>
                         </div>
                     </form>
                 </div>
@@ -274,7 +302,7 @@
                 <form method="post">
                     {{ csrf_field() }}
                     <div class="p-w-md">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ __('custom.close') }}</span></button>
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ uctrans('custom.close') }}</span></button>
                         <h2>{{ __('custom.api_key_new') }}</h2>
                     </div>
                     <div class="modal-body">

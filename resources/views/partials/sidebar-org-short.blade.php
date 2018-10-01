@@ -27,7 +27,7 @@
             </ul>
         </li>
         <li class="js-show-submenu">
-            <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.license') }}</a>
+            <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ ultrans('custom.license', 2) }}</a>
             <ul class="sidebar-submenu">
                 <li><a href="#">Lorem ipsum</a></li>
                 <li><a href="#">Lorem ipsum</a></li>
@@ -83,7 +83,7 @@
             </ul>
         </li>
         <li>
-            <span>{{ __('custom.license') }}</span>
+            <span>{{ ultrans('custom.license', 2) }}</span>
             <ul class="sidebar-submenu">
                 <li><a href="#">Lorem ipsum</a></li>
                 <li><a href="#">Lorem ipsum</a></li>

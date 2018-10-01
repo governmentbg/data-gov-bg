@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Role;
 use App\User;
 use App\Locale;
+use App\Module;
 use PDOException;
 use App\RoleRight;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
+use App\ActionsHistory;
+use App\DataSet;
+use App\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +29,11 @@ class UserController extends ApiController
     /**
      * List user records by given criteria
      *
-     * @param string api_key - required
+     * @param string api_key - optional
      * @param integer records_per_page - optional
      * @param integer page_number - optional
      * @param array criteria - optional
+     * @param string criteria[keywords] - optional
      * @param integer criteria[active] - optional
      * @param integer criteria[is_admin] - optional
      * @param integer criteria[org_id] - optional
@@ -44,29 +49,67 @@ class UserController extends ApiController
     public function listUsers(Request $request)
     {
         $result = [];
-        $criteria = $request->offsetGet('criteria');
+        $data = $request->all();
 
-        $validator = \Validator::make($request->all(), [
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+        $validator = \Validator::make($data, [
+            'api_key'               => 'nullable|string|exists:users,api_key',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|digits_between:1,10',
             'criteria'              => 'nullable|array',
-            'criteria.active'       => 'nullable|boolean',
-            'criteria.approved'     => 'nullable|boolean',
-            'criteria.is_admin'     => 'nullable|int',
-            'criteria.role_id'      => 'nullable|int',
-            'criteria.org_id'       => 'nullable|int',
-            'criteria.id'           => 'nullable|int',
-            'criteria.user_ids'     => 'nullable|array',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
         ]);
 
-        if (!$validator->fails()) {
-            $query = User::select();
+        $criteria = isset($data['criteria']) ? $data['criteria'] : [];
 
-            if (isset($criteria['active'])) {
-                $query->where('active', $criteria['active']);
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'active'       => 'nullable|boolean',
+                'approved'     => 'nullable|boolean',
+                'is_admin'     => 'nullable|int|digits_between:1,10',
+                'role_id'      => 'nullable',
+                'org_id'       => 'nullable',
+                'id'           => 'nullable|int|digits_between:1,10',
+                'user_ids'     => 'nullable|array',
+                'order'        => 'nullable|array',
+                'keywords'     => 'nullable|string|max:191'
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $query = User::select()->with('userToOrgRole');
+
+            if (isset($criteria['keywords'])) {
+                $ids = User::search($criteria['keywords'])->get()->pluck('id');
+                $query = User::whereIn('id', $ids)->with('userToOrgRole');
+            }
+
+            if (isset($data['api_key'])) {
+                $user = User::where('api_key', $data['api_key'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'user' => $user
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
+                if (isset($criteria['active'])) {
+                    $query->where('active', $criteria['active']);
+                }
+            } else {
+                $query->where('active', 1);
             }
 
             if (isset($criteria['approved'])) {
@@ -77,15 +120,23 @@ class UserController extends ApiController
                 $query->where('is_admin', $criteria['is_admin']);
             }
 
-            if (!empty($criteria['role_id'])) {
+            if (!empty($criteria['role_ids'])) {
                 $query->whereHas('userToOrgRole', function($q) use($criteria) {
-                    $q->where('role_id', $criteria['role_id']);
+                    if (is_array($criteria['role_ids'])) {
+                        $q->whereIn('role_id', $criteria['role_ids']);
+                    } else {
+                        $q->where('role_id', $criteria['role_ids']);
+                    }
                 });
             }
 
-            if (!empty($criteria['org_id'])) {
+            if (!empty($criteria['org_ids'])) {
                 $query->whereHas('userToOrgRole', function($q) use($criteria) {
-                    $q->where('org_id', $criteria['org_id']);
+                    if (is_array($criteria['org_ids'])) {
+                        $q->whereIn('org_id', $criteria['org_ids']);
+                    } else {
+                        $q->where('org_id', $criteria['org_ids']);
+                    }
                 });
             }
 
@@ -95,9 +146,31 @@ class UserController extends ApiController
                 $query->whereIn('id', $criteria['user_ids']);
             }
 
-            $query->where('username', '!=', 'system');
-
             $count = $query->count();
+
+            $columns = [
+                'id',
+                'add_info',
+                'username',
+                'firstname',
+                'lastname',
+                'email',
+                'is_admin',
+                'active',
+                'approved',
+                'deleted_by',
+                'deleted_at',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($order['field'])){
+                if (!in_array($order['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
 
             if (isset($criteria['order']['field']) && isset($criteria['order']['type'])) {
                 $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
@@ -110,6 +183,16 @@ class UserController extends ApiController
 
             try {
                 $users = $query->get();
+
+                if (Auth::user() !== null) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::USERS),
+                        'action'           => ActionsHistory::TYPE_SEE,
+                        'action_msg'       => 'Listed users',
+                    ];
+
+                    Module::add($logData);
+                }
 
                 return $this->successResponse(['users'=> $users, 'total_records' => $count], true);
             } catch (QueryException $ex) {
@@ -138,20 +221,31 @@ class UserController extends ApiController
         $search = $request->all();
 
         $validator = \Validator::make($search, [
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|digits_between:1,10',
             'criteria'              => 'required|array',
-            'criteria.keywords'     => 'required|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
         ]);
 
         if (!$validator->fails()) {
-            $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
-            $query = User::whereIn('id', $ids);
+            $validator = \Validator::make($search['criteria'], [
+                'keywords'     => 'required|string|max:191',
+                'order'        => 'nullable|array',
+            ]);
+        }
 
-            $query->where('username', '!=', 'system');
+        $order = isset($search['criteria']['order']) ? $search['criteria']['order'] :[];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
+            $query = User::whereIn('id', $ids)->with('userToOrgRole');
+
             $count = $query->count();
 
             $query->forPage(
@@ -161,6 +255,14 @@ class UserController extends ApiController
 
             try {
                 $data = $query->get();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_msg'       => 'Searched users',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['users' => $data, 'total_records' => $count], true);
             } catch (QueryException $ex) {
@@ -183,20 +285,30 @@ class UserController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['id' => 'required|int']);
+        $validator = \Validator::make($post, ['id' => 'required|int|digits_between:1,10']);
 
         if (!$validator->fails()) {
-            $user = User::find($post['id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_VIEW
+            );
 
-            if ($user) {
-                $result = [];
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
-                foreach($user->userToOrgRole as $role) {
-                    $result[] = [
-                        'org_id'    => $role->org_id,
-                        'role_id'   => $role->role_id,
-                    ];
-                }
+            $result = User::getUserRoles($post['id']);
+
+            if (is_array($result)) {
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $post['id'],
+                    'action_msg'       => 'Got user roles',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['roles' => $result]);
             }
@@ -217,9 +329,18 @@ class UserController extends ApiController
     {
         $result = [];
 
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|digits_between:1,10']);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $user = User::with('userSetting', 'follow')->find($request->id);
 
             if (!empty($user)) {
@@ -248,6 +369,15 @@ class UserController extends ApiController
                     }
                 }
             }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::USERS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_object'    => $request->id,
+                'action_msg'       => 'Got user settings',
+            ];
+
+            Module::add($logData);
 
             return $this->successResponse(['user' => $result], true);
         }
@@ -283,13 +413,83 @@ class UserController extends ApiController
             'lastname'          => 'required|string',
             'username'          => 'nullable|string|unique:users,username,NULL,id,deleted_at,NULL',
             'email'             => 'required|email',
+            'is_admin'          => 'nullable|bool',
+            'active'            => 'nullable|bool',
+            'approved'          => 'nullable|bool',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
-            'role_id'           => 'nullable|int|required_with:org_id',
-            'org_id'            => 'nullable|int|required_with:role_id',
+            'role_id'           => 'nullable',
+            'org_id'            => 'nullable',
         ]);
 
+        $data['role_id'] = isset($data['role_id']) ? $data['role_id'] : [];
+
         if (!$validator->fails()) {
+            if (isset($data['org_id'])) {
+               $org = Organisation::where('id', $data['org_id'])->first();
+
+               if ($org->type != Organisation::TYPE_GROUP) {
+                    $orgRightCheck = RoleRight::checkUserRight(
+                        Module::ORGANISATIONS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id' => $org->id
+                        ],
+                        [
+                            'created_by'    => $org->created_by,
+                            'org_id'        => $org->id
+                        ]
+                    );
+
+                    $usersRightCheck = RoleRight::checkUserRight(
+                        Module::USERS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id' => $org->id
+                        ],
+                        [
+                            'org_id' => $org->id
+                        ]
+                    );
+
+                    $rightCheck = ($usersRightCheck && $orgRightCheck) ? true : false;
+               } else {
+                    $groupRightCheck = RoleRight::checkUserRight(
+                        Module::GROUPS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id'      => $org->id
+                        ],
+                        [
+                            'created_by'    => $org->created_by,
+                            'group_ids'     => [$org->id]
+                        ]
+                    );
+
+                    $usersRightCheck = RoleRight::checkUserRight(
+                        Module::USERS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id' => $org->id
+                        ],
+                        [
+                            'group_ids' => [$org->id]
+                        ]
+                    );
+
+                    $rightCheck = ($usersRightCheck && $groupRightCheck) ? true : false;
+                }
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::USERS,
+                    RoleRight::RIGHT_EDIT
+                );
+            }
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
 
@@ -306,35 +506,27 @@ class UserController extends ApiController
                 $user->add_info = !empty($request->data['add_info'])
                     ? $request->data['add_info']
                     : null;
-                $user->is_admin = 0;
-                $user->active = 0;
-                $user->approved = !empty($request->offsetGet('invite')) ? 1 : 0;
+                $user->is_admin = !empty($request->data['is_admin']) && Role::isAdmin()
+                    ? $request->data['is_admin']
+                    : false;
+                $user->active = !empty($request->data['active']) ? $request->data['active'] : false;
+                $user->approved = !empty($request->data['invite']) ? 1 : false;
                 $user->api_key = $apiKey;
                 $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
                 $user->remember_token = null;
 
+                if (
+                    isset($request->data['migrated_data'])
+                    && Auth::user()->username == 'migrate_data'
+                ) {
+                    if (!empty($request->data['created_by'])) {
+                        $user->created_by = $request->data['created_by'];
+                    }
+                }
+
                 $registered = $user->save();
 
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject(__('custom.register_subject'));
-                });
-
-                if (isset($data['role_id']) || isset($data['org_id'])) {
-                    $userToOrgRole = new UserToOrgRole;
-
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = (int) $data['role_id'];
-                    $userToOrgRole->org_id = (int) $data['org_id'];
-
-                    $userToOrgRole->save();
-                }
+                $this->addRoles($user->id, $data['role_id'], $data['org_id']);
 
                 $userSettings = new UserSetting;
 
@@ -354,6 +546,30 @@ class UserController extends ApiController
                 }
 
                 $userSettings->save();
+
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                    'id'    => $user->id,
+                    'pass' => $request->data['password'],
+                ];
+
+                if (!isset($request->data['migrated_data'])) {
+                    Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                        $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                        $m->to($user->email, $user->firstname);
+                        $m->subject(__('custom.register_subject'));
+                    });
+                }
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $user->id,
+                    'action_msg'       => 'Added user',
+                ];
+
+                Module::add($logData);
 
                 DB::commit();
 
@@ -399,21 +615,26 @@ class UserController extends ApiController
     {
         $data = $request->data;
         $id = $request->id;
+        $post = $request->all();
 
-        $validator = \Validator::make(
-            $request->all(),
-            [
-                'id'                    => 'required|int',
-                'data'                  => 'required|array',
-                'data.firstname'        => 'nullable|string',
-                'data.lastname'         => 'nullable|string',
-                'data.email'            => 'nullable|email',
-                'data.add_info'         => 'nullable|string',
-                'data.password'         => 'nullable|string',
-                'data.is_admin'         => 'nullable|int',
-                'data.password_confirm' => 'nullable|string|same:data.password',
-            ]
-        );
+        $validator = \Validator::make($post, [
+            'id'                    => 'required|int|digits_between:1,10',
+            'data'                  => 'required|array',
+        ]);
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($post['data'], [
+                'firstname'         => 'nullable|string|max:100',
+                'lastname'          => 'nullable|string|max:100',
+                'email'             => 'nullable|email|max:191',
+                'add_info'          => 'nullable|string|max:8000',
+                'password'          => 'nullable|string|min:6',
+                'is_admin'          => 'nullable|bool',
+                'active'            => 'nullable|bool',
+                'aproved'           => 'nullable|bool',
+                'password_confirm'  => 'nullable|string|same:password',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.edit_user_fail'), $validator->errors()->messages());
@@ -421,6 +642,20 @@ class UserController extends ApiController
 
         if (empty($user = User::find($request->id))) {
             return $this->errorResponse(__('custom.edit_user_fail'));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::USERS,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $user->created_by,
+                'object_id'  => $user->id
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         $newUserData = [];
@@ -450,7 +685,7 @@ class UserController extends ApiController
             });
 
             if (count(Mail::failures()) > 0) {
-                return $this->errorResponse('Failed to send mail');
+                return $this->errorResponse(__('custom.failed_send_mail'));
             }
         }
 
@@ -463,15 +698,11 @@ class UserController extends ApiController
         }
 
         if (!empty($data['password'])) {
-            $validator = \Validator::make(
-                $request->all(),
-                [
-                    'data.password_confirm'  => 'required|same:data.password',
-                ]
-            );
+            $validator = \Validator::make($request->all(), [
+                'data.password_confirm'  => 'required|same:data.password',
+            ]);
 
             if ($validator->fails()) {
-
                 return $this->errorResponse(__('custom.edit_user_fail'), $validator->errors()->messages());
             }
 
@@ -491,26 +722,6 @@ class UserController extends ApiController
         }
 
         $orgAndRoles = [];
-
-        if (isset($data['role_id']) || isset($data['org_id'])) {
-
-            $validator = \Validator::make(
-                $request->all(),
-                [
-                    'data.role_id' => 'required',
-                    'data.org_id'  => 'required',
-                ]
-            );
-
-            if ($validator->fails()) {
-
-                return $this->errorResponse(__('custom.edit_user_fail'));
-            }
-
-            $orgAndRoles['role_id'] = (int) $data['role_id'];
-            $orgAndRoles['org_id'] = (int) $data['org_id'];
-        }
-
         $newSettings = [];
 
         if (isset($data['user_settings']['locale'])) {
@@ -537,9 +748,33 @@ class UserController extends ApiController
             }
         }
 
-        if (!empty($orgAndRoles)) {
+        if (isset($data['role_id']) || isset($data['org_id'])) {
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'data.role_id' => 'required',
+                    'data.org_id'  => 'nullable',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return $this->errorResponse(__('custom.edit_user_fail'));
+            }
+
             try {
-                UserToOrgRole::where('user_id', $request->id)->update($orgAndRoles);
+                UserToOrgRole::where('user_id', $request->id)->delete();
+
+                foreach ($data['role_id'] as $org => $role) {
+                    if (!empty($role)) {
+                        foreach ($role as $id) {
+                            $orgAndRoles['user_id'] = $request->id;
+                            $orgAndRoles['org_id'] = $org != 0 ? $org : null;
+                            $orgAndRoles['role_id'] = $id;
+
+                            UserToOrgRole::create($orgAndRoles);
+                        }
+                    }
+                }
             } catch (QueryException $e) {
                 Log::error($e->getMessage());
 
@@ -556,6 +791,15 @@ class UserController extends ApiController
                 return $this->errorResponse(__('custom.edit_user_fail'));
             }
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_MOD,
+            'action_object'    => $user->id,
+            'action_msg'       => 'Edited user',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse(['api_key' => $user['api_key']], true);
     }
@@ -575,7 +819,7 @@ class UserController extends ApiController
         $validator = \Validator::make(
             $request->all(),
             [
-                'id' => 'required',
+                'id' => 'required|digits_between:1,10',
             ]
         );
 
@@ -586,6 +830,19 @@ class UserController extends ApiController
 
         if (empty($user = User::find($request->id))) {
             return $this->errorResponse(__('custom.delete_user_fail'));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::USERS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $user->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         try {
@@ -604,6 +861,15 @@ class UserController extends ApiController
             return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_DEL,
+            'action_object'    => $id,
+            'action_msg'       => 'Deleted user',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse();
     }
 
@@ -617,7 +883,7 @@ class UserController extends ApiController
      */
     public function generateAPIKey(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|digits_between:1,10']);
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.generate_api_key_fail'), $validator->errors()->messages());
@@ -625,6 +891,20 @@ class UserController extends ApiController
 
         if (empty($user = User::find($request->id))) {
             return $this->errorResponse(__('custom.generate_api_key_fail'));
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::USERS,
+            RoleRight::RIGHT_EDIT,
+            [],
+            [
+                'created_by' => $user->created_by,
+                'object_id'  => $user->id
+            ]
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         try {
@@ -636,6 +916,15 @@ class UserController extends ApiController
 
             return $this->errorResponse(__('custom.generate_api_key_fail'));
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_MOD,
+            'action_object'    => $request->id,
+            'action_msg'       => 'Generated API key',
+        ];
+
+        Module::add($logData);
 
         return $this->successResponse();
     }
@@ -664,17 +953,58 @@ class UserController extends ApiController
             $errors = $validator->errors()->messages();
         } else {
             $validator = \Validator::make($post['data'], [
-                'email'    => 'required|email',
-                'is_admin' => 'nullable|int',
-                'approved' => 'nullable|int',
-                'role_id'  => 'nullable|int|required_with:org_id',
-                'org_id'   => 'nullable|int|required_with:role_id',
+                'email'    => 'required|email|max:191',
+                'is_admin' => 'nullable|int|digits_between:1,10',
+                'approved' => 'nullable|int|digits_between:1,10',
+                'role_id'  => 'nullable|required_with:org_id',
+                'org_id'   => 'nullable|int|required_with:role_id|digits_between:1,10|exists:organisations,id',
                 'generate' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
                 $errors = $validator->errors()->messages();
             }
+        }
+
+        $rightCheck = false;
+
+        if (isset($post['data']['org_id'])) {
+            if ($orgData = Organisation::where('id', $post['data']['org_id'])->first()) {
+                if( $orgData->type == Organisation::TYPE_GROUP) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::GROUPS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id'       => $orgData->id
+                        ],
+                        [
+                            'created_by'    => $orgData->created_by,
+                            'group_ids'     => [$orgData->id]
+                        ]
+                    );
+                } else {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::ORGANISATIONS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'org_id'       => $orgData->id
+                        ],
+                        [
+                            'created_by' => $orgData->created_by,
+                            'org_id'     => $orgData->id
+                        ]
+                    );
+                }
+            }
+        } else {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_EDIT
+            );
+        }
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
         }
 
         if (!empty($errors)) {
@@ -705,7 +1035,7 @@ class UserController extends ApiController
                 ? (int) $request->data['is_admin']
                 : 0;
             $user->active = 0;
-            $user->approved = 0;
+            $user->approved = !empty($post['data']['approved']) ? $post['data']['approved'] : 0;
             $user->api_key = Uuid::generate(4)->string;
             $user->hash_id = str_replace('-', '', Uuid::generate(4)->string);
             $user->remember_token = null;
@@ -713,26 +1043,23 @@ class UserController extends ApiController
             try {
                 $user->save();
 
-                if (Role::isAdmin($reqOrgId)) {
-                    if (isset($request->data['approved'])) {
-                        $user->approved = $request->data['approved'];
-                    }
+                if (isset($request->data['approved'])) {
+                    $user->approved = $request->data['approved'];
+                }
 
-                    $template = 'mail/generateMail';
-                    $mailData = [
-                        'user'      => Auth::user()->firstname .' '. Auth::user()->lastname,
-                        'username'  => $user->username,
-                        'pass'      => $password,
-                    ];
+                $template = 'mail/generateMail';
+                $mailData = [
+                    'user'      => Auth::user()->firstname .' '. Auth::user()->lastname,
+                    'username'  => $user->username,
+                    'pass'      => $password,
+                ];
 
-                    if (isset($request->data['role_id']) && isset($request->data['org_id'])) {
-                        $userToOrgRole = new UserToOrgRole;
+                if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
+                    $defaultRole = Role::where('default_user', 1)->first()->id;
+                    $this->addRoles($user->id, $defaultRole, $empty);
 
-                        $userToOrgRole->user_id = $user->id;
-                        $userToOrgRole->role_id = $request->data['role_id'];
-                        $userToOrgRole->org_id = $request->data['org_id'];
-
-                        $userToOrgRole->save();
+                    foreach ($post['data']['role_id'] as $role) {
+                        $this->addRoles($user->id, $role, $post['data']['org_id']);
                     }
                 }
 
@@ -772,6 +1099,15 @@ class UserController extends ApiController
             }
         }
 
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::USERS),
+            'action'           => ActionsHistory::TYPE_ADD,
+            'action_object'    => $user->id,
+            'action_msg'       => 'Invited user',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse();
     }
 
@@ -809,14 +1145,14 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'firstname'         => 'required|string',
-            'lastname'          => 'required|string',
-            'username'          => 'required|string|unique:users,username,NULL,id,deleted_at,NULL',
-            'email'             => 'required|email',
+            'firstname'         => 'required|string|max:100',
+            'lastname'          => 'required|string|max:100',
+            'username'          => 'required|string|unique:users,username,NULL,id,deleted_at,NULL|max:100',
+            'email'             => 'required|email|max:191',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
-            'role_id'           => 'nullable|int|required_with:org_id',
-            'org_id'            => 'nullable|int|required_with:role_id',
+            'role_id'           => 'nullable',
+            'org_id'            => 'nullable',
         ]);
 
         if (!$validator->fails()) {
@@ -845,26 +1181,12 @@ class UserController extends ApiController
 
                 $registered = $user->save();
 
-                $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                ];
-
-                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
-                    $m->to($user->email, $user->firstname);
-                    $m->subject(__('custom.register_subject'));
-                });
-
-                if (isset($data['role_id']) || isset($data['org_id'])) {
-                    $userToOrgRole = new UserToOrgRole;
-
-                    $userToOrgRole->user_id = $user->id;
-                    $userToOrgRole->role_id = (int) $data['role_id'];
-                    $userToOrgRole->org_id = (int) $data['org_id'];
-
-                    $userToOrgRole->save();
+                if (!empty($data['org_id'])) {
+                    $defaultRole = Role::where('default_user', 1)->first()->id;
+                    $this->addRoles($user->id, $defaultRole, $empty);
                 }
+
+                $this->addRoles($user->id, $data['role_id'], $data['org_id']);
 
                 $userSettings = new UserSetting;
 
@@ -885,9 +1207,10 @@ class UserController extends ApiController
 
                 $userSettings->save();
 
-                if (!empty($data['org_data'])) {
+                if (!empty($data['org_data']) && $registered) {
                     $organisation = new Organisation;
 
+                    $organisation->uri = !empty($data['org_data']['uri']) ? $data['org_data']['uri'] : \Uuid::generate(4)->string;
                     $organisation->type = $data['org_data']['type'];
                     $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
                         ? $data['org_data']['parent_org_id']
@@ -903,7 +1226,7 @@ class UserController extends ApiController
                         : null;
                     $organisation->active = 0;
                     $organisation->approved = 0;
-                    $organisation->created_by = $user->id;
+                    $organisation->created_by = $registered->id;
                     $organisation->name = $this->trans($locale, $data['org_data']['name']);
                     $organisation->descript = $this->trans($locale, $data['org_data']['description']);
                     $organisation->activity_info = $data['org_data']['activity_info'];
@@ -913,6 +1236,23 @@ class UserController extends ApiController
                 }
 
                 DB::commit();
+
+                $mailData = [
+                    'user'  => $user->firstname,
+                    'hash'  => $user->hash_id,
+                    'id'    => $user->id,
+                    'mail'  => $user->email
+                ];
+
+                if (!empty($data['invite'])) {
+                    $mailData = array_merge($mailData, ['pass' => $request->data['password']]);
+                }
+
+                Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
+                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->to($user->email, $user->firstname);
+                    $m->subject(__('custom.register_subject'));
+                });
 
                 return $this->successResponse(['api_key' => $apiKey], true);
             } catch (QueryException $ex) {
@@ -925,6 +1265,105 @@ class UserController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('email', __('custom.send_mail_failed'));
+            }
+        } else if(!empty($data['org_data']) && !empty($data['username'])) {
+            $user = User::where('username', $data['username'])->first();
+            $id = $user->id;
+
+            $validator = \Validator::make($data['org_data'], [
+                'locale'                => 'nullable|string|max:5',
+                'name'                  => 'required_with:locale|max:191',
+                'name.bg'               => 'required_without:locale|string|max:191',
+                'type'                  => 'required|int|max:191|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
+                'description'           => 'nullable|max:8000',
+                'uri'                   => 'nullable|string|unique:organisations,uri|max:191',
+                'logo'                  => 'nullable|string|max:191',
+                'logo_filename'         => 'nullable|string|max:191',
+                'logo_mimetype'         => 'nullable|string|max:191',
+                'logo_data'             => 'nullable|max:16777215',
+                'activity_info'         => 'nullable|max:8000',
+                'contacts'              => 'nullable|max:8000',
+                'parent_org_id'         => 'nullable|int|digits_between:1,10',
+                'active'                => 'nullable|bool',
+                'approved'              => 'nullable|bool',
+                'custom_fields.*.label' => 'nullable|max:191',
+                'custom_fields.*.value' => 'nullable|max:8000',
+            ]);
+
+            if ($user && !$validator->fails()) {
+                DB::beginTransaction();
+
+                try {
+                    $organisation = new Organisation;
+
+                    $organisation->uri = !empty($data['org_data']['uri']) ? $data['org_data']['uri'] : \Uuid::generate(4)->string;
+                    $organisation->type = $data['org_data']['type'];
+                    $organisation->parent_org_id = !empty($data['org_data']['parent_org_id'])
+                        ? $data['org_data']['parent_org_id']
+                        : null;
+                    $organisation->active = $data['org_data']['active'];
+                    $organisation->approved = 0;
+                    $organisation->created_by = $id;
+                    $organisation->name = $this->trans($locale, $data['org_data']['name']);
+                    $organisation->descript = $this->trans($locale, $data['org_data']['descript']);
+                    $organisation->activity_info = $data['org_data']['activity_info'];
+                    $organisation->contacts = $data['org_data']['contacts'];
+
+                    if (!empty($data['org_data']['logo'])) {
+                        try {
+                            $img = \Image::make($data['org_data']['logo']);
+
+                            $organisation->logo_file_name = empty($data['org_data']['logo_filename'])
+                                ? basename($data['org_data']['logo'])
+                                : $data['org_data']['logo_filename'];
+                            $organisation->logo_mime_type = $img->mime();
+
+                            $temp = tmpfile();
+                            $path = stream_get_meta_data($temp)['uri'];
+                            $img->save($path);
+                            $organisation->logo_data = file_get_contents($path);
+
+                            fclose($temp);
+                        } catch (\Exception $ex) {
+                            $imageError = true;
+
+                            $validator->errors()->add('logo', $this->getImageTypeError());
+                        }
+
+                        if (isset($data['org_data']['logo_filename']) && isset($data['org_data']['logo_mimetype']) && isset($data['org_data']['logo_data'])) {
+                            $organisation->logo_file_name = $data['org_data']['logo_filename'];
+                            $organisation->logo_mime_type = $data['org_data']['logo_mimetype'];
+                            $organisation->logo_data = $data['org_data']['logo_data'];
+                        }
+
+                        if (isset($organisation->logo_data) && !$this->checkImageSize($organisation->logo_data)) {
+                            $imageError = true;
+
+                            $validator->errors()->add('logo', $this->getImageSizeError());
+                        }
+                    }
+
+                    $organisation->save();
+
+                    if ($organisation) {
+                        $role = Role::getOrgAdminRole();
+
+                        $userToOrgRole = new UserToOrgRole;
+                        $userToOrgRole->org_id = $organisation->id;
+                        $userToOrgRole->user_id = $id;
+                        $userToOrgRole->role_id = $role->id;
+
+                        $userToOrgRole->save();
+
+                        DB::commit();
+                    }
+
+                    return $this->successResponse(['api_key' => $user->api_key], true);
+                } catch (QueryException $ex) {
+                    DB::rollback();
+
+                    Log::error($ex->getMessage());
+                }
             }
         }
 
@@ -963,7 +1402,7 @@ class UserController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'username' => 'required|string|exists:users,username,deleted_at,NULL'
+            'username' => 'required|string|exists:users,username,deleted_at,NULL|max:255'
         ]);
 
         if (!$validator->fails()) {
@@ -1055,5 +1494,160 @@ class UserController extends ApiController
         $users = User::where('active', 1)->count();
 
         return $this->successResponse(['count' => $users], true);
+    }
+
+    /**
+     * Lists the count of the datasets per user
+     *
+     * @param array criteria - optional
+     * @param array criteria[dataset_criteria] - optional
+     * @param array criteria[dataset_criteria][user_ids] - optional
+     * @param array criteria[dataset_criteria][group_ids] - optional
+     * @param array criteria[dataset_criteria][category_ids] - optional
+     * @param array criteria[dataset_criteria][tag_ids] - optional
+     * @param array criteria[dataset_criteria][formats] - optional
+     * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
+     * @param boolean criteria[dataset_criteria][reported] - optional
+     * @param array criteria[dataset_ids] - optional
+     * @param int criteria[records_limit] - optional
+     *
+     * @return json response
+     */
+    public function listDataUsers(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'criteria' => 'nullable|array'
+        ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+            $validator = \Validator::make($criteria, [
+                'dataset_criteria'  => 'nullable|array',
+                'dataset_ids'       => 'nullable|array',
+                'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
+                'records_limit'     => 'nullable|int|digits_between:1,10|min:1',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $dsCriteria = isset($criteria['dataset_criteria']) ? $criteria['dataset_criteria'] : [];
+            $validator = \Validator::make($dsCriteria, [
+                'user_ids'            => 'nullable|array',
+                'user_ids.*'          => 'int|digits_between:1,10|exists:users,id',
+                'group_ids'           => 'nullable|array',
+                'group_ids.*'         => 'int|digits_between:1,10|exists:organisations,id,type,'. Organisation::TYPE_GROUP,
+                'category_ids'        => 'nullable|array',
+                'category_ids.*'      => 'int|digits_between:1,10|exists:categories,id,parent_id,NULL',
+                'tag_ids'             => 'nullable|array',
+                'tag_ids.*'           => 'int|digits_between:1,10|exists:tags,id',
+                'terms_of_use_ids'    => 'nullable|array',
+                'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
+                'formats'             => 'nullable|array|min:1',
+                'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
+                'reported'            => 'nullable|boolean',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            try {
+                $data = User::join('data_sets', 'users.id', '=', 'data_sets.created_by');
+                $data->select('users.id', 'username', 'firstname', 'lastname', DB::raw('count(distinct data_sets.id, data_sets.created_by) as total'));
+
+                $data->where('users.active', 1);
+                $data->whereNull('data_sets.org_id');
+                $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
+                $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
+
+                if (!empty($dsCriteria['user_ids'])) {
+                    $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
+                }
+                if (!empty($dsCriteria['group_ids'])) {
+                    $data->whereIn(
+                        'data_sets.id',
+                        DB::table('data_set_groups')->select('data_set_id')->distinct()->whereIn('group_id', $dsCriteria['group_ids'])
+                    );
+                }
+                if (!empty($dsCriteria['category_ids'])) {
+                    $data->whereIn('category_id', $dsCriteria['category_ids']);
+                }
+                if (!empty($dsCriteria['tag_ids'])) {
+                    $data->whereIn(
+                        'data_sets.id',
+                        DB::table('data_set_tags')->select('data_set_id')->distinct()->whereIn('tag_id', $dsCriteria['tag_ids'])
+                    );
+                }
+                if (!empty($dsCriteria['terms_of_use_ids'])) {
+                    $data->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
+                }
+                if (!empty($dsCriteria['formats'])) {
+                    $fileFormats = [];
+                    foreach ($dsCriteria['formats'] as $format) {
+                        $fileFormats[] = Resource::getFormatsCode($format);
+                    }
+                    $data->whereIn(
+                        'data_sets.id',
+                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                    );
+                }
+                if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
+                    $data->whereIn(
+                        'data_sets.id',
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                    );
+                }
+
+                if (!empty($criteria['dataset_ids'])) {
+                    $data->whereIn('data_sets.id', $criteria['dataset_ids']);
+                }
+
+                $data->groupBy(['users.id', 'username', 'firstname', 'lastname'])->orderBy('total', 'desc');
+
+                if (!empty($criteria['records_limit'])) {
+                    $data->take($criteria['records_limit']);
+                }
+                $data = $data->get();
+
+                $results = [];
+                if (!empty($data)) {
+                    foreach ($data as $item) {
+                        $results[] = [
+                            'id'             => $item->id,
+                            'first_name'     => $item->firstname,
+                            'last_name'      => $item->lastname,
+                            'username'       => $item->username,
+                            'datasets_count' => $item->total,
+                        ];
+                    }
+                }
+
+                return $this->successResponse(['users' => $results], true);
+
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.list_data_users_fail'), $validator->errors()->messages());
+    }
+
+    private function addRoles($userId, &$roleIds, &$orgId)
+    {
+        if (!empty($roleIds) && is_numeric($roleIds)) {
+            $roleIds = [$roleIds];
+        } else if (empty($roleIds)) {
+            $roleIds = [Role::where('default_user', 1)->first()->id];
+        }
+
+        foreach ($roleIds as $role) {
+            $userToOrgRole = new UserToOrgRole;
+            $userToOrgRole->user_id = $userId;
+            $userToOrgRole->org_id = !empty($orgId) ? $orgId : null;
+            $userToOrgRole->role_id = $role;
+
+            $userToOrgRole->save();
+        }
     }
 }

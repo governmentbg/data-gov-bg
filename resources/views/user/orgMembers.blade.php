@@ -25,16 +25,6 @@
                             >{{ $role->name }}</a>
                         </li>
                     @endforeach
-                    <li>
-                        <a
-                            class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                            href="{{ route('userOrgMembersView', [
-                                'uri'       => $organisation->uri,
-                                'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                'keywords'  => $keywords,
-                            ]) }}"
-                        >{{ __('custom.for_approval') }}</a>
-                    </li>
                 </ul>
             </li>
         </ul>
@@ -61,23 +51,13 @@
                                         >{{ $role->name }}</a>
                                     </li>
                                 @endforeach
-                                <li>
-                                    <a
-                                        class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                                        href="{{ route('userOrgMembersView', [
-                                            'uri'       => $organisation->uri,
-                                            'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                            'keywords'  => $keywords,
-                                        ]) }}"
-                                    >{{ __('custom.for_approval') }}</a>
-                                </li>
                             </ul>
                         </li>
                     </ul>
-                    <div class="org m-t-lg">
+                    <div class="org m-t-lg side-info">
                         <img src="{{ $organisation->logo }}">
                         <h2>{{ $organisation->name }}</h2>
-                        <h4>{{ truncate($organisation->descript, 150) }}</h4>
+                        <h4>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h4>
                         <p class="text-right show-more">
                             <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
                         </p>
@@ -102,7 +82,7 @@
                                 <input type="submit" class="hidden">
                             </form>
                         </div>
-                        @if ($isAdmin)
+                        @if ($buttons[$organisation->id]['editMember'])
                             <div class="m-r-md p-h-xs col-md-6 invite-choice">
                                 <div>{{ __('custom.add_members') }}</div>
                                 <ul class="input-border-r-12">
@@ -128,6 +108,13 @@
                     </div>
                     <div class="col-xs-12 page-content text-left p-l-none">
                         @if (!empty($members))
+                            @if (isset($pagination))
+                                <div class="row">
+                                    <div class="col-xs-12 text-center pagination">
+                                        {{ $pagination->links(null, app('request')->except(['page'])) }}
+                                    </div>
+                                </div>
+                            @endif
                             @foreach ($members as $member)
                                 <div class="col-xs-12 p-l-none">
                                     <h3 class="m-b-md">{{
@@ -135,23 +122,25 @@
                                         ? $member->username
                                         : $member->firstname .' '. $member->lastname
                                     }}</h3>
-                                    @if ($isAdmin)
                                         <div class="js-member-admin-controls">
-                                            <button
-                                                class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
-                                            >{{ __('custom.edit') }}</button>
-                                            <form method="POST" class="inline-block">
-                                                {{ csrf_field() }}
+                                            @if ($buttons[$organisation->id]['editMember'])
                                                 <button
-                                                    class="badge cust-btn badge-pill m-b-sm del-btn"
-                                                    type="submit"
-                                                    name="delete"
-                                                    onclick="return confirm('Изтриване на данните?');"
-                                                >{{ __('custom.remove') }}</button>
-                                                <input name="user_id" type="hidden" value="{{ $member->id }}">
-                                            </form>
+                                                    class="badge cust-btn badge-pill m-r-md m-b-sm js-member-edit"
+                                                >{{ uctrans('custom.edit') }}</button>
+                                            @endif
+                                            @if ($buttons[$organisation->id]['deleteMember'])
+                                                <form method="POST" class="inline-block">
+                                                    {{ csrf_field() }}
+                                                    <button
+                                                        class="badge cust-btn badge-pill m-b-sm del-btn"
+                                                        type="submit"
+                                                        name="delete"
+                                                        data-confirm="{{ __('custom.remove_data') }}"
+                                                    >{{ uctrans('custom.remove') }}</button>
+                                                    <input name="user_id" type="hidden" value="{{ $member->id }}">
+                                                </form>
+                                            @endif
                                         </div>
-                                    @endif
                                     <div class="js-member-edit-controls m-b-sm hidden">
                                         <form method="POST" class="member-edit-form">
                                             {{ csrf_field() }}
@@ -160,12 +149,15 @@
                                             <div class="m-b-sm">
                                                 <select
                                                     class="form-control js-select"
-                                                    name="role_id"
+                                                    name="role_id[]"
+                                                    multiple="multiple"
                                                 >
                                                     @foreach ($roles as $role)
                                                         <option
                                                             value="{{ $role->id }}"
-                                                            {{ $member->role_id == $role->id ? 'selected' : null }}
+                                                            @foreach ($member->role_id as $memberRole)
+                                                                {{ $memberRole == $role->id ? 'selected' : null }}
+                                                            @endforeach
                                                         >{{ $role->name }}</option>
                                                     @endforeach
                                                 </select>
@@ -174,11 +166,11 @@
                                                 type="submit"
                                                 class="badge cust-btn badge-pill m-t-sm m-r-md"
                                                 name="edit_member"
-                                            >{{ __('custom.save') }}</button>
+                                            >{{ uctrans('custom.save') }}</button>
                                             <button
                                                 type="button"
                                                 class="badge cust-btn badge-pill m-t-sm js-member-cancel del-btn"
-                                            >{{ __('custom.cancel') }}</button>
+                                            >{{ uctrans('custom.cancel') }}</button>
                                         </form>
                                     </div>
                                 </div>
@@ -214,7 +206,7 @@
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="role" class="col-lg-2 col-form-label">{{ __('custom.name') }}: </label>
+                            <label for="role" class="col-lg-2 col-form-label">{{ uctrans('custom.name') }}: </label>
                             <div class="col-lg-10">
                                 <select
                                     class="js-ajax-autocomplete form-control"
@@ -234,7 +226,8 @@
                             <div class="col-lg-10">
                                 <select
                                     class="js-select form-control"
-                                    name="role"
+                                    name="role[]"
+                                    multiple="multiple"
                                     data-placeholder="{{ __('custom.select_role') }}"
                                     id="role_exist"
                                 >
@@ -250,7 +243,7 @@
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
                                 <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ __('custom.close') }}</button>
-                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
+                                <button type="submit" name="invite_existing" class="m-l-md btn btn-custom">{{ __('custom.add') }}</button>
                             </div>
                         </div>
                     </form>
@@ -285,7 +278,13 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-lg-10">
-                                <select class="js-select form-control" data-placeholder="{{ __('custom.select_role') }}" name="role" id="role">
+                                <select
+                                    class="js-select form-control"
+                                    data-placeholder="{{ __('custom.select_role') }}"
+                                    name="role[]"
+                                    id="role"
+                                    multiple="multiple"
+                                >
                                     <option></option>
                                     @foreach($roles as $role)
                                         <option

@@ -1,0 +1,141 @@
+.admin {
+    .add {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .frame-wrap {
+        width: 800px;
+        margin: 0 auto;
+
+        @include mobile() {
+            width: 100%;
+        }
+
+        .frame {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+
+            h3 {
+                margin-bottom: 40px;
+            }
+        }
+    }
+
+    .adm-filter {
+        label {
+            font-size: 15pt;
+            font-weight: 100;
+        }
+
+        div {
+            margin-top: 3px;
+            padding-left: 17px;
+        }
+    }
+}
+
+.add-terms {
+    .body {
+        padding: 20px 40px;
+        @include mobile() {
+            padding: 20px;
+        }
+    }
+}
+
+.terms-hr {
+    hr {
+        border-top: 1px solid #108f9e;
+    }
+}
+
+.from-to {
+    font-size: 22px;
+}
+
+.order-terms-req {
+    a {
+        &.active {
+            color: #108f9e;
+        }
+
+        padding-bottom: 10px;
+        padding-top: 10px;
+
+        &:first-child() {
+            border-right: 1px solid #108f9e;
+            height: 20px;
+            padding-right: 10px;
+        }
+
+        &:last-child() {
+            padding-left: 10px;
+        }
+    }
+}
+
+.order-datasets {
+    a {
+        &.active {
+            color: #108f9e;
+        }
+
+        padding-bottom: 10px;
+        padding-top: 10px;
+
+        border-right: 1px solid #108f9e;
+        height: 20px;
+        padding-right: 10px;
+
+        &:last-child() {
+            border: none;
+            padding-left: 10px;
+        }
+    }
+}
+
+.order-documents {
+    a {
+        &.active {
+            color: #108f9e;
+        }
+
+        padding-bottom: 10px;
+        padding-top: 10px;
+        border-right: 1px solid #108f9e;
+        height: 20px;
+        padding-right: 10px;
+        padding-left: 10px;
+
+        &:last-child() {
+            border-right: none;
+        }
+
+        &:first-child() {
+            padding-left: 0px;
+        }
+    }
+}
+
+.doc-badge {
+    padding: 5px 40px;
+
+    @include smMobile {
+        margin-top: 30px;
+    }
+}
+
+.long-badge {
+    padding: 5px 40px;
+}
+
+.sort-links {
+    a {
+        padding: 10px 10px 10px 6px !important;
+    }
+}
+
+.section-edit {
+    padding: 20px 95px;
+}

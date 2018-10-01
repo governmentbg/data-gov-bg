@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\ApiController;
+use App\ActionsHistory;
+use App\Module;
+use App\RoleRight;
 
 class ThemeController extends ApiController
 {
@@ -22,16 +25,16 @@ class ThemeController extends ApiController
     public static function getThemes()
     {
         return [
-            self::THEME_RED         => 'Red',
-            self::THEME_DARK_RED    => 'Dark Red',
-            self::THEME_LIGHT_BLUE  => 'Light Blue',
-            self::THEME_BLUE        => 'Blue',
-            self::THEME_DARK_BLUE   => 'Dark Red',
-            self::THEME_LIGHT_GREEN => 'Light Green',
-            self::THEME_GREEN       => 'Green',
-            self::THEME_YELLOW      => 'Yellow',
-            self::THEME_ORANGE      => 'Orange',
-            self::THEME_PURPLE      => 'Purple',
+            self::THEME_RED         => __('custom.red'),
+            self::THEME_DARK_RED    => __('custom.dark_red'),
+            self::THEME_LIGHT_BLUE  => __('custom.light_blue'),
+            self::THEME_BLUE        => __('custom.blue'),
+            self::THEME_DARK_BLUE   => __('custom.dark_blue'),
+            self::THEME_LIGHT_GREEN => __('custom.light_green'),
+            self::THEME_GREEN       => __('custom.green'),
+            self::THEME_YELLOW      => __('custom.yellow'),
+            self::THEME_ORANGE      => __('custom.orange'),
+            self::THEME_PURPLE      => __('custom.purple'),
         ];
     }
 
@@ -60,6 +63,15 @@ class ThemeController extends ApiController
      */
     public function listThemes(Request $request)
     {
+        $rightCheck = RoleRight::checkUserRight(
+            Module::THEMES,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $themeNames = $this->getThemes();
         foreach ($themeNames as $id => $themeName) {
             $themes[] = [
@@ -67,6 +79,14 @@ class ThemeController extends ApiController
                 'name'  => $themeName,
             ];
         }
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::THEMES),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed themes',
+        ];
+
+        Module::add($logData);
+
         return $this->successResponse($themes);
     }
 }

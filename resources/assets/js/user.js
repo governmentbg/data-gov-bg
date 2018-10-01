@@ -1,3 +1,6 @@
+import { EEXIST } from 'constants';
+import { error } from 'util';
+
 $(function() {
     if ($('.js-logo').length) {
         var $button = $('.js-logo');
@@ -65,11 +68,15 @@ $(function() {
     });
 });
 
+
 /**
  * Select 2 functionality
  *
  */
 function initSelect2() {
+    var select2Delay = 1000;
+    var select2MinLength = 3;
+
     if ($('.js-select').length) {
         $('.js-select').each(function() {
             $(this).select2({
@@ -104,12 +111,12 @@ function initSelect2() {
         $('.js-ajax-autocomplete').each(function() {
             var options = {
                 placeholder: $(this).data('placeholder'),
-                minimumInputLength: 3,
+                minimumInputLength: select2MinLength,
                 dropdownParent: $($(this).data('parent')),
                 ajax: {
                     url: $(this).data('url'),
                     type: 'POST',
-                    delay: 1000,
+                    delay: select2Delay,
                     data: function (params) {
                         var queryParams = {
                             criteria: {
@@ -124,7 +131,7 @@ function initSelect2() {
                         return {
                             results: $.map(data.users, function (item) {
                                 return {
-                                    text: item.firstname + ' ' + item.lastname,
+                                    text: item.username + ' | ' + item.firstname + ' ' + item.lastname,
                                     id: item.id
                                 }
                             })
@@ -154,16 +161,15 @@ function initSelect2() {
         $('.js-ajax-autocomplete-org').each(function() {
             var options = {
                 placeholder: $(this).data('placeholder'),
-                minimumInputLength: 3,
+                minimumInputLength: select2MinLength,
                 ajax: {
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     url: $(this).data('url'),
                     type: 'POST',
-                    delay: 1000,
+                    delay: select2Delay,
                     data: function (params) {
-
                         var queryParams = {
                             criteria: {
                                 keywords: params.term
@@ -174,8 +180,6 @@ function initSelect2() {
                         return finalParams;
                     },
                     processResults: function (data) {
-                        data.organisations = $.merge([{uri: 0, name: 'Главна организация'}], data.organisations);
-
                         return {
                             results: $.map(data.organisations, function (item) {
                                 return {
@@ -266,4 +270,42 @@ $(function() {
     $('#invite').on('show.bs.modal', function (e) {
         setTimeout(function() {initSelect2();}, 200);
     });
+});
+
+$(function() {
+    if ($('.js-ress-type').length) {
+        $('.js-ress-type').on('change', function() {
+            var type = $(".js-ress-type option:selected").val();
+            switch (parseInt(type)) {
+                case 1:
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').hide();
+                    $('.js-ress-file').show();
+                    break;
+                case 2:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-api').hide();
+                    $('.js-ress-url').show();
+                    break;
+                case 3:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').show();
+                    break;
+                default:
+                    $('.js-ress-file').hide();
+                    $('.js-ress-url').hide();
+                    $('.js-ress-api').hide();
+            }
+        })
+    }
+});
+
+$(function() {
+    if ($('.js-xml-prev').length) {
+        var format = require('prettify-xml');
+        var xmlData = $(".js-xml-prev").data('xml-data');
+        var formattedXml = format(xmlData.trim());
+        $('.js-xml-prev').html(formattedXml);
+    }
 });

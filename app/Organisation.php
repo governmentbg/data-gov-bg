@@ -16,12 +16,16 @@ class Organisation extends Model implements TranslatableInterface
     use RecordSignature;
     use Searchable;
 
+    const INIT_FILTER = 10;
+
     const TYPE_CIVILIAN = 1;
     const TYPE_COUNTRY = 2;
     const TYPE_GROUP = 3;
 
     const ACTIVE_FALSE = 0;
+    const ACTIVE_TRUE = 1;
     const APPROVED_FALSE = 0;
+    const APPROVED_TRUE = 1;
 
     protected $guarded = ['id'];
 
@@ -82,7 +86,7 @@ class Organisation extends Model implements TranslatableInterface
 
     public function dataSetGroup()
     {
-        return $this->hasMany('App\DataSetGroup');
+        return $this->hasMany('App\DataSetGroup', 'group_id');
     }
 
     public function dataRequest()

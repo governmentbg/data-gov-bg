@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use App\Http\Controllers\ApiController;
-use Illuminate\Support\Facades\Log;
-use App\Section;
 use App\Locale;
+use App\Module;
+use App\Section;
+use App\RoleRight;
+use App\ActionsHistory;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 
 class SectionController extends ApiController
 {
@@ -32,29 +36,73 @@ class SectionController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'name'          => 'required|string',
-            'locale'        => 'required|string|max:5',
-            'active'        => 'required|boolean',
-            'parent_id'     => 'nullable|integer|exists:sections,id',
-            'ordering'      => 'nullable|integer',
+            'name'          => 'required_with:locale|max:191',
+            'name.bg'       => 'required_without:locale|string|max:191',
+            'name.*'        => 'max:191',
+            'locale'        => 'nullable|string|max:5',
+            'active'        => 'nullable|boolean',
+            'parent_id'     => 'nullable|integer|exists:sections,id|digits_between:1,10',
+            'ordering'      => 'nullable|integer|digits_between:1,3',
             'read_only'     => 'nullable|boolean',
-            'theme'         => 'nullable|integer',
-            'forum_link'    => 'nullable|string',
+            'theme'         => 'nullable|integer|digits_between:1,3',
+            'forum_link'    => 'nullable|string|max:191',
+            'help_section'  => 'nullable|string|exists:help_sections,name|max:191',
         ]);
 
         if (!$validator->fails()) {
-            $locale = Locale::where('locale', $data['locale'])->value('locale');
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             //prepare section data
             $newSection = new Section;
-            $newSection->created_by = \Auth::user()->id;
 
-            $newSection->name = $data['name'];
-            unset($data['locale']);
-            $newSection->fill($data);
+            $newSection->name = $this->trans($data['locale'], $data['name']);
+            $newSection->active = !empty($data['active']);
+            $newSection->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
+            $newSection->forum_link = isset($data['forum_link']) ? $data['forum_link'] : null;
+
+            if (isset($data['ordering'])) {
+                $newSection->ordering = $data['ordering'];
+            }
+
+            if (isset($data['read_only'])) {
+                $newSection->read_only = $data['read_only'];
+            }
+
+            if (isset($data['theme'])) {
+                $newSection->theme = $data['theme'];
+            }
+
+            if (isset($data['forum_link'])) {
+                $newSection->forum_link = $data['forum_link'];
+            }
+
+            if (isset($data['parent_id'])) {
+                $newSection->parent_id = $data['parent_id'];
+            }
+
+            if (isset($data['help_section'])) {
+                $newSection->help_section = $data['help_section'];
+            }
 
             try {
                 $newSection->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SECTIONS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newSection->id,
+                    'action_msg'       => 'Added section',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['id' => $newSection->id], true);
             } catch (QueryException $ex) {
@@ -86,37 +134,93 @@ class SectionController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'id'                => 'required|numeric|exists:sections,id',
-            'data.name'         => 'required|string',
-            'data.locale'       => 'required|string|max:5',
-            'data.active'       => 'required|boolean',
-            'data.parent_id'    => 'nullable|integer|exists:sections,id',
-            'data.ordering'     => 'nullable|integer',
-            'data.read_only'    => 'nullable|boolean',
-            'data.theme'        => 'nullable|integer',
-            'data.forum_link'   => 'nullable|string',
+            'id'   => 'required|numeric|exists:sections,id|digits_between:1,10',
+            'data' => 'required|array'
         ]);
 
         if (!$validator->fails()) {
-            $data = $request->data;
-            $locale = Locale::where('locale', $data['locale'])->value('locale');
+            $validator = \Validator::make($post['data'], [
+                'name'          => 'required_with:locale|max:191',
+                'name.bg'       => 'required_without:locale|string|max:191',
+                'name.*'        => 'max:191',
+                'locale'        => 'nullable|string|max:5',
+                'active'        => 'nullable|boolean',
+                'parent_id'     => 'nullable|integer|exists:sections,id|digits_between:1,10',
+                'ordering'      => 'nullable|integer|digits_between:1,3',
+                'read_only'     => 'nullable|boolean',
+                'theme'         => 'nullable|integer|digits_between:1,3',
+                'forum_link'    => 'nullable|string|max:191',
+                'help_section'  => 'nullable|string|exists:help_sections,name|max:191',
+            ]);
+        }
 
-            // if request locale not found set default
-            if (is_null($locale)) {
-                $data['locale'] = config('app.locale');
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => \Auth::user()->id
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
             }
 
-            //prepare section data
+            $data = $request->data;
             $section = Section::find($post['id']);
 
             if ($section) {
-                $section->updated_by = \Auth::user()->id;
-                $section->name = $data['name'];
-                unset($data['locale']);
-                $section->fill($data);
+                $section->name = $this->trans($data['locale'], $data['name']);
+
+                if (!empty($data['active'])) {
+                    $section->active = $data['active'];
+                } else {
+                    $section->active = Section::ACTIVE_FALSE;
+                }
+
+                if (!empty($data['read_only'])) {
+                    $section->read_only = $data['read_only'];
+                } else {
+                    $section->read_only = Section::READ_ONLY_FALSE;
+                }
+
+                if (!empty($data['ordering'])) {
+                    $section->ordering = $data['ordering'];
+                }
+
+                if (!empty($data['parent_id'])) {
+                    $section->parent_id = $data['parent_id'];
+                }
+
+                if (!empty($data['theme'])) {
+                    $section->theme = $data['theme'];
+                }
+
+                if (!empty($data['forum_link'])) {
+                    $section->forum_link = $data['forum_link'];
+                } else {
+                    $section->forum_link = null;
+                }
+
+                if (!empty($data['help_section'])) {
+                    $section->help_section = $data['help_section'];
+                }
+
+                $section->updated_by = \Auth::id();
 
                 try {
                     $section->save();
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::SECTIONS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $section->id,
+                        'action_msg'       => 'Edited section',
+                    ];
+
+                    Module::add($logData);
 
                     return $this->successResponse();
                 } catch (QueryException $ex) {
@@ -140,10 +244,33 @@ class SectionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['id' => 'required|integer|exists:sections,id']);
+        $validator = \Validator::make($post, ['id' => 'required|integer|exists:sections,id|digits_between:1,10']);
 
         if (!$validator->fails()) {
-            if (Section::find($post['id'])->delete()) {
+            $section = Section::find($post['id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $section->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            if ($section->delete()) {
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::SECTIONS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $post['id'],
+                    'action_msg'       => 'Deleted section',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             }
         }
@@ -158,40 +285,139 @@ class SectionController extends ApiController
      * @param string criteria[locale] - optional
      * @param integer criteria[id] - optional
      * @param integer criteria[active] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
      *
      * @return JsonResponse - with list of sections or error
      */
     public function listSections(Request $request)
     {
-        $sectionModel = new Section;
-        $post = $request->criteria;
+        $post = $request->all();
 
-        if (!empty($post)) {
-            $validator = \Validator::make($request->all(), [
-                'criteria.id'       => 'nullable|integer',
-                'criteria.active'   => 'nullable|boolean',
-                'criteria.locale'   => 'nullable|string|max:5',
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|max:191',
+        ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'id'       => 'nullable|integer|digits_between:1,10',
+                'active'   => 'nullable|boolean',
+                'locale'   => 'nullable|string|max:5',
             ]);
-
-            if ($validator->fails()) {
-                return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
-            }
-
-            $criteria['locale'] = $request->filled('criteria.locale')
-                    ? $request->input('criteria.locale')
-                    : config('app.locale');
-
-            if ($request->filled('criteria.active')) {
-                $criteria['active'] = $request->input('criteria.active');
-            }
-        } else {
-            $criteria['locale'] = config('app.locale');
         }
 
-        $sections = $sectionModel->listSections($criteria);
-        $response = $this->prepareSections($sections);
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
 
-        return $this->successResponse($response);
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SECTIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
+        $query = Section::where('parent_id', null);
+        $criteria = [];
+
+        if (isset($post['criteria'])) {
+            if (isset($post['criteria']['locale'])) {
+                $criteria['locale'] = $post['criteria']['locale'];
+            }
+
+            if (isset($post['criteria']['active'])) {
+                $criteria['active'] = $post['criteria']['active'];
+            }
+
+            if (isset($post['criteria']['id'])) {
+                $criteria['id'] = $post['criteria']['id'];
+            }
+        }
+
+        if (!empty($criteria)) {
+            $query->where($criteria);
+        }
+
+        $columns = [
+            'id',
+            'name',
+            'parent_id',
+            'ordering',
+            'active',
+            'read_only',
+            'theme',
+            'forum_link',
+            'help_section',
+            'created_at',
+            'updated_at',
+            'created_by',
+            'updated_by',
+        ];
+
+        if (isset($order['field'])) {
+            if (!in_array($order['field'], $columns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
+            }
+        }
+
+        if (isset($order['type']) && isset($order['field'])) {
+            $query->orderBy(
+                $order['field'],
+                $order['type'] == 'asc' ? 'asc' : 'desc'
+            );
+        }
+
+        $count = $query->count();
+        $query->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
+
+        $result = [];
+
+        foreach ($query->get() as $section) {
+            $result[] = [
+                'id'            => $section->id,
+                'name'          => $section->name,
+                'locale'        => \LaravelLocalization::getCurrentLocale(),
+                'parent_id'     => $section->parent_id,
+                'active'        => $section->active,
+                'ordering'      => $section->ordering,
+                'read_only'     => $section->read_only,
+                'forum_link'    => $section->forum_link,
+                'help_section'  => $section->help_section,
+                'theme'         => $section->theme,
+                'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
+                'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,
+                'created_by'    => $section->created_by,
+                'updated_by'    => $section->updated_by,
+            ];
+        }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::SECTIONS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed sections',
+        ];
+
+        Module::add($logData);
+
+        return $this->successResponse(['sections' => $result, 'total_records' => $count], true);
     }
 
     /**
@@ -201,76 +427,126 @@ class SectionController extends ApiController
      * @param string criteria[locale] - optional
      * @param integer criteria[section_id] - optional
      * @param integer criteria[active] - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
      *
      * @return JsonResponse - with list of subsections or error
      */
     public function listSubsections(Request $request)
     {
-        $sectionModel = new Section;
-        $post = $request->criteria;
+        $post = $request->all();
 
-        if (!empty($post)) {
-            $validator = \Validator::make($request->all(), [
-                'criteria.section_id'   => 'nullable|integer',
-                'criteria.active'       => 'nullable|boolean',
-                'criteria.locale'       => 'nullable|string|max:5',
+        $validator = \Validator::make($post, [
+            'criteria'              => 'nullable|array',
+            'records_per_page'      => 'nullable|int|digits_between:1,10',
+            'page_number'           => 'nullable|int|max:191',
+        ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($criteria, [
+                'id'         => 'nullable|integer|digits_between:1,10',
+                'active'     => 'nullable|boolean',
+                'locale'     => 'nullable|string|max:5',
+                'section_id' => 'nullable|int|digits_between:1,10',
             ]);
-
-            if ($validator->fails()) {
-                return $this->errorResponse(__('custom.list_subsections_fail'), $validator->errors()->messages());
-            }
-
-            $criteria['locale'] = $request->filled('criteria.locale')
-                    ? $request->input('criteria.locale')
-                    : config('app.locale');
-
-            if ($request->filled('criteria.active')) {
-                $criteria['active'] = $request->input('criteria.active');
-            }
-
-            if ($request->filled('criteria.section_id')) {
-                $criteria['parent_id'] = $request->input('criteria.section_id');
-            }
-
-            $sections = $sectionModel->listSubsections($criteria);
-        } else {
-            $criteria['locale'] = config('app.locale');
-            $sections = $sectionModel->listSubsections($criteria);
         }
 
-        $response = $this->prepareSections($sections);
+        if ($validator->fails()) {
+            return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
+        }
 
-        return $this->successResponse($response);
-    }
+        $rightCheck = RoleRight::checkUserRight(
+            Module::SECTIONS,
+            RoleRight::RIGHT_VIEW
+        );
 
-    /**
-     * Helper function for listing APIs - preparing section records for response
-     *
-     * @param Collection $sections - collection of Section records
-     * @return array - Section records data prepared for response
-     */
-    private function prepareSections($sections)
-    {
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
+        $query = isset($criteria['section_id'])
+            ? Section::where('parent_id', $criteria['section_id'])
+            : Section::where('parent_id', '!=', null);
+
+        $criteria = [];
+
+        if (isset($post['criteria'])) {
+            if (isset($post['criteria']['locale'])) {
+                $criteria['locale'] = $post['criteria']['locale'];
+            }
+
+            if (isset($post['criteria']['active'])) {
+                $criteria['active'] = $post['criteria']['active'];
+            }
+
+            if (isset($post['criteria']['id'])) {
+                $criteria['id'] = $post['criteria']['id'];
+            }
+        }
+
+        if (!empty($criteria)) {
+            $query->where($criteria);
+        }
+
+        $count = $query->count();
+        $query->forPage(
+            $request->offsetGet('page_number'),
+            $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+        );
+
         $result = [];
 
-        foreach ($sections as $section) {
+        foreach ($query->get() as $section) {
             $result[] = [
                 'id'            => $section->id,
-                'name'          => $section->label,
-                'locale'        => $section->locale,
+                'name'          => $section->name,
+                'locale'        => \LaravelLocalization::getCurrentLocale(),
                 'parent_id'     => $section->parent_id,
                 'active'        => $section->active,
                 'ordering'      => $section->ordering,
                 'read_only'     => $section->read_only,
                 'forum_link'    => $section->forum_link,
+                'help_section'  => $section->help_section,
                 'theme'         => $section->theme,
-                'created_at'    => $section->created_at,
-                'updated_at'   => $section->updated_at,
-                'created_by'   => $section->created_by,
+                'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
+                'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,
+                'created_by'    => $section->created_by,
                 'updated_by'    => $section->updated_by,
             ];
         }
 
-        return $result;
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::SECTIONS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed sub section',
+        ];
+
+        Module::add($logData);
+
+        return $this->successResponse(['subsections' => $result, 'total_records' => $count], true);
+    }
+
+    public function isParent(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['id' => 'required|int|exists:sections,id|digits_between:1,10']);
+
+        if (!$validator->fails()) {
+            $section = Section::find($post['id']);
+
+            if ($section) {
+                if (Section::where('parent_id', $section->id)->count()) {
+
+                    return $this->successResponse(['data' => true], true);
+                }
+
+                return $this->successResponse(['data' => false], true);
+            }
+        }
+
+        return $this->errorResponse(__('custom.error'), $validator->errors()->messages());
     }
 }

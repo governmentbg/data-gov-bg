@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal inmodal fade" id="add-license" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">
                 <div class="p-w-md">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ __('custom.close') }}</span></button>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ uctrans('custom.close') }}</span></button>
                     <h2>{{ __('custom.license_add_req') }}</h2>
                 </div>
                 <div class="modal-body">
@@ -14,24 +14,25 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Вашата заявка за лиценз беше приета.</p>
+                        <p>{{ __('custom.terms_req_success') }}</p>
                     </div>
                     <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <p>Имаше проблем с вашата заявка за лиценз.</p>
+                        <p>{{ __('custom.terms_req_error') }}</p>
                     </div>
                     <form id="sendTermOfUseReq" method="POST" action="{{ url('/user/sendTermsOfUseReq') }}" class="m-t-lg">
                         {{ csrf_field() }}
                         <div class="form-group row required">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                             <div class="col-sm-9">
                                 <input
                                     id="fname"
                                     class="input-border-r-12 form-control"
                                     name="firstname"
                                     type="text"
+                                    value="{{ \Auth::user()->firstname }}"
                                 >
                             </div>
                         </div>
@@ -43,6 +44,7 @@
                                     class="input-border-r-12 form-control"
                                     name="lastname"
                                     type="text"
+                                    value="{{ \Auth::user()->lastname }}"
                                 >
                             </div>
                         </div>
@@ -54,6 +56,7 @@
                                     class="input-border-r-12 form-control"
                                     name="email"
                                     type="email"
+                                    value="{{ \Auth::user()->email }}"
                                 >
                             </div>
                         </div>
@@ -69,8 +72,8 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">Close</button>
-                                <button type="submit" class="m-l-md btn btn-custom">{{ __('custom.send') }}</button>
+                                <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
+                                <button type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
                             </div>
                         </div>
                     </form>
@@ -82,11 +85,30 @@
 
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'group'])
-    <div class="col-xs-12 m-t-lg">
+    @if (Auth::user()->is_admin)
+        @include('partials.admin-nav-bar', ['view' => 'group'])
+    @else
+        @include('partials.user-nav-bar', ['view' => 'group'])
+    @endif
+    @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $group])
+    <div class="col-sm-3 col-xs-12 text-left sidenav">
+        @include('partials.group-info', ['group' => $group])
+    </div>
+    <div class="col-sm-9 col-xs-12 m-t-lg">
         <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
         <form method="POST">
             {{ csrf_field() }}
+            <div class="form-group row">
+                <div class="col-xs-12 text-right mng-btns">
+                @if ($buttons['addResource'])
+                    <button
+                        class="btn btn-primary"
+                        name="add_resource"
+                    >{{ uctrans('custom.add_resource') }}</button>
+                @endif
+                    <button type="submit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
+                </div>
+            </div>
             <div class="form-group row">
                 <label for="identifier" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
                 <div class="col-sm-9">
@@ -133,23 +155,20 @@
                         'components.form_groups.translation_textarea',
                         ['field' => $field]
                     )
-                @elseif ($field['view'] == 'translation_tags')
-                    @include(
-                        'components.form_groups.translation_tags',
-                        ['field' => $field]
-                    )
                 @endif
             @endforeach
+
+            @include('components.form_groups.tags')
 
             <div class="form-group row">
                 <label for="termsOfuse" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.terms_and_conditions') }}:</label>
                 <div class="col-sm-6">
                     <select
                         id="termsOfuse"
-                        class="input-border-r-12 form-control term-use"
+                        class="js-select form-control"
                         name="terms_of_use_id"
-                        size="5"
                     >
+                        <option value="">{{ utrans('custom.select_terms_of_use') }}</option>
                         @foreach ($termsOfUse as $id => $term)
                             <option
                                 value="{{ $id }}"
@@ -160,7 +179,7 @@
                     <span class="error">{{ $errors->first('terms_of_use_id') }}</span>
                 </div>
                 <div class="col-sm-3 text-right add-terms">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">{{ __('custom.new_terms_and_conditions') }}</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-license">{{ __('custom.new_terms_and_conditions') }}</button>
                 </div>
             </div>
             <div class="form-group row">
@@ -168,11 +187,10 @@
                 <div class="col-sm-9">
                     <select
                         id="organisation"
-                        class="js-select form-control"
+                        class="js-autocomplete form-control"
                         name="org_id"
-                        data-placeholder="{{ utrans('custom.select_org') }}"
                     >
-                        <option></option>
+                        <option value="">{{ utrans('custom.select_org') }}</option>
                         @foreach ($organisations as $id => $org)
                             <option
                                 value="{{ $id }}"
@@ -188,15 +206,16 @@
                 <div class="col-sm-9">
                     <select
                         id="group"
-                        class="js-select form-control"
-                        name="group_id"
+                        class="js-autocomplete form-control"
+                        name="group_id[]"
                         data-placeholder="{{ utrans('custom.groups', 1) }}"
+                        multiple="multiple"
                     >
                         <option></option>
-                        @foreach ($groups as $id =>$group)
+                        @foreach ($groups as $id => $group)
                             <option
                                 value="{{ $id }}"
-                                {{ $id == old('group_id') ? 'selected' : '' }}
+                                {{ $id == old('group_id') || $id == $groupId ? 'selected' : '' }}
                             >{{ $group }}</option>
                         @endforeach
                     </select>
@@ -319,12 +338,13 @@
 
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
+                @if ($buttons['addResource'])
                     <button
                         class="btn btn-primary"
                         name="add_resource"
-                    >{{ __('custom.add_resource') }}</button>
-                    <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('custom.save') }}</button>
+                    >{{ uctrans('custom.add_resource') }}</button>
+                @endif
+                    <button type="submit" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

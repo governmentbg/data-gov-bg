@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use \Validator;
 use \App\Locale;
+use App\Module;
+use App\RoleRight;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
@@ -24,14 +27,23 @@ class LocaleController extends ApiController
     public function addLocale(Request $request)
     {
         $post = $request->all();
+        $post['data'] = isset($post['data']) ? $post['data'] : [];
 
-        $validator = Validator::make($post, [
-            'data'          => 'required|array',
-            'data.locale'   => 'required|string|max:5|unique:locale,locale',
-            'data.active'   => 'required|bool',
+        $validator = Validator::make($post['data'], [
+            'locale'   => 'required|string|max:5|unique:locale,locale',
+            'active'   => 'required|bool',
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::LOCALE,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $locale = new Locale;
 
             $locale->locale = $post['data']['locale'];
@@ -39,6 +51,15 @@ class LocaleController extends ApiController
 
             try {
                 $locale->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::LOCALE),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $post['data']['locale'],
+                    'action_msg'       => 'Added locale',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -66,16 +87,47 @@ class LocaleController extends ApiController
         $validator = Validator::make($post, [
             'locale'        => 'required|string|max:5|exists:locale,locale',
             'data'          => 'required|array',
-            'data.active'   => 'required|bool',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($post['data'], [
+                'active'   => 'required|bool',
+            ]);
+        }
+
+        if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::LOCALE,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $locale->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            if ($locale->locale == \LaravelLocalization::getDefaultLocale()) {
+                return $this->errorResponse(__('custom.default_locale_error'));
+            }
 
             $locale->active = $post['data']['active'];
 
             try {
                 $locale->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::LOCALE),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $post['locale'],
+                    'action_msg'       => 'Edited locale',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -105,12 +157,39 @@ class LocaleController extends ApiController
         if (!$validator->fails()) {
             $locale = Locale::find($post['locale']);
 
+            $rightCheck = RoleRight::checkUserRight(
+                Module::LOCALE,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $locale->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+
+            if ($locale->locale == \LaravelLocalization::getDefaultLocale()) {
+                return $this->errorResponse(__('custom.default_locale_error'));
+            }
+
             try {
                 $locale->delete();
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::LOCALE),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $post['locale'],
+                    'action_msg'       => 'Deleted locale',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
-                return $this->errorResponse(__('custom.delete_locale_fail'));
+                Log::error($e->getMessage());
             }
         }
 
@@ -131,9 +210,16 @@ class LocaleController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'criteria'        => 'nullable|array',
-            'criteria.active' => 'nullable|bool',
+            'criteria'    => 'nullable|array',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($post, [
+                'active'    => 'nullable|bool',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $locales = new Locale;

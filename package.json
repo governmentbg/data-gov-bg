@@ -14,13 +14,17 @@
         "bootstrap-sass": "^3.3.7",
         "cross-env": "^5.1",
         "jquery": "^3.2",
-        "laravel-mix": "^2.0",
+        "laravel-mix": "^2.1.14",
         "lodash": "^4.17.4",
         "postcss-cli": "^4.1.1",
         "vue": "2.5.17"
     },
     "dependencies": {
+        "codemirror": "^5.40.0",
+        "datatables.net-dt": "^1.10.19",
         "flag-icon-css": "^3.0.0",
-        "icheck": "^1.0.2"
+        "icheck": "^1.0.2",
+        "prettify-xml": "^1.2.0",
+        "summernote": "^0.8.10"
     }
 }

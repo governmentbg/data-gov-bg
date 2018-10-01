@@ -1,32 +1,32 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="modal inmodal fade" id="addLicense" tabindex="-1" role="dialog"  aria-hidden="true">
+<div class="modal inmodal fade" id="add-license" tabindex="-1" role="dialog"  aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">
                 <div class="p-w-md">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{__(custom.close)}}</span></button>
                     <h2>{{__(custom.license_add_req)}}</h2>
                 </div>
                 <div class="modal-body">
                     <form class="m-t-lg">
                         <div class="form-group row">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{__(custom.name)}}:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{uctrans(custom.name)}}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="fname" placeholder="Иван">
+                                <input type="text" class="input-border-r-12 form-control" id="fname" value="{{ \Auth::user()->firstname }}">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="lname" class="col-sm-3 col-xs-12 col-form-label">{{__(custom.family_name)}}:</label>
                             <div class="col-sm-9">
-                                <input type="text" class="input-border-r-12 form-control" id="lname" placeholder="Иванов">
+                                <input type="text" class="input-border-r-12 form-control" id="lname" value="{{ \Auth::user()->lastname }}">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{__(custom.e_mail)}}:</label>
                             <div class="col-sm-9">
-                                <input type="email" class="input-border-r-12 form-control" id="email" placeholder="ivanov@abv.bg">
+                                <input type="email" class="input-border-r-12 form-control" id="email" value="{{ \Auth::user()->email }}">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -37,7 +37,7 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-12 text-right">
-                                <button type="submit" class="m-l-md btn btn-custom">{{__(custom.send)}}</button>
+                                <button type="submit" class="m-l-md btn btn-custom">{{uctrans(custom.send)}}</button>
                             </div>
                         </div>
                     </form>
@@ -100,7 +100,7 @@
                     </select>
                 </div>
                 <div class="col-sm-3 text-right add-terms">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLicense">{{ __('custom.new_terms_and_conditions') }}</button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-license">{{ __('custom.new_terms_and_conditions') }}</button>
                 </div>
             </div>
             <div class="form-group row">
@@ -198,8 +198,8 @@
             </div>
             <div class="form-group row">
                 <div class="col-xs-12 text-right mng-btns">
-                    <button type="button" class="btn btn-primary">{{ __('custom.preview') }}</button>
-                    <button type="button" class="btn btn-primary">{{ __('custom.save') }}</button>
+                    <button type="button" class="btn btn-primary">{{ uctrans('custom.preview') }}</button>
+                    <button type="button" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

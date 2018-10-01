@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Laravel\Scout\Searchable;
 use App\Translator\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use App\Contracts\TranslatableInterface;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Traits\RecordSignature;
 
 class Category extends Model implements TranslatableInterface
 {
+    use Searchable;
     use Translatable;
     use RecordSignature;
 
@@ -19,6 +21,18 @@ class Category extends Model implements TranslatableInterface
 
     const ORDERING_ASC = 1;
     const ORDERING_DESC = 2;
+
+    const ACTIVE_FALSE = 0;
+
+    const IMG_EXT_SVG = 'svg';
+    const IMG_MIME_SVG = 'image/svg+xml';
+
+    public static function getOrdering() {
+        return [
+            self::ORDERING_ASC => __('custom.order_asc'),
+            self::ORDERING_DESC => __('custom.order_desc'),
+        ];
+    }
 
     public function userFollow()
     {
@@ -38,6 +52,14 @@ class Category extends Model implements TranslatableInterface
     public function tags()
     {
         return $this->hasMany('App\Category', 'parent_id');
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id'   => $this->id,
+            'name' => $this->concatTranslations('name'),
+        ];
     }
 
 }

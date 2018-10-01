@@ -2,13 +2,14 @@
 
 namespace Tests\Unit\Api;
 
+use App\Page;
 use App\Role;
+use App\Tags;
 use App\User;
 use App\Locale;
 use App\Signal;
-use App\Page;
-use App\Section;
 use App\DataSet;
+use App\Section;
 use App\Category;
 use App\Document;
 use App\Resource;
@@ -16,7 +17,8 @@ use App\RoleRight;
 use App\TermsOfUse;
 use App\UserFollow;
 use Tests\TestCase;
-use App\Translator\Translation;
+use App\DataRequest;
+use App\DataSetTags;
 use App\UserSetting;
 use App\DataSetGroup;
 use App\Organisation;
@@ -25,10 +27,9 @@ use App\UserToOrgRole;
 use App\ActionsHistory;
 use App\ElasticDataSet;
 use App\TermsOfUseRequest;
-use App\DataSetSubCategory;
 use Faker\Factory as Faker;
 use App\NewsletterDigestLog;
-use App\DataRequest;
+use App\Translator\Translation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -61,7 +62,8 @@ class DatabaseTest extends TestCase
     const USER_SETTING_RECORDS = 10;
     const USER_TO_ORG_RECORDS = 10;
     const DATA_SET_GROUP_RECORDS = 10;
-    const DATA_SET_SUB_CATEGORIES_RECORDS = 10;
+    const TAGS_RECORDS = 10;
+    const DATA_SET_TAGS_RECORDS = 10;
     const ELASTIC_DATA_SET_RECORDS = 10;
     const CUSTOM_SETTING_RECORDS = 10;
 
@@ -95,7 +97,8 @@ class DatabaseTest extends TestCase
         $this->userSettings();
         $this->userToOrg();
         $this->dataSetGroup();
-        $this->dataSetSubCategories();
+        $this->tags();
+        $this->dataSetTags();
         $this->elasticDataSets();
         $this->customSettings();
     }
@@ -325,7 +328,6 @@ class DatabaseTest extends TestCase
                 'bg'    => true,
                 'en'    => true,
                 'ru'    => false,
-                'xx'    => false,
             ];
             // Test creation
             foreach ($languages as $language => $active) {
@@ -558,8 +560,7 @@ class DatabaseTest extends TestCase
             $record = null;
             $locale = $this->faker->randomElement($locales)['locale'];
             $dbData = [
-                'name'         => [$locale=>$this->faker->word],
-                'parent_id'    => 1,
+                'name'         => [$locale => $this->faker->word],
                 'active'       => $this->faker->boolean(),
                 'ordering'     => $this->faker->boolean(),
                 'read_only'    => $this->faker->boolean(),
@@ -587,7 +588,7 @@ class DatabaseTest extends TestCase
     {
         $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
         $types = array_keys(ActionsHistory::getTypes());
-        $modules = ActionsHistory::MODULE_NAMES;
+        $modules = Module::getModuleNames();
 
         // Test creation
         foreach (range(1, self::ACTIONS_HISTORY_RECORDS) as $i) {
@@ -792,7 +793,7 @@ class DatabaseTest extends TestCase
             $record = null;
             $dbData = [
                 'resource_id' => $resource,
-                'descript'    =>$this->faker->sentence(4),
+                'descript'    => $this->faker->sentence(4),
                 'firstname'   => $this->faker->firstName(),
                 'lastname'    => $this->faker->lastName(),
                 'email'       => $this->faker->email(),
@@ -1008,10 +1009,9 @@ class DatabaseTest extends TestCase
     {
         $dataSets = DataSet::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
-        $groupFaker = Faker::create();
         // Test creation
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
-            $dataSet = $groupFaker->unique()->randomElement($dataSets)['id'];
+            $dataSet = $this->faker->randomElement($dataSets)['id'];
             $organisation = $this->faker->randomElement($organisations)['id'];
 
             $record = null;
@@ -1037,28 +1037,52 @@ class DatabaseTest extends TestCase
     }
 
     /**
-     * Tests data_set_groups table structure and models
+     * Tests tags table structure and models
      *
      * @return void
      */
-    private function dataSetSubCategories()
+    private function tags()
     {
-        $dataSets = DataSet::select('id')->limit(self::DATA_SET_SUB_CATEGORIES_RECORDS)->get()->toArray();
-        $categories = Category::select('id')->limit(self::DATA_SET_SUB_CATEGORIES_RECORDS)->get()->toArray();
+        foreach (range(1, self::TAGS_RECORDS) as $i) {
+            $dbData = ['name' => $this->faker->unique()->word];
 
-        foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
+            try {
+                $record = Tags::create($dbData);
+            } catch (QueryException $ex) {
+                $this->log($ex->getMessage());
+            }
+
+            $this->assertNotNull($record);
+
+            if (!empty($record->id)) {
+                $this->assertDatabaseHas('tags', ['id' => $record->id]);
+            }
+        }
+    }
+
+    /**
+     * Tests data_set_tags table structure and models
+     *
+     * @return void
+     */
+    private function dataSetTags()
+    {
+        $dataSets = DataSet::select('id')->limit(self::DATA_SET_TAGS_RECORDS)->get()->toArray();
+        $tags = Tags::select('id')->limit(self::DATA_SET_TAGS_RECORDS)->get()->toArray();
+
+        foreach (range(1, self::DATA_SET_TAGS_RECORDS) as $i) {
             $dataSet = $this->faker->randomElement($dataSets)['id'];
-            $category = $this->faker->randomElement($categories)['id'];
+            $tag = $this->faker->randomElement($tags)['id'];
 
             $record = null;
             $dbData = [
-                'data_set_id' => $dataSet,
-                'sub_cat_id'  => $category
+                'data_set_id'   => $dataSet,
+                'tag_id'        => $tag
             ];
 
-            if (!DataSetSubCategory::where($dbData)->count()) {
+            if (!DataSetTags::where($dbData)->count()) {
                 try {
-                    $record = DataSetSubCategory::create($dbData);
+                    $record = DataSetTags::create($dbData);
                 } catch (QueryException $ex) {
                     $this->log($ex->getMessage());
                 }
@@ -1066,12 +1090,17 @@ class DatabaseTest extends TestCase
                 $this->assertNotNull($record);
 
                 if (!empty($record->id)) {
-                    $this->assertDatabaseHas('data_set_sub_category', ['id' => $record->data_set_id]);
+                    $this->assertDatabaseHas('data_set_tags', ['id' => $record->data_set_id]);
                 }
             }
         }
     }
 
+    /**
+     * Tests elastic_data_set table structure and models
+     *
+     * @return void
+     */
     private function elasticDataSets()
     {
         // Test creation
@@ -1097,6 +1126,11 @@ class DatabaseTest extends TestCase
         }
     }
 
+    /**
+     * Tests custom_settings table structure and models
+     *
+     * @return void
+     */
     private function customSettings()
     {
         $dataSets = DataSet::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();

@@ -2,7 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Module;
 use App\DataRequest;
+use App\ActionsHistory;
+use App\RoleRight;
+use App\Organisation;
+use App\UserToOrgRole;
+use App\Role;
+use App\User;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -30,17 +38,25 @@ class DataRequestController extends ApiController
         $requestData = $request->all();
         $validator = Validator::make($requestData, [
             'data'                  => 'required|array',
-            'data.org_id'           => 'required|integer',
-            'data.description'      => 'required|string',
-            'data.published_url'    => 'nullable|string',
-            'data.contact_name'     => 'nullable|string',
-            'data.email'            => 'required|email',
-            'data.notes'            => 'nullable|string',
-            'data.status'           => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($requestData['data'], [
+                'org_id'           => 'required|integer|digits_between:1,10',
+                'description'      => 'required|string|max:191',
+                'published_url'    => 'nullable|string|max:191',
+                'email'            => 'sometimes|email|max:191',
+                'contact_name'     => 'nullable|string|max:191',
+                'notes'            => 'nullable|string|max:8000',
+                'status'           => 'nullable|integer|digits_between:1,3',
+            ]);
+        }
 
+        if (!isset($requestData['data']['email'])) {
+            $requestData['data']['email'] = '';
+        }
+
+        if (!$validator->fails()) {
             $dataRequest = new DataRequest;
             $dataRequest->org_id = $requestData['data']['org_id'];
             $dataRequest->descript = $requestData['data']['description'];
@@ -64,8 +80,48 @@ class DataRequestController extends ApiController
                 $dataRequest->status = DataRequest::NEW_DATA_REQUEST;
             }
 
+            if (!empty($requestData['data']['org_id'])) {
+                $organisation = Organisation::where('id', $requestData['data']['org_id'])->first();
+                $orgCreatedBy = $organisation->created_by;
+                $orgAdmins = UserToOrgRole::where('org_id', $requestData['data']['org_id'])
+                    ->where('role_id', Role::getOrgAdminRole()->id)
+                    ->pluck('user_id')->toArray();
+
+                $mailData = [
+                    'description'   => $dataRequest->descript,
+                    'email'         => $dataRequest->email,
+                    'status'        => $dataRequest->status,
+                    'published_url' => isset($dataRequest->published_url) ? $dataRequest->published_url : null,
+                    'contact_name'  => isset($dataRequest->contact_name) ? $dataRequest->contact_name : null,
+                    'notes'         => isset($dataRequest->notes) ? $dataRequest->notes : null,
+                ];
+
+                if (!empty($orgAdmins)) {
+                    foreach ($orgAdmins as $orgAdmin) {
+                        $userData = User::where('id', $orgAdmin)->first();
+                        if (!empty($userData->email)) {
+                            Mail::send('mail/newDataRequest', $mailData, function ($m) use ($userData) {
+                                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                                $m->to($userData->email, $userData->firstname);
+                                $m->subject(__('custom.new_data_request'));
+                            });
+                        }
+                    }
+                }
+            }
+
             try {
                 $dataRequest->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $dataRequest->id,
+                    'action_msg'       => 'Sent data request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['request_id' => $dataRequest->id], true);
             } catch (QueryException $e) {
                 Log::error($ex->getMessage());
@@ -94,20 +150,37 @@ class DataRequestController extends ApiController
     {
         $editRequestData = $request->all();
         $validator = Validator::make($editRequestData, [
-            'request_id'            => 'required|integer|exists:data_requests,id',
+            'request_id'            => 'required|integer|exists:data_requests,id|digits_between:1,10',
             'data'                  => 'required|array',
-            'data.org_id'           => 'nullable|integer',
-            'data.description'      => 'nullable|string',
-            'data.published_url'    => 'nullable|string',
-            'data.contact_name'     => 'nullable|string',
-            'data.email'            => 'nullable|email',
-            'data.notes'            => 'nullable|string',
-            'data.status'           => 'nullable|integer',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($editRequestData['data'], [
+                'org_id'           => 'nullable|integer|digits_between:1,10',
+                'description'      => 'nullable|string|max:191',
+                'published_url'    => 'nullable|string|max:191',
+                'contact_name'     => 'nullable|string|max:191',
+                'email'            => 'nullable|email|max:191',
+                'notes'            => 'nullable|string|max:8000',
+                'status'           => 'nullable|integer|digits_between:1,3',
+            ]);
+        }
 
+        if (!$validator->fails()) {
             $requestToEdit = DataRequest::find($editRequestData['request_id']);
+
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_EDIT,
+                [],
+                [
+                    'created_by' => $requestToEdit->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             if (isset($editRequestData['data']['org_id'])) {
                 $requestToEdit->org_id = $editRequestData['data']['org_id'];
@@ -139,8 +212,18 @@ class DataRequestController extends ApiController
 
             try {
                 $requestToEdit->save();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $requestToEdit->id,
+                    'action_msg'       => 'Edited data request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
-            } catch (QueryException $e) {
+            } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -159,15 +242,38 @@ class DataRequestController extends ApiController
     {
         $deleteRequestData = $request->all();
         $validator = Validator::make($deleteRequestData, [
-            'request_id' => 'required|integer|exists:data_requests,id',
+            'request_id' => 'required|integer|exists:data_requests,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
 
             $requestToDelete = DataRequest::find($deleteRequestData['request_id']);
 
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_REQUESTS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $requestToDelete->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 $requestToDelete->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $deleteRequestData['request_id'],
+                    'action_msg'       => 'Deleted data request',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
 
@@ -199,25 +305,45 @@ class DataRequestController extends ApiController
         $listRequestData = $request->all();
         $validator = Validator::make($listRequestData, [
             'criteria'                => 'nullable|array',
-            'criteria.request_id'     => 'nullable|integer',
-            'criteria.org_id'         => 'nullable|integer',
-            'criteria.status'         => 'nullable|integer',
-            'criteria.date_from'      => 'nullable|date',
-            'criteria.date_to'        => 'nullable|date',
-            'criteria.search'         => 'nullable|string',
-            'criteria.order'          => 'nullable|array',
-            'criteria.order.type'     => 'nullable|string',
-            'criteria.order.field'    => 'nullable|string',
-            'records_per_page'        => 'nullable|integer',
-            'page_number'             => 'nullable|integer',
+            'records_per_page'        => 'nullable|integer|digits_between:1,10',
+            'page_number'             => 'nullable|integer|digits_between:1,10',
         ]);
+
+        if (!$validator->fails()) {
+            $criteria = isset($listRequestData['criteria']) ? $listRequestData['criteria'] : [];
+            $validator = Validator::make($criteria, [
+                'request_id'              => 'nullable|integer|digits_between:1,10',
+                'org_id'                  => 'nullable|integer|digits_between:1,10',
+                'status'                  => 'nullable|integer|digits_between:1,3',
+                'date_from'               => 'nullable|date',
+                'date_to'                 => 'nullable|date',
+                'search'                  => 'nullable|string|max:191',
+                'order'                   => 'nullable|array',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $order = isset($criteria['order']) ? $criteria['order'] : [];
+            $validator = Validator::make($order, [
+                'type'     => 'nullable|string|max:191',
+                'field'    => 'nullable|string|max:191',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_request_fail'), $validator->errors()->messages());
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_REQUESTS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        if (!$rightCheck) {
+            return $this->errorResponse(__('custom.access_denied'));
+        }
+
         $result = [];
-        $criteria = $request->json('criteria');
 
         $dataRequestList = DataRequest::select('*');
 
@@ -238,7 +364,7 @@ class DataRequestController extends ApiController
 
         if (isset($criteria['order']['field'])) {
             if (!in_array($criteria['order']['field'], $orderColumns)) {
-                unset($criteria['order']['field']);
+                return $this->errorResponse(__('custom.invalid_sort_field'));
             }
         }
 
@@ -254,18 +380,21 @@ class DataRequestController extends ApiController
             $dataRequestList = $dataRequestList->where('status', $criteria['status']);
         }
 
-        $total_records = $dataRequestList->count();
-
-        if (isset($request['records_per_page']) && isset($request['page_number'])) {
-            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
-        }
-
         if (isset($criteria['date_from'])) {
             $dataRequestList = $dataRequestList->where('created_at', '>=', $criteria['date_from']);
         }
 
         if (isset($criteria['date_to'])) {
             $dataRequestList = $dataRequestList->where('created_at', '<=', $criteria['date_to']);
+        }
+
+        if (isset($criteria['search'])) {
+            $search = $criteria['search'];
+            $dataRequestList = $dataRequestList->where('descript', 'like', '%' . $search . '%')
+                ->orWhere('published_url', 'like', '%' . $search . '%')
+                ->orWhere('contact_name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('notes', 'like', '%' . $search . '%');
         }
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
@@ -278,13 +407,10 @@ class DataRequestController extends ApiController
             }
         }
 
-        if (isset($criteria['search'])) {
-            $search = $criteria['search'];
-            $dataRequestList = $dataRequestList->where('descript', 'like', '%' . $search . '%')
-                ->orWhere('published_url', 'like', '%' . $search . '%')
-                ->orWhere('contact_name', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%')
-                ->orWhere('notes', 'like', '%' . $search . '%');
+        $total_records = $dataRequestList->count();
+
+        if (isset($request->records_per_page) && isset($request->page_number)) {
+            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
 
         $dataRequestList = $dataRequestList->get();
@@ -307,6 +433,25 @@ class DataRequestController extends ApiController
                 ];
             }
         }
+
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::DATA_REQUESTS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed data request',
+        ];
+
+        Module::add($logData);
+
+        if(isset($criteria['order']) && isset($criteria['order']['field'])) {
+            if ($criteria['order'] && $criteria['order']['field'] == 'description') {
+                usort($result, function($a, $b) use ($criteria) {
+                    return strtolower($criteria['order']['type']) == 'asc'
+                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+                });
+            }
+        }
+
         return $this->successResponse([
             'total_records' => $total_records,
             'dataRequests'  => $result,

@@ -3,6 +3,7 @@
 use App\Category;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use App\Http\Controllers\ApiController;
 
 class CategorySeeder extends Seeder
 {
@@ -16,16 +17,22 @@ class CategorySeeder extends Seeder
     public function run()
     {
         $this->faker = Faker::create();
+        $locale = App::getLocale();
 
         foreach (range(1, self::CATEGORY_RECORDS) as $i) {
-            Category::create([
-                'name'              => $this->faker->name,
+            $category = Category::create([
+                'name'              => ApiController::trans($locale, $this->faker->name),
                 'icon_file_name'    => $this->faker->name,
                 'icon_mime_type'    => $this->faker->mimeType,
                 'icon_data'         => $this->faker->name,
+                'parent_id'         => $i < 5 || empty($catId) ? null : $catId,
                 'active'            => $this->faker->boolean(),
                 'ordering'          => $this->faker->randomDigit(),
             ]);
+
+            $catId = $category->id;
+
+            $category->searchable();
         }
     }
 }

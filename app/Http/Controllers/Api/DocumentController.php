@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use \Validator;
 use App\Document;
+use App\Module;
+use App\RoleRight;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,26 +41,58 @@ class DocumentController extends ApiController
      */
     public function addDocument(Request $request)
     {
-        $data = $request->offsetGet('data', []);
+        $post = $request->all();
 
-        $validator = Validator::make($data, [
-            'name'         => 'required',
-            'description'  => 'required',
-            'locale'       => 'nullable|string|max:5',
-            'filename'     => 'required|string',
-            'mimetype'     => 'required|string',
-            'data'         => 'required|string',
+        $validator = Validator::make($post, [
+            'data'  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($post['data'], [
+                'name'           => 'required_with:locale|max:191',
+                'name.bg'        => 'required_without:locale|string|max:191',
+                'name.*'         => 'max:191',
+                'description'    => 'required_with:locale|max:8000',
+                'description.bg' => 'required_without:locale|string|max:8000',
+                'locale'         => 'nullable|string|max:5',
+                'filename'       => 'required|string|max:191',
+                'mimetype'       => 'required|string|max:191',
+                'data'           => 'required|string|max:4294967295',
+                'forum_link'     => 'nullable|string|max:191'
+            ]);
+        }
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('filename')) {
+                $validator->errors()->add('document', $validator->errors()->first('filename'));
+            }
+
+            if ($validator->errors()->has('data')) {
+                $validator->errors()->add('document', $validator->errors()->first('data'));
+            }
+        });
+
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DOCUMENTS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
                 DB::beginTransaction();
 
                 $doc = new Document;
-                $doc->name = $this->trans($data['locale'], $data['name']);
-                $doc->descript = $this->trans($data['locale'], $data['description']);
-                $doc->file_name = $data['filename'];
-                $doc->mime_type = $data['mimetype'];
+                $doc->name = $this->trans($post['data']['locale'], $post['data']['name']);
+                $doc->descript = $this->trans($post['data']['locale'], $post['data']['description']);
+                $doc->file_name = $post['data']['filename'];
+                $doc->mime_type = $post['data']['mimetype'];
+                $doc->data = $post['data']['data'];
+                $doc->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
+                $doc->save();
 
                 if ($this->checkFileSize($data['data'])) {
                     $doc->save();
@@ -65,6 +100,15 @@ class DocumentController extends ApiController
                     file_put_contents($this->path . $doc->id, $data['data']);
 
                     DB::commit();
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $doc->id,
+                        'action_msg'       => 'Added new document',
+                    ];
+
+                    Module::add($logData);
                 } else {
                     $validator->errors()->add('logo', $this->getFileSizeError());
                 }
@@ -130,8 +174,8 @@ class DocumentController extends ApiController
         $post = $request->all();
         $errors = [];
 
-        $validator = \Validator::make($post, [
-            'doc_id'    => 'required|int|exists:documents,id',
+        $validator = Validator::make($post, [
+            'doc_id'    => 'required|integer|exists:documents,id|digits_between:1,10',
             'data'      => 'required|array',
         ]);
 
@@ -139,6 +183,7 @@ class DocumentController extends ApiController
             $errors = $validator->errors()->messages();
         } else {
             $data = $post['data'];
+
             $validator = \Validator::make($data, [
                 'name'         => 'nullable',
                 'description'  => 'nullable',
@@ -150,8 +195,54 @@ class DocumentController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $validator = Validator::make($post['data'], [
+                'name'           => 'required_with:locale|max:191',
+                'name.bg'        => 'required_without:locale|string|max:191',
+                'name.*'         => 'max:191',
+                'description'    => 'required_with:locale|max:8000',
+                'description.bg' => 'required_without:locale|string|max:8000',
+                'locale'         => 'nullable|string|max:5',
+                'filename'       => 'nullable|string|max:191',
+                'mimetype'       => 'nullable|string|max:191',
+                'data'           => 'nullable|string|max:4294967295',
+                'forum_link'     => 'nullable|string|max:191'
+            ]);
+        }
+
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('description.bg')) {
+                $validator->errors()->add('descript.bg', $validator->errors()->first('description.bg'));
+            }
+
+            if ($validator->errors()->has('description')) {
+                $validator->errors()->add('descript', $validator->errors()->first('description'));
+            }
+
+            if ($validator->errors()->has('filename')) {
+                $validator->errors()->add('document', $validator->errors()->first('filename'));
+            }
+
+            if ($validator->errors()->has('data')) {
+                $validator->errors()->add('document', $validator->errors()->first('data'));
+            }
+        });
+
+        if (!$validator->fails()) {
             try {
                 $doc = Document::find($post['doc_id']);
+
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DOCUMENTS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $editDocument->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 DB::beginTransaction();
 
@@ -171,6 +262,10 @@ class DocumentController extends ApiController
                     $doc->mime_type = $data['mimetype'];
                 }
 
+                if (isset($data['forum_link'])) {
+                    $doc->mime_type = $data['forum_link'];
+                }
+
                 if (isset($data['data'])) {
                     file_put_contents($this->path . $doc->id, $data['data']);
                 }
@@ -178,6 +273,15 @@ class DocumentController extends ApiController
                 $doc->save();
 
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $doc->id,
+                    'action_msg'       => 'Edited a document',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (\Exception $e) {
@@ -204,16 +308,37 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'doc_id' => 'required|int|exists:documents,id',
+            'doc_id' => 'required|integer|exists:documents,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             $deleteDocument = Document::find($post['doc_id']);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DOCUMENTS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $deleteDocument->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             try {
                 $deleteDocument->delete();
 
                 unlink($this->path . $post['doc_id']);
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $post['doc_id'],
+                    'action_msg'       => 'Deleted document',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (\Exception $ex) {
@@ -247,25 +372,39 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'criteria'              => 'nullable|array',
-            'criteria.doc_id'       => 'nullable|int',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.locale'       => 'nullable|string|max:5',
-            'criteria.date_type'    => 'nullable|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'criteria'          => 'nullable|array',
+            'records_per_page'  => 'nullable|integer|digits_between:1,10',
+            'page_number'       => 'nullable|integer|digits_between:1,10',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'doc_id'       => 'nullable|integer|digits_between:1,10',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'locale'       => 'nullable|string|max:5',
+                'date_type'    => 'nullable|string|max:191',
+                'order'        => 'nullable|array',
+                'forum_link'   => 'nullable|string|max:191'
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
 
         if ($validator->fails()) {
             return $this->errorResponse(__('custom.list_document_fail'), $validator->errors()->messages());
         }
 
         $result = [];
-        $criteria = $request->json('criteria');
 
         $columns = [
             'id',
@@ -281,11 +420,9 @@ class DocumentController extends ApiController
 
         $query = Document::select($columns);
 
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
-                if (!in_array($criteria['order']['field'], $columns)) {
-                    unset($criteria['order']['field']);
-                }
+        if (isset($criteria['order']['field'])) {
+            if (!in_array($criteria['order']['field'], $columns)) {
+                return $this->errorResponse(__('custom.invalid_sort_field'));
             }
         }
 
@@ -303,6 +440,10 @@ class DocumentController extends ApiController
 
         if (isset($criteria['date_from'])) {
             $query->where($filterColumn, '>=', $criteria['date_from']);
+        }
+
+        if (isset($criteria['forum_link'])) {
+            $query->where('forum_link', $criteria['forum_link']);
         }
 
         if (isset($criteria['date_to'])) {
@@ -326,7 +467,7 @@ class DocumentController extends ApiController
         $results = [];
 
         foreach ($query->get() as $result) {
-            $results[] = [
+            $itemData = [
                 'id'            => $result->id,
                 'locale'        => $locale,
                 'name'          => $result->name,
@@ -334,17 +475,41 @@ class DocumentController extends ApiController
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
                 'data'          => file_get_contents($this->path . $result->id),
+                'forum_link'    => $result->forum_link,
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
                 'created_by'    => $result->created_by,
                 'updated_by'    => $result->updated_by,
             ];
+
+            $results[] = $itemData;
         }
 
-        return $this->successResponse([
-            'total_records' => $count,
-            'documents'     => $results,
-        ], true);
+        $logData = [
+            'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+            'action'           => ActionsHistory::TYPE_SEE,
+            'action_msg'       => 'Listed documents',
+        ];
+
+        Module::add($logData);
+
+        $transFields = ['description', 'name'];
+
+        if (isset($criteria['order']) && $criteria['order'] && isset($criteria['order']['field']) && in_array($criteria['order']['field'], $transFields)) {
+            usort($results, function($a, $b) use ($criteria) {
+                return strtolower($criteria['order']['type']) == 'asc'
+                    ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                    : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+            });
+        }
+
+        return $this->successResponse(
+            [
+                'total_records' => $count,
+                'documents'     => $results
+            ],
+            true
+        );
     }
 
     /**
@@ -366,13 +531,28 @@ class DocumentController extends ApiController
 
         $validator = Validator::make($post, [
             'criteria'              => 'required|array',
-            'criteria.search'       => 'required|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|int',
-            'page_number'           => 'nullable|int',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
+
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'search'       => 'required|string|max:191',
+                'order'        => 'nullable|array',
+                'forum_link'   => 'nullable|string|max:191'
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $data = [];
@@ -394,7 +574,7 @@ class DocumentController extends ApiController
 
             if (isset($order['field'])) {
                 if (!in_array($order['field'], $orderColumns)) {
-                    unset($order['field']);
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
                 }
             }
 
@@ -409,7 +589,6 @@ class DocumentController extends ApiController
 
             $query->orderBy($order['field'], $order['type']);
 
-
             $locale = \LaravelLocalization::getCurrentLocale();
             $results = [];
 
@@ -422,11 +601,30 @@ class DocumentController extends ApiController
                     'filename'      => $result->file_name,
                     'mimetype'      => $result->mime_type,
                     'data'          => file_get_contents($this->path . $result->id),
+                    'forum_link'    => $result->forum_link,
                     'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                     'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
                     'created_by'    => $result->created_by,
                     'updated_by'    => $result->updated_by,
                 ];
+            }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_msg'       => 'Searched documents',
+            ];
+
+            Module::add($logData);
+
+            $transFields = ['description', 'name'];
+
+            if ($order && in_array($order['field'], $transFields)) {
+                usort($results, function($a, $b) use ($criteria) {
+                    return strtolower($order['type']) == 'asc'
+                    ? strcmp($a[$order['field']], $b[$order['field']])
+                    : strcmp($b[$order['field']], $a[$order['field']]);
+                });
             }
 
             return $this->successResponse([

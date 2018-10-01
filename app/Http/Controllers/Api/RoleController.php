@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
-use App\Http\Controllers\ApiController;
-use Illuminate\Support\Facades\Log;
 use App\Role;
 use App\RoleRight;
+use App\Module;
+use App\ActionsHistory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\QueryException;
 
 class RoleController extends ApiController
 {
@@ -18,25 +21,67 @@ class RoleController extends ApiController
      * @param array data - required
      * @param string data[name] - required
      * @param boolean data[active] - required
+     * @param boolean data[default_user] - optional
+     * @param boolean data[default_group_admin] - optional
+     * @param boolean data[default_org_admin] - optional
      *
      * @return json with success and role id or error
      */
     public function addRole(Request $request)
     {
-        $post = $request->all();
+        $post = $request->get('data', []);
 
-        $validator = \Validator::make($post['data'], [
-            'name'      => 'required|max:255',
-            'active'    => 'required|boolean',
+        $validator = \Validator::make($post, [
+            'name'                  => 'required|max:255',
+            'active'                => 'required|bool',
+            'default_user'          => 'nullable|bool',
+            'default_group_admin'   => 'nullable|bool',
+            'default_org_admin'     => 'nullable|bool',
+            'for_org'               => 'nullable|int',
+            'for_group'             => 'nullable|int',
         ]);
 
-        if (!$validator->fails()) {
-            try {
-                $newRole = Role::create($post['data']);
+        if (isset($post['default_user']) && $post['default_user']) {
+            if (Role::where('default_user', 1)->where('active', 1)->first()) {
+               return $this->errorResponse(__('custom.default_user_role'));
+            }
+        }
 
-                if ($newRole) {
-                    return $this->successResponse(['id' => $newRole->id], true);
-                }
+        if (isset($post['default_group_admin']) && $post['default_group_admin']) {
+            if (Role::where('default_group_admin', 1)->where('active', 1)->first()) {
+               return $this->errorResponse(__('custom.default_group_admin_role'));
+            }
+        }
+
+        if (isset($post['default_org_admin']) && $post['default_org_admin']) {
+            if (Role::where('default_org_admin', 1)->where('active', 1)->first()) {
+               return $this->errorResponse(__('custom.default_org_admin_role'));
+            }
+        }
+
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            try {
+                $newRole = Role::create($post);
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newRole->id,
+                    'action_msg'       => 'Added role',
+                ];
+
+                Module::add($logData);
+
+                return $this->successResponse(['id' => $newRole->id], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -53,6 +98,9 @@ class RoleController extends ApiController
      * @param array data - required
      * @param string data[name] - required
      * @param boolean data[active] - required
+     * @param boolean data[default_user] - optional
+     * @param boolean data[default_group_admin] - optional
+     * @param boolean data[default_org_admin] - optional
      *
      * @return json with success or error
      */
@@ -60,22 +108,70 @@ class RoleController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['id' => 'required|int']);
+        $validator = \Validator::make($post, [
+            'id'    => 'required|int|exists:roles,id',
+            'data'  => 'required|array',
+        ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'      => 'required|max:255',
-                'active'    => 'required|boolean',
+                'name'                  => 'required|max:255',
+                'active'                => 'required|bool',
+                'default_user'          => 'nullable|bool',
+                'default_group_admin'   => 'nullable|bool',
+                'default_org_admin'     => 'nullable|bool',
+                'for_org'               => 'nullable|int',
+                'for_group'             => 'nullable|int',
             ]);
 
-            if (
-                !$validator->fails()
-                && Role::where('id', $post['id'])->get()->count()
-            ) {
+            if (isset($post['data']['default_user']) && $post['data']['default_user']) {
+                if (Role::where('default_user', 1)->where('id', '!=', $post['id'])->first()) {
+                    return $this->errorResponse(__('custom.edit_role_fail'));
+                }
+            }
+
+            if (isset($post['data']['default_group_admin']) && $post['data']['default_group_admin']) {
+                if (Role::where('default_group_admin', 1)->where('id', '!=', $post['id'])->first()) {
+                    return $this->errorResponse(__('custom.edit_role_fail'));
+                }
+            }
+
+            if (isset($post['data']['default_org_admin']) && $post['data']['default_org_admin']) {
+                if (Role::where('default_org_admin', 1)->where('id', '!=', $post['id'])->first()) {
+                    return $this->errorResponse(__('custom.edit_role_fail'));
+                }
+            }
+
+            if (!$validator->fails()) {
                 try {
-                    if (Role::where('id', $post['id'])->update($post['data'])) {
-                        return $this->successResponse();
+                    $role = Role::where('id', $post['id'])->first();
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::ROLES,
+                        RoleRight::RIGHT_EDIT,
+                        [],
+                        [
+                            'created_by' => $role->created_by
+                        ]
+                    );
+
+                    if (!$rightCheck) {
+                        return $this->errorResponse(__('custom.access_denied'));
                     }
+
+                    $role->update($post['data']);
+
+                    if ($role) {
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::ROLES),
+                            'action'           => ActionsHistory::TYPE_MOD,
+                            'action_object'    => $post['id'],
+                            'action_msg'       => 'Edited role',
+                        ];
+
+                        Module::add($logData);
+                    }
+
+                    return $this->successResponse();
                 } catch (QueryException $ex) {
                     Log::error($ex->getMessage());
                 }
@@ -95,15 +191,40 @@ class RoleController extends ApiController
      */
     public function deleteRole(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id']);
 
-        $id = $request->offsetGet('id');
+        $id = $request->get('id');
 
         if (!$validator->fails()) {
             try {
-                if (Role::find($id)->delete()) {
-                    return $this->successResponse();
+                $role = Role::find($id);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::ROLES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $role->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
                 }
+
+                $role = $role->delete();
+
+                if ($role) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::ROLES),
+                        'action'           => ActionsHistory::TYPE_DEL,
+                        'action_object'    => $id,
+                        'action_msg'       => 'Deleted role',
+                    ];
+
+                    Module::add($logData);
+                }
+
+                return $this->successResponse();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -118,38 +239,71 @@ class RoleController extends ApiController
      * @param string api_key - required
      * @param array criteria - optional
      * @param boolean active - optional | 1 = active 0 = inactive
+     * @param boolean data[default_user] - optional
+     * @param boolean data[default_group_admin] - optional
+     * @param boolean data[default_org_admin] - optional
      *
      * @return json with list of roles or error
      */
     public function listRoles(Request $request)
     {
-        $post = $request->all();
+        $post = $request->get('criteria', []);
 
         $validator = \Validator::make($post, [
-            'criteria.role_id'  => 'nullable|int',
-            'criteria.active'   => 'nullable|boolean',
-            'criteria.org_id'   => 'nullable|int|exists:organisations,id,deleted_at,NULL',
+            'role_id'               => 'nullable|int|digits_between:1,10',
+            'active'                => 'nullable|bool',
+            'org_id'                => 'nullable|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
+            'default_user'          => 'nullable|bool',
+            'default_group_admin'   => 'nullable|bool',
+            'default_org_admin'     => 'nullable|bool',
+            'for_org'               => 'nullable|int',
+            'for_group'             => 'nullable|int',
         ]);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $query = Role::select();
 
-            if (isset($post['criteria']['role_id'])) {
-                $query->where('id', $post['criteria']['role_id']);
+            if (isset($post['role_id'])) {
+                $query->where('id', $post['role_id']);
             }
 
-            if (isset($post['criteria']['active'])) {
-                $query->where('active', $post['criteria']['active']);
+            if (isset($post['active'])) {
+                $query->where('active', $post['active']);
             }
 
-            if (isset($post['criteria']['org_id'])) {
+            if (isset($post['org_id'])) {
                 $query->whereHas('userToOrg', function($q) use ($post) {
-                    $q->where('org_id', $post['criteria']['org_id']);
+                    $q->where('org_id', $post['org_id']);
                 });
+            }
+
+            if (isset($post['for_org'])) {
+                $query->where('for_org', $post['for_org']);
+            }
+
+            if (isset($post['for_group'])) {
+                $query->where('for_group', $post['for_group']);
             }
 
             try {
                 $roles = $query->get()->toArray();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_msg'       => 'Listed roles',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse(['roles' => $roles], true);
             } catch (QueryException $ex) {
@@ -170,23 +324,42 @@ class RoleController extends ApiController
      */
     public function getRoleRights(Request $request)
     {
-        $validator = \Validator::make($request->all(), ['id' => 'required|int']);
+        $validator = \Validator::make($request->all(), ['id' => 'required|int|exists:roles,id|digits_between:1,10']);
 
         if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             $id = $request->get('id');
 
             try {
                 $role = Role::find($id);
                 $rights = RoleRight::getRightsDescription();
+                $result = [];
 
-                if ($role) {
-                    foreach ($role->rights as $right) {
-                        $right['right_id'] = $right->right;
-                        $right['right'] = $rights[$right->right];
-                    }
+                foreach ($role->rights as $right) {
+                    $right['right_id'] = $right->right;
+                    $right['right'] = $rights[$right['right_id']];
 
-                    return $this->successResponse(['rights' => $role->rights], true);
+                    $result[] = $right->toArray();
                 }
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $id,
+                    'action_msg'       => 'Got role rights',
+                ];
+
+                Module::add($logData);
+
+                return $this->successResponse(['rights' => $result], true);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -212,25 +385,33 @@ class RoleController extends ApiController
     public function modifyRoleRights(Request $request)
     {
         $post = $request->all();
-        $id = $request->get('id');
+        $modules = Module::getModules();
+        $rights = RoleRight::getRights();
 
         $validator = \Validator::make($post, [
-            'data.*.module_name'       => 'required|string|max:255',
-            'data.*.right'             => 'required|integer',
-            'data.*.limit_to_own_data' => 'required|boolean',
-            'data.*.api'               => 'required|boolean',
+            'id'                        => 'required|int|exists:roles,id|digits_between:1,10',
+            'data.*.module_name'        => 'required|string|max:191|in:'. implode(',', $modules),
+            'data.*.right'              => 'required|int|digits_between:1,10|in:'. implode(',', array_flip($rights)),
+            'data.*.limit_to_own_data'  => 'required|bool',
+            'data.*.api'                => 'required|bool',
         ]);
 
-        if (
-            empty($id)
-            || !Role::where('id', $id)->get()->count()
-            || $validator->fails()
-        ) {
-            $response = $this->errorResponse(__('custom.no_role_found'), $validator->errors()->messages());
-        } else {
-            $role = Role::where('id', $id)->first();
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::ROLES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            $role = Role::where('id', $post['id'])->first();
             $rights = $role->rights;
             $names = $request->input('data.*.module_name');
+            $success = true;
+
+            DB::beginTransaction();
 
             try {
                 foreach ($rights as $right) {
@@ -240,27 +421,40 @@ class RoleController extends ApiController
                 }
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
-                return $this->errorResponse();
+
+                $success = false;
             }
 
             try {
                 foreach ($post['data'] as $module) {
-                    $newRight = RoleRight::updateOrCreate(
-                        ['role_id' => $id, 'module_name' => $module['module_name']],
-                        $module
-                    );
-
-                    $response = $newRight ? $this->successResponse() : $this->errorResponse(__('custom.no_role_found'));
-
-                    if (empty($newRight)) {
-                        break;
-                    }
+                    $newRight = RoleRight::updateOrCreate([
+                        'role_id'       => $post['id'],
+                        'module_name'   => $module['module_name']
+                    ], $module);
                 }
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
+
+                $success = false;
             }
+
+            if ($success) {
+                DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::ROLES),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $post['id'],
+                    'action_msg'       => 'Modified role rights',
+                ];
+
+                Module::add($logData);
+                return $this->successResponse();
+            }
+
+            DB::rollback();
         }
 
-        return $response;
+        return $this->errorResponse(__('custom.modify_role_right_fail'), $validator->errors()->messages());
     }
 }

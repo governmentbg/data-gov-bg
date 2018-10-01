@@ -98,6 +98,10 @@
                         &.gp i {
                             padding: 6px 4px;
                         }
+
+                        &.in i {
+                            padding: 6px 6px;
+                        }
                     }
                 }
                 @include smMobile() {
@@ -207,6 +211,16 @@
         -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, .05);
     }
 
+    .article-underline {
+        .text-elipsis {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+    }
+
     @include xsMobile() {
 
         .sort-by {
@@ -229,5 +243,11 @@
                 display: inline;
             }
         }
+    }
+}
+
+.custom-fields {
+    &.form-group {
+        overflow: hidden;
     }
 }

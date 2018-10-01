@@ -513,8 +513,20 @@ class ResourceTest extends TestCase
     {
         // test mising api key
         $this->post(url('api/listResources'), ['api_key' => null])
-            ->assertStatus(200)
-            ->assertJson(['success' => true]);
+            ->assertStatus(500)
+            ->assertJson(['success' => false]);
+
+         // test ok list
+         $this->post(url('api/listResources'),
+         [
+            'api_key' => $this->getApiKey(),
+            'criteria' => [
+                "locale" => "en"
+            ]
+
+         ])
+         ->assertStatus(200)
+         ->assertJson(['success' => true]);
     }
 
     public function testGetResourceMetadata()

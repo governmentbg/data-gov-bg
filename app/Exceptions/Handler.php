@@ -48,6 +48,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if (
+            $exception instanceof ForumDiscussion
+            || $exception instanceof ForumResponse
+        ) {
+            return redirect()->back()->with('alert-danger', $exception->getMessage());
+        }
+
         return parent::render($request, $exception);
     }
 }

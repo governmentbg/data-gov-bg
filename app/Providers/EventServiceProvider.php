@@ -16,6 +16,12 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\Event' => [
             'App\Listeners\EventListener',
         ],
+        'DevDojo\Chatter\Events\ChatterBeforeNewDiscussion' => [
+            'App\Listeners\HandleNewDiscussion',
+        ],
+        'DevDojo\Chatter\Events\ChatterBeforeNewResponse' => [
+            'App\Listeners\HandleNewResponse',
+        ],
     ];
 
     /**

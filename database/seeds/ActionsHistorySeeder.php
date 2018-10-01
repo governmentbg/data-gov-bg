@@ -1,7 +1,9 @@
 <?php
 
 use App\Tag;
+use App\Role;
 use App\User;
+use App\Module;
 use App\Group;
 use App\Dataset;
 use App\Category;
@@ -22,49 +24,49 @@ class ActionsHistorySeeder extends Seeder
      */
     public function run()
     {
-        $this->faker = Faker::create();
+        // $this->faker = Faker::create();
 
-        $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
-        $types = array_keys(ActionsHistory::getTypes());
-        $modules = ActionsHistory::MODULE_NAMES;
+        // $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
+        // $types = array_keys(ActionsHistory::getTypes());
+        // $modules = Module::getModules();
 
-        $actionObjects = [];
+        // $actionObjects = [];
 
-        foreach ($modules as $module) {
-            $table = class_exists('App\\'. $module)
-                ? App::make('App\\'. $module)->getTable()
-                : null;
+        // foreach ($modules as $module) {
+        //     $table = class_exists('App\\'. $module)
+        //         ? App::make('App\\'. $module)->getTable()
+        //         : null;
 
-            if ($table) {
-                $actionObjects[$module] = DB::table($table)->select('id')
-                    ->limit(self::ACTIONS_HISTORY_RECORDS)
-                    ->get()
-                    ->toArray();
-            }
-        }
+        //     if ($table) {
+        //         $actionObjects[$module] = DB::table($table)->select('id')
+        //             ->limit(self::ACTIONS_HISTORY_RECORDS)
+        //             ->get()
+        //             ->toArray();
+        //     }
+        // }
 
-        // Test creation
-        foreach (range(1, self::ACTIONS_HISTORY_RECORDS) as $i) {
-            $user = $this->faker->randomElement($users)['id'];
-            $type = $this->faker->randomElement($types);
-            $module = $this->faker->randomElement($modules);
+        // // Test creation
+        // foreach (range(1, self::ACTIONS_HISTORY_RECORDS) as $i) {
+        //     $user = $this->faker->randomElement($users)['id'];
+        //     $type = $this->faker->randomElement($types);
+        //     $module = $this->faker->randomElement($modules);
 
-            if (isset($actionObjects[$module])) {
-                $actionObject = $this->faker->randomElement($actionObjects[$module])->id;
-            } else {
-                $actionObject = $this->faker->numberBetween(1,10);
-            }
+        //     if (isset($actionObjects[$module])) {
+        //         $actionObject = $this->faker->randomElement($actionObjects[$module])->id;
+        //     } else {
+        //         $actionObject = $this->faker->numberBetween(1,10);
+        //     }
 
-            ActionsHistory::create([
-                'user_id'       => $user,
-                'occurrence'    => $this->faker->dateTimeBetween('-1 years', 'now'),
-                'module_name'   => $module,
-                'action'        => $type,
-                'action_object' => $actionObject,
-                'action_msg'    => $this->faker->sentence(),
-                'ip_address'    => $this->faker->ipv4(),
-                'user_agent'    => $this->faker->sentence(),
-            ]);
-        }
+        //     ActionsHistory::create([
+        //         'user_id'       => $user,
+        //         'occurrence'    => $this->faker->dateTimeBetween('-1 years', 'now'),
+        //         'module_name'   => $module,
+        //         'action'        => $type,
+        //         'action_object' => $actionObject,
+        //         'action_msg'    => $this->faker->sentence(),
+        //         'ip_address'    => $this->faker->ipv4(),
+        //         'user_agent'    => $this->faker->sentence(),
+        //     ]);
+        // }
     }
 }

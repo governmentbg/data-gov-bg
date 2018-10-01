@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="password_confirm" class="col-xs-12 col-form-label">{{ __('custom.password_confirm') }}:</label>
+                <label for="password_confirm" class="col-xs-12 col-form-label">{{ uctrans('custom.password_confirm') }}:</label>
                 <div class="col-xs-12">
                     <input type="password" class="input-border-r-12 form-control" name="password_confirm">
                     @if (!empty($errors['password_confirm']))

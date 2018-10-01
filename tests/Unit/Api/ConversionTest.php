@@ -151,4 +151,52 @@ class ConversionTest extends TestCase
             }', true),
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
+
+    public function testImgToJson()
+    {
+        $this->post(url('api/img2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.jpg'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testPdfToJson()
+    {
+        $this->post(url('api/pdf2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.pdf'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testDocToJson()
+    {
+        $this->post(url('api/doc2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.doc'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testDocxToJson()
+    {
+        $this->post(url('api/doc2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.docx'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testXlsToJson()
+    {
+        $this->post(url('api/xls2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.xls'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testXlsxToJson()
+    {
+        $this->post(url('api/xls2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.xlsx'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
 }

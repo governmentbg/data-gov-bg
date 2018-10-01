@@ -30,30 +30,52 @@ class DataSet extends Model implements TranslatableInterface
         'sla'       => 'text',
     ];
 
+    public function getDescriptionAttribute()
+    {
+        return $this->descript;
+    }
+
     public static function getStatus()
     {
         return [
-            self::STATUS_DRAFT      => 'Draft',
-            self::STATUS_PUBLISHED  => 'Published',
+            self::STATUS_DRAFT      => uctrans('custom.draft'),
+            self::STATUS_PUBLISHED  => uctrans('custom.published'),
         ];
     }
 
     public static function getVisibility()
     {
         return [
-            self::VISIBILITY_PUBLIC     => 'Public',
-            self::VISIBILITY_PRIVATE    => 'Private',
+            self::VISIBILITY_PUBLIC     => __('custom.public'),
+            self::VISIBILITY_PRIVATE    => __('custom.private'),
         ];
     }
 
     public function toSearchableArray()
     {
         return [
-            'id'        => $this->id,
-            'name'      => $this->concatTranslations('name'),
-            'descript'  => $this->concatTranslations('descript'),
-            'sla'       => $this->concatTranslations('sla'),
+            'id'            => $this->id,
+            'name'          => $this->concatTranslations('name'),
+            'descript'      => $this->concatTranslations('descript'),
+            'sla'           => $this->concatTranslations('sla'),
+            'source'        => $this->source,
+            'author_name'   => $this->author_name,
+            'author_email'  => $this->author_email,
+            'support_name'  => $this->support_name,
+            'support_email' => $this->support_email,
+            'custom_fields' => $this->concatCustomSettings(),
         ];
+    }
+
+    private function concatCustomSettings()
+    {
+        $settings = '';
+
+        foreach ($this->customSetting()->get() as $setting) {
+            $settings .= $setting->concatTranslations('key') .' '. $setting->concatTranslations('value');
+        }
+
+        return $settings;
     }
 
     public function organisation()
@@ -66,9 +88,14 @@ class DataSet extends Model implements TranslatableInterface
         return $this->hasMany('App\DataSetGroup');
     }
 
-    public function dataSetSubCategory()
+    public function dataSetTags()
     {
-        return $this->belongsToMany('App\Category', 'data_set_sub_categories', 'data_set_id', 'sub_cat_id');
+        return $this->hasMany('App\DataSetTags');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tags', 'data_set_tags', 'data_set_id', 'tag_id');
     }
 
     public function resource()
@@ -89,5 +116,10 @@ class DataSet extends Model implements TranslatableInterface
     public function searchableAs()
     {
         return 'data_sets';
+    }
+
+    public function customSetting()
+    {
+        return $this->hasMany('App\CustomSetting', 'data_set_id');
     }
 }

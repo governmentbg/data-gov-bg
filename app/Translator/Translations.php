@@ -109,12 +109,6 @@ class Translations
                 'locale'    => $locale,
             ]);
         }
-
-        $dummy = $this->get('xx');
-
-        if ($locale !== 'xx' && $dummy) {
-            $dummy->delete();
-        }
     }
 
     /**

@@ -121,16 +121,17 @@ class ApiController extends Controller
      * @param array $data
      * @param string $xmlData
      */
-    public static function arrayToXml($data, &$xmlData) {
+    public static function arrayToXml($data, &$xmlData, $parentKey = '')
+    {
         foreach ($data as $key => $value) {
             if (is_numeric($key)) {
-                $key = 'item'. $key; //dealing with <0/>..<n/> issues
+                $key = $parentKey; //dealing with <0/>..<n/> issues
             }
 
-            if (is_array($value)) {
+            if (is_array($value) || is_object($value)) {
                 $subNode = $xmlData->addChild($key);
 
-                self::arrayToXml($value, $subNode);
+                self::arrayToXml($value, $subNode, $key);
             } else {
                 $xmlData->addChild($key, htmlspecialchars($value));
             }
@@ -143,7 +144,8 @@ class ApiController extends Controller
      * @param string|null $locale
      * @param string|array $data
      */
-    public static function trans(&$locale, $data, $isUpdate = false) {
+    public static function trans(&$locale, $data, $isUpdate = false)
+    {
         $defaultLocale = \LaravelLocalization::getDefaultLocale();
 
         if (isset($locale)) {
@@ -159,11 +161,19 @@ class ApiController extends Controller
         if (is_array($data)) {
             $locales = array_keys($data);
 
-            if ($isUpdate || in_array($defaultLocale, $locales)) {
+            if (
+                $isUpdate
+                || in_array($defaultLocale, $locales)
+                && !empty($data[$defaultLocale])
+            ) {
                 return $data;
             }
 
-            return array_merge([$defaultLocale => $data[$locales[0]]], $data);
+            unset($data[$defaultLocale]);
+
+            return array_merge([
+                $defaultLocale => $data[$locales[0] == $defaultLocale ? $locales[1] : $locales[0]]
+            ], $data);
         }
 
         return [[]];
@@ -189,6 +199,16 @@ class ApiController extends Controller
     protected function getImageSizeError()
     {
         return __('custom.image_size_too_big'). env('IMAGE_MAX_SIZE', 16777215) . __('custom.bytes');
+    }
+
+    /**
+     * Get image type error message
+     *
+     * @return string $text
+     */
+    protected function getImageTypeError()
+    {
+        return __('custom.image_type_error') .' (JPEG, PNG, GIF, WebP, TIF, BMP, ICO, PSD)';
     }
 
     /*

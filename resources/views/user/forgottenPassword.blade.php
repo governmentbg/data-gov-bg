@@ -6,7 +6,7 @@
         <img class="responsive logo-login" src="{{ asset('img/opendata-logo-color.svg') }}">
     </div>
     <div class="m-b-lg">
-        <h3 class="text-center">{{ __('custom.forgotten_password') }}</h3>
+        <h3 class="text-center">{{ uctrans('custom.forgotten_password') }}</h3>
         <p>{{ __('custom.enter_username') }}</p>
         <p>{{ __('custom.receive_email') }}</p>
     </div>
@@ -23,7 +23,7 @@
             {{ csrf_field() }}
 
             <div class="form-group row">
-                <label for="username" class="col-xs-12 col-form-label">{{ utrans('custom.user_name') }}:</label>
+                <label for="username" class="col-xs-12 col-form-label">{{ uctrans('custom.user_name') }}:</label>
                 <div class="col-xs-12">
                     <input type="text" class="input-border-r-12 form-control" name="username">
                     @if (!empty($errors['username']))
@@ -33,12 +33,12 @@
             </div>
             <div class="form-group row">
                 <div class="col-xs-12">
-                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ __('custom.send') }}</button>
+                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ uctrans('custom.send') }}</button>
                 </div>
             </div>
             <div class="form-group row">
                 <div class="col-xs-12">
-                    <a href="{{ url()->previous() }}" class="col-xs-12 btn btn-primary">{{ __('custom.back') }}</a>
+                    <a href="{{ url()->previous() }}" class="col-xs-12 btn btn-primary">{{ uctrans('custom.back') }}</a>
                 </div>
             </div>
         </form>

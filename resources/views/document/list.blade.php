@@ -6,28 +6,59 @@
         <div class="col-xs-12">
             <div class=" m-t-md">
                 <div class="col-xs-12 m-b-md">
+                @if (!empty($documents))
                     <div class="col-sm-5 col-xs-12 pull-right">
-                        <input class="rounded-input input-long" type="text">
+                        <form method="GET" action="{{ url('/document/search') }}">
+                        <input
+                            type="text"
+                            class="input-border-r-12 form-control"
+                            placeholder="{{ __('custom.search') }}"
+                            value="{{ isset($search) ? $search : '' }}"
+                            name="q"
+                        >
+                        </form>
                     </div>
+                @endif
                 </div>
-                @for ($i = 0; $i < 3; $i++)
+                @if (isset($pagination))
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            {{ $pagination->render() }}
+                        </div>
+                    </div>
+                @endif
+                @if (isset($documents))
+                    @foreach ($documents as $document)
                     <div class="m-b-lg">
-                        <div>{{ __('custom.date_added') }}: {{ date('d.m.Y') }}</div>
+                        <div>{{ __('custom.date_added') }}: {{ date($document->created_at) }}</div>
                         <div class="col-sm-12 p-l-none article-underline">
-                            <a href="{{ url('/document/view') }}">
-                                <h2 class="m-t-xs">Lorem ipsum dolor sit amet</h2>
+                            <a href="{{ url('/document/view/' . $document->id ) }}">
+                                <h2 class="m-t-xs">{{$document->name}}</h2>
                             </a>
                             <p>
-                                Pellentesque risus nisl, hendrerit eget tellus sit amet, ornare blandit nisi. Morbi consectetur, felis in semper euismod, mi libero fringilla felis, sit amet ullamcorper enim turpis non nisi. Ut euismod nibh at ante dapibus, sit amet pharetra lectus blandit. Aliquam eget orci tellus. Aliquam quis dignissim lectus, non dictum purus. Pellentesque scelerisque quis enim at varius. Duis a ex faucibus urna volutpat varius ac quis mauris. Sed porttitor cursus metus, molestie ullamcorper dolor auctor sed. Praesent dictum posuere tellus, vitae eleifend dui ornare et. Donec eu ornare eros. Cras eget velit et ex viverra facilisis eget nec lacus.
+                                {!! nl2br(e($document->description)) !!}
                             </p>
                             <div class="col-sm-12 p-l-none text-right">
-                                <span><a href="{{ url('/document/view') }}">{{ __('custom.see_more') }}</a></span>
+                                <span><a href="{{ url('/document/view/' . $document->id) }}">{{ __('custom.see_more') }}</a></span>
                             </div>
                         </div>
                     </div>
-                @endfor
+                    @endforeach
+                @endif
+                @if (empty($documents))
+                <div class="col-sm-12 m-t-xl text-center no-info">
+                    {{ __('custom.no_info') }}
+                </div>
+                @endif
             </div>
         </div>
     </div>
+    @if (isset($pagination))
+        <div class="row">
+            <div class="col-xs-12 text-center">
+                {{ $pagination->render() }}
+            </div>
+        </div>
+    @endif
 </div>
 @endsection

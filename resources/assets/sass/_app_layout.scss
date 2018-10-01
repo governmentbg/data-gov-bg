@@ -100,7 +100,7 @@ body {
                             vertical-align: middle;
 
                             &.social-icons {
-                                width: 98px;
+                                width: 130px;
 
                                 a {
                                     font-size: 14px;
@@ -149,6 +149,13 @@ body {
                                         span {
                                             padding-left: 3px;
                                             padding-right: 3px;
+                                        }
+                                    }
+
+                                    &.in {
+                                        span {
+                                            padding-left: 6px;
+                                            padding-right: 6px;
                                         }
                                     }
                                 }
@@ -247,6 +254,9 @@ body {
 
                                         img {
                                             border-radius: 13px;
+                                            &.admin {
+                                                border-radius: 3px;
+                                            }
                                         }
                                     }
                                 }

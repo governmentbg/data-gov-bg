@@ -245,9 +245,6 @@ trait Translatable
         foreach (self::$translatable as $key => $type) {
             if (!isset($translations[$key]) || $translations[$key] == []) {
                 $value = $type == 'bool' ? null : '';
-                $translations[$key] = [
-                    'xx' => $value, // Dummy
-                ];
             }
         }
 
@@ -402,6 +399,7 @@ trait Translatable
     {
         $localesAll = config('laravellocalization.supportedLocales');
         $translations = collect();
+
         foreach ($localesAll as $k => $locale) {
             $this->translate($k);
             $translation = $this->translatable_get($key);

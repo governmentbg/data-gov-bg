@@ -4,6 +4,7 @@ use App\TermsOfUse;
 use Faker\Factory as Faker;
 use App\Locale;
 use Illuminate\Database\Seeder;
+use App\Http\Controllers\ApiController;
 
 class TermsOfUseSeeder extends Seeder
 {
@@ -21,8 +22,8 @@ class TermsOfUseSeeder extends Seeder
         foreach (range(1, self::TERMS_RECORDS) as $i) {
             $locale = $this->faker->randomElement($locales)['locale'];
             TermsOfUse::create([
-                'name'          => [$locale => $this->faker->word()],
-                'descript'      => [$locale => $this->faker->text()],
+                'name'          => ApiController::trans($locale, $this->faker->word()),
+                'descript'      => ApiController::trans($locale, $this->faker->text()),
                 'active'        => $this->faker->boolean(),
                 'is_default'    => $this->faker->boolean(),
                 'ordering'      => $this->faker->randomDigit(),

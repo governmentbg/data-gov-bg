@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Module;
+use App\User;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\Api\RightController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -42,15 +48,12 @@ class LoginController extends Controller
     public function login(Request $request) {
         $error = [];
         $class = 'index';
-        $message = 'Поздравления! Профилът ви беше активиран.
-            Вашите данни ще се публикуват като непотвъдени, докaто не ви одобри някой от нашите администратори';
+        $message = __('profile_success');
         $loginData = $request->all();
 
         if ($request->has('username')) {
-            $field = filter_var($loginData['username'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
             $validator = \Validator::make($loginData, [
-                'username'      => 'required|string|exists:users,'. $field,
+                'username'      => 'required|string',
                 'password'      => 'required|string',
                 'remember_me'   => 'nullable|boolean'
             ]);
@@ -68,14 +71,28 @@ class LoginController extends Controller
             });
 
             if (!$validator->fails()) {
-                $request->merge([$field => $loginData['username']]);
-                $credentials = $request->only($field, 'password');
+                $request->merge(['username' => $loginData['username']]);
+                $credentials = $request->only('username', 'password');
                 $rememberMe = isset($loginData['remember_me']) ? $loginData['remember_me'] : false;
 
                 if (Auth::attempt($credentials, $rememberMe)) {
+                    $user = User::where('username', $request->username)->first();
+                    $result = User::getUserRoles($user->id);
+
+                    Session::put('roles', $result);
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::USERS),
+                        'action'           => ActionsHistory::TYPE_LOGIN,
+                        'action_object'    => $loginData['username'],
+                        'action_msg'       => 'Login',
+                    ];
+
+                    Module::add($logData);
+
                     return redirect('/');
                 } else {
-                    $error['password'][0] = 'Wrong password given.';
+                    $error['password'][0] = __('custom.wrong_password');
                 }
             } else {
                 $error = $validator->errors()->messages();

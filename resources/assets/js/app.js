@@ -28,9 +28,19 @@ require('./bootstrap-datepicker.bg');
 // Dropdowns
 require('./select2.full.min');
 
+// DataTables
+require('datatables.net-dt');
+
 // Checkboxes
 require('icheck');
 
 // Main js
 require('./custom');
+require('./admin');
 require('./user');
+
+// Codemirror
+require('codemirror');
+
+// Summernote wysiwyg editor
+require('summernote');

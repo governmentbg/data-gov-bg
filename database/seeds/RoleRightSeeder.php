@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 class RoleRightSeeder extends Seeder
 {
-    const ROLE_RIGHT_RECORDS = 10;
+    const ROLE_RIGHT_RECORDS = 0;
 
     /**
      * Run the database seeds.

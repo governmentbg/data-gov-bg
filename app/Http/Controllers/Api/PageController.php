@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use \App\Page;
 use \Validator;
+use App\Module;
+use App\RoleRight;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +21,7 @@ class PageController extends ApiController
      * Requires a json $request
      *
      * @param array data - required
-     * @param string data[locale] - required
+     * @param string data[locale] - optional
      * @param integer data[section_id] - optional
      * @param string data[title] - required
      * @param string data[body] - optional
@@ -34,24 +37,78 @@ class PageController extends ApiController
         $pageData = $request->all();
 
         $validator = Validator::make($pageData, [
-            'data'                     => 'required|array',
-            'locale'                   => 'required|string',
-            'data.section_id'          => 'nullable|integer',
-            'data.title'               => 'required|string',
-            'data.body'                => 'nullable|string',
-            'data.head_title'          => 'nullable|string',
-            'data.meta_description'    => 'nullable|string',
-            'data.meta_keywords'       => 'nullable|string',
-            'data.forum_link'          => 'nullable|string',
-            'data.active'              => 'required|integer',
+            'data'      => 'required|array',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($pageData['data'], [
+                'locale'              => 'nullable|string|max:5',
+                'section_id'          => 'required|integer|digits_between:1,10',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'nullable|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'nullable|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'nullable|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'nullable|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'help_page'           => 'nullable|string|exists:help_pages,name|max:191',
+                'active'              => 'nullable|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
+            ]);
+        }
+
+        $validator->after(function ($validator) {
+            if (
+                $validator->errors()->has('meta_description.*')
+                || $validator->errors()->has('meta_keywords.*')
+            ) {
+                foreach ($validator->errors()->getMessages() as $key => $value) {
+
+                    if (str_contains($key, 'meta_description')) {
+                        $newKey = str_replace_last('meta_description', 'meta_descript', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+
+                    if (str_contains($key, 'meta_keywords')) {
+                        $newKey = str_replace_last('meta_keywords', 'meta_key_words', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+                }
+            }
+        });
+
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::PAGES,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            $locale = isset($pageData['data']['locale']) ? $pageData['data']['locale'] : null;
+
             try {
                 DB::beginTransaction();
-                $locale = $pageData['locale'];
 
                 $newPage = new Page;
+                $newPage->type = Page::TYPE_PAGE;
                 $newPage->title = $this->trans($locale, $pageData['data']['title']);
 
                 if (isset($pageData['data']['section_id'])) {
@@ -78,12 +135,41 @@ class PageController extends ApiController
                     $newPage->forum_link = $pageData['data']['forum_link'];
                 }
 
-                $newPage->active = $pageData['data']['active'];
+                if (isset($pageData['data']['help_page'])) {
+                    $newPage->help_page = $pageData['data']['help_page'];
+                }
+
+                if (isset($pageData['data']['valid_from'])) {
+                    $newPage->valid_from = $pageData['data']['valid_from'];
+                }
+
+                if (isset($pageData['data']['valid_to'])) {
+                    $newPage->valid_to = $pageData['data']['valid_to'];
+                }
+
+                if (isset($pageData['data']['abstract'])) {
+                    $newPage->abstract = $this->trans($locale, $pageData['data']['abstract']);
+                }
+
+                if (isset($pageData['data']['active'])) {
+                    $newPage->active = $pageData['data']['active'];
+                } else {
+                    $newPage->active = Page::ACTIVE_FALSE;
+                }
 
                 $newPage->save();
                 DB::commit();
-                return $this->successResponse(['page_id' => $newPage->id]);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::PAGES),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newPage->id,
+                    'action_msg'       => 'Added page',
+                ];
+
+                Module::add($logData);
+
+                return $this->successResponse(['page_id' => $newPage->id]);
             } catch (QueryException $e) {
                 DB::rollback();
                 Log::error($e->getMessage());
@@ -98,7 +184,7 @@ class PageController extends ApiController
      *
      * @param integer page_id - required
      * @param array data - required
-     * @param string data[locale] - required
+     * @param string data[locale] - optional
      * @param integer data[section_id] - optional
      * @param string data[title] - required
      * @param string data[body] - optional
@@ -114,65 +200,150 @@ class PageController extends ApiController
         $editData = $request->all();
 
         if (sizeof($editData['data']) < 1) {
-            return $this->errorResponse('Edit Page failure');
+            return $this->errorResponse(__('custom.edit_page_fail'));
         }
 
         $validator = Validator::make($editData, [
-            'page_id'                  => 'required|integer|exists:pages,id',
-            'data'                     => 'required|array',
-            'locale'                   => 'nullable|string',
-            'data.section_id'          => 'nullable|integer',
-            'data.title'               => 'nullable|string',
-            'data.body'                => 'nullable|string',
-            'data.head_title'          => 'nullable|string',
-            'data.meta_description'    => 'nullable|string',
-            'data.meta_keywords'       => 'nullable|string',
-            'data.forum_link'          => 'nullable|string',
-            'data.active'              => 'required|integer',
+            'page_id'    => 'required|integer|exists:pages,id|digits_between:1,10',
+            'data'       => 'required|array',
+            'locale'     => 'nullable|string|max:5',
         ]);
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($editData['data'], [
+                'section_id'          => 'required|integer|digits_between:1,10',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'nullable|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'nullable|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'nullable|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'nullable|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'help_page'           => 'nullable|string|exists:help_pages,name|max:191',
+                'active'              => 'nullable|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
+            ]);
+        }
+
+        $validator->after(function ($validator) {
+            if (
+                $validator->errors()->has('meta_description.*')
+                || $validator->errors()->has('meta_keywords.*')
+            ) {
+                foreach ($validator->errors()->getMessages() as $key => $value) {
+
+                    if (str_contains($key, 'meta_description')) {
+                        $newKey = str_replace_last('meta_description', 'meta_descript', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+
+                    if (str_contains($key, 'meta_keywords')) {
+                        $newKey = str_replace_last('meta_keywords', 'meta_key_words', $key);
+                        $validator->errors()->add(
+                            $newKey,
+                            is_array($value) ? $value[0] : $value
+                        );
+                    }
+                }
+            }
+        });
 
         if (!$validator->fails()) {
             try {
                 $pageToEdit = Page::find($editData['page_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::PAGES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $pageToEdit->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 DB::beginTransaction();
 
-                $locale = $editData['locale'];
-
                 if (isset($editData['data']['title'])) {
-                    $pageToEdit->title = $this->trans($locale, $editData['data']['title']);
+                    $pageToEdit->title = $this->trans($editData['locale'], $editData['data']['title']);
                 }
 
                 if (isset($editData['data']['section_id'])) {
                     $pageToEdit->section_id = $editData['data']['section_id'];
                 }
 
+                if (isset($editData['data']['valid_from'])) {
+                    $pageToEdit->valid_from = $editData['data']['valid_from'];
+                } else {
+                    $pageToEdit->valid_from = null;
+                }
+
+                if (isset($editData['data']['valid_to'])) {
+                    $pageToEdit->valid_to = $editData['data']['valid_to'];
+                } else {
+                    $pageToEdit->valid_to = null;
+                }
+
                 if (isset($editData['data']['body'])) {
-                    $pageToEdit->body = $this->trans($locale, $editData['data']['body']);
+                    $pageToEdit->body = $this->trans($editData['locale'], $editData['data']['body']);
                 }
 
                 if (isset($editData['data']['head_title'])) {
-                    $pageToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
+                    $pageToEdit->head_title = $this->trans($editData['locale'], $editData['data']['head_title']);
                 }
 
                 if (isset($editData['data']['meta_description'])) {
-                    $pageToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
+                    $pageToEdit->meta_descript = $this->trans($editData['locale'], $editData['data']['meta_description']);
+                }
+
+                if (isset($editData['data']['abstract'])) {
+                    $pageToEdit->abstract = $this->trans($editData['locale'], $editData['data']['abstract']);
                 }
 
                 if (isset($editData['data']['meta_keywords'])) {
-                    $pageToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
+                    $pageToEdit->meta_key_words = $this->trans($editData['locale'], $editData['data']['meta_keywords']);
                 }
 
                 if (isset($editData['data']['forum_link'])) {
                     $pageToEdit->forum_link = $editData['data']['forum_link'];
                 }
 
+                if (isset($editData['data']['help_page'])) {
+                    $pageToEdit->help_page = $editData['data']['help_page'];
+                }
+
                 if (isset($editData['data']['active'])) {
                     $pageToEdit->active = $editData['data']['active'];
+                } else {
+                    $pageToEdit->active = Page::ACTIVE_FALSE;
                 }
 
                 $pageToEdit->save();
                 DB::commit();
+
+                $logData = [
+                    'module_name'   => Module::getModuleName(Module::PAGES),
+                    'action'        => ActionsHistory::TYPE_MOD,
+                    'action_object' => $pageToEdit->id,
+                    'action_msg'    => 'Edited page',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 DB::rollback();
@@ -197,14 +368,36 @@ class PageController extends ApiController
         $deleteData = $request->all();
 
         $validator = Validator::make($deleteData, [
-            'page_id' => 'required|integer|exists:pages,id',
+            'page_id' => 'required|integer|exists:pages,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             try {
                 $pageToBeDeleted = Page::find($deleteData['page_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::PAGES,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $pageToBeDeleted->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $pageToBeDeleted->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::PAGES),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $deleteData['page_id'],
+                    'action_msg'       => 'Deleted page',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 Log::error($ex->getMessage());
@@ -234,105 +427,160 @@ class PageController extends ApiController
      */
     public function listPages(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'criteria'                => 'nullable|array',
-            'locale'                  => 'nullable|string',
-            'criteria.page_id'        => 'nullable|integer',
-            'criteria.active'         => 'nullable|integer',
-            'criteria.section_id '    => 'nullable|integer',
-            'criteria.order'          => 'nullable|array',
-            'criteria.order.type'     => 'nullable|string',
-            'criteria.order.field'    => 'nullable|string',
-            'records_per_page'        => 'nullable|integer',
-            'page_number'             => 'nullable|integer',
+        $post = $request->all();
+
+        $validator = Validator::make($post, [
+            'locale'            => 'nullable|string|max:5',
+            'criteria'          => 'nullable|array',
+            'records_per_page'  => 'nullable|integer|digits_between:1,10',
+            'page_number'       => 'nullable|integer|digits_between:1,10',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse(__('custom.list_pages_fail'), $validator->errors()->messages());
+        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'page_id'       => 'nullable|integer|digits_between:1,10',
+                'active'        => 'nullable|boolean',
+                'section_id '   => 'nullable|integer|digits_between:1,10',
+                'order'         => 'nullable|array',
+            ]);
         }
 
-        $result = [];
-        $criteria = $request->json('criteria');
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
 
-        $locale = \LaravelLocalization::getCurrentLocale();
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'  => 'nullable|string|max:191',
+                'field' => 'nullable|string|max:191',
+            ]);
+        }
 
-        $pageList = '';
-        $columns = [
-            'id',
-            'section_id',
-            'title',
-            'body',
-            'head_title',
-            'meta_descript',
-            'meta_key_words',
-            'forum_link',
-            'active',
-            'created_at',
-            'updated_at',
-            'created_by',
-            'updated_by',
-        ];
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::PAGES,
+                RoleRight::RIGHT_VIEW
+            );
 
-        $pageList = Page::select($columns);
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
-        if (isset($criteria['order'])) {
-            if (is_array($criteria['order'])) {
+            $result = [];
+
+            $locale = \LaravelLocalization::getCurrentLocale();
+
+            $pageList = '';
+            $columns = [
+                'id',
+                'section_id',
+                'abstract',
+                'title',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+                'forum_link',
+                'help_page',
+                'active',
+                'valid_from',
+                'valid_to',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            $pageList = Page::select($columns)->where('type', Page::TYPE_PAGE);
+
+            if (isset($criteria['order']['field'])) {
                 if (!in_array($criteria['order']['field'], $columns)) {
-                    unset($criteria['order']['field']);
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
                 }
             }
-        }
 
-        if (isset($criteria['page_id'])) {
-            $pageList->where('id', $criteria['page_id']);
-        }
-
-        if (isset($criteria['active'])) {
-            $pageList->where('active', $criteria['active']);
-        }
-
-        if (isset($criteria['section_id'])) {
-            $pageList->where('section_id', $criteria['section_id']);
-        }
-
-        if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-            $pageList->orderBy($criteria['order']['field'],
-                $criteria['order']['type'] == 'asc' ? 'asc' : 'desc');
-        }
-
-        $total_records = $pageList->count();
-
-        if (isset($request['records_per_page']) || isset($request['page_number'])) {
-            $pageList->forPage($request->input('page_number'), $request->input('records_per_page'));
-        }
-
-        $pageList = $pageList->get();
-
-        if (!empty($pageList)) {
-
-            foreach ($pageList as $singlePage) {
-                $result[] = [
-                    'id'                  => $singlePage->id,
-                    'locale'              => $locale,
-                    'section_id'          => $singlePage->section_id,
-                    'title'               => $singlePage->title,
-                    'body'                => $singlePage->body,
-                    'head_title'          => $singlePage->head_title,
-                    'meta_description'    => $singlePage->meta_descript,
-                    'meta_keywords'       => $singlePage->meta_key_words,
-                    'forum_link'          => $singlePage->forum_link,
-                    'active'              => $singlePage->active,
-                    'created_at'          => date($singlePage->created_at),
-                    'updated_at'          => date($singlePage->updated_at),
-                    'created_by'          => $singlePage->created_by,
-                    'updated_by'          => $singlePage->updated_by,
-                ];
+            if (isset($criteria['page_id'])) {
+                $pageList->where('id', $criteria['page_id']);
             }
+
+            if (isset($criteria['active'])) {
+                $pageList->where('active', $criteria['active']);
+            }
+
+            if (isset($criteria['section_id'])) {
+                $pageList->where('section_id', $criteria['section_id']);
+            }
+
+            if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
+                $pageList->orderBy($criteria['order']['field'],
+                    $criteria['order']['type'] == 'asc' ? 'asc' : 'desc');
+            }
+
+            $total_records = $pageList->count();
+
+            if (isset($request->records_per_page) || isset($request->page_number)) {
+                $pageList->forPage($request->input('page_number'), $request->input('records_per_page'));
+            }
+
+            $pageList = $pageList->get();
+
+            if (!empty($pageList)) {
+
+                foreach ($pageList as $singlePage) {
+                    $result[] = [
+                        'id'                => $singlePage->id,
+                        'locale'            => $locale,
+                        'section_id'        => $singlePage->section_id,
+                        'title'             => $singlePage->title,
+                        'body'              => $singlePage->body,
+                        'head_title'        => $singlePage->head_title,
+                        'meta_description'  => $singlePage->meta_descript,
+                        'meta_keywords'     => $singlePage->meta_key_words,
+                        'forum_link'        => $singlePage->forum_link,
+                        'help_page'         => $singlePage->help_page,
+                        'active'            => $singlePage->active,
+                        'abstract'          => $singlePage->abstract,
+                        'valid_from'        => date($singlePage->valid_from),
+                        'valid_to'          => date($singlePage->valid_to),
+                        'created_at'        => date($singlePage->created_at),
+                        'updated_at'        => date($singlePage->updated_at),
+                        'created_by'        => $singlePage->created_by,
+                        'updated_by'        => $singlePage->updated_by,
+                    ];
+                }
+            }
+
+            $logData = [
+                'module_name'      => Module::getModuleName(Module::PAGES),
+                'action'           => ActionsHistory::TYPE_SEE,
+                'action_msg'       => 'Listed pages',
+            ];
+
+            Module::add($logData);
+
+            $transFields = [
+                'title',
+                'abstract',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            if (isset($criteria['order']) && in_array($criteria['order']['field'], $transFields)) {
+                usort($result, function($a, $b) use ($criteria) {
+                    return strtolower($criteria['order']['type']) == 'asc'
+                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+                });
+            }
+
+            return $this->successResponse([
+                'total_records' => $total_records,
+                'pages'         => $result,
+            ], true);
         }
 
-        return $this->successResponse([
-            'total_records' => $total_records,
-            'pages' => $result,
-        ], true);
+        return $this->errorResponse(__('custom.list_pages_fail'), $validator->errors()->messages());
     }
 }

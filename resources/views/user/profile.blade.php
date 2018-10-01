@@ -23,9 +23,8 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a href="{{ url('/users/list') }}">{{ trans_choice(__('custom.users'), 2) }}</a></li>
                                     <li><a class="active" href="#">{{ trans_choice(__('custom.users'), 1) }}</a></li>
-                                    <li><a href="{{ url('/user/groups') }}">{{ __('custom.data') }}</a></li>
-                                    <li><a href="{{ url('/user/organisations') }}">{{ __('custom.chronology') }}</a></li>
-                                    <li><a href="{{ url('/user/invite') }}">{{ __('custom.members') }}</a></li>
+                                    <li><a href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ url('/user/profile/'. $user->id .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -42,7 +41,7 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="#" class="data-sets">
+                    <a href="{{ url('/data') }}" class="data-sets">
                         <p>{{ $dataSetsCount }}</p>
                         <hr>
                         <p>{{ __('custom.data_sets') }}</p>
@@ -55,9 +54,9 @@
                     <h2>{{ $user->firstname .' '. $user->lastname}}</h2>
                 </div>
                 <div class="row">
-                    <span class="user-info">{{ $user->add_info }}</span>
+                    <span class="user-info">{!! nl2br(e($user->add_info)) !!}</span>
                 </div>
-                @if (!$ownProfile)
+                @if (!$ownProfile && \Auth::user() !== null)
                     <form method="post">
                         {{ csrf_field() }}
                         @if (!$followed)
@@ -81,8 +80,6 @@
                 @endif
                 <div class="row contacts">
                     <p>{{ uctrans('custom.to_contact') }}</p><br>
-                    <p>Иван Иванов<br>Дирекция Български пощи</p><br>
-                    <p>тел. 02/ 940 2445</p><br>
                     <p class="email">Email: {{ $user->email }}</p>
                 </div>
             </div>

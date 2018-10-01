@@ -7,6 +7,45 @@ use Illuminate\Database\Migrations\Migration;
 
 class InsertBaseRolesInRoles extends Migration
 {
+    public function __construct()
+    {
+        $this->roles = [
+            [
+                'name'                  => 'Администратор на организация',
+                'active'                => 1,
+                'default_org_admin'     => 1,
+                'for_org'               => 1,
+            ],
+            [
+                'name'                  => 'Администратор на група',
+                'active'                => 1,
+                'default_group_admin'   => 1,
+                'for_group'             => 1,
+            ],
+            [
+                'name'                  => 'Обикновен потребител',
+                'active'                => 1,
+                'default_user'          => 1,
+            ],
+            [
+                'name'                  => 'Редактор на организация',
+                'active'                => 1,
+            ],
+            [
+                'name'                  => 'Член на организация',
+                'active'                => 1,
+            ],
+            [
+                'name'                  => 'Редактор на група',
+                'active'                => 1,
+            ],
+            [
+                'name'                  => 'Член на група',
+                'active'                => 1,
+            ],
+        ];
+    }
+
     /**
      * Run the migrations.
      *
@@ -14,11 +53,12 @@ class InsertBaseRolesInRoles extends Migration
      */
     public function up()
     {
-        foreach (Role::getBaseRoles() as $role) {
-            Role::create([
-                'name'      => $role,
-                'active'    => true,
-            ]);
+        if (!env('IS_TOOL')) {
+            foreach ($this->roles as $role) {
+                if (!Role::where(['name' => $role['name']])->count()) {
+                    Role::create($role);
+                }
+            }
         }
     }
 
@@ -29,8 +69,12 @@ class InsertBaseRolesInRoles extends Migration
      */
     public function down()
     {
-        foreach (Role::getBaseRoles() as $role) {
-            Role::where(['name' => $role])->get()->delete();
+        if (!env('IS_TOOL')) {
+            foreach ($this->roles as $role) {
+                if (Role::where(['name' => $role['name']])->count()) {
+                    Role::where(['name' => $role['name']])->delete();
+                }
+            }
         }
     }
 }

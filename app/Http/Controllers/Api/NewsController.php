@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Page;
 use \Validator;
+use App\Module;
+use App\RoleRight;
+use App\ActionsHistory;
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +23,7 @@ class NewsController extends ApiController
      *
      * @param string api_key - required
      * @param array data - required
-     * @param string data[locale] - required
+     * @param string data[locale] - optional
      * @param string data[title] - required
      * @param string data[abstract] -required
      * @param string data[body] - required
@@ -38,56 +42,91 @@ class NewsController extends ApiController
 
         $validator = Validator::make($newsData, [
             'data'                  => 'required|array',
-            'data.locale'           => 'required|string',
-            'data.title'            => 'required|string',
-            'data.abstract'         => 'required|string',
-            'data.body'             => 'required|string',
-            'data.head_title'       => 'nullable|string',
-            'data.meta_description' => 'nullable|string',
-            'data.meta_keywords'    => 'nullable|string',
-            'data.forum_link'       => 'nullable|string',
-            'data.active'           => 'required|integer',
-            'data.valid_from'       => 'nullable|date',
-            'data.valid_to'         => 'nullable|date',
         ]);
 
         if (!$validator->fails()) {
+            $validator = Validator::make($newsData['data'], [
+                'locale'              => 'nullable|string|max:5',
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'required_with:locale|max:8000',
+                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'nullable|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'nullable|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'nullable|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'active'              => 'required|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::NEWS,
+                RoleRight::RIGHT_EDIT
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
+            $locale = isset($newsData['data']['locale']) ? $newsData['data']['locale'] : null;
+
             try {
-            DB::beginTransaction();
-            $newNews = new Page;
-            $locale = $newsData['data']['locale'];
-            $newNews->title = $this->trans($locale, $newsData['data']['title']);
-            $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
-            $newNews->body = $this->trans($locale, $newsData['data']['body']);
+                DB::beginTransaction();
+                $newNews = new Page;
+                $newNews->type = Page::TYPE_NEWS;
+                $newNews->title = $this->trans($locale, $newsData['data']['title']);
+                $newNews->abstract = $this->trans($locale, $newsData['data']['abstract']);
+                $newNews->body = $this->trans($locale, $newsData['data']['body']);
 
-            if (isset($newsData['data']['head_title'])) {
-                $newNews->head_title = $this->trans($locale, $newsData['data']['head_title']);
-            }
+                if (isset($newsData['data']['head_title'])) {
+                    $newNews->head_title = $this->trans($locale, $newsData['data']['head_title']);
+                }
 
-            if (isset($newsData['data']['meta_description'])) {
-                $newNews->meta_descript = $this->trans($locale, $newsData['data']['meta_description']);
-            }
+                if (isset($newsData['data']['meta_description'])) {
+                    $newNews->meta_descript = $this->trans($locale, $newsData['data']['meta_description']);
+                }
 
-            if (isset($newsData['data']['meta_key_words'])) {
-                $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_key_words']);
-            }
+                if (isset($newsData['data']['meta_keywords'])) {
+                    $newNews->meta_key_words = $this->trans($locale, $newsData['data']['meta_keywords']);
+                }
 
-            if (isset($newsData['data']['forum_link'])) {
-                $newNews->forum_link = $newsData['data']['forum_link'];
-            }
+                if (isset($newsData['data']['forum_link'])) {
+                    $newNews->forum_link = $newsData['data']['forum_link'];
+                }
 
-            if (isset($newsData['data']['valid_from'])) {
-                $newNews->valid_from = $newsData['data']['valid_from'];
-            }
+                if (isset($newsData['data']['valid_from'])) {
+                    $newNews->valid_from = $newsData['data']['valid_from'];
+                }
 
-            if (isset($newsData['data']['valid_to'])) {
-                $newNews->valid_to = $newsData['data']['valid_to'];
-            }
+                if (isset($newsData['data']['valid_to'])) {
+                    $newNews->valid_to = $newsData['data']['valid_to'];
+                }
 
-            $newNews->active = $newsData['data']['active'];
+                $newNews->active = $newsData['data']['active'];
 
                 $newNews->save();
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $newNews->id,
+                    'action_msg'       => 'Added news',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
                 DB::rollback();
@@ -124,61 +163,52 @@ class NewsController extends ApiController
         $editData = $request->all();
 
         $validator = Validator::make($editData, [
-            'news_id'               => 'required|integer|exists:pages,id',
-            'data'                  => 'required|array',
-            'data.locale'           => 'nullable|string',
-            'data.title'            => 'nullable|string',
-            'data.abstract'         => 'nullable|string',
-            'data.body'             => 'nullable|string',
-            'data.head_title'       => 'nullable|string',
-            'data.meta_description' => 'nullable|string',
-            'data.meta_key_words'   => 'nullable|string',
-            'data.forum_link'       => 'nullable|string',
-            'data.active'           => 'nullable|integer',
-            'data.valid_from'       => 'nullable|date',
-            'data.valid_to'         => 'nullable|date',
+            'news_id'   => 'required|integer|exists:pages,id|digits_between:1,10',
+            'data'      => 'required|array',
+            'locale'    => 'nullable|string|max:5',
         ]);
 
-        if (isset($editData['data']['title'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
-                return $editData['data']['title'] != '';
-            });
-        }
-
-        if (isset($editData['data']['abstract'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
-                return $editData['data']['abstract'] != '';
-            });
-        }
-
-        if (isset($editData['data']['body'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
-                return $editData['data']['body'] != '';
-            });
-        }
-
-        if (isset($editData['data']['head_title'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
-                return $editData['data']['head_title'] != '';
-            });
-        }
-
-        if (isset($editData['data']['meta_description'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
-                return $editData['data']['meta_description'] != '';
-            });
-        }
-
-        if (isset($editData['data']['meta_key_words'])) {
-            $validator->sometimes('data.locale', 'required', function ($editData) {
-                return $editData['data']['meta_key_words'] != '';
-            });
+        if (!$validator->fails()) {
+            $validator = Validator::make($editData['data'], [
+                'title'               => 'required_with:locale|max:191',
+                'title.bg'            => 'required_without:locale|string|max:191',
+                'title.*'             => 'max:191',
+                'abstract'            => 'required_with:locale|max:8000',
+                'abstract.bg'         => 'required_without:locale|string|max:8000',
+                'abstract.*'          => 'max:8000',
+                'body'                => 'required_with:locale|max:8000',
+                'body.bg'             => 'required_without:locale|string|max:8000',
+                'body.*'              => 'max:8000',
+                'head_title'          => 'nullable|max:191',
+                'head_title.*'        => 'max:191',
+                'meta_description'    => 'nullable|max:191',
+                'meta_description.*'  => 'max:191',
+                'meta_keywords'       => 'nullable|max:191',
+                'meta_keywords.*'     => 'max:191',
+                'forum_link'          => 'nullable|string|max:191',
+                'active'              => 'nullable|boolean',
+                'valid_from'          => 'nullable|date',
+                'valid_to'            => 'nullable|date',
+            ]);
         }
 
         if (!$validator->fails()) {
             try {
-                $locale = $editData['data']['locale'];
+                $locale = isset($newsData['locale']) ? $newsData['locale'] : null;
                 $newsToEdit = Page::find($editData['news_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::NEWS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $newsToEdit->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 DB::beginTransaction();
 
                 if (isset($editData['data']['title'])) {
@@ -223,6 +253,16 @@ class NewsController extends ApiController
 
                 $newsToEdit->save();
                 DB::commit();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $newsToEdit->id,
+                    'action_msg'       => 'Edited news',
+                ];
+
+                Module::add($logData);
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 DB::rollback();
@@ -247,14 +287,35 @@ class NewsController extends ApiController
     {
         $newsDeleteData = $request->all();
         $validator = Validator::make($newsDeleteData, [
-            'news_id' => 'required|integer|exists:pages,id',
+            'news_id' => 'required|integer|exists:pages,id|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
             try {
                 $deleteNews = Page::find($newsDeleteData['news_id']);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::NEWS,
+                    RoleRight::RIGHT_ALL,
+                    [],
+                    [
+                        'created_by' => $deleteNews->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 $deleteNews->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $newsDeleteData['news_id'],
+                    'action_msg'       => 'Deleted news',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (QueryException $e) {
@@ -289,19 +350,34 @@ class NewsController extends ApiController
         $newsListData = $request->all();
 
         $validator = Validator::make($newsListData, [
-            'locale'                => 'nullable|string',
+            'api_key'               => 'nullable|string|exists:users,api_key',
+            'locale'                => 'nullable|string|max:5',
             'criteria'              => 'nullable|array',
-            'criteria.active'       => 'nullable|integer',
-            'criteria.valid'        => 'nullable|integer',
-            'criteria.date_from'    => 'nullable|date',
-            'criteria.date_to'      => 'nullable|date',
-            'criteria.date_type'    => 'nullable|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
+
+        $criteria = isset($newsListData['criteria']) ? $newsListData['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'active'       => 'nullable|boolean',
+                'valid'        => 'nullable|integer|digits_between:1,10',
+                'date_from'    => 'nullable|date',
+                'date_to'      => 'nullable|date',
+                'date_type'    => 'nullable|string|max:191',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $result = [];
@@ -309,72 +385,164 @@ class NewsController extends ApiController
             $locale = \LaravelLocalization::getCurrentLocale();
             $newsList = Page::select();
 
-            $filterColumn = 'created_at';
+            if (!empty($criteria['date_type'])) {
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_UPDATED) {
+                    $newsList->whereBetween('updated_at', [$criteria['date_from'],$criteria['date_to']]);
+                }
+            }
 
             if (!empty($criteria['date_type'])) {
-                if (strtolower($criteria['date_type']) == Page::DATE_TYPE_UPDATED) {
-                    $filterColumn = 'updated_at';
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_CREATED) {
+                    $newsList->whereBetween('created_at', [$criteria['date_from'],$criteria['date_to']]);
                 }
             }
 
-            if (!empty($criteria['date_from'])) {
-                if (strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
-                    $filterColumn = 'valid_from';
+            if (!empty($criteria['date_from']) && empty($criteria['date_to'])) {
+                $dateCreate = date_create($criteria['date_from']);
+                $date = date_format($dateCreate, 'Y-m-d');
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                    $newsList->where(function($c) use ($date) {
+                            $c->where('valid_from', null)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);})
+                        ->orWhere(function($m) use ($date){
+                            $m->where('valid_from', '<=', $date)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function ($a) use ($date) {
+                            $a->where('valid_from', '>=', $date)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function($b) use ($date) {
+                            $b->where('valid_from', '<=', $date)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function($d) use ($date) {
+                            $d->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function ($g) use ($date) {
+                            $g->where('valid_from', '>=', $date)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                        });
                 }
+            } else if (!empty($criteria['date_to']) && empty($criteria['date_from'])) {
+                $dateCreate = date_create($criteria['date_to']);
+                $dated = date_format($dateCreate, 'Y-m-d');
+                if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                    $newsList->where(function($c) use ($dated) {
+                            $c->where('valid_from', null)->where('valid_to', '<=', $dated)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function($m) use ($dated){
+                            $m->where('valid_from', '<=', $dated)->where('valid_to', '<=', $dated)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function ($a) use ($dated) {
+                            $a->where('valid_from', '<=', $dated)->where('valid_to', '>=', $dated)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function($b) use ($dated) {
+                            $b->where('valid_from', '<=', $dated)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function($d) use ($dated) {
+                            $d->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                        })->orWhere(function ($e) use ($dated) {
+                            $e->where('valid_from',null)->where('valid_to','>=', $dated)->where('type', Page::TYPE_NEWS);
+                        });
+                }
+            } else if (!empty($criteria['date_from']) && !empty($criteria['date_to']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+                $datePeriodFrom = date_create($criteria['date_from']);
+                $dateFrom = date_format($datePeriodFrom, 'Y-m-d');
+                $datePeriodTo = date_create($criteria['date_to']);
+                $dateTo = date_format($datePeriodTo, 'Y-m-d');
+                $newsList->orWhere(function($a) use ($dateFrom, $dateTo) {
 
-                $newsList->where($filterColumn, '>=', $criteria['date_from']);
+                    $a->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($b) use ($dateFrom, $dateTo) {
+
+                    $b->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($c) use ($dateFrom, $dateTo) {
+
+                    $c->where('valid_from', '>=', $dateFrom)->where('valid_from', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($d) use ($dateFrom, $dateTo) {
+
+                    $d->where('valid_from', '<=', $dateFrom)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                })->orWhere(function($e) use ($dateFrom, $dateTo) {
+
+                    $e->where('valid_from', null)->where('valid_to', '>=', $dateFrom)->where('type', Page::TYPE_NEWS);
+                });
+            } else {
+                $newsList->where('type', Page::TYPE_NEWS);
             }
 
-            if (!empty($criteria['date_to'])) {
-                if (strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
-                    $filterColumn = 'valid_to';
+            if (isset($newsListData['api_key'])) {
+                if (\Auth::check() && !\Auth::user()->is_admin) {
+                    if (isset($criteria['active'])) {
+                        $newsList->where('active', $criteria['active']);
+                    }
+
+                    if (isset($criteria['valid'])) {
+                        if ($criteria['valid'] == 1) {
+                            $newsList->where(function ($m) {
+                                $m->where('valid_to', '>=', date(now()))
+                                    ->where('valid_from', '<=', date(now()))
+
+                                    ->orWhere('valid_from', null)
+                                    ->where('valid_to', '>=', date(now()))
+
+                                    ->orWhere('valid_to', null)
+                                    ->where('valid_from', '>=', date(now()))
+
+                                    ->orWhere('valid_to', null)
+                                    ->where('valid_from', null);
+                            });
+                        }
+
+                        if ($criteria['valid'] == 0) {
+                            $newsList->where(function ($m) {
+                                $m->where('valid_to', '<', date(now()))
+                                    ->where('valid_from', '>', date(now()))
+
+                                    ->orWhere('valid_from', null)
+                                    ->where('valid_to', '<', date(now()))
+
+                                    ->orWhere('valid_from', '>', date(now()))
+                                    ->where('valid_to', null)
+
+                                    ->orWhere('valid_from', '>', date(now()))
+                                    ->where('valid_to', '>', date(now()))
+
+                                    ->orWhere('valid_from', '<', date(now()))
+                                    ->where('valid_to', '<', date(now()));
+                            });
+                        }
+                    }
+                } else {
+                    if (isset($criteria['active'])) {
+                        $newsList->where('active', $criteria['active']);
+                    }
                 }
-
-                $newsList->where($filterColumn, '<=', $criteria['date_to']);
-            }
-
-            if (isset($criteria['active'])) {
-                $newsList->where('active', $criteria['active']);
-            }
-
-            if (isset($criteria['valid'])) {
-                if ($criteria['valid'] == 1) {
-                    $newsList->where(function ($newsList) {
-                        $newsList->where('valid_to', '>=', date(now()))
-                            ->where('valid_from', '<=', date(now()))
-
-                            ->orWhere('valid_from', null)
-                            ->where('valid_to', '>=', date(now()))
-
-                            ->orWhere('valid_to', null)
-                            ->where('valid_from', '>=', date(now()));
-                    });
-                }
-
-                if ($criteria['valid'] == 0) {
-                    $newsList->where(function ($newsList) {
-                        $newsList->where('valid_to', '<', date(now()))
-                            ->where('valid_from', '>', date(now()))
-
-                            ->orWhere('valid_from', null)
-                            ->where('valid_to', '<', date(now()))
-
-                            ->orWhere('valid_from', '>', date(now()))
+            } else if (!\Auth::check()) {
+                $newsList->where('active', 1);
+                $newsList->where(function ($m){
+                        $m->where('valid_from', null)
                             ->where('valid_to', null)
-
-                            ->orWhere('valid_from', '>', date(now()))
-                            ->where('valid_to', '>', date(now()))
-
-                            ->orWhere('valid_from', '<', date(now()))
-                            ->where('valid_to', '<', date(now()));
-                    });
-                }
+                            ->orWhere('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                });
             }
 
             $count = $newsList->count();
 
+            $columns = [
+                'id',
+                'abstract',
+                'title',
+                'body',
+                'active',
+                'head_title',
+                'meta_description',
+                'meta_keywords',
+                'forum_link',
+                'valid_from',
+                'valid_to',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $query->orderBy($criteria['order']['field'], $criteria['order']['type']);
+                $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);
             }
 
             $newsList->forPage(
@@ -382,7 +550,7 @@ class NewsController extends ApiController
                 $this->getRecordsPerPage($request->offsetGet('records_per_page'))
             );
 
-            $newsList = $newsList->get();
+            $newsList = $newsList->where('type', Page::TYPE_NEWS)->get();
 
             if ($newsList) {
                 foreach ($newsList as $singleNews) {
@@ -404,6 +572,25 @@ class NewsController extends ApiController
                         'valid_from'        => date($singleNews->valid_from),
                         'valid_to'          => date($singleNews->valid_to),
                     ];
+                }
+            }
+
+            $transFields = [
+                'title',
+                'abstract',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            if (isset($criteria['order'])) {
+                if ($criteria['order'] && isset($criteria['order']['field']) && in_array($criteria['order']['field'], $transFields)) {
+                    usort($results, function($a, $b) use ($criteria) {
+                        return strtolower($criteria['order']['type']) == 'asc'
+                            ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
+                            : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
+                    });
                 }
             }
 
@@ -436,15 +623,30 @@ class NewsController extends ApiController
         $newsSearchData = $request->all();
 
         $validator = Validator::make($newsSearchData, [
-            'locale'                => 'nullable|string',
+            'api_key'               => 'nullable|string|exists:users,api_key',
+            'locale'                => 'nullable|string|max:5',
             'criteria'              => 'required|array',
-            'criteria.keywords'     => 'required|string',
-            'criteria.order'        => 'nullable|array',
-            'criteria.order.type'   => 'nullable|string',
-            'criteria.order.field'  => 'nullable|string',
-            'records_per_page'      => 'nullable|integer',
-            'page_number'           => 'nullable|integer',
+            'records_per_page'      => 'nullable|integer|digits_between:1,10',
+            'page_number'           => 'nullable|integer|digits_between:1,10',
         ]);
+
+        $criteria = isset($newsSearchData['criteria']) ? $newsSearchData['criteria'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($criteria, [
+                'keywords'     => 'required|string|max:191',
+                'order'        => 'nullable|array',
+            ]);
+        }
+
+        $order = isset($criteria['order']) ? $criteria['order'] : [];
+
+        if (!$validator->fails()) {
+            $validator = Validator::make($order, [
+                'type'   => 'nullable|string|max:191',
+                'field'  => 'nullable|string|max:191',
+            ]);
+        }
 
         $locale = \LaravelLocalization::getCurrentLocale();
 
@@ -453,10 +655,58 @@ class NewsController extends ApiController
             $criteria = $request->offsetGet('criteria');
             $search = $criteria['keywords'];
 
-            $ids = Page::search($search)->get()->pluck('id');
+            $ids = Page::search($search)->where('type', Page::TYPE_NEWS)->get()->pluck('id');
             $newsList = Page::whereIn('id', $ids);
+            $rightCheck = false;
+            if (isset($newsSearchData['api_key'])) {
+                $user = \App\User::where('api_key', $newsSearchData['api_key'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DATA_SETS,
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'user' => $user
+                    ]
+                );
+            }
+
+            if(!$rightCheck) {
+                $newsList
+                    ->where('active', 1)
+                    ->where(function ($m){
+                        $m->where('valid_from', null)
+                            ->where('valid_to', null)
+                            ->orWhere('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                });
+            }
 
             $total_records = $newsList->count();
+
+            $columns = [
+                'id',
+                'abstract',
+                'title',
+                'body',
+                'active',
+                'head_title',
+                'meta_description',
+                'meta_keywords',
+                'forum_link',
+                'valid_from',
+                'valid_to',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($criteria['order'])) {
+                if (is_array($criteria['order'])) {
+                    if (!in_array($criteria['order']['field'], $columns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
+            }
 
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);
@@ -514,15 +764,29 @@ class NewsController extends ApiController
         $newsSearchData = $request->all();
 
         $validator = Validator::make($newsSearchData, [
-            'locale' => 'string',
-            'news_id' => 'integer|required|exists:pages,id',
+            'locale'  => 'string|max:5',
+            'news_id' => 'integer|required|exists:pages,id|digits_between:1,10',
         ]);
+
         $locale = \LaravelLocalization::getCurrentLocale();
         if (!$validator->fails()) {
-            $singleNews = Page::find($newsSearchData['news_id']);
+            $singleNews = Page::select()->where('type', 1)->where('id', $newsSearchData['news_id']);
+
+            if(!\Auth::check() || !Role::isAdmin()) {
+                $singleNews
+                    ->where('active', 1)
+                    ->where(function ($m){
+                        $m->where('valid_from', null)
+                            ->where('valid_to', null)
+                            ->orWhere('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                });
+            }
+
+            $singleNews = $singleNews->first();
 
             if ($singleNews) {
-                $result[] = [
+                $result = [
                     'id'                => $singleNews->id,
                     'locale'            => $locale,
                     'title'             => $singleNews->title,
@@ -540,6 +804,15 @@ class NewsController extends ApiController
                     'valid_from'        => date($singleNews->valid_from),
                     'valid_to'          => date($singleNews->valid_to),
                 ];
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::NEWS),
+                    'action'           => ActionsHistory::TYPE_SEE,
+                    'action_object'    => $singleNews->id,
+                    'action_msg'       => 'Got news details',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse([
                     'news' => $result,

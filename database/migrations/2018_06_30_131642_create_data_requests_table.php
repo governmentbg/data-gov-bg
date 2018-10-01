@@ -18,7 +18,7 @@ class CreateDataRequestsTable extends Migration
                 $table->increments('id');
                 $table->integer('org_id')->unsigned();
                 $table->foreign('org_id')->references('id')->on('organisations');
-                $table->string('descript');
+                $table->text('descript');
                 $table->string('published_url')->nullable();
                 $table->string('contact_name')->nullable();
                 $table->string('email');

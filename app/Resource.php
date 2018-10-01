@@ -40,6 +40,11 @@ class Resource extends Model implements TranslatableInterface
         'descript'  => 'text',
     ];
 
+    public static function getTransFields()
+    {
+        return self::$translatable;
+    }
+
     public static function getTypes()
     {
         return [

@@ -2527,6 +2527,13 @@ class UserController extends Controller {
 
         $buttons['add'] = $rightCheck;
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['view'] = $rightCheck;
+
         foreach ($organisations as $organisation) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::ORGANISATIONS,

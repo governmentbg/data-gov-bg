@@ -345,6 +345,10 @@ class CategoryController extends ApiController
         }
 
         if (!$validator->fails()) {
+            $locale = !empty($post['criteria']['locale'])
+            ? $post['criteria']['locale']
+            : \LaravelLocalization::getCurrentLocale();
+
             $criteria = empty($post['criteria']) ? false : $post['criteria'];
             $order = [];
             $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
@@ -384,11 +388,20 @@ class CategoryController extends ApiController
                 }
             }
 
-            if ($order) {
+            $count = $query->count();
+
+            $transFields = ['name'];
+
+            $transCols = Category::getTransFields();
+
+            if (in_array($order['field'], $transFields)) {
+                $col = $transCols[$order['field']];
+                $query->select('translations.label', 'translations.group_id', 'translations.text', 'categories.*')
+                    ->leftJoin('translations', 'translations.group_id', '=', 'categories.' . $order['field'])->where('translations.locale', $locale)
+                    ->orderBy('translations.' . $col, $order['type']);
+            } else {
                 $query->orderBy($order['field'], $order['type']);
             }
-
-            $count = $query->count();
 
             $query->forPage(
                 $request->offsetGet('page_number'),
@@ -412,14 +425,6 @@ class CategoryController extends ApiController
                         'updated_at'    => date($category->updated_at),
                         'updated_by'    => $category->updated_by,
                     ];
-                }
-
-                if ($order && $order['field'] == 'name') {
-                    usort($results, function($a, $b) use ($order) {
-                        return strtolower($order['type']) == 'asc'
-                            ? strcmp($a[$order['field']], $b[$order['field']])
-                            : strcmp($b[$order['field']], $a[$order['field']]);
-                    });
                 }
 
                 return $this->successResponse([

@@ -179,7 +179,8 @@ class ApiController extends Controller
         return [[]];
     }
 
-     /* Check if image data is less than the max image size
+    /*
+     * Check if image data is less than the max image size
      *
      * @param string $imageData
      *
@@ -208,5 +209,27 @@ class ApiController extends Controller
     protected function getImageTypeError()
     {
         return __('custom.image_type_error') .' (JPEG, PNG, GIF, WebP, TIF, BMP, ICO, PSD)';
+    }
+
+    /*
+     * Check if file data is less than the max file size
+     *
+     * @param string $fileData
+     *
+     * @return bool $flag
+     */
+    protected function checkFileSize($fileData)
+    {
+        return (strlen(bin2hex($fileData)) / 2) <= env('FILE_MAX_SIZE', 16777215);
+    }
+
+    /**
+     * Get file size error message
+     *
+     * @return string $text
+     */
+    protected function getFileSizeError()
+    {
+        return __('custom.file_size_too_big'). env('FILE_MAX_SIZE', 16777215) . __('custom.bytes');
     }
 }

@@ -43,7 +43,7 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($requestData['data'], [
                 'org_id'           => 'required|integer|digits_between:1,10',
-                'description'      => 'required|string|max:191',
+                'description'      => 'required|string|max:8000',
                 'published_url'    => 'nullable|string|max:191',
                 'email'            => 'sometimes|email|max:191',
                 'contact_name'     => 'nullable|string|max:191',
@@ -157,7 +157,7 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($editRequestData['data'], [
                 'org_id'           => 'nullable|integer|digits_between:1,10',
-                'description'      => 'nullable|string|max:191',
+                'description'      => 'nullable|string|max:8000',
                 'published_url'    => 'nullable|string|max:191',
                 'contact_name'     => 'nullable|string|max:191',
                 'email'            => 'nullable|email|max:191',
@@ -364,7 +364,7 @@ class DataRequestController extends ApiController
 
         if (isset($criteria['order']['field'])) {
             if (!in_array($criteria['order']['field'], $orderColumns)) {
-                unset($criteria['order']['field']);
+                return $this->errorResponse(__('custom.invalid_sort_field'));
             }
         }
 
@@ -380,18 +380,21 @@ class DataRequestController extends ApiController
             $dataRequestList = $dataRequestList->where('status', $criteria['status']);
         }
 
-        $total_records = $dataRequestList->count();
-
-        if (isset($request->records_per_page) && isset($request->page_number)) {
-            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
-        }
-
         if (isset($criteria['date_from'])) {
             $dataRequestList = $dataRequestList->where('created_at', '>=', $criteria['date_from']);
         }
 
         if (isset($criteria['date_to'])) {
             $dataRequestList = $dataRequestList->where('created_at', '<=', $criteria['date_to']);
+        }
+
+        if (isset($criteria['search'])) {
+            $search = $criteria['search'];
+            $dataRequestList = $dataRequestList->where('descript', 'like', '%' . $search . '%')
+                ->orWhere('published_url', 'like', '%' . $search . '%')
+                ->orWhere('contact_name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('notes', 'like', '%' . $search . '%');
         }
 
         if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
@@ -404,13 +407,10 @@ class DataRequestController extends ApiController
             }
         }
 
-        if (isset($criteria['search'])) {
-            $search = $criteria['search'];
-            $dataRequestList = $dataRequestList->where('descript', 'like', '%' . $search . '%')
-                ->orWhere('published_url', 'like', '%' . $search . '%')
-                ->orWhere('contact_name', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%')
-                ->orWhere('notes', 'like', '%' . $search . '%');
+        $total_records = $dataRequestList->count();
+
+        if (isset($request->records_per_page) && isset($request->page_number)) {
+            $dataRequestList = $dataRequestList->forPage($request->input('page_number'), $request->input('records_per_page'));
         }
 
         $dataRequestList = $dataRequestList->get();
@@ -442,7 +442,7 @@ class DataRequestController extends ApiController
 
         Module::add($logData);
 
-        if(isset($criteria['order'])) {
+        if(isset($criteria['order']) && isset($criteria['order']['field'])) {
             if ($criteria['order'] && $criteria['order']['field'] == 'description') {
                 usort($result, function($a, $b) use ($criteria) {
                     return strtolower($criteria['order']['type']) == 'asc'

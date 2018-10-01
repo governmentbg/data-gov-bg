@@ -78,6 +78,12 @@
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
                                     @endif
+                                    <a
+                                        href="{{ url('user/groups') }}"
+                                        class="btn btn-primary"
+                                    >
+                                        {{ uctrans('custom.close') }}
+                                    </a>
                                     @if ($buttons[$group->uri]['delete'])
                                                 <form
                                                     method="POST"

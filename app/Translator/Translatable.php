@@ -399,6 +399,7 @@ trait Translatable
     {
         $localesAll = config('laravellocalization.supportedLocales');
         $translations = collect();
+
         foreach ($localesAll as $k => $locale) {
             $this->translate($k);
             $translation = $this->translatable_get($key);

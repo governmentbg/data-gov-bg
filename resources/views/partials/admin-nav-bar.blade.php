@@ -15,7 +15,7 @@
                         </li>
                         <li>
                             <!-- if there is resource with signal -->
-                            @if (isset($hasReported))
+                            @if (!empty($hasReported))
                                 <div class="col-xs-12 text-center exclamation-sign">
                                     <img src="{{ asset('img/reported.svg') }}">
                                 </div>
@@ -143,6 +143,12 @@
                                 class="{{ $view == 'forum' ? 'active' : '' }}"
                                 href="{{ url('/admin/forum/discussions/list') }}"
                             >{{ ultrans('custom.forum') }}</a>
+                        </li>
+                        <li>
+                            <a
+                                class="{{ $view == 'help' ? 'active' : '' }}"
+                                href="{{ url('/admin/help/sections/list') }}"
+                            >{{ ultrans('custom.help_sections') }}</a>
                         </li>
                     </ul>
                 </div>

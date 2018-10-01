@@ -64,14 +64,7 @@
                             </ul>
                         </li>
                     </ul>
-                    <div class="org m-t-lg">
-                        <img src="{{ $group->logo }}">
-                        <h2>{{ $group->name }}</h2>
-                        <h4>{!! nl2br(truncate(e($group->descript), 150)) !!}</h4>
-                        <p class="text-right show-more">
-                            <a href="{{ url('/admin/groups/view/'. $group->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                        </p>
-                    </div>
+                    @include('partials.group-info', ['group' => $group])
                 </div>
                 <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
                     <button
@@ -118,6 +111,13 @@
                     </div>
                     <div class="col-xs-12 page-content text-left p-l-none">
                         @if (!empty($members))
+                            @if (isset($pagination))
+                                <div class="row">
+                                    <div class="col-xs-12 text-center pagination">
+                                        {{ $pagination->links(null, app('request')->except(['page'])) }}
+                                    </div>
+                                </div>
+                            @endif
                             @foreach ($members as $member)
                                 <div class="col-xs-12 p-l-none">
                                     <h3 class="m-b-md"><a href="{{ url('/admin/users/edit/'. $member->id) }}">{{

@@ -47,7 +47,13 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <button type="submit" name="save" class="btn btn-primary pull-right">{{ uctrans('custom.save') }}</button>
+                    <div class="col-sm-12 text-right">
+                        <button
+                            name="back"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.close') }}</button>
+                        <button type="submit" name="save" value="1" class="m-l-md btn btn-custom">{{ __('custom.add') }}</button>
+                    </div>
                 </div>
             </div>
         </div>

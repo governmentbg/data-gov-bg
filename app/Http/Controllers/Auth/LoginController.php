@@ -48,8 +48,7 @@ class LoginController extends Controller
     public function login(Request $request) {
         $error = [];
         $class = 'index';
-        $message = 'Поздравления! Профилът ви беше активиран.
-            Вашите данни ще се публикуват като непотвъдени, докaто не ви одобри някой от нашите администратори';
+        $message = __('profile_success');
         $loginData = $request->all();
 
         if ($request->has('username')) {

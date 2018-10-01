@@ -4,11 +4,14 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'users'])
+    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <span class="my-profile m-l-sm">{{uctrans('custom.users_edit')}}</span>
+    </div>
     <div class="col-xs-12 m-t-lg">
         <form class="m-t-lg p-sm" method="post">
             {{ csrf_field() }}
             <div class="form-group row required">
-                <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+                <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                 <div class="col-sm-9">
                     <input
                         type="text"
@@ -266,7 +269,13 @@
                     </div>
                 </div>
                 <div class="form-group row text-right">
-                    <button type="submit" name="save" class="btn btn-primary">{{ __('custom.save') }}</button>
+                    <a
+                        href="{{ url('admin/users') }}"
+                        class="btn btn-primary"
+                    >
+                        {{ uctrans('custom.close') }}
+                    </a>
+                    <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
         </form>
         <div class="form-group row p-h-lg">

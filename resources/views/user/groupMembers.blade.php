@@ -101,6 +101,13 @@
                     </div>
                     <div class="col-xs-12 page-content text-left p-l-none">
                         @if (!empty($members))
+                            @if (isset($pagination))
+                                <div class="row">
+                                    <div class="col-xs-12 text-center pagination">
+                                        {{ $pagination->links(null, app('request')->except(['page'])) }}
+                                    </div>
+                                </div>
+                            @endif
                             @foreach ($members as $member)
                                 <div class="col-xs-12 p-l-none">
                                     <h3 class="m-b-md">{{
@@ -192,7 +199,7 @@
                     <form method="POST" class="form-horisontal">
                         {{ csrf_field() }}
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="role" class="col-lg-2 col-form-label">{{ __('custom.name') }}: </label>
+                            <label for="role" class="col-lg-2 col-form-label">{{ uctrans('custom.name') }}: </label>
                             <div class="col-lg-10">
                                 <select
                                     class="js-ajax-autocomplete form-control"

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 
 use Uuid;
+use App\User;
 use App\Tags;
 use App\Module;
 use App\Signal;
@@ -41,7 +42,6 @@ class DataSetController extends ApiController
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
      * @param string data[source] - optional
-     * @param string data[version] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
      * @param string data[support_name] - optional
@@ -75,7 +75,6 @@ class DataSetController extends ApiController
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10|exists:terms_of_use,id',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
                 'source'                => 'nullable|string|max:191',
-                'version'               => 'nullable|max:15',
                 'author_name'           => 'nullable|string|max:191',
                 'author_email'          => 'nullable|email|max:191',
                 'support_name'          => 'nullable|string|max:191',
@@ -99,8 +98,7 @@ class DataSetController extends ApiController
                     'org_id' => $organisation->id
                 ],
                 [
-                    'created_by' => $organisation->created_by,
-                    'org_id'     => $organisation->id
+                    'org_id' => $organisation->id
                 ]
             );
         } else {
@@ -125,7 +123,7 @@ class DataSetController extends ApiController
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
                 'org_id'            => empty($data['org_id']) ? null : $data['org_id'],
                 'visibility'        => DataSet::VISIBILITY_PRIVATE,
-                'version'           => empty($data['version']) ? 1 : $data['version'],
+                'version'           => 1,
                 'status'            => DataSet::STATUS_DRAFT,
                 'category_id'       => $data['category_id'],
                 'terms_of_use_id'   => empty($data['terms_of_use_id']) ? null : $data['terms_of_use_id'],
@@ -232,7 +230,6 @@ class DataSetController extends ApiController
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
      * @param string data[source] - optional
-     * @param string data[version] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
      * @param string data[support_name] - optional
@@ -271,7 +268,6 @@ class DataSetController extends ApiController
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
                 'source'                => 'nullable|string|max:255',
-                'version'               => 'nullable|max:15',
                 'author_name'           => 'nullable|string|max:191',
                 'author_email'          => 'nullable|email|max:191',
                 'support_name'          => 'nullable|string|max:191',
@@ -300,7 +296,7 @@ class DataSetController extends ApiController
                         'org_id' => $organisation->id
                     ],
                     [
-                        'created_by' => $organisation->created_by,
+                        'created_by' => $dataSet->created_by,
                         'org_id'     => $organisation->id
                     ]
                 );
@@ -371,10 +367,6 @@ class DataSetController extends ApiController
                     $dataSet->source = $post['data']['source'];
                 }
 
-                if (!empty($post['data']['version'])) {
-                    $dataSet->version = $post['data']['version'];
-                }
-
                 if (!empty($post['data']['author_name'])) {
                     $dataSet->author_name = $post['data']['author_name'];
                 }
@@ -440,7 +432,7 @@ class DataSetController extends ApiController
     }
 
     /**
-     * API function for eleting an existing Data Set
+     * API function for deleting an existing Data Set
      *
      * @param string api_key - required
      * @param integer dataset_uri - required
@@ -461,14 +453,28 @@ class DataSetController extends ApiController
             return $this->errorResponse(__('custom.delete_dataset_fail'));
         }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::DATA_SETS,
-            RoleRight::RIGHT_ALL,
-            [],
-            [
-                'created_by' => $dataset->created_by,
-            ]
-        );
+        if (isset($dataset->org_id)) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [
+                    'org_id' => $dataset->org_id
+                ],
+                [
+                    'created_by' => $dataset->created_by,
+                    'org_id'     => $dataset->org_id
+                ]
+            );
+        } else {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $dataset->created_by,
+                ]
+            );
+        }
 
         if (!$rightCheck) {
             return $this->errorResponse(__('custom.access_denied'));
@@ -522,6 +528,7 @@ class DataSetController extends ApiController
      * @param integer criteria[created_by] - optional
      * @param array criteria[user_ids] - optional
      * @param boolean criteria[user_datasets_only] - optional
+     * @param boolean criteria[keywords] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -582,7 +589,6 @@ class DataSetController extends ApiController
         }
 
         if (!$validator->fails()) {
-
             try {
                 $query = DataSet::select()->with('resource');
 
@@ -590,7 +596,10 @@ class DataSetController extends ApiController
                     $user = \App\User::where('api_key', $post['api_key'])->first();
                     $rightCheck = RoleRight::checkUserRight(
                         Module::DATA_SETS,
-                        RoleRight::RIGHT_VIEW
+                        RoleRight::RIGHT_VIEW,
+                        [
+                            'user' => $user
+                        ]
                     );
 
                     if (!$rightCheck) {
@@ -614,7 +623,7 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['keywords'])) {
-                    $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
+                    $ids = DataSet::search($criteria['keywords'], true)->get()->pluck('id');
                     $query->whereIn('id', $ids);
                 }
 
@@ -668,6 +677,30 @@ class DataSetController extends ApiController
                     $query->whereIn('created_by', $criteria['user_ids']);
                 } elseif (!empty($criteria['created_by'])) {
                     $query->where('created_by', $criteria['created_by']);
+                }
+
+                $orderColumns = [
+                    'org_id',
+                    'name',
+                    'descript',
+                    'visibility',
+                    'source',
+                    'version',
+                    'author_name',
+                    'author_email',
+                    'support_name',
+                    'sla',
+                    'status',
+                    'created_at',
+                    'created_by',
+                    'updated_at',
+                    'updated_by'
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $orderColumns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
                 }
 
                 if (!empty($order)) {
@@ -815,14 +848,12 @@ class DataSetController extends ApiController
             $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
 
             try {
-
                 if (!empty($criteria['user_id'])) {
                     $orgIds = UserToOrgRole::where('user_id', $criteria['user_id'])->get()->pluck('org_id');
-                    $ids = DataSet::search($search)->get()->pluck('id');
-                    $query = DataSet::whereIn('id', $ids)
-                        ->whereIn('org_id', $orgIds);
+                    $ids = DataSet::search($search, true)->get()->pluck('id');
+                    $query = DataSet::whereIn('id', $ids)->whereIn('org_id', $orgIds);
                 } else {
-                    $ids = DataSet::search($search)->get()->pluck('id');
+                    $ids = DataSet::search($search, true)->get()->pluck('id');
                     $query = DataSet::whereIn('id', $ids);
 
                     $query->orWhereHas('resource', function($q) use ($ids) {
@@ -923,7 +954,7 @@ class DataSetController extends ApiController
                     ->with(['tags' => function($query) {
                         $query->select('id', 'name');
                     }])
-                    ->with('CustomSetting')
+                    ->with('organisation')
                     ->first()
                     ->loadTranslations();
 
@@ -940,6 +971,34 @@ class DataSetController extends ApiController
                         }
                     }
 
+                    $groupLinks = $data->dataSetGroup()->get();
+                    $ids = $groups = [];
+
+                    if (count($groupLinks)) {
+                        foreach ($groupLinks as $link) {
+                            $ids[] = $link->group_id;
+                        }
+                    }
+
+                    $groupsCollection = Organisation::whereIn('id', $ids)->get()->loadTranslations();
+
+                    foreach ($groupsCollection as $value) {
+                        $groups[] = [
+                            'id'    => $value->id,
+                            'uri'   => $value->uri,
+                            'name'  => $value->name,
+                        ];
+                    }
+
+                    if (isset($data->organisation)) {
+                        $data['org'] = [
+                            'uri'   => $data->organisation->uri,
+                            'name'  => $data->organisation->name,
+                        ];
+                        unset($data->organisation);
+                    }
+
+                    $data['groups'] = $groups;
                     $data['custom_settings'] = $customFields;
                     $data['name'] = $data->name;
                     $data['sla'] = $data->sla;
@@ -1015,7 +1074,7 @@ class DataSetController extends ApiController
         $validator = \Validator::make($post, [
             'data_set_uri'  => 'required|string|exists:data_sets,uri,deleted_at,NULL|max:191',
             'group_id'      => 'nullable|array',
-            'group_id.*'     => [
+            'group_id.*'    => [
                 'required',
                 'int',
                 Rule::exists('organisations', 'id')->where(function ($query) {
@@ -1206,7 +1265,6 @@ class DataSetController extends ApiController
 
                 foreach ($customFields as $field) {
                     if (!empty($field['value'])) {
-                        // foreach ($field['value'] as $locale => $string) {
                         if (!empty($field['sett_id'])) {
                             $saveField = CustomSetting::find($field['sett_id']);
 
@@ -1236,13 +1294,13 @@ class DataSetController extends ApiController
 
                             $saveField->save();
                         }
-
                     } else {
                         DB::rollback();
 
                         return false;
                     }
                 }
+
                 DB::commit();
 
                 return true;

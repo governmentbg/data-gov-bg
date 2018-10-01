@@ -36,12 +36,14 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             'locale',
+            'tool',
         ],
 
         'api' => [
             'throttle:60,1',
             'bindings',
             'locale',
+            'tool',
         ],
     ];
 
@@ -60,6 +62,8 @@ class Kernel extends HttpKernel
         'guest'             => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle'          => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'auth.api'          => \App\Http\Middleware\CheckApiKey::class,
+        'tool'              => \App\Http\Middleware\CheckTool::class,
+        'admin'             => \App\Http\Middleware\AdminAuth::class,
         'locale'            => \App\Http\Middleware\SetLocale::class,
         'check.resources'   => \App\Http\Middleware\CheckReportedResources::class,
     ];

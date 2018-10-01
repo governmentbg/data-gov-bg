@@ -36,7 +36,14 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 col-xs-offset-3 p-w-xl search-field">
+            <div class="col-sm-3 col-xs-12 text-left p-w-xl">
+            @if (isset($buttons['add']) && $buttons['add'])
+                <span class="badge badge-pill m-t-md new-data">
+                    <a href="{{ url('/'. $buttons['rootUrl'] .'/organisations/register') }}">{{ __('custom.add_new_organisation') }}</a>
+                </span>
+            @endif
+            </div>
+            <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 p-w-xl search-field">
                 <form method="GET" action="{{ url('/organisation') }}">
                     <input
                         type="text"
@@ -72,7 +79,7 @@
                                 ? 'active'
                                 : ''
                         }}"
-                    >{{ __('custom.order_asc') }}</a>
+                    >{{ uctrans('custom.order_asc') }}</a>
                     <a
                         href="{{
                             action(
@@ -88,7 +95,7 @@
                                 ? 'active'
                                 : ''
                         }}"
-                    >{{ __('custom.order_desc') }}</a>
+                    >{{ uctrans('custom.order_desc') }}</a>
                 </div>
             @endif
         </div>
@@ -107,11 +114,41 @@
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <h3 class="org-name"><a href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ $organisation->name }}</a></h3>
+                                    <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}">
+                                        <h3 class="org-name">{{ $organisation->name }}</h3>
+                                    </a>
                                     <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
                                     <p class="text-right show-more">
-                                        <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                                        <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}" class="view-profile">
+                                            {{ __('custom.see_more') }}
+                                        </a>
                                     </p>
+                                </div>
+                                <div class="col-xs-12 ch-del-btns">
+                                    <div class="row">
+                                        @if (isset($buttons[$organisation->id]['edit']) && $buttons[$organisation->id]['edit'])
+                                            <form method="POST" action="{{ url('/'. $buttons['rootUrl'] .'/organisations/edit/'. $organisation->uri) }}">
+                                                {{ csrf_field() }}
+                                                <div class="col-xs-6">
+                                                    <button type="submit">{{ uctrans('custom.edit') }}</button>
+                                                </div>
+                                            </form>
+                                        @endif
+                                        @if (isset($buttons[$organisation->id]['delete']) && $buttons[$organisation->id]['delete'])
+                                            <form method="POST" action="{{ route('orgDelete', app('request')->input()) }}">
+                                                {{ csrf_field() }}
+                                                <div class="col-xs-6 text-right">
+                                                    <button
+                                                        type="submit"
+                                                        name="delete"
+                                                        class="del-btn"
+                                                        data-confirm="{{ __('custom.delete_organisation_confirm') }}"
+                                                    >{{ uctrans('custom.remove') }}</button>
+                                                </div>
+                                                <input class="user-org-del" type="hidden" name="org_uri" value="{{ $organisation->uri }}">
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @endforeach

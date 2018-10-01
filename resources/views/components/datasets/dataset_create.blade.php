@@ -1,3 +1,6 @@
+<div class="col-xs-12 sidenav m-t-lg m-b-lg">
+    <span class="my-profile m-l-sm">{{uctrans('custom.dataset_add')}}</span>
+</div>
 <div class="col-xs-12 m-t-lg">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
     <form method="POST">
@@ -186,24 +189,6 @@
 
         <div class="form-group row">
             <label
-                for="version"
-                class="col-sm-3 col-xs-12 col-form-label"
-            >{{ utrans('custom.version') }}:</label>
-            <div class="col-sm-9">
-                <input
-                    id="version"
-                    name="version"
-                    class="input-border-r-12 form-control"
-                    value="{{ old('version') }}"
-                    type="text"
-                    placeholder="{{ __('custom.version') }}"
-                >
-                <span class="error">{{ $errors->first('version') }}</span>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label
                 for="author"
                 class="col-sm-3 col-xs-12 col-form-label"
             >{{ utrans('custom.author') }}:</label>
@@ -284,8 +269,13 @@
 
         <div class="form-group row">
             <div class="col-xs-12 text-right mng-btns">
+                <button
+                    name="back"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</button>
                 @if (!empty($admin) || !empty($buttons['add']))
                     <button
+                        type="submit"
                         name="add_resource"
                         class="btn btn-primary"
                     >{{ uctrans('custom.add_resource') }}</button>

@@ -115,7 +115,7 @@
                 @endif
             </div>
             <div class="form-group row">
-                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
+                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.activef') }}:</label>
                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                     <div class="js-check">
                         <input
@@ -142,6 +142,10 @@
             </div>
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
+                <button
+                    name="back"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</button>
                     <button type="submit" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
             </div>

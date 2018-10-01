@@ -26,11 +26,10 @@ class ElasticDataSetSeeder extends Seeder
             $elasticDataSet = ElasticDataSet::create([
                 'index'         => $index,
                 'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                'doc'           => $id
+                'doc'           => $id .'_1',
+                'version'       => 1,
+                'resource_id'   => $id
             ]);
-
-            $resource->es_id = $elasticDataSet->id;
-            $resource->save();
 
             $data = [
                 'username'  => $this->faker->name,
@@ -47,7 +46,7 @@ class ElasticDataSetSeeder extends Seeder
                'body'  => $data,
                'index' => $index,
                'type'  => ElasticDataSet::ELASTIC_TYPE,
-               'id'    => $id,
+               'id'    => $id .'_1',
            ]);
         }
     }

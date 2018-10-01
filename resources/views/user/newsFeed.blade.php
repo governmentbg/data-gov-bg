@@ -8,6 +8,9 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'newsfeed'])
     @endif
+    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <span class="my-profile m-l-sm">{{uctrans('custom.notifications')}}</span>
+    </div>
     <div class="col-xs-12">
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-12 sidenav">
@@ -91,7 +94,7 @@
                                     @endif
                                     </div>
                                     <div class="col-md-10 col-xs-10">
-                                        <div>{{ __('custom.date_added') }}: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
+                                        <div>{{ __('custom.date') }}: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
                                         <h3><a href="{{ url($objOwnerView) }}">{{ $objOwnerName }}</a></h3>
                                         <p>
                                             {{ $actionTypes[$actionHistory->action]['name'] .' '. $objModule }}

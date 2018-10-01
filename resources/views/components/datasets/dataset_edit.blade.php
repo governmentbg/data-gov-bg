@@ -1,3 +1,6 @@
+<div class="col-xs-12 sidenav m-t-lg m-b-lg">
+    <span class="my-profile m-l-sm">{{uctrans('custom.dataset_edit')}}</span>
+</div>
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
 <div class="col-xs-12 m-t-lg">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
@@ -213,24 +216,6 @@
 
         <div class="form-group row">
             <label
-                for="version"
-                class="col-sm-3 col-xs-12 col-form-label"
-            >{{ utrans('custom.version') }}:</label>
-            <div class="col-sm-9">
-                <input
-                    id="version"
-                    name="version"
-                    class="input-border-r-12 form-control"
-                    value="{{ empty(old('version')) ? $dataSet->version : old('version') }}"
-                    type="text"
-                    placeholder="{{ __('custom.version') }}"
-                >
-                <span class="error">{{ $errors->first('version') }}</span>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label
                 for="author"
                 class="col-sm-3 col-xs-12 col-form-label"
             >{{ utrans('custom.author') }}:</label>
@@ -304,7 +289,7 @@
             @if ($field['view'] == 'translation_custom')
                 @include(
                     'components.form_groups.translation_custom_fields',
-                    ['field' => $field]
+                    ['field' => $field, 'model' => $withModel]
                 )
             @endif
         @endforeach
@@ -327,6 +312,12 @@
                     class="btn btn-primary"
                     href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
                 >{{ uctrans('custom.preview') }}</a>
+                <a
+                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
                 <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
             </div>
         </div>

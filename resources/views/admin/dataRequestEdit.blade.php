@@ -16,7 +16,7 @@
                             <form method="POST" enctype="multipart/form-data" class="form-horisontal">
                                 {{ csrf_field() }}
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.short_data_descr') }}</label>
+                                    <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.short_data_descr') }}:</label>
                                     <div class="col-sm-9">
                                         <textarea
                                             name="description"
@@ -29,7 +29,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="published_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.published_url') }}</label>
+                                    <label for="published_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.published_url') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                             <input
@@ -45,7 +45,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="contact_name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.contact_person_org') }}</label>
+                                    <label for="contact_name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.contact_person_org') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                             <input
@@ -61,7 +61,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.email') }}</label>
+                                    <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.email') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                             <input
@@ -77,7 +77,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="notes" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.notes') }}</label>
+                                    <label for="notes" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.notes') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                             <textarea
@@ -91,7 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="org_id" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisation') }}</label>
+                                    <label for="org_id" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisation') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                         <select
@@ -121,7 +121,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="status" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.status') }}</label>
+                                    <label for="status" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.status') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                         <select
@@ -150,6 +150,12 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12 text-right">
+                                    <a
+                                        href="{{ url('admin/data-requests/list') }}"
+                                        class="btn btn-primary"
+                                    >
+                                        {{ uctrans('custom.close') }}
+                                    </a>
                                         <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ __('custom.edit') }}</button>
                                     </div>
                                 </div>

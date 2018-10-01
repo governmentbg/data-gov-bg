@@ -13,13 +13,15 @@ class CreateDataSetGroupsTable extends Migration
      */
     public function up()
     {
-        Schema::create('data_set_groups', function (Blueprint $table) {
-            $table->integer('data_set_id')->unsigned();
-            $table->foreign('data_set_id')->references('id')->on('data_sets');
-            $table->integer('group_id')->unsigned();
-            $table->foreign('group_id')->references('id')->on('organisations');
-            $table->primary(['data_set_id', 'group_id']);
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('data_set_groups', function (Blueprint $table) {
+                $table->integer('data_set_id')->unsigned();
+                $table->foreign('data_set_id')->references('id')->on('data_sets');
+                $table->integer('group_id')->unsigned();
+                $table->foreign('group_id')->references('id')->on('organisations');
+                $table->primary(['data_set_id', 'group_id']);
+            });
+        }
     }
 
     /**

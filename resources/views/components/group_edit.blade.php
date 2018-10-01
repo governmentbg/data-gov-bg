@@ -6,7 +6,7 @@
     <form method="POST" class="m-t-lg" enctype="multipart/form-data">
         {{ csrf_field() }}
         <div class="form-group row">
-            <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}</label>
+            <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>
             <div class="col-sm-9">
                 <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md">
                     <img
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="form-group row {{ !empty($errors->uri) ? 'has-error' : '' }}">
-            <label for="uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}</label>
+            <label for="uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
             <div class="col-sm-9">
                 <input
                     type="text"
@@ -58,6 +58,12 @@
         @endforeach
         <div class="form-group row">
             <div class="col-sm-12 text-right">
+                <a
+                    href="{{ url('/'. $root .'/groups') }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
                 <button
                     type="submit"
                     name="edit"

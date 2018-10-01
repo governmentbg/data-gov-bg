@@ -30,7 +30,7 @@
                                 @endif
                             @endforeach
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-9">
                                     <input
                                         name="forum_link"
@@ -43,7 +43,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="document" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}</label>
+                                <label for="document" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}:</label>
                                 <div class="col-sm-6">
                                     <input
                                         type="file"
@@ -61,6 +61,10 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
                                     <button type="submit" name="create" value="1" class="m-l-md btn btn-custom">{{ __('custom.add') }}</button>
                                 </div>
                             </div>

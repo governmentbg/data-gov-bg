@@ -154,7 +154,6 @@ label {
         color: black;
 
         img {
-            width: 90%;
             margin-top: 10px;
             margin-bottom: 10px;
         }
@@ -225,6 +224,10 @@ ul > li {
     width: max-content;
     display: inline-block;
     clear: both;
+}
+
+.badge-follow {
+  padding: 0px 0px 1px 0px !important;
 }
 
 .rounded-input {
@@ -706,4 +709,11 @@ textarea {
 .discussion-btn {
     background-color: #108f9e !important;
     color: #fff !important;
+}
+
+.side-info {
+    img {
+        height: 200px !important;
+        max-width: 245px;
+    }
 }

@@ -75,6 +75,59 @@
                     {!! nl2br(e($dataset->sla)) !!}
                 </div>
             @endif
+            @if (!empty($dataset->org))
+                <p><strong>{{ utrans('custom.organisation') }}:</strong></p>
+                <div class="m-b-sm">
+                    <p><a href="{{ url('/'. $root .'/organisations/view/'. $dataset->org->uri) }}">{{ $dataset->org->name }}</a></p>
+                </div>
+            @endif
+            @if (!empty($dataset->groups))
+                <p><strong>{{ utrans('custom.groups', 2) }}:</strong></p>
+                <div class="m-b-sm">
+                    @foreach ($dataset->groups as $group)
+                    <p>
+                        <a href="{{ url('/'. $root .'/groups/view/'. $group->uri) }}">{{ $group->name }}</a>
+                    </p>
+                    @endforeach
+                </div>
+            @endif
+
+            @if (!empty($admin) || !empty($buttons['addResource']))
+                <form method="POST">
+                    {{ csrf_field() }}
+                    <div class="form-group row">
+                        <select
+                            id="group"
+                            name="group_id[]"
+                            class="js-autocomplete form-control"
+                            data-placeholder="{{ utrans('custom.groups', 1) }}"
+                            multiple="multiple"
+                        >
+                            <option></option>
+                            @foreach ($groups as $id => $group)
+                                <option
+                                    value="{{ $id }}"
+                                    {{
+                                        !empty(old('group_id'))
+                                        && in_array($id, old('group_id'))
+                                        || !empty($setGroups)
+                                        && in_array($id, $setGroups)
+                                        ? 'selected' : ''
+                                    }}
+                                >{{ $group }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group row">
+                        <button
+                            type="submit"
+                            name="save"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.save') }}</button>
+                    </div>
+                </form>
+            @endif
+
             @if (
                 isset($dataset->custom_settings[0])
                 && !empty($dataset->custom_settings[0]->key)

@@ -16,6 +16,8 @@ class CreateUserForMigrations extends Migration
         if (!env('IS_TOOL')) {
             $errors = [];
 
+            $password = env('SYSTEM_PASSWORD');
+
             try {
                 DB::table('users')->insert([
                     'username'      => 'migrate_data',

@@ -216,24 +216,6 @@
 
         <div class="form-group row">
             <label
-                for="version"
-                class="col-sm-3 col-xs-12 col-form-label"
-            >{{ utrans('custom.version') }}:</label>
-            <div class="col-sm-9">
-                <input
-                    id="version"
-                    name="version"
-                    class="input-border-r-12 form-control"
-                    value="{{ empty(old('version')) ? $dataSet->version : old('version') }}"
-                    type="text"
-                    placeholder="{{ __('custom.version') }}"
-                >
-                <span class="error">{{ $errors->first('version') }}</span>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label
                 for="author"
                 class="col-sm-3 col-xs-12 col-form-label"
             >{{ utrans('custom.author') }}:</label>

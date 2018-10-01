@@ -581,12 +581,28 @@ class UserController extends Controller {
             return redirect(url('user/datasets'));
         }
 
-        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
-        $apiDatasets = new ApiDataset($datasetReq);
-        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
-        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+        if ($request->has('save')) {
+            $groupParams = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $request->input('group_id', []),
+            ];
 
-        if (!isset($datasetData)) {
+            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+            $api = new ApiDataset($addGroup);
+            $added = $api->addDataSetToGroup($addGroup)->getData();
+
+            if (!$added->success) {
+                session()->flash('alert-danger', __('custom.edit_error'));
+            }
+        }
+
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $api = new ApiDataset($datasetReq);
+        $result = $api->getDatasetDetails($datasetReq)->getData();
+        $dataset = !empty($result->data) ? $result->data : null;
+
+        if (!isset($dataset)) {
             return back();
         }
 
@@ -604,22 +620,22 @@ class UserController extends Controller {
             RoleRight::RIGHT_EDIT,
             [],
             [
-                'created_by' => $datasetData->created_by
+                'created_by' => $dataset->created_by
             ]
         );
 
-        $buttons[$datasetData->uri]['edit'] = $rightCheck;
+        $buttons[$dataset->uri]['edit'] = $rightCheck;
 
         $rightCheck = RoleRight::checkUserRight(
             Module::DATA_SETS,
             RoleRight::RIGHT_ALL,
             [],
             [
-                'created_by' => $datasetData->created_by
+                'created_by' => $dataset->created_by
             ]
         );
 
-        $buttons[$datasetData->uri]['delete'] = $rightCheck;
+        $buttons[$dataset->uri]['delete'] = $rightCheck;
 
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
@@ -628,9 +644,24 @@ class UserController extends Controller {
 
         $buttons['addResource'] = $rightCheck;
 
-        $detailsReq = Request::create('/api/getDatasetDetails', 'POST', $params);
-        $api = new ApiDataSet($detailsReq);
-        $dataset = $api->getDatasetDetails($detailsReq)->getData();
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addToGroup'] = $rightCheck;
+        $groups = $setGroups = [];
+
+        if ($buttons['addToGroup']) {
+            $groups = $this->prepareGroups();
+        }
+
+        if (!empty($dataset->groups)) {
+            foreach ($dataset->groups as $record) {
+                $setGroups[] = $record->id;
+            }
+        }
+
         // prepera request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
@@ -654,7 +685,9 @@ class UserController extends Controller {
 
         return view('user/datasetView', [
             'class'     => 'user',
-            'dataset'   => $this->getModelUsernames($dataset->data),
+            'groups'    => $groups,
+            'setGroups' => $setGroups,
+            'dataset'   => $this->getModelUsernames($dataset),
             'resources' => $resources->resources,
             'buttons'   => $buttons,
         ]);
@@ -1811,7 +1844,6 @@ class UserController extends Controller {
                     'http_rq_type'  => $request->offsetGet('http_rq_type'),
                     'http_headers'  => $request->offsetGet('http_headers'),
                     'post_data'     => $request->offsetGet('post_data'),
-                    'version'       => strval(intval($resource->version) + 1),
                 ];
 
                 $file = $request->file('file');
@@ -2174,12 +2206,6 @@ class UserController extends Controller {
                 $apiEsData = new ApiResource($reqEsData);
                 $response = $apiEsData->getResourceData($reqEsData)->getData();
 
-                $versions = [];
-                $versionsList = Resource::where('id', $resource->id)->first()->elasticDataSet()->get();
-                foreach ($versionsList as $row) {
-                    $versions[] = $row->version;
-                }
-
                 $data = !empty($response->data) ? $response->data : [];
 
                 if ($resource->format_code == Resource::FORMAT_XML) {
@@ -2198,7 +2224,6 @@ class UserController extends Controller {
                     'resource'      => $resource,
                     'data'          => $data,
                     'versionView'   => $version,
-                    'versions'      => $versions,
                     'buttons'       => $buttons
                 ]);
             }

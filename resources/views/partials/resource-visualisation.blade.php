@@ -41,12 +41,6 @@
             {{ csrf_field() }}
             <input
                 hidden
-                name="es_id"
-                type="text"
-                value="{{ $resource->es_id }}"
-            >
-            <input
-                hidden
                 name="name"
                 type="text"
                 value="{{ $resource->name }}"

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Api\HelpController as ApiHelp;
 use App\Http\Controllers\Api\SectionController as ApiSection;
 
 class SubsectionController extends AdminController
@@ -85,6 +86,7 @@ class SubsectionController extends AdminController
         }
 
         $sections = $this->getMainSections();
+        $helpSections = $this->getHelpSections();
 
         if ($request->has('create')) {
             $validator = \Validator::make($request->all(), [
@@ -94,11 +96,12 @@ class SubsectionController extends AdminController
             if (!$validator->fails()) {
                 $rq = Request::create('/api/addSection', 'POST', [
                     'data' => [
-                        'name'       => $request->offsetGet('name'),
-                        'active'     => $request->offsetGet('active'),
-                        'parent_id'  => $request->offsetGet('parent_id'),
-                        'ordering'   => $request->offsetGet('ordering'),
-                        'forum_link' => $request->offsetGet('forum_link'),
+                        'name'          => $request->offsetGet('name'),
+                        'active'        => $request->offsetGet('active'),
+                        'parent_id'     => $request->offsetGet('parent_id'),
+                        'ordering'      => $request->offsetGet('ordering'),
+                        'forum_link'    => $request->offsetGet('forum_link'),
+                        'help_section'  => $request->offsetGet('help_section'),
                     ]
                 ]);
                 $api = new ApiSection($rq);
@@ -124,10 +127,11 @@ class SubsectionController extends AdminController
         return view(
             'admin/subsectionAdd',
             [
-                'class'     => 'user',
-                'fields'    => self::getSubsectionTransFields(),
-                'sections'  => $sections,
-                'sectionId' => $id,
+                'class'         => 'user',
+                'fields'        => self::getSubsectionTransFields(),
+                'sections'      => $sections,
+                'helpSections'  => $helpSections,
+                'sectionId'     => $id,
             ]
         );
     }
@@ -186,6 +190,7 @@ class SubsectionController extends AdminController
         $fields = self::getSubsectionTransFields();
         $model = Section::find($id);
         $sections = $this->getMainSections();
+        $helpSections = $this->getHelpSections();
 
         if (!is_null($model)) {
             $model = $this->getModelUsernames($model->loadTranslations());
@@ -195,11 +200,12 @@ class SubsectionController extends AdminController
             $rq = Request::create('/api/editSection', 'POST', [
                 'id'   => $id,
                 'data' => [
-                    'name'       => $request->offsetGet('name'),
-                    'active'     => $request->offsetGet('active'),
-                    'parent_id'  => $request->offsetGet('parent_id'),
-                    'ordering'   => $request->offsetGet('ordering'),
-                    'forum_link' => $request->offsetGet('forum_link'),
+                    'name'          => $request->offsetGet('name'),
+                    'active'        => $request->offsetGet('active'),
+                    'parent_id'     => $request->offsetGet('parent_id'),
+                    'ordering'      => $request->offsetGet('ordering'),
+                    'forum_link'    => $request->offsetGet('forum_link'),
+                    'help_section'  => $request->offsetGet('help_section'),
                 ]
             ]);
 
@@ -217,7 +223,7 @@ class SubsectionController extends AdminController
             }
         }
 
-        return view('admin/subsectionEdit', compact('class', 'fields', 'model', 'sections'));
+        return view('admin/subsectionEdit', compact('class', 'fields', 'model', 'sections', 'helpSections'));
     }
 
     /**
@@ -274,5 +280,14 @@ class SubsectionController extends AdminController
         }
 
         return $sections;
+    }
+
+    public function getHelpSections()
+    {
+        $rq = Request::create('/api/listHelpSections', 'POST', ['api_key'   => Auth::user()->api_key]);
+        $help = new ApiHelp($rq);
+        $result = $help->listHelpSections($rq)->getData();
+
+        return $result->success ? $result->sections : [];
     }
 }

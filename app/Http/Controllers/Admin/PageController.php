@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Api\HelpController as ApiHelp;
 use App\Http\Controllers\Api\PageController as ApiPage;
 
 class PageController extends AdminController
@@ -165,6 +166,7 @@ class PageController extends AdminController
         $class = 'user';
         $fields = self::getPageTransFields();
         $model = Page::find($id);
+        $helpPages = $this->getHelpPages();
         $sections = [];
 
         if (!is_null($model)) {
@@ -197,17 +199,18 @@ class PageController extends AdminController
             $rq = Request::create('/api/editPage', 'POST', [
                 'page_id' => $id,
                 'data' => [
-                    'title'            => $request->offsetGet('title'),
-                    'section_id'       => $request->offsetGet('section_id'),
-                    'body'             => $request->offsetGet('body'),
-                    'head_title'       => $request->offsetGet('head_title'),
-                    'meta_description' => $request->offsetGet('meta_descript'),
-                    'meta_keywords'    => $request->offsetGet('meta_key_words'),
-                    'abstract'         => $request->offsetGet('abstract'),
-                    'forum_link'       => $request->offsetGet('forum_link'),
-                    'active'           => !empty($request->offsetGet('active')),
-                    'valid_from'       => $from,
-                    'valid_to'         => $to,
+                    'title'             => $request->offsetGet('title'),
+                    'section_id'        => $request->offsetGet('section_id'),
+                    'body'              => $request->offsetGet('body'),
+                    'head_title'        => $request->offsetGet('head_title'),
+                    'meta_description'  => $request->offsetGet('meta_descript'),
+                    'meta_keywords'     => $request->offsetGet('meta_key_words'),
+                    'abstract'          => $request->offsetGet('abstract'),
+                    'forum_link'        => $request->offsetGet('forum_link'),
+                    'help_page'         => $request->offsetGet('help_page'),
+                    'active'            => !empty($request->offsetGet('active')),
+                    'valid_from'        => $from,
+                    'valid_to'          => $to,
                 ]
             ]);
 
@@ -225,13 +228,14 @@ class PageController extends AdminController
             }
         }
 
-        return view('admin/pagesEdit', compact('class', 'fields', 'model', 'sections'));
+        return view('admin/pagesEdit', compact('class', 'fields', 'model', 'sections', 'helpPages'));
     }
 
     public function add(Request $request)
     {
         $sections = Section::select()->get();
         $sections = $this->prepareSections($sections);
+        $helpPages = $this->getHelpPages();
 
         if ($request->has('back')) {
             return redirect()->route('adminPages');
@@ -252,17 +256,18 @@ class PageController extends AdminController
 
             $rq = Request::create('/api/addPage', 'POST', [
                 'data' => [
-                    'title'            => $request->offsetGet('title'),
-                    'section_id'       => $request->offsetGet('section_id'),
-                    'body'             => $request->offsetGet('body'),
-                    'head_title'       => $request->offsetGet('head_title'),
-                    'meta_description' => $request->offsetGet('meta_descript'),
-                    'meta_keywords'    => $request->offsetGet('meta_key_words'),
-                    'abstract'         => $request->offsetGet('abstract'),
-                    'forum_link'       => $request->offsetGet('forum_link'),
-                    'active'           => !empty($request->offsetGet('active')),
-                    'valid_from'       => $from,
-                    'valid_to'         => $to,
+                    'title'             => $request->offsetGet('title'),
+                    'section_id'        => $request->offsetGet('section_id'),
+                    'body'              => $request->offsetGet('body'),
+                    'head_title'        => $request->offsetGet('head_title'),
+                    'meta_description'  => $request->offsetGet('meta_descript'),
+                    'meta_keywords'     => $request->offsetGet('meta_key_words'),
+                    'abstract'          => $request->offsetGet('abstract'),
+                    'forum_link'        => $request->offsetGet('forum_link'),
+                    'help_page'         => $request->offsetGet('help_page'),
+                    'active'            => !empty($request->offsetGet('active')),
+                    'valid_from'        => $from,
+                    'valid_to'          => $to,
                 ]
             ]);
             $api = new ApiPage($rq);
@@ -279,10 +284,12 @@ class PageController extends AdminController
             }
         }
 
-        return view(
-            'admin/pagesAdd',
-            ['class' => 'user', 'fields' => self::getPageTransFields(), 'sections' => $sections]
-        );
+        return view('admin/pagesAdd', [
+            'class'     => 'user',
+            'fields'    => self::getPageTransFields(),
+            'sections'  => $sections,
+            'helpPages' => $helpPages,
+        ]);
     }
 
     /**
@@ -329,5 +336,14 @@ class PageController extends AdminController
         }
 
         return $result;
+    }
+
+    public function getHelpPages()
+    {
+        $rq = Request::create('/api/listHelpPages', 'POST', ['page_number' => 1, 'records_per_page' => 1000]);
+        $api = new ApiHelp($rq);
+        $result = $api->listHelpPages($rq)->getData();
+
+        return $result->success ? $result->pages : [];
     }
 }

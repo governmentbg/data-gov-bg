@@ -9,7 +9,19 @@
             {{ csrf_field() }}
             <div class="col-lg-2"></div>
             <div class="col-lg-8 frame section-edit">
-                <h3 class="text-center m-b-lg">{{ uctrans('custom.add_help_sections') }}</h3>
+                <h3 class="text-center m-b-lg">{{ empty($parentId) ? uctrans('custom.add_help_sections') : uctrans('custom.add_help_subsections') }}</h3>
+                <div class="form-group row m-t-md required">
+                    <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.unique_identificator') }}:</label>
+                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                        <input
+                            class="input-border-r-12 form-control"
+                            name="name"
+                            id="name"
+                            value="{{ !empty(old('name')) ? old('name') : '' }}"
+                        >
+                        <span class="error">{{ $errors->first('name') }}</span>
+                    </div>
+                </div>
                 <div class="m-t-lg">
                     @foreach($fields as $field)
                         @if($field['view'] == 'translation')
@@ -34,7 +46,12 @@
                                 @foreach ($parents as $parent)
                                     <option
                                         value="{{ $parent->id }}"
-                                        {{ !empty(old('parent')) && old('parent') == $parent->id ? 'selected' : '' }}
+                                        {{
+                                            (!empty(old('parent')) && old('parent') == $parent->id)
+                                            || !empty($parentId) && $parentId == $parent->id
+                                                ? 'selected'
+                                                : ''
+                                        }}
                                     >{{ $parent->name }}</option>
                                 @endforeach
                             </select>

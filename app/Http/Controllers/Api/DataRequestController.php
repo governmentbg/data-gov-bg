@@ -43,7 +43,7 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($requestData['data'], [
                 'org_id'           => 'required|integer|digits_between:1,10',
-                'description'      => 'required|string|max:191',
+                'description'      => 'required|string|max:8000',
                 'published_url'    => 'nullable|string|max:191',
                 'email'            => 'sometimes|email|max:191',
                 'contact_name'     => 'nullable|string|max:191',
@@ -157,7 +157,7 @@ class DataRequestController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($editRequestData['data'], [
                 'org_id'           => 'nullable|integer|digits_between:1,10',
-                'description'      => 'nullable|string|max:191',
+                'description'      => 'nullable|string|max:8000',
                 'published_url'    => 'nullable|string|max:191',
                 'contact_name'     => 'nullable|string|max:191',
                 'email'            => 'nullable|email|max:191',

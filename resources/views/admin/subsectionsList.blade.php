@@ -4,7 +4,6 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'sections'])
-        @include('partials.pagination')
         <div class="col-lg-6 col-sm-5 col-xs-2 m-t-lg">
             <span class="my-profile head elipsis">{{ isset($sectionName) ? $sectionName : '' }}</span>
         </div>
@@ -25,6 +24,7 @@
                 </ul>
             </div>
         </div>
+        @include('partials.pagination')
         <div class="col-xs-12 m-t-lg m-b-lg">
             <span class="my-profile head">{{ __('custom.subsections_list') }}</span>
         </div>

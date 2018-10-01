@@ -482,11 +482,9 @@ class PageController extends ApiController
 
             $pageList = Page::select($columns)->where('type', Page::TYPE_PAGE);
 
-            if (isset($criteria['order'])) {
-                if (is_array($criteria['order'])) {
-                    if (!in_array($criteria['order']['field'], $columns)) {
-                        unset($criteria['order']['field']);
-                    }
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
                 }
             }
 

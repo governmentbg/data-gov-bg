@@ -16,7 +16,7 @@
                         </li>
                         <li>
                             <!-- if there is resource with signal -->
-                            @if (isset($hasReported))
+                            @if (!empty($hasReported))
                                 <div class="col-xs-12 text-center exclamation-sign">
                                     <img src="{{ asset('img/reported.svg') }}">
                                 </div>

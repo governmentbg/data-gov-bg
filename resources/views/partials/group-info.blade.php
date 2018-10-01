@@ -1,4 +1,4 @@
-<div class="org m-t-lg">
+<div class="org m-t-lg side-info">
     <img src="{{ $group->logo }}">
     <h2>{{ $group->name }}</h2>
     @if (isset($group->descript))

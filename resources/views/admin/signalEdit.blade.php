@@ -103,6 +103,12 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
+                                    <a
+                                        href="{{ url('admin/signals/list') }}"
+                                        class="btn btn-primary"
+                                    >
+                                        {{ uctrans('custom.close') }}
+                                    </a>
                                     <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ utrans('custom.edit') }}</button>
                                 </div>
                             </div>

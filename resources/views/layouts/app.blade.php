@@ -103,21 +103,42 @@
                                     </span>
                                 @endif
                                 <span class="search-input">
-                                    <input type="text" placeholder="{{ __('custom.search') }}">
+                                    <form action="{{ action('DataController@list') }}" class="inline-block">
+                                        <input type="text" name="q" placeholder="{{ __('custom.search') }}">
+                                    </form>
                                 </span>
                             @endif
+
                             <span class="trans-link">
                                 <a
                                     href="{{ route('lang.switch', $altLang) }}"
                                 >{{ strtoupper($altLang) }}</a>
                             </span>
+
                             @if (!env('IS_TOOL'))
                                 <span class="social-icons">
-                                    <a href="#" class="fb"><span class="fa fa-facebook"></span></a>
-                                    <a href="#" class="tw"><span class="fa fa-twitter"></span></a>
-                                    <a href="#" class="gp"><span class="fa fa-google-plus"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="http://www.facebook.com/sharer.php?u={{ url('/') }}"
+                                        class="fb"
+                                    ><span class="fa fa-facebook"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="http://twitter.com/home?status={{ url('/') }}"
+                                        class="tw"
+                                    ><span class="fa fa-twitter"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="https://plus.google.com/share?url={{ url('/') }}"
+                                        class="gp"
+                                    ><span class="fa fa-google-plus"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"
+                                    ><span class="fa fa-linkedin"></span></a>
                                 </span>
                             @endif
+
                         </div>
                     </div>
                     <div class="collapse navbar-collapse" id="my-navbar">
@@ -237,6 +258,6 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
-    
+
 </body>
 </html>

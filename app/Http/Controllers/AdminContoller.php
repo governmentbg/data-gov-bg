@@ -13,6 +13,11 @@ use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class AdminController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+
     public function getOrgDropdown($userId = null, $count = null, $fullData = false)
     {
         $request = Request::create('/api/listOrganisations', 'POST', [

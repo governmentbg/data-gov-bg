@@ -44,7 +44,7 @@ class InsertBaseLanguagesInLocale extends Migration
         if (!env('IS_TOOL')) {
             foreach ($this->languages as $language) {
                 if (!Locale::where('locale', $language)->count()) {
-                    Locale::where(['locale' => $language['name']])->get()->delete();
+                    Locale::where(['locale' => $language['name']])->delete();
                 }
             }
         }

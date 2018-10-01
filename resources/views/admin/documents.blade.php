@@ -4,10 +4,10 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'documents'])
-        @include('partials.pagination')
         <div class="col-xs-12 sidenav m-t-lg m-b-lg">
             <span class="my-profile m-l-sm">{{ __('custom.document_list') }}</span>
         </div>
+        @include('partials.pagination')
         <div class="row m-b-lg">
             <div class="col-md-3 col-sm-5 sidenav p-l-r-none col-xs-12 m-t-md m-l-sm">
                  <form

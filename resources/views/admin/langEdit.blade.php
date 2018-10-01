@@ -33,7 +33,15 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <button type="submit" name="edit" class="btn btn-primary pull-right">{{ uctrans('custom.save') }}</button>
+                    <div class="col-sm-12 text-right">
+                        <a
+                            href="{{ url('admin/languages') }}"
+                            class="btn btn-primary"
+                        >
+                            {{ uctrans('custom.close') }}
+                        </a>
+                        <button type="submit" name="edit" class="btn btn-primary ">{{ uctrans('custom.save') }}</button>
+                    </div>
                 </div>
             </div>
         </div>

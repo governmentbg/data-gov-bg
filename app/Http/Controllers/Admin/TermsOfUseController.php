@@ -41,6 +41,10 @@ class TermsOfUseController extends AdminController
 
     public function add(Request $request)
     {
+        if ($request->has('back')) {
+            return redirect()->route('adminTermsOfUse');
+        }
+
         if ($request->has('create')) {
             $rq = Request::create('/api/addTermsOfUse', 'POST', [
                 'data' => [
@@ -78,22 +82,22 @@ class TermsOfUseController extends AdminController
      */
     public function view(Request $request, $id)
     {
-        if (Role::isAdmin()) {
-            $request = Request::create('/api/getTermsOfUseDetails', 'POST', [
-                'terms_id'  => $id,
-                'locale'    => \LaravelLocalization::getCurrentLocale(),
-            ]);
-            $api = new ApiTermsOfUse($request);
-            $result = $api->getTermsOfUseDetails($request)->getData();
-
-            if ($result->success) {
-                return view('admin/termsOfUseView', ['class' => 'user', 'term' => $result->data]);
-            }
-
-            return redirect('/admin/terms-of-use/list');
+        if ($request->has('back')) {
+            return redirect()->route('adminTermsOfUse');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        $request = Request::create('/api/getTermsOfUseDetails', 'POST', [
+            'terms_id'  => $id,
+            'locale'    => \LaravelLocalization::getCurrentLocale(),
+        ]);
+        $api = new ApiTermsOfUse($request);
+        $result = $api->getTermsOfUseDetails($request)->getData();
+
+        if ($result->success) {
+            return view('admin/termsOfUseView', ['class' => 'user', 'term' => $result->data]);
+        }
+
+        return redirect('/admin/terms-of-use/list');
     }
 
     /**
@@ -105,43 +109,39 @@ class TermsOfUseController extends AdminController
      */
     public function edit(Request $request, $id)
     {
-        if (Role::isAdmin()) {
-            $class = 'user';
-            $fields = self::getTermsTransFields();
+        $class = 'user';
+        $fields = self::getTermsTransFields();
 
-            $model = TermsOfUse::find($id)->loadTranslations();
+        $model = TermsOfUse::find($id)->loadTranslations();
 
-            if ($request->has('edit')) {
-                $rq = Request::create('/api/editTermsOfUse', 'POST', [
-                    'terms_id' => $id,
-                    'data' => [
-                        'name'        => $request->offsetGet('name'),
-                        'description' => $request->offsetGet('descript'),
-                        'active'      => isset($request->active),
-                        'is_default'  => $request->offsetGet('default'),
-                        'ordering'    => $request->offsetGet('order'),
-                    ]
-                ]);
+        if ($request->has('edit')) {
+            $rq = Request::create('/api/editTermsOfUse', 'POST', [
+                'terms_id' => $id,
+                'data' => [
+                    'name'        => $request->offsetGet('name'),
+                    'description' => $request->offsetGet('descript'),
+                    'active'      => isset($request->active),
+                    'is_default'  => $request->offsetGet('default'),
+                    'ordering'    => $request->offsetGet('order'),
+                ]
+            ]);
 
-                $api = new ApiTermsOfUse($rq);
-                $result = $api->editTermsOfUse($rq)->getData();
+            $api = new ApiTermsOfUse($rq);
+            $result = $api->editTermsOfUse($rq)->getData();
 
-                if ($result->success) {
-                    $request->session()->flash('alert-success', __('custom.edit_success'));
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                    return back();
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                return back();
+            } else {
+                $request->session()->flash('alert-danger', __('custom.edit_error'));
 
-                    return back()->withErrors(isset($result->errors) ? $result->errors : []);
-                }
-
+                return back()->withErrors(isset($result->errors) ? $result->errors : []);
             }
 
-            return view('admin/termsOfUseEdit', compact('class', 'fields', 'model'));
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return view('admin/termsOfUseEdit', compact('class', 'fields', 'model'));
     }
 
     /**

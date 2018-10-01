@@ -157,7 +157,7 @@ class HistoryController extends AdminController
         $paginationData = $this->getPaginationData(
             $history,
             $res->total_records,
-            array_except(app('request')->input(), ['page',]),
+            array_except(app('request')->input(), ['page']),
             $perPage
         );
 

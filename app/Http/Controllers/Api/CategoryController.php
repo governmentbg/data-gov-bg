@@ -365,6 +365,25 @@ class CategoryController extends ApiController
                 $query->whereIn('id', $ids);
             }
 
+            $orderColumns = [
+                'id',
+                'name',
+                'locale',
+                'active',
+                'ordering',
+                'icon',
+                'created_at',
+                'created_by',
+                'updated_at',
+                'updated_by'
+            ];
+
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             if ($order) {
                 $query->orderBy($order['field'], $order['type']);
             }
@@ -514,6 +533,7 @@ class CategoryController extends ApiController
                 $data->whereNull('categories.parent_id');
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
                 $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);

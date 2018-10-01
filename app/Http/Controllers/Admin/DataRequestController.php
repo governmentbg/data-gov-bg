@@ -60,8 +60,13 @@ class DataRequestController extends AdminController
         $result = $api->listDataRequests($req)->getData();
         $getParams = array_except(app('request')->input(), ['page', 'q']);
         $statuses = DataRequest::getDataRequestStatuses();
+
+        $dataRequests = !empty($result->dataRequests)
+        ? $this->getModelUsernames($result->dataRequests)
+        : $result->dataRequests;
+
         $paginationData = $this->getPaginationData(
-            $result->dataRequests,
+            $dataRequests,
             $result->total_records,
             $getParams,
             $perPage

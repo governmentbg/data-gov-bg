@@ -20,6 +20,16 @@
         font-weight: 600;
     }
 
+    .inline-block {
+        display: inline-block;
+    }
+
+    .new-data {
+        padding: 8px 28px;
+        margin-top: 25px;
+        width: 230px;
+    }
+
     .list-orgs {
         img {
             height: 200px;
@@ -36,7 +46,7 @@
                     button {
                         border-radius: 10px;
                         padding: 7px;
-                        background-color: #108f9e;
+                        background-color: #76ad3f;
                         color: white;
                         border: none;
                         min-width: 80px;

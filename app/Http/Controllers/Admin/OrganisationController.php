@@ -36,55 +36,51 @@ class OrganisationController extends AdminController
      */
     public function list(Request $request)
     {
-        if (Role::isAdmin()) {
-            $perPage = 6;
-            $params = [
-                'api_key'          => Auth::user()->api_key,
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
+        $perPage = 6;
+        $params = [
+            'api_key'          => Auth::user()->api_key,
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
 
-            if (isset($request->active)) {
-                $params['criteria']['active'] = (bool) $request->active;
-            }
-
-            if (isset($request->approved)) {
-                $params['criteria']['approved'] = (bool) $request->approved;
-            }
-
-            if (isset($request->parent)) {
-                $parent = Organisation::where('uri', $request->parent)->first();
-
-                if (isset($parent->id)) {
-                    $params['criteria']['org_id'] = $parent->id;
-                }
-            }
-
-            $request = Request::create('/api/listOrganisations', 'POST', $params);
-            $api = new ApiOrganisation($request);
-            $result = $api->listOrganisations($request)->getData();
-
-            $paginationData = $this->getPaginationData(
-                $result->organisations,
-                $result->total_records,
-                array_except(app('request')->input(), ['q', 'page',]),
-                $perPage
-            );
-
-            return view(
-                'admin/organisations',
-                [
-                    'class'         => 'user',
-                    'organisations' => $paginationData['items'],
-                    'pagination'    => $paginationData['paginate'],
-                    'selectedOrg'   => isset($parent) && !empty($parent->id)
-                        ? $parent
-                        : null
-                ]
-            );
+        if (isset($request->active)) {
+            $params['criteria']['active'] = (bool) $request->active;
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        if (isset($request->approved)) {
+            $params['criteria']['approved'] = (bool) $request->approved;
+        }
+
+        if (isset($request->parent)) {
+            $parent = Organisation::where('uri', $request->parent)->first();
+
+            if (isset($parent->id)) {
+                $params['criteria']['org_id'] = $parent->id;
+            }
+        }
+
+        $request = Request::create('/api/listOrganisations', 'POST', $params);
+        $api = new ApiOrganisation($request);
+        $result = $api->listOrganisations($request)->getData();
+
+        $paginationData = $this->getPaginationData(
+            $result->organisations,
+            $result->total_records,
+            array_except(app('request')->input(), ['q', 'page',]),
+            $perPage
+        );
+
+        return view(
+            'admin/organisations',
+            [
+                'class'         => 'user',
+                'organisations' => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'selectedOrg'   => isset($parent) && !empty($parent->id)
+                    ? $parent
+                    : null
+            ]
+        );
     }
 
     /**
@@ -97,50 +93,46 @@ class OrganisationController extends AdminController
      */
     public function search(Request $request)
     {
-        if (Role::isAdmin()) {
-            $search = $request->q;
+        $search = $request->q;
 
-            if (empty(trim($search))) {
-                return redirect('/admin/organisations');
-            }
-
-            $perPage = 6;
-            $params = [
-                'api_key'          => \Auth::user()->api_key,
-                'criteria'         => [
-                    'keywords' => $search,
-                ],
-                'records_per_page' => $perPage,
-                'page_number'      => !empty($request->page) ? $request->page : 1,
-            ];
-
-            $request = Request::create('/api/searchOrganisations', 'POST', $params);
-            $api = new ApiOrganisation($request);
-            $result = $api->searchOrganisations($request)->getData();
-            $organisations = !empty($result->organisations) ? $result->organisations : [];
-            $count = !empty($result->total_records) ? $result->total_records : 0;
-
-            $getParams = ['q' => $search];
-
-            $paginationData = $this->getPaginationData(
-                $organisations,
-                $count,
-                $getParams,
-                $perPage
-            );
-
-            return view(
-                'admin/organisations',
-                [
-                    'class'         => 'user',
-                    'organisations' => $paginationData['items'],
-                    'pagination'    => $paginationData['paginate'],
-                    'search'        => $search
-                ]
-            );
+        if (empty(trim($search))) {
+            return redirect('/admin/organisations');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        $perPage = 6;
+        $params = [
+            'api_key'          => \Auth::user()->api_key,
+            'criteria'         => [
+                'keywords' => $search,
+            ],
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ];
+
+        $request = Request::create('/api/searchOrganisations', 'POST', $params);
+        $api = new ApiOrganisation($request);
+        $result = $api->searchOrganisations($request)->getData();
+        $organisations = !empty($result->organisations) ? $result->organisations : [];
+        $count = !empty($result->total_records) ? $result->total_records : 0;
+
+        $getParams = ['q' => $search];
+
+        $paginationData = $this->getPaginationData(
+            $organisations,
+            $count,
+            $getParams,
+            $perPage
+        );
+
+        return view(
+            'admin/organisations',
+            [
+                'class'         => 'user',
+                'organisations' => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'search'        => $search
+            ]
+        );
     }
 
     /**
@@ -153,36 +145,36 @@ class OrganisationController extends AdminController
      */
     public function register(Request $request)
     {
-        if (Role::isAdmin()) {
-            $post = [
-                'data' => $request->all()
-            ];
-
-            if (!empty($post['data']['logo'])) {
-                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                $post['data']['logo'] = $post['data']['logo']->getPathName();
-            }
-
-            $post['data']['description'] = $post['data']['descript'];
-            $request = Request::create('/api/addOrganisation', 'POST', $post);
-            $api = new ApiOrganisation($request);
-            $result = $api->addOrganisation($request)->getData();
-
-            if ($result->success) {
-                session()->flash('alert-success', __('custom.add_org_success'));
-            } else {
-                session()->flash(
-                    'alert-danger',
-                    isset($result->error) ? $result->error->message : __('custom.add_org_error')
-                );
-            }
-
-            return $result->success
-                ? redirect('admin/organisations/view/'. Organisation::where('id', $result->org_id)->value('uri'))
-                : redirect('admin/organisations/register')->withInput(Input::all())->withErrors($result->errors);
+        if ($request->has('back')) {
+            return redirect()->route('adminOrgs');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        $post = [
+            'data' => $request->all()
+        ];
+
+        if (!empty($post['data']['logo'])) {
+            $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+            $post['data']['logo'] = $post['data']['logo']->getPathName();
+        }
+
+        $post['data']['description'] = $post['data']['descript'];
+        $request = Request::create('/api/addOrganisation', 'POST', $post);
+        $api = new ApiOrganisation($request);
+        $result = $api->addOrganisation($request)->getData();
+
+        if ($result->success) {
+            session()->flash('alert-success', __('custom.add_org_success'));
+        } else {
+            session()->flash(
+                'alert-danger',
+                isset($result->error) ? $result->error->message : __('custom.add_org_error')
+            );
+        }
+
+        return $result->success
+            ? redirect('admin/organisations/view/'. Organisation::where('id', $result->org_id)->value('uri'))
+            : redirect('admin/organisations/register')->withInput(Input::all())->withErrors($result->errors);
     }
 
     /**
@@ -190,23 +182,19 @@ class OrganisationController extends AdminController
      *
      * @return view login on success or error on fail
      */
-    public function showOrgRegisterForm() {
+    public function showOrgRegisterForm()
+    {
+        $parentOrgs = Organisation::select('id', 'name')
+            ->where('type', '!=', Organisation::TYPE_GROUP)->get();
 
-        if (Role::isAdmin()) {
-            $parentOrgs = Organisation::select('id', 'name')
-                ->where('type', '!=', Organisation::TYPE_GROUP)->get();
-
-            return view(
-                'admin/orgRegister',
-                [
-                    'class'      => 'user',
-                    'fields'     => $this->getTransFields(),
-                    'parentOrgs' => $parentOrgs
-                ]
-            );
-        }
-
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return view(
+            'admin/orgRegister',
+            [
+                'class'      => 'user',
+                'fields'     => $this->getTransFields(),
+                'parentOrgs' => $parentOrgs
+            ]
+        );
     }
 
     /**
@@ -218,23 +206,23 @@ class OrganisationController extends AdminController
      */
     public function view(Request $request, $uri)
     {
-        if (Role::isAdmin()) {
-            $orgId = Organisation::where('uri', $uri)
-                ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-                ->value('id');
-
-            $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
-            $api = new ApiOrganisation($request);
-            $result = $api->getOrganisationDetails($request)->getData();
-
-            if ($result->success) {
-                return view('admin/orgView', ['class' => 'user', 'organisation' => $result->data]);
-            }
-
-            return redirect('/admin/organisations');
+        if ($request->has('back')) {
+            return redirect()->route('adminOrgs');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        $orgId = Organisation::where('uri', $uri)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->value('id');
+
+        $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_id' => $orgId]);
+        $api = new ApiOrganisation($request);
+        $result = $api->getOrganisationDetails($request)->getData();
+
+        if ($result->success) {
+            return view('admin/orgView', ['class' => 'user', 'organisation' => $result->data]);
+        }
+
+        return redirect('/admin/organisations');
     }
 
     /**
@@ -246,76 +234,74 @@ class OrganisationController extends AdminController
      */
     public function edit(Request $request, $uri)
     {
-        if (Role::isAdmin()) {
-            $org = Organisation::where('uri', $uri)
-                ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-                ->first();
+        $org = Organisation::where('uri', $uri)
+            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+            ->first();
 
-            if (empty($org)) {
-                return redirect('/admin/organisations');
-            }
+        if (empty($org)) {
+            return redirect('/admin/organisations');
+        }
 
-            $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
+        $query = Organisation::select('id', 'name')->where('type', '!=', Organisation::TYPE_GROUP);
 
-            $parentOrgs = $query->get();
+        $parentOrgs = $query->get();
+
+        $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
+        $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
+        $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
+        $root = 'admin';
+
+        $viewData = [
+            'class'      => 'user',
+            'model'      => $orgModel,
+            'withModel'  => $customModel,
+            'fields'     => $this->getTransFields(),
+            'parentOrgs' => $parentOrgs,
+            'root'       => $root
+        ];
+
+        if (isset($request->view)) {
+            return view('admin/orgEdit', $viewData);
+        }
+
+        $post = [
+            'api_key'       => Auth::user()->api_key,
+            'data'          => $request->all(),
+            'org_id'        => $org->id,
+            'parentOrgs'    => $parentOrgs,
+        ];
+
+        if (!empty($post['data']['logo'])) {
+            $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
+            $post['data']['logo'] = $post['data']['logo']->getPathName();
+        }
+
+        if (isset($post['data']['descript'])) {
+            $post['data']['description'] = $post['data']['descript'];
+        }
+
+        if ($request->has('save')) {
+            $request = Request::create('/api/editOrganisation', 'POST', $post);
+            $api = new ApiOrganisation($request);
+            $result = $api->editOrganisation($request)->getData();
+            $errors = !empty($result->errors) ? $result->errors : [];
 
             $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
             $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
             $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
 
-            $viewData = [
-                'class'      => 'user',
-                'model'      => $orgModel,
-                'withModel'  => $customModel,
-                'fields'     => $this->getTransFields(),
-                'parentOrgs' => $parentOrgs
-            ];
+            if ($result->success) {
+                session()->flash('alert-success', __('custom.edit_success'));
 
-            if (isset($request->view)) {
-                return view('admin/orgEdit', $viewData);
-            }
-
-            $post = [
-                'api_key'       => Auth::user()->api_key,
-                'data'          => $request->all(),
-                'org_id'        => $org->id,
-                'parentOrgs'    => $parentOrgs,
-            ];
-
-            if (!empty($post['data']['logo'])) {
-                $post['data']['logo_filename'] = $post['data']['logo']->getClientOriginalName();
-                $post['data']['logo'] = $post['data']['logo']->getPathName();
-            }
-
-            if (isset($post['data']['descript'])) {
-                $post['data']['description'] = $post['data']['descript'];
-            }
-
-            if ($request->has('save')) {
-                $request = Request::create('/api/editOrganisation', 'POST', $post);
-                $api = new ApiOrganisation($request);
-                $result = $api->editOrganisation($request)->getData();
-                $errors = !empty($result->errors) ? $result->errors : [];
-
-                $orgModel = Organisation::with('CustomSetting')->find($org->id)->loadTranslations();
-                $customModel = CustomSetting::where('org_id', $orgModel->id)->get()->loadTranslations();
-                $orgModel->logo = $this->getImageData($orgModel->logo_data, $orgModel->logo_mime_type);
-
-                if ($result->success) {
-                    session()->flash('alert-success', __('custom.edit_success'));
-
-                    if (!empty($post['data']['uri'])) {
-                        return redirect(url('/admin/organisations/edit/'. $post['data']['uri']));
-                    }
-                } else {
-                    session()->flash('alert-danger', __('custom.edit_error'));
+                if (!empty($post['data']['uri'])) {
+                    return redirect(url('/admin/organisations/edit/'. $post['data']['uri']));
                 }
+            } else {
+                session()->flash('alert-danger', __('custom.edit_error'));
             }
-
-            return view('admin/orgEdit', $viewData)->withErrors(isset($result->errors) ? $result->errors : []);
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return view('admin/orgEdit', $viewData)->withErrors(isset($result->errors) ? $result->errors : []);
     }
 
     /**
@@ -327,173 +313,165 @@ class OrganisationController extends AdminController
      */
     public function delete(Request $request, $id)
     {
-        if (Role::isAdmin()) {
-            $orgId = Organisation::where('id', $id)
-            ->whereIn('type', array_flip(Organisation::getPublicTypes()))
-            ->value('id');
+        $orgId = Organisation::where('id', $id)
+        ->whereIn('type', array_flip(Organisation::getPublicTypes()))
+        ->value('id');
 
-            $params = [
-                'api_key' => \Auth::user()->api_key,
-                'org_id'  => $id,
-            ];
+        $params = [
+            'api_key' => \Auth::user()->api_key,
+            'org_id'  => $id,
+        ];
 
-            $request = Request::create('/api/deleteOrganisation', 'POST', $params);
-            $api = new ApiOrganisation($request);
-            $result = $api->deleteOrganisation($request)->getData();
+        $request = Request::create('/api/deleteOrganisation', 'POST', $params);
+        $api = new ApiOrganisation($request);
+        $result = $api->deleteOrganisation($request)->getData();
 
-            if ($result->success) {
-                session()->flash('alert-success', __('custom.delete_success'));
-
-                return redirect('/admin/organisations');
-            }
-
-            session()->flash('alert-danger', __('custom.delete_error'));
+        if ($result->success) {
+            session()->flash('alert-success', __('custom.delete_success'));
 
             return redirect('/admin/organisations');
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        session()->flash('alert-danger', __('custom.delete_error'));
+
+        return redirect('/admin/organisations');
     }
 
     public function viewMembers(Request $request, $uri)
     {
-        if (Role::isAdmin()) {
-            $perPage = 6;
-            $filter = $request->offsetGet('filter');
-            $userId = $request->offsetGet('user_id');
-            $roleId = $request->offsetGet('role_id');
-            $keywords = $request->offsetGet('keywords');
-            $org = Organisation::where('uri', $uri)->first();
+        $perPage = 6;
+        $filter = $request->offsetGet('filter');
+        $userId = $request->offsetGet('user_id');
+        $roleId = $request->offsetGet('role_id');
+        $keywords = $request->offsetGet('keywords');
+        $org = Organisation::where('uri', $uri)->first();
 
-            if ($org) {
-                if ($request->has('edit_member')) {
-                    if(empty($roleId)) {
-                        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
-                    }
-
-                    $rq = Request::create('/api/editMember', 'POST', [
-                        'org_id'    => $org->id,
-                        'user_id'   => $userId,
-                        'role_id'   => $roleId,
-                    ]);
-                    $api = new ApiOrganisation($rq);
-                    $result = $api->editMember($rq)->getData();
-
-                    if (!empty($result->success)) {
-                        $request->session()->flash('alert-success', __('custom.edit_success'));
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.edit_error'));
-                    }
-
-                    return back();
+        if ($org) {
+            if ($request->has('edit_member')) {
+                if(empty($roleId)) {
+                    return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.empty_role')));
                 }
 
-                if ($request->has('delete')) {
-                    if (app('App\Http\Controllers\UserController')->delMember($userId, $org->id)) {
-                        $request->session()->flash('alert-success', __('custom.delete_success'));
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.delete_error'));
-                    }
-
-                    return back();
-                }
-
-                if ($request->has('invite_existing')) {
-                    $newUser = $request->offsetGet('user');
-                    $newRole = $request->offsetGet('role');
-
-                    $rq = Request::create('/api/addMember', 'POST', [
-                        'org_id'    => $org->id,
-                        'user_id'   => $newUser,
-                        'role_id'   => $newRole,
-                    ]);
-                    $api = new ApiOrganisation($rq);
-                    $result = $api->addMember($rq)->getData();
-
-                    if (!empty($result->success)) {
-                        $request->session()->flash('alert-success', __('custom.add_success'));
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.add_error'));
-                    }
-
-                    return back();
-                }
-
-                if ($request->has('invite')) {
-                    $email = $request->offsetGet('email');
-                    $role = $request->offsetGet('role');
-
-                    $rq = Request::create('/inviteUser', 'POST', [
-                        'api_key'   => Auth::user()->api_key,
-                        'data'      => [
-                            'email'     => $email,
-                            'org_id'    => $org->id,
-                            'role_id'   => $role,
-                            'generate'  => true,
-                        ],
-                    ]);
-                    $api = new ApiUser($rq);
-                    $result = $api->inviteUser($rq)->getData();
-
-                    if (!empty($result->success)) {
-                        $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.add_error'));
-                    }
-
-                    return back();
-                }
-
-                $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
-
-                $criteria = ['org_id' => $org->id];
-
-                if ($filter == 'for_approval') {
-                    $criteria['for_approval'] = true;
-                }
-
-                if (is_numeric($filter)) {
-                    $criteria['role_id'] = $filter;
-                }
-
-                if (!empty($keywords)) {
-                    $criteria['keywords'] = $keywords;
-                }
-
-                $criteria['records_per_page'] = $perPage;
-                $criteria['page_number'] = $request->offsetGet('page', 1);
-
-                $rq = Request::create('/api/getMembers', 'POST', $criteria);
-                $api = new ApiOrganisation($rq);
-                $result = $api->getMembers($rq)->getData();
-                $paginationData = $this->getPaginationData(
-                    $result->members,
-                    $result->total_records,
-                    $request->except('page'),
-                    $perPage
-                );
-
-                $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
-                $api = new ApiRole($rq);
-                $result = $api->listRoles($rq)->getData();
-                $roles = isset($result->roles) ? $result->roles : [];
-
-                return view('admin/orgMembers', [
-                    'class'         => 'user',
-                    'members'       => $paginationData['items'],
-                    'pagination'    => $paginationData['paginate'],
-                    'organisation'  => $org,
-                    'roles'         => $roles,
-                    'filter'        => $filter,
-                    'keywords'      => $keywords,
-                    'isAdmin'       => true
+                $rq = Request::create('/api/editMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $userId,
+                    'role_id'   => $roleId,
                 ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->editMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                return back();
             }
 
-            return redirect('/admin/organisations');
+            if ($request->has('delete')) {
+                if (app('App\Http\Controllers\UserController')->delMember($userId, $org->id)) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite_existing')) {
+                $newUser = $request->offsetGet('user');
+                $newRole = $request->offsetGet('role');
+
+                $rq = Request::create('/api/addMember', 'POST', [
+                    'org_id'    => $org->id,
+                    'user_id'   => $newUser,
+                    'role_id'   => $newRole,
+                ]);
+                $api = new ApiOrganisation($rq);
+                $result = $api->addMember($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            if ($request->has('invite')) {
+                $email = $request->offsetGet('email');
+                $role = $request->offsetGet('role');
+
+                $rq = Request::create('/inviteUser', 'POST', [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'email'     => $email,
+                        'org_id'    => $org->id,
+                        'role_id'   => $role,
+                        'generate'  => true,
+                    ],
+                ]);
+                $api = new ApiUser($rq);
+                $result = $api->inviteUser($rq)->getData();
+
+                if (!empty($result->success)) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+                }
+
+                return back();
+            }
+
+            $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
+
+            $criteria = ['org_id' => $org->id];
+
+            if ($filter == 'for_approval') {
+                $criteria['for_approval'] = true;
+            }
+
+            if (is_numeric($filter)) {
+                $criteria['role_id'] = $filter;
+            }
+
+            if (!empty($keywords)) {
+                $criteria['keywords'] = $keywords;
+            }
+
+            $criteria['records_per_page'] = $perPage;
+            $criteria['page_number'] = $request->offsetGet('page', 1);
+
+            $rq = Request::create('/api/getMembers', 'POST', $criteria);
+            $api = new ApiOrganisation($rq);
+            $result = $api->getMembers($rq)->getData();
+            $paginationData = $this->getPaginationData(
+                $result->members,
+                $result->total_records,
+                $request->except('page'),
+                $perPage
+            );
+
+            $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+
+            return view('admin/orgMembers', [
+                'class'         => 'user',
+                'members'       => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'organisation'  => $org,
+                'roles'         => $roles,
+                'filter'        => $filter,
+                'keywords'      => $keywords,
+                'isAdmin'       => true
+            ]);
         }
 
-        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+        return redirect('/admin/organisations');
     }
 
     public function addMembersNew(Request $request, $uri)
@@ -502,45 +480,41 @@ class OrganisationController extends AdminController
         $class = 'user';
 
         if ($organisation) {
-            if (Role::isAdmin()) {
-                $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
-                $api = new ApiRole($rq);
-                $result = $api->listRoles($rq)->getData();
-                $roles = isset($result->roles) ? $result->roles : [];
-                $digestFreq = UserSetting::getDigestFreq();
+            $rq = Request::create('/api/listRoles', 'POST', ['criteria' => ['for_org' => 1]]);
+            $api = new ApiRole($rq);
+            $result = $api->listRoles($rq)->getData();
+            $roles = isset($result->roles) ? $result->roles : [];
+            $digestFreq = UserSetting::getDigestFreq();
 
-                if ($request->has('save')) {
-                    $post = [
-                        'api_key'   => Auth::user()->api_key,
-                        'data'      => [
-                            'firstname'         => $request->offsetGet('firstname'),
-                            'lastname'          => $request->offsetGet('lastname'),
-                            'username'          => $request->offsetGet('username'),
-                            'email'             => $request->offsetGet('email'),
-                            'password'          => $request->offsetGet('password'),
-                            'password_confirm'  => $request->offsetGet('password_confirm'),
-                            'role_id'           => $request->offsetGet('role_id'),
-                            'org_id'            => $organisation->id,
-                            'invite'            => true,
-                        ],
-                    ];
+            if ($request->has('save')) {
+                $post = [
+                    'api_key'   => Auth::user()->api_key,
+                    'data'      => [
+                        'firstname'         => $request->offsetGet('firstname'),
+                        'lastname'          => $request->offsetGet('lastname'),
+                        'username'          => $request->offsetGet('username'),
+                        'email'             => $request->offsetGet('email'),
+                        'password'          => $request->offsetGet('password'),
+                        'password_confirm'  => $request->offsetGet('password_confirm'),
+                        'role_id'           => $request->offsetGet('role_id'),
+                        'org_id'            => $organisation->id,
+                        'invite'            => true,
+                    ],
+                ];
 
-                    $rq = Request::create('/api/register', 'POST', $post);
-                    $api = new ApiUser($rq);
-                    $result = $api->register($rq)->getData();
+                $rq = Request::create('/api/register', 'POST', $post);
+                $api = new ApiUser($rq);
+                $result = $api->register($rq)->getData();
 
-                    if ($result->success) {
-                        $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
 
-                        return redirect('/admin/organisations/members/'. $uri);
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.add_error'));
+                    return redirect('/admin/organisations/members/'. $uri);
+                } else {
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
 
-                        return redirect()->back()->withInput()->withErrors($result->errors);
-                    }
+                    return redirect()->back()->withInput()->withErrors($result->errors);
                 }
-            } else {
-                return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
             }
         }
 
@@ -663,8 +637,8 @@ class OrganisationController extends AdminController
                 [
                     'class'          => $class,
                     'organisation'   => $result->data,
-                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
                 ]

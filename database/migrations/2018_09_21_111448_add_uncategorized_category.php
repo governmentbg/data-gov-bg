@@ -51,7 +51,7 @@ class AddUncategorizedCategory extends Migration
         if (!env('IS_TOOL')) {
             foreach ($this->categories as $catData) {
                 if (Category::where($catData)->count()) {
-                    Category::where($catData)->get()->delete();
+                    Category::where($catData)->delete();
                 }
             }
         }

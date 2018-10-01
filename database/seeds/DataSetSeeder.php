@@ -34,8 +34,8 @@ class DataSetSeeder extends Seeder
             DataSet::create([
                 'org_id'        => $organisation,
                 'uri'           => $this->faker->uuid(),
-                'name'          => ApiController::trans($locale, $this->faker->word()),
-                'descript'      => ApiController::trans($locale, $this->faker->text()),
+                'name'          => ApiController::trans($locale, $this->faker->word() .' '. $this->faker->word()),
+                'descript'      => ApiController::trans($locale, $this->faker->text(100)),
                 'author_name'   => $this->faker->name(),
                 'author_email'  => $this->faker->email(),
                 'support_name'  => $this->faker->name(),

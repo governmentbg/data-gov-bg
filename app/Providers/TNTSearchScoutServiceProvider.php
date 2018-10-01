@@ -4,10 +4,11 @@ namespace App\Providers;
 
 use Laravel\Scout\Builder;
 use Laravel\Scout\EngineManager;
-use App\Extensions\CustomTNTSearch;
+use App\Extensions\TNT\CustomTNTSearch;
 use Illuminate\Support\ServiceProvider;
 use TeamTNT\Scout\Console\ImportCommand;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
+use App\Extensions\TNT\CustomTNTSearchEngine;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
@@ -30,7 +31,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             $this->setFuzziness($tnt);
             $this->setAsYouType($tnt);
 
-            return new TNTSearchEngine($tnt);
+            return new CustomTNTSearchEngine($tnt);
         });
 
         if ($this->app->runningInConsole()) {

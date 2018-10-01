@@ -58,6 +58,12 @@
         @endforeach
         <div class="form-group row">
             <div class="col-sm-12 text-right">
+                <a
+                    href="{{ url('/'. $root .'/groups') }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
                 <button
                     type="submit"
                     name="edit"

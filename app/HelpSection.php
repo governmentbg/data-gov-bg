@@ -17,13 +17,14 @@ class HelpSection extends Model implements TranslatableInterface
     protected $guarded = ['id'];
     protected $table = 'help_sections';
 
-    protected static $translatable = ['name' => 'label'];
+    protected static $translatable = ['title' => 'label'];
 
     public function toSearchableArray()
     {
         return [
-            'id'   => $this->id,
-            'name' => $this->concatTranslations('name'),
+            'id'    => $this->id,
+            'name'  => $this->name,
+            'title' => $this->concatTranslations('title'),
         ];
     }
 

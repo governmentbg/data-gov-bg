@@ -811,4 +811,8 @@ return [
     'add_help_паге' => 'Add Help Page',
     'edit_help_паге' => 'Edit Help Page',
     'help_page_preview' => 'Preview Help Page',
+    'help_section' => 'Help Section',
+    'help_page' => 'Help Page',
+    'add_help_subsections' => 'Add Help Subsection',
+    'edit_help_subsections' => 'Edit Help Subsection',
 ];

@@ -4,7 +4,7 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'help'])
-    <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.sections') }}</h3>
+    <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.subsections') }}</h3>
     <div class="row">
         <div class="col-xs-12 m-t-lg m-b-lg text-right section">
             <div class="filter-content section-nav-bar">
@@ -27,14 +27,14 @@
     <div class="row m-b-sm">
         <div class="col-xs-12 text-right">
             <span class="badge badge-pill long-badge">
-                <a href="{{ url('/admin/help/section/add') }}">{{ __('custom.add') }}</a>
+                <a href="{{ url('/admin/help/section/add/'. $id) }}">{{ __('custom.add') }}</a>
             </span>
         </div>
     </div>
     <div class="row">
         <form method="POST" class="form-horizontal m-t-md">
-            @include('partials.pagination')
             {{ csrf_field() }}
+            @include('partials.pagination')
             <div class="col-lg-12">
                 @if (!empty($helpSections))
                     <div class="table-responsive opn-tbl text-center">
@@ -60,17 +60,13 @@
                                             >{{ utrans('custom.edit') }}</a>
                                             <a
                                                 class="link-action"
-                                                href="{{ url('admin/help/section/view/'. $record->id) }}"
+                                                href="{{ url('admin/help/subsection/view/'. $record->id) }}"
                                             >{{ utrans('custom.preview') }}</a>
                                             <a
                                                 class="link-action red"
                                                 href="{{ url('/admin/help/section/delete/'. $record->id) }}"
                                                 data-confirm="{{ __('custom.remove_data') }}"
                                             >{{ __('custom.delete') }}</a>
-                                            <a
-                                                class="link-action"
-                                                href="{{ url('/admin/help/subsections/list/'. $record->id) }}"
-                                            >{{ utrans('custom.subsections') }}</a>
                                         </td>
                                     </tr>
                                 @endforeach

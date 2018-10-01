@@ -25,6 +25,7 @@ class CreatePagesTable extends Migration
             $table->integer('meta_descript')->unsigned()->nullable();
             $table->integer('meta_key_words')->unsigned()->nullable();
             $table->string('forum_link')->nullable();
+            $table->string('help_page')->nullable();
             $table->boolean('active');
             $table->date('valid_from')->nullable();
             $table->date('valid_to')->nullable();

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Role;
 use App\Page;
+use App\Role;
 use App\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Api\SectionController as ApiSection;
+use App\Http\Controllers\Api\HelpController as ApiHelp;
 use App\Http\Controllers\Api\ThemeController as ApiTheme;
+use App\Http\Controllers\Api\SectionController as ApiSection;
 
 class SectionController extends AdminController
 {
@@ -81,16 +82,18 @@ class SectionController extends AdminController
         }
 
         $themes = $this->getColorThemes(true);
+        $helpSections = $this->getHelpSections();
 
         if ($request->has('create')) {
             $rq = Request::create('/api/addSection', 'POST', [
                 'data' => [
-                    'name'       => $request->offsetGet('name'),
-                    'active'     => $request->offsetGet('active'),
-                    'parent_id'  => $request->offsetGet('parent_id'),
-                    'ordering'   => $request->offsetGet('ordering'),
-                    'forum_link' => $request->offsetGet('forum_link'),
-                    'theme'      => $request->offsetGet('theme'),
+                    'name'          => $request->offsetGet('name'),
+                    'active'        => $request->offsetGet('active'),
+                    'parent_id'     => $request->offsetGet('parent_id'),
+                    'ordering'      => $request->offsetGet('ordering'),
+                    'forum_link'    => $request->offsetGet('forum_link'),
+                    'help_section'  => $request->offsetGet('help_section'),
+                    'theme'         => $request->offsetGet('theme'),
                 ]
             ]);
             $api = new ApiSection($rq);
@@ -110,9 +113,10 @@ class SectionController extends AdminController
         return view(
             'admin/sectionAdd',
             [
-                'class'  => 'user',
-                'fields' => self::getSectionTransFields(),
-                'themes' => $themes
+                'class'         => 'user',
+                'fields'        => self::getSectionTransFields(),
+                'themes'        => $themes,
+                'helpSections'  => $helpSections,
             ]
         );
     }
@@ -178,6 +182,7 @@ class SectionController extends AdminController
             $fields = self::getSectionTransFields();
             $model = Section::find($id);
             $themes = $this->getColorThemes(true);
+            $helpSections = $this->getHelpSections();
 
             if (!is_null($model)) {
                 $model = $this->getModelUsernames($model->loadTranslations());
@@ -187,12 +192,13 @@ class SectionController extends AdminController
                 $rq = Request::create('/api/editSection', 'POST', [
                     'id'   => $id,
                     'data' => [
-                        'name'       => $request->offsetGet('name'),
-                        'active'     => $request->offsetGet('active'),
-                        'parent_id'  => $request->offsetGet('parent_id'),
-                        'ordering'   => $request->offsetGet('ordering'),
-                        'forum_link' => $request->offsetGet('forum_link'),
-                        'theme'      => $request->offsetGet('theme'),
+                        'name'          => $request->offsetGet('name'),
+                        'active'        => $request->offsetGet('active'),
+                        'parent_id'     => $request->offsetGet('parent_id'),
+                        'ordering'      => $request->offsetGet('ordering'),
+                        'forum_link'    => $request->offsetGet('forum_link'),
+                        'help_section'  => $request->offsetGet('help_section'),
+                        'theme'         => $request->offsetGet('theme'),
                     ]
                 ]);
 
@@ -210,7 +216,7 @@ class SectionController extends AdminController
                 }
             }
 
-            return view('admin/sectionEdit', compact('class', 'fields', 'model', 'themes'));
+            return view('admin/sectionEdit', compact('class', 'fields', 'model', 'themes', 'helpSections'));
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
@@ -288,5 +294,14 @@ class SectionController extends AdminController
         }
 
         return isset($result->data) ? $result->data : $result;
+    }
+
+    public function getHelpSections()
+    {
+        $rq = Request::create('/api/listHelpSections', 'POST', ['api_key'   => Auth::user()->api_key]);
+        $help = new ApiHelp($rq);
+        $result = $help->listHelpSections($rq)->getData();
+
+        return $result->success ? $result->sections : [];
     }
 }

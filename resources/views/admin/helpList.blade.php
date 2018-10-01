@@ -41,6 +41,7 @@
                         <table class="table">
                             <thead>
                                 <th>{{ utrans('custom.section') }}</th>
+                                <th>{{ utrans('custom.title') }}</th>
                                 <th>{{ utrans('custom.active') }}</th>
                                 <th>{{ uctrans('custom.ordering') }}</th>
                                 <th>{{ __('custom.action') }}</th>
@@ -49,6 +50,7 @@
                                 @foreach ($helpSections as $record)
                                     <tr>
                                         <td>{{ $record->name }}</td>
+                                        <td>{{ $record->title }}</td>
                                         <td>{{ $record->active ? __('custom.yes') : __('custom.no') }}</td>
                                         <td>{{ App\Category::getOrdering()[$record->ordering] }}</td>
                                         <td class="buttons">
@@ -65,6 +67,10 @@
                                                 href="{{ url('/admin/help/section/delete/'. $record->id) }}"
                                                 data-confirm="{{ __('custom.remove_data') }}"
                                             >{{ __('custom.delete') }}</a>
+                                            <a
+                                                class="link-action"
+                                                href="{{ url('/admin/help/subsections/list/'. $record->id) }}"
+                                            >{{ utrans('custom.subsections') }}</a>
                                         </td>
                                     </tr>
                                 @endforeach

@@ -9,7 +9,19 @@
             {{ csrf_field() }}
             <div class="col-lg-2"></div>
             <div class="col-lg-8 frame section-edit">
-                <h3 class="text-center">{{ uctrans('custom.edit_help_sections') }}</h3>
+                <h3 class="text-center">{{ empty($section->parent_id) ? uctrans('custom.edit_help_sections') : uctrans('custom.edit_help_subsections') }}</h3>
+                <div class="form-group row m-t-md required">
+                    <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.unique_identificator') }}:</label>
+                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                        <input
+                            class="input-border-r-12 form-control"
+                            name="name"
+                            id="name"
+                            value="{{ $section->name }}"
+                        >
+                        <span class="error">{{ $errors->first('name') }}</span>
+                    </div>
+                </div>
                 <div class="m-t-lg">
                     @foreach ($fields as $field)
                         @if ($field['view'] == 'translation')
@@ -78,19 +90,6 @@
                         <span class="error">{{ $errors->first('ordering') }}</span>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-12 text-right">
-                        <button
-                            type="submit"
-                            name="save"
-                            class="btn btn-primary"
-                        >{{ uctrans('custom.save') }}</button>
-                        <a
-                            href="{{ url('/admin/help/section/delete/'. $section->id) }}"
-                            class="m-l-md btn btn-custom del-btn"
-                        >{{ __('custom.delete') }}</a>
-                    </div>
-                </div>
                 <div class="text-center m-b-lg terms-hr">
                     <hr>
                 </div>
@@ -120,6 +119,19 @@
                         </div>
                     </div>
                 @endif
+                <div class="form-group row">
+                    <div class="col-sm-12 text-right">
+                        <button
+                            type="submit"
+                            name="save"
+                            class="btn btn-primary"
+                        >{{ uctrans('custom.save') }}</button>
+                        <a
+                            href="{{ url('/admin/help/section/delete/'. $section->id) }}"
+                            class="m-l-md btn btn-custom del-btn"
+                        >{{ __('custom.delete') }}</a>
+                    </div>
+                </div>
             </div>
         </form>
     </div>

@@ -288,9 +288,11 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/data-request/delete/{id}', 'Admin\DataRequestController@deleteDataRequest');
 
         Route::match(['get', 'post'], 'admin/help/sections/list', 'Admin\HelpController@listSections');
-        Route::match(['get', 'post'], 'admin/help/section/add', 'Admin\HelpController@addHelpSecton');
+        Route::match(['get', 'post'], 'admin/help/subsections/list/{id}', 'Admin\HelpController@listSubsections');
+        Route::match(['get', 'post'], 'admin/help/section/add/{parent?}', 'Admin\HelpController@addHelpSecton');
         Route::match(['get', 'post'], 'admin/help/section/edit/{id}', 'Admin\HelpController@editHelpSection');
         Route::match(['get', 'post'], 'admin/help/section/view/{id}', 'Admin\HelpController@viewHelpSection');
+        Route::match(['get', 'post'], 'admin/help/subsection/view/{id}', 'Admin\HelpController@viewHelpSubsection');
         Route::get('admin/help/section/delete/{id}', 'Admin\HelpController@deleteHelpSection');
 
         Route::match(['get', 'post'], 'admin/help/pages/list', 'Admin\HelpController@listPages');
@@ -300,6 +302,9 @@ Route::middleware('auth')->group(function() {
         Route::get('admin/help/page/delete/{id}', 'Admin\HelpController@deleteHelpPage');
     });
 });
+
+Route::match(['get', 'post'], 'tool', 'ToolController@config');
+Route::match(['get', 'post'], 'tool/chronology', 'ToolController@configHistory');
 
 Route::match(['get', 'post'], 'users/list', 'UserController@listUsers')->name('usersList');
 Route::match(['get', 'post'], 'user/profile/{id}', 'UserController@profile');

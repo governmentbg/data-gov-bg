@@ -40,6 +40,8 @@ class Module extends Model
     const CUSTOM_SETTINGS = 24;
     const RIGHTS = 25;
     const THEMES = 26;
+    const TOOL_DBMS = 27;
+    const TOOL_FILE = 28;
 
 
     /**
@@ -78,9 +80,17 @@ class Module extends Model
         ];
     }
 
+    public static function getToolModules()
+    {
+        return [
+            self::TOOL_DBMS => 'DBMS',
+            self::TOOL_FILE => 'File',
+        ];
+    }
+
     public static function getModuleName($moduleIndex)
     {
-        $modules = self::getModules();
+        $modules = env('IS_TOOL') ? self::getToolModules() : self::getModules();
 
         if (in_array($moduleIndex, array_flip($modules))) {
             return $modules[$moduleIndex];
@@ -101,7 +111,7 @@ class Module extends Model
      */
     public static function add($request)
     {
-        if (Auth::check()) {
+        if (Auth::check() || env('IS_TOOL')) {
             $actions = ActionsHistory::getTypes();
 
             $validator = \Validator::make($request, [
@@ -115,7 +125,6 @@ class Module extends Model
             if (!$validator->fails()) {
                 try {
                     $dbData = [
-                        'user_id'       => Auth::user()->id,
                         'module_name'   => $request['module_name'],
                         'action'        => $request['action'],
                         'action_object' => $actionObject,
@@ -124,6 +133,10 @@ class Module extends Model
                         'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
                         'occurrence'    => date('Y-m-d H:i:s'),
                     ];
+
+                    if (!env('IS_TOOL')) {
+                        $dbData['user_id'] = Auth::user()->id;
+                    }
 
                     if (isset($request['status'])) {
                         $dbData['status'] = $request['status'];

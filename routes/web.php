@@ -288,7 +288,7 @@ Route::middleware('auth')->group(function() {
 });
 
 Route::match(['get', 'post'], 'tool', 'ToolController@config');
-Route::match(['get', 'post'], 'toolHistory', 'ToolController@configHistory');
+Route::match(['get', 'post'], 'tool/chronology', 'ToolController@configHistory');
 
 Route::match(['get', 'post'], 'users/list', 'UserController@listUsers')->name('usersList');
 Route::match(['get', 'post'], 'user/profile/{id}', 'UserController@profile');

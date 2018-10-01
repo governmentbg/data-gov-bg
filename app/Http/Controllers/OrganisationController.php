@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Role;
+use App\RoleRight;
 use App\ActionsHistory;
 use App\Module;
 use App\Organisation;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TagController as ApiTag;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\SignalController as ApiSignal;
 use Illuminate\Http\Request;
 
@@ -89,10 +91,14 @@ class OrganisationController extends Controller {
         if ($request->has('sort')) {
             $params['criteria']['order']['field'] = $request->sort;
             $getParams['sort'] = $request->sort;
-            if ($request->has('order')) {
-                $params['criteria']['order']['type'] = $request->order;
-                $getParams['order'] = $request->order;
-            }
+        } else {
+            $params['criteria']['order']['field'] = 'name';
+        }
+        if ($request->has('order')) {
+            $params['criteria']['order']['type'] = $request->order;
+            $getParams['order'] = $request->order;
+        } else {
+            $params['criteria']['order']['type'] = 'asc';
         }
 
         // list organisations
@@ -105,6 +111,33 @@ class OrganisationController extends Controller {
 
         $paginationData = $this->getPaginationData($organisations, $count, $getParams, $perPage);
 
+        $buttons = [];
+        if (\Auth::check()) {
+            // check rights for add button
+            $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_EDIT);
+            $buttons['add'] = $rightCheck;
+
+            foreach ($paginationData['items'] as $organisation) {
+                $checkData = [
+                    'org_id' => $organisation->id
+                ];
+                $objData = [
+                    'org_id'      => $organisation->id,
+                    'created_by'  => $organisation->created_by
+                ];
+
+                // check rights for edit button
+                $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                $buttons[$organisation->id]['edit'] = $rightCheck;
+
+                // check rights for delete button
+                $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons[$organisation->id]['delete'] = $rightCheck;
+            }
+
+            $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
+        }
+
         return view(
             'organisation.list',
             [
@@ -113,6 +146,7 @@ class OrganisationController extends Controller {
                 'pagination'    => $paginationData['paginate'],
                 'orgTypes'      => $orgTypes,
                 'getParams'     => $getParams,
+                'buttons'       => $buttons
             ]
         );
     }
@@ -125,17 +159,20 @@ class OrganisationController extends Controller {
             'org_uri' => $uri,
             'locale'  => $locale
         ];
+
         $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
         $api = new ApiOrganisation($rq);
-        $result = $api->getOrganisationDetails($rq)->getData();
+        $res = $api->getOrganisationDetails($rq)->getData();
+        $organisation = !empty($res->data) ? $res->data : [];
 
-        if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active == Organisation::ACTIVE_TRUE &&
-            $result->data->approved == Organisation::APPROVED_TRUE) {
+        if (!empty($organisation) &&
+            $organisation->active == Organisation::ACTIVE_TRUE &&
+            $organisation->approved == Organisation::APPROVED_TRUE) {
 
+            // get child organisations
             $params = [
                 'criteria'     => [
-                    'org_id'   => $result->data->id,
+                    'org_id'   => $organisation->id,
                     'active'   => Organisation::ACTIVE_TRUE,
                     'approved' => Organisation::APPROVED_TRUE,
                     'locale'   => $locale
@@ -144,12 +181,13 @@ class OrganisationController extends Controller {
             $rq = Request::create('/api/listOrganisations', 'POST', $params);
             $api = new ApiOrganisation($rq);
             $res = $api->listOrganisations($rq)->getData();
-            $childOrgs = $res->success ? $res->organisations : [];
+            $childOrgs = !empty($res->organisations) ? $res->organisations : [];
 
             $parentOrg = null;
-            if (isset($result->data->parent_org_id)) {
+            if (isset($organisation->parent_org_id)) {
+                // get parent organisation details
                 $params = [
-                    'org_id' => $result->data->parent_org_id,
+                    'org_id' => $organisation->parent_org_id,
                     'locale' => $locale
                 ];
                 $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
@@ -160,66 +198,175 @@ class OrganisationController extends Controller {
                 }
             }
 
-            $followed = false;
-            if ($user = \Auth::user()) {
-                $params = [
-                    'api_key' => $user->api_key,
-                    'id'      => $user->id
-                ];
-                $rq = Request::create('/api/getUserSettings', 'POST', $params);
-                $api = new ApiUser($rq);
-                $res = $api->getUserSettings($rq)->getData();
-                if (!empty($res->user) && !empty($res->user->follows)) {
-                    $followedOgrs = array_where(array_pluck($res->user->follows, 'org_id'), function ($value, $key) {
-                        return !is_null($value);
-                    });
-                    if (in_array($result->data->id, $followedOgrs)) {
-                        $followed = true;
+            $buttons = [];
+            if ($authUser = \Auth::user()) {
+                $objData = ['object_id' => $authUser->id];
+                $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+                if ($rightCheck) {
+                    $userData = [
+                        'api_key' => $authUser->api_key,
+                        'id'      => $authUser->id
+                    ];
+
+                    // get followed organisations
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'org_id', $followed)) {
+                        if (!in_array($organisation->id, $followed)) {
+                            $buttons['follow'] = true;
+                        } else {
+                            $buttons['unfollow'] = true;
+                        }
+
+                        // follow / unfollow organisation
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'org_id', [$organisation->id]);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
                     }
                 }
 
-                if (!$followed) {
-                    if ($request->has('follow')) {
-                        $followRq = Request::create('api/addFollow', 'POST', [
-                            'api_key' => $user->api_key,
-                            'user_id' => $user->id,
-                            'org_id'  => $result->data->id,
-                        ]);
-                        $apiFollow = new ApiFollow($followRq);
-                        $followResult = $apiFollow->addFollow($followRq)->getData();
-                        if ($followResult->success) {
-                            return back();
-                        }
-                    }
-                } else {
-                    if ($request->has('unfollow')) {
-                        $followRq = Request::create('api/unFollow', 'POST', [
-                            'api_key' => $user->api_key,
-                            'user_id' => $user->id,
-                            'org_id'  => $result->data->id,
-                        ]);
-                        $apiFollow = new ApiFollow($followRq);
-                        $followResult = $apiFollow->unFollow($followRq)->getData();
-                        if ($followResult->success) {
-                            return back();
-                        }
-                    }
-                }
+                $checkData = [
+                    'org_id' => $organisation->id
+                ];
+                $objData = [
+                    'org_id'      => $organisation->id,
+                    'created_by'  => $organisation->created_by
+                ];
+
+                // check rights for edit button
+                $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                $buttons['edit'] = $rightCheck;
+
+                // check rights for delete button
+                $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons['delete'] = $rightCheck;
+
+                $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
             }
 
             return view(
                 'organisation/profile',
                 [
                     'class'        => 'organisation',
-                    'organisation' => $result->data,
+                    'organisation' => $organisation,
                     'childOrgs'    => $childOrgs,
                     'parentOrg'    => $parentOrg,
-                    'followed'     => $followed
+                    'buttons'      => $buttons
                 ]
             );
         }
 
         return redirect()->back();
+    }
+
+    private function getFollowed($userData, $followType, &$followed)
+    {
+        $followed = [];
+
+        $rq = Request::create('/api/getUserSettings', 'POST', $userData);
+        $api = new ApiUser($rq);
+        $res = $api->getUserSettings($rq)->getData();
+
+        if (isset($res->user) && !empty($res->user)) {
+            if (!empty($res->user->follows)) {
+                $followed = array_where(array_pluck($res->user->follows, $followType), function ($value, $key) {
+                    return !is_null($value);
+                });
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function followObject($followReq, $userData, $followed, $followType, $objIds)
+    {
+        $followResult = null;
+
+        if (isset($followReq['follow'])) {
+            // follow object
+            if (in_array($followReq['follow'], $objIds) && !in_array($followReq['follow'], $followed)) {
+                $followRq = Request::create('api/addFollow', 'POST', [
+                    'api_key'    => $userData['api_key'],
+                    'user_id'    => $userData['id'],
+                    $followType  => $followReq['follow'],
+                ]);
+                $apiFollow = new ApiFollow($followRq);
+                $followResult = $apiFollow->addFollow($followRq)->getData();
+            }
+        } elseif (isset($followReq['unfollow'])) {
+            // unfollow object
+            if (in_array($followReq['unfollow'], $objIds) && in_array($followReq['unfollow'], $followed)) {
+                $followRq = Request::create('api/unFollow', 'POST', [
+                    'api_key'    => $userData['api_key'],
+                    'user_id'    => $userData['id'],
+                    $followType  => $followReq['unfollow'],
+                ]);
+                $apiFollow = new ApiFollow($followRq);
+                $followResult = $apiFollow->unFollow($followRq)->getData();
+            }
+        }
+
+        return $followResult;
+    }
+
+    /**
+     * Deletes an organisation
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return view to previous page
+     */
+    public function delete(Request $request)
+    {
+        if (\Auth::check() && $request->has('delete') && $request->has('org_uri')) {
+            $rq = Request::create('/api/getOrganisationDetails', 'POST', ['org_uri' => $request->org_uri]);
+            $api = new ApiOrganisation($rq);
+            $res = $api->getOrganisationDetails($rq)->getData();
+            $organisation = !empty($res->data) ? $res->data : [];
+
+            if (empty($organisation)) {
+                return redirect()->back();
+            }
+
+            // check delete rights
+            $checkData = [
+                'org_id' => $organisation->id
+            ];
+            $objData = [
+                'org_id'      => $organisation->id,
+                'created_by'  => $organisation->created_by
+            ];
+            $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+            if (!$rightCheck) {
+                return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
+            }
+
+            $params = [
+                'api_key'   => \Auth::user()->api_key,
+                'org_id'    => $organisation->id,
+            ];
+
+            $delReq = Request::create('/api/deleteOrganisation', 'POST', $params);
+            $api = new ApiOrganisation($delReq);
+            $result = $api->deleteOrganisation($delReq)->getData();
+
+            if (isset($result->success) && $result->success) {
+                $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                return redirect()->route('organisations', array_except($request->query(), ['page']));
+            }
+
+            $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
+
+            return redirect()->back();
+        }
+
+        return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));
     }
 
     public function datasets(Request $request, $uri)
@@ -233,14 +380,15 @@ class OrganisationController extends Controller {
         ];
         $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
         $api = new ApiOrganisation($rq);
-        $result = $api->getOrganisationDetails($rq)->getData();
+        $res = $api->getOrganisationDetails($rq)->getData();
+        $organisation = !empty($res->data) ? $res->data : [];
 
-        if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active == Organisation::ACTIVE_TRUE &&
-            $result->data->approved == Organisation::APPROVED_TRUE) {
+        if (!empty($organisation) &&
+            $organisation->active == Organisation::ACTIVE_TRUE &&
+            $organisation->approved == Organisation::APPROVED_TRUE) {
 
             $criteria = [
-                'org_ids' => [$result->data->id]
+                'org_ids' => [$organisation->id]
             ];
 
             // filters
@@ -322,7 +470,7 @@ class OrganisationController extends Controller {
 
             $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
 
-            $followed = [];
+            $buttons = [];
 
             if (!empty($paginationData['items'])) {
                 $recordsLimit = 10;
@@ -417,49 +565,83 @@ class OrganisationController extends Controller {
 
                 $this->prepareDisplayParams(count($termsOfUse), $hasLimit, $recordsLimit, 'license', $display);
 
-                // follow / unfollow dataset
-                if ($user = \Auth::user()) {
-                    // get user follows
-                    $params = [
-                        'api_key' => $user->api_key,
-                        'id'      => $user->id
-                    ];
-                    $rq = Request::create('/api/getUserSettings', 'POST', $params);
-                    $api = new ApiUser($rq);
-                    $res = $api->getUserSettings($rq)->getData();
-                    if (!empty($res->user) && !empty($res->user->follows)) {
-                        $followed = array_where(array_pluck($res->user->follows, 'dataset_id'), function ($value, $key) {
-                            return !is_null($value);
-                        });
-                    }
+                if ($authUser = \Auth::user()) {
+                    $objData = ['object_id' => $authUser->id];
+                    $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+                    if ($rightCheck) {
+                        $userData = [
+                            'api_key' => $authUser->api_key,
+                            'id'      => $authUser->id
+                        ];
 
-                    $datasetIds = array_pluck($paginationData['items'], 'id');
+                        // get followed categories
+                        $followed = [];
+                        if ($this->getFollowed($userData, 'category_id', $followed)) {
+                            foreach ($getParams['category'] as $selCategory) {
+                                if (!in_array($selCategory, $followed)) {
+                                    $buttons[$selCategory]['followCategory'] = true;
+                                } else {
+                                    $buttons[$selCategory]['unfollowCategory'] = true;
+                                }
+                            }
 
-                    if ($request->has('follow')) {
-                        // follow dataset
-                        if (in_array($request->follow, $datasetIds) && !in_array($request->follow, $followed)) {
-                            $followRq = Request::create('api/addFollow', 'POST', [
-                                'api_key' => $user->api_key,
-                                'user_id' => $user->id,
-                                'data_set_id' => $request->follow,
-                            ]);
-                            $apiFollow = new ApiFollow($followRq);
-                            $followResult = $apiFollow->addFollow($followRq)->getData();
-                            if ($followResult->success) {
+                            // follow / unfollow category
+                            $followReq = [];
+                            if ($request->has('followCategory')) {
+                                $followReq['follow'] = $request->followCategory;
+                            } elseif ($request->has('unfollowCategory')) {
+                                $followReq['unfollow'] = $request->unfollowCategory;
+                            }
+                            $followResult = $this->followObject($followReq, $userData, $followed, 'category_id', $getParams['category']);
+                            if (!empty($followResult) && $followResult->success) {
                                 return back();
                             }
                         }
-                    } elseif ($request->has('unfollow')) {
-                        // unfollow dataset
-                        if (in_array($request->unfollow, $datasetIds) && in_array($request->unfollow, $followed)) {
-                            $followRq = Request::create('api/unFollow', 'POST', [
-                                'api_key' => $user->api_key,
-                                'user_id' => $user->id,
-                                'data_set_id' => $request->unfollow,
-                            ]);
-                            $apiFollow = new ApiFollow($followRq);
-                            $followResult = $apiFollow->unFollow($followRq)->getData();
-                            if ($followResult->success) {
+
+                        // get followed tags
+                        $followed = [];
+                        if ($this->getFollowed($userData, 'tag_id', $followed)) {
+                            foreach ($getParams['tag'] as $selTag) {
+                                if (!in_array($selTag, $followed)) {
+                                    $buttons[$selTag]['followTag'] = true;
+                                } else {
+                                    $buttons[$selTag]['unfollowTag'] = true;
+                                }
+                            }
+
+                            // follow / unfollow tag
+                            $followReq = [];
+                            if ($request->has('followTag')) {
+                                $followReq['follow'] = $request->followTag;
+                            } elseif ($request->has('unfollowTag')) {
+                                $followReq['unfollow'] = $request->unfollowTag;
+                            }
+                            $followResult = $this->followObject($followReq, $userData, $followed, 'tag_id', $getParams['tag']);
+                            if (!empty($followResult) && $followResult->success) {
+                                return back();
+                            }
+                        }
+
+                        // get followed datasets
+                        $followed = [];
+                        if ($this->getFollowed($userData, 'dataset_id', $followed)) {
+                            $datasetIds = array_pluck($paginationData['items'], 'id');
+                            foreach ($datasetIds as $datasetId) {
+                                $buttons[$datasetId] = [
+                                    'follow'   => false,
+                                    'unfollow' => false,
+                                ];
+                                if (!in_array($datasetId, $followed)) {
+                                    $buttons[$datasetId]['follow'] = true;
+                                } else {
+                                    $buttons[$datasetId]['unfollow'] = true;
+                                }
+                            }
+
+                            // follow / unfollow dataset
+                            $followReq = $request->only(['follow', 'unfollow']);
+                            $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
+                            if (!empty($followResult) && $followResult->success) {
                                 return back();
                             }
                         }
@@ -467,12 +649,20 @@ class OrganisationController extends Controller {
                 }
             }
 
+            if  (\Auth::check()) {
+                // check rights for add button
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
+                $buttons['add'] = $rightCheck;
+
+                $buttons['addUrl'] = 'user/organisations/dataset/create/'. $organisation->uri;
+            }
+
             return view(
                 'organisation/datasets',
                 [
                     'class'              => 'organisation',
-                    'organisation'       => $result->data,
-                    'approved'           => ($result->data->type == Organisation::TYPE_COUNTRY),
+                    'organisation'       => $organisation,
+                    'approved'           => ($organisation->type == Organisation::TYPE_COUNTRY),
                     'datasets'           => $paginationData['items'],
                     'resultsCount'       => $count,
                     'pagination'         => $paginationData['paginate'],
@@ -482,7 +672,7 @@ class OrganisationController extends Controller {
                     'termsOfUse'         => $termsOfUse,
                     'getParams'          => $getParams,
                     'display'            => $display,
-                    'followed'           => $followed
+                    'buttons'            => $buttons
                 ]
             );
         }
@@ -516,7 +706,7 @@ class OrganisationController extends Controller {
         $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($rq);
         $res = $api->getDataSetDetails($rq)->getData();
-        $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
+        $dataset = !empty($res->data) ? $res->data : [];
 
         if (!empty($dataset) && isset($dataset->org_id) &&
             $dataset->status == DataSet::STATUS_PUBLISHED &&
@@ -535,6 +725,37 @@ class OrganisationController extends Controller {
             if (!empty($organisation) &&
                 $organisation->active == Organisation::ACTIVE_TRUE &&
                 $organisation->approved == Organisation::APPROVED_TRUE) {
+
+                if (\Auth::check() && $request->has('delete')) {
+                    // check delete rights
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $dataset->created_by
+                    ];
+                    $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                    if ($rightCheck) {
+                        $params = [
+                            'api_key'      => \Auth::user()->api_key,
+                            'dataset_uri'  => $dataset->uri,
+                        ];
+
+                        $delReq = Request::create('/api/deleteDataset', 'POST', $params);
+                        $api = new ApiDataSet($delReq);
+                        $result = $api->deleteDataset($delReq)->getData();
+
+                        if (isset($result->success) && $result->success) {
+                            $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+
+                            return redirect()->route('orgDatasets', array_merge(array_except($request->query(), ['page']), ['uri' => $organisation->uri]));
+                        }
+
+                        $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
+                    }
+                }
 
                 $params = [
                     'criteria' => [
@@ -572,6 +793,61 @@ class OrganisationController extends Controller {
                     $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
                 }
 
+                $buttons = [];
+                if ($authUser = \Auth::user()) {
+                    $objData = ['object_id' => $authUser->id];
+                    $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+                    if ($rightCheck) {
+                        $userData = [
+                            'api_key' => $authUser->api_key,
+                            'id'      => $authUser->id
+                        ];
+
+                        // get followed datasets
+                        $followed = [];
+                        if ($this->getFollowed($userData, 'dataset_id', $followed)) {
+                            if (!in_array($dataset->id, $followed)) {
+                                $buttons['follow'] = true;
+                            } else {
+                                $buttons['unfollow'] = true;
+                            }
+
+                            // follow / unfollow dataset
+                            $followReq = $request->only(['follow', 'unfollow']);
+                            $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
+                            if (!empty($followResult) && $followResult->success) {
+                                return back();
+                            }
+                        }
+                    }
+
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $dataset->created_by
+                    ];
+
+                    // check rights for add resource button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                    $buttons['addResource'] = $rightCheck;
+
+                    // check rights for edit button
+                    $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                    $buttons['edit'] = $rightCheck;
+
+                    // check rights for delete button
+                    $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                    $buttons['delete'] = $rightCheck;
+
+                    $buttons['addResourceRootUrl'] = 'user/organisation/dataset';
+                    $buttons['parentUri'] = $organisation->uri;
+                    $buttons['editRootUrl'] = 'user/organisation/'. $organisation->uri .'/datasets';
+                }
+
+                $dataset = $this->getModelUsernames($dataset);
+
                 return view(
                     'organisation/viewDataset',
                     [
@@ -579,7 +855,8 @@ class OrganisationController extends Controller {
                         'organisation'   => $organisation,
                         'approved'       => ($organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'        => $dataset,
-                        'resources'      => $resources
+                        'resources'      => $resources,
+                        'buttons'        => $buttons
                     ]
                 );
             }
@@ -588,7 +865,7 @@ class OrganisationController extends Controller {
         return redirect()->back();
     }
 
-    public function resourceView(Request $request, $uri)
+    public function resourceView(Request $request, $uri, $version = null)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
@@ -599,7 +876,7 @@ class OrganisationController extends Controller {
         $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
-        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+        $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
             // get dataset details
@@ -633,18 +910,84 @@ class OrganisationController extends Controller {
                     // set resource format code
                     $resource->format_code = Resource::getFormatsCode($resource->file_format);
 
+                    if (empty($version)) {
+                        $version = $resource->version;
+                    }
+
+                    if (\Auth::check() && $request->has('delete')) {
+                        // check delete rights
+                        $checkData = [
+                            'org_id' => $dataset->org_id
+                        ];
+                        $objData = [
+                            'org_id'      => $dataset->org_id,
+                            'created_by'  => $resource->created_by
+                        ];
+                        $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                        if ($rightCheck) {
+                            $params = [
+                                'api_key'       => \Auth::user()->api_key,
+                                'resource_uri'  => $resource->uri,
+                            ];
+
+                            $delReq = Request::create('/api/deleteResource', 'POST', $params);
+                            $api = new ApiResource($delReq);
+                            $result = $api->deleteResource($delReq)->getData();
+
+                            if (isset($result->success) && $result->success) {
+                                $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                                return redirect()->route('orgViewDataset', array_merge($request->query(), ['uri' => $dataset->uri]));
+                            }
+
+                            $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
+                        }
+                    }
+
                     // get resource data
-                    $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri]);
+                    $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri, 'version' => $version]);
                     $api = new ApiResource($rq);
                     $res = $api->getResourceData($rq)->getData();
                     $data = !empty($res->data) ? $res->data : [];
 
-                    $userData = [];
-                    if (\Auth::check()) {
-                        $userData['firstname'] =  \Auth::user()->firstname;
-                        $userData['lastname'] =  \Auth::user()->lastname;
-                        $userData['email'] =  \Auth::user()->email;
+                    if ($resource->format_code == Resource::FORMAT_XML) {
+                        $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
+                        $apiConvert = new ApiConversion($reqConvert);
+                        $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                        $data = isset($resultConvert->data) ? $resultConvert->data : [];
                     }
+
+                    $userData = [];
+                    $buttons = [];
+                    if ($authUser = \Auth::user()) {
+                        $userData['firstname'] = $authUser->firstname;
+                        $userData['lastname'] = $authUser->lastname;
+                        $userData['email'] = $authUser->email;
+
+                        $checkData = [
+                            'org_id' => $dataset->org_id
+                        ];
+                        $objData = [
+                            'org_id'      => $dataset->org_id,
+                            'created_by'  => $resource->created_by
+                        ];
+
+                        // check rights for update / edit buttons
+                        $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                        $buttons['update'] = $rightCheck;
+                        $buttons['edit'] = $rightCheck;
+
+                        // check rights for delete button
+                        $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+                        $buttons['delete'] = $rightCheck;
+
+                        $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
+                        $buttons['parentUri'] = $organisation->uri;
+                    }
+
+                    $dataset = $this->getModelUsernames($dataset);
+                    $resource = $this->getModelUsernames($resource);
 
                     return view(
                         'organisation/resourceView',
@@ -655,7 +998,9 @@ class OrganisationController extends Controller {
                             'dataset'        => $dataset,
                             'resource'       => $resource,
                             'data'           => $data,
-                            'userData'       => $userData
+                            'versionView'    => $version,
+                            'userData'       => $userData,
+                            'buttons'        => $buttons
                         ]
                     );
                 }
@@ -695,15 +1040,24 @@ class OrganisationController extends Controller {
 
         $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
         $api = new ApiOrganisation($rq);
-        $result = $api->getOrganisationDetails($rq)->getData();
+        $res = $api->getOrganisationDetails($rq)->getData();
+        $organisation = !empty($res->data) ? $res->data : [];
 
-        if (isset($result->success) && $result->success && !empty($result->data) &&
-            $result->data->active == Organisation::ACTIVE_TRUE &&
-            $result->data->approved == Organisation::APPROVED_TRUE) {
+        if (!empty($organisation) &&
+            $organisation->active == Organisation::ACTIVE_TRUE &&
+            $organisation->approved == Organisation::APPROVED_TRUE) {
+
+            // set object owner
+            $objOwner = [
+                'id' => $organisation->id,
+                'name' => $organisation->name,
+                'logo' => $organisation->logo,
+                'view' => '/organisation/profile/'. $organisation->uri
+            ];
 
             $params = [
                 'criteria' => [
-                    'org_ids' => [$result->data->id],
+                    'org_ids' => [$organisation->id],
                     'locale' => $locale
                 ]
             ];
@@ -712,18 +1066,22 @@ class OrganisationController extends Controller {
             $res = $api->listDatasets($rq)->getData();
 
             $criteria = [
-                'org_ids' => [$result->data->id]
+                'org_ids' => [$organisation->id]
             ];
 
             $objType = Module::getModuleName(Module::ORGANISATIONS);
             $actObjData[$objType] = [];
-            $actObjData[$objType][$result->data->id] = [
-                'obj_id'        => $result->data->uri,
-                'obj_name'      => $result->data->name,
-                'obj_module'    => ultrans('custom.organisations'),
-                'obj_type'      => 'org',
-                'obj_view'      => '/organisation/profile/'. $result->data->uri,
-                'parent_obj_id' => ''
+            $actObjData[$objType][$organisation->id] = [
+                'obj_id'         => $organisation->uri,
+                'obj_name'       => $organisation->name,
+                'obj_module'     => ultrans('custom.organisations'),
+                'obj_type'       => 'org',
+                'obj_view'       => '/organisation/profile/'. $organisation->uri,
+                'parent_obj_id'  => '',
+                'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
             ];
 
             if (isset($res->success) && $res->success && !empty($res->datasets)) {
@@ -734,12 +1092,16 @@ class OrganisationController extends Controller {
                 foreach ($res->datasets as $dataset) {
                     $criteria['dataset_ids'][] = $dataset->id;
                     $actObjData[$objType][$dataset->id] = [
-                        'obj_id'        => $dataset->uri,
-                        'obj_name'      => $dataset->name,
-                        'obj_module'    => ultrans('custom.dataset'),
-                        'obj_type'      => 'dataset',
-                        'obj_view'      => '/data/view/'. $dataset->uri,
-                        'parent_obj_id' => ''
+                        'obj_id'         => $dataset->uri,
+                        'obj_name'       => $dataset->name,
+                        'obj_module'     => ultrans('custom.dataset'),
+                        'obj_type'       => 'dataset',
+                        'obj_view'       => '/data/view/'. $dataset->uri,
+                        'parent_obj_id'  => '',
+                        'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                        'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                        'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                        'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
                     ];
 
                     if (!empty($dataset->resource)) {
@@ -755,7 +1117,11 @@ class OrganisationController extends Controller {
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => ultrans('custom.dataset'),
                                 'parent_obj_type'   => 'dataset',
-                                'parent_obj_view'   => '/data/view/'. $dataset->uri
+                                'parent_obj_view'   => '/data/view/'. $dataset->uri,
+                                'obj_owner_id'      => isset($objOwner['id']) ? $objOwner['id'] : '',
+                                'obj_owner_name'    => isset($objOwner['name']) ? $objOwner['name'] : '',
+                                'obj_owner_logo'    => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                                'obj_owner_view'    => isset($objOwner['view']) ? $objOwner['view'] : ''
                             ];
                         }
                     }
@@ -799,13 +1165,145 @@ class OrganisationController extends Controller {
                 'organisation/chronology',
                 [
                     'class'          => 'organisation',
-                    'organisation'   => $result->data,
-                    'chronology'     => !empty($paginationData) ? $paginationData['items'] : [],
-                    'pagination'     => !empty($paginationData) ? $paginationData['paginate'] : [],
+                    'organisation'   => $organisation,
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
-                    'actionTypes'    => $actTypes,
+                    'actionTypes'    => $actTypes
                 ]
             );
+        }
+
+        return redirect()->back();
+    }
+
+    public function datasetChronology(Request $request, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        // get dataset details
+        $params = [
+            'dataset_uri' => $uri,
+            'locale'      => $locale
+        ];
+        $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $res = $api->getDataSetDetails($rq)->getData();
+        $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
+
+        if (!empty($dataset) && isset($dataset->org_id) &&
+            $dataset->status == DataSet::STATUS_PUBLISHED &&
+            $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+
+            // get organisation details
+            $params = [
+                'org_id' => $dataset->org_id,
+                'locale'  => $locale
+            ];
+            $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+            $api = new ApiOrganisation($rq);
+            $res = $api->getOrganisationDetails($rq)->getData();
+            $organisation = !empty($res->data) ? $res->data : [];
+
+            if (!empty($organisation) &&
+                $organisation->active == Organisation::ACTIVE_TRUE &&
+                $organisation->approved == Organisation::APPROVED_TRUE) {
+
+                // set object owner
+                $objOwner = [
+                    'id' => $organisation->id,
+                    'name' => $organisation->name,
+                    'logo' => $organisation->logo,
+                    'view' => '/organisation/profile/'. $organisation->uri
+                ];
+
+                $objType = Module::getModuleName(Module::DATA_SETS);
+                $objTypeRes = Module::getModuleName(Module::RESOURCES);
+                $actObjData[$objType] = [];
+
+                $criteria = [];
+                $criteria['dataset_ids'][] = $dataset->id;
+                $actObjData[$objType][$dataset->id] = [
+                    'obj_id'         => $dataset->uri,
+                    'obj_name'       => $dataset->name,
+                    'obj_module'     => ultrans('custom.dataset'),
+                    'obj_type'       => 'dataset',
+                    'obj_view'       => '/data/view/'. $dataset->uri,
+                    'parent_obj_id'  => '',
+                    'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                    'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                    'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                    'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
+                ];
+
+                if (!empty($dataset->resource)) {
+                    foreach ($dataset->resource as $resource) {
+                        $criteria['resource_uris'][] = $resource->uri;
+                        $actObjData[$objTypeRes][$resource->uri] = [
+                            'obj_id'            => $resource->uri,
+                            'obj_name'          => $resource->name,
+                            'obj_module'        => ultrans('custom.resource'),
+                            'obj_type'          => 'resource',
+                            'obj_view'          => '/data/resourceView/'. $resource->uri,
+                            'parent_obj_id'     => $dataset->uri,
+                            'parent_obj_name'   => $dataset->name,
+                            'parent_obj_module' => ultrans('custom.dataset'),
+                            'parent_obj_type'   => 'dataset',
+                            'parent_obj_view'   => '/data/view/'. $dataset->uri,
+                            'obj_owner_id'      => isset($objOwner['id']) ? $objOwner['id'] : '',
+                            'obj_owner_name'    => isset($objOwner['name']) ? $objOwner['name'] : '',
+                            'obj_owner_logo'    => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                            'obj_owner_view'    => isset($objOwner['view']) ? $objOwner['view'] : ''
+                        ];
+                    }
+                }
+
+                $paginationData = [];
+                $actTypes = [];
+
+                if (!empty($criteria)) {
+                    $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionTypes($rq)->getData();
+
+                    if ($res->success && !empty($res->types)) {
+                        $linkWords = ActionsHistory::getTypesLinkWords();
+                        foreach ($res->types as $type) {
+                            $actTypes[$type->id] = [
+                                'name'     => $type->name,
+                                'linkWord' => $linkWords[$type->id]
+                            ];
+                        }
+
+                        $criteria['actions'] = array_keys($actTypes);
+                        $perPage = 10;
+                        $params = [
+                            'criteria'         => $criteria,
+                            'records_per_page' => $perPage,
+                            'page_number'      => !empty($request->page) ? $request->page : 1,
+                        ];
+
+                        $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                        $api = new ApiActionsHistory($rq);
+                        $res = $api->listActionHistory($rq)->getData();
+                        $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                        $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                    }
+                }
+
+                return view(
+                    'organisation/datasetChronology',
+                    [
+                        'class'          => 'organisation',
+                        'organisation'   => $organisation,
+                        'dataset'        => $dataset,
+                        'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                        'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
+                        'actionObjData'  => $actObjData,
+                        'actionTypes'    => $actTypes
+                    ]
+                );
+            }
         }
 
         return redirect()->back();

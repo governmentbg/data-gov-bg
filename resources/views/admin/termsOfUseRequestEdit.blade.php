@@ -15,7 +15,7 @@
                         <form method="POST" class="form-horisontal">
                             {{ csrf_field() }}
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="firstname" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.name') }}</label>
+                                <label for="firstname" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.name') }}:</label>
                                 <div class="col-sm-9">
                                     <input
                                         name="firstname"
@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="lastname" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.lastname') }}</label>
+                                <label for="lastname" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.lastname') }}:</label>
                                 <div class="col-sm-9">
                                     <input
                                         name="lastname"
@@ -47,7 +47,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.email') }}</label>
+                                <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.email') }}:</label>
                                 <div class="col-sm-9">
                                     <input
                                         name="email"
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.description') }}</label>
+                                <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.description') }}:</label>
                                 <div class="col-sm-9">
                                     <textarea
                                         name="description"

@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="container">
-    <div class="col-xs-12 p-h-sm">
+    <div class="col-xs-12 m-l-sm">
         <div class="row">
-             <div class="col-sm-offset-3 filter-content">
-                <div class="col-md-12">
+            <div class="col-sm-9 col-xs-12 p-sm col-sm-offset-3">
+                <div class="filter-content">
                     <div class="row">
                         <div class="col-xs-12 p-l-r-none">
                             <div>
@@ -106,28 +106,59 @@
                                     </div>
                                 @endif
                                 <div class="col-sm-4 col-xs-12 pull-right text-right">
-                                    @auth
-                                        <form method="post">
-                                            {{ csrf_field() }}
-                                            @if (!$followed)
-                                                <div class="row">
-                                                    <button
-                                                        class="btn btn-primary pull-right"
-                                                        type="submit"
-                                                        name="follow"
-                                                    >{{ utrans('custom.follow') }}</button>
-                                                </div>
-                                            @else
-                                                <div class="row">
-                                                    <button
-                                                        class="btn btn-primary pull-right"
-                                                        type="submit"
-                                                        name="unfollow"
-                                                    >{{ uctrans('custom.stop_follow') }}</button>
-                                                </div>
-                                            @endif
-                                        </form>
-                                    @endauth
+                                    <form method="post">
+                                        {{ csrf_field() }}
+                                        @if (isset($buttons['follow']) && $buttons['follow'])
+                                            <div class="row">
+                                                <button
+                                                    class="btn btn-primary pull-right m-r-xs"
+                                                    type="submit"
+                                                    name="follow"
+                                                    value="{{ $organisation->id }}"
+                                                >{{ utrans('custom.follow') }}</button>
+                                            </div>
+                                        @elseif (isset($buttons['unfollow']) && $buttons['unfollow'])
+                                            <div class="row">
+                                                <button
+                                                    class="btn btn-primary pull-right"
+                                                    type="submit"
+                                                    name="unfollow"
+                                                    value="{{ $organisation->id }}"
+                                                >{{ uctrans('custom.stop_follow') }}</button>
+                                            </div>
+                                        @endif
+                                    </form>
+                                </div>
+                                <div class="col-xs-12 view-btns p-h-md">
+                                    <div class="row">
+                                        @if (isset($buttons['edit']) && $buttons['edit'])
+                                            <form
+                                                method="POST"
+                                                class="inline-block"
+                                                action="{{ url('/'. $buttons['rootUrl'] .'/organisations/edit/'. $organisation->uri) }}"
+                                            >
+                                                {{ csrf_field() }}
+                                                <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                                <input type="hidden" name="view" value="1">
+                                            </form>
+                                        @endif
+                                        @if (isset($buttons['delete']) && $buttons['delete'])
+                                            <form
+                                                method="POST"
+                                                class="inline-block"
+                                                action="{{ route('orgDelete', array_except(app('request')->input(), ['page'])) }}"
+                                            >
+                                                {{ csrf_field() }}
+                                                <button
+                                                    class="btn del-btn btn-primary del-btn"
+                                                    type="submit"
+                                                    name="delete"
+                                                    data-confirm="{{ __('custom.delete_organisation_confirm') }}"
+                                                >{{ uctrans('custom.remove') }}</button>
+                                                <input class="user-org-del" type="hidden" name="org_uri" value="{{ $organisation->uri }}">
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>

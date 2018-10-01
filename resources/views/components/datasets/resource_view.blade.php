@@ -4,7 +4,10 @@
         <div class="col-sm-12 p-l-none">
             <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
             <p>
-                {{ utrans('custom.version') }}:&nbsp;{{ $resource->version }}
+                {{ utrans('custom.version_current') }}:&nbsp;{{ $resource->version }}
+            </p>
+            <p>
+                {{ utrans('custom.version_displayed') }}:&nbsp;{{ $versionView }}
             </p>
             @if (!empty($admin))
                 <p>
@@ -25,7 +28,7 @@
             @if (!empty($resource->resource_url))
                 <p><strong>{{ uctrans('custom.url') }}:</strong></p>
                 <div class="m-b-sm">
-                    {{ $resource->resource_url }}
+                    <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
                 </div>
             @endif
 
@@ -63,6 +66,15 @@
                     {{ $resource->schema_url }}
                 </div>
             @endif
+            @if (!empty($resource->custom_settings))
+                <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                @foreach ($resource->custom_settings as $field)
+                    <div class="row m-b-lg">
+                        <div class="col-xs-6">{{ $field->key }}</div>
+                        <div class="col-xs-6 text-left">{{ $field->value }}</div>
+                    </div>
+                @endforeach
+            @endif
         </div>
         <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
             <ul class="p-l-none">
@@ -74,25 +86,41 @@
                 @endif
             </ul>
         </div>
-        <div class="col-sm-12 m-t-lg p-l-r-none">
-            @include('partials.resource-visualisation')
-        </div>
+        @if ($resource->resource_type !== \App\Resource::TYPE_HYPERLINK)
+            <div class="col-sm-12 m-t-lg p-l-r-none">
+                @include('partials.resource-visualisation')
+            </div>
+        @endif
         <div class="col-sm-12 p-l-none">
             <div class="col-sm-12 text-left">
                 @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
                     <form method="POST">
                         {{ csrf_field() }}
-                        <button
-                            type="button"
-                            class="btn btn-primary js-res-uri"
-                            data-toggle="modal"
-                            data-target="#embed-resource"
-                            data-uri ="{{ $resource->uri }}"
-                        >{{ uctrans('custom.embed') }}</button>
+                        @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
+                            <button
+                                type="button"
+                                class="btn btn-primary js-res-uri"
+                                data-toggle="modal"
+                                data-target="#embed-resource"
+                                data-uri ="{{ $resource->uri }}"
+                            >{{ uctrans('custom.embed') }}</button>
+                            @if ($resource->version == $versionView)
+                                <a
+                                    class="btn btn-primary"
+                                    href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
+                                >{{ uctrans('custom.update') }}</a>
+                            @endif
+                        @endif
                         <a
                             class="btn btn-primary"
                             href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
                         >{{ uctrans('custom.edit') }}</a>
+                        <a
+                            href="{{ url('/'. $root .'/dataset/view/' . $resource->dataset_uri) }}"
+                            class="btn btn-primary"
+                        >
+                            {{ uctrans('custom.close') }}
+                        </a>
                         <button
                             name="delete"
                             class="btn del-btn btn-primary"
@@ -104,22 +132,20 @@
         </div>
 
         <!-- IF there are old versions of this article -->
-        <div class="col-sm-12 pull-left m-t-md p-l-none">
-            <div class="pull-left history">
-                <div>
-                    <a href="#">
-                        <span class="version-heading">{{ __('custom.title') }}</span>
-                        <span class="version">&nbsp;&#8211;&nbsp;версия 1</span>
-                    </a>
-                </div>
-                <div>
-                    <a href="#">
-                        <span class="version-heading">{{ __('custom.title') }}</span>
-                        <span class="version">&nbsp;&#8211;&nbsp;версия 2</span>
-                    </a>
+        @if (!empty($resource->versions_list))
+            <div class="col-sm-12 pull-left m-t-md p-l-none">
+                <div class="pull-left history">
+                    @foreach ($resource->versions_list as $version)
+                    <div>
+                        <a href="{{ url('/'. $root .'/resource/view/'. $resource->uri .'/'. $version) }}">
+                            <span class="version-heading">{{ uctrans('custom.version') }}</span>
+                            <span class="version">&nbsp;&#8211;&nbsp;{{ $version }}</span>
+                        </a>
+                    </div>
+                    @endforeach
                 </div>
             </div>
-        </div>
+        @endif
         @include('components.signal-box', ['signals' => $resource->signals])
     </div>
 </div>

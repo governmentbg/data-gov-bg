@@ -59,6 +59,7 @@ class PageController extends ApiController
                 'meta_keywords'       => 'nullable|max:191',
                 'meta_keywords.*'     => 'max:191',
                 'forum_link'          => 'nullable|string|max:191',
+                'help_page'           => 'nullable|string|exists:help_pages,name|max:191',
                 'active'              => 'nullable|boolean',
                 'valid_from'          => 'nullable|date',
                 'valid_to'            => 'nullable|date',
@@ -132,6 +133,10 @@ class PageController extends ApiController
 
                 if (isset($pageData['data']['forum_link'])) {
                     $newPage->forum_link = $pageData['data']['forum_link'];
+                }
+
+                if (isset($pageData['data']['help_page'])) {
+                    $newPage->help_page = $pageData['data']['help_page'];
                 }
 
                 if (isset($pageData['data']['valid_from'])) {
@@ -222,6 +227,7 @@ class PageController extends ApiController
                 'meta_keywords'       => 'nullable|max:191',
                 'meta_keywords.*'     => 'max:191',
                 'forum_link'          => 'nullable|string|max:191',
+                'help_page'           => 'nullable|string|exists:help_pages,name|max:191',
                 'active'              => 'nullable|boolean',
                 'valid_from'          => 'nullable|date',
                 'valid_to'            => 'nullable|date',
@@ -316,6 +322,10 @@ class PageController extends ApiController
                     $pageToEdit->forum_link = $editData['data']['forum_link'];
                 }
 
+                if (isset($editData['data']['help_page'])) {
+                    $pageToEdit->help_page = $editData['data']['help_page'];
+                }
+
                 if (isset($editData['data']['active'])) {
                     $pageToEdit->active = $editData['data']['active'];
                 } else {
@@ -326,10 +336,10 @@ class PageController extends ApiController
                 DB::commit();
 
                 $logData = [
-                    'module_name'      => Module::getModuleName(Module::PAGES),
-                    'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $pageToEdit->id,
-                    'action_msg'       => 'Edited page',
+                    'module_name'   => Module::getModuleName(Module::PAGES),
+                    'action'        => ActionsHistory::TYPE_MOD,
+                    'action_object' => $pageToEdit->id,
+                    'action_msg'    => 'Edited page',
                 ];
 
                 Module::add($logData);
@@ -420,20 +430,20 @@ class PageController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'criteria'                => 'nullable|array',
-            'locale'                  => 'nullable|string|max:5',
-            'records_per_page'        => 'nullable|integer|digits_between:1,10',
-            'page_number'             => 'nullable|integer|digits_between:1,10',
+            'locale'            => 'nullable|string|max:5',
+            'criteria'          => 'nullable|array',
+            'records_per_page'  => 'nullable|integer|digits_between:1,10',
+            'page_number'       => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
 
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
-                'page_id'        => 'nullable|integer|digits_between:1,10',
-                'active'         => 'nullable|boolean',
-                'section_id '    => 'nullable|integer|digits_between:1,10',
-                'order'          => 'nullable|array',
+                'page_id'       => 'nullable|integer|digits_between:1,10',
+                'active'        => 'nullable|boolean',
+                'section_id '   => 'nullable|integer|digits_between:1,10',
+                'order'         => 'nullable|array',
             ]);
         }
 
@@ -441,8 +451,8 @@ class PageController extends ApiController
 
         if (!$validator->fails()) {
             $validator = Validator::make($order, [
-                'type'     => 'nullable|string|max:191',
-                'field'    => 'nullable|string|max:191',
+                'type'  => 'nullable|string|max:191',
+                'field' => 'nullable|string|max:191',
             ]);
         }
 
@@ -471,6 +481,7 @@ class PageController extends ApiController
                 'meta_descript',
                 'meta_key_words',
                 'forum_link',
+                'help_page',
                 'active',
                 'valid_from',
                 'valid_to',
@@ -482,11 +493,9 @@ class PageController extends ApiController
 
             $pageList = Page::select($columns)->where('type', Page::TYPE_PAGE);
 
-            if (isset($criteria['order'])) {
-                if (is_array($criteria['order'])) {
-                    if (!in_array($criteria['order']['field'], $columns)) {
-                        unset($criteria['order']['field']);
-                    }
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
                 }
             }
 
@@ -519,23 +528,24 @@ class PageController extends ApiController
 
                 foreach ($pageList as $singlePage) {
                     $result[] = [
-                        'id'                  => $singlePage->id,
-                        'locale'              => $locale,
-                        'section_id'          => $singlePage->section_id,
-                        'title'               => $singlePage->title,
-                        'body'                => $singlePage->body,
-                        'head_title'          => $singlePage->head_title,
-                        'meta_description'    => $singlePage->meta_descript,
-                        'meta_keywords'       => $singlePage->meta_key_words,
-                        'forum_link'          => $singlePage->forum_link,
-                        'active'              => $singlePage->active,
-                        'abstract'            => $singlePage->abstract,
-                        'valid_from'          => date($singlePage->valid_from),
-                        'valid_to'            => date($singlePage->valid_to),
-                        'created_at'          => date($singlePage->created_at),
-                        'updated_at'          => date($singlePage->updated_at),
-                        'created_by'          => $singlePage->created_by,
-                        'updated_by'          => $singlePage->updated_by,
+                        'id'                => $singlePage->id,
+                        'locale'            => $locale,
+                        'section_id'        => $singlePage->section_id,
+                        'title'             => $singlePage->title,
+                        'body'              => $singlePage->body,
+                        'head_title'        => $singlePage->head_title,
+                        'meta_description'  => $singlePage->meta_descript,
+                        'meta_keywords'     => $singlePage->meta_key_words,
+                        'forum_link'        => $singlePage->forum_link,
+                        'help_page'         => $singlePage->help_page,
+                        'active'            => $singlePage->active,
+                        'abstract'          => $singlePage->abstract,
+                        'valid_from'        => date($singlePage->valid_from),
+                        'valid_to'          => date($singlePage->valid_to),
+                        'created_at'        => date($singlePage->created_at),
+                        'updated_at'        => date($singlePage->updated_at),
+                        'created_by'        => $singlePage->created_by,
+                        'updated_by'        => $singlePage->updated_by,
                     ];
                 }
             }

@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
 class HomeController extends Controller {
-
     /**
      * Create a new controller instance.
      *

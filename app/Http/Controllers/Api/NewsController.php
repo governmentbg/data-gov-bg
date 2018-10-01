@@ -383,7 +383,7 @@ class NewsController extends ApiController
             $result = [];
             $criteria = $request->offsetGet('criteria');
             $locale = \LaravelLocalization::getCurrentLocale();
-            $newsList = Page::select()->where('type', Page::TYPE_NEWS);
+            $newsList = Page::select();
 
             if (!empty($criteria['date_type'])) {
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_UPDATED) {
@@ -434,29 +434,28 @@ class NewsController extends ApiController
                         });
                 }
             } else if (!empty($criteria['date_from']) && !empty($criteria['date_to']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
-                $dateCreatedFrom = date_create($criteria['date_from']);
-                $dateFrom = date_format($dateCreatedFrom, 'Y-m-d');
-                $dateCreatedTo = date_create($criteria['date_to']);
-                $dateTo = date_format($dateCreatedTo, 'Y-m-d');
+                $datePeriodFrom = date_create($criteria['date_from']);
+                $dateFrom = date_format($datePeriodFrom, 'Y-m-d');
+                $datePeriodTo = date_create($criteria['date_to']);
+                $dateTo = date_format($datePeriodTo, 'Y-m-d');
                 $newsList->orWhere(function($a) use ($dateFrom, $dateTo) {
+
                     $a->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($b) use ($dateFrom, $dateTo) {
-                    $b->where('valid_from', null)->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+
+                    $b->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($c) use ($dateFrom, $dateTo) {
-                    $c->where('valid_to', null)->where('valid_from', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+
+                    $c->where('valid_from', '>=', $dateFrom)->where('valid_from', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($d) use ($dateFrom, $dateTo) {
-                    $d->where('valid_from', '<=', $dateFrom)->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+
+                    $d->where('valid_from', '<=', $dateFrom)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($e) use ($dateFrom, $dateTo) {
-                    $e->where('valid_to', '>=', $dateFrom)->where('valid_from', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($f) use ($dateFrom, $dateTo) {
-                    $f->where('valid_from', '<=', $dateFrom)->where('valid_to', '>=', $dateTo)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($g) use ($dateFrom, $dateTo) {
-                    $g->where('valid_from', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($h) use ($dateFrom, $dateTo) {
-                    $h->where('valid_from', '>=', $dateFrom)->where('valid_to', '>=', $dateTo)->where('type', Page::TYPE_NEWS);
-                })->orWhere(function($i) use ($dateFrom, $dateTo) {
-                    $i->where('valid_from', '>=', $dateFrom)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+
+                    $e->where('valid_from', null)->where('valid_to', '>=', $dateFrom)->where('type', Page::TYPE_NEWS);
                 });
+            } else {
+                $newsList->where('type', Page::TYPE_NEWS);
             }
 
             if (isset($newsListData['api_key'])) {
@@ -518,6 +517,30 @@ class NewsController extends ApiController
 
             $count = $newsList->count();
 
+            $columns = [
+                'id',
+                'abstract',
+                'title',
+                'body',
+                'active',
+                'head_title',
+                'meta_description',
+                'meta_keywords',
+                'forum_link',
+                'valid_from',
+                'valid_to',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);
             }
@@ -562,7 +585,7 @@ class NewsController extends ApiController
             ];
 
             if (isset($criteria['order'])) {
-                if ($criteria['order'] && in_array($criteria['order']['field'], $transFields)) {
+                if ($criteria['order'] && isset($criteria['order']['field']) && in_array($criteria['order']['field'], $transFields)) {
                     usort($results, function($a, $b) use ($criteria) {
                         return strtolower($criteria['order']['type']) == 'asc'
                             ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
@@ -600,6 +623,7 @@ class NewsController extends ApiController
         $newsSearchData = $request->all();
 
         $validator = Validator::make($newsSearchData, [
+            'api_key'               => 'nullable|string|exists:users,api_key',
             'locale'                => 'nullable|string|max:5',
             'criteria'              => 'required|array',
             'records_per_page'      => 'nullable|integer|digits_between:1,10',
@@ -633,8 +657,19 @@ class NewsController extends ApiController
 
             $ids = Page::search($search)->where('type', Page::TYPE_NEWS)->get()->pluck('id');
             $newsList = Page::whereIn('id', $ids);
+            $rightCheck = false;
+            if (isset($newsSearchData['api_key'])) {
+                $user = \App\User::where('api_key', $newsSearchData['api_key'])->first();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::DATA_SETS,
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'user' => $user
+                    ]
+                );
+            }
 
-            if(!\Auth::check() || !Role::isAdmin()) {
+            if(!$rightCheck) {
                 $newsList
                     ->where('active', 1)
                     ->where(function ($m){
@@ -646,6 +681,32 @@ class NewsController extends ApiController
             }
 
             $total_records = $newsList->count();
+
+            $columns = [
+                'id',
+                'abstract',
+                'title',
+                'body',
+                'active',
+                'head_title',
+                'meta_description',
+                'meta_keywords',
+                'forum_link',
+                'valid_from',
+                'valid_to',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($criteria['order'])) {
+                if (is_array($criteria['order'])) {
+                    if (!in_array($criteria['order']['field'], $columns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
+            }
 
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
                 $newsList->orderBy($criteria['order']['field'], $criteria['order']['type']);

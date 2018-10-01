@@ -98,6 +98,10 @@
                         &.gp i {
                             padding: 6px 4px;
                         }
+
+                        &.in i {
+                            padding: 6px 6px;
+                        }
                     }
                 }
                 @include smMobile() {

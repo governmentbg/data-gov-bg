@@ -63,16 +63,17 @@ class RoleRight extends Model
      */
     public static function checkUserRight($module, $rightType, $checkData = [], $objData = [])
     {
-        if (!\Auth::check()) {
+
+        if (!\Auth::check() && empty($checkData['user'])) {
             return false;
         }
 
         // return true if user is portal admin
-        if (Role::isAdmin()) {
+        if (Role::isAdmin() || (!empty($checkData['user']) && $checkData['user']->is_admin)) {
             return true;
         }
 
-        $checkData['user_id'] = \Auth::user()->id;
+        $checkData['user_id'] = \Auth::check() ? \Auth::user()->id : $checkData['user']->id;
         $checkData['check_api'] = false;
 
         $rolesArray = session()->get('roles');

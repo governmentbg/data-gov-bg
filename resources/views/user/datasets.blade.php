@@ -4,6 +4,9 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'dataset'])
+    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <span class="my-profile m-l-sm">{{uctrans('custom.datasets_list')}}</span>
+    </div>
     @include('partials.pagination')
     <div class="row">
     @if ($buttons['add'])
@@ -58,7 +61,7 @@
                                                 </div>
                                                 <div class="col-xs-6">
                                                 @if ($buttons[$set->uri]['delete'])
-                                                    <form method="POST">
+                                                    <form method="POST" action="{{ url('/user/dataset/delete') }}">
                                                         {{ csrf_field() }}
                                                         <div class="col-xs-6 text-right">
                                                             <button

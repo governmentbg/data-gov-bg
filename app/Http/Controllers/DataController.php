@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\DataSet;
 use App\Resource;
 use App\Organisation;
+use App\Role;
 use App\RoleRight;
 use App\Module;
+use App\ActionsHistory;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
@@ -17,28 +19,10 @@ use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\SignalController as ApiSignal;
+use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 use Illuminate\Http\Request;
 
 class DataController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index() {
-
-    }
-
     /**
      * List datasets
      *
@@ -357,9 +341,57 @@ class DataController extends Controller {
                         'id'      => $authUser->id
                     ];
 
+                    // get followed categories
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'category_id', $followed)) {
+                        foreach ($getParams['category'] as $selCategory) {
+                            if (!in_array($selCategory, $followed)) {
+                                $buttons[$selCategory]['followCategory'] = true;
+                            } else {
+                                $buttons[$selCategory]['unfollowCategory'] = true;
+                            }
+                        }
+
+                        // follow / unfollow category
+                        $followReq = [];
+                        if ($request->has('followCategory')) {
+                            $followReq['follow'] = $request->followCategory;
+                        } elseif ($request->has('unfollowCategory')) {
+                            $followReq['unfollow'] = $request->unfollowCategory;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'category_id', $getParams['category']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
+                    // get followed tags
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'tag_id', $followed)) {
+                        foreach ($getParams['tag'] as $selTag) {
+                            if (!in_array($selTag, $followed)) {
+                                $buttons[$selTag]['followTag'] = true;
+                            } else {
+                                $buttons[$selTag]['unfollowTag'] = true;
+                            }
+                        }
+
+                        // follow / unfollow tag
+                        $followReq = [];
+                        if ($request->has('followTag')) {
+                            $followReq['follow'] = $request->followTag;
+                        } elseif ($request->has('unfollowTag')) {
+                            $followReq['unfollow'] = $request->unfollowTag;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'tag_id', $getParams['tag']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         $datasetIds = array_pluck($paginationData['items'], 'id');
                         foreach ($datasetIds as $datasetId) {
                             $buttons[$datasetId] = [
@@ -374,13 +406,22 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, $datasetIds);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
                     }
                 }
             }
+        }
+
+        if  (\Auth::check()) {
+            // check rights for add button
+            $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
+            $buttons['add'] = $rightCheck;
+
+            $buttons['addUrl'] = Role::isAdmin() ? '/admin/dataset/add' : '/user/dataset/create';
         }
 
         return view(
@@ -419,7 +460,7 @@ class DataController extends Controller {
         }
     }
 
-    private function getFollowedDatasets($userData, &$followed)
+    private function getFollowed($userData, $followType, &$followed)
     {
         $followed = [];
 
@@ -429,7 +470,7 @@ class DataController extends Controller {
 
         if (isset($res->user) && !empty($res->user)) {
             if (!empty($res->user->follows)) {
-                $followed = array_where(array_pluck($res->user->follows, 'dataset_id'), function ($value, $key) {
+                $followed = array_where(array_pluck($res->user->follows, $followType), function ($value, $key) {
                     return !is_null($value);
                 });
             }
@@ -440,28 +481,28 @@ class DataController extends Controller {
         return false;
     }
 
-    private function followDataset(Request $request, $userData, $followed, $datasetIds)
+    private function followObject($followReq, $userData, $followed, $followType, $objIds)
     {
         $followResult = null;
 
-        if ($request->has('follow')) {
-            // follow dataset
-            if (in_array($request->follow, $datasetIds) && !in_array($request->follow, $followed)) {
+        if (isset($followReq['follow'])) {
+            // follow object
+            if (in_array($followReq['follow'], $objIds) && !in_array($followReq['follow'], $followed)) {
                 $followRq = Request::create('api/addFollow', 'POST', [
-                    'api_key' => $userData['api_key'],
-                    'user_id' => $userData['id'],
-                    'data_set_id' => $request->follow,
+                    'api_key'    => $userData['api_key'],
+                    'user_id'    => $userData['id'],
+                    $followType  => $followReq['follow'],
                 ]);
                 $apiFollow = new ApiFollow($followRq);
                 $followResult = $apiFollow->addFollow($followRq)->getData();
             }
-        } elseif ($request->has('unfollow')) {
-            // unfollow dataset
-            if (in_array($request->unfollow, $datasetIds) && in_array($request->unfollow, $followed)) {
+        } elseif (isset($followReq['unfollow'])) {
+            // unfollow object
+            if (in_array($followReq['unfollow'], $objIds) && in_array($followReq['unfollow'], $followed)) {
                 $followRq = Request::create('api/unFollow', 'POST', [
-                    'api_key' => $userData['api_key'],
-                    'user_id' => $userData['id'],
-                    'data_set_id' => $request->unfollow,
+                    'api_key'    => $userData['api_key'],
+                    'user_id'    => $userData['id'],
+                    $followType  => $followReq['unfollow'],
                 ]);
                 $apiFollow = new ApiFollow($followRq);
                 $followResult = $apiFollow->unFollow($followRq)->getData();
@@ -512,7 +553,36 @@ class DataController extends Controller {
                 $user = !empty($res->users) ? $res->users[0] : [];
             }
 
-            $dataset = $this->getModelUsernames($dataset);
+            if (\Auth::check() && $request->has('delete')) {
+                // check delete rights
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                if ($rightCheck) {
+                    $params = [
+                        'api_key'      => \Auth::user()->api_key,
+                        'dataset_uri'  => $dataset->uri,
+                    ];
+
+                    $delReq = Request::create('/api/deleteDataset', 'POST', $params);
+                    $api = new ApiDataSet($delReq);
+                    $result = $api->deleteDataset($delReq)->getData();
+
+                    if (isset($result->success) && $result->success) {
+                        $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+
+                        return redirect()->route('data', array_except($request->query(), ['page']));
+                    }
+
+                    $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
+                }
+            }
 
             // list resources
             $params = [
@@ -563,7 +633,7 @@ class DataController extends Controller {
 
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         if (!in_array($dataset->id, $followed)) {
                             $buttons['follow'] = true;
                         } else {
@@ -571,23 +641,38 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, [$dataset->id]);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
                     }
                 }
 
-                /*$objData = ['created_by' => $dataset->created_by];
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+
+                // check rights for add resource button
+                $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                $buttons['addResource'] = $rightCheck;
 
                 // check rights for edit button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, [], $objData);
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['edit'] = $rightCheck;
 
                 // check rights for delete button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, [], $objData);
-                $buttons['delete'] = $rightCheck;*/
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons['delete'] = $rightCheck;
+
+                $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
             }
+
+            $dataset = $this->getModelUsernames($dataset);
 
             return view(
                 'data/view',
@@ -606,7 +691,7 @@ class DataController extends Controller {
         return redirect()->back();
     }
 
-    public function resourceView(Request $request, $uri)
+    public function resourceView(Request $request, $uri, $version = null)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
@@ -617,7 +702,7 @@ class DataController extends Controller {
         $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
-        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+        $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
             // get dataset details
@@ -657,23 +742,86 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
-                $dataset = $this->getModelUsernames($dataset);
-
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
 
+                if (empty($version)) {
+                    $version = $resource->version;
+                }
+
+                if (\Auth::check() && $request->has('delete')) {
+                    // check delete rights
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                    if ($rightCheck) {
+                        $params = [
+                            'api_key'       => \Auth::user()->api_key,
+                            'resource_uri'  => $resource->uri,
+                        ];
+
+                        $delReq = Request::create('/api/deleteResource', 'POST', $params);
+                        $api = new ApiResource($delReq);
+                        $result = $api->deleteResource($delReq)->getData();
+
+                        if (isset($result->success) && $result->success) {
+                            $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                            return redirect()->route('dataView', array_merge($request->query(), ['uri' => $dataset->uri]));
+                        }
+
+                        $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
+                    }
+                }
+
                 // get resource data
-                $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri]);
+                $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri, 'version' => $version]);
                 $api = new ApiResource($rq);
                 $res = $api->getResourceData($rq)->getData();
                 $data = !empty($res->data) ? $res->data : [];
 
+                if ($resource->format_code == Resource::FORMAT_XML) {
+                    $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
+                    $apiConvert = new ApiConversion($reqConvert);
+                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                    $data = isset($resultConvert->data) ? $resultConvert->data : [];
+                }
+
                 $userData = [];
+                $buttons = [];
                 if ($authUser = \Auth::user()) {
                     $userData['firstname'] = $authUser->firstname;
                     $userData['lastname'] = $authUser->lastname;
                     $userData['email'] = $authUser->email;
+
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+
+                    // check rights for update / edit buttons
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                    $buttons['update'] = $rightCheck;
+                    $buttons['edit'] = $rightCheck;
+
+                    // check rights for delete button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+                    $buttons['delete'] = $rightCheck;
+
+                    $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
                 }
+
+                $dataset = $this->getModelUsernames($dataset);
+                $resource = $this->getModelUsernames($resource);
 
                 return view(
                     'data/resourceView',
@@ -685,7 +833,9 @@ class DataController extends Controller {
                         'dataset'        => $dataset,
                         'resource'       => $resource,
                         'data'           => $data,
-                        'userData'       => $userData
+                        'versionView'    => $version,
+                        'userData'       => $userData,
+                        'buttons'        => $buttons
                     ]
                 );
             }
@@ -1104,9 +1254,57 @@ class DataController extends Controller {
                         'id'      => $authUser->id
                     ];
 
+                    // get followed categories
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'category_id', $followed)) {
+                        foreach ($getParams['category'] as $selCategory) {
+                            if (!in_array($selCategory, $followed)) {
+                                $buttons[$selCategory]['followCategory'] = true;
+                            } else {
+                                $buttons[$selCategory]['unfollowCategory'] = true;
+                            }
+                        }
+
+                        // follow / unfollow category
+                        $followReq = [];
+                        if ($request->has('followCategory')) {
+                            $followReq['follow'] = $request->followCategory;
+                        } elseif ($request->has('unfollowCategory')) {
+                            $followReq['unfollow'] = $request->unfollowCategory;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'category_id', $getParams['category']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
+                    // get followed tags
+                    $followed = [];
+                    if ($this->getFollowed($userData, 'tag_id', $followed)) {
+                        foreach ($getParams['tag'] as $selTag) {
+                            if (!in_array($selTag, $followed)) {
+                                $buttons[$selTag]['followTag'] = true;
+                            } else {
+                                $buttons[$selTag]['unfollowTag'] = true;
+                            }
+                        }
+
+                        // follow / unfollow tag
+                        $followReq = [];
+                        if ($request->has('followTag')) {
+                            $followReq['follow'] = $request->followTag;
+                        } elseif ($request->has('unfollowTag')) {
+                            $followReq['unfollow'] = $request->unfollowTag;
+                        }
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'tag_id', $getParams['tag']);
+                        if (!empty($followResult) && $followResult->success) {
+                            return back();
+                        }
+                    }
+
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         $datasetIds = array_pluck($paginationData['items'], 'id');
                         foreach ($datasetIds as $datasetId) {
                             $buttons[$datasetId] = [
@@ -1121,13 +1319,22 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, $datasetIds);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
                     }
                 }
             }
+        }
+
+        if  (\Auth::check()) {
+            // check rights for add button
+            $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
+            $buttons['add'] = $rightCheck;
+
+            $buttons['addUrl'] = Role::isAdmin() ? '/admin/dataset/add' : '/user/dataset/create';
         }
 
         return view(
@@ -1193,7 +1400,36 @@ class DataController extends Controller {
                 $user = !empty($res->users) ? $res->users[0] : [];
             }
 
-            $dataset = $this->getModelUsernames($dataset);
+            if (\Auth::check() && $request->has('delete')) {
+                // check delete rights
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                if ($rightCheck) {
+                    $params = [
+                        'api_key'      => \Auth::user()->api_key,
+                        'dataset_uri'  => $dataset->uri,
+                    ];
+
+                    $delReq = Request::create('/api/deleteDataset', 'POST', $params);
+                    $api = new ApiDataSet($delReq);
+                    $result = $api->deleteDataset($delReq)->getData();
+
+                    if (isset($result->success) && $result->success) {
+                        $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+
+                        return redirect()->route('reportedData', array_except($request->query(), ['page']));
+                    }
+
+                    $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
+                }
+            }
 
             // list resources
             $params = [
@@ -1232,13 +1468,7 @@ class DataController extends Controller {
                 $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
             }
 
-            $buttons = [
-                'follow'   => false,
-                'unfollow' => false,
-                'edit'     => false,
-                'delete'   => false,
-            ];
-
+            $buttons = [];
             if ($authUser = \Auth::user()) {
                 $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
@@ -1250,7 +1480,7 @@ class DataController extends Controller {
 
                     // get followed datasets
                     $followed = [];
-                    if ($this->getFollowedDatasets($userData, $followed)) {
+                    if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         if (!in_array($dataset->id, $followed)) {
                             $buttons['follow'] = true;
                         } else {
@@ -1258,23 +1488,38 @@ class DataController extends Controller {
                         }
 
                         // follow / unfollow dataset
-                        $followResult = $this->followDataset($request, $userData, $followed, [$dataset->id]);
+                        $followReq = $request->only(['follow', 'unfollow']);
+                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
                     }
                 }
 
-                /*$objData = ['created_by' => $dataset->created_by];
+                $checkData = [
+                    'org_id' => $dataset->org_id
+                ];
+                $objData = [
+                    'org_id'      => $dataset->org_id,
+                    'created_by'  => $dataset->created_by
+                ];
+
+                // check rights for add resource button
+                $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                $buttons['addResource'] = $rightCheck;
 
                 // check rights for edit button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, [], $objData);
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['edit'] = $rightCheck;
 
                 // check rights for delete button
-                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, [], $objData);
-                $buttons['delete'] = $rightCheck;*/
+                $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons['delete'] = $rightCheck;
+
+                $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
             }
+
+            $dataset = $this->getModelUsernames($dataset);
 
             return view(
                 'data/reportedView',
@@ -1293,7 +1538,7 @@ class DataController extends Controller {
         return redirect()->back();
     }
 
-    public function reportedResourceView(Request $request, $uri)
+    public function reportedResourceView(Request $request, $uri, $version = null)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
@@ -1304,7 +1549,7 @@ class DataController extends Controller {
         $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
-        $resource = !empty($res->resource) ? $this->getModelUsernames($res->resource) : [];
+        $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
             // get dataset details
@@ -1344,23 +1589,86 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
-                $dataset = $this->getModelUsernames($dataset);
-
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
 
+                if (empty($version)) {
+                    $version = $resource->version;
+                }
+
+                if (\Auth::check() && $request->has('delete')) {
+                    // check delete rights
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+
+                    if ($rightCheck) {
+                        $params = [
+                            'api_key'       => \Auth::user()->api_key,
+                            'resource_uri'  => $resource->uri,
+                        ];
+
+                        $delReq = Request::create('/api/deleteResource', 'POST', $params);
+                        $api = new ApiResource($delReq);
+                        $result = $api->deleteResource($delReq)->getData();
+
+                        if (isset($result->success) && $result->success) {
+                            $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                            return redirect()->route('reportedView', array_merge($request->query(), ['uri' => $dataset->uri]));
+                        }
+
+                        $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.delete_error'));
+                    }
+                }
+
                 // get resource data
-                $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri]);
+                $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri, 'version' => $version]);
                 $api = new ApiResource($rq);
                 $res = $api->getResourceData($rq)->getData();
                 $data = !empty($res->data) ? $res->data : [];
 
+                if ($resource->format_code == Resource::FORMAT_XML) {
+                    $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
+                    $apiConvert = new ApiConversion($reqConvert);
+                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                    $data = isset($resultConvert->data) ? $resultConvert->data : [];
+                }
+
                 $userData = [];
+                $buttons = [];
                 if ($authUser = \Auth::user()) {
                     $userData['firstname'] = $authUser->firstname;
                     $userData['lastname'] = $authUser->lastname;
                     $userData['email'] = $authUser->email;
+
+                    $checkData = [
+                        'org_id' => $dataset->org_id
+                    ];
+                    $objData = [
+                        'org_id'      => $dataset->org_id,
+                        'created_by'  => $resource->created_by
+                    ];
+
+                    // check rights for update / edit buttons
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
+                    $buttons['update'] = $rightCheck;
+                    $buttons['edit'] = $rightCheck;
+
+                    // check rights for delete button
+                    $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
+                    $buttons['delete'] = $rightCheck;
+
+                    $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
                 }
+
+                $dataset = $this->getModelUsernames($dataset);
+                $resource = $this->getModelUsernames($resource);
 
                 return view(
                     'data/reportedResourceView',
@@ -1372,10 +1680,151 @@ class DataController extends Controller {
                         'dataset'        => $dataset,
                         'resource'       => $resource,
                         'data'           => $data,
-                        'userData'       => $userData
+                        'versionView'    => $version,
+                        'userData'       => $userData,
+                        'buttons'        => $buttons
                     ]
                 );
             }
+        }
+
+        return redirect()->back();
+    }
+
+    public function chronology(Request $request, $uri)
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        // get dataset details
+        $params = [
+            'dataset_uri' => $uri,
+            'locale'      => $locale
+        ];
+        $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $res = $api->getDataSetDetails($rq)->getData();
+        $dataset = !empty($res->data) ? $this->getModelUsernames($res->data) : [];
+
+        $typeChecked = true;
+        $class = 'data';
+        if ($reported = ($request->filled('type') && $request->type == 'reported')) {
+            $typeChecked = $dataset->reported;
+            $class = 'data-attention';
+        }
+
+        if (!empty($dataset) && $typeChecked &&
+            $dataset->status == DataSet::STATUS_PUBLISHED &&
+            $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+
+            $objOwner = [];
+            if (!is_null($dataset->org_id)) {
+                // get organisation details
+                $params = [
+                    'org_id'  => $dataset->org_id,
+                    'locale'  => $locale
+                ];
+                $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
+                $api = new ApiOrganisation($rq);
+                $res = $api->getOrganisationDetails($rq)->getData();
+                $organisation = !empty($res->data) ? $res->data : [];
+
+                // set object owner
+                if (!empty($organisation)) {
+                    $objOwner = [
+                        'id' => $organisation->id,
+                        'name' => $organisation->name,
+                        'logo' => $organisation->logo,
+                        'view' => '/organisation/profile/'. $organisation->uri
+                    ];
+                }
+            }
+
+            $objType = Module::getModuleName(Module::DATA_SETS);
+            $objTypeRes = Module::getModuleName(Module::RESOURCES);
+            $actObjData[$objType] = [];
+
+            $criteria = [];
+            $criteria['dataset_ids'][] = $dataset->id;
+            $actObjData[$objType][$dataset->id] = [
+                'obj_id'         => $dataset->uri,
+                'obj_name'       => $dataset->name,
+                'obj_module'     => ultrans('custom.dataset'),
+                'obj_type'       => 'dataset',
+                'obj_view'       => '/data/view/'. $dataset->uri,
+                'parent_obj_id'  => '',
+                'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
+            ];
+
+            if (!empty($dataset->resource)) {
+                foreach ($dataset->resource as $resource) {
+                    $criteria['resource_uris'][] = $resource->uri;
+                    $actObjData[$objTypeRes][$resource->uri] = [
+                        'obj_id'            => $resource->uri,
+                        'obj_name'          => $resource->name,
+                        'obj_module'        => ultrans('custom.resource'),
+                        'obj_type'          => 'resource',
+                        'obj_view'          => '/data/resourceView/'. $resource->uri,
+                        'parent_obj_id'     => $dataset->uri,
+                        'parent_obj_name'   => $dataset->name,
+                        'parent_obj_module' => ultrans('custom.dataset'),
+                        'parent_obj_type'   => 'dataset',
+                        'parent_obj_view'   => '/data/view/'. $dataset->uri,
+                        'obj_owner_id'   => isset($objOwner['id']) ? $objOwner['id'] : '',
+                        'obj_owner_name' => isset($objOwner['name']) ? $objOwner['name'] : '',
+                        'obj_owner_logo' => isset($objOwner['logo']) ? $objOwner['logo'] : '',
+                        'obj_owner_view' => isset($objOwner['view']) ? $objOwner['view'] : ''
+                    ];
+                }
+            }
+
+            $paginationData = [];
+            $actTypes = [];
+
+            if (!empty($criteria)) {
+                $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
+                $api = new ApiActionsHistory($rq);
+                $res = $api->listActionTypes($rq)->getData();
+
+                if ($res->success && !empty($res->types)) {
+                    $linkWords = ActionsHistory::getTypesLinkWords();
+                    foreach ($res->types as $type) {
+                        $actTypes[$type->id] = [
+                            'name'     => $type->name,
+                            'linkWord' => $linkWords[$type->id]
+                        ];
+                    }
+
+                    $criteria['actions'] = array_keys($actTypes);
+                    $perPage = 10;
+                    $params = [
+                        'criteria'         => $criteria,
+                        'records_per_page' => $perPage,
+                        'page_number'      => !empty($request->page) ? $request->page : 1,
+                    ];
+
+                    $rq = Request::create('/api/listActionHistory', 'POST', $params);
+                    $api = new ApiActionsHistory($rq);
+                    $res = $api->listActionHistory($rq)->getData();
+                    $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+                    $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+                }
+            }
+
+            return view(
+                'data/chronology',
+                [
+                    'class'          => $class,
+                    'reported'       => $reported,
+                    'dataset'        => $dataset,
+                    'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
+                    'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
+                    'actionObjData'  => $actObjData,
+                    'actionTypes'    => $actTypes
+                ]
+            );
         }
 
         return redirect()->back();

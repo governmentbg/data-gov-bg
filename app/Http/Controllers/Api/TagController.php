@@ -277,6 +277,21 @@ class TagController extends ApiController
                 $query->whereIn('id', $criteria['tag_ids']);
             }
 
+            $orderColumns = [
+                'id',
+                'name',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($criteria['order']['field'])) {
+                if (!in_array($criteria['order']['field'], $orderColumns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
             $query->orderBy($order['field'], $order['type']);
 
             $count = $query->count();

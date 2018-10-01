@@ -14,37 +14,37 @@
                         </div>
                         <div class="body">
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.title') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.title') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->title }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}</label>
+                                <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ !empty($news->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_head') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_head') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->head_title }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_keywords') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_keywords') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->meta_keywords }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_desc') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_desc') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->meta_description }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.valid') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.valid') }}:</label>
                                 <div class="col-sm-3 col-xs-12">
                                     <div>{{ __('custom.from') .': '. $news->valid_from }}</div>
                                 </div>
@@ -53,19 +53,19 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.short_txt') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.short_txt') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
-                                    <div>{{ $news->abstract }}</div>
+                                    <div>{!! $news->abstract !!}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.content') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.content') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
-                                    <div>{{ $news->body }}</div>
+                                    <div>{!! $news->body !!}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->forum_link }}</div>
                                 </div>
@@ -75,28 +75,66 @@
                                 <hr>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->created_by }}</div>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $news->created_at }}</div>
                                 </div>
                             </div>
                             @if ($news->created_at != $news->updated_at)
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $news->updated_by }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $news->updated_at }}</div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if (\App\Role::isAdmin())
+                                <div class="text-right">
+                                    <div class="row">
+                                        <form
+                                            method="POST"
+                                            class="inline-block"
+                                            action="{{ url('admin/news/edit/'. $news->id) }}"
+                                        >
+                                            {{ csrf_field() }}
+                                            <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                            <input type="hidden" name="view" value="1">
+                                        </form>
+                                        <form
+                                            method="POST"
+                                            class="inline-block"
+                                        >
+                                            {{ csrf_field() }}
+                                        <button
+                                            name="back"
+                                            class="btn btn-primary"
+                                        >{{ uctrans('custom.close') }}</button>
+                                        </form>
+                                        <form
+                                            method="POST"
+                                            class="inline-block"
+                                            action="{{ url('admin/news/delete/'. $news->id) }}"
+                                        >
+                                            {{ csrf_field() }}
+                                                <button
+                                                    class="btn del-btn btn-primary del-btn"
+                                                    type="submit"
+                                                    name="delete"
+                                                    data-confirm="{{ __('custom.remove_data') }}"
+                                                >{{ uctrans('custom.remove') }}</button>
+                                        </form>
                                     </div>
                                 </div>
                             @endif

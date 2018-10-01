@@ -50,7 +50,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                                <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-9">
                                     <input
                                         name="forum_link"
@@ -62,8 +62,28 @@
                                     @endif
                                 </div>
                             </div>
+                            <div class="form-group row">
+                                <label for="help_page" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.help_page') }}:</label>
+                                <div class="col-sm-9">
+                                    <select
+                                        id="help_page"
+                                        name="help_page"
+                                        class="js-select form-control"
+                                        data-placeholder="{{ __('custom.select') }}"
+                                    >
+                                        <option></option>
+                                        @foreach ($helpPages as $page)
+                                            <option
+                                                value="{{ $page->name }}"
+                                                {{ $page->name == $model->help_page ? 'selected' : '' }}
+                                            >{{ $page->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="error">{{ $errors->first('help_page') }}</span>
+                                </div>
+                            </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}</label>
+                                <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}:</label>
                                 <div class="col-sm-4 m-b-sm">
                                     <div class="col-xs-3">{{ __('custom.from') .': ' }}</div>
                                     <div class="col-xs-9 text-left search-field admin">
@@ -84,7 +104,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.active') }}</label>
+                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.activef') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <div class="js-check">
                                         <input
@@ -101,7 +121,7 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ __('custom.edit') }}</button>
+                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
                                 </div>
                             </div>
                         </form>

@@ -43,7 +43,7 @@ class ConversionController extends ApiController
                 $array = $this->fromXML($post['data'], true);
 
                 return $this->successResponse($array);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_xml'));
             }
@@ -71,7 +71,7 @@ class ConversionController extends ApiController
                 $data = $this->getXML($post['data']);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json'));
             }
@@ -99,7 +99,7 @@ class ConversionController extends ApiController
                 $data = $this->fromCells($post['data']);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_csv'));
             }
@@ -127,7 +127,7 @@ class ConversionController extends ApiController
                 $data = $this->getCSV($post['data']);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json'));
             }
@@ -157,7 +157,7 @@ class ConversionController extends ApiController
                 if ($geo) {
                     return $this->successResponse(json_decode($geo->out('json'), true));
                 }
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_kml'));
             }
@@ -185,7 +185,7 @@ class ConversionController extends ApiController
                 $data = $this->getKML($post['data']);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_kml_json'));
             }
@@ -215,7 +215,7 @@ class ConversionController extends ApiController
                 $easyRdf->parse($post['data']);
 
                 return $this->successResponse(json_decode($easyRdf->serialise('json')));
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_rdf'));
             }
@@ -243,7 +243,7 @@ class ConversionController extends ApiController
                 $data = $this->getRDF($post['data']);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json'));
             }
@@ -298,7 +298,7 @@ class ConversionController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.no_text_found'));
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
@@ -338,7 +338,7 @@ class ConversionController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.no_text_found'));
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'img']));
             }
@@ -366,7 +366,7 @@ class ConversionController extends ApiController
                 $result = $this->fromWORD($post['data']);
 
                 return $this->successResponse($result);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'doc/docx']));
             }
@@ -394,7 +394,7 @@ class ConversionController extends ApiController
                 $data = $this->fromCells($post['data'], false);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'xls/xlsx']));
             }
@@ -422,7 +422,7 @@ class ConversionController extends ApiController
                 $data = ElasticDataSet::getElasticData($post['es_id']);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -450,7 +450,7 @@ class ConversionController extends ApiController
                 $data = $this->getXML($data);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -494,7 +494,7 @@ class ConversionController extends ApiController
                 $data = $this->getCSV($data);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -555,25 +555,29 @@ class ConversionController extends ApiController
         $worksheet = $spreadsheet->getActiveSheet();
         $rows = [];
 
-        foreach ($worksheet->getRowIterator() as $row) {
-            $cellIterator = $row->getCellIterator();
-            $cellIterator->setIterateOnlyExistingCells(false);
-            $cells = [];
+        try {
+            foreach ($worksheet->getRowIterator() as $row) {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                $cells = [];
 
-            foreach ($cellIterator as $cell) {
-                $value = trim($cell->getFormattedValue());
+                foreach ($cellIterator as $cell) {
+                    $value = trim($cell->getFormattedValue());
 
-                $cells[] = $value;
+                    $cells[] = $value;
+                }
+
+                if (!empty($cells)) {
+                    $rows[] = $cells;
+                }
             }
 
-            if (!empty($cells)) {
-                $rows[] = $cells;
-            }
+            fclose($temp);
+
+            $rowCount = count($rows);
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
         }
-
-        fclose($temp);
-
-        $rowCount = count($rows);
 
         foreach ($rows[0] as $cellIndex => $cell) {
             if ($cell == '') {
@@ -590,6 +594,7 @@ class ConversionController extends ApiController
         }
 
         return $rows;
+
     }
 
     /**
@@ -672,7 +677,7 @@ class ConversionController extends ApiController
                 $data = $this->getKML($data);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_json_kml'));
             }
@@ -715,7 +720,7 @@ class ConversionController extends ApiController
                 $data = $this->getRDF($data);
 
                 return $this->successResponse($data);
-            } catch (\ErrorException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invlid_json_rdf'));
             }

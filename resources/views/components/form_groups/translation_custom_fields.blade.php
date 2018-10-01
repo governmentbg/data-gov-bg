@@ -132,6 +132,6 @@
 
 <div class="row">
     <div class="col-xs-12 text-right m-t-n-xs m-b-md">
-        <a class="btn btn-primary js-add-custom-field">{{ __('custom.add') }}</a>
+        <a class="btn btn-primary js-add-custom-field">{{ __('custom.add_field') }}</a>
     </div>
 </div>

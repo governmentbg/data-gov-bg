@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 class DataRequestController extends AdminController
 {
     /**
-     * Lists datareuqests
+     * Lists datarequests
      *
      * @param Request $request
      * @return view with a list of data requests
@@ -60,8 +60,13 @@ class DataRequestController extends AdminController
         $result = $api->listDataRequests($req)->getData();
         $getParams = array_except(app('request')->input(), ['page', 'q']);
         $statuses = DataRequest::getDataRequestStatuses();
+
+        $dataRequests = !empty($result->dataRequests)
+        ? $this->getModelUsernames($result->dataRequests)
+        : $result->dataRequests;
+
         $paginationData = $this->getPaginationData(
-            $result->dataRequests,
+            $dataRequests,
             $result->total_records,
             $getParams,
             $perPage
@@ -137,6 +142,13 @@ class DataRequestController extends AdminController
         return view('admin/dataRequestEdit', compact('class', 'dataRequest', 'organisations', 'statuses'));
     }
 
+    /**
+     * Deletes a datarequest based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return success messsage or failure
+     */
     public function deleteDataRequest(Request $request, $id)
     {
         $rq = Request::create('/api/deleteDataRequest', 'POST', [

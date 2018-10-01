@@ -13,15 +13,17 @@ class CreateUserToOrgRoleTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_to_org_role', function (Blueprint $table) {
-            $table->integer('user_id')->unsigned();
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('org_id')->unsigned()->nullable();
-            $table->foreign('org_id')->references('id')->on('organisations');
-            $table->integer('role_id')->unsigned();
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
-            $table->unique(['user_id', 'org_id', 'role_id']);
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('user_to_org_role', function (Blueprint $table) {
+                $table->integer('user_id')->unsigned();
+                $table->foreign('user_id')->references('id')->on('users');
+                $table->integer('org_id')->unsigned()->nullable();
+                $table->foreign('org_id')->references('id')->on('organisations');
+                $table->integer('role_id')->unsigned();
+                $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
+                $table->unique(['user_id', 'org_id', 'role_id']);
+            });
+        }
     }
 
     /**

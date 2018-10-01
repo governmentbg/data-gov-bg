@@ -5,6 +5,6 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.public-org-dataset-nav-bar')
-        @include('components.public-resource-view', ['rootUrl' => '/organisation/dataset', 'user' => []])
+        @include('components.public-resource-view', ['rootUrl' => '/organisation/dataset', 'routeName' => 'orgDataResourceView', 'user' => []])
     </div>
 @endsection

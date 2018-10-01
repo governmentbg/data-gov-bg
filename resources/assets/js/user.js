@@ -1,3 +1,6 @@
+import { EEXIST } from 'constants';
+import { error } from 'util';
+
 $(function() {
     if ($('.js-logo').length) {
         var $button = $('.js-logo');
@@ -71,6 +74,9 @@ $(function() {
  *
  */
 function initSelect2() {
+    var select2Delay = 1000;
+    var select2MinLength = 3;
+
     if ($('.js-select').length) {
         $('.js-select').each(function() {
             $(this).select2({
@@ -105,12 +111,12 @@ function initSelect2() {
         $('.js-ajax-autocomplete').each(function() {
             var options = {
                 placeholder: $(this).data('placeholder'),
-                minimumInputLength: 3,
+                minimumInputLength: select2MinLength,
                 dropdownParent: $($(this).data('parent')),
                 ajax: {
                     url: $(this).data('url'),
                     type: 'POST',
-                    delay: 1000,
+                    delay: select2Delay,
                     data: function (params) {
                         var queryParams = {
                             criteria: {
@@ -155,16 +161,15 @@ function initSelect2() {
         $('.js-ajax-autocomplete-org').each(function() {
             var options = {
                 placeholder: $(this).data('placeholder'),
-                minimumInputLength: 3,
+                minimumInputLength: select2MinLength,
                 ajax: {
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     url: $(this).data('url'),
                     type: 'POST',
-                    delay: 1000,
+                    delay: select2Delay,
                     data: function (params) {
-
                         var queryParams = {
                             criteria: {
                                 keywords: params.term
@@ -175,8 +180,6 @@ function initSelect2() {
                         return finalParams;
                     },
                     processResults: function (data) {
-                        data.organisations = $.merge([{uri: 0, name: 'Главна организация'}], data.organisations);
-
                         return {
                             results: $.map(data.organisations, function (item) {
                                 return {

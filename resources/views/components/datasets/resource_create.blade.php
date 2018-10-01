@@ -13,6 +13,11 @@
                     'components.form_groups.translation_textarea',
                     ['field' => $field, 'result' => session('result')]
                 )
+            @elseif($field['view'] == 'translation_custom')
+                @include(
+                    'components.form_groups.translation_custom_fields',
+                    ['field' => $field, 'result' => session('result')]
+                )
             @endif
         @endforeach
 
@@ -143,6 +148,12 @@
 
         <div class="form-group row">
             <div class="col-sm-12 text-right">
+                <a
+                    href="{{ url('/'. $root .'/dataset/view/'. $uri) }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
                 <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
             </div>
         </div>

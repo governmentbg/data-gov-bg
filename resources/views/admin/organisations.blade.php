@@ -4,7 +4,9 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'organisation'])
-        @include('partials.pagination')
+        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+            <span class="my-profile m-l-sm">{{uctrans('custom.organisations_list')}}</span>
+        </div>
         <div class="row">
             <div class="col-sm-3 col-xs-12 text-left">
                 <span class="badge badge-pill m-t-md new-data user-add-btn">
@@ -32,6 +34,7 @@
                 </form>
             </div>
         </div>
+        @include('partials.pagination')
         <div class="row">
             <div class="col-sm-3 sidenav hidden-xs">
                 <ul class="nav">

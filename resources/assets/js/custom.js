@@ -16,8 +16,10 @@ $(function() {
 // data tables functionality
 $(function() {
     $(document).ready(function() {
-        $('.data-table').DataTable({
-            pageLength: 25,
+        var $dataTable = $('.data-table');
+
+        $dataTable.DataTable({
+            pageLength: $dataTable.data('page-length') ? $dataTable.data('page-length') : 25,
             responsive: true,
             language: {
                 search: $('.js-translations').data('search'),
@@ -42,7 +44,7 @@ $(function () {
 
     if ($checkboxes.length) {
         $checkboxes.each(function () {
-            var $checkbox = $(this);
+            var $checkbox = $(this).css('visibility', 'visible');
 
             $checkbox.iCheck({
                 checkboxClass: 'icheckbox_square-green',
@@ -368,27 +370,27 @@ $(function () {
 
 $(function() {
     if ($('#js-code').length > 0) {
-        var width = $("#js-width").val();
-        var height = $("#js-height").val();
-        var uri = $(".js-res-uri").data('uri');
+        var width = $('#js-width').val();
+        var height = $('#js-height').val();
+        var uri = $('.js-res-uri').data('uri');
 
-        $("#js-width").on("change paste keyup", function(width, height) {
+        $('#js-width').on('change paste keyup', function(width, height) {
             width = $(this).val();
-            height = $("#js-height").val();
+            height = $('#js-height').val();
             updateTextarea(width, height);
         });
 
-        $("#js-height").on("change paste keyup", function(width, height) {
+        $('#js-height').on('change paste keyup', function(width, height) {
             height = $(this).val();
-            width = $("#js-width").val();
+            width = $('#js-width').val();
             updateTextarea(width, height);
         });
 
         updateTextarea(width, height);
 
-        $(".js-copy").on("click", function() {
+        $('.js-copy').on('click', function() {
             $('#js-code').select();
-            document.execCommand("copy");
+            document.execCommand('copy');
         });
 
         function updateTextarea(width, height) {
@@ -425,9 +427,15 @@ $(function() {
         rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
 
         return (rgb && rgb.length === 4)
-            ? "#" + ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
-              ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
-              ("0" + parseInt(rgb[3],10).toString(16)).slice(-2)
+            ? '#' + ('0' + parseInt(rgb[1], 10).toString(16)).slice(-2) +
+                ('0' + parseInt(rgb[2], 10).toString(16)).slice(-2) +
+                ('0' + parseInt(rgb[3], 10).toString(16)).slice(-2)
             : '';
     }
+});
+
+// Hide target with button functionality
+$('.js-hide-button').click(function() {
+    $($(this).data('target')).hide();
+    $(this).hide();
 });

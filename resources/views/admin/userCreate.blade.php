@@ -5,7 +5,7 @@
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'users'])
     <div class="col-lg-12">
-        <h3>{{ utrans('custom.new_user') }}</h3>
+        <h3>{{ uctrans('custom.new_user') }}</h3>
         <div class="col-lg-10 col-md-11 col-xs-12 col-lg-offset-1 m-t-md">
             <div class="row">
                 <div class="col-xs-12">
@@ -16,7 +16,7 @@
                         {{ csrf_field() }}
 
                         <div class="form-group row required">
-                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.name') }}:</label>
+                            <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                             <div class="col-sm-9">
                                 <input
                                     type="text"
@@ -194,10 +194,14 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div class="reg-btns">
+                            <div class="col-xs-12 text-right mng-btns">
+                                <button
+                                    name="back"
+                                    class="btn btn-primary"
+                                >{{ uctrans('custom.close') }}</button>
                                 <button
                                     type="submit"
-                                    class="m-l-md btn pull-right btn-primary m-b-sm"
+                                    class="btn btn-primary"
                                 >{{ uctrans('custom.save') }}</button>
                             </div>
                         </div>

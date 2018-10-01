@@ -580,7 +580,10 @@ class OrganisationController extends ApiController
                 $user = \App\User::where('api_key', $post['api_key'])->first();
                 $rightCheck = RoleRight::checkUserRight(
                     Module::ORGANISATIONS,
-                    RoleRight::RIGHT_VIEW
+                    RoleRight::RIGHT_VIEW,
+                    [
+                        'user' => $user
+                    ]
                 );
 
                 if (!$rightCheck) {
@@ -644,6 +647,25 @@ class OrganisationController extends ApiController
 
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $columns = [
+                    'id',
+                    'name',
+                    'type',
+                    'descript',
+                    'contacts',
+                    'activity_info',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($request->criteria['order']['field'])) {
+                    if (!in_array($request->criteria['order']['field'], $columns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
 
                 $query->orderBy($field, $type);
 
@@ -924,6 +946,25 @@ class OrganisationController extends ApiController
 
                 $field = empty($criteria['order']['field']) ? 'created_at' : $criteria['order']['field'];
                 $type = empty($criteria['order']['type']) ? 'desc' : $criteria['order']['type'];
+
+                $columns = [
+                    'id',
+                    'name',
+                    'type',
+                    'descript',
+                    'contacts',
+                    'activity_info',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $columns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
 
                 $query->orderBy($field, $type);
 
@@ -1791,6 +1832,8 @@ class OrganisationController extends ApiController
      * @param integer criteria - optional
      * @param array criteria[group_ids] - optional
      * @param integer criteria[dataset_id] - optional
+     * @param integer criteria[user_id] - optional
+     * @param string criteria[keywords] - optional
      * @param string criteria[locale] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
@@ -1809,10 +1852,6 @@ class OrganisationController extends ApiController
         $locale = !empty($post['criteria']['locale'])
             ? $post['criteria']['locale']
             : \LaravelLocalization::getCurrentLocale();
-        $groups = [];
-        $result = [];
-
-        $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
         $validator = \Validator::make($post, [
             'criteria'              => 'nullable|array',
@@ -1828,6 +1867,7 @@ class OrganisationController extends ApiController
                 'locale'       => 'nullable|string|max:5',
                 'dataset_id'   => 'nullable|int|digits_between:1,10',
                 'user_id'      => 'nullable|int|exists:users,id|digits_between:1,10',
+                'keywords'     => 'nullable|string|max:191',
                 'order'        => 'nullable|array'
             ]);
         }
@@ -1842,99 +1882,115 @@ class OrganisationController extends ApiController
         }
 
         if (!$validator->fails()) {
-            if (!empty($criteria['group_ids'])) {
-                $query->whereIn('id', $criteria['group_ids']);
-            }
+            try {
+                $groups = [];
+                $result = [];
 
-            if (!empty($criteria['dataset_id'])) {
-                $query->whereHas('dataSet', function($q) use ($criteria) {
-                    $q->where('id', $criteria['dataset_id']);
-                });
-            }
+                $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
-            if (!empty($criteria['user_id'])) {
-                $query->whereHas('userToOrgRole', function($q) use ($criteria) {
-                    $q->where('user_id', $criteria['user_id']);
-                });
-            }
-
-            $orderColumns = [
-                'id',
-                'type',
-                'name',
-                'descript',
-                'activity_info',
-                'contacts',
-                'active',
-                'approved',
-                'created_at',
-                'updated_at',
-                'created_by',
-                'updated_by',
-            ];
-
-            if (isset($criteria['order']['field'])) {
-                if (!in_array($criteria['order']['field'], $orderColumns)) {
-                    unset($criteria['order']['field']);
-                }
-            }
-
-            $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
-            $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
-
-            $count = $query->count();
-
-            $query->forPage(
-                $request->offsetGet('page_number'),
-                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-            );
-
-            $groups = $query->get();
-
-            if (!empty($groups)) {
-                foreach ($groups as $group) {
-                    $customFields = [];
-
-                    //get custom fields
-                    foreach ($group->customSetting()->get() as $setting) {
-                        $customFields[] = [
-                            'key'    => $setting->key,
-                            'value'  => $setting->value
-                        ];
-                    }
-
-                    $result[] = [
-                        'id'                => $group->id,
-                        'name'              => $group->name,
-                        'description'       => $group->descript,
-                        'locale'            => $locale,
-                        'uri'               => $group->uri,
-                        'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
-                        'custom_fields'     => $customFields,
-                        'datasets_count'    => $group->dataSet()->count(),
-                        'followers_count'   => $group->userFollow()->count(),
-                        'created_at'        => $group->created,
-                        'updated_at'        => $group->updated_at,
-                        'created_by'        => $group->created_by,
-                        'updated_by'        => $group->updated_by,
-                    ];
+                if (!empty($criteria['group_ids'])) {
+                    $query->whereIn('id', $criteria['group_ids']);
                 }
 
-                $transFields = ['name', 'description'];
+                if (!empty($criteria['keywords'])) {
+                    $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
+                    $query->whereIn('id', $ids);
+                }
 
-                if (in_array($field, $transFields)) {
-                    usort($result, function($a, $b) use ($type, $field) {
-                        return strtolower($type) == 'asc'
-                            ? strcmp($a[$field], $b[$field])
-                            : strcmp($b[$field], $a[$field]);
+                if (!empty($criteria['dataset_id'])) {
+                    $query->whereHas('dataSetGroup', function($q) use ($criteria) {
+                        $q->where('data_set_id', $criteria['dataset_id']);
                     });
                 }
 
-                return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
-            }
+                if (!empty($criteria['user_id'])) {
+                    $query->whereHas('userToOrgRole', function($q) use ($criteria) {
+                        $q->where('user_id', $criteria['user_id']);
+                    });
+                }
 
-            return $this->errorResponse(__('custom.no_groups_found'), $validator->errors()->messages());
+                $orderColumns = [
+                    'id',
+                    'type',
+                    'name',
+                    'descript',
+                    'activity_info',
+                    'contacts',
+                    'active',
+                    'approved',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $orderColumns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
+
+                $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+                $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $count = $query->count();
+
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
+
+                $groups = $query->get();
+
+                if (!empty($groups)) {
+                    foreach ($groups as $group) {
+                        $customFields = [];
+
+                        //get custom fields
+                        foreach ($group->customSetting()->get() as $setting) {
+                            $customFields[] = [
+                                'key'    => $setting->key,
+                                'value'  => $setting->value
+                            ];
+                        }
+
+                        $result[] = [
+                            'id'                => $group->id,
+                            'name'              => $group->name,
+                            'description'       => $group->descript,
+                            'locale'            => $locale,
+                            'uri'               => $group->uri,
+                            'logo'              => $this->getImageData($group->logo_data, $group->logo_mime_type, 'group'),
+                            'custom_fields'     => $customFields,
+                            'datasets_count'    => $group->dataSet()->count(),
+                            'followers_count'   => $group->userFollow()->count(),
+                            'created_at'        => $group->created,
+                            'updated_at'        => $group->updated_at,
+                            'created_by'        => $group->created_by,
+                            'updated_by'        => $group->updated_by,
+                        ];
+                    }
+
+                    $transFields = ['name', 'description'];
+
+                    if (in_array($field, $transFields)) {
+                        usort($result, function($a, $b) use ($type, $field) {
+                            return strtolower($type) == 'asc'
+                                ? strcmp($a[$field], $b[$field])
+                                : strcmp($b[$field], $a[$field]);
+                        });
+                    }
+
+                    return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
+                }
+
+                return $this->errorResponse(__('custom.no_groups_found'), $validator->errors()->messages());
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+            }
         }
+
+        return $this->errorResponse(__('custom.list_groups_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -1995,7 +2051,10 @@ class OrganisationController extends ApiController
                     foreach ($relations as $v) {
                         $ids[] = $v->data_set_id;
                     }
-                    $count = DataSet::whereIn('id', $ids)->where('status', DataSet::STATUS_PUBLISHED)->count();
+                    $count = DataSet::whereIn('id', $ids)
+                        ->where('status', DataSet::STATUS_PUBLISHED)
+                        ->where('visibility', DataSet::VISIBILITY_PUBLIC)
+                        ->count();
                     $result['datasets_count'] = $count;
 
                     return $this->successResponse($result);
@@ -2086,6 +2145,27 @@ class OrganisationController extends ApiController
 
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+                $orderColumns = [
+                    'id',
+                    'type',
+                    'name',
+                    'descript',
+                    'activity_info',
+                    'contacts',
+                    'active',
+                    'approved',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                ];
+
+                if (isset($criteria['order']['field'])) {
+                    if (!in_array($criteria['order']['field'], $orderColumns)) {
+                        return $this->errorResponse(__('custom.invalid_sort_field'));
+                    }
+                }
 
                 $query->orderBy($field, $type);
 
@@ -2325,6 +2405,7 @@ class OrganisationController extends ApiController
                 }
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
                 $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
@@ -2469,6 +2550,7 @@ class OrganisationController extends ApiController
                 $data->where('organisations.type', Organisation::TYPE_GROUP);
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
                 $data->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC);
+                $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);

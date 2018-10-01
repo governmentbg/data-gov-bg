@@ -18,7 +18,7 @@
                                 {{ csrf_field() }}
 
                                 <div class="form-group row m-b-lg m-t-md required">
-                                    <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}</label>
+                                    <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <input
                                             type="text"
@@ -32,13 +32,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-3 col-xs-12 col-form-label">MIME type</label>
+                                    <label class="col-sm-3 col-xs-12 col-form-label">MIME type:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div>{{ $model->mime_type }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="comment" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.comment') }}</label>
+                                    <label for="comment" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.comment') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <input
                                             type="text"
@@ -52,7 +52,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}</label>
+                                    <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
                                     <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                         <div class="js-check">
                                             <input
@@ -80,49 +80,49 @@
                                     <hr>
                                 </div>
                                 <div class="form-group row m-b-lg">
-                                    <label class="col-sm-6 col-xs-12 col-form-label m-t-lg">{{ utrans('custom.size') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label m-t-lg">{{ utrans('custom.size') }}:</label>
                                     <div class="col-sm-6 col-xs-12 m-t-lg">
                                         <div>{{ $model->width .' x '. $model->height }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.file_size') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.file_size') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->size }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">URI Image</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">URI Image:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->item }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">URI Thumbnail</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">URI Thumbnail:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->thumb }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->created_by }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->created_at }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $model->created_at != $model->updated_at ? $model->updated_by : '' }}</div>
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{$model->created_at != $model->updated_at ? $model->updated_at : '' }}</div>
                                     </div>

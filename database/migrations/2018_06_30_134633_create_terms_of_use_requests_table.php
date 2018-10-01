@@ -13,19 +13,21 @@ class CreateTermsOfUseRequestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('terms_of_use_requests', function (Blueprint $table) {
-            $table->increments('id');
-            $table->text('descript');
-            $table->string('firstname', 100);
-            $table->string('lastname', 100);
-            $table->string('email');
-            $table->unsignedTinyInteger('status');
-            $table->timestamps();
-            $table->integer('updated_by')->unsigned()->nullable();
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->integer('created_by')->unsigned()->nullable();
-            $table->foreign('created_by')->references('id')->on('users');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('terms_of_use_requests', function (Blueprint $table) {
+                $table->increments('id');
+                $table->text('descript');
+                $table->string('firstname', 100);
+                $table->string('lastname', 100);
+                $table->string('email');
+                $table->unsignedTinyInteger('status');
+                $table->timestamps();
+                $table->integer('updated_by')->unsigned()->nullable();
+                $table->foreign('updated_by')->references('id')->on('users');
+                $table->integer('created_by')->unsigned()->nullable();
+                $table->foreign('created_by')->references('id')->on('users');
+            });
+        }
     }
 
     /**

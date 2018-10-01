@@ -31,6 +31,12 @@
     $secondary: white;
 
     .#{$name} {
+        .section-line {
+            height: 1px;
+            margin: 0 1%;
+            border-color: $primary;
+        }
+
         .nano {
             > .nano-pane {
                 > .nano-slider {

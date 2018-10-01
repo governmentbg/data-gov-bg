@@ -53,9 +53,11 @@ class InsertBaseRolesInRoles extends Migration
      */
     public function up()
     {
-        foreach ($this->roles as $role) {
-            if (!Role::where(['name' => $role['name']])->count()) {
-                Role::create($role);
+        if (!env('IS_TOOL')) {
+            foreach ($this->roles as $role) {
+                if (!Role::where(['name' => $role['name']])->count()) {
+                    Role::create($role);
+                }
             }
         }
     }
@@ -67,9 +69,11 @@ class InsertBaseRolesInRoles extends Migration
      */
     public function down()
     {
-        foreach ($this->roles as $role) {
-            if (Role::where(['name' => $role['name']])->count()) {
-                Role::where(['name' => $role['name']])->delete();
+        if (!env('IS_TOOL')) {
+            foreach ($this->roles as $role) {
+                if (Role::where(['name' => $role['name']])->count()) {
+                    Role::where(['name' => $role['name']])->delete();
+                }
             }
         }
     }

@@ -13,11 +13,9 @@ class CreateUserForMigrations extends Migration
      */
     public function up()
     {
-        $errors = [];
+        if (!env('IS_TOOL')) {
+            $errors = [];
 
-        $password = env('SYSTEM_PASSWORD');
-
-        if (!empty($password)) {
             try {
                 DB::table('users')->insert([
                     'username'      => 'migrate_data',
@@ -37,12 +35,10 @@ class CreateUserForMigrations extends Migration
             } catch (\Illuminate\Database\QueryException $ex) {
                 $errors[] = $ex->getMessage();
             }
-        } else {
-            $errors[] = 'SYSTEM_PASSWORD not entered in config';
-        }
 
-        if (!empty($errors)) {
-            dd($errors[0]);
+            if (!empty($errors)) {
+                dd($errors[0]);
+            }
         }
     }
 
@@ -53,8 +49,10 @@ class CreateUserForMigrations extends Migration
      */
     public function down()
     {
-        try {
-            DB::table('users')->where('username', 'migrate_data')->delete();
-        } catch (\Illuminate\Database\QueryException $ex) {}
+        if (!env('IS_TOOL')) {
+            try {
+                DB::table('users')->where('username', 'migrate_data')->delete();
+            } catch (\Illuminate\Database\QueryException $ex) {}
+        }
     }
 }

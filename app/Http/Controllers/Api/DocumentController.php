@@ -15,6 +15,17 @@ use Illuminate\Database\QueryException;
 
 class DocumentController extends ApiController
 {
+    private $path;
+
+    public function __construct()
+    {
+        $this->path = storage_path('docs') .'/';
+
+        if (!is_dir($this->path)) {
+            mkdir($this->path);
+        }
+    }
+
     /**
      * Add a document with provided data
      *
@@ -74,28 +85,36 @@ class DocumentController extends ApiController
             try {
                 DB::beginTransaction();
 
-                $newDocument = new Document;
-                $newDocument->name = $this->trans($post['data']['locale'], $post['data']['name']);
-                $newDocument->descript = $this->trans($post['data']['locale'], $post['data']['description']);
-                $newDocument->file_name = $post['data']['filename'];
-                $newDocument->mime_type = $post['data']['mimetype'];
-                $newDocument->data = $post['data']['data'];
-                $newDocument->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
-                $newDocument->save();
+                $doc = new Document;
+                $doc->name = $this->trans($post['data']['locale'], $post['data']['name']);
+                $doc->descript = $this->trans($post['data']['locale'], $post['data']['description']);
+                $doc->file_name = $post['data']['filename'];
+                $doc->mime_type = $post['data']['mimetype'];
+                $doc->data = $post['data']['data'];
+                $doc->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
+                $doc->save();
 
-                DB::commit();
+                if ($this->checkFileSize($data['data'])) {
+                    $doc->save();
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
-                    'action'           => ActionsHistory::TYPE_ADD,
-                    'action_object'    => $newDocument->id,
-                    'action_msg'       => 'Added new document',
-                ];
+                    file_put_contents($this->path . $doc->id, $data['data']);
 
-                Module::add($logData);
+                    DB::commit();
 
-                return $this->successResponse(['doc_id' => $newDocument->id]);
-            } catch (QueryException $ex) {
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $doc->id,
+                        'action_msg'       => 'Added new document',
+                    ];
+
+                    Module::add($logData);
+                } else {
+                    $validator->errors()->add('logo', $this->getFileSizeError());
+                }
+
+                return $this->successResponse(['doc_id' => $doc->id]);
+            } catch (\Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -103,6 +122,37 @@ class DocumentController extends ApiController
         }
 
         return $this->errorResponse(__('custom.add_document_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Append provided data to a document
+     *
+     * @param array data - required
+     * @param int data[doc_id] - required
+     * @param string data[data] - required
+     *
+     * @return json response with doc id or error message
+     */
+    public function appendDocumentData(Request $request)
+    {
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
+            'doc_id'    => 'required|int|exists:documents,id',
+            'data'      => 'required|string',
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                file_put_contents($this->path . $data['doc_id'], $data['data'], FILE_APPEND);
+
+                return $this->successResponse();
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.append_document_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -122,11 +172,27 @@ class DocumentController extends ApiController
     public function editDocument(Request $request)
     {
         $post = $request->all();
+        $errors = [];
 
         $validator = Validator::make($post, [
-            'doc_id'            => 'required|integer|exists:documents,id|digits_between:1,10',
-            'data'              => 'required|array',
+            'doc_id'    => 'required|integer|exists:documents,id|digits_between:1,10',
+            'data'      => 'required|array',
         ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->messages();
+        } else {
+            $data = $post['data'];
+
+            $validator = \Validator::make($data, [
+                'name'         => 'nullable',
+                'description'  => 'nullable',
+                'locale'       => 'nullable|string|max:5',
+                'filename'     => 'nullable|string',
+                'mimetype'     => 'nullable|string',
+                'data'         => 'nullable|string',
+            ]);
+        }
 
         if (!$validator->fails()) {
             $validator = Validator::make($post['data'], [
@@ -163,7 +229,7 @@ class DocumentController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $editDocument = Document::find($post['doc_id']);
+                $doc = Document::find($post['doc_id']);
 
                 $rightCheck = RoleRight::checkUserRight(
                     Module::DOCUMENTS,
@@ -180,52 +246,54 @@ class DocumentController extends ApiController
 
                 DB::beginTransaction();
 
-                if (!empty($post['data']['name'])) {
-                    $editDocument->name = $this->trans($post['data']['locale'], $post['data']['name'], true);
+                if (isset($data['name'])) {
+                    $doc->name = $this->trans($data['locale'], $data['name'], true);
                 }
 
-                if (!empty($post['data']['description'])) {
-                    $editDocument->descript = $this->trans($post['data']['locale'], $post['data']['description'], true);
+                if (isset($data['description'])) {
+                    $doc->descript = $this->trans($data['locale'], $data['description'], true);
                 }
 
-                if (!empty($post['data']['filename'])) {
-                    $editDocument->file_name = $post['data']['filename'];
+                if (isset($data['filename'])) {
+                    $doc->file_name = $data['filename'];
                 }
 
-                if (!empty($post['data']['mimetype'])) {
-                    $editDocument->mime_type = $post['data']['mimetype'];
+                if (isset($data['mimetype'])) {
+                    $doc->mime_type = $data['mimetype'];
                 }
 
-                if (!empty($post['data']['data'])) {
-                    $editDocument->data = $post['data']['data'];
+                if (isset($data['forum_link'])) {
+                    $doc->mime_type = $data['forum_link'];
                 }
 
-                if (!empty($post['data']['forum_link'])) {
-                    $editDocument->forum_link = $post['data']['forum_link'];
+                if (isset($data['data'])) {
+                    file_put_contents($this->path . $doc->id, $data['data']);
                 }
 
-                $editDocument->save();
+                $doc->save();
 
                 DB::commit();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DOCUMENTS),
                     'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $editDocument->id,
+                    'action_object'    => $doc->id,
                     'action_msg'       => 'Edited a document',
                 ];
 
                 Module::add($logData);
 
                 return $this->successResponse();
-            } catch (QueryException $e) {
+            } catch (\Exception $e) {
                 DB::rollback();
 
                 Log::error($e->getMessage());
             }
+        } else {
+            $errors = $validator->errors()->messages();
         }
 
-        return $this->errorResponse(__('custom.edit_document_fail'), $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_document_fail'), $errors);
     }
 
     /**
@@ -261,6 +329,8 @@ class DocumentController extends ApiController
             try {
                 $deleteDocument->delete();
 
+                unlink($this->path . $post['doc_id']);
+
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DOCUMENTS),
                     'action'           => ActionsHistory::TYPE_DEL,
@@ -271,7 +341,7 @@ class DocumentController extends ApiController
                 Module::add($logData);
 
                 return $this->successResponse();
-            } catch (QueryException $ex) {
+            } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
             }
             return $this->errorResponse(__('custom.delete_document_fail'));
@@ -302,12 +372,13 @@ class DocumentController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
-            'criteria'              => 'nullable|array',
-            'records_per_page'      => 'nullable|integer|digits_between:1,10',
-            'page_number'           => 'nullable|integer|digits_between:1,10',
+            'criteria'          => 'nullable|array',
+            'records_per_page'  => 'nullable|integer|digits_between:1,10',
+            'page_number'       => 'nullable|integer|digits_between:1,10',
         ]);
 
         $criteria = isset($post['criteria']) ? $post['criteria'] : [];
+
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
                 'doc_id'       => 'nullable|integer|digits_between:1,10',
@@ -341,7 +412,6 @@ class DocumentController extends ApiController
             'descript',
             'file_name',
             'mime_type',
-            'data',
             'created_at',
             'updated_at',
             'created_by',
@@ -404,6 +474,7 @@ class DocumentController extends ApiController
                 'description'   => $result->descript,
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
+                'data'          => file_get_contents($this->path . $result->id),
                 'forum_link'    => $result->forum_link,
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
@@ -411,9 +482,7 @@ class DocumentController extends ApiController
                 'updated_by'    => $result->updated_by,
             ];
 
-            $results[] = isset($criteria['doc_id'])
-                ? array_merge(['data' => utf8_encode($result->data)], $itemData)
-                : $itemData;
+            $results[] = $itemData;
         }
 
         $logData = [
@@ -497,7 +566,6 @@ class DocumentController extends ApiController
                 'descript',
                 'file_name',
                 'mime_type',
-                'data',
                 'created_at',
                 'updated_at',
                 'created_by',
@@ -532,6 +600,7 @@ class DocumentController extends ApiController
                     'description'   => $result->descript,
                     'filename'      => $result->file_name,
                     'mimetype'      => $result->mime_type,
+                    'data'          => file_get_contents($this->path . $result->id),
                     'forum_link'    => $result->forum_link,
                     'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                     'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,

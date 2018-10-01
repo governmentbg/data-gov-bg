@@ -77,6 +77,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('addDocument', 'Api\DocumentController@addDocument');
     Route::post('editDocument', 'Api\DocumentController@editDocument');
+    Route::post('appendDocumentData', 'Api\DocumentController@appendDocumentData');
     Route::post('deleteDocument', 'Api\DocumentController@deleteDocument');
     Route::post('listDocuments', 'Api\DocumentController@listDocuments');
     Route::post('searchDocuments', 'Api\DocumentController@searchDocuments');

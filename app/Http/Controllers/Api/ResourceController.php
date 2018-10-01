@@ -29,7 +29,6 @@ class ResourceController extends ApiController
      * @param string data[name] - required
      * @param string data[description] - optional
      * @param string data[locale] - required
-     * @param string data[version] - optional
      * @param string data[schema_description] - required if no schema_url|optional
      * @param string data[schema_url] - required if no schema_description|optional
      * @param int data[type] - required (1 -> File, 2 -> Hiperlink, 3 -> API)
@@ -66,7 +65,6 @@ class ResourceController extends ApiController
                 'locale'               => 'nullable|max:5',
                 'name'                 => 'required_with:locale|max:191',
                 'name.bg'              => 'required_without:locale|string|max:191',
-                'version'              => 'nullable|max:15',
                 'file_format'          => 'nullable|string',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
@@ -129,7 +127,7 @@ class ResourceController extends ApiController
                         ? $this->trans($post['data']['locale'], $post['data']['description'])
                         : null,
                     'uri'               => Uuid::generate(4)->string,
-                    'version'           => isset($post['data']['version']) ? $post['data']['version'] : 1,
+                    'version'           => 1,
                     'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
                     'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
                     'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
@@ -306,7 +304,6 @@ class ResourceController extends ApiController
      * @param string data[name] - optional
      * @param string data[description] - optional
      * @param string data[locale] - optional
-     * @param string data[version] - optional
      * @param string data[schema_description] - optional
      * @param string data[schema_url] - optional
      * @param int data[type] - optional (1 -> File, 2 -> Hiperlink, 3 -> API)
@@ -341,7 +338,6 @@ class ResourceController extends ApiController
                 'description'          => 'nullable|max:8000',
                 'file_format'          => 'sometimes|string|max:191',
                 'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',
-                'version'              => 'nullable|string|max:15',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
                 'type'                 => 'sometimes|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
@@ -396,10 +392,6 @@ class ResourceController extends ApiController
             }
 
             DB::beginTransaction();
-
-            if (isset($post['data']['version'])) {
-                $resource->version = $post['data']['version'];
-            }
 
             if (isset($post['data']['type'])) {
                 $resource->resource_type = $post['data']['type'];
@@ -518,6 +510,7 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
+                $newVersion = strval(intval($resource->version) + 1);
                 $dataset = DataSet::where('id', $resource->data_set_id);
 
                 if (isset($dataset->org_id)) {
@@ -553,8 +546,8 @@ class ResourceController extends ApiController
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
                     'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                    'doc'           => $id .'_'. $resource->version,
-                    'version'       => $resource->version,
+                    'doc'           => $id .'_'. $newVersion,
+                    'version'       => $newVersion,
                     'resource_id'   => $id
                 ]);
 
@@ -562,12 +555,13 @@ class ResourceController extends ApiController
                     'body'  => ['rows' => $post['data']],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id .'_'. $resource->version,
+                    'id'    => $id .'_'. $newVersion,
                 ]);
 
                 // update signals status after resource version update and mark resource as not reported
                 Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
                 $resource->is_reported = Resource::REPORTED_FALSE;
+                $resource->version = $newVersion;
                 $resource->save();
 
                 $logData = [
@@ -778,7 +772,6 @@ class ResourceController extends ApiController
                     'authentication'        => $result->authentication,
                     'custom_fields'         => [], // TODO
                     'file_format'           => isset($result->file_format) ? $fileFormats[$result->file_format] : null,
-                    'es_id'                 => isset($resource->es_id) ? $resource->es_id : null,
                     'reported'              => $result->is_reported,
                     'created_at'            => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                     'updated_at'            => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
@@ -846,7 +839,6 @@ class ResourceController extends ApiController
                     'http_headers'          => $resource->http_headers,
                     'post_data'             => $resource->post_data,
                     'file_format'           => isset($resource->file_format) ? $fileFormats[$resource->file_format] : null,
-                    'es_id'                 => isset($resource->es_id) ? $resource->es_id : null,
                     'reported'              => $resource->is_reported,
                     'created_at'            => isset($resource->created_at) ? $resource->created_at->toDateTimeString() : null,
                     'created_by'            => $resource->created_by,

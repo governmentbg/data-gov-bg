@@ -44,7 +44,6 @@ class HelpController extends ApiController
             ]);
 
             if (!$validator->fails()) {
-                error_log('data: '. print_r($data, true));
                 $helpSection = new HelpSection;
 
                 $helpSection->name = $data['name'];
@@ -73,7 +72,6 @@ class HelpController extends ApiController
 
                     return $this->successResponse(['id' => $helpSection->id], true);
                 } catch (\QueryException $ex) {
-                    error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
                     Log::error($ex->getMessage());
                 }
             }

@@ -22,6 +22,7 @@ class CreateSectionsTable extends Migration
             $table->tinyInteger('ordering')->default(1);
             $table->boolean('read_only')->default(0);
             $table->string('forum_link')->nullable();
+            $table->string('help_section')->nullable();
             $table->tinyInteger('theme')->default(1);
             $table->timestamps();
             $table->integer('updated_by')->unsigned()->nullable();

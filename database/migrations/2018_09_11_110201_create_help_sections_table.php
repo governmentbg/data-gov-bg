@@ -15,7 +15,8 @@ class CreateHelpSectionsTable extends Migration
     {
         Schema::create('help_sections', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('name')->unsigned();
+            $table->string('name')->unique();
+            $table->integer('title')->unsigned();
             $table->integer('parent_id')->unsigned()->nullable();
             $table->foreign('parent_id')->references('id')->on('help_sections');
             $table->boolean('active');

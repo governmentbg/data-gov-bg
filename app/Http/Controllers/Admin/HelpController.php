@@ -19,8 +19,8 @@ class HelpController extends AdminController
     {
         return [
             [
-                'label'    => 'custom.name',
-                'name'     => 'name',
+                'label'    => 'custom.title',
+                'name'     => 'title',
                 'type'     => 'text',
                 'view'     => 'translation',
                 'required' => true,
@@ -43,6 +43,7 @@ class HelpController extends AdminController
                 'name'     => 'body',
                 'type'     => 'text',
                 'view'     => 'translation_txt',
+                'addClass' => 'js-summernote',
                 'required' => true,
             ]
         ];
@@ -65,9 +66,28 @@ class HelpController extends AdminController
     }
 
     /**
+     *  show list of help subsections
+     */
+    public function listSubsections(Request $request, $id)
+    {
+        $rq = Request::create('/api/listHelpSubsections', 'POST', [
+            'api_key'       => Auth::user()->api_key,
+            'criteria'      => [
+                'section_id'    => $id,
+            ]
+        ]);
+        $api = new ApiHelp($rq);
+        $result = $api->listHelpSubsections($rq)->getData();
+
+        $helpSections = $result->success ? $result->subsections : [];
+
+        return view('admin/helpSubsectionsList', compact('helpSections', 'id'));
+    }
+
+    /**
      * show form for creation of help sections
      */
-    public function addHelpSecton(Request $request)
+    public function addHelpSecton(Request $request, $parent = null)
     {
         if ($request->has('back')) {
             return redirect('admin/help/sections/list');
@@ -78,7 +98,8 @@ class HelpController extends AdminController
                 'api_key'   => Auth::user()->api_key,
                 'data'      => [
                     'name'      => $request->offsetGet('name'),
-                    'parent_id' => $request->offsetGet('parent_id'),
+                    'title'     => $request->offsetGet('title'),
+                    'parent_id' => $request->offsetGet('parent'),
                     'active'    => $request->offsetGet('active') ?: false,
                     'ordering'  => $request->offsetGet('ordering'),
                 ],
@@ -101,6 +122,7 @@ class HelpController extends AdminController
             'fields'    => self::getHelpSectionTransFields(),
             'parents'   => self::getMainSections(),
             'ordering'  => Category::getOrdering(),
+            'parentId'  => $parent,
         ]);
     }
 
@@ -128,6 +150,7 @@ class HelpController extends AdminController
                 'id'        => $id,
                 'data'      => [
                     'name'      => $request->offsetGet('name'),
+                    'title'     => $request->offsetGet('title'),
                     'parent_id' => $request->offsetGet('parent'),
                     'active'    => $request->offsetGet('active') ?: false,
                     'ordering'  => $request->offsetGet('ordering'),
@@ -170,6 +193,25 @@ class HelpController extends AdminController
         $result = $api->listHelpSections($rq)->getData();
 
         $section = $result->success ? $result->sections[0] : [];
+
+        return view('admin/viewHelpSection', compact('section'));
+    }
+
+    /**
+     * show view of help subsection
+     */
+    public function viewHelpSubsection(Request $request, $id)
+    {
+        $rq = Request::create('/api/listHelpSubsections', 'POST', [
+            'api_key'   => Auth::user()->api_key,
+            'criteria'  => [
+                'id'        => $id
+            ]
+        ]);
+        $api = new ApiHelp($rq);
+        $result = $api->listHelpSubsections($rq)->getData();
+
+        $section = $result->success ? $result->subsections[0] : [];
 
         return view('admin/viewHelpSection', compact('section'));
     }

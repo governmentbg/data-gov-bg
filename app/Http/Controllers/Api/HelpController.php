@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Module;
 use App\HelpPage;
 use App\HelpSection;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController;
 
@@ -31,9 +33,10 @@ class HelpController extends ApiController
             $data = $request->data;
 
             $validator = \Validator::make($data, [
-                'name'      => 'required_with:locale|max:191',
-                'name.bg'   => 'required_without:locale|string|max:191',
-                'name.*'    => 'max:191',
+                'name'      => 'required|string|unique:help_sections|max:191',
+                'title'     => 'required_with:locale|max:191',
+                'title.bg'  => 'required_without:locale|string|max:191',
+                'title.*'   => 'max:191',
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
                 'active'    => 'required|boolean',
@@ -41,9 +44,11 @@ class HelpController extends ApiController
             ]);
 
             if (!$validator->fails()) {
+                error_log('data: '. print_r($data, true));
                 $helpSection = new HelpSection;
 
-                $helpSection->name = $this->trans($data['locale'], $data['name']);
+                $helpSection->name = $data['name'];
+                $helpSection->title = $this->trans($data['locale'], $data['title']);
                 $helpSection->active = boolval($data['active']);
 
                 if (!empty($data['parent_id'])) {
@@ -57,8 +62,18 @@ class HelpController extends ApiController
                 try {
                     $helpSection->save();
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::HELP_SECTIONS),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $helpSection->id,
+                        'action_msg'       => 'Added help section',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse(['id' => $helpSection->id], true);
                 } catch (\QueryException $ex) {
+                    error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
                     Log::error($ex->getMessage());
                 }
             }
@@ -91,9 +106,10 @@ class HelpController extends ApiController
             $data = $request->data;
 
             $validator = \Validator::make($data, [
-                'name'      => 'required_with:locale|max:191',
-                'name.bg'   => 'required_without:locale|string|max:191',
-                'name.*'    => 'max:191',
+                'name'      => 'required|string|unique:help_pages|max:191',
+                'title'     => 'required_with:locale|max:191',
+                'title.bg'  => 'required_without:locale|string|max:191',
+                'title.*'   => 'max:191',
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
                 'active'    => 'required|boolean',
@@ -103,7 +119,8 @@ class HelpController extends ApiController
             if (!$validator->fails()) {
                 $section = HelpSection::find($request->id);
 
-                $section->name = $this->trans($data['locale'], $data['name']);
+                $section->name = $data['name'];
+                $section->title = $this->trans($data['locale'], $data['title']);
                 $section->active = boolval($data['active']);
 
                 if (!empty($data['parent_id'])) {
@@ -116,6 +133,15 @@ class HelpController extends ApiController
 
                 try {
                     $section->save();
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::HELP_SECTIONS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $section->id,
+                        'action_msg'       => 'Edited help section',
+                    ];
+
+                    Module::add($logData);
 
                     return $this->successResponse();
                 } catch (\QueryException $ex) {
@@ -144,6 +170,15 @@ class HelpController extends ApiController
 
             try {
                 $section->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::HELP_SECTIONS),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $request->id,
+                    'action_msg'       => 'Deleted help section ',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (\QueryException $ex) {
@@ -186,7 +221,7 @@ class HelpController extends ApiController
             $criteria['active'] = true;
         }
 
-        $helpSections = HelpSection::select();
+        $helpSections = HelpSection::select()->where('parent_id', null);
 
         if (isset($criteria['active'])) {
             $helpSections->where('active', $criteria['active']);
@@ -202,6 +237,7 @@ class HelpController extends ApiController
             $results[] = [
                 'id'            => $section->id,
                 'name'          => $section->name,
+                'title'         => $section->title,
                 'locale'        => \LaravelLocalization::getCurrentLocale(),
                 'parent_id'     => $section->parent_id,
                 'ordering'      => $section->ordering,
@@ -236,7 +272,8 @@ class HelpController extends ApiController
             $validator = \Validator::make($criteria, [
                 'locale'        => 'nullable|string|max:5',
                 'active'        => 'nullable|boolean',
-                'section_id'    => 'nullable|int|exists:help_sections,id'
+                'section_id'    => 'nullable|int|exists:help_sections,id',
+                'id'            => 'nullable|int|exists:help_sections,id',
             ]);
 
             if ($validator->fails()) {
@@ -249,6 +286,10 @@ class HelpController extends ApiController
         }
 
         $subsections = HelpSection::select()->where('parent_id', '!=', null);
+
+        if (isset($criteria['id'])) {
+            $subsections->where('id', $criteria['id']);
+        }
 
         if (isset($criteria['active'])) {
             $subsections->where('active', $criteria['active']);
@@ -264,6 +305,7 @@ class HelpController extends ApiController
             $results[] = [
                 'id'            => $section->id,
                 'name'          => $section->name,
+                'title'         => $section->title,
                 'locale'        => \LaravelLocalization::getCurrentLocale(),
                 'parent_id'     => $section->parent_id,
                 'ordering'      => $section->ordering,
@@ -338,6 +380,15 @@ class HelpController extends ApiController
 
                 try {
                     $helpPage->save();
+
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::HELP_PAGES),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $helpPage->id,
+                        'action_msg'       => 'Added help page',
+                    ];
+
+                    Module::add($logData);
 
                     return $this->successResponse(['id' => $helpPage->id], true);
                 } catch (\QueryException $ex) {
@@ -421,6 +472,15 @@ class HelpController extends ApiController
                 try {
                     $helpPage->save();
 
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::HELP_PAGES),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $helpPage->id,
+                        'action_msg'       => 'Added help page',
+                    ];
+
+                    Module::add($logData);
+
                     return $this->successResponse();
                 } catch (\QueryException $ex) {
                     Log::error($ex->getMessage());
@@ -448,6 +508,15 @@ class HelpController extends ApiController
 
             try {
                 $page->delete();
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::HELP_PAGES),
+                    'action'           => ActionsHistory::TYPE_DEL,
+                    'action_object'    => $request->page_id,
+                    'action_msg'       => 'Deleted help page',
+                ];
+
+                Module::add($logData);
 
                 return $this->successResponse();
             } catch (\QueryException $ex) {

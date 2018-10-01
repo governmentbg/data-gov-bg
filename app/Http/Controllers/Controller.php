@@ -43,7 +43,7 @@ class Controller extends BaseController
 
         return [
             'items'    => $result,
-            'paginate' => $paginator
+            'paginate' => $paginator,
         ];
     }
 

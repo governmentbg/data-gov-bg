@@ -9,11 +9,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @if ( !empty($description))
-        <meta name="description" content="{{$description}}">
+    @if (!empty($description))
+        <meta name="description" content="{{ $description }}">
     @endif
-    @if ( !empty($keywords))
-        <meta name="keywords" content="{{$keywords}}">
+    @if (!empty($keywords))
+        <meta name="keywords" content="{{ $keywords }}">
     @endif
     <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
@@ -68,53 +68,77 @@
                                 </span>
                             </a>
                         </div>
-                        <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
-                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#my-navbar">
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                            </button>
-                        </div>
-                        <div class="nav-controls text-right hidden-xs js-show-on-load">
-                            @if (\Auth::check())
-                                <span class="login-link username">
-                                    <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
-                                </span>
-                                <span class="user-icon {{ Request::segment(1) == 'user' || 'admin' ? 'active' : '' }}">
-                                    <a
-                                        href="{{ url('/user') }}"
-                                    >
-                                        @if (Auth::user()->is_admin)
-                                            <img class="admin" src="{{ asset('img/admin.svg') }}">
-                                        @else
-                                            <img src="{{ asset('img/user.svg') }}">
-                                        @endif
-                                    </a>
-                                </span>
-                                <span class="login-link">
-                                    <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
-                                </span>
-                            @else
-                                <span class="login-link">>
-                                    <a href="{{ url('/login') }}">{{ __('custom.login') }}</a>
+                        @if (!env('IS_TOOL'))
+                            <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#my-navbar">
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                            </div>
+                        @endif
+                        <div class="nav-controls text-right {{ env('IS_TOOL') ? null : 'hidden-xs' }} js-show-on-load">
+                            @if (!env('IS_TOOL'))
+                                @if (\Auth::check())
+                                    <span class="login-link username">
+                                        <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
+                                    </span>
+                                    <span class="user-icon {{ in_array(Request::segment(1), ['user', 'admin']) ? 'active' : '' }}">
+                                        <a
+                                            href="{{ url('/user') }}"
+                                        >
+                                            @if (\Auth::user()->is_admin)
+                                                <img class="admin" src="{{ asset('img/admin.svg') }}">
+                                            @else
+                                                <img src="{{ asset('img/user.svg') }}">
+                                            @endif
+                                        </a>
+                                    </span>
+                                    <span class="login-link">
+                                        <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
+                                    </span>
+                                @else
+                                    <span class="login-link">>
+                                        <a href="{{ url('/login') }}">{{ __('custom.login') }}</a>
+                                    </span>
+                                @endif
+                                <span class="search-input">
+                                    <form action="{{ action('DataController@list') }}" class="inline-block">
+                                        <input type="text" name="q" placeholder="{{ __('custom.search') }}">
+                                    </form>
                                 </span>
                             @endif
-                            <span class="search-input">
-                                <form action="{{ action('DataController@list') }}" class="inline-block">
-                                    <input type="text" name="q" placeholder="{{ __('custom.search') }}">
-                                </form>
-                            </span>
+
                             <span class="trans-link">
                                 <a
                                     href="{{ route('lang.switch', $altLang) }}"
                                 >{{ strtoupper($altLang) }}</a>
                             </span>
-                            <span class="social-icons">
-                                <a target ="_blank" href="http://www.facebook.com/sharer.php?u={{ url('/') }}" class="fb"><span class="fa fa-facebook"></span></a>
-                                <a target ="_blank" href="http://twitter.com/home?status={{ url('/') }}" class="tw"><span class="fa fa-twitter"></span></a>
-                                <a target ="_blank" href="https://plus.google.com/share?url={{ url('/') }}" class="gp"><span class="fa fa-google-plus"></span></a>
-                                <a target ="_blank" href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"><span class="fa fa-linkedin"></span></a>
-                            </span>
+
+                            @if (!env('IS_TOOL'))
+                                <span class="social-icons">
+                                    <a
+                                        target="_blank"
+                                        href="http://www.facebook.com/sharer.php?u={{ url('/') }}"
+                                        class="fb"
+                                    ><span class="fa fa-facebook"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="http://twitter.com/home?status={{ url('/') }}"
+                                        class="tw"
+                                    ><span class="fa fa-twitter"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="https://plus.google.com/share?url={{ url('/') }}"
+                                        class="gp"
+                                    ><span class="fa fa-google-plus"></span></a>
+                                    <a
+                                        target="_blank"
+                                        href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"
+                                    ><span class="fa fa-linkedin"></span></a>
+                                </span>
+                            @endif
+
                         </div>
                     </div>
                     <div class="collapse navbar-collapse" id="my-navbar">
@@ -122,56 +146,71 @@
                             <span><img class="js-close-navbar" src="{{ asset('img/close-btn.png') }}"></span>
                         </div>
                         <ul class="nav navbar-nav">
-                            <li class="index {{ Request::is('/') ? 'active' : '' }}">
-                                <a href="{{ url('/') }}">{{ utrans('custom.home') }}</a>
-                            </li>
-                            <li class="data {{ Request::segment(1) == 'data' ? 'active' : '' }}">
-                                <a href="{{ url('/data') }}">{{ utrans('custom.data') }}</a>
-                            </li>
-                            <li class="organisation {{ Request::segment(1) == 'organisation'  ? 'active' : '' }}">
-                                <a href="{{ url('/organisation') }}">{{ utrans('custom.organisations', 2) }}</a>
-                            </li>
-                            <li class="request {{ Request::segment(1) == 'request' ? 'active' : '' }}">
-                                <a href="{{ url('/request') }}">{{ __('custom.data_requests') }}</a>
-                            </li>
-                            <li class="visualisation {{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
-                                <a href="{{ url('/visualisation') }}">{{ utrans('custom.visualizations') }}</a>
-                            </li>
-                            <li class="news {{ Request::segment(1) == 'news' ? 'active' : '' }}">
-                                <a href="{{ url('/news') }}">{{ __('custom.news_events') }}</a>
-                            </li>
-                            <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
-                                <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
-                            </li>
-                            <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : '' }}">
-                                <a href="{{ url('/contact') }}">{{ utrans('custom.contacts', 2) }}</a>
-                            </li>
-                            <li
-                                class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
-                                    Request::segment(1),
-                                    ['user', 'login', 'registration']
-                                ) ? 'active' : null }}"
-                            >
-                                @if (!\Auth::check())
-                                    <a href="{{ url('/login') }}">{{ utrans('custom.login') }}</a>
-                                @else
-                                    <a href="{{ url('/user') }}">{{ utrans('custom.profile') }}</a>
+                            @if (env('IS_TOOL'))
+                                <li class="index {{ empty(Request::segment(2)) ? 'active' : '' }}">
+                                    <a href="{{ url('/tool') }}">{{ uctrans('custom.config') }}</a>
                                 </li>
-                                <li class="hidden-lg hidden-md hidden-sm index">
-                                    <a href="{{ url('/logout') }}">{{ utrans('custom.logout') }}&nbsp;<i class="fa fa-sign-out"></i></a>
-                                @endif
-                            </li>
-                            <li class="hidden-lg hidden-md hidden-sm">
-                                <input type="text" placeholder="{{ __('custom.search') }}" class="form-control rounded-input input-long">
-                            </li>
-                            <li class="hidden-lg hidden-md hidden-sm icons">
-                                <a
-                                    href="{{ route('lang.switch', $altLang) }}"
-                                >{{ strtoupper($altLang) }}</a>
-                                <a href="#" class="fb"><i class="fa fa-facebook"></i></a>
-                                <a href="#" class="tw"><i class="fa fa-twitter"></i></a>
-                                <a href="#" class="gp"><i class="fa fa-google-plus"></i></a>
-                            </li>
+                                <li class="index {{ Request::segment(2) == 'chronology' ? 'active' : '' }}">
+                                    <a href="{{ url('/tool/chronology') }}">{{ uctrans('custom.chronology') }}</a>
+                                </li>
+                            @else
+                                <li class="index {{ Request::is('/') ? 'active' : '' }}">
+                                    <a href="{{ url('/') }}">{{ uctrans('custom.home') }}</a>
+                                </li>
+                                <li class="data {{ Request::segment(1) == 'data' ? 'active' : '' }}">
+                                    <a href="{{ url('/data') }}">{{ uctrans('custom.data') }}</a>
+                                </li>
+                                <li class="organisation {{ Request::segment(1) == 'organisation'  ? 'active' : '' }}">
+                                    <a href="{{ url('/organisation') }}">{{ uctrans('custom.organisations', 2) }}</a>
+                                </li>
+                                <li class="request {{ Request::segment(1) == 'request' ? 'active' : '' }}">
+                                    <a href="{{ url('/request') }}">{{ __('custom.data_requests') }}</a>
+                                </li>
+                                <li class="visualisation {{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
+                                    <a href="{{ url('/visualisation') }}">{{ uctrans('custom.visualizations') }}</a>
+                                </li>
+                                <li class="news {{ Request::segment(1) == 'news' ? 'active' : '' }}">
+                                    <a href="{{ url('/news') }}">{{ __('custom.news_events') }}</a>
+                                </li>
+                                <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
+                                    <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
+                                </li>
+                                <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : '' }}">
+                                    <a href="{{ url('/contact') }}">{{ uctrans('custom.contacts', 2) }}</a>
+                                </li>
+                                <li
+                                    class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
+                                        Request::segment(1),
+                                        ['user', 'login', 'registration']
+                                    ) ? 'active' : null }}"
+                                >
+                                    @if (!\Auth::check())
+                                        <a href="{{ url('/login') }}">{{ uctrans('custom.login') }}</a>
+                                    @else
+                                        <a href="{{ url('/user') }}">{{ uctrans('custom.profile') }}</a>
+                                    </li>
+                                    <li class="hidden-lg hidden-md hidden-sm index">
+                                        <a
+                                            href="{{ url('/logout') }}"
+                                        >{{ uctrans('custom.logout') }}&nbsp;<i class="fa fa-sign-out"></i></a>
+                                    @endif
+                                </li>
+                                <li class="hidden-lg hidden-md hidden-sm">
+                                    <input
+                                        type="text"
+                                        placeholder="{{ __('custom.search') }}"
+                                        class="form-control rounded-input input-long"
+                                    >
+                                </li>
+                                <li class="hidden-lg hidden-md hidden-sm icons">
+                                    <a
+                                        href="{{ route('lang.switch', $altLang) }}"
+                                    >{{ strtoupper($altLang) }}</a>
+                                    <a href="#" class="fb"><i class="fa fa-facebook"></i></a>
+                                    <a href="#" class="tw"><i class="fa fa-twitter"></i></a>
+                                    <a href="#" class="gp"><i class="fa fa-google-plus"></i></a>
+                                </li>
+                            @endif
                         </ul>
                     </div>
                 </div>
@@ -219,6 +258,6 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
-    @yield('js')
+
 </body>
 </html>

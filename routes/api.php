@@ -161,6 +161,7 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('editHelpPage', 'Api\HelpController@editHelpPage');
     Route::post('deleteHelpPage', 'Api\HelpController@deleteHelpPage');
 });
+
 Route::post('listHelpSections', 'Api\HelpController@listHelpSections');
 Route::post('listHelpSubsections', 'Api\HelpController@listHelpSubsections');
 

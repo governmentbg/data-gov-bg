@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePasswordResetsTable extends Migration
+class AddChatterSoftDeletes extends Migration
 {
     /**
      * Run the migrations.
@@ -14,10 +14,12 @@ class CreatePasswordResetsTable extends Migration
     public function up()
     {
         if (!env('IS_TOOL')) {
-            Schema::create('password_resets', function (Blueprint $table) {
-                $table->string('email')->index();
-                $table->string('token');
-                $table->timestamp('created_at')->nullable();
+            Schema::table('chatter_discussion', function (Blueprint $table) {
+                $table->softDeletes();
+            });
+
+            Schema::table('chatter_post', function (Blueprint $table) {
+                $table->softDeletes();
             });
         }
     }
@@ -29,6 +31,6 @@ class CreatePasswordResetsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('password_resets');
+        //
     }
 }

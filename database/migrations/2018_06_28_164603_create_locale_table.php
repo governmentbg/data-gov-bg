@@ -13,15 +13,17 @@ class CreateLocaleTable extends Migration
      */
     public function up()
     {
-        Schema::create('locale', function (Blueprint $table) {
-            $table->char('locale', 5)->primary();
-            $table->boolean('active');
-            $table->timestamps();
-            $table->integer('updated_by')->unsigned()->nullable();
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->integer('created_by')->unsigned();
-            $table->foreign('created_by')->references('id')->on('users');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('locale', function (Blueprint $table) {
+                $table->char('locale', 5)->primary();
+                $table->boolean('active');
+                $table->timestamps();
+                $table->integer('updated_by')->unsigned()->nullable();
+                $table->foreign('updated_by')->references('id')->on('users');
+                $table->integer('created_by')->unsigned();
+                $table->foreign('created_by')->references('id')->on('users');
+            });
+        }
     }
 
     /**

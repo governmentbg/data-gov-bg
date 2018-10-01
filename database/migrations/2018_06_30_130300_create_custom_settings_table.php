@@ -13,35 +13,37 @@ class CreateCustomSettingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('custom_settings', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('org_id')->unsigned()->nullable();
-            $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
-            $table->integer('data_set_id')->unsigned()->nullable();
-            $table->foreign('data_set_id')->references('id')->on('data_sets')->onDelete('cascade');
-            $table->integer('resource_id')->unsigned()->nullable();
-            $table->foreign('resource_id')->references('id')->on('resources')->onDelete('cascade');
-            $table->integer('key')->unsigned();
-            $table->integer('value')->unsigned();
-            $table->timestamps();
-            $table->integer('updated_by')->unsigned()->nullable();
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->integer('created_by')->unsigned();
-            $table->foreign('created_by')->references('id')->on('users');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::create('custom_settings', function (Blueprint $table) {
+                $table->increments('id');
+                $table->integer('org_id')->unsigned()->nullable();
+                $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
+                $table->integer('data_set_id')->unsigned()->nullable();
+                $table->foreign('data_set_id')->references('id')->on('data_sets')->onDelete('cascade');
+                $table->integer('resource_id')->unsigned()->nullable();
+                $table->foreign('resource_id')->references('id')->on('resources')->onDelete('cascade');
+                $table->integer('key')->unsigned();
+                $table->integer('value')->unsigned();
+                $table->timestamps();
+                $table->integer('updated_by')->unsigned()->nullable();
+                $table->foreign('updated_by')->references('id')->on('users');
+                $table->integer('created_by')->unsigned();
+                $table->foreign('created_by')->references('id')->on('users');
+            });
 
-        DB::unprepared("
-           CREATE TRIGGER check_custom_settings_insert BEFORE INSERT ON custom_settings
-           FOR EACH ROW
-           BEGIN
-               ". $this->preventInsertQuery() ."
-           END;
-           CREATE TRIGGER check_custom_settings_update BEFORE UPDATE ON custom_settings
-           FOR EACH ROW
-           BEGIN
-               ". $this->preventUpdateQuery() ."
-           END;
-       ");
+            DB::unprepared("
+                CREATE TRIGGER check_custom_settings_insert BEFORE INSERT ON custom_settings
+                FOR EACH ROW
+                BEGIN
+                    ". $this->preventInsertQuery() ."
+                END;
+                CREATE TRIGGER check_custom_settings_update BEFORE UPDATE ON custom_settings
+                FOR EACH ROW
+                BEGIN
+                    ". $this->preventUpdateQuery() ."
+                END;
+            ");
+        }
     }
 
     /**

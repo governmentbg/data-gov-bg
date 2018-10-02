@@ -1493,9 +1493,10 @@ class UserController extends ApiController
      */
     public function userCount(Request $request)
     {
-        $users = User::where('active', 1);
-        $users->whereNotIn('username', User::SYSTEM_USERS);
-        $users = $users->count();
+        $users = User::where('active', 1)
+            ->whereNotIn('username', User::SYSTEM_USERS)
+            ->count();
+
         return $this->successResponse(['count' => $users], true);
     }
 

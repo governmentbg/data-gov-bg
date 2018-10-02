@@ -54,6 +54,22 @@ class ThemeController extends ApiController
         ];
     }
 
+    public static function getThemeClasses()
+    {
+        return [
+            self::THEME_RED         => 'data-attention',
+            self::THEME_DARK_RED    => 'index',
+            self::THEME_LIGHT_BLUE  => 'user',
+            self::THEME_BLUE        => 'data',
+            self::THEME_DARK_BLUE   => 'document',
+            self::THEME_LIGHT_GREEN => 'organisation',
+            self::THEME_GREEN       => 'news',
+            self::THEME_YELLOW      => 'request',
+            self::THEME_ORANGE      => 'visualisation',
+            self::THEME_PURPLE      => 'contact',
+        ];
+    }
+
     /**
      * API function for themes
      *

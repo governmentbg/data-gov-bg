@@ -847,4 +847,9 @@ return [
     'add_help_subsections' => 'Add Help Subsection',
     'edit_help_subsections' => 'Edit Help Subsection',
     'add_field' => 'Add new field',
+    'action_error' => 'Action cannot be done!',
+    'discussion_posts' => 'posts',
+    'user' => 'user',
+    'discussion' => 'discussion',
+    'post_preview' => 'Post preview',
 ];

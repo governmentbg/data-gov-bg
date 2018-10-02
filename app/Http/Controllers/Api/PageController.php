@@ -320,6 +320,8 @@ class PageController extends ApiController
 
                 if (isset($editData['data']['forum_link'])) {
                     $pageToEdit->forum_link = $editData['data']['forum_link'];
+                } else {
+                    $pageToEdit->forum_link = null;
                 }
 
                 if (isset($editData['data']['help_page'])) {
@@ -457,13 +459,17 @@ class PageController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::PAGES,
-                RoleRight::RIGHT_VIEW
-            );
+            if (isset($post['api_key'])) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::SECTIONS,
+                    RoleRight::RIGHT_VIEW
+                );
 
-            if (!$rightCheck) {
-                return $this->errorResponse(__('custom.access_denied'));
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+            } else {
+                $criteria['active'] = 1;
             }
 
             $result = [];

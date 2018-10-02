@@ -441,7 +441,8 @@ class DataController extends Controller {
                 'termsOfUse'         => $termsOfUse,
                 'getParams'          => $getParams,
                 'display'            => $display,
-                'buttons'            => $buttons
+                'buttons'            => $buttons,
+                'activeSections'     => $this->getActiveSections()
             ]
         );
     }

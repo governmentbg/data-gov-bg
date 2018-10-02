@@ -6,7 +6,7 @@
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         @include('partials.pagination')
         <div class="col-xs-2 m-t-lg m-b-lg">
-            <span class="my-profile head">{{ utrans('custom.forum') }}</span>
+            <span class="my-profile head">{{ utrans('custom.discussion_posts') }}</span>
         </div>
         <div class="col-xs-10 m-t-lg text-right section">
             <div class="filter-content section-nav-bar">
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="row m-b-lg">
-            @if (count($discussions))
+            @if (count($posts))
                 <form method="POST" class="form-horizontal">
                     {{ csrf_field() }}
                     <div class="col-xs-12 m-l-sm">
@@ -41,39 +41,29 @@
                             <div class="table-responsive opn-tbl text-center">
                                 <table class="table">
                                     <thead>
-                                        <th>{{ utrans('custom.title') }}</th>
-                                        <th>{{ utrans('custom.category') }}</th>
-                                        <th>{{ utrans('custom.color') }}</th>
+                                        <th>{{ utrans('custom.user') }}</th>
+                                        <th>{{ utrans('custom.discussion') }}</th>
                                         <th>{{ __('custom.created_at') }}</th>
                                         <th>{{ __('custom.updated_at') }}</th>
                                         <th>{{ __('custom.action') }}</th>
                                     </thead>
                                     <tbody>
-                                        @foreach ($discussions as $discussion)
+                                        @foreach ($posts as $post)
                                             <tr>
-                                                <td class="name">{{ $discussion->title }}</td>
-                                                <td class="name">{{ $discussion->category()->first()->name }}</td>
-                                                <td class="name">{{ $discussion->color }}</td>
-                                                <td class="name">{{ $discussion->created_at }}</td>
-                                                <td class="name">{{ $discussion->updated_at }}</td>
+                                                <td class="name">{{ isset($post->user) ? $post->user : $post->user_id }}</td>
+                                                <td class="name">{{ isset($discussion) ? $discussion : '' }}</td>
+                                                <td class="name">{{ $post->created_at }}</td>
+                                                <td class="name">{{ $post->updated_at }}</td>
                                                 <td class="buttons">
                                                     <a
                                                         class="link-action"
-                                                        href="{{ url('admin/forum/discussions/edit/'. $discussion->id) }}"
-                                                    >{{ utrans('custom.edit') }}</a>
-                                                    <a
-                                                        class="link-action"
-                                                        href="{{ url('admin/forum/discussions/view/'. $discussion->id) }}"
+                                                        href="{{ url('admin/forum/posts/view/'. $post->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
                                                     <a
                                                         class="link-action red"
                                                         data-confirm="{{ __('custom.remove_data') }}"
-                                                        href="{{ url('admin/forum/discussions/delete/'. $discussion->id) }}"
+                                                        href="{{ url('admin/forum/posts/delete/'. $post->id) }}"
                                                     >{{ __('custom.delete') }}</a>
-                                                    <a
-                                                        class="link-action"
-                                                        href="{{ url('admin/forum/posts/list/'. $discussion->id) }}"
-                                                    >{{ utrans('custom.discussion_posts') }}</a>
                                                 </td>
                                             </tr>
                                         @endforeach

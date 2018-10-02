@@ -852,4 +852,5 @@ return [
     'user' => 'user',
     'discussion' => 'discussion',
     'post_preview' => 'Post preview',
+    'clear_filter' => 'clear filter',
 ];

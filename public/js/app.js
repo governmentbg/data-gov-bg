@@ -71977,6 +71977,8 @@ function initSelect2() {
                         return finalParams;
                     },
                     processResults: function processResults(data) {
+                        data.organisations = $.merge([{ uri: 0, name: $('.js-translations').data('clear-org-filter') }], data.organisations);
+
                         return {
                             results: $.map(data.organisations, function (item) {
                                 return {

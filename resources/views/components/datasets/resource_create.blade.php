@@ -150,7 +150,7 @@
             <div class="col-sm-12 text-right">
                 <a
                     href="{{ url('/'. $root .'/dataset/view/'. $uri) }}"
-                    class="btn btn-primary"
+                    class="btn btn-primary del-btn"
                 >
                     {{ uctrans('custom.close') }}
                 </a>

@@ -146,6 +146,8 @@ class UserController extends ApiController
                 $query->whereIn('id', $criteria['user_ids']);
             }
 
+            $query->whereNotIn('username', User::SYSTEM_USERS);
+
             $count = $query->count();
 
             $columns = [
@@ -1485,14 +1487,15 @@ class UserController extends ApiController
     }
 
     /**
-     * Get active users count
+     * Get active users count without system users
      *
      * @return json response with user count
      */
     public function userCount(Request $request)
     {
-        $users = User::where('active', 1)->count();
-
+        $users = User::where('active', 1);
+        $users->whereNotIn('username', User::SYSTEM_USERS);
+        $users = $users->count();
         return $this->successResponse(['count' => $users], true);
     }
 

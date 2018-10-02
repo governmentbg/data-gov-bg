@@ -47,8 +47,9 @@ class DocumentController extends Controller {
             return view(
                 'document/view',
                 [
-                    'class'    => 'documents',
-                    'document' => $documents
+                    'class'          => 'documents',
+                    'document'       => $documents,
+                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }
@@ -80,6 +81,7 @@ class DocumentController extends Controller {
             'class'            => 'documents',
             'documents'        => $paginationData['items'],
             'pagination'       => $paginationData['paginate'],
+            'activeSections'   => $this->getActiveSections()
         ]);
     }
 
@@ -113,10 +115,11 @@ class DocumentController extends Controller {
         $paginationData = $this->getPaginationData($documents, $count, $getParams, $perPage);
 
         return view('document/list', [
-            'class'         => 'documents',
-            'documents'     => $paginationData['items'],
-            'pagination'    => $paginationData['paginate'],
-            'search'        => $search,
+            'class'          => 'documents',
+            'documents'      => $paginationData['items'],
+            'pagination'     => $paginationData['paginate'],
+            'search'         => $search,
+            'activeSections' => $this->getActiveSections()
         ]);
     }
 }

@@ -122,6 +122,10 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/forum/discussions/edit/{id}', 'Admin\ForumController@editDiscussion');
         Route::match(['get', 'post'], '/admin/forum/discussions/delete/{id}', 'Admin\ForumController@deleteDiscussion');
 
+        Route::match(['get', 'post'], '/admin/forum/posts/list/{id}', 'Admin\ForumController@listPosts');
+        Route::match(['get', 'post'], '/admin/forum/posts/view/{id}', 'Admin\ForumController@viewPost');
+        Route::match(['get', 'post'], '/admin/forum/posts/delete/{id}', 'Admin\ForumController@deletePost');
+
         Route::match(['get', 'post'], '/admin/forum/categories/list', 'Admin\ForumController@listCategories');
         Route::match(['get', 'post'], '/admin/forum/categories/add', 'Admin\ForumController@addCategory');
         Route::match(['get', 'post'], '/admin/forum/categories/view/{id}', 'Admin\ForumController@viewCategory');
@@ -399,5 +403,7 @@ Route::get('contact', function () {
 Route::get('visualisation', function () {
     return view('visualisation/visualisation', ['class' => 'visualisations']);
 });
+
+Route::get('{section}', 'StaticPageController@show');
 
 Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'LanguageController@switchLang']);

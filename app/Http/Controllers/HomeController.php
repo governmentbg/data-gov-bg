@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
-use App\Http\Controllers\Api\CategoryController as ApiCategories;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\CategoryController as ApiCategories;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
 
@@ -96,6 +96,8 @@ class HomeController extends Controller {
         $resultCategories = $categoryApi->listMainCategories($categoryReq)->getData();
         $categories = $resultCategories->categories;
 
+        $activeSections = $this->getActiveSections();
+
         return view('/home/index', compact(
             'class',
             'updates',
@@ -104,7 +106,8 @@ class HomeController extends Controller {
             'datasets',
             'lastMonth',
             'mostActiveOrg',
-            'categories'
+            'categories',
+            'activeSections'
         ));
     }
 }

@@ -25,7 +25,7 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
+                            <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.activef') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ !empty($section->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
                             </div>

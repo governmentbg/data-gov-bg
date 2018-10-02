@@ -67,7 +67,7 @@
                                     >
                                         {{ uctrans('custom.close') }}
                                     </a>
-                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ __('custom.edit') }}</button>
+                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
                                 </div>
                             </div>
                         </form>

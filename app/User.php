@@ -44,6 +44,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    const SYSTEM_USERS = [
+        'system',
+        'migrate_data'
+    ];
+
     public function toSearchableArray()
     {
         $array['id'] = $this->id;

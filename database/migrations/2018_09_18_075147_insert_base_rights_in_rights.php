@@ -291,14 +291,14 @@ class InsertBaseRightsInRights extends Migration
                         'right'             => RoleRight::RIGHT_EDIT,
                         'limit_to_own_data' => 0,
                         'api'               => 0,
-                     ],
-                     [
+                    ],
+                    [
                         'module_name'       => Module::MAIN_CATEGORIES,
                         'right'             => RoleRight::RIGHT_VIEW,
                         'limit_to_own_data' => 0,
                         'api'               => 0,
-                     ],
-                     [
+                    ],
+                    [
                         'module_name'       => Module::TAGS,
                         'right'             => RoleRight::RIGHT_EDIT,
                         'limit_to_own_data' => 0,

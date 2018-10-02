@@ -1328,7 +1328,10 @@ class DataSetController extends ApiController
         $validator = \Validator::make($data, ['id' => 'required|int|digits_between:1,10']);
 
         if (!$validator->fails()) {
-            $sets = DataSet::where('created_by', $data['id']);
+            $sets = DataSet::where('created_by', $data['id'])
+                ->where('visibility', DataSet::VISIBILITY_PUBLIC)
+                ->where('status', DataSet::STATUS_PUBLISHED)
+                ->where('org_id', null);
 
             $rightCheck = RoleRight::checkUserRight(
                 Module::DATA_SETS,

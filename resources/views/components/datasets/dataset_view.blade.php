@@ -93,7 +93,7 @@
             @endif
 
             @if (!empty($admin) || !empty($buttons['addResource']))
-                <form method="POST">
+                <form method="POST" class="col-lg-4">
                     {{ csrf_field() }}
                     <div class="form-group row">
                         <select

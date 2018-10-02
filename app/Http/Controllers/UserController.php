@@ -4115,7 +4115,7 @@ class UserController extends Controller {
         $apiUser = new ApiUser($listReq);
         $result = $apiUser->listUsers($listReq)->getData();
 
-        if ($result->success) {
+        if ($result->success && !empty($result->users[0])) {
             $follReq = Request::create('api/getFollowersCount', 'POST', $params);
             $apiFollow = new ApiFollow($follReq);
             $followers = $apiFollow->getFollowersCount($follReq)->getData();
@@ -4178,7 +4178,7 @@ class UserController extends Controller {
             ]);
         } else {
 
-            return redirect('/');
+            return redirect('/users/list');
         }
     }
 

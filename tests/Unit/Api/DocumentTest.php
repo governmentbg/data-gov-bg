@@ -176,7 +176,7 @@ class DocumentTest extends TestCase
     {
         // test missing criteria
         $this->post(
-            url('api/searchDocuments'),
+            url('api/listDocuments'),
             [
                 'api_key'   => $this->getApiKey(),
                 'criteria'  => [],
@@ -187,11 +187,11 @@ class DocumentTest extends TestCase
 
         //test successful search
         $this->post(
-            url('api/searchDocuments'),
+            url('api/listDocuments'),
             [
                 'api_key'   => $this->getApiKey(),
                 'criteria'  => [
-                    'search'    => $this->faker->word(),
+                    'keywords'    => $this->faker->word(),
                 ],
             ]
         )

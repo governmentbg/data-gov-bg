@@ -120,13 +120,13 @@ class DocumentController extends AdminController
         $params = [
             'records_per_page'  => $perPage,
             'criteria'          => [
-                'search' => $search,
+                'keywords' => $search,
             ]
         ];
 
-        $searchRq = Request::create('/api/searchDocuments', 'POST', $params);
+        $searchRq = Request::create('/api/listDocuments', 'POST', $params);
         $api = new ApiDocument($searchRq);
-        $docData = $api->searchDocuments($searchRq)->getData();
+        $docData = $api->listDocuments($searchRq)->getData();
 
         $documents = !empty($docData->documents) ? $docData->documents : [];
         $count = !empty($docData->total_records) ? $docData->total_records : 0;

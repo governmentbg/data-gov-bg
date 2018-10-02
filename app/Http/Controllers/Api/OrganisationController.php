@@ -1150,7 +1150,7 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'org_id'            => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'           => 'nullable|int|exists:roles,id|digits_between:1,10',
+            'role_ids'          => 'nullable|array',
             'keywords'          => 'nullable|string|max:191',
             'for_approval'      => 'nullable|bool',
             'records_per_page'  => 'nullable|int|digits_between:1,10',
@@ -1176,8 +1176,12 @@ class OrganisationController extends ApiController
                 $query->whereHas('UserToOrgRole', function($q) use ($post) {
                     $q->where('org_id', $post['org_id']);
 
-                    if (isset($post['role_id'])) {
-                        $q->where('role_id', $post['role_id']);
+                    if (isset($post['role_ids'])) {
+                        if (is_array($post['role_ids'])) {
+                            $q->whereIn('role_id', $post['role_ids']);
+                        } else {
+                            $q->where('role_id', $post['role_ids']);
+                        }
                     }
                 });
 

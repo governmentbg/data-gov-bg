@@ -382,6 +382,7 @@ class DocumentController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
                 'doc_id'       => 'nullable|integer|digits_between:1,10',
+                'keywords'     => 'nullable|string',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
                 'locale'       => 'nullable|string|max:5',
@@ -419,6 +420,11 @@ class DocumentController extends ApiController
         ];
 
         $query = Document::select($columns);
+
+        if (isset($criteria['keywords'])) {
+            $ids = Document::search($criteria['keywords'])->get()->pluck('id');
+            $query = Document::whereIn('id', $ids);
+        }
 
         if (isset($criteria['order']['field'])) {
             if (!in_array($criteria['order']['field'], $columns)) {
@@ -509,134 +515,5 @@ class DocumentController extends ApiController
             ],
             true
         );
-    }
-
-    /**
-     * Search for a list of documents based on criteria
-     *
-     * @param array criteria - required
-     * @param integer criteria[search] - required
-     * @param array criteria[order] - optional
-     * @param string criteria[order][type] - optional
-     * @param string criteria[order][field] - optional
-     * @param integer records_per_page - optional
-     * @param integer page_number - optional
-     *
-     * @return json response with doc list or error message
-     */
-    public function searchDocuments(Request $request)
-    {
-        $post = $request->all();
-
-        $validator = Validator::make($post, [
-            'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|integer|digits_between:1,10',
-            'page_number'           => 'nullable|integer|digits_between:1,10',
-        ]);
-
-        $criteria = isset($post['criteria']) ? $post['criteria'] : [];
-
-        if (!$validator->fails()) {
-            $validator = Validator::make($criteria, [
-                'search'       => 'required|string|max:191',
-                'order'        => 'nullable|array',
-                'forum_link'   => 'nullable|string|max:191'
-            ]);
-        }
-
-        $order = isset($criteria['order']) ? $criteria['order'] : [];
-
-        if (!$validator->fails()) {
-            $validator = Validator::make($order, [
-                'type'   => 'nullable|string|max:191',
-                'field'  => 'nullable|string|max:191',
-            ]);
-        }
-
-        if (!$validator->fails()) {
-            $data = [];
-            $criteria = $post['criteria'];
-            $locale = \LaravelLocalization::getCurrentLocale();
-            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'asc';
-            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'id';
-
-            $orderColumns = [
-                'id',
-                'name',
-                'descript',
-                'file_name',
-                'mime_type',
-                'created_at',
-                'updated_at',
-                'created_by',
-                'updated_by',
-            ];
-
-            if (isset($order['field'])) {
-                if (!in_array($order['field'], $orderColumns)) {
-                    return $this->errorResponse(__('custom.invalid_sort_field'));
-                }
-            }
-
-            $ids = Document::search($criteria['search'])->get()->pluck('id');
-            $query = Document::whereIn('documents.id', $ids);
-
-            $count = $query->count();
-
-            $transFields = ['descript', 'name'];
-
-            $transCols = Document::getTransFields();
-
-            if (isset($order['type'] ) && isset($order['field'])) {
-                if (in_array($order['field'], $transFields)) {
-                    $col = $transCols[$order['field']];
-                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'documents.*')
-                        ->leftJoin('translations', 'translations.group_id', '=', 'documents.' . $order['field'])
-                        ->where('translations.locale', $locale)
-                        ->orderBy('translations.' . $col, $order['type'] );
-                } else {
-                    $query->orderBy($order['field'], $order['type'] );
-                }
-            }
-
-            $query->forPage(
-                $request->offsetGet('page_number'),
-                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-            );
-
-            $results = [];
-
-            foreach ($query->get() as $result) {
-                $results[] = [
-                    'id'            => $result->id,
-                    'locale'        => $locale,
-                    'name'          => $result->name,
-                    'description'   => $result->descript,
-                    'filename'      => $result->file_name,
-                    'mimetype'      => $result->mime_type,
-                    'data'          => file_get_contents($this->path . $result->id),
-                    'forum_link'    => $result->forum_link,
-                    'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
-                    'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,
-                    'created_by'    => $result->created_by,
-                    'updated_by'    => $result->updated_by,
-                ];
-            }
-
-            $logData = [
-                'module_name'      => Module::getModuleName(Module::DOCUMENTS),
-                'action'           => ActionsHistory::TYPE_SEE,
-                'action_msg'       => 'Searched documents',
-            ];
-
-            Module::add($logData);
-
-            return $this->successResponse([
-                'documents'     => $results,
-                'total_records' => $count,
-            ], true);
-        }
-
-        return $this->errorResponse(__('custom.search_document_fail'), $validator->errors()->messages());
     }
 }

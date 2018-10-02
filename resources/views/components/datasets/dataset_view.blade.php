@@ -183,6 +183,13 @@
                     href="{{ url('/'. $root .'/dataset/edit/'. $dataset->uri) }}"
                 >{{ uctrans('custom.edit') }}</a>
             @endif
+            <form method="POST" class="inline-block">
+            {{ csrf_field() }}
+                <button
+                    name="back"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</button>
+            </form>
             @if (!empty($admin) || !empty($buttons[$dataset->uri]['delete']))
                 <form method="POST" class="inline-block" action="{{ url('/'. $root .'/dataset/delete') }}">
                     {{ csrf_field() }}
@@ -195,13 +202,6 @@
                     <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                 </form>
             @endif
-            <form method="POST" class="inline-block">
-            {{ csrf_field() }}
-                <button
-                    name="back"
-                    class="btn btn-primary"
-                >{{ uctrans('custom.close') }}</button>
-            </form>
         </div>
     </div>
     @include('components.signal-box', ['signals' => $dataset->signals])

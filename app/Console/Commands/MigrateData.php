@@ -414,7 +414,6 @@ class MigrateData extends Command
             $this->line('Organisations total: '. (isset($response['result']) ? count($response['result']) : '0'));
             $this->info('Organisations successful: '. (isset($orgs['success']) ? count($orgs['success']) : '0'));
             $this->error('Organisations failed: '.(isset($orgs['error']) ? count($orgs['error']) : '0'));
-            $this->line('Organisations` dataset total: '. $numPackageFromOrgs);
             $this->line('User to org role: '. count($usersToOrgRole));
         }
         $this->line('');
@@ -588,7 +587,7 @@ class MigrateData extends Command
                 $newData['data']['firstname'] = ucfirst($fname);
                 $newData['data']['lastname'] = ucfirst($lname);
                 $newData['data']['username'] = $res['name'];
-                $newData['data']['email'] = $res['email'];
+                $newData['data']['email'] = trim($res['email']);
                 $newData['data']['password'] = $password;
                 $newData['data']['password_confirm'] = $password;
                 $newData['data']['add_info'] = $res['about'];

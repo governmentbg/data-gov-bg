@@ -58,6 +58,42 @@ class InsertBaseRightsInRights extends Migration
                         'limit_to_own_data' => 0,
                         'api'               => 0,
                     ],
+                    [
+                        'module_name'       => Module::SIGNALS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::MAIN_CATEGORIES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TAGS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TERMS_OF_USE,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TERMS_OF_USE_REQUESTS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::CUSTOM_SETTINGS,
+                        'right'             => RoleRight::RIGHT_ALL,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
                 ],
                 $organisationModerator->id => [
                     [
@@ -90,6 +126,48 @@ class InsertBaseRightsInRights extends Migration
                         'limit_to_own_data' => 0,
                         'api'               => 0,
                     ],
+                    [
+                        'module_name'       => Module::SIGNALS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::USERS,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::MAIN_CATEGORIES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::ROLES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TAGS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TERMS_OF_USE,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TERMS_OF_USE_REQUESTS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
                 ],
                 $organisationMember->id => [
                     [
@@ -118,6 +196,36 @@ class InsertBaseRightsInRights extends Migration
                     ],
                     [
                         'module_name'       => Module::CUSTOM_SETTINGS,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::USERS,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::MAIN_CATEGORIES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::ROLES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TAGS,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TERMS_OF_USE,
                         'right'             => RoleRight::RIGHT_VIEW,
                         'limit_to_own_data' => 0,
                         'api'               => 0,
@@ -178,6 +286,24 @@ class InsertBaseRightsInRights extends Migration
                         'limit_to_own_data' => 0,
                         'api'               => 0,
                     ],
+                    [
+                        'module_name'       => Module::SIGNALS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::MAIN_CATEGORIES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TAGS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
                 ],
                 $groupModerator->id => [
                     [
@@ -228,6 +354,30 @@ class InsertBaseRightsInRights extends Migration
                         'limit_to_own_data' => 0,
                         'api'               => 0,
                     ],
+                    [
+                        'module_name'       => Module::SIGNALS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::MAIN_CATEGORIES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::ROLES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TAGS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ]
                 ],
                 $groupMember->id => [
                     [
@@ -256,6 +406,36 @@ class InsertBaseRightsInRights extends Migration
                     ],
                     [
                         'module_name'       => Module::ACTIONSHISTORY,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::MAIN_CATEGORIES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::ROLES,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TAGS,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::TERMS_OF_USE,
+                        'right'             => RoleRight::RIGHT_VIEW,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::CUSTOM_SETTINGS,
                         'right'             => RoleRight::RIGHT_VIEW,
                         'limit_to_own_data' => 0,
                         'api'               => 0,
@@ -320,6 +500,18 @@ class InsertBaseRightsInRights extends Migration
                         'module_name'       => Module::ACTIONSHISTORY,
                         'right'             => RoleRight::RIGHT_VIEW,
                         'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::SIGNALS,
+                        'right'             => RoleRight::RIGHT_EDIT,
+                        'limit_to_own_data' => 0,
+                        'api'               => 0,
+                    ],
+                    [
+                        'module_name'       => Module::CUSTOM_SETTINGS,
+                        'right'             => RoleRight::RIGHT_ALL,
+                        'limit_to_own_data' => 1,
                         'api'               => 0,
                     ],
                 ],

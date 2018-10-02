@@ -30,18 +30,22 @@ class InsertBaseRolesInRoles extends Migration
             [
                 'name'                  => 'Редактор на организация',
                 'active'                => 1,
+                'for_org'               => 1,
             ],
             [
                 'name'                  => 'Член на организация',
                 'active'                => 1,
+                'for_org'               => 1,
             ],
             [
                 'name'                  => 'Редактор на група',
                 'active'                => 1,
+                'for_group'             => 1,
             ],
             [
                 'name'                  => 'Член на група',
                 'active'                => 1,
+                'for_group'             => 1,
             ],
         ];
     }

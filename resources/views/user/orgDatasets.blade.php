@@ -18,7 +18,7 @@
         @endif
         @if ($buttons['view'])
             <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
-                <form method="GET" action="{{ url('/user/organisations/datasets/search') }}">
+                <form method="GET">
                     <input
                         type="text"
                         class="m-t-md input-border-r-12 form-control"

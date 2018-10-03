@@ -375,9 +375,9 @@ class UserController extends AdminController {
             ],
         ];
 
-        $searchReq = Request::create('/api/searchUsers', 'POST', $params);
+        $searchReq = Request::create('/api/listUsers', 'POST', $params);
         $api = new ApiUser($searchReq);
-        $result = $api->searchUsers($searchReq)->getData();
+        $result = $api->listUsers($searchReq)->getData();
 
         $users = !empty($result->users) ? $result->users : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;

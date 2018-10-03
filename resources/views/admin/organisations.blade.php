@@ -157,7 +157,7 @@
                                 <div class="col-lg-10">
                                     <select
                                         class="js-ajax-autocomplete-org form-control js-parent-org-filter"
-                                        data-url="{{ url('/api/searchOrganisations') }}"
+                                        data-url="{{ url('/api/listOrganisations') }}"
                                         data-post="{{ json_encode(['api_key' => \Auth::user()->api_key]) }}"
                                         data-placeholder="{{__('custom.main_org')}}"
                                         name="parent"

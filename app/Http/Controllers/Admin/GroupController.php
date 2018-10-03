@@ -254,9 +254,9 @@ class GroupController extends AdminController
             ]
         ];
 
-        $searchRq = Request::create('/api/searchGroups', 'POST', $params);
+        $searchRq = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($searchRq);
-        $grpData = $api->searchGroups($searchRq)->getData();
+        $grpData = $api->listGroups($searchRq)->getData();
 
         $groups = !empty($grpData->groups) ? $grpData->groups : [];
         $count = !empty($grpData->total_records) ? $grpData->total_records : 0;

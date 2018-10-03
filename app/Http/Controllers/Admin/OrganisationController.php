@@ -109,9 +109,9 @@ class OrganisationController extends AdminController
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $request = Request::create('/api/searchOrganisations', 'POST', $params);
+        $request = Request::create('/api/listOrganisations', 'POST', $params);
         $api = new ApiOrganisation($request);
-        $result = $api->searchOrganisations($request)->getData();
+        $result = $api->listOrganisations($request)->getData();
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 

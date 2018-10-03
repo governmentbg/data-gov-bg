@@ -159,7 +159,7 @@ class OrganisationTest extends TestCase
     public function testSearchOrganisations()
     {
         // test empty criteria
-        $this->post(url('api/searchOrganisations'), ['api_key' => null])
+        $this->post(url('api/listOrganisations'), ['api_key' => null])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
@@ -182,7 +182,7 @@ class OrganisationTest extends TestCase
             'approved'          => $this->faker->boolean(),
         ]);
 
-        $this->post(url('api/searchOrganisations'), [
+        $this->post(url('api/listOrganisations'), [
             'criteria'  => [
                 'locale'    => 'bg',
                 'keywords'  => $name,

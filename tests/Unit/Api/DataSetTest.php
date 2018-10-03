@@ -159,7 +159,7 @@ class DataSetTest extends TestCase
     public function testSearchDataSets()
     {
         // test missing api_key
-        $this->post(url('api/searchDataset'), [
+        $this->post(url('api/listDatasets'), [
             'api_key'   => null,
             'criteria'  => [
                 'locale'    => 'en',
@@ -167,12 +167,12 @@ class DataSetTest extends TestCase
         ])->assertStatus(500)->assertJson(['success' => false]);
 
         // test empty criteria
-        $this->post(url('api/searchDataset'), ['criteria' => []])
+        $this->post(url('api/listDatasets'), ['criteria' => []])
              ->assertStatus(500)
              ->assertJson(['success' => false]);
 
         // test successfull search
-        $this->post(url('api/searchDataset'), [
+        $this->post(url('api/listDatasets'), [
             'criteria'   => [
                 'locale'    => 'en',
                 'keywords'  => $this->faker->word(),

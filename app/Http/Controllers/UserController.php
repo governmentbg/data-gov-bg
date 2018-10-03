@@ -2527,6 +2527,13 @@ class UserController extends Controller {
 
         $buttons['add'] = $rightCheck;
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::ORGANISATIONS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['view'] = $rightCheck;
+
         foreach ($organisations as $organisation) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::ORGANISATIONS,
@@ -4108,7 +4115,7 @@ class UserController extends Controller {
         $apiUser = new ApiUser($listReq);
         $result = $apiUser->listUsers($listReq)->getData();
 
-        if ($result->success) {
+        if ($result->success && !empty($result->users[0])) {
             $follReq = Request::create('api/getFollowersCount', 'POST', $params);
             $apiFollow = new ApiFollow($follReq);
             $followers = $apiFollow->getFollowersCount($follReq)->getData();
@@ -4171,7 +4178,7 @@ class UserController extends Controller {
             ]);
         } else {
 
-            return redirect('/');
+            return redirect('/users/list');
         }
     }
 

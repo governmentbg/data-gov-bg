@@ -23,7 +23,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a href="{{ url('/users/list') }}">{{ trans_choice(__('custom.users'), 2) }}</a></li>
                                     <li><a class="active" href="#">{{ trans_choice(__('custom.users'), 1) }}</a></li>
-                                    <li><a href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                    <li><a href="{{ route('data', ['user' => [$user->id]]) }}">{{ __('custom.data') }}</a></li>
                                     <li><a href="{{ url('/user/profile/'. $user->id .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
@@ -41,7 +41,7 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="{{ url('/data') }}" class="data-sets">
+                    <a href="{{ route('data', ['user' => [$user->id]]) }}" class="data-sets">
                         <p>{{ $dataSetsCount }}</p>
                         <hr>
                         <p>{{ __('custom.data_sets') }}</p>

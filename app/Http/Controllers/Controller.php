@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Section;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Http\Controllers\Api\SectionController as ApiSection;
+use App\Http\Controllers\Api\ThemeController as ApiTheme;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 
@@ -26,19 +29,20 @@ class Controller extends BaseController
      *
      * @return array with results for the current page and paginator object
      */
-    public function getPaginationData($result = [], $totalCount = 0, $params = [], $perPage = 1)
+    public function getPaginationData($result = [], $totalCount = 0, $params = [], $perPage = 1, $pageName = 'page')
     {
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $path = !empty($params)
             ? LengthAwarePaginator::resolveCurrentPath() .'?'. http_build_query($params)
             : LengthAwarePaginator::resolveCurrentPath();
+
+        $options = ['path' => $path, 'pageName' => $pageName];
 
         $paginator = new LengthAwarePaginator(
             $result,
             $totalCount,
             $perPage,
-            LengthAwarePaginator::resolveCurrentPage(),
-            ['path' => $path]
+            LengthAwarePaginator::resolveCurrentPage($pageName),
+            $options
         );
 
         return [
@@ -348,5 +352,23 @@ class Controller extends BaseController
                 'required' => false,
             ],
         ];
+    }
+
+    public function getActiveSections()
+    {
+        $criteria = ['criteria' => ['active' => 1, 'order' => ['type' => 'asc', 'field' => 'ordering']]];
+        $rq = Request::create('/api/listSections', 'POST', $criteria);
+        $api = new ApiSection($rq);
+        $result = $api->listSections($rq)->getData();
+        $sections = !empty($result->sections) ? $result->sections : [];
+        $themeClasses = ApiTheme::getThemeClasses();
+
+        foreach ($sections as $key => $section) {
+            $sections[$key]->class = isset($themeClasses[$section->theme])
+                ? $themeClasses[$section->theme]
+                : null;
+        }
+
+        return $sections;
     }
 }

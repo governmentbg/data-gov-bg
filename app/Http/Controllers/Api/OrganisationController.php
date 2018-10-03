@@ -610,6 +610,8 @@ class OrganisationController extends ApiController
                 $criteria['user_id'] = $request->criteria['user_id'];
             }
 
+            $locale = \LaravelLocalization::getCurrentLocale();
+
             try {
                 $query = Organisation::with('CustomSetting');
 
@@ -639,12 +641,6 @@ class OrganisationController extends ApiController
                     $query->where($criteria);
                 }
 
-                $count = $query->count();
-                $query->forPage(
-                    $request->offsetGet('page_number'),
-                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                );
-
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
@@ -667,7 +663,25 @@ class OrganisationController extends ApiController
                     }
                 }
 
-                $query->orderBy($field, $type);
+                $count = $query->count();
+
+                $transFields = ['name', 'descript'];
+
+                $transCols = Organisation::getTransFields();
+
+                if (in_array($field, $transFields)) {
+                    $col = $transCols[$field];
+                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $type);
+                } else {
+                    $query->orderBy($field, $type);
+                }
+
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
 
                 foreach ($query->get() as $org) {
                     $customFields = [];
@@ -683,7 +697,7 @@ class OrganisationController extends ApiController
                         'id'                => $org->id,
                         'name'              => $org->name,
                         'description'       => $org->descript,
-                        'locale'            => $org->locale,
+                        'locale'            => $locale,
                         'uri'               => $org->uri,
                         'type'              => $org->type,
                         'logo'              => $this->getImageData($org->logo_data, $org->logo_mime_type),
@@ -702,16 +716,6 @@ class OrganisationController extends ApiController
                     ];
                 }
 
-                $transFields = ['name', 'description'];
-
-                if (in_array($field, $transFields)) {
-                    usort($results, function($a, $b) use ($type, $field) {
-                        return strtolower($type) == 'asc'
-                            ? strcmp($a[$field], $b[$field])
-                            : strcmp($b[$field], $a[$field]);
-                    });
-                }
-
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
 
             } catch (QueryException $ex) {
@@ -727,7 +731,7 @@ class OrganisationController extends ApiController
      *
      * @param array criteria -optional
      * @param string criteria[locale] - optional
-     * @param integer criteria[user_id] - optional
+     * @param integer criteria[id] - optional
      * @param integer criteria[active] - optional
      * @param integer criteria[approved] - optional
      * @param string criteria[order][type] - optional
@@ -754,6 +758,7 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
+                'id'           => 'nullable|integer|exists:users,id',
                 'locale'       => 'nullable|string|max:5',
                 'active'       => 'nullable|bool',
                 'approved'     => 'nullable|bool',
@@ -770,15 +775,9 @@ class OrganisationController extends ApiController
             ]);
         }
 
+        $locale = \LaravelLocalization::getCurrentLocale();
+
         if (!$validator->fails()) {
-            if (isset($post->criteria['active'])) {
-                $criteria['active'] = $post->criteria['active'];
-            }
-
-            if (isset($post->criteria['approved'])) {
-                $criteria['approved'] = $post->criteria['approved'];
-            }
-
             $rightCheck = RoleRight::checkUserRight(
                 Module::ORGANISATIONS,
                 RoleRight::RIGHT_VIEW
@@ -788,35 +787,72 @@ class OrganisationController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
+            $columns = [
+                'id',
+                'name',
+                'type',
+                'descript',
+                'contacts',
+                'activity_info',
+                'created_at',
+                'updated_at',
+                'created_by',
+                'updated_by',
+            ];
+
+            if (isset($request->criteria['order']['field'])) {
+                if (!in_array($request->criteria['order']['field'], $columns)) {
+                    return $this->errorResponse(__('custom.invalid_sort_field'));
+                }
+            }
+
+            $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
+            $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
+
+            $userId = \Auth::user()->id;
+
+            if (!empty($criteria['id'])) {
+                $userId = $criteria['id'];
+            }
+
+            $transFields = ['name', 'descript'];
+
+            $transCols = Organisation::getTransFields();
+
             try {
-                $query = Organisation::with('CustomSetting')->with('UserToOrgRole')->with('dataSet')->where('type', '!=', Organisation::TYPE_GROUP);
-                $query = $query->whereIn('type', array_flip(Organisation::getPublicTypes()));
+                $query = Organisation::with('UserToOrgRole')->with('dataSet')
+                    ->where('organisations.type', '!=', Organisation::TYPE_GROUP);
+                $query->whereIn('organisations.type', array_flip(Organisation::getPublicTypes()));
 
-                $userId = \Auth::user()->id;
+                if (isset($criteria['active'])) {
+                    $query->where('active', $criteria['active']);
+                }
 
-                if (!empty($post->criteria['id'])) {
-                    $userId = $post->criteria['id'];
+                if (isset($criteria['approved'])) {
+                    $query->where('approved', $criteria['approved']);
                 }
 
                 $query->whereHas('UserToOrgRole', function($q) use ($userId) {
                     $q->where('user_id', $userId);
                 });
 
-                if (!empty($criteria)) {
-                    $query->where($criteria);
-                }
-
                 $count = $query->count();
+
+                if (in_array($field, $transFields)) {
+                    $col = $transCols[$field];
+
+                    $query->select('translations.group_id', 'translations.label', 'translations.text', 'organisations.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)
+                        ->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $type);
+                } else {
+                    $query->orderBy($field, $type);
+                }
 
                 $query->forPage(
                     $request->offsetGet('page_number'),
                     $this->getRecordsPerPage($request->offsetGet('records_per_page'))
                 );
-
-                $field = empty($post->criteria['order']['field']) ? 'created_at' : $post->criteria['order']['field'];
-                $type = empty($post->criteria['order']['type']) ? 'desc' : $post->criteria['order']['type'];
-
-                $query->orderBy($field, $type);
 
                 foreach ($query->get() as $org) {
                     $customFields = [];
@@ -832,7 +868,7 @@ class OrganisationController extends ApiController
                         'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
-                        'locale'          => $org->locale,
+                        'locale'          => $locale,
                         'uri'             => $org->uri,
                         'type'            => $org->type,
                         'logo'            => $this->getImageData($org->logo_data, $org->logo_mime_type),
@@ -858,16 +894,6 @@ class OrganisationController extends ApiController
                 ];
 
                 Module::add($logData);
-
-                $transFields = ['name', 'description'];
-
-                if (in_array($field, $transFields)) {
-                    usort($results, function($a, $b) use ($type, $field) {
-                        return strtolower($type) == 'asc'
-                            ? strcmp($a[$field], $b[$field])
-                            : strcmp($b[$field], $a[$field]);
-                    });
-                }
 
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
             } catch (QueryException $ex) {
@@ -927,9 +953,10 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             try {
                 $criteria = $request->criteria;
+                $locale = \LaravelLocalization::getCurrentLocale();
 
                 $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
-                $query = Organisation::whereIn('id', $ids);
+                $query = Organisation::whereIn('organisations.id', $ids);
                 $query->where('type', '!=', Organisation::TYPE_GROUP);
 
                 if (!empty($criteria['user_id'])) {
@@ -939,10 +966,6 @@ class OrganisationController extends ApiController
                 }
 
                 $count = $query->count();
-                $query->forPage(
-                    $request->offsetGet('page_number'),
-                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                );
 
                 $field = empty($criteria['order']['field']) ? 'created_at' : $criteria['order']['field'];
                 $type = empty($criteria['order']['type']) ? 'desc' : $criteria['order']['type'];
@@ -966,7 +989,23 @@ class OrganisationController extends ApiController
                     }
                 }
 
-                $query->orderBy($field, $type);
+                $transFields = ['name', 'descript'];
+
+                $transCols = Organisation::getTransFields();
+
+                if (in_array($field, $transFields)) {
+                    $col = $transCols[$field];
+                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)
+                        ->orderBy('translations.' . $col, $type);
+                } else {
+                    $query->orderBy($field, $type);
+                }
+
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
 
                 foreach ($query->get() as $org) {
                     $customFields = [];
@@ -982,7 +1021,7 @@ class OrganisationController extends ApiController
                         'id'              => $org->id,
                         'name'            => $org->name,
                         'description'     => $org->descript,
-                        'locale'          => $org->locale,
+                        'locale'          => $locale,
                         'uri'             => $org->uri,
                         'type'            => $org->type,
                         'logo'            => $this->getImageData($org->logo_data, $org->logo_mime_type),
@@ -999,16 +1038,6 @@ class OrganisationController extends ApiController
                         'created_by'      => $org->created_by,
                         'updated_by'      => $org->updated_by,
                     ];
-                }
-
-                $transFields = ['name', 'description'];
-
-                if (in_array($field, $transFields)) {
-                    usort($results, function($a, $b) use ($type, $field) {
-                        return strtolower($type) == 'asc'
-                            ? strcmp($a[$field], $b[$field])
-                            : strcmp($b[$field], $a[$field]);
-                    });
                 }
 
                 return $this->successResponse(['organisations'=> $results, 'total_records' => $count], true);
@@ -1121,7 +1150,7 @@ class OrganisationController extends ApiController
 
         $validator = \Validator::make($post, [
             'org_id'            => 'required|int|exists:organisations,id,deleted_at,NULL|digits_between:1,10',
-            'role_id'           => 'nullable|int|exists:roles,id|digits_between:1,10',
+            'role_ids'          => 'nullable|array',
             'keywords'          => 'nullable|string|max:191',
             'for_approval'      => 'nullable|bool',
             'records_per_page'  => 'nullable|int|digits_between:1,10',
@@ -1147,8 +1176,12 @@ class OrganisationController extends ApiController
                 $query->whereHas('UserToOrgRole', function($q) use ($post) {
                     $q->where('org_id', $post['org_id']);
 
-                    if (isset($post['role_id'])) {
-                        $q->where('role_id', $post['role_id']);
+                    if (isset($post['role_ids'])) {
+                        if (is_array($post['role_ids'])) {
+                            $q->whereIn('role_id', $post['role_ids']);
+                        } else {
+                            $q->where('role_id', $post['role_ids']);
+                        }
                     }
                 });
 
@@ -1933,6 +1966,20 @@ class OrganisationController extends ApiController
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
+                $transFields = ['name', 'descript'];
+
+                $transCols = Organisation::getTransFields();
+
+                if (in_array($field, $transFields)) {
+
+                    $col = $transCols[$field];
+                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $type);
+                } else {
+                    $query->orderBy($field, $type);
+                }
+
                 $count = $query->count();
 
                 $query->forPage(
@@ -1972,14 +2019,6 @@ class OrganisationController extends ApiController
                     }
 
                     $transFields = ['name', 'description'];
-
-                    if (in_array($field, $transFields)) {
-                        usort($result, function($a, $b) use ($type, $field) {
-                            return strtolower($type) == 'asc'
-                                ? strcmp($a[$field], $b[$field])
-                                : strcmp($b[$field], $a[$field]);
-                        });
-                    }
 
                     return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
                 }

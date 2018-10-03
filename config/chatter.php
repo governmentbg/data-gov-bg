@@ -123,7 +123,7 @@ return [
 
     'user' => [
         'namespace'                     => 'App\User',
-        'database_field_with_user_name' => 'name',
+        'database_field_with_user_name' => 'username',
         'relative_url_to_profile'       => '',
         'relative_url_to_image_assets'  => '',
         'avatar_image_database_field'   => '',
@@ -297,9 +297,9 @@ return [
             'show'    => [],
             'create'  => [],
             'store'   => [],
-            'destroy' => [],
-            'edit'    => [],
-            'update'  => [],
+            'destroy' => ['chatter.post.change'],
+            'edit'    => ['chatter.post.change'],
+            'update'  => ['chatter.post.change'],
         ],
         'category' => [
             'show' => [],

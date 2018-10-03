@@ -320,6 +320,8 @@ class PageController extends ApiController
 
                 if (isset($editData['data']['forum_link'])) {
                     $pageToEdit->forum_link = $editData['data']['forum_link'];
+                } else {
+                    $pageToEdit->forum_link = null;
                 }
 
                 if (isset($editData['data']['help_page'])) {
@@ -457,13 +459,17 @@ class PageController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::PAGES,
-                RoleRight::RIGHT_VIEW
-            );
+            if (isset($post['api_key'])) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::SECTIONS,
+                    RoleRight::RIGHT_VIEW
+                );
 
-            if (!$rightCheck) {
-                return $this->errorResponse(__('custom.access_denied'));
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+            } else {
+                $criteria['active'] = 1;
             }
 
             $result = [];
@@ -511,9 +517,26 @@ class PageController extends ApiController
                 $pageList->where('section_id', $criteria['section_id']);
             }
 
+            $transFields = [
+                'title',
+                'body',
+                'head_title',
+                'meta_descript',
+                'meta_key_words',
+            ];
+
+            $transCols = Page::getTransFields();
+
             if (isset($criteria['order']['type']) && isset($criteria['order']['field'])) {
-                $pageList->orderBy($criteria['order']['field'],
-                    $criteria['order']['type'] == 'asc' ? 'asc' : 'desc');
+                if (in_array($criteria['order']['field'], $transFields)) {
+                    $col = $transCols[$criteria['order']['field']];
+                    $pageList->select('translations.label', 'translations.group_id', 'translations.text', 'pages.*')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.' . $criteria['order']['field'])
+                        ->where('translations.locale', $locale)
+                        ->orderBy('translations.' . $col, $criteria['order']['type']);
+                } else {
+                    $pageList->orderBy($criteria['order']['field'], $criteria['order']['type']);
+                }
             }
 
             $total_records = $pageList->count();
@@ -539,7 +562,6 @@ class PageController extends ApiController
                         'forum_link'        => $singlePage->forum_link,
                         'help_page'         => $singlePage->help_page,
                         'active'            => $singlePage->active,
-                        'abstract'          => $singlePage->abstract,
                         'valid_from'        => date($singlePage->valid_from),
                         'valid_to'          => date($singlePage->valid_to),
                         'created_at'        => date($singlePage->created_at),
@@ -557,23 +579,6 @@ class PageController extends ApiController
             ];
 
             Module::add($logData);
-
-            $transFields = [
-                'title',
-                'abstract',
-                'body',
-                'head_title',
-                'meta_descript',
-                'meta_key_words',
-            ];
-
-            if (isset($criteria['order']) && in_array($criteria['order']['field'], $transFields)) {
-                usort($result, function($a, $b) use ($criteria) {
-                    return strtolower($criteria['order']['type']) == 'asc'
-                        ? strcmp($a[$criteria['order']['field']], $b[$criteria['order']['field']])
-                        : strcmp($b[$criteria['order']['field']], $a[$criteria['order']['field']]);
-                });
-            }
 
             return $this->successResponse([
                 'total_records' => $total_records,

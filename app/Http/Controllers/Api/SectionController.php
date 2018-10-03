@@ -323,24 +323,29 @@ class SectionController extends ApiController
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
         }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::SECTIONS,
-            RoleRight::RIGHT_VIEW
-        );
+        $criteria = [];
 
-        if (!$rightCheck) {
-            return $this->errorResponse(__('custom.access_denied'));
+        if (isset($post['api_key'])) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+        } else {
+            $criteria['active'] = 1;
         }
 
-        $query = Section::where('parent_id', null);
-        $criteria = [];
+        $query = Section::where('parent_id', null)->with('page');
 
         if (isset($post['criteria'])) {
             if (isset($post['criteria']['locale'])) {
                 $criteria['locale'] = $post['criteria']['locale'];
             }
 
-            if (isset($post['criteria']['active'])) {
+            if (isset($post['criteria']['active']) && !isset($criteria['active'])) {
                 $criteria['active'] = $post['criteria']['active'];
             }
 
@@ -391,6 +396,8 @@ class SectionController extends ApiController
         $result = [];
 
         foreach ($query->get() as $section) {
+            $pages = $this->formatPages($section->page()->get());
+
             $result[] = [
                 'id'            => $section->id,
                 'name'          => $section->name,
@@ -402,6 +409,7 @@ class SectionController extends ApiController
                 'forum_link'    => $section->forum_link,
                 'help_section'  => $section->help_section,
                 'theme'         => $section->theme,
+                'pages'         => $pages,
                 'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,
                 'created_by'    => $section->created_by,
@@ -457,27 +465,31 @@ class SectionController extends ApiController
             return $this->errorResponse(__('custom.list_sections_fail'), $validator->errors()->messages());
         }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::SECTIONS,
-            RoleRight::RIGHT_VIEW
-        );
+        $criteria = [];
 
-        if (!$rightCheck) {
-            return $this->errorResponse(__('custom.access_denied'));
+        if (isset($post['api_key'])) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::SECTIONS,
+                RoleRight::RIGHT_VIEW
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+        } else {
+            $criteria['active'] = 1;
         }
 
-        $query = isset($criteria['section_id'])
-            ? Section::where('parent_id', $criteria['section_id'])
-            : Section::where('parent_id', '!=', null);
-
-        $criteria = [];
+        $query = isset($post['criteria']) && !empty($post['criteria']['section_id'])
+            ? Section::where('parent_id', $post['criteria']['section_id'])->with('page')
+            : Section::where('parent_id', '!=', null)->with('page');
 
         if (isset($post['criteria'])) {
             if (isset($post['criteria']['locale'])) {
                 $criteria['locale'] = $post['criteria']['locale'];
             }
 
-            if (isset($post['criteria']['active'])) {
+            if (isset($post['criteria']['active']) && !isset($criteria['active'])) {
                 $criteria['active'] = $post['criteria']['active'];
             }
 
@@ -499,6 +511,8 @@ class SectionController extends ApiController
         $result = [];
 
         foreach ($query->get() as $section) {
+            $pages = $this->formatPages($section->page()->get());
+
             $result[] = [
                 'id'            => $section->id,
                 'name'          => $section->name,
@@ -510,6 +524,7 @@ class SectionController extends ApiController
                 'forum_link'    => $section->forum_link,
                 'help_section'  => $section->help_section,
                 'theme'         => $section->theme,
+                'pages'         => $pages,
                 'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,
                 'created_by'    => $section->created_by,
@@ -548,5 +563,34 @@ class SectionController extends ApiController
         }
 
         return $this->errorResponse(__('custom.error'), $validator->errors()->messages());
+    }
+
+    public function formatPages($result)
+    {
+        $pages = [];
+
+        if (is_array($pages)) {
+            foreach ($result as $key => $page) {
+                $pages[$key]['id'] = $page->id;
+                $pages[$key]['type'] = $page->type;
+                $pages[$key]['section_id'] = $page->section_id;
+                $pages[$key]['title'] = $page->title;
+                $pages[$key]['abstract'] = $page->abstract;
+                $pages[$key]['body'] = $page->body;
+                $pages[$key]['head_title'] = $page->head_title;
+                $pages[$key]['meta_descript'] = $page->meta_descript;
+                $pages[$key]['meta_key_words'] = $page->meta_key_words;
+                $pages[$key]['forum_link'] = $page->forum_link;
+                $pages[$key]['active'] = $page->active;
+                $pages[$key]['valid_from'] = $page->valid_from;
+                $pages[$key]['valid_to'] = $page->valid_to;
+                $pages[$key]['created_at'] = $page->created_at;
+                $pages[$key]['updated_at'] = $page->updated_at;
+                $pages[$key]['updated_by'] = $page->updated_by;
+                $pages[$key]['created_by'] = $page->created_by;
+            }
+        }
+
+        return $pages;
     }
 }

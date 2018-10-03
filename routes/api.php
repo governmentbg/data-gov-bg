@@ -44,7 +44,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('addPage', 'Api\PageController@addPage');
     Route::post('editPage', 'Api\PageController@editPage');
     Route::post('deletePage', 'Api\PageController@deletePage');
-    Route::post('listPages', 'Api\PageController@listPages');
     Route::post('listModules', 'Api\ModulesController@listModules');
     Route::post('addActionHistory', 'Api\ActionsHistoryController@addActionHistory');
 
@@ -53,8 +52,6 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
     Route::post('addSection', 'Api\SectionController@addSection');
     Route::post('editSection', 'Api\SectionController@editSection');
     Route::post('deleteSection', 'Api\SectionController@deleteSection');
-    Route::post('listSections', 'Api\SectionController@listSections');
-    Route::post('listSubsections', 'Api\SectionController@listSubsections');
     Route::post('isParent', 'Api\SectionController@isParent');
 
     Route::post('listThemes', 'Api\ThemeController@listThemes');
@@ -77,10 +74,10 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('addDocument', 'Api\DocumentController@addDocument');
     Route::post('editDocument', 'Api\DocumentController@editDocument');
-    Route::post('appendDocumentData', 'Api\DocumentController@appendDocumentData');
     Route::post('deleteDocument', 'Api\DocumentController@deleteDocument');
     Route::post('listDocuments', 'Api\DocumentController@listDocuments');
     Route::post('searchDocuments', 'Api\DocumentController@searchDocuments');
+    Route::post('appendDocument', 'Api\DocumentController@appendDocumentData');
 
     Route::post('roles/getRoleRights', 'Api\RoleController@getRoleRights');
     Route::post('roles/modifyRoleRights', 'Api\RoleController@modifyRoleRights');
@@ -218,6 +215,11 @@ Route::post('getMostActiveOrganisation', 'Api\OrganisationController@getMostActi
 
 Route::post('getTermsOfUseDetails', 'Api\TermsOfUseController@getTermsOfUseDetails');
 Route::post('listDataTermsOfUse', 'Api\TermsOfUseController@listDataTermsOfUse');
+
+Route::post('listSections', 'Api\SectionController@listSections');
+Route::post('listSubsections', 'Api\SectionController@listSubsections');
+
+Route::post('listPages', 'Api\PageController@listPages');
 
 Route::post('listLocale', 'Api\LocaleController@listLocale');
 Route::post('getLocaleDetails', 'Api\LocaleController@getLocaleDetails');

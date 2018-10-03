@@ -34,24 +34,21 @@ class DocumentController extends Controller {
         $documents = !empty($docList->documents[0]) ? $docList->documents[0] : null;
 
         if (!is_null($documents)) {
-            if ($request->has('download')) {
-                return response(utf8_decode($documents->data))
-                    ->header('Cache-Control', 'no-cache private')
-                    ->header('Content-Description', 'File Transfer')
-                    ->header('Content-Type', $documents->mimetype)
-                    ->header('Content-length', strlen(utf8_decode($documents->data)))
-                    ->header('Content-Disposition', 'attachment; filename='. $documents->filename)
-                    ->header('Content-Transfer-Encoding', 'binary');
-            }
 
             return view(
                 'document/view',
                 [
-                    'class'    => 'documents',
-                    'document' => $documents
+                    'class'          => 'documents',
+                    'document'       => $documents,
+                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }
+    }
+
+    public function downloadDocument(Request $request, $path, $fileName)
+    {
+        return response()->download(base64_decode($path), $fileName);
     }
 
     public function listDocuments(Request $request)
@@ -80,6 +77,7 @@ class DocumentController extends Controller {
             'class'            => 'documents',
             'documents'        => $paginationData['items'],
             'pagination'       => $paginationData['paginate'],
+            'activeSections'   => $this->getActiveSections()
         ]);
     }
 
@@ -95,13 +93,13 @@ class DocumentController extends Controller {
         $params = [
             'records_per_page'  => $perPage,
             'criteria'          => [
-                'search' => $search,
+                'keywords' => $search,
             ]
         ];
 
-        $searchRq = Request::create('/api/searchDocuments', 'POST', $params);
+        $searchRq = Request::create('/api/listDocuments', 'POST', $params);
         $api = new ApiDocuments($searchRq);
-        $docData = $api->searchDocuments($searchRq)->getData();
+        $docData = $api->listDocuments($searchRq)->getData();
 
         $documents = !empty($docData->documents) ? $docData->documents : [];
         $count = !empty($docData->total_records) ? $docData->total_records : 0;
@@ -113,10 +111,11 @@ class DocumentController extends Controller {
         $paginationData = $this->getPaginationData($documents, $count, $getParams, $perPage);
 
         return view('document/list', [
-            'class'         => 'documents',
-            'documents'     => $paginationData['items'],
-            'pagination'    => $paginationData['paginate'],
-            'search'        => $search,
+            'class'          => 'documents',
+            'documents'      => $paginationData['items'],
+            'pagination'     => $paginationData['paginate'],
+            'search'         => $search,
+            'activeSections' => $this->getActiveSections()
         ]);
     }
 }

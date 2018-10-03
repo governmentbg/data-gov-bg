@@ -61,6 +61,12 @@
                                 <div>{{ $discussion->last_reply_at }}</div>
                             </div>
                         </div>
+                        <div class="form-group row m-b-lg m-t-md">
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                            <div class="col-sm-6 col-xs-12">
+                                <div>{{ isset($discussion->link) ? $discussion->link : null }}</div>
+                            </div>
+                        </div>
                         <div class="text-center m-b-lg terms-hr">
                             <hr>
                         </div>

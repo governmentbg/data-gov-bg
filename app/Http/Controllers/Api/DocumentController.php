@@ -491,7 +491,7 @@ class DocumentController extends ApiController
                 'description'   => $result->descript,
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
-                'data'          => 'document/download/'. $path .'/'. $result->file_name,
+                'data'          => url('document/download/'. $path .'/'. $result->file_name),
                 'forum_link'    => $result->forum_link,
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,

@@ -23,7 +23,7 @@
                             <form
                                 method="POST"
                                 class="inline-block"
-                                action="{{ url($document->data) }}"
+                                action="{{ $document->data }}"
                             >
                                 {{ csrf_field() }}
                                 <button class="badge badge-pill" type="submit">{{ uctrans('custom.download') }}</button>

@@ -23,11 +23,10 @@
                             <form
                                 method="POST"
                                 class="inline-block"
-                                action="{{ url('/admin/documents/view/'. $document->id) }}"
+                                action="{{ url($document->data) }}"
                             >
                                 {{ csrf_field() }}
                                 <button class="badge badge-pill" type="submit">{{ uctrans('custom.download') }}</button>
-                                <input type="hidden" name="download" value="1">
                             </form>
                             <span class="badge badge-pill">
                                 <a

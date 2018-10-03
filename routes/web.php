@@ -395,6 +395,7 @@ Route::match(['get', 'post'], 'news/view/{id}', 'NewsController@viewNews');
 Route::match(['get', 'post'], 'document', 'DocumentController@listDocuments');
 Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocuments');
 Route::match(['get', 'post'], 'document/view/{id}', 'DocumentController@viewDocument');
+Route::match(['get', 'post'], 'document/download/{path}/{fileName}', 'DocumentController@downloadDocument');
 
 Route::get('contact', function () {
     return view('contact/contact', ['class' => 'contact']);

@@ -34,15 +34,6 @@ class DocumentController extends Controller {
         $documents = !empty($docList->documents[0]) ? $docList->documents[0] : null;
 
         if (!is_null($documents)) {
-            if ($request->has('download')) {
-                return response(utf8_decode($documents->data))
-                    ->header('Cache-Control', 'no-cache private')
-                    ->header('Content-Description', 'File Transfer')
-                    ->header('Content-Type', $documents->mimetype)
-                    ->header('Content-length', strlen(utf8_decode($documents->data)))
-                    ->header('Content-Disposition', 'attachment; filename='. $documents->filename)
-                    ->header('Content-Transfer-Encoding', 'binary');
-            }
 
             return view(
                 'document/view',
@@ -53,6 +44,11 @@ class DocumentController extends Controller {
                 ]
             );
         }
+    }
+
+    public function downloadDocument(Request $request, $path, $fileName)
+    {
+        return response()->download(base64_decode($path), $fileName);
     }
 
     public function listDocuments(Request $request)

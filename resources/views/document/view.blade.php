@@ -17,15 +17,14 @@
                                     <div class="col-xs-12 m-t-sm p-l-none text-right">
                                         <span class="badge badge-pill"><button class="badge badge-pill">{{ uctrans('custom.comment') }}</button></span>
                                         <span class="badge badge-pill">
-                                            <form
+                                        <form
                                                 method="POST"
                                                 class="inline-block"
-                                                action="{{ url('document/view/'. $document->id) }}"
-                                            >
-                                                {{ csrf_field() }}
-                                                <button class="badge badge-pill" type="submit">{{ uctrans('custom.download') }}</button>
-                                                <input type="hidden" name="download" value="1">
-                                            </form>
+                                                action="{{ $document->data }}"
+                                        >
+                                            {{ csrf_field() }}
+                                            <button class="badge badge-pill" type="submit">{{ uctrans('custom.download') }}</button>
+                                        </form>
                                         </span>
                                     </div>
                                 </div>

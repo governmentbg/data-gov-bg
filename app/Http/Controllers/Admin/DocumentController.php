@@ -13,6 +13,13 @@ use App\Http\Controllers\Api\DocumentController as ApiDocument;
 
 class DocumentController extends AdminController
 {
+    private $path;
+
+    public function __construct()
+    {
+        $this->path = storage_path('docs') .'/';
+    }
+
      /**
      * Function for getting an array of translatable fields
      *
@@ -155,9 +162,17 @@ class DocumentController extends AdminController
             $params = [];
 
             if (!empty($request->document)) {
+                $maxFileSize = env('FILE_MAX_SIZE');
                 $params['filename'] = $request->document->getClientOriginalName();
                 $path = $request->document->getPathName();
-                $params['data'] = \File::get($path);
+
+                if ($request->document->getClientSize() <= $maxFileSize) {
+                    $params['data'] = \File::get($path);
+                } else {
+                    $handle = fopen($request->document->getPathName(), 'rb');
+                    $params['data'] = fread($handle, $maxFileSize);
+                }
+
                 $params['mimetype'] = $request->document->getMimeType();
             }
 
@@ -175,9 +190,11 @@ class DocumentController extends AdminController
             $result = $api->addDocument($rq)->getData();
 
             if (!empty($result->success)) {
-                $request->session()->flash('alert-success', __('custom.add_success'));
+                if ($this->appendFileData($handle, $result->data->doc_id)) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
 
-                return redirect('/admin/documents/view/'. $result->data->doc_id);
+                    return redirect('/admin/documents/view/'. $result->data->doc_id);
+                }
             } else {
                 $request->session()->flash('alert-danger', __('custom.add_error'));
 
@@ -204,16 +221,6 @@ class DocumentController extends AdminController
         $doc = isset($result->documents[0]) ? $result->documents[0] : null;
 
         if (!is_null($doc)) {
-            if ($request->has('download')) {
-                return response(utf8_decode($doc->data))
-                    ->header('Cache-Control', 'no-cache private')
-                    ->header('Content-Description', 'File Transfer')
-                    ->header('Content-Type', $doc->mimetype)
-                    ->header('Content-length', strlen(utf8_decode($doc->data)))
-                    ->header('Content-Disposition', 'attachment; filename='. $doc->filename)
-                    ->header('Content-Transfer-Encoding', 'binary');
-
-            }
 
             return view(
                 'admin/documentsView',
@@ -243,10 +250,17 @@ class DocumentController extends AdminController
 
         if ($request->has('edit')) {
             if (!empty($request->document)) {
+                $maxFileSize = env('FILE_MAX_SIZE');
                 $params['filename'] = $request->document->getClientOriginalName();
                 $path = $request->document->getPathName();
-                $params['data'] = \File::get($path);
                 $params['mimetype'] = $request->document->getMimeType();
+
+                if ($request->document->getClientSize() <= $maxFileSize) {
+                    $params['data'] = \File::get($path);
+                } else {
+                    $handle = fopen($request->document->getPathName(), 'rb');
+                    $params['data'] = fread($handle, $maxFileSize);
+                }
             }
 
             $rq = Request::create('/api/editDocument', 'POST', [
@@ -265,9 +279,11 @@ class DocumentController extends AdminController
             $result = $api->editDocument($rq)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.edit_success'));
+                if ($this->appendFileData($handle, $id)) {
+                    $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                return back();
+                    return back();
+                }
             } else {
                 $request->session()->flash('alert-danger', __('custom.edit_error'));
 
@@ -305,5 +321,34 @@ class DocumentController extends AdminController
 
             return redirect('/admin/documents/list')->withErrors(isset($result->errors) ? $result->errors : []);
         }
+    }
+
+    public function appendFileData(&$handle, $id)
+    {
+        if (isset($handle)) {
+            $maxFileSize = env('FILE_MAX_SIZE');
+
+            while (!feof($handle)) {
+                $contents = fread($handle, $maxFileSize);
+                $appendRq = Request::create('/api/appendDocument', 'POST', [
+                    'data'   => $contents,
+                    'doc_id' => $id
+                ]);
+                $api = new ApiDocument($appendRq);
+                $appendResult = $api->appendDocumentData($appendRq)->getData();
+
+                if (empty($appendResult->success)) {
+                    fclose($handle);
+                    unlink($this->path . $id);
+                    Document::where('id', $id)->delete();
+                    $request->session()->flash('alert-danger', __('custom.add_error'));
+
+                    return back()->withErrors($result->errors)->withInput(Input::all());
+                }
+            }
+            fclose($handle);
+        }
+
+        return true;
     }
 }

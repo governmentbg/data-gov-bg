@@ -24,6 +24,11 @@ class Document extends Model implements TranslatableInterface
         'descript'  => 'text'
     ];
 
+    public static function getTransFields()
+    {
+        return self::$translatable;
+    }
+
     public function toSearchableArray()
     {
         return [

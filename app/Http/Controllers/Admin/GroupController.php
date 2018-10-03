@@ -372,7 +372,7 @@ class GroupController extends AdminController
             }
 
             if (is_numeric($filter)) {
-                $criteria['role_id'] = $filter;
+                $criteria['role_ids'] = [$filter];
             }
 
             if (!empty($keywords)) {

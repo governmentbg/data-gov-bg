@@ -33,6 +33,11 @@ class Page extends Model implements TranslatableInterface
         'meta_key_words'    => 'label',
     ];
 
+    public static function getTransFields()
+    {
+        return self::$translatable;
+    }
+
     public function toSearchableArray()
     {
         return [

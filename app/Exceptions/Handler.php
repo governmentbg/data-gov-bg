@@ -55,6 +55,10 @@ class Handler extends ExceptionHandler
             return redirect()->back()->with('alert-danger', $exception->getMessage());
         }
 
+        if ($exception instanceof AfterForumResponse) {
+            return redirect()->back()->with('alert-success', trans('chatter::alert.success.reason.submitted_to_post'));
+        }
+
         return parent::render($request, $exception);
     }
 }

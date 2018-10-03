@@ -352,6 +352,20 @@ body {
                         }
                     }
 
+                    &.data-attention {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeDataAttention !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeDataAttention;
+                            }
+                        }
+                    }
+
                     &.organisation {
                         &:hover, &.active {
                             @include smMobile() {

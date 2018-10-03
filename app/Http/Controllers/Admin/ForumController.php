@@ -24,11 +24,13 @@ class ForumController extends AdminController
     public function listDiscussions(Request $request)
     {
         $perPage = 10;
+        $page = isset($request->page) ? $request->page : 1;
         $discussions = Models::discussion()->with('category')->get();
+        $items = collect($discussions);
 
         $paginationData = $this->getPaginationData(
-            $discussions,
-            0,
+            $items->forPage($page, $perPage),
+            count($discussions),
             [],
             $perPage
         );
@@ -52,12 +54,14 @@ class ForumController extends AdminController
      */
     public function listCategories(Request $request)
     {
+        $page = isset($request->page) ? $request->page : 1;
         $perPage = 10;
         $categories = Models::category()->where('parent_id', null)->get();
+        $items = collect($categories);
 
         $paginationData = $this->getPaginationData(
-            $categories,
-            0,
+            $items->forPage($page, $perPage),
+            count($categories),
             [],
             $perPage
         );
@@ -81,14 +85,16 @@ class ForumController extends AdminController
      */
     public function listSubcategories(Request $request, $id)
     {
+        $page = isset($request->page) ? $request->page : 1;
         $perPage = 10;
         $subcategories = Models::category()->where('parent_id', $id)->get();
         $mainCategory = Models::category()->where('id', $id)->where('parent_id', null)->first();
+        $items = collect($subcategories);
 
         if (!is_null($mainCategory)) {
             $paginationData = $this->getPaginationData(
-                $subcategories,
-                0,
+                $items->forPage($page, $perPage),
+                count($subcategories),
                 [],
                 $perPage
             );
@@ -306,6 +312,8 @@ class ForumController extends AdminController
 
         if (!is_null($discussion)) {
             $discussion->created_by = User::where('id', $discussion->user_id)->value('username');
+            $categorySlug = Models::category()->where('id', $discussion->chatter_category_id)->value('slug');
+            $discussion->link = '/'. config('chatter.routes.home') .'/'. config('chatter.routes.discussion') .'/'. $categorySlug .'/'. $discussion->slug;
 
             return view(
                 'admin/forum/discussionView',
@@ -582,12 +590,17 @@ class ForumController extends AdminController
         $category = Models::category()->where('id', $id)->first();
 
         if (!is_null($category)) {
+            DB::beginTransaction();
+
             try {
+                Models::category()->where('parent_id', $id)->delete();
                 $category->delete();
                 $request->session()->flash('alert-success', __('custom.delete_success'));
+                DB::commit();
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
                 $request->session()->flash('alert-danger', __('custom.delete_error'));
+                DB::rollback();
             }
         } else {
             $request->session()->flash('alert-danger', __('custom.delete_error'));
@@ -622,5 +635,95 @@ class ForumController extends AdminController
         }
 
         return redirect('/admin/forum/subcategories/list/'. $category->parent_id);
+    }
+
+    /**
+     * Lists posts
+     *
+     * @param Request $request
+     *
+     * @return view with list of posts
+     */
+    public function listPosts(Request $request, $id)
+    {
+        $perPage = 10;
+        $page = isset($request->page) ? $request->page : 1;
+        $posts = Models::post()->where('chatter_discussion_id', $id)->get();
+        $discussion = Models::discussion()->where('id', $id)->value('title');
+        $items = collect($posts);
+
+        foreach ($items as $key => $post) {
+            $items[$key]->user = User::where('id', $post->user_id)->value('username');
+        }
+
+        $paginationData = $this->getPaginationData(
+            $items->forPage($page, $perPage),
+            count($posts),
+            [],
+            $perPage
+        );
+
+        return view(
+            'admin/forum/postsList',
+            [
+                'class'       => 'user',
+                'posts'       => $paginationData['items'],
+                'pagination'  => $paginationData['paginate'],
+                'discussion'  => $discussion,
+            ]
+        );
+    }
+
+    /**
+     * Displays information for a given post
+     *
+     * @param Request $request
+     * @param integer $id
+     *
+     * @return view on success on failure redirect to homepage
+     */
+    public function viewPost(Request $request, $id)
+    {
+        $post = Models::post()->where('id', $id)->first();
+
+        if (!is_null($post)) {
+            $post->user = User::where('id', $post->user_id)->value('username');
+
+            return view(
+                'admin/forum/postView',
+                [
+                    'class' => 'user',
+                    'post'  => $post,
+                ]
+            );
+        }
+
+        return back();
+    }
+
+    /**
+     * Delete a post based on id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return view on success with messages
+     */
+    public function deletePost(Request $request, $id)
+    {
+        $post = Models::post()->where('id', $id)->first();
+
+        if (!is_null($post)) {
+            try {
+                $post->delete();
+                $request->session()->flash('alert-success', __('custom.delete_success'));
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+                $request->session()->flash('alert-danger', __('custom.delete_error'));
+            }
+        } else {
+            $request->session()->flash('alert-danger', __('custom.delete_error'));
+        }
+
+        return back();
     }
 }

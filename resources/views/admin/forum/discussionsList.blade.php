@@ -70,6 +70,10 @@
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                         href="{{ url('admin/forum/discussions/delete/'. $discussion->id) }}"
                                                     >{{ __('custom.delete') }}</a>
+                                                    <a
+                                                        class="link-action"
+                                                        href="{{ url('admin/forum/posts/list/'. $discussion->id) }}"
+                                                    >{{ utrans('custom.discussion_posts') }}</a>
                                                 </td>
                                             </tr>
                                         @endforeach

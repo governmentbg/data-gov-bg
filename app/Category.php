@@ -27,6 +27,11 @@ class Category extends Model implements TranslatableInterface
     const IMG_EXT_SVG = 'svg';
     const IMG_MIME_SVG = 'image/svg+xml';
 
+    public static function getTransFields()
+    {
+        return self::$translatable;
+    }
+
     public static function getOrdering() {
         return [
             self::ORDERING_ASC => __('custom.order_asc'),

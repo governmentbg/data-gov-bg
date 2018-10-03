@@ -13,7 +13,7 @@
         <meta name="description" content="{{ $description }}">
     @endif
     @if (!empty($keywords))
-        <meta name="keywords" content="{{ $keywords }}">
+        <meta name="keywords" content="{{$keywords}}">
     @endif
     <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
@@ -175,9 +175,29 @@
                                 <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
                                     <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
                                 </li>
-                                <li class="contact {{ Request::segment(1) == 'contact' ? 'active' : '' }}">
-                                    <a href="{{ url('/contact') }}">{{ uctrans('custom.contacts', 2) }}</a>
-                                </li>
+                                @if (isset($activeSections))
+                                    @foreach ($activeSections as $section)
+                                        <li
+                                            class="
+                                                {{
+                                                    isset(app('request')->input()['section'])
+                                                    && app('request')->input()['section'] == $section->id
+                                                        ? 'active'
+                                                        : ''
+                                                }}
+                                                {{ isset($section->class) ? $section->class : '' }}
+                                            "
+                                        >
+                                            <a
+                                                href="{{
+                                                    url(str_slug($section->name)) .
+                                                    '?'.
+                                                    http_build_query(['section' => $section->id])
+                                                }}"
+                                            >{{ $section->name }}</a>
+                                        </li>
+                                    @endforeach
+                                @endif
                                 <li
                                     class="hidden-lg hidden-md hidden-sm js-check-url {{ in_array(
                                         Request::segment(1),
@@ -258,6 +278,6 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
-
+    @yield('js')
 </body>
 </html>

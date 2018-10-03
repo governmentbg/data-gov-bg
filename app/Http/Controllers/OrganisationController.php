@@ -112,6 +112,7 @@ class OrganisationController extends Controller {
         $paginationData = $this->getPaginationData($organisations, $count, $getParams, $perPage);
 
         $buttons = [];
+
         if (\Auth::check()) {
             // check rights for add button
             $rightCheck = RoleRight::checkUserRight(Module::ORGANISATIONS, RoleRight::RIGHT_EDIT);
@@ -141,12 +142,13 @@ class OrganisationController extends Controller {
         return view(
             'organisation.list',
             [
-                'class'         => 'organisation',
-                'organisations' => $paginationData['items'],
-                'pagination'    => $paginationData['paginate'],
-                'orgTypes'      => $orgTypes,
-                'getParams'     => $getParams,
-                'buttons'       => $buttons
+                'class'          => 'organisation',
+                'organisations'  => $paginationData['items'],
+                'pagination'     => $paginationData['paginate'],
+                'orgTypes'       => $orgTypes,
+                'getParams'      => $getParams,
+                'buttons'        => $buttons,
+                'activeSections' => $this->getActiveSections()
             ]
         );
     }
@@ -248,11 +250,12 @@ class OrganisationController extends Controller {
             return view(
                 'organisation/profile',
                 [
-                    'class'        => 'organisation',
-                    'organisation' => $organisation,
-                    'childOrgs'    => $childOrgs,
-                    'parentOrg'    => $parentOrg,
-                    'buttons'      => $buttons
+                    'class'          => 'organisation',
+                    'organisation'   => $organisation,
+                    'childOrgs'      => $childOrgs,
+                    'parentOrg'      => $parentOrg,
+                    'buttons'        => $buttons,
+                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }
@@ -672,7 +675,8 @@ class OrganisationController extends Controller {
                     'termsOfUse'         => $termsOfUse,
                     'getParams'          => $getParams,
                     'display'            => $display,
-                    'buttons'            => $buttons
+                    'buttons'            => $buttons,
+                    'activeSections'     => $this->getActiveSections()
                 ]
             );
         }
@@ -856,7 +860,8 @@ class OrganisationController extends Controller {
                         'approved'       => ($organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'        => $dataset,
                         'resources'      => $resources,
-                        'buttons'        => $buttons
+                        'buttons'        => $buttons,
+                        'activeSections' => $this->getActiveSections()
                     ]
                 );
             }
@@ -1000,7 +1005,8 @@ class OrganisationController extends Controller {
                             'data'           => $data,
                             'versionView'    => $version,
                             'userData'       => $userData,
-                            'buttons'        => $buttons
+                            'buttons'        => $buttons,
+                            'activeSections' => $this->getActiveSections()
                         ]
                     );
                 }
@@ -1169,7 +1175,8 @@ class OrganisationController extends Controller {
                     'chronology'     => !empty($paginationData['items']) ? $paginationData['items'] : [],
                     'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
-                    'actionTypes'    => $actTypes
+                    'actionTypes'    => $actTypes,
+                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }

@@ -717,3 +717,74 @@ textarea {
         max-width: 245px;
     }
 }
+
+.pages-list {
+
+    .page-item:hover {
+        box-shadow: 0 0 11px rgba(33,33,33,.2);
+      }
+
+    .page-item {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        border-radius: 15px;
+
+        &.index {
+            border: 1px solid $themeIndex;
+        }
+
+        &.data {
+            border: 1px solid $themeData;
+        }
+
+        &.data-attention {
+            border: 1px solid $themeDataAttention;
+        }
+
+        &.organisation {
+            border: 1px solid $themeOrganisation;
+        }
+
+        &.request {
+            border: 1px solid $themeRequest;
+        }
+
+        &.visualisation {
+            border: 1px solid $themeVisualisations;
+        }
+
+        &.news {
+            border: 1px solid $themeNews;
+        }
+
+        &.document {
+            border: 1px solid $themeDocuments;
+        }
+
+        &.contact {
+            border: 1px solid $themeContact;
+        }
+
+        &.user {
+            border: 1px solid $themeUser;
+        }
+    }
+}
+
+.chatter-alert {
+    &.alert-success {
+        background-color: #dff0d8 !important;
+        border-color: #d6e9c6 !important;
+        color: #3c763d !important;
+    }
+
+    &.alert-danger {
+        background-color: #f2dede !important;
+        border-color: #ebccd1 !important;
+        color: #a94442 !important;
+    }
+
+    .chatter-close {
+        padding-right: 30px;
+    }
+}

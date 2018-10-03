@@ -65,8 +65,8 @@ class UserController extends ApiController
                 'active'       => 'nullable|boolean',
                 'approved'     => 'nullable|boolean',
                 'is_admin'     => 'nullable|int|digits_between:1,10',
-                'role_id'      => 'nullable',
-                'org_id'       => 'nullable',
+                'role_ids'     => 'nullable',
+                'org_ids'      => 'nullable',
                 'id'           => 'nullable|int|digits_between:1,10',
                 'user_ids'     => 'nullable|array',
                 'order'        => 'nullable|array',
@@ -145,6 +145,8 @@ class UserController extends ApiController
             } elseif (isset($criteria['user_ids'])) {
                 $query->whereIn('id', $criteria['user_ids']);
             }
+
+            $query->whereNotIn('username', User::SYSTEM_USERS);
 
             $count = $query->count();
 
@@ -1485,13 +1487,15 @@ class UserController extends ApiController
     }
 
     /**
-     * Get active users count
+     * Get active users count without system users
      *
      * @return json response with user count
      */
     public function userCount(Request $request)
     {
-        $users = User::where('active', 1)->count();
+        $users = User::where('active', 1)
+            ->whereNotIn('username', User::SYSTEM_USERS)
+            ->count();
 
         return $this->successResponse(['count' => $users], true);
     }

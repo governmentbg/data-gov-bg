@@ -60,6 +60,13 @@ class RequestController extends Controller {
         $orgList = $apiOrganisations->listOrganisations($orgRequest)->getData();
         $organisations = !empty($orgList->organisations) ? $orgList->organisations : null;
 
-        return view('request/dataRequest', ['class' => 'request', 'orgList' => $organisations]);
+        return view(
+            'request/dataRequest',
+            [
+                'class'          => 'request',
+                'orgList'        => $organisations,
+                'activeSections' => $this->getActiveSections()
+            ]
+        );
     }
 }

@@ -109,11 +109,11 @@ class DocumentController extends ApiController
                     ];
 
                     Module::add($logData);
-                } else {
-                    $validator->errors()->add('logo', $this->getFileSizeError());
+
+                    return $this->successResponse(['doc_id' => $doc->id]);
                 }
 
-                return $this->successResponse(['doc_id' => $doc->id]);
+                $validator->errors()->add('logo', $this->getFileSizeError());
             } catch (\Exception $ex) {
                 DB::rollback();
 
@@ -236,7 +236,7 @@ class DocumentController extends ApiController
                     RoleRight::RIGHT_EDIT,
                     [],
                     [
-                        'created_by' => $editDocument->created_by
+                        'created_by' => $doc->created_by
                     ]
                 );
 
@@ -482,6 +482,8 @@ class DocumentController extends ApiController
         $results = [];
 
         foreach ($query->get() as $result) {
+            $path = base64_encode($this->path . $result->id);
+
             $itemData = [
                 'id'            => $result->id,
                 'locale'        => $locale,
@@ -489,7 +491,7 @@ class DocumentController extends ApiController
                 'description'   => $result->descript,
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
-                'data'          => file_get_contents($this->path . $result->id),
+                'data'          => url('document/download/'. $path .'/'. $result->file_name),
                 'forum_link'    => $result->forum_link,
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,

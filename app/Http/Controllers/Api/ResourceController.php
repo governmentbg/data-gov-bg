@@ -1405,7 +1405,7 @@ class ResourceController extends ApiController
         return $data;
     }
 
-    /*
+    /**
      * Check if given string is personal information (egn/lnch)
      *
      * @param string $string - required
@@ -1422,7 +1422,7 @@ class ResourceController extends ApiController
         return false;
     }
 
-    /*
+    /**
      * Check if given string is valid EGN (identification number)
      *
      * @param string $egn - required

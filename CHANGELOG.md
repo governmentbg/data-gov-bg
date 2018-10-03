@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased]
 ### Added
 - Change log
+- Filter for personal information
 
 ## [0.5.1] - 2018-10-03
 ### Fixed

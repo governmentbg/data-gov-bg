@@ -2,16 +2,15 @@
 
 @section('content')
     <div class="container">
-        @include('partials.alerts-bar')
         <div class="row">
             <div class="col-xs-12 p-h-sm p-l-r-none">
                 <div class="filter-content">
                     <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-12 text-center p-l-none">
-                                <div>
-                                    <ul class="nav filter-type right-border">
-                                        @if (isset($page) && !empty($page->subsection))
+                        @if (isset($page) && !empty($page->subsection))
+                            <div class="row">
+                                <div class="col-md-12 text-center p-l-none">
+                                    <div>
+                                        <ul class="nav filter-type right-border">
                                             <li>
                                                 <a
                                                     href="{{ isset($page->subsection->base_url)
@@ -20,16 +19,16 @@
                                                     }}"
                                                 >{{ $page->subsection->name }}</a>
                                             </li>
-                                        @endif
-                                    </ul>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 text-center p-l-none">
-                                <div>
-                                    <ul class="nav filter-type right-border">
-                                        @if (isset($page))
+                        @endif
+                        @if (isset($page))
+                            <div class="row">
+                                <div class="col-md-12 text-center p-l-none">
+                                    <div>
+                                        <ul class="nav filter-type right-border">
                                             <li>
                                                 <a href=""
                                                     class="{{
@@ -40,11 +39,11 @@
                                                     }}"
                                                 >{{ $page->title }}</a>
                                             </li>
-                                        @endif
-                                    </ul>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

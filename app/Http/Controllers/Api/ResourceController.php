@@ -261,7 +261,7 @@ class ResourceController extends ApiController
                     'resource_id'   => $id
                 ]);
 
-                //Filter data for containing personal info
+                // Filter data for containing personal info
                 $filteredData = $this->checkData($post['data']);
 
                 \Elasticsearch::index([
@@ -1391,7 +1391,7 @@ class ResourceController extends ApiController
             $replaceWith = '**********';
             $pattern = '/[0-9]{10}/';
 
-            if (preg_match_all($pattern,$item, $match)) {
+            if (preg_match_all($pattern, $item, $match)) {
                 foreach ($match as $k => $value) {
                     foreach ($value as $v) {
                         if ($this->isPersonalInfo($v)) {
@@ -1432,35 +1432,44 @@ class ResourceController extends ApiController
     {
         $egnWeights = [2, 4, 8, 5, 10, 9, 7, 3, 6];
 
-        if (strlen($egn) != 10)
+        if (strlen($egn) != 10) {
             return false;
-
-        $year = substr($egn,0,2);
-        $mon  = substr($egn,2,2);
-        $day  = substr($egn,4,2);
-
-        if ($mon > 40) {
-            if (!checkdate($mon-40, $day, $year+2000)) return false;
-        } else if ($mon > 20) {
-            if (!checkdate($mon-20, $day, $year+1800)) return false;
-        } else {
-            if (!checkdate($mon, $day, $year+1900)) return false;
         }
 
-        $checkSum = substr($egn,9,1);
+        $year = substr($egn, 0, 2);
+        $mon = substr($egn, 2, 2);
+        $day = substr($egn, 4, 2);
+
+        if ($mon > 40) {
+            if (!checkdate($mon - 40, $day, $year + 2000)) {
+                return false;
+            }
+        } else if ($mon > 20) {
+            if (!checkdate($mon - 20, $day, $year + 1800)) {
+                return false;
+            }
+        } else {
+            if (!checkdate($mon, $day, $year + 1900)) {
+                return false;
+            }
+        }
+
+        $checkSum = substr($egn, 9, 1);
         $egnSum = 0;
 
-        for ($i=0;$i<9;$i++) {
-            $egnSum += substr($egn,$i,1) * $egnWeights[$i];
+        for ($i = 0; $i < 9; $i++) {
+            $egnSum += substr($egn, $i, 1) * $egnWeights[$i];
         }
 
         $validCheckSum = $egnSum % 11;
 
-        if ($validCheckSum == 10)
+        if ($validCheckSum == 10) {
             $validCheckSum = 0;
+        }
 
-        if ($checkSum == $validCheckSum)
+        if ($checkSum == $validCheckSum) {
             return true;
+        }
     }
 
     /*
@@ -1473,19 +1482,21 @@ class ResourceController extends ApiController
     {
         $pnfWeights = [21, 19, 17, 13, 11, 9, 7, 3, 1];
 
-        if (strlen($pnForeigner) != 10)
+        if (strlen($pnForeigner) != 10) {
             return false;
+        }
 
-        $checkSum = substr($pnForeigner,9,1);
+        $checkSum = substr($pnForeigner, 9, 1);
         $pnfSum = 0;
 
-        for ($i=0;$i<9;$i++) {
-            $pnfSum += substr($pnForeigner,$i,1) * $pnfWeights[$i];
+        for ($i = 0; $i < 9; $i++) {
+            $pnfSum += substr($pnForeigner, $i, 1) * $pnfWeights[$i];
         }
 
         $validCheckSum = $pnfSum % 10;
 
-        if ($checkSum == $validCheckSum)
+        if ($checkSum == $validCheckSum) {
             return true;
+        }
     }
 }

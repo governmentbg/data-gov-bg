@@ -166,7 +166,8 @@
                 </div>
             </div>
         </div>
-        <link rel="alternate" type="application/rss+xml" title="{{$organisation->name}}" href="{{url('/feed/organisation/dataSetHistory/' . $organisation->id)}}" />
+        <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}" />
+
         @if (count($childOrgs) > 0)
             <div class="row">
                 <div class="col-sm-12">

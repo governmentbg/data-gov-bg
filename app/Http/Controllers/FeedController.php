@@ -16,30 +16,26 @@ class FeedController extends Controller
      * @return xml view for rss feed
      * for the organisation's dataset history
      */
-    public function getOrganisationDatasetHistory($orgId)
+    public function getOrganisationDatasetHistory($uri)
     {
-        $organisation = Organisation::where('id', $orgId)->first();
+        $organisation = Organisation::where('uri', $uri)->first();
+
         if ($organisation) {
-
-            $datasetsList = Dataset::where('org_id', $organisation->id)
-                ->where('visibility', DataSet::VISIBILITY_PUBLIC)
-                ->where('status', DataSet::STATUS_PUBLISHED)
-                ->get();
-
             $history = [];
 
-            foreach ($organisation->dataSet as $dataset){
-                $datasetIds[] = $dataset->id;
-            }
-
-            if (!empty($datasetIds)) {
-                $history = ActionsHistory::where('module_name', 'Dataset')
-                    ->whereIn('action_object', $datasetIds)
-                    ->where('action', '!=', 1)->get();
-            }
+            $history = Dataset::select('actions_history.id AS ahId', 'actions_history.*','data_sets.*')
+                ->leftJoin('actions_history', 'actions_history.action_object', '=', 'data_sets.id')
+                ->withTrashed()
+                ->where('data_sets.org_id', $organisation->id)
+                ->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC)
+                ->where('data_sets.status', DataSet::STATUS_PUBLISHED)
+                ->where('actions_history.action', '!=', 1)
+                ->orderBy('data_sets.id', 'occurrence')
+                ->limit('1000')
+                ->get() ;
 
             return response()
-                ->view('feeds.orgDatasetFeed', compact('history', 'datasetsList', 'organisation'))
+                ->view('feeds/orgDatasetFeed', compact('history', 'organisation'))
                 ->header('Content-Type', 'text/xml');
         }
     }

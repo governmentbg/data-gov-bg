@@ -409,4 +409,4 @@ Route::get('{section}', 'StaticPageController@show');
 
 Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'LanguageController@switchLang']);
 
-Route::get('/feed/organisation/dataSetHistory/{id}', 'FeedController@getOrganisationDatasetHistory')->name('getOrgDatasetHistory');
+Route::get('/datasets/{uri}/rss', 'FeedController@getOrganisationDatasetHistory');

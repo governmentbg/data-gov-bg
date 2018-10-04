@@ -522,15 +522,16 @@ class UserController extends Controller {
                 'group_id'      => $groupId,
             ];
 
-            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-            $added = $api->addDataSetToGroup($addGroup)->getData();
+            if (!is_null($groupId)) {
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
 
-            if (!$added->success) {
-                session()->flash('alert-danger', __('custom.edit_error'));
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
 
-                return redirect()->back()->withInput()->withErrors($added->errors);
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
             }
-
             if ($request->has('publish')) {
                 $editData['status'] = DataSet::STATUS_PUBLISHED;
             }
@@ -2027,6 +2028,7 @@ class UserController extends Controller {
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $fromOrg = Organisation::where('uri', $orgUri)->first();
+        $root = isset(\Auth::user()->is_admin) ? 'admin' : 'user';
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if (!is_null($fromOrg)) {
@@ -2137,6 +2139,7 @@ class UserController extends Controller {
             'fields'      => $this->getResourceTransFields(),
             'fromOrg'     => $fromOrg,
             'dataSetName' => isset($dataSetName) ? $dataSetName : null,
+            'root'        => $root
         ]);
     }
 

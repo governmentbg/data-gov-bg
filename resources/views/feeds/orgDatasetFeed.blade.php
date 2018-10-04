@@ -1,23 +1,22 @@
-
 <rss version="2.0">
     @if (!empty($history))
         <channel>
-            @foreach ($history as $singleItem)
+            @foreach ($history as $singleDataset)
                 <item>
-                    @foreach ($datasetsList as $singleDataset)
-                        @if ($singleDataset->id == $singleItem->action_object)
-                            <title>{{ $singleItem->action_msg }}</title>
-                            <itemName>{{ $singleDataset->name }}</itemName>
+                    <dataset id="{{$singleDataset->id}}">
+                        <title>{{ $singleDataset->name . ' ' . $singleDataset->action_msg . ' ' . $singleDataset->descript}}</title>
+                        <itemName>{{ $singleDataset->name }}</itemName>
+                        @if (is_null($singleDataset->deleted_at))
                             <link>{{ url('data/view/' . $singleDataset->uri) }}</link>
+                        @else
+                            <link>{{ url('organisation/' . $organisation->uri . '/datasets') }}</link>
                         @endif
-                    @endforeach
-                    <description>{{ $singleItem->action_msg . ' ' . $singleDataset->name}}</description>
-                    <moment>{{ $singleItem->occurrence }}</moment>
-                    <guid>{{ $singleItem->id }}</guid>
+                        <description>{{ $singleDataset->name . ' ' . $singleDataset->action_msg  }}</description>
+                        <moment>{{ $singleDataset->occurrence }}</moment>
+                        <guid>{{ $singleDataset->ahId }}</guid>
+                    </dataset>
                 </item>
             @endforeach
         </channel>
     @endif
 </rss>
-
-

@@ -5,14 +5,14 @@ namespace Tests\Unit\Api;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 
-class ActionHistoryTest extends TestCase
+class ModulesTest extends TestCase
 {
     /**
      * A basic test example.
      *
      * @return void
      */
-    public function testList()
+    public function testListModules()
     {
         $response = $this->post(
             url('api/listModules'),

@@ -14,20 +14,19 @@ class CategoryTest extends TestCase
     use WithFaker;
     use DatabaseTransactions;
 
-    private $locale = 'en';
     /**
-     * A basic test example.
+     * Test category creation
      *
      * @return void
      */
     public function testAddMainCategory()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addMainCategory'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/addMainCategory'),
             [
@@ -38,14 +37,27 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful MainCategory create
+        // Test successful MainCategory create
         $this->post(
             url('api/addMainCategory'),
             [
                 'api_key'   => $this->getApiKey(),
                 'data'      => [
                     'name'          => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
+                ]
+            ]
+        )
+          ->assertStatus(200)
+          ->assertJson(['success' => true]);
+
+        // Test successful MainCategory create
+        $this->post(
+            url('api/addMainCategory'),
+            [
+                'api_key'   => $this->getApiKey(),
+                'data'      => [
+                    'name'      => ApiController::trans($this->locale, $this->faker->name()),
                 ]
             ]
         )
@@ -53,6 +65,11 @@ class CategoryTest extends TestCase
           ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test category modification
+     *
+     * @return void
+     */
     public function testEditMainCategory() {
         $category = Category::create([
             'name'              => ApiController::trans($this->locale, $this->faker->name()),
@@ -68,7 +85,7 @@ class CategoryTest extends TestCase
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/editMainCategory'),
             [
@@ -80,7 +97,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test empty category id
+        // Test empty category id
         $this->post(
             url('api/editMainCategory'),
             [
@@ -88,14 +105,14 @@ class CategoryTest extends TestCase
                 'category_id'   => null,
                 'data'          => [
                     'name'          => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                 ],
             ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful MainCategory create
+        // Test successful MainCategory create
         $this->post(
             url('api/editMainCategory'),
             [
@@ -103,7 +120,20 @@ class CategoryTest extends TestCase
                 'category_id'   => $category->id,
                 'data'          => [
                     'name'          => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
+                ]
+            ]
+        )
+          ->assertStatus(200)
+          ->assertJson(['success' => true]);
+
+        $this->post(
+            url('api/editMainCategory'),
+            [
+                'api_key'       => $this->getApiKey(),
+                'category_id'   => $category->id,
+                'data'          => [
+                    'name'          => ApiController::trans($this->locale, $this->faker->name()),
                 ]
             ]
         )
@@ -111,6 +141,11 @@ class CategoryTest extends TestCase
           ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test category deletion
+     *
+     * @return void
+     */
     public function testDeleteMainCategory()
     {
         $category = Category::create([
@@ -127,7 +162,7 @@ class CategoryTest extends TestCase
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty category id
+        // Test empty category id
         $this->post(
             url('api/deleteMainCategory'),
             [
@@ -138,7 +173,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful MainCategory delete
+        // Test successful MainCategory delete
         $this->post(
             url('api/deleteMainCategory'),
             [
@@ -150,14 +185,19 @@ class CategoryTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test category list
+     *
+     * @return void
+     */
     public function testListMainCategories()
     {
-        //  test missing api_key
+        // Test missing api_key
         $this->post(url('api/listMainCategories'), ['api_key' => null])
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        //test with criteria
+        // Test with criteria
         $this->post(url('api/listMainCategories'), [
             'criteria' => [
                 'active' => 1,
@@ -167,6 +207,11 @@ class CategoryTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test category details
+     *
+     * @return void
+     */
     public function testGetMainCategoryDetails()
     {
         $category = Category::create([
@@ -178,18 +223,18 @@ class CategoryTest extends TestCase
             'ordering'          => Category::ORDERING_ASC,
         ]);
 
-        // test missing category id
+        // Test missing category id
         $this->post(url('api/getMainCategoryDetails'), [
             'category_id'   => null,
-            'locale'        => 'en',
+            'locale'        => $this->locale,
         ])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful request
+        // Test successful request
         $this->post(url('api/getMainCategoryDetails'), [
             'category_id'   => $category->id,
-            'locale'        => 'en',
+            'locale'        => $this->locale,
         ])
             ->assertStatus(200)
             ->assertJson(['success' => true]);

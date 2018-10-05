@@ -13,18 +13,17 @@ class TermsOfUseTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    private $locale = 'en';
     /**
      * Test for TermsOfUseController@addTermsOfUse
      */
     public function testAddTermsOfUse()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addTermsOfUse'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/addTermsOfUse'),
             [
@@ -35,7 +34,7 @@ class TermsOfUseTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section create
+        // Test successful section create
         $this->post(
             url('api/addTermsOfUse'),
             [
@@ -43,7 +42,7 @@ class TermsOfUseTest extends TestCase
                 'data'      => [
                     'name'          => $this->faker->word(),
                     'description'   => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
                     'ordering'      => $this->faker->numberBetween(0, 10),
@@ -53,26 +52,27 @@ class TermsOfUseTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
     }
+
     /**
      * Test for TermsOfUseController@editTermsOfUse
      */
     public function testEditTermsOfUse()
     {
         $section = TermsOfUse::create([
-            'name'          => Apicontroller::trans($this->locale, $this->faker->word()),
-            'descript'      => Apicontroller::trans($this->locale, $this->faker->word()),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
+            'descript'      => ApiController::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'is_default'    => $this->faker->boolean(),
             'ordering'      => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/editTermsOfUse'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(
             url('api/editTermsOfUse'),
             [
@@ -80,7 +80,7 @@ class TermsOfUseTest extends TestCase
                 'data'      => [
                     'name'          => $this->faker->word(),
                     'description'   => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
                     'ordering'      => $this->faker->numberBetween(0, 10),
@@ -90,7 +90,7 @@ class TermsOfUseTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/editTermsOfUse'),
             [
@@ -102,7 +102,7 @@ class TermsOfUseTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section edit
+        // Test successful section edit
         $this->post(
             url('api/editTermsOfUse'),
             [
@@ -111,7 +111,7 @@ class TermsOfUseTest extends TestCase
                 'data'      => [
                     'name'          => $this->faker->word(),
                     'description'   => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
                     'ordering'      => $this->faker->numberBetween(0, 10),
@@ -128,25 +128,25 @@ class TermsOfUseTest extends TestCase
     public function testDeleteTermsOfUse()
     {
         $section = TermsOfUse::create([
-            'name'          => Apicontroller::trans($this->locale, $this->faker->word()),
-            'descript'      => Apicontroller::trans($this->locale, $this->faker->word()),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
+            'descript'      => ApiController::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'is_default'    => $this->faker->boolean(),
             'ordering'      => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/deleteTermsOfUse'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(url('api/deleteTermsOfUse'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section delete
+        // Test successful section delete
         $this->post(
             url('api/deleteTermsOfUse'),
             [
@@ -163,12 +163,12 @@ class TermsOfUseTest extends TestCase
      */
     public function testListTermsOfUse()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/listTermsOfUse'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty criteria
+        // Test empty criteria
         $this->post(
             url('api/listTermsOfUse'),
             [
@@ -179,14 +179,14 @@ class TermsOfUseTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test successful section list
+        // Test successful section list
         $this->post(
             url('api/listTermsOfUse'),
             [
                 'api_key'   => $this->getApiKey(),
                 'criteria'  => [
                     'active' => $this->faker->boolean(),
-                    'locale' => 'en'
+                    'locale' => $this->locale
                 ],
             ]
         )
@@ -200,14 +200,14 @@ class TermsOfUseTest extends TestCase
     public function testGetTermsOfUseDetails()
     {
         $section = TermsOfUse::create([
-            'name'          => Apicontroller::trans($this->locale, $this->faker->word()),
-            'descript'      => Apicontroller::trans($this->locale, $this->faker->word()),
+            'name'          => ApiController::trans($this->locale, $this->faker->word()),
+            'descript'      => ApiController::trans($this->locale, $this->faker->word()),
             'active'        => $this->faker->boolean(),
             'is_default'    => $this->faker->boolean(),
             'ordering'      => $this->faker->numberBetween(0, 10),
             'created_by'    => 1,
         ]);
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/getTermsOfUseDetails'), [
                 'api_key'   => null,
                 'terms_id'  => $section->id,
@@ -216,12 +216,12 @@ class TermsOfUseTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(url('api/getTermsOfUseDetails'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section delete
+        // Test successful section delete
         $this->post(
             url('api/getTermsOfUseDetails'),
             [

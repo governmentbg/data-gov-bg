@@ -308,6 +308,8 @@ class SectionController extends ApiController
                 'active'   => 'nullable|boolean',
                 'locale'   => 'nullable|string|max:5',
             ]);
+
+            unset($criteria['locale']);
         }
 
         $order = isset($criteria['order']) ? $criteria['order'] : [];
@@ -341,10 +343,6 @@ class SectionController extends ApiController
         $query = Section::where('parent_id', null)->with('page');
 
         if (isset($post['criteria'])) {
-            if (isset($post['criteria']['locale'])) {
-                $criteria['locale'] = $post['criteria']['locale'];
-            }
-
             if (isset($post['criteria']['active']) && !isset($criteria['active'])) {
                 $criteria['active'] = $post['criteria']['active'];
             }
@@ -459,6 +457,8 @@ class SectionController extends ApiController
                 'locale'     => 'nullable|string|max:5',
                 'section_id' => 'nullable|int|digits_between:1,10',
             ]);
+
+            unset($criteria['locale']);
         }
 
         if ($validator->fails()) {
@@ -485,10 +485,6 @@ class SectionController extends ApiController
             : Section::where('parent_id', '!=', null)->with('page');
 
         if (isset($post['criteria'])) {
-            if (isset($post['criteria']['locale'])) {
-                $criteria['locale'] = $post['criteria']['locale'];
-            }
-
             if (isset($post['criteria']['active']) && !isset($criteria['active'])) {
                 $criteria['active'] = $post['criteria']['active'];
             }

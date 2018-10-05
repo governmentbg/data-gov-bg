@@ -9,11 +9,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class ThemeTest extends TestCase
 {
     /**
-     * Test for SectionController@listSections
+     * Test theme list
      */
-    public function testlistThemes()
+    public function testListThemes()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(
             url('api/listThemes'),
             ['api_key' => null]
@@ -21,7 +21,7 @@ class ThemeTest extends TestCase
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test successful theme list
+        // Test successful theme list
         $this->post(
             url('api/listThemes'),
             ['api_key'   => $this->getApiKey()]

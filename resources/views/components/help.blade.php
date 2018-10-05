@@ -1,8 +1,8 @@
 <div class="js-help-bar help-container hidden">
     @if(!empty($help))
-    <div class="nano">
-        <div class="nano-content">
-            <div class="help-content">
+        <div class="nano">
+            <div class="nano-content">
+                <div class="help-content">
                     <span class="glyphicon glyphicon-question-sign"></span>
                     <div class="close"><span class="close-btn">X</span></div>
                     <h3>{{ $help->title }}</h3>

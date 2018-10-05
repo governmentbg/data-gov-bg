@@ -23,7 +23,13 @@
                                                 action="{{ $document->data }}"
                                         >
                                             {{ csrf_field() }}
-                                            <button class="badge badge-pill" type="submit">{{ uctrans('custom.download') }}</button>
+                                            <button
+                                                class="badge badge-pill js-ga-event"
+                                                type="submit"
+                                                data-ga-action="download"
+                                                data-ga-label="document download"
+                                                data-ga-category="data"
+                                            >{{ uctrans('custom.download') }}</button>
                                         </form>
                                         </span>
                                     </div>

@@ -11,10 +11,13 @@
                         <form method="GET" action="{{ url('/document/search') }}">
                         <input
                             type="text"
-                            class="input-border-r-12 form-control"
+                            class="input-border-r-12 form-control js-ga-event"
                             placeholder="{{ __('custom.search') }}"
                             value="{{ isset($search) ? $search : '' }}"
                             name="q"
+                            data-ga-action="search"
+                            data-ga-label="data search"
+                            data-ga-category="data"
                         >
                         </form>
                     </div>

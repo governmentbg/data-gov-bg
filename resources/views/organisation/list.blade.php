@@ -47,10 +47,13 @@
                 <form method="GET" action="{{ url('/organisation') }}">
                     <input
                         type="text"
-                        class="m-t-md input-border-r-12 form-control"
+                        class="m-t-md input-border-r-12 form-control js-ga-event"
                         placeholder="{{ __('custom.search') }}"
                         value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
                         name="q"
+                        data-ga-action="search"
+                        data-ga-label="data search"
+                        data-ga-category="data"
                     >
                     @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
                         <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>

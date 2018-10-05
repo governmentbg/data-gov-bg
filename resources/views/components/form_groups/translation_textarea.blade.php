@@ -18,6 +18,7 @@
                     <textarea
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
                         class="
+                            text-area
                             input-border-r-12
                             form-control
                             {{ !empty($field['addClass']) ? $field['addClass'] : '' }}
@@ -27,6 +28,7 @@
                     <textarea
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
                         class="
+                            text-area
                             input-border-r-12
                             form-control
                             {{ !empty($field['addClass']) ? $field['addClass'] : '' }}
@@ -36,6 +38,7 @@
                     <textarea
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
                         class="
+                            text-area
                             input-border-r-12
                             form-control
                             {{ !empty($field['addClass']) ? $field['addClass'] : '' }}

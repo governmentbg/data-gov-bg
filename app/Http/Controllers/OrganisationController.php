@@ -22,17 +22,8 @@ use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use App\Http\Controllers\Api\SignalController as ApiSignal;
 use Illuminate\Http\Request;
 
-class OrganisationController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
+class OrganisationController extends Controller
+{
     /**
      * Show the application dashboard.
      *

@@ -17,7 +17,7 @@
                             class="input-border-r-12 form-control"
                             name="name"
                             id="name"
-                            value="{{ !empty(old('name')) ? old('name') : '' }}"
+                            value="{{ !empty(old('name')) ? old('name') : $page }}"
                         >
                         <span class="error">{{ $errors->first('name') }}</span>
                     </div>
@@ -86,20 +86,16 @@
                     </div>
                 </div>
                 <div class="form-group row m-b-md m-t-md required">
-                    <label for="ordering" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.ordering') }}:</label>
-                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                        <select
-                            class="js-select"
-                            id="ordering"
+                    <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
+                    <div class="col-lg-2">
+                        <input
+                            id="order"
                             name="ordering"
+                            type="number"
+                            min="1"
+                            class="input-border-r-12 form-control"
+                            value="{{ old('ordering') }}"
                         >
-                            @foreach($ordering as $id => $name)
-                                <option
-                                    value="{{ $id }}"
-                                    {{ !empty(old('ordering')) && old('ordering') == $id ? 'selected' : '' }}
-                                >{{ $name }}</option>
-                            @endforeach
-                        </select>
                         <span class="error">{{ $errors->first('ordering') }}</span>
                     </div>
                 </div>

@@ -91,28 +91,48 @@
                     </div>
                 </div>
                 <div class="form-group row m-b-md m-t-md required">
-                    <label for="ordering" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.ordering') }}:</label>
-                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                        <select
-                            class="js-select"
-                            id="ordering"
+                    <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
+                    <div class="col-lg-2">
+                        <input
+                            id="order"
                             name="ordering"
+                            type="number"
+                            min="1"
+                            class="input-border-r-12 form-control"
+                            value="{{ $page->ordering }}"
                         >
-                            @foreach($ordering as $id => $name)
-                                <option
-                                    value="{{ $id }}"
-                                    {{
-                                        (!empty(old('ordering')) && old('ordering') == $id)
-                                        || $page->ordering == $id
-                                            ? 'selected'
-                                            : ''
-                                    }}
-                                >{{ $name }}</option>
-                            @endforeach
-                        </select>
                         <span class="error">{{ $errors->first('ordering') }}</span>
                     </div>
                 </div>
+                <div class="text-center m-b-lg terms-hr">
+                    <hr>
+                </div>
+                <div class="form-group row m-b-lg m-t-md">
+                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+                    <div class="col-sm-6 col-xs-12">
+                        <div>{{ $page->created_by }}</div>
+                    </div>
+                </div>
+                <div class="form-group row m-b-lg m-t-md">
+                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+                    <div class="col-sm-6 col-xs-12">
+                        <div>{{ $page->created_at }}</div>
+                    </div>
+                </div>
+                @if (!empty($page->updated_by))
+                    <div class="form-group row m-b-lg m-t-md">
+                        <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                        <div class="col-sm-6 col-xs-12">
+                            <div>{{ $page->updated_by }}</div>
+                        </div>
+                    </div>
+                    <div class="form-group row m-b-lg m-t-md">
+                        <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                        <div class="col-sm-6 col-xs-12">
+                            <div>{{ $page->updated_at }}</div>
+                        </div>
+                    </div>
+                @endif
                 <div class="form-group row">
                     <div class="col-sm-12 text-right">
                         <button

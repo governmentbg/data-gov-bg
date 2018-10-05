@@ -33,7 +33,7 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}:</label>
                             <div class="col-sm-6 col-xs-12">
-                                <div>{{ App\Category::getOrdering()[$section->ordering] }}</div>
+                                <div>{{ $section->ordering }}</div>
                             </div>
                         </div>
                         <div class="text-center m-b-lg terms-hr">

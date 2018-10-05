@@ -234,7 +234,30 @@
                         </ul>
                     </div>
                 </div>
-                <div class="underline"></div>
+                <div class="underline">
+                    <div class="help-ico js-help">
+                        <span class="js-open-help glyphicon glyphicon-question-sign"></span>
+                        @if(!empty($help))
+                            @include('components.help', ['help' => $help])
+                        @elseif(\Auth::check() && App\Role::isAdmin())
+                            <div class="js-help-bar help-container hidden">
+                                <div class="help-content">
+                                    <div class="close"><span class="close-btn">X</span></div>
+                                    <h3>{{ __('custom.no_help') }}</h3>
+                                    <a
+                                        class="btn-primary btn"
+                                        href="{{
+                                            route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
+                                                ? 'home'
+                                                : str_replace(env('APP_URL') .'/','',\Request::url())
+                                            ])
+                                        }}"
+                                    >{{ __('custom.add') }}</a>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </nav>
 
             <div class="js-content">

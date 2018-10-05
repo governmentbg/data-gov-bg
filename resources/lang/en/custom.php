@@ -853,4 +853,5 @@ return [
     'discussion' => 'discussion',
     'post_preview' => 'Post preview',
     'clear_filter' => 'clear filter',
+    'no_help' => 'Help is missing',
 ];

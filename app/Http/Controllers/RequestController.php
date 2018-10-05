@@ -7,16 +7,6 @@ use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\DataRequestController as ApiDataRequest;
 
 class RequestController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
     /**
      * Show the application dashboard.
      *

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\User;
 use App\Category;
 use App\HelpPage;
 use App\HelpSection;
@@ -143,6 +144,15 @@ class HelpController extends AdminController
     public function editHelpSection(Request $request, $id)
     {
         $section = HelpSection::find($id);
+        $section->created_by = User::find($section->created_by)->username;
+
+        if (!empty($section->updated_by)) {
+            $section->updated_by = User::find($section->updated_by)->username;
+        }
+
+        if ($request->has('back')) {
+            return redirect('admin/help/sections/list');
+        }
 
         if ($request->has('save')) {
             $rq = Request::create('/api/editHelpSection', 'POST', [
@@ -194,6 +204,12 @@ class HelpController extends AdminController
 
         $section = $result->success ? $result->sections[0] : [];
 
+        $section->created_by = User::find($section->created_by)->username;
+
+        if (!empty($section->updated_by)) {
+            $section->updated_by = User::find($section->updated_by)->username;
+        }
+
         return view('admin/viewHelpSection', compact('section'));
     }
 
@@ -222,7 +238,7 @@ class HelpController extends AdminController
     public function listPages(Request $request)
     {
         $criteria = [];
-        $perPage = 3;
+        $perPage = 15;
 
         $criteria = [
             'records_per_page'  => $perPage,
@@ -257,7 +273,7 @@ class HelpController extends AdminController
     /**
      * show help page creation view
      */
-    public function addHelpPage(Request $request)
+    public function addHelpPage(Request $request, $page = null)
     {
         $rq = Request::create('/api/listHelpSections', 'POST', [
             'api_key' => Auth::user()->api_key,
@@ -301,6 +317,7 @@ class HelpController extends AdminController
             'fields'    => self::getHelpPagesTransFields(),
             'ordering'  => Category::getOrdering(),
             'sections'  => $helpSections,
+            'page'      => $request->offsetGet('page') ? preg_replace('/[0-9]+/', '', $request->offsetGet('page')) : '',
         ]);
     }
 
@@ -329,6 +346,12 @@ class HelpController extends AdminController
         $helpSections = $result->success ? $result->sections : [];
 
         $page = HelpPage::find($id);
+
+        $page->created_by = User::find($page->created_by)->username;
+
+        if (!empty($page->updated_by)) {
+            $page->updated_by = User::find($page->updated_by)->username;
+        }
 
         if ($request->has('back')) {
             return redirect('admin/help/pages/list');
@@ -379,6 +402,13 @@ class HelpController extends AdminController
         $result = $api->getHelpPageDetails($rq)->getData();
 
         $page = $result->page;
+
+
+        $page->created_by = User::find($page->created_by)->username;
+
+        if (!empty($page->updated_by)) {
+            $page->updated_by = User::find($page->updated_by)->username;
+        }
 
         if (empty($page)) {
             return redirect('admin/help/pages/list');

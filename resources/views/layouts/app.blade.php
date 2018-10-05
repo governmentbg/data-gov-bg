@@ -13,7 +13,7 @@
         <meta name="description" content="{{ $description }}">
     @endif
     @if (!empty($keywords))
-        <meta name="keywords" content="{{$keywords}}">
+        <meta name="keywords" content="{{ $keywords }}">
     @endif
     <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
@@ -28,6 +28,9 @@
     <link href="{{ asset('css/summernote/summernote-bs4.css') }}" rel="stylesheet">
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
+    @if (isset($link))
+        <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/' . $organisation->uri . '/rss') }}" />
+    @endif
     @yield('css')
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">

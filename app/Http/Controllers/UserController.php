@@ -847,41 +847,43 @@ class UserController extends Controller {
      * @return true on success and false on failure
      *
      */
-    public function datasetDelete($uri)
+    public function datasetDelete(Request $request)
     {
-        $params['api_key'] = \Auth::user()->api_key;
-        $params['dataset_uri'] = $uri;
+        if ($request->has('delete')) {
+            $params['api_key'] = \Auth::user()->api_key;
+            $params['dataset_uri'] = $request->offsetGet('dataset_uri');
 
-        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', $params);
-        $apiDatasets = new ApiDataset($datasetReq);
-        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
-        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+            $datasetReq = Request::create('/api/getDatasetDetails', 'POST', $params);
+            $apiDatasets = new ApiDataset($datasetReq);
+            $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+            $datasetData = !empty($dataset->data) ? $dataset->data : null;
 
-        if (!isset($datasetData)) {
-            return back();
-        }
+            if (!isset($datasetData)) {
+                return back();
+            }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::DATA_SETS,
-            RoleRight::RIGHT_ALL,
-            [],
-            [
-                'created_by' => $datasetData->created_by
-            ]
-        );
+            $rightCheck = RoleRight::checkUserRight(
+                Module::DATA_SETS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $datasetData->created_by
+                ]
+            );
 
-        if (!$rightCheck) {
-            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
-        }
+            if (!$rightCheck) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+            }
 
-        $apiRequest = Request::create('/api/deleteDataset', 'POST', $params);
-        $api = new ApiDataSet($apiRequest);
-        $result = $api->deleteDataset($apiRequest)->getData();
+            $apiRequest = Request::create('/api/deleteDataset', 'POST', $params);
+            $api = new ApiDataSet($apiRequest);
+            $result = $api->deleteDataset($apiRequest)->getData();
 
-        if ($result->success) {
-            session()->flash('alert-success', __('custom.success_dataset_delete'));
-        } else {
-            session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            if ($result->success) {
+                session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
         }
 
         return redirect('/user/datasets');

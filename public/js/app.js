@@ -71792,6 +71792,52 @@ if ($('.js-help').length) {
     });
 }
 
+/**
+ * Handle google ga events
+ */
+$(function () {
+    $(document).ready(function () {
+        $(document).on('click keydown', '.js-ga-event', function (e) {
+            if (typeof gtag != 'undefined') {
+                $this = $(this);
+
+                if ($this.is('input')) {
+                    if (e.which == 13 && e.type == 'keydown') {
+                        sendGaEvent($this);
+                    }
+                } else {
+                    sendGaEvent($this);
+                }
+            }
+        });
+
+        function sendGaEvent($element) {
+            var category = $element.data('ga-category'),
+                action = $element.data('ga-action'),
+                value = $element.data('ga-value'),
+                label = $element.data('ga-label');
+
+            if (typeof action != 'undefined') {
+                var params = {};
+
+                if (typeof category != 'undefined') {
+                    params.event_category = category;
+                }
+
+                if (typeof label != 'undefined') {
+                    params.event_label = label;
+                }
+
+                if (typeof value != 'undefined') {
+                    params.value = value;
+                }
+
+                gtag('event', action, params);
+            }
+        }
+    });
+});
+
 /***/ }),
 /* 51 */
 /***/ (function(module, exports) {

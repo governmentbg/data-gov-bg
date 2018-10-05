@@ -18,6 +18,8 @@ Security - in case of vulnerabilities.
 - RSS feed for organisation datasets
 - Insert base terms of use
 - RSS feed for datasets
+- Required sections and static pages
+- Google Analitycs integration
 
 ### Fixed
 - Refactured and optimised tests

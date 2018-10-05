@@ -192,7 +192,7 @@ class NewsController extends ApiController
                 'valid_to'              => 'nullable|date',
             ]);
         }
-error_log('editData: '. print_r($editData, true));
+
         if (!$validator->fails()) {
             try {
                 $locale = isset($editData['data']['locale']) ? $editData['data']['locale'] : null;

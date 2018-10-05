@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased]
 ### Added
+- RSS feed for organisation datasets
+
+## [Unreleased]
+### Added
 - Change log
 - Filter for personal information
 

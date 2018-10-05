@@ -1,4 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.app', [
+    'link' => isset($organisation->uri) ? true : false
+])
 
 @section('content')
 <div class="container">
@@ -166,7 +168,6 @@
                 </div>
             </div>
         </div>
-        <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}" />
 
         @if (count($childOrgs) > 0)
             <div class="row">

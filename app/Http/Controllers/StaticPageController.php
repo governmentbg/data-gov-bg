@@ -6,6 +6,7 @@ use App\Page;
 use App\Section;
 use Illuminate\Http\Request;
 use DevDojo\Chatter\Models\Models;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\PageController as ApiPage;
 use App\Http\Controllers\Api\ThemeController as ApiTheme;
 use App\Http\Controllers\Api\SectionController as ApiSection;
@@ -240,7 +241,9 @@ class StaticPageController extends Controller {
             );
 
             $result['items'] = $paginationData['items'];
-            $result['pagination'] = $paginationData['paginate'];
+            $result['pagination'] = $paginationData['paginate'] instanceof LengthAwarePaginator && $paginationData['paginate']->hasPages()
+                ? $paginationData['paginate']
+                : null;
         }
 
         return $result;

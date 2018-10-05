@@ -300,7 +300,7 @@ Route::middleware('auth')->group(function() {
         Route::get('admin/help/section/delete/{id}', 'Admin\HelpController@deleteHelpSection');
 
         Route::match(['get', 'post'], 'admin/help/pages/list', 'Admin\HelpController@listPages');
-        Route::match(['get', 'post'], 'admin/help/pages/add', 'Admin\HelpController@addHelpPage');
+        Route::match(['get', 'post'], 'admin/help/pages/add', 'Admin\HelpController@addHelpPage')->name('addHelpPage');
         Route::match(['get', 'post'], 'admin/help/page/edit/{id}', 'Admin\HelpController@editHelpPage');
         Route::match(['get', 'post'], 'admin/help/page/view/{id}', 'Admin\HelpController@viewHelpPage');
         Route::get('admin/help/page/delete/{id}', 'Admin\HelpController@deleteHelpPage');
@@ -386,7 +386,7 @@ Route::get('user/orgMembers', function () {
 Route::match(['get', 'post'], 'password/forgotten', 'UserController@forgottenPassword');
 Route::match(['get', 'post'], 'password/reset', 'UserController@passwordReset')->name('passReset');
 
-Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
+Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest')->middleware('help');
 
 Route::match(['get', 'post'], 'news', 'NewsController@listNews');
 Route::match(['get', 'post'], 'news/search', 'NewsController@searchNews');
@@ -399,11 +399,11 @@ Route::match(['get', 'post'], 'document/download/{path}/{fileName}', 'DocumentCo
 
 Route::get('contact', function () {
     return view('contact/contact', ['class' => 'contact']);
-});
+})->middleware('help');
 
 Route::get('visualisation', function () {
     return view('visualisation/visualisation', ['class' => 'visualisations']);
-});
+})->middleware('help');
 
 Route::get('{section}', 'StaticPageController@show');
 

@@ -695,6 +695,12 @@ textarea {
 .input-group {
     .note-editor {
         margin-bottom: 0px !important;
+        max-width: 390px;
+
+        iframe {
+            width: 100%;
+            height: 220px;
+        }
     }
 }
 
@@ -787,4 +793,8 @@ textarea {
     .chatter-close {
         padding-right: 30px;
     }
+}
+
+.text-area {
+    max-width: 100%;
 }

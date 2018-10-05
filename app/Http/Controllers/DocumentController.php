@@ -6,16 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Api\DocumentController as ApiDocuments;
 
 class DocumentController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
     /**
      * Show the application dashboard.
      *

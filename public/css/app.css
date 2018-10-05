@@ -13252,6 +13252,7 @@ body #app {
 
 body #app .navbar {
   margin-bottom: 10px;
+  z-index: 99;
 }
 
 body #app .navbar .navbar-header {
@@ -13730,7 +13731,7 @@ body #app .navbar .navbar-nav li.user.active:after {
 }
 
 body #app .navbar .underline {
-  padding: 15px;
+  height: 30px;
 }
 
 @media screen and (max-width: 767px) {
@@ -15268,6 +15269,12 @@ textarea {
 
 .input-group .note-editor {
   margin-bottom: 0px !important;
+  max-width: 390px;
+}
+
+.input-group .note-editor iframe {
+  width: 100%;
+  height: 220px;
 }
 
 .select2-container {
@@ -15353,6 +15360,10 @@ textarea {
 
 .chatter-alert .chatter-close {
   padding-right: 30px;
+}
+
+.text-area {
+  max-width: 100%;
 }
 
 .container .filter-content .filter-type,
@@ -19949,5 +19960,113 @@ table.dataTable td {
 
 .config-form .form-group {
   overflow: hidden;
+}
+
+.help-ico {
+  position: absolute;
+  padding-top: 6px;
+  right: 320px;
+}
+
+@media screen and (max-width: 1199px) {
+  .help-ico {
+    right: 100px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .help-ico {
+    right: 10px;
+  }
+}
+
+.help-container {
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  color: white;
+  width: 275px;
+  top: 0px;
+  left: auto;
+}
+
+@media screen and (max-width: 1199px) {
+  .help-container {
+    right: -75px;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .help-container {
+    right: -90px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .help-container {
+    right: 0px;
+    width: 180px;
+  }
+}
+
+.help-container .help-content {
+  padding: 10px;
+  height: 100%;
+  width: 100%;
+  word-wrap: break-word;
+}
+
+.help-container .help-content > h3 {
+  margin-top: 10px;
+}
+
+.help-container .help-content > span {
+  top: -3px;
+}
+
+.help-container .help-content iframe {
+  width: 100%;
+  height: 150px;
+}
+
+.help-container .help-content .help-edit a {
+  color: white !important;
+}
+
+.help-container .close {
+  color: white;
+  opacity: 1;
+  bottom: 6px;
+  position: relative;
+}
+
+.help-container .close span {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.stick {
+  position: fixed;
+  top: 0px;
+  height: 100%;
+}
+
+@media screen and (max-width: 1199px) {
+  .stick {
+    right: 25px;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .stick {
+    right: 10px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .stick {
+    right: 10px;
+  }
 }
 

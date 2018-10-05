@@ -18,6 +18,9 @@ Security - in case of vulnerabilities.
 - RSS feed for organisation datasets
 - Insert base terms of use
 
+### Fixed
+- Refactured and optimised tests
+
 ## [0.5.1] - 2018-10-03
 ### Fixed
 - Api sorting improvement

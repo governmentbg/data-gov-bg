@@ -10,19 +10,24 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class CategoryTest extends TestCase
+class TagTest extends TestCase
 {
     use WithFaker;
     use DatabaseTransactions;
 
+    /**
+     * Test tag creation
+     *
+     * @return void
+     */
     public function testAddTag()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addTag'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/addTag'),
             [
@@ -33,7 +38,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful Tag create
+        // Test successful Tag create
         $this->post(
             url('api/addTag'),
             [
@@ -47,16 +52,21 @@ class CategoryTest extends TestCase
         ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test tag modification
+     *
+     * @return void
+     */
     public function testEditTag()
     {
         $tag = Tags::create(['name' => 'a new tag for edit test']);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/editTag'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing tag_id
+        // Test missing tag_id
         $this->post(
             url('api/editTag'),
             [
@@ -70,7 +80,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test missing data
+        // Test missing data
         $this->post(
             url('api/editTag'),
             [
@@ -82,7 +92,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful edit
+        // Test successful edit
         $this->post(
             url('api/editTag'),
             [
@@ -97,16 +107,21 @@ class CategoryTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test tag deletion
+     *
+     * @return void
+     */
     public function testDeleteTag()
     {
         $tag = Tags::create(['name' => 'a new tag for delete test']);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/deleteTag'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing tag_id
+        // Test missing tag_id
         $this->post(
             url('api/deleteTag'),
             [
@@ -117,7 +132,7 @@ class CategoryTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful delete
+        // Test successful delete
         $this->post(
             url('api/deleteTag'),
             [
@@ -127,29 +142,38 @@ class CategoryTest extends TestCase
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
-
     }
 
+    /**
+     * Test tag list
+     *
+     * @return void
+     */
     public function testListTags()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/listTags'), ['api_key' => null])
             ->assertStatus(200)
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test tag details
+     *
+     * @return void
+     */
     public function testGetTagDetails()
     {
         $tag = Tags::create([
             'name'      => $this->faker->name(),
         ]);
 
-        // test missing tag_id
+        // Test missing tag_id
         $this->post(url('api/getTagDetails'))
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test for success
+        // Test for success
         $this->post(url('api/getTagDetails'), [
             'tag_id' => $tag->id,
         ])
@@ -157,6 +181,11 @@ class CategoryTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test tag search
+     *
+     * @return void
+     */
     public function testSearchTag()
     {
         $name = $this->faker->name();
@@ -164,12 +193,12 @@ class CategoryTest extends TestCase
             'name'  => $name,
         ]);
 
-        // test missing tag_id
+        // Test missing tag_id
         $this->post(url('api/searchTag'))
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test for success
+        // Test for success
         $this->post(url('api/searchTag'), [
             'name' => $name,
         ])

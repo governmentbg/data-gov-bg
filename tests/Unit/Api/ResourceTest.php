@@ -15,27 +15,20 @@ class ResourceTest extends TestCase
     use DatabaseTransactions;
 
     /**
-     * A basic test example.
+     * Test resource creation
      *
      * @return void
      */
     public function testAddResourceMetadata()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1, 2),
-        ]);
+        $dataSet = $this->getNewDataSet();
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addResourceMetadata'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing dataset_uri
+        // Test missing dataset_uri
         $this->post(
             url('api/addResourceMetadata'),
             [
@@ -43,7 +36,7 @@ class ResourceTest extends TestCase
                 'data'              => [
                     'name'              => $this->faker->word(),
                     'description'       => $this->faker->text(),
-                    'locale'            => 'en',
+                    'locale'            => $this->locale,
                     'version'           => $this->faker->numberBetween(1, 999),
                     'schema_descript'   => $this->faker->word(),
                     'schema_url'        => $this->faker->url(),
@@ -57,7 +50,7 @@ class ResourceTest extends TestCase
             ]
         )->assertStatus(500)->assertJson(['success' => false]);
 
-        // test successfull creation
+        // Test successfull creation
         $this->post(
             url('api/addResourceMetadata'),
             [
@@ -67,7 +60,7 @@ class ResourceTest extends TestCase
                     'type'              => $this->faker->numberBetween(1, 3),
                     'name'              => $this->faker->word(),
                     'descript'          => $this->faker->text(),
-                    'locale'            => 'en',
+                    'locale'            => $this->locale,
                     'version'           => $this->faker->word(),
                     'schema_descript'   => $this->faker->word(),
                     'schema_url'        => $this->faker->url(),
@@ -82,65 +75,46 @@ class ResourceTest extends TestCase
         )->assertStatus(200)->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource data creation
+     *
+     * @return void
+     */
     public function testAddResourceData()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1, 2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addResourceData'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing resource uri
+        // Test missing resource uri
         $this->post(
             url('api/addResourceData'),
             [
-                'api_key'           => $this->getApiKey(),
-                'resource_uri'      => null,
-                'data'              => $this->faker->text(),
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => null,
+                'data'          => $this->faker->text(),
             ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test missing data uri
+        // Test missing data uri
         $this->post(
             url('api/addResourceData'),
             [
-                'api_key'           => $this->getApiKey(),
-                'resource_uri'      => $resource->uri,
-                'data'              => null,
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => null,
             ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successfull edit
+        // Test successfull edit
         $data = [
             [
                 'album'                 => 'The White Stripes',
@@ -194,7 +168,7 @@ class ResourceTest extends TestCase
             ],
         ];
 
-        // alternative format
+        // Alternative format
         $data2 = [
             [
                 'album',
@@ -251,72 +225,53 @@ class ResourceTest extends TestCase
         $this->post(
             url('api/addResourceData'),
             [
-                'api_key'           => $this->getApiKey(),
-                'resource_uri'      => $resource->uri,
-                'data'              => $data2,
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => $data2,
             ]
         )->assertStatus(200)->assertJson(['success' => true]);
 
         sleep(1);
 
-        // test successful request
+        // Test successful request
         $this->post(
             url('api/getResourceData'),
             ['resource_uri' => $resource->uri]
         )->assertStatus(200)->assertJson(['success' => true]);
 
-        // test successfull data update
+        // Test successfull data update
         $this->post(
             url('api/updateResourceData'),
             [
-                'api_key'           => $this->getApiKey(),
-                'resource_uri'      => $resource->uri,
-                'data'              => $data2,
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => $data2,
             ]
         )->assertStatus(200)->assertJson(['success' => true]);
 
-        // test successful request
+        // Test successful request
         $this->post(
             url('api/getResourceData'),
             ['resource_uri' => $resource->uri]
         )->assertStatus(200)->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource modification
+     *
+     * @return void
+     */
     public function testEditResourceMetadata()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1, 2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/editResourceMetadata'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing resource uri
+        // Test missing resource uri
         $this->post(
             url('api/editResourceMetadata'),
             [
@@ -325,7 +280,7 @@ class ResourceTest extends TestCase
                 'data'              => [
                     'name'              => $this->faker->word(),
                     'descript'          => $this->faker->text(),
-                    'version'           => $this->faker->word(),
+                    'version'           => 2,
                     'schema_descript'   => $this->faker->word(),
                     'file_format'       => $this->faker->numberBetween(1, 3),
                     'post_data'         => $this->faker->text(),
@@ -342,7 +297,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test missing data
+        // Test missing data
         $this->post(
             url('api/editResourceMetadata'),
             [
@@ -354,17 +309,17 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test sucessfull metadata edit
+        // Test sucessfull metadata edit
         $this->post(
             url('api/editResourceMetadata'),
             [
                 'api_key'           => $this->getApiKey(),
                 'resource_uri'      => $resource->uri,
                 'data'              => [
-                    'locale'            => 'en',
+                    'locale'            => $this->locale,
                     'name'              => $this->faker->word(),
                     'descript'          => $this->faker->text(),
-                    'version'           => $this->faker->word(),
+                    'version'           => 2,
                     'schema_descript'   => $this->faker->word(),
                     'post_data'         => $this->faker->text(),
                     'schema_url'        => $this->faker->url(),
@@ -381,41 +336,22 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource data modification
+     *
+     * @return void
+     */
     public function testUpdateResourceData()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/updateResourceData'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing resource uri
+        // Test missing resource uri
         $this->post(
             url('api/updateResourceData'),
             [
@@ -427,7 +363,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test missing resource uri
+        // Test missing resource uri
         $this->post(
             url('api/updateResourceData'),
             [
@@ -439,7 +375,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successfull data update
+        // Test successfull data update
         $this->post(
             url('api/updateResourceData'),
             [
@@ -452,41 +388,22 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource deletion
+     *
+     * @return void
+     */
     public function testDeleteResource()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1, 2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/deleteResource'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing resource uri
+        // Test missing resource uri
         $this->post(
             url('api/deleteResource'),
             [
@@ -497,7 +414,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successfull delete
+        // Test successfull delete
         $this->post(
             url('api/deleteResource'),
             [
@@ -509,19 +426,24 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource list
+     *
+     * @return void
+     */
     public function testListResources()
     {
-        // test mising api key
+        // Test mising api key
         $this->post(url('api/listResources'), ['api_key' => null])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-         // test ok list
+         // Test ok list
          $this->post(url('api/listResources'),
          [
-            'api_key' => $this->getApiKey(),
-            'criteria' => [
-                "locale" => "en"
+            'api_key'   => $this->getApiKey(),
+            'criteria'  => [
+                'locale'    => 'en'
             ]
 
          ])
@@ -529,36 +451,17 @@ class ResourceTest extends TestCase
          ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource metadata
+     *
+     * @return void
+     */
     public function testGetResourceMetadata()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test mising resource uri
+        // Test mising resource uri
         $this->post(
             url('api/getResourceMetadata'),
             [
@@ -568,7 +471,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful request
+        // Test successful request
         $this->post(
             url('api/getResourceMetadata'),
             [
@@ -579,36 +482,17 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource schema
+     *
+     * @return void
+     */
     public function testGetResourceSchema()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test mising resource uri
+        // Test mising resource uri
         $this->post(
             url('api/getResourceSchema'),
             [
@@ -619,7 +503,7 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => false]);
 
 
-        // test successful request
+        // Test successful request
         $this->post(
             url('api/getResourceSchema'),
             [
@@ -630,36 +514,17 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource view
+     *
+     * @return void
+     */
     public function testGetResourceView()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1,3),
-            'visibility'    => $this->faker->numberBetween(1,2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1,2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test mising resource uri
+        // Test mising resource uri
         $this->post(
             url('api/getResourceView'),
             [
@@ -669,7 +534,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful request
+        // Test successful request
         $this->post(
             url('api/getResourceView'),
             [
@@ -680,36 +545,17 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource data
+     *
+     * @return void
+     */
     public function testGetResourceData()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1, 2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test mising resource uri
+        // Test mising resource uri
         $this->post(
             url('api/getResourceData'),
             [
@@ -719,7 +565,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful request
+        // Test successful request
         $this->post(
             url('api/getResourceData'),
             [
@@ -730,36 +576,17 @@ class ResourceTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test resource search
+     *
+     * @return void
+     */
     public function testSearchResourceData()
     {
-        $dataSet = DataSet::create([
-            'name'          => $this->faker->word(),
-            'uri'           => $this->faker->uuid(),
-            'category_id'   => $this->faker->numberBetween(1, 3),
-            'visibility'    => $this->faker->numberBetween(1, 2),
-            'version'       => $this->faker->word(),
-            'status'        => $this->faker->numberBetween(1, 2),
-        ]);
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
 
-        $resource = Resource::create([
-            'data_set_id'       => $dataSet->id,
-            'uri'               => $this->faker->uuid(),
-            'name'              => $this->faker->word(),
-            'descript'          => $this->faker->text(),
-            'version'           => $this->faker->word(),
-            'schema_descript'   => $this->faker->word(),
-            'file_format'       => $this->faker->numberBetween(1, 3),
-            'post_data'         => $this->faker->text(),
-            'schema_url'        => $this->faker->url(),
-            'resource_type'     => $this->faker->numberBetween(1, 3),
-            'resource_url'      => $this->faker->url(),
-            'http_rq_type'      => $this->faker->numberBetween(1, 2),
-            'authentication'    => $this->faker->word(),
-            'http_headers'      => $this->faker->text(),
-            'is_reported'       => false,
-        ]);
-
-        // test mising criteria
+        // Test mising criteria
         $this->post(
             url('api/searchResourceData'),
             [
@@ -769,7 +596,7 @@ class ResourceTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test mising with criteria
+        // Test mising with criteria
         $this->post(
             url('api/searchResourceData'),
             [

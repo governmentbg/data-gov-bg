@@ -542,7 +542,6 @@ class OrganisationController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'api_key'               => 'nullable|string|exists:users,api_key',
             'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|max:191',
@@ -553,7 +552,7 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
                 'org_ids'      => 'nullable|array',
-                'org_ids.*'    => 'int|digits_between:1,10',
+                'org_ids.*'    => 'nullable|int|digits_between:1,10',
                 'locale'       => 'nullable|string|max:5',
                 'active'       => 'nullable|bool',
                 'approved'     => 'nullable|bool',
@@ -576,6 +575,7 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             $criteria = [];
+
             if (isset($post['api_key'])) {
                 $user = \App\User::where('api_key', $post['api_key'])->first();
                 $rightCheck = RoleRight::checkUserRight(
@@ -994,8 +994,11 @@ class OrganisationController extends ApiController
      * Get organisation members
      *
      * @param integer org_id - required
-     * @param integer role_id - optional
+     * @param array role_ids - optional
+     * @param string keywords - optional
      * @param boolean for_approval - optional
+     * @param integer records_per_page - optional
+     * @param integer page_number - optional
      *
      * @return json with organisaion member details or error
      */

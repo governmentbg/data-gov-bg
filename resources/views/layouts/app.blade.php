@@ -29,7 +29,7 @@
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
     @if (isset($link))
-        <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/' . $organisation->uri . '/rss') }}" />
+        <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}" />
     @endif
     @yield('css')
 </head>

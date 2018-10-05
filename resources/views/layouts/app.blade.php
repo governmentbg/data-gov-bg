@@ -31,6 +31,9 @@
     @if (isset($link))
         <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}" />
     @endif
+    @if (isset($datasetLink))
+        <link rel="alternate" type="application/rss+xml" title="Datasets" href="{{ url('/datasets/rss') }}" />
+    @endif
     @yield('css')
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">

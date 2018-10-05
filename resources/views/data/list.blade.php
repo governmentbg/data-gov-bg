@@ -1,4 +1,6 @@
-@extends('layouts.app')
+ @extends('layouts.app', [
+    'datasetLink' => true
+])
 
 @section('content')
 <div class="container">

@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 - Filter for personal information
 - RSS feed for organisation datasets
 - Insert base terms of use
+- RSS feed for datasets
 
 ## [0.5.1] - 2018-10-03
 ### Fixed

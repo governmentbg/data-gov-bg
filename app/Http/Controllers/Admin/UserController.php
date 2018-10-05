@@ -15,16 +15,6 @@ use App\Http\Controllers\Api\LocaleController as ApiLocale;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 
 class UserController extends AdminController {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
     /**
      * Show the role list.
      *

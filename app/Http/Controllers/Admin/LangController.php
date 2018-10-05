@@ -8,16 +8,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\LocaleController as ApiLocale;
 
 class LangController extends AdminController {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
     /**
      * Show the language list.
      *

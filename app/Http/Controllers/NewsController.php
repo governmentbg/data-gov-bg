@@ -6,16 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Api\NewsController as ApiNews;
 
 class NewsController extends Controller {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
     /**
      * Show the application dashboard.
      *

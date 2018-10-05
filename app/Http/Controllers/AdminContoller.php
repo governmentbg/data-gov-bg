@@ -16,6 +16,7 @@ class AdminController extends Controller
     public function __construct()
     {
         $this->middleware('admin');
+        $this->middleware('help');
     }
 
     public function getOrgDropdown($userId = null, $count = null, $fullData = false)

@@ -4,16 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Role;
 use App\User;
+use Exception;
 use App\Locale;
 use App\Module;
+use App\DataSet;
+use App\Resource;
 use PDOException;
 use App\RoleRight;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
 use App\ActionsHistory;
-use App\DataSet;
-use App\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -510,7 +511,7 @@ class UserController extends ApiController
                 DB::rollback();
 
                 Log::error($ex->getMessage());
-            } catch (\Swift_TransportException $ex) {
+            } catch (Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -902,12 +903,12 @@ class UserController extends ApiController
 
         if (isset($post['data']['org_id'])) {
             if ($orgData = Organisation::where('id', $post['data']['org_id'])->first()) {
-                if( $orgData->type == Organisation::TYPE_GROUP) {
+                if ($orgData->type == Organisation::TYPE_GROUP) {
                     $rightCheck = RoleRight::checkUserRight(
                         Module::GROUPS,
                         RoleRight::RIGHT_EDIT,
                         [
-                            'group_id'       => $orgData->id
+                            'group_id'      => $orgData->id
                         ],
                         [
                             'created_by'    => $orgData->created_by,
@@ -919,11 +920,11 @@ class UserController extends ApiController
                         Module::ORGANISATIONS,
                         RoleRight::RIGHT_EDIT,
                         [
-                            'org_id'       => $orgData->id
+                            'org_id'        => $orgData->id
                         ],
                         [
-                            'created_by' => $orgData->created_by,
-                            'org_id'     => $orgData->id
+                            'created_by'    => $orgData->created_by,
+                            'org_id'        => $orgData->id
                         ]
                     );
                 }
@@ -995,6 +996,15 @@ class UserController extends ApiController
                     }
                 }
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $user->id,
+                    'action_msg'       => 'Invited user',
+                ];
+
+                Module::add($logData);
+
                 DB::commit();
             } catch (QueryException $e) {
                 $mailData = null;
@@ -1030,15 +1040,6 @@ class UserController extends ApiController
                 return $this->errorResponse(__('custom.invite_user_fail'), $validator->errors()->messages());
             }
         }
-
-        $logData = [
-            'module_name'      => Module::getModuleName(Module::USERS),
-            'action'           => ActionsHistory::TYPE_ADD,
-            'action_object'    => $user->id,
-            'action_msg'       => 'Invited user',
-        ];
-
-        Module::add($logData);
 
         return $this->successResponse();
     }

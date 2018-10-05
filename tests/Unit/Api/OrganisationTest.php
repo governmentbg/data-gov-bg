@@ -61,8 +61,8 @@ class OrganisationTest extends TestCase
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => Apicontroller::trans($locale, $this->faker->name),
-            'descript'          => Apicontroller::trans($locale, $this->faker->text(intval(8000))),
+            'name'              => ApiController::trans($locale, $this->faker->name),
+            'descript'          => ApiController::trans($locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),
@@ -111,8 +111,8 @@ class OrganisationTest extends TestCase
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => Apicontroller::trans($locale, $this->faker->name),
-            'descript'          => Apicontroller::trans($locale, $this->faker->text(intval(8000))),
+            'name'              => ApiController::trans($locale, $this->faker->name),
+            'descript'          => ApiController::trans($locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),
@@ -137,18 +137,18 @@ class OrganisationTest extends TestCase
 
     public function testListOrganisations()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/listOrganisations'), ['api_key' => null])
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test empty criteria
+        // Test empty criteria
         $this->post(url('api/listOrganisations'), [
             'api_key'    => $this->getApiKey(),
             'criteria'   => [],
         ])->assertStatus(200)->assertJson(['success' => true]);
 
-        // test successful list
+        // Test successful list
         $this->post(url('api/listOrganisations'), [
             'criteria'  => [
                 'active'    => $this->faker->numberBetween(0, 1),
@@ -158,33 +158,26 @@ class OrganisationTest extends TestCase
 
     public function testSearchOrganisations()
     {
-        // test empty criteria
-        $this->post(url('api/listOrganisations'), ['api_key' => null])
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
-
-        // test search criteria
-        $locales = Locale::where('active', 1)->limit(self::ORGANISATION_RECORDS)->get()->toArray();
-        $locale = $this->faker->randomElement($locales)['locale'];
+        // Test search criteria
         $types = array_keys(Organisation::getPublicTypes());
         $type = $this->faker->randomElement($types);
         $name = $this->faker->name;
 
         $org = Organisation::create([
             'type'              => $type,
-            'name'              => ApiController::trans($locale, $name),
-            'descript'          => ApiController::trans($locale, $this->faker->text(intval(8000))),
+            'name'              => ApiController::trans($this->locale, $name),
+            'descript'          => ApiController::trans($this->locale, $this->faker->text(intval(8000))),
             'uri'               => $this->faker->uuid(),
             'logo_file_name'    => $this->faker->imageUrl(),
             'logo_mime_type'    => $this->faker->mimeType(),
             'logo_data'         => $this->faker->text(intval(8000)),
-            'active'            => $this->faker->boolean(),
-            'approved'          => $this->faker->boolean(),
+            'active'            => 1,
+            'approved'          => 1,
         ]);
 
         $this->post(url('api/listOrganisations'), [
             'criteria'  => [
-                'locale'    => 'bg',
+                'locale'    => $this->locale,
                 'keywords'  => $name,
             ],
         ])->assertStatus(200)->assertJson(['success' => true, 'organisations' => [['name' => $name]]]);
@@ -192,12 +185,12 @@ class OrganisationTest extends TestCase
 
     public function testOrganisationDetails()
     {
-        // test empty criteria
+        // Test empty criteria
         $this->post(url('api/getOrganisationDetails'), ['api_key' => null])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test search criteria
+        // Test search criteria
         $locales = Locale::where('active', 1)->limit(self::ORGANISATION_RECORDS)->get()->toArray();
         $locale = $this->faker->randomElement($locales)['locale'];
         $types = array_keys(Organisation::getPublicTypes());
@@ -223,69 +216,61 @@ class OrganisationTest extends TestCase
 
     public function testMembers()
     {
-        // test empty criteria
+        // Test empty criteria
         $this->post(url('api/getMembers'))
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test search criteria
-        $org = Organisation::select('id')->inRandomOrder()->first()->toArray();
-        $role = Role::select('id')->inRandomOrder()->first()->toArray();
+        // Test search criteria
+        $org = $this->getNewOrganisation();
 
-        if (!empty($org)) {
-            $this->post(url('api/getMembers'), [
-                'org_id'        => $org['id'],
-                'role_id'       => $role['id'],
-                'for_approval'  => $this->faker->boolean(),
-                'keywords'      => $this->faker->word,
-            ])->assertStatus(200)->assertJson(['success' => true]);
-        }
+        $this->post(url('api/getMembers'), [
+            'org_id'        => $org['id'],
+            'for_approval'  => $this->faker->boolean(),
+            'keywords'      => $this->faker->word,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testDelMember()
     {
-        // test no api key
+        // Test no api key
         $this->post(url('api/delMember'))
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty criteria
+        // Test empty criteria
         $this->post(url('api/delMember'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        $userToOrgRole = UserToOrgRole::inRandomOrder()->first()->toArray();
+        $userToOrgRole = $this->getNewUserToOrgRole();
 
-        if (!empty($userToOrgRole)) {
-            $this->post(url('api/delMember'), [
-                'api_key'       => $this->getApiKey(),
-                'org_id'        => $userToOrgRole['org_id'],
-                'user_id'       => $userToOrgRole['user_id'],
-            ])->assertStatus(200)->assertJson(['success' => true]);
-        }
+        $this->post(url('api/delMember'), [
+            'api_key'       => $this->getApiKey(),
+            'org_id'        => $userToOrgRole->org_id,
+            'user_id'       => $userToOrgRole->user_id,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testEditMember()
     {
-        // test no api key
+        // Test no api key
         $this->post(url('api/editMember'))
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty criteria
+        // Test empty criteria
         $this->post(url('api/editMember'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        $userToOrgRole = UserToOrgRole::inRandomOrder()->first()->toArray();
+        $userToOrgRole = $this->getNewUserToOrgRole();
 
-        if (!empty($userToOrgRole)) {
-            $this->post(url('api/delMember'), [
-                'api_key'       => $this->getApiKey(),
-                'org_id'        => $userToOrgRole['org_id'],
-                'user_id'       => $userToOrgRole['user_id'],
-                'role_id'       => $userToOrgRole['role_id'],
-            ])->assertStatus(200)->assertJson(['success' => true]);
-        }
+        $this->post(url('api/delMember'), [
+            'api_key'       => $this->getApiKey(),
+            'org_id'        => $userToOrgRole->org_id,
+            'user_id'       => $userToOrgRole->user_id,
+            'role_id'       => $userToOrgRole->role_id,
+        ])->assertStatus(200)->assertJson(['success' => true]);
     }
 }

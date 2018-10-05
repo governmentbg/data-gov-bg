@@ -37,12 +37,12 @@ class SignalController extends ApiController
         $signalData = $request->all();
 
         $validator = Validator::make($signalData, [
-            'data'              => 'required|array',
+            'data'  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = Validator::make($signalData['data'], [
-                'resource_id'  => 'required|integer|digits_between:1,10|exists:resources,id',
+                'resource_id'  => 'required|integer|digits_between:1,10|exists:resources,id,deleted_at,NULL',
                 'description'  => 'required|string|max:8000',
                 'firstname'    => 'required|string|max:100',
                 'lastname'     => 'required|string|max:100',
@@ -72,7 +72,6 @@ class SignalController extends ApiController
                 $saved = $newSignal->save();
 
                 // mark related resource as reported
-                // if ($saved && $newSignal->status == Signal::STATUS_NEW) {
                 if ($saved) {
                     $resource = Resource::where('id', $newSignal->resource_id)->first();
                     $resource->is_reported = Resource::REPORTED_TRUE;
@@ -117,7 +116,7 @@ class SignalController extends ApiController
                     Log::error($ex->getMessage());
                 }
 
-                return $this->successResponse(['signal_id :' . $newSignal->id]);
+                return $this->successResponse(['signal_id' => $newSignal->id]);
             }
         }
 

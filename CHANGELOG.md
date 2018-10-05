@@ -13,12 +13,9 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased]
 ### Added
-- RSS feed for organisation datasets
-
-## [Unreleased]
-### Added
 - Change log
 - Filter for personal information
+- RSS feed for organisation datasets
 
 ## [0.5.1] - 2018-10-03
 ### Fixed

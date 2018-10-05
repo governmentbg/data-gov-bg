@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 - Filter for personal information
 - RSS feed for organisation datasets
 - Insert base terms of use
+- RSS feed for datasets
 
 ### Fixed
 - Refactured and optimised tests

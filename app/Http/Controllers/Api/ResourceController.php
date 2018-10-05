@@ -271,8 +271,6 @@ class ResourceController extends ApiController
                     'id'    => $id .'_1',
                 ]);
 
-                DB::commit();
-
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_ADD,
@@ -281,6 +279,8 @@ class ResourceController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse();
             } catch (\Exception $ex) {
@@ -512,6 +512,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                DB::beginTransaction();
+
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $newVersion = strval(intval($resource->version) + 1);
                 $dataset = DataSet::where('id', $resource->data_set_id);
@@ -521,11 +523,11 @@ class ResourceController extends ApiController
                         Module::RESOURCES,
                         RoleRight::RIGHT_EDIT,
                         [
-                            'org_id' => $dataset->org_id
+                            'org_id'    => $dataset->org_id
                         ],
                         [
-                            'created_by' => $dataset->created_by,
-                            'org_id'     => $dataset->org_id
+                            'created_by'    => $dataset->created_by,
+                            'org_id'        => $dataset->org_id
                         ]
                     );
                 } else {
@@ -534,7 +536,7 @@ class ResourceController extends ApiController
                         RoleRight::RIGHT_EDIT,
                         [],
                         [
-                            'created_by' => $resource->created_by
+                            'created_by'    => $resource->created_by
                         ]
                     );
                 }
@@ -545,6 +547,12 @@ class ResourceController extends ApiController
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
+
+                // update signals status after resource version update and mark resource as not reported
+                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                $resource->is_reported = Resource::REPORTED_FALSE;
+                $resource->version = $newVersion;
+                $resource->save();
 
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
@@ -561,12 +569,6 @@ class ResourceController extends ApiController
                     'id'    => $id .'_'. $newVersion,
                 ]);
 
-                // update signals status after resource version update and mark resource as not reported
-                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
-                $resource->is_reported = Resource::REPORTED_FALSE;
-                $resource->version = $newVersion;
-                $resource->save();
-
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,
@@ -576,12 +578,16 @@ class ResourceController extends ApiController
 
                 Module::add($logData);
 
+                DB::commit();
+
                 return $this->successResponse();
             } catch (\Exception $ex) {
+                DB::rollback();
+error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
                 Log::error($ex->getMessage());
             }
         }
-
+        error_log('ex->getMessage(): '. print_r($validator->errors()->messages(), true));
         return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
     }
 
@@ -598,7 +604,9 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
+        $validator = \Validator::make($post, [
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
+        ]);
 
         if (!$validator->fails()) {
             try {

@@ -4,6 +4,7 @@ namespace Tests\Unit\Api;
 
 use App\Role;
 use App\Locale;
+use App\Module;
 use Tests\TestCase;
 use App\Organisation;
 use App\Http\Controllers\ApiController;
@@ -17,16 +18,18 @@ class RoleTest extends TestCase
     use WithFaker;
 
     /**
-     * A basic test example.
+     * Test role creation
      *
      * @return void
      */
     public function testAddRole()
     {
         $response = $this->post(url('api/addRole'), [
-            'api_key' => $this->getApiKey(),
-            'name'    => 'addedFromTest',
-            'active'  => 1,
+            'api_key'   => $this->getApiKey(),
+            'data'      => [
+                'name'      => 'addedFromTest',
+                'active'    => 1,
+            ],
         ]);
 
         $response
@@ -34,6 +37,11 @@ class RoleTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test role modification
+     *
+     * @return void
+     */
     public function testEditRole()
     {
         $role = Role::create([
@@ -44,8 +52,10 @@ class RoleTest extends TestCase
         $response = $this->post(url('api/editRole'), [
             'api_key'   => $this->getApiKey(),
             'id'        => $role->id,
-            'name'      => $this->faker->firstName(),
-            'active'    => 0,
+            'data'      => [
+                'name'      => 'addedFromTest2',
+                'active'    => 0,
+            ],
         ]);
 
         $response
@@ -53,6 +63,11 @@ class RoleTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test role deletion
+     *
+     * @return void
+     */
     public function testDeleteRole()
     {
         $role = Role::create([
@@ -70,37 +85,35 @@ class RoleTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test role list
+     *
+     * @return void
+     */
     public function testListRole()
     {
         $response = $this->post(url('api/listRoles'), [
             'api_key'   => $this->getApiKey(),
             'criteria'  => [
                 'active'    => 0,
-            ]
+            ],
         ])->assertStatus(200)->assertJson(['success' => true]);
 
-        $locales = Locale::where('active', 1)->get()->toArray();
-        $locale = $this->faker->randomElement($locales)['locale'];
-        $types = array_keys(Organisation::getPublicTypes());
-        $type = $this->faker->randomElement($types);
-        $name = $this->faker->name;
-        
-        $org = Organisation::create([
-            'type'              => $type,
-            'name'              => ApiController::trans($locale, $name),
-            'uri'               => $this->faker->uuid(),
-            'active'            => $this->faker->boolean(),
-            'approved'          => $this->faker->boolean(),
-        ]);
+        $org = $this->getNewOrganisation();
 
         $response = $this->post(url('api/listRoles'), [
             'api_key'   => $this->getApiKey(),
             'criteria'  => [
                 'org_id'    => $org->id,
-            ]
+            ],
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
+    /**
+     * Test role rights modification
+     *
+     * @return void
+     */
     public function testModifyRoleRights()
     {
         $role = Role::create([
@@ -113,19 +126,19 @@ class RoleTest extends TestCase
             'id'        => $role->id,
             'data'      => [
                 [
-                    'module_name'       => 'testModule',
+                    'module_name'       => Module::getModules()[1],
                     'right'             => 2,
                     'limit_to_own_data' => 0,
                     'api'               => 1,
                 ],
                 [
-                    'module_name'       => 'testModule2',
+                    'module_name'       => Module::getModules()[2],
                     'right'             => 2,
                     'limit_to_own_data' => 0,
                     'api'               => 1,
                 ],
                 [
-                    'module_name'       => 'testModule3',
+                    'module_name'       => Module::getModules()[3],
                     'right'             => 2,
                     'limit_to_own_data' => 0,
                     'api'               => 1,
@@ -138,6 +151,11 @@ class RoleTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test role rights list
+     *
+     * @return void
+     */
     public function testListRoleRights()
     {
         $role = Role::create([

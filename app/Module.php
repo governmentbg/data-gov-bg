@@ -13,7 +13,6 @@ class Module extends Model
     /*
      * User actions
      */
-
     const ORGANISATIONS = 1;
     const GROUPS = 2;
     const USERS = 3;
@@ -42,7 +41,6 @@ class Module extends Model
     const THEMES = 26;
     const TOOL_DBMS = 27;
     const TOOL_FILE = 28;
-
 
     /**
      * Gives back the available user actions.

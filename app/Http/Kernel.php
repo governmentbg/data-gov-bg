@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \App\Http\Middleware\LoginByApiKey::class,
             'throttle:60,1',
             'bindings',
             'locale',

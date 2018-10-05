@@ -545,8 +545,8 @@ class DataSetController extends ApiController
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
         $locale = !empty($post['criteria']['locale'])
-        ? $post['criteria']['locale']
-        : \LaravelLocalization::getCurrentLocale();
+            ? $post['criteria']['locale']
+            : \LaravelLocalization::getCurrentLocale();
 
         $validator = \Validator::make($post, [
             'api_key'                    => 'nullable|string|exists:users,api_key',
@@ -940,7 +940,7 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'data_set_uri'  => 'required|string|exists:data_sets,uri,deleted_at,NULL|max:191',
-            'group_id'      => 'nullable|array',
+            'group_id'      => 'required|array',
             'group_id.*'    => [
                 'required',
                 'int',
@@ -957,29 +957,27 @@ class DataSetController extends ApiController
                 $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
                 DataSetGroup::destroy($dataSetId);
 
-                if (!empty($post['group_id'])) {
-                    foreach ($post['group_id'] as $id) {
-                        $rightCheck = RoleRight::checkUserRight(
-                            Module::GROUPS,
-                            RoleRight::RIGHT_EDIT,
-                            [
-                                'group_id' => $id
-                            ],
-                            [
-                                'group_ids' => $post['group_id']
-                            ]
-                        );
+                foreach ($post['group_id'] as $id) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::GROUPS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id' => $id
+                        ],
+                        [
+                            'group_ids' => $post['group_id']
+                        ]
+                    );
 
-                        if (!$rightCheck) {
-                            return $this->errorResponse(__('custom.access_denied'));
-                        }
-
-                        $setGroup = new DataSetGroup;
-                        $setGroup->data_set_id = $dataSetId;
-                        $setGroup->group_id = $id;
-
-                        $setGroup->save();
+                    if (!$rightCheck) {
+                        return $this->errorResponse(__('custom.access_denied'));
                     }
+
+                    $setGroup = new DataSetGroup;
+                    $setGroup->data_set_id = $dataSetId;
+                    $setGroup->group_id = $id;
+
+                    $setGroup->save();
                 }
 
                 $logData = [

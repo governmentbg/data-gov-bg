@@ -116,7 +116,6 @@ class NewsController extends ApiController
                 $newNews->active = $newsData['data']['active'];
 
                 $newNews->save();
-                DB::commit();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::NEWS),
@@ -126,6 +125,8 @@ class NewsController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse(['news_id' => $newNews->id], true);
             } catch (QueryException $e) {
@@ -163,38 +164,38 @@ class NewsController extends ApiController
         $editData = $request->all();
 
         $validator = Validator::make($editData, [
-            'news_id'   => 'required|integer|exists:pages,id|digits_between:1,10',
+            'news_id'   => 'required|integer|exists:pages,id,type,'. Page::TYPE_NEWS,
             'data'      => 'required|array',
-            'locale'    => 'nullable|string|max:5',
         ]);
 
         if (!$validator->fails()) {
-            $validator = Validator::make($editData['data'], [
-                'title'               => 'required_with:locale|max:191',
-                'title.bg'            => 'required_without:locale|string|max:191',
-                'title.*'             => 'max:191',
-                'abstract'            => 'required_with:locale|max:8000',
-                'abstract.bg'         => 'required_without:locale|string|max:8000',
-                'abstract.*'          => 'max:8000',
-                'body'                => 'required_with:locale|max:8000',
-                'body.bg'             => 'required_without:locale|string|max:8000',
-                'body.*'              => 'max:8000',
-                'head_title'          => 'nullable|max:191',
-                'head_title.*'        => 'max:191',
-                'meta_description'    => 'nullable|max:191',
-                'meta_description.*'  => 'max:191',
-                'meta_keywords'       => 'nullable|max:191',
-                'meta_keywords.*'     => 'max:191',
-                'forum_link'          => 'nullable|string|max:191',
-                'active'              => 'nullable|boolean',
-                'valid_from'          => 'nullable|date',
-                'valid_to'            => 'nullable|date',
+            $validator = Validator::make($request->get('data', []), [
+                'locale'                => 'nullable|string|max:5',
+                'title'                 => 'required_with:locale|max:191',
+                'title.bg'              => 'required_without:locale|string|max:191',
+                'title.*'               => 'max:191',
+                'abstract'              => 'required_with:locale|max:8000',
+                'abstract.bg'           => 'required_without:locale|string|max:8000',
+                'abstract.*'            => 'max:8000',
+                'body'                  => 'required_with:locale|max:8000',
+                'body.bg'               => 'required_without:locale|string|max:8000',
+                'body.*'                => 'max:8000',
+                'head_title'            => 'nullable|max:191',
+                'head_title.*'          => 'max:191',
+                'meta_description'      => 'nullable|max:191',
+                'meta_description.*'    => 'max:191',
+                'meta_keywords'         => 'nullable|max:191',
+                'meta_keywords.*'       => 'max:191',
+                'forum_link'            => 'nullable|string|max:191',
+                'active'                => 'nullable|boolean',
+                'valid_from'            => 'nullable|date',
+                'valid_to'              => 'nullable|date',
             ]);
         }
-
+error_log('editData: '. print_r($editData, true));
         if (!$validator->fails()) {
             try {
-                $locale = isset($newsData['locale']) ? $newsData['locale'] : null;
+                $locale = isset($editData['data']['locale']) ? $editData['data']['locale'] : null;
                 $newsToEdit = Page::find($editData['news_id']);
                 $rightCheck = RoleRight::checkUserRight(
                     Module::NEWS,
@@ -212,27 +213,27 @@ class NewsController extends ApiController
                 DB::beginTransaction();
 
                 if (isset($editData['data']['title'])) {
-                    $newsToEdit->title = $this->trans($locale, $editData['data']['title']);
+                    $newsToEdit->title = $this->trans($locale, $editData['data']['title'], true);
                 }
 
                 if (isset($editData['data']['abstract'])) {
-                    $newsToEdit->abstract = $this->trans($locale, $editData['data']['abstract']);
+                    $newsToEdit->abstract = $this->trans($locale, $editData['data']['abstract'], true);
                 }
 
                 if (isset($editData['data']['body'])) {
-                    $newsToEdit->body = $this->trans($locale, $editData['data']['body']);
+                    $newsToEdit->body = $this->trans($locale, $editData['data']['body'], true);
                 }
 
                 if (isset($editData['data']['head_title'])) {
-                    $newsToEdit->head_title = $this->trans($locale, $editData['data']['head_title']);
+                    $newsToEdit->head_title = $this->trans($locale, $editData['data']['head_title'], true);
                 }
 
                 if (isset($editData['data']['meta_description'])) {
-                    $newsToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description']);
+                    $newsToEdit->meta_descript = $this->trans($locale, $editData['data']['meta_description'], true);
                 }
 
                 if (isset($editData['data']['meta_keywords'])) {
-                    $newsToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords']);
+                    $newsToEdit->meta_key_words = $this->trans($locale, $editData['data']['meta_keywords'], true);
                 }
 
                 if (isset($editData['data']['forum_link'])) {
@@ -252,7 +253,6 @@ class NewsController extends ApiController
                 }
 
                 $newsToEdit->save();
-                DB::commit();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::NEWS),
@@ -263,9 +263,12 @@ class NewsController extends ApiController
 
                 Module::add($logData);
 
+                DB::commit();
+
                 return $this->successResponse();
             } catch (QueryException $e) {
                 DB::rollback();
+
                 Log::error($e->getMessage());
             }
         }
@@ -287,7 +290,7 @@ class NewsController extends ApiController
     {
         $newsDeleteData = $request->all();
         $validator = Validator::make($newsDeleteData, [
-            'news_id' => 'required|integer|exists:pages,id|digits_between:1,10',
+            'news_id' => 'required|integer|exists:pages,id,type,'. Page::TYPE_NEWS,
         ]);
 
         if (!$validator->fails()) {
@@ -400,59 +403,94 @@ class NewsController extends ApiController
             if (!empty($criteria['date_from']) && empty($criteria['date_to'])) {
                 $dateCreate = date_create($criteria['date_from']);
                 $date = date_format($dateCreate, 'Y-m-d');
+
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     $newsList->where(function($c) use ($date) {
-                            $c->where('valid_from', null)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);})
-                        ->orWhere(function($m) use ($date){
-                            $m->where('valid_from', '<=', $date)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function ($a) use ($date) {
-                            $a->where('valid_from', '>=', $date)->where('valid_to', '>=', $date)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function($b) use ($date) {
-                            $b->where('valid_from', '<=', $date)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function($d) use ($date) {
-                            $d->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function ($g) use ($date) {
-                            $g->where('valid_from', '>=', $date)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
-                        });
+                        $c->where('valid_from', null)
+                            ->where('valid_to', '>=', $date)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function($m) use ($date) {
+                        $m->where('valid_from', '<=', $date)
+                            ->where('valid_to', '>=', $date)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function ($a) use ($date) {
+                        $a->where('valid_from', '>=', $date)
+                            ->where('valid_to', '>=', $date)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function($b) use ($date) {
+                        $b->where('valid_from', '<=', $date)
+                            ->where('valid_to', null)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function($d) use ($date) {
+                        $d->where('valid_from', null)
+                            ->where('valid_to', null)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function ($g) use ($date) {
+                        $g->where('valid_from', '>=', $date)
+                            ->where('valid_to', null)
+                            ->where('type', Page::TYPE_NEWS);
+                    });
                 }
             } else if (!empty($criteria['date_to']) && empty($criteria['date_from'])) {
                 $dateCreate = date_create($criteria['date_to']);
                 $dated = date_format($dateCreate, 'Y-m-d');
+
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     $newsList->where(function($c) use ($dated) {
-                            $c->where('valid_from', null)->where('valid_to', '<=', $dated)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function($m) use ($dated){
-                            $m->where('valid_from', '<=', $dated)->where('valid_to', '<=', $dated)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function ($a) use ($dated) {
-                            $a->where('valid_from', '<=', $dated)->where('valid_to', '>=', $dated)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function($b) use ($dated) {
-                            $b->where('valid_from', '<=', $dated)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function($d) use ($dated) {
-                            $d->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
-                        })->orWhere(function ($e) use ($dated) {
-                            $e->where('valid_from',null)->where('valid_to','>=', $dated)->where('type', Page::TYPE_NEWS);
-                        });
+                        $c->where('valid_from', null)
+                            ->where('valid_to', '<=', $dated)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function($m) use ($dated) {
+                        $m->where('valid_from', '<=', $dated)
+                            ->where('valid_to', '<=', $dated)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function ($a) use ($dated) {
+                        $a->where('valid_from', '<=', $dated)
+                            ->where('valid_to', '>=', $dated)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function($b) use ($dated) {
+                        $b->where('valid_from', '<=', $dated)
+                            ->where('valid_to', null)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function($d) use ($dated) {
+                        $d->where('valid_from', null)
+                            ->where('valid_to', null)
+                            ->where('type', Page::TYPE_NEWS);
+                    })->orWhere(function ($e) use ($dated) {
+                        $e->where('valid_from',null)
+                            ->where('valid_to','>=', $dated)
+                            ->where('type', Page::TYPE_NEWS);
+                    });
                 }
-            } else if (!empty($criteria['date_from']) && !empty($criteria['date_to']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
+            } else if (
+                !empty($criteria['date_from'])
+                && !empty($criteria['date_to'])
+                && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID
+            ) {
                 $datePeriodFrom = date_create($criteria['date_from']);
                 $dateFrom = date_format($datePeriodFrom, 'Y-m-d');
                 $datePeriodTo = date_create($criteria['date_to']);
                 $dateTo = date_format($datePeriodTo, 'Y-m-d');
                 $newsList->orWhere(function($a) use ($dateFrom, $dateTo) {
-
-                    $a->where('valid_from', null)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                    $a->where('valid_from', null)
+                        ->where('valid_to', null)
+                        ->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($b) use ($dateFrom, $dateTo) {
-
-                    $b->where('valid_to', '>=', $dateFrom)->where('valid_to', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                    $b->where('valid_to', '>=', $dateFrom)
+                        ->where('valid_to', '<=', $dateTo)
+                        ->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($c) use ($dateFrom, $dateTo) {
-
-                    $c->where('valid_from', '>=', $dateFrom)->where('valid_from', '<=', $dateTo)->where('type', Page::TYPE_NEWS);
+                    $c->where('valid_from', '>=', $dateFrom)
+                        ->where('valid_from', '<=', $dateTo)
+                        ->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($d) use ($dateFrom, $dateTo) {
-
-                    $d->where('valid_from', '<=', $dateFrom)->where('valid_to', null)->where('type', Page::TYPE_NEWS);
+                    $d->where('valid_from', '<=', $dateFrom)
+                        ->where('valid_to', null)
+                        ->where('type', Page::TYPE_NEWS);
                 })->orWhere(function($e) use ($dateFrom, $dateTo) {
-
-                    $e->where('valid_from', null)->where('valid_to', '>=', $dateFrom)->where('type', Page::TYPE_NEWS);
+                    $e->where('valid_from', null)
+                        ->where('valid_to', '>=', $dateFrom)
+                        ->where('type', Page::TYPE_NEWS);
                 });
             } else {
                 $newsList->where('type', Page::TYPE_NEWS);
@@ -485,16 +523,12 @@ class NewsController extends ApiController
                             $newsList->where(function ($m) {
                                 $m->where('valid_to', '<', date(now()))
                                     ->where('valid_from', '>', date(now()))
-
                                     ->orWhere('valid_from', null)
                                     ->where('valid_to', '<', date(now()))
-
                                     ->orWhere('valid_from', '>', date(now()))
                                     ->where('valid_to', null)
-
                                     ->orWhere('valid_from', '>', date(now()))
                                     ->where('valid_to', '>', date(now()))
-
                                     ->orWhere('valid_from', '<', date(now()))
                                     ->where('valid_to', '<', date(now()));
                             });
@@ -507,11 +541,11 @@ class NewsController extends ApiController
                 }
             } else if (!\Auth::check()) {
                 $newsList->where('active', 1);
-                $newsList->where(function ($m){
-                        $m->where('valid_from', null)
-                            ->where('valid_to', null)
-                            ->orWhere('valid_from', '<=', date(now()))
-                            ->where('valid_to', '>=', date(now()));
+                $newsList->where(function ($m) {
+                    $m->where('valid_from', null)
+                        ->where('valid_to', null)
+                        ->orWhere('valid_from', '<=', date(now()))
+                        ->where('valid_to', '>=', date(now()));
                 });
             }
 
@@ -556,9 +590,9 @@ class NewsController extends ApiController
                 if (in_array($order['field'], $transFields)) {
                     $col = $transCols[$order['field']];
                     $newsList->select('translations.label', 'translations.group_id', 'translations.text', 'pages.*')
-                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.' . $order['field'])
+                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.'. $order['field'])
                         ->where('translations.locale', $locale)
-                        ->orderBy('translations.' . $col, $order['type'] );
+                        ->orderBy('translations.'. $col, $order['type'] );
                 } else {
                     $newsList->orderBy($order['field'], $order['type'] );
                 }
@@ -658,6 +692,7 @@ class NewsController extends ApiController
             $ids = Page::search($search)->where('type', Page::TYPE_NEWS)->get()->pluck('id');
             $newsList = Page::whereIn('pages.id', $ids);
             $rightCheck = false;
+
             if (isset($newsSearchData['api_key'])) {
                 $user = \App\User::where('api_key', $newsSearchData['api_key'])->first();
                 $rightCheck = RoleRight::checkUserRight(
@@ -672,7 +707,7 @@ class NewsController extends ApiController
             if(!$rightCheck) {
                 $newsList
                     ->where('active', 1)
-                    ->where(function ($m){
+                    ->where(function ($m) {
                         $m->where('valid_from', null)
                             ->where('valid_to', null)
                             ->orWhere('valid_from', '<=', date(now()))
@@ -723,9 +758,9 @@ class NewsController extends ApiController
                 if (in_array($order['field'], $transFields)) {
                     $col = $transCols[$order['field']];
                     $newsList->select('translations.label', 'translations.group_id', 'translations.text', 'pages.*')
-                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.' . $order['field'])
+                        ->leftJoin('translations', 'translations.group_id', '=', 'pages.'. $order['field'])
                         ->where('translations.locale', $locale)
-                        ->orderBy('translations.' . $col, $order['type'] );
+                        ->orderBy('translations.'. $col, $order['type'] );
                 } else {
                     $newsList->orderBy($order['field'], $order['type'] );
                 }
@@ -784,21 +819,23 @@ class NewsController extends ApiController
 
         $validator = Validator::make($newsSearchData, [
             'locale'  => 'string|max:5',
-            'news_id' => 'integer|required|exists:pages,id|digits_between:1,10',
+            'news_id' => 'integer|required|exists:pages,id,type,'. Page::TYPE_NEWS,
         ]);
 
         $locale = \LaravelLocalization::getCurrentLocale();
+
         if (!$validator->fails()) {
             $singleNews = Page::select()->where('type', 1)->where('id', $newsSearchData['news_id']);
 
             if(!\Auth::check() || !Role::isAdmin()) {
                 $singleNews
                     ->where('active', 1)
-                    ->where(function ($m){
+                    ->where(function ($m) {
                         $m->where('valid_from', null)
                             ->where('valid_to', null)
                             ->orWhere('valid_from', '<=', date(now()))
-                            ->where('valid_to', '>=', date(now()));
+                            ->where('valid_to', '>=', date(now())
+                    );
                 });
             }
 

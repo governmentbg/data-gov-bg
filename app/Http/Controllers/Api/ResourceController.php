@@ -583,11 +583,11 @@ class ResourceController extends ApiController
                 return $this->successResponse();
             } catch (\Exception $ex) {
                 DB::rollback();
-error_log('ex->getMessage(): '. print_r($ex->getMessage(), true));
+
                 Log::error($ex->getMessage());
             }
         }
-        error_log('ex->getMessage(): '. print_r($validator->errors()->messages(), true));
+
         return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
     }
 

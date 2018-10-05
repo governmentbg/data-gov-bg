@@ -119,7 +119,7 @@ class SignalController extends ApiController
                 return $this->successResponse(['signal_id' => $newSignal->id]);
             }
         }
-error_log('label: '. print_r($validator->errors()->messages(), true));
+
         return $this->errorResponse(__('custom.send_signal_fail'), $validator->errors()->messages());
     }
 

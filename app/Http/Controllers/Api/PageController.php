@@ -486,7 +486,6 @@ class PageController extends ApiController
                 );
 
                 if (!$rightCheck) {
-                    error_log('123');
                     return $this->errorResponse(__('custom.access_denied'));
                 }
             } else {
@@ -521,7 +520,6 @@ class PageController extends ApiController
 
             if (isset($criteria['order']['field'])) {
                 if (!in_array($criteria['order']['field'], $columns)) {
-                    error_log('1234');
                     return $this->errorResponse(__('custom.invalid_sort_field'));
                 }
             }

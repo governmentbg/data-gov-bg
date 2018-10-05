@@ -1,0 +1,91 @@
+.help-ico {
+    position: absolute;
+    padding-top: 6px;
+    right: 320px;
+
+    @include mobile{
+        right: 100px;
+    }
+
+    @include smMobile{
+        right: 10px;
+    }
+ }
+
+.help-container {
+    background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    color: white;
+    width: 275px;
+    top: 0px;
+    left: auto;
+
+    @include mobile{
+        right: -75px;
+    }
+
+    @include mdMobile{
+        right: -90px;
+    }
+
+    @include smMobile{
+        right: 0px;
+        width: 180px;
+    }
+
+    .help-content {
+        padding: 10px;
+        height: 100%;
+        width: 100%;
+        word-wrap: break-word;
+
+        > h3 {
+            margin-top: 10px;
+        }
+
+        > span {
+            top: -3px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 150px;
+        }
+
+        .help-edit {
+            a {
+                color: white !important;
+            }
+        }
+    }
+
+    .close {
+        color: white;
+        opacity: 1;
+        bottom: 6px;
+        position: relative;
+
+        span {
+            user-select: none;
+        }
+    }
+}
+
+.stick {
+    position: fixed;
+    top: 0px;
+    height: 100%;
+
+    @include mobile{
+        right: 25px;
+    }
+
+    @include mdMobile{
+        right: 10px;
+    }
+
+    @include smMobile{
+        right: 10px;
+    }
+}
+

@@ -71624,11 +71624,50 @@ var $content = $('.js-content');
 var $footer = $('.js-footer');
 
 if ($head && $content && $footer) {
+    helpBar();
+
     $(window).bind('load', function () {
         stickyFooter();
 
-        $(window).resize(stickyFooter);
+        $(window).resize(resize);
+
+        $('#app').on('update', scroll);
     });
+}
+
+function resize() {
+    stickyFooter();
+    helpBar();
+}
+
+function scroll() {
+    helpBar();
+}
+
+function helpBar() {
+    $helpBar = $('.js-help-bar');
+
+    if ($helpBar.length) {
+        var windowTop = $(window).scrollTop();
+        var top = $content.offset().top;
+        var headerTop = $head.offset().top;
+        var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
+        var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
+        var footerHeight = getInt($footer.css('height'));
+        console.log(headerTop);
+        var height;
+
+        if (windowTop > top) {
+            $helpBar.addClass('stick');
+            height = windowHeight;
+        } else {
+
+            $helpBar.removeClass('stick');
+            height = windowHeight - headerHeight + footerHeight - headerTop - 9;
+        }
+
+        $helpBar.css('height', height + 'px');
+    }
 }
 
 function stickyFooter() {
@@ -71745,6 +71784,13 @@ $('.js-hide-button').click(function () {
     $($(this).data('target')).hide();
     $(this).hide();
 });
+
+if ($('.js-help').length) {
+    $('.js-open-help, .close-btn').on('click', function () {
+        $('.help-container').toggleClass('hidden');
+        $('.js-open-help').toggle();
+    });
+}
 
 /***/ }),
 /* 51 */

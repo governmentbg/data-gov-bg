@@ -11,10 +11,10 @@ Removed - for now removed features.
 Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
-## [Unreleased]
+## [Unreleased] - XXXX-XX-XX
 ### Added
 
-## [0.6.0]
+## [0.6.0] - 2018-10-08
 ### Added
 - Change log
 - Tool history page
@@ -29,7 +29,7 @@ Security - in case of vulnerabilities.
 - Map old license ids with the new terms of use
 
 ### Fixed
-- Refactured and optimised tests
+- Refactored and optimised tests
 - Activation link for deactivated users
 
 ## [0.5.1] - 2018-10-03

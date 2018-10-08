@@ -20,21 +20,23 @@ class CheckHelp
      */
     public function handle(Request $request, Closure $next)
     {
-        $pages = HelpPage::where('active', true)->get();
+        if (!env('IS_TOOL')) {
+            $pages = HelpPage::where('active', true)->get();
 
-        foreach ($pages as $page) {
-            if ($request->is($page->name)) {
-                view()->share('help', $page);
+            foreach ($pages as $page) {
+                if ($request->is($page->name)) {
+                    view()->share('help', $page);
 
-                return $next($request);
-            } elseif ($request->is($page->name .'/*')) {
-                view()->share('help', $page);
+                    return $next($request);
+                } elseif ($request->is($page->name .'/*')) {
+                    view()->share('help', $page);
 
-                return $next($request);
-            } else if ($request->is('/') && $page->name == 'home') {
-                view()->share('help', $page);
+                    return $next($request);
+                } else if ($request->is('/') && $page->name == 'home') {
+                    view()->share('help', $page);
 
-                return $next($request);
+                    return $next($request);
+                }
             }
         }
 

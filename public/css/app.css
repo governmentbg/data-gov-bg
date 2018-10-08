@@ -19953,13 +19953,50 @@ table.dataTable td {
   font-size: 20px;
 }
 
-.config-form .save-btn {
+.config-form .form-group {
+  overflow: hidden;
+}
+
+.save-btn {
   background-color: #2ab27b !important;
   border-color: #2ab27b !important;
 }
 
-.config-form .form-group {
-  overflow: hidden;
+.tool-history .history-filters {
+  color: black !important;
+  padding: 25px 20px 5px 15px;
+  border: 1px #c02e54 solid;
+  border-radius: 10px;
+}
+
+.tool-history .history-filters .date {
+  padding-right: 0px;
+}
+
+.tool-history .history-filters .last {
+  padding-right: 10px;
+}
+
+.tool-history .history-row {
+  border-left: 2px #c02e54 solid;
+  padding-left: 20px;
+  padding-bottom: 50px;
+}
+
+.tool-history .history-row:last-child {
+  padding-bottom: 0px;
+}
+
+.tool-history .history-row span {
+  word-break: break-word;
+}
+
+.tool-history .succ-lbl {
+  margin-left: 27px !important;
+}
+
+.dropdown-menu {
+  z-index: 999 !important;
 }
 
 .help-ico {

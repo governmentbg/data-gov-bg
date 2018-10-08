@@ -71353,6 +71353,14 @@ $(function () {
 });
 
 $(function () {
+    if ($('.js-clockpicker').length) {
+        $('.js-clockpicker').each(function () {
+            $(this).clockpicker({ autoclose: true });
+        });
+    }
+});
+
+$(function () {
     var $checkboxes = $('.js-check');
 
     if ($checkboxes.length) {

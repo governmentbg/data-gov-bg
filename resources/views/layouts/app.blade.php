@@ -28,6 +28,7 @@
     <link href="{{ asset('css/summernote/summernote-bs4.css') }}" rel="stylesheet">
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
     @if (isset($link))
         <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}"/>
     @endif
@@ -273,8 +274,8 @@
                 </div>
                 <div class="underline">
                     <div class="help-ico js-help">
-                        <span class="js-open-help glyphicon glyphicon-question-sign"></span>
                         @if(!empty($help))
+                            <span class="js-open-help glyphicon glyphicon-question-sign"></span>
                             @include('components.help', ['help' => $help])
                         @elseif(\Auth::check() && App\Role::isAdmin())
                             <div class="js-help-bar help-container hidden">
@@ -338,6 +339,7 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
+    <script src="{{ asset('js/bootstrap-clockpicker.min.js') }}"></script>
     @yield('js')
 </body>
 </html>

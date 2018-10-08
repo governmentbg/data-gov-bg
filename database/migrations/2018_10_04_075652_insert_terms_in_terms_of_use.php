@@ -102,18 +102,20 @@ class InsertTermsInTermsOfUse extends Migration
      */
     public function up()
     {
-        foreach ($this->termsOfUse as $i => $termData) {
-            $termData['active'] = true;
-            $termData['is_default'] = isset($termData['is_default']) ? $termData['is_default'] : false;
-            $termData['ordering'] = $i + 1;
+        if (!env('IS_TOOL')) {
+            foreach ($this->termsOfUse as $i => $termData) {
+                $termData['active'] = true;
+                $termData['is_default'] = isset($termData['is_default']) ? $termData['is_default'] : false;
+                $termData['ordering'] = $i + 1;
 
-            $alreadySaved = DB::table('translations')
-                ->where('label', $termData['name'])
-                ->join('terms_of_use', 'group_id', '=', 'terms_of_use.name')
-                ->first();
+                $alreadySaved = DB::table('translations')
+                    ->where('label', $termData['name'])
+                    ->join('terms_of_use', 'group_id', '=', 'terms_of_use.name')
+                    ->first();
 
-            if (!TermsOfUse::where($termData)->count() && !$alreadySaved) {
-                TermsOfUse::create($termData);
+                if (!TermsOfUse::where($termData)->count() && !$alreadySaved) {
+                    TermsOfUse::create($termData);
+                }
             }
         }
     }
@@ -125,15 +127,17 @@ class InsertTermsInTermsOfUse extends Migration
      */
     public function down()
     {
-        foreach ($this->termsOfUse as $termData) {
-            $deleteTerm = DB::table('terms_of_use')
-                ->select('terms_of_use.id as id')
-                ->join('translations', 'translations.group_id', '=', 'terms_of_use.name')
-                ->where('translations.label', $termData['name'])
-                ->first();
+        if (!env('IS_TOOL')) {
+            foreach ($this->termsOfUse as $termData) {
+                $deleteTerm = DB::table('terms_of_use')
+                    ->select('terms_of_use.id as id')
+                    ->join('translations', 'translations.group_id', '=', 'terms_of_use.name')
+                    ->where('translations.label', $termData['name'])
+                    ->first();
 
-            if ($term = TermsOfUse::find($deleteTerm->id)) {
-                $term->delete();
+                if ($term = TermsOfUse::find($deleteTerm->id)) {
+                    $term->delete();
+                }
             }
         }
     }

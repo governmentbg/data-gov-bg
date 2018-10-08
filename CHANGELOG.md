@@ -13,16 +13,24 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased]
 ### Added
+
+## [0.6.0]
+### Added
 - Change log
-- Filter for personal information
-- RSS feed for organisation datasets
-- Insert base terms of use
+- Tool history page
+- RSS feed for news
 - RSS feed for datasets
+- Insert base terms of use
+- Google analytics integration
+- Filter for personal information
+- Help functionality for all pages
 - Required sections and static pages
-- Google Analitycs integration
+- RSS feed for organisation datasets
+- Map old license ids with the new terms of use
 
 ### Fixed
 - Refactured and optimised tests
+- Activation link for deactivated users
 
 ## [0.5.1] - 2018-10-03
 ### Fixed
@@ -50,5 +58,6 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.4.1...v0.5.0

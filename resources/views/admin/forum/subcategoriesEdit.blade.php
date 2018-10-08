@@ -35,7 +35,7 @@
                             {{ csrf_field() }}
 
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}</label>
+                            <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}</label>
+                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 color-picker colorpicker-component" data-color="">
                                     <input
                                         type="text"
@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}</label>
+                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
                                 <div class="col-lg-2">
                                     <input
                                         id="order"
@@ -103,14 +103,14 @@
                                 <hr>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $category->created_at }}</div>
                                 </div>
                             </div>
                             @if (!empty($category->updated_at))
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $category->updated_at }}</div>
                                     </div>
@@ -118,7 +118,16 @@
                             @endif
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ __('custom.edit') }}</button>
+                                    <button
+                                        type="submit"
+                                        name="edit"
+                                        value="1"
+                                        class="m-l-md btn btn-custom"
+                                    >{{ uctrans('custom.edit') }}</button>
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

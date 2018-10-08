@@ -35,7 +35,7 @@
                             {{ csrf_field() }}
 
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="title" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.title') }}</label>
+                            <label for="title" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.title') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}</label>
+                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 color-picker colorpicker-component" data-color="">
                                     <input
                                         type="text"
@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                             <div class="form-group row required">
-                            <label for="category" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.category') }}:</label>
+                            <label for="category" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.category') }}::</label>
                                 <div class="col-sm-9">
                                     <select
                                         id="category"
@@ -84,7 +84,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="message" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.message') }}</label>
+                            <label for="message" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.message') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <textarea
                                         name="message"
@@ -97,7 +97,16 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="submit" name="create" value="1" class="m-l-md btn btn-custom">{{ __('custom.add') }}</button>
+                                    <button
+                                        type="submit"
+                                        name="create"
+                                        value="1"
+                                        class="m-l-md btn btn-custom"
+                                    >{{ __('custom.add') }}</button>
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

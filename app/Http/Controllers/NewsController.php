@@ -53,7 +53,7 @@ class NewsController extends Controller {
             'criteria'         => [
                 'active'   => true,
                 'order'    => [
-                    'type'     => 'asc',
+                    'type'     => 'desc',
                     'field'    => 'created_at'
                 ]
             ]

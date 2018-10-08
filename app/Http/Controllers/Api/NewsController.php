@@ -540,12 +540,21 @@ class NewsController extends ApiController
                     }
                 }
             } else if (!\Auth::check()) {
-                $newsList->where('active', 1);
-                $newsList->where(function ($m) {
-                    $m->where('valid_from', null)
-                        ->where('valid_to', null)
-                        ->orWhere('valid_from', '<=', date(now()))
-                        ->where('valid_to', '>=', date(now()));
+                $newsList->where('active', '!=', Page::ACTIVE_FALSE);
+                $newsList->where(function ($g) {
+                    $g->where(function($a) {
+                        $a->where('valid_from', null)
+                            ->where('valid_to', null);
+                    })->orWhere(function($b) {
+                        $b->where('valid_from', null)
+                            ->where('valid_to', '>=', date(now()));
+                    })->orWhere(function($c) {
+                        $c->where('valid_from', '<=', date(now()))
+                            ->where('valid_to', null);
+                    })->orWhere(function ($d) {
+                        $d->where('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                    });
                 });
             }
 
@@ -705,13 +714,21 @@ class NewsController extends ApiController
             }
 
             if(!$rightCheck) {
-                $newsList
-                    ->where('active', 1)
-                    ->where(function ($m) {
-                        $m->where('valid_from', null)
-                            ->where('valid_to', null)
-                            ->orWhere('valid_from', '<=', date(now()))
+                $newsList->where('active', '!=', Page::ACTIVE_FALSE);
+                $newsList->where(function ($g) {
+                    $g->where(function($a) {
+                        $a->where('valid_from', null)
+                            ->where('valid_to', null);
+                    })->orWhere(function($b) {
+                        $b->where('valid_from', null)
                             ->where('valid_to', '>=', date(now()));
+                    })->orWhere(function($c) {
+                        $c->where('valid_from', '<=', date(now()))
+                            ->where('valid_to', null);
+                    })->orWhere(function ($d) {
+                        $d->where('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                    });
                 });
             }
 
@@ -825,17 +842,24 @@ class NewsController extends ApiController
         $locale = \LaravelLocalization::getCurrentLocale();
 
         if (!$validator->fails()) {
-            $singleNews = Page::select()->where('type', 1)->where('id', $newsSearchData['news_id']);
+            $singleNews = Page::select()->where('type', Page::TYPE_NEWS)->where('id', $newsSearchData['news_id']);
 
             if(!\Auth::check() || !Role::isAdmin()) {
-                $singleNews
-                    ->where('active', 1)
-                    ->where(function ($m) {
-                        $m->where('valid_from', null)
-                            ->where('valid_to', null)
-                            ->orWhere('valid_from', '<=', date(now()))
-                            ->where('valid_to', '>=', date(now())
-                    );
+                $singleNews->where('active', '!=', Page::ACTIVE_FALSE);
+                $singleNews->where(function ($g) {
+                    $g->where(function($a) {
+                        $a->where('valid_from', null)
+                            ->where('valid_to', null);
+                    })->orWhere(function($b) {
+                        $b->where('valid_from', null)
+                            ->where('valid_to', '>=', date(now()));
+                    })->orWhere(function($c) {
+                        $c->where('valid_from', '<=', date(now()))
+                            ->where('valid_to', null);
+                    })->orWhere(function ($d) {
+                        $d->where('valid_from', '<=', date(now()))
+                            ->where('valid_to', '>=', date(now()));
+                    });
                 });
             }
 

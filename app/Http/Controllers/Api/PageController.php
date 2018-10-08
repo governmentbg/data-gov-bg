@@ -599,7 +599,7 @@ class PageController extends ApiController
             Module::add($logData);
 
             return $this->successResponse([
-                'totalRecords'  => $totalRecords,
+                'total_records' => $totalRecords,
                 'pages'         => $result,
             ], true);
         }

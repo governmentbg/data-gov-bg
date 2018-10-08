@@ -54,7 +54,10 @@
             <button
                 name="download"
                 type="submit"
-                class="badge badge-pill pull-right"
+                class="badge badge-pill pull-right js-ga-event"
+                data-ga-action="download"
+                data-ga-label="resource download"
+                data-ga-category="data"
             >{{ uctrans('custom.download') }}</button>
         </form>
     @endif

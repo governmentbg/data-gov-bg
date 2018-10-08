@@ -45,7 +45,13 @@
             </div>
             <div class="form-group row">
                 <div class="col-xs-12">
-                    <button type="submit" class="col-xs-12 btn btn-primary login-btn">{{ uctrans('custom.login') }}</button>
+                    <button
+                        type="submit"
+                        class="col-xs-12 btn btn-primary login-btn js-ga-event"
+                        data-ga-action="login"
+                        data-ga-label="login attempt"
+                        data-ga-category="users"
+                    >{{ uctrans('custom.login') }}</button>
                 </div>
             </div>
         </form>

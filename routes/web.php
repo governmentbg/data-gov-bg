@@ -337,14 +337,6 @@ Route::match(['get', 'post'], 'confirmError', 'UserController@confirmError')->na
 
 Route::match(['get', 'post'], 'delSettings', 'UserController@deleteCustomSettings');
 
-Route::get('accessibility', function () {
-    return view('accessibility', ['class' => 'index']);
-});
-
-Route::get('terms', function () {
-    return view('terms', ['class' => 'index']);
-});
-
 Route::match(['get', 'post'], 'data', 'DataController@list')->name('data');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
 Route::match(['get', 'post'], 'data/resourceView/{uri}/{version?}', 'DataController@resourceView')->name('dataResourceView');
@@ -396,14 +388,6 @@ Route::match(['get', 'post'], 'document', 'DocumentController@listDocuments');
 Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocuments');
 Route::match(['get', 'post'], 'document/view/{id}', 'DocumentController@viewDocument');
 Route::match(['get', 'post'], 'document/download/{path}/{fileName}', 'DocumentController@downloadDocument');
-
-Route::get('contact', function () {
-    return view('contact/contact', ['class' => 'contact']);
-})->middleware('help');
-
-Route::get('visualisation', function () {
-    return view('visualisation/visualisation', ['class' => 'visualisations']);
-})->middleware('help');
 
 Route::get('{section}', 'StaticPageController@show');
 

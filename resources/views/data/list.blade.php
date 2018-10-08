@@ -23,10 +23,13 @@
                                     <form method="GET" action="{{ url('/data/') }}">
                                         <input
                                             type="text"
-                                            class="m-t-md m-b-md input-border-r-12 form-control"
+                                            class="m-t-md m-b-md input-border-r-12 form-control js-ga-event"
                                             placeholder="{{ __('custom.search') }}"
                                             value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
                                             name="q"
+                                            data-ga-action="search"
+                                            data-ga-label="data search"
+                                            data-ga-category="data"
                                         >
                                         @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
                                             @if (is_array($qpv))

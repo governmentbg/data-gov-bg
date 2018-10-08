@@ -19,18 +19,18 @@ class LocaleTest extends TestCase
      */
     public function testAddLocale()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addLocale'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(url('api/addLocale'),[
             'api_key'   => $this->getApiKey(),
             'data'      => [],
         ])->assertStatus(500)->assertJson(['success' => false]);
 
-        // test successful locale create
+        // Test successful locale create
         $this->post(url('api/addLocale'), [
             'api_key'   => $this->getApiKey(),
             'data'      => [
@@ -52,12 +52,12 @@ class LocaleTest extends TestCase
             'active'    => $this->faker->boolean(),
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/editLocale'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing locale
+        // Test missing locale
         $this->post(url('api/editLocale'), [
             'api_key'   => $this->getApiKey(),
             'data'      => [
@@ -65,14 +65,14 @@ class LocaleTest extends TestCase
             ]
         ])->assertStatus(500)->assertJson(['success' => false]);
 
-        // test missing active
+        // Test missing active
         $this->post(url('api/editLocale'), [
             'api_key'   => $this->getApiKey(),
             'locale'    => 'yy',
             'data'      => [],
         ])->assertStatus(500)->assertJson(['success' => false]);
 
-        // test successful edit
+        // Test successful edit
         $this->post(url('api/editLocale'), [
             'api_key'   => $this->getApiKey(),
             'locale'    => 'yy',
@@ -94,18 +94,18 @@ class LocaleTest extends TestCase
             'active'    => $this->faker->boolean(),
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/deleteLocale'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test wrong locale uri
+        // Test wrong locale uri
         $this->post(url('api/deleteLocale'), [
             'api_key'   => $this->getApiKey(),
             'locale'    => 'yyx',
         ])->assertStatus(500)->assertJson(['success' => false]);
 
-        // test locale deletion
+        // Test locale deletion
         $this->post(url('api/deleteLocale'), [
             'api_key'   => $this->getApiKey(),
             'locale'    => 'yy',
@@ -119,18 +119,18 @@ class LocaleTest extends TestCase
      */
     public function testListLocale()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/listLocale'), ['api_key' => null])
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test empty criteria
+        // Test empty criteria
         $this->post(url('api/listLocale'), [
             'api_key'    => $this->getApiKey(),
             'criteria'   => [],
         ])->assertStatus(200)->assertJson(['success' => true]);
 
-        // test successful list
+        // Test successful list
         $this->post(url('api/listLocale'), [
             'criteria'   => [
                 'active'    => $this->faker->boolean(),
@@ -145,12 +145,12 @@ class LocaleTest extends TestCase
             'active'    => $this->faker->boolean(),
         ]);
 
-        // test missing locale
+        // Test missing locale
         $this->post(url('api/getLocaleDetails'), [
             'locale'    => 'yyx',
         ])->assertStatus(500)->assertJson(['success' => false]);
 
-        // test correct locale
+        // Test correct locale
         $this->post(url('api/getLocaleDetails'), [
             'api_key'   => $this->getApiKey(),
             'locale'    => 'yy',

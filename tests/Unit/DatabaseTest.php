@@ -7,6 +7,7 @@ use App\Role;
 use App\Tags;
 use App\User;
 use App\Locale;
+use App\Module;
 use App\Signal;
 use App\DataSet;
 use App\Section;
@@ -523,17 +524,18 @@ class DatabaseTest extends TestCase
             $locale = $this->faker->randomElement($locales)['locale'];
             $section = $this->faker->randomElement($sections)['id'];
             $dbData = [
-                'section_id'     => $section,
-                'title'          => $this->faker->randomDigit(),
-                'abstract'       => $this->faker->randomDigit(),
-                'body'           => $this->faker->randomDigit(),
-                'head_title'     => $this->faker->randomDigit(),
-                'meta_descript'  => $this->faker->randomDigit(),
-                'meta_key_words' => $this->faker->randomDigit(),
-                'forum_link'     => $this->faker->word,
-                'active'         => $this->faker->boolean,
-                'valid_from'     => $this->faker->date,
-                'valid_to'       => $this->faker->date,
+                'section_id'        => $section,
+                'title'             => $this->faker->randomDigit(),
+                'abstract'          => $this->faker->randomDigit(),
+                'body'              => $this->faker->randomDigit(),
+                'head_title'        => $this->faker->randomDigit(),
+                'meta_descript'     => $this->faker->randomDigit(),
+                'meta_key_words'    => $this->faker->randomDigit(),
+                'type'              => Page::TYPE_PAGE,
+                'forum_link'        => $this->faker->word,
+                'active'            => $this->faker->boolean,
+                'valid_from'        => $this->faker->date,
+                'valid_to'          => $this->faker->date,
             ];
 
             try {
@@ -588,7 +590,7 @@ class DatabaseTest extends TestCase
     {
         $users = User::select('id')->limit(self::ACTIONS_HISTORY_RECORDS)->get()->toArray();
         $types = array_keys(ActionsHistory::getTypes());
-        $modules = Module::getModuleNames();
+        $modules = Module::getModules();
 
         // Test creation
         foreach (range(1, self::ACTIONS_HISTORY_RECORDS) as $i) {
@@ -614,7 +616,8 @@ class DatabaseTest extends TestCase
                 $this->log($ex->getMessage());
             }
 
-             $this->assertNotNull($record);
+            $this->assertNotNull($record);
+
             if (!empty($record->id)) {
                 $this->assertDatabaseHas('actions_history', ['id' => $record->id]);
             }
@@ -787,6 +790,7 @@ class DatabaseTest extends TestCase
     private function signals()
     {
         $resources = Resource::limit(self::SIGNALS_RECORDS)->get()->toArray();
+
         // Test creation
         foreach (range(1, self::SIGNALS_RECORDS) as $i) {
             $resource = $this->faker->randomElement($resources)['id'];
@@ -831,7 +835,6 @@ class DatabaseTest extends TestCase
                 'descript'      => 1,
                 'file_name'     => $this->faker->word,
                 'mime_type'     => $this->faker->word,
-                'data'          => $this->faker->sentence(4)
             ];
 
             try {
@@ -1103,13 +1106,18 @@ class DatabaseTest extends TestCase
      */
     private function elasticDataSets()
     {
+        $resources = Resource::limit(self::DATA_SET_GROUP_RECORDS)->get()->toArray();
+
         // Test creation
         foreach (range(1, self::DATA_SET_GROUP_RECORDS) as $i) {
+            $resource = $this->faker->randomElement($resources)['id'];
             $record = null;
             $dbData = [
-                'index'       => $this->faker->word,
-                'index_type'  => $this->faker->word,
-                'doc'         => $this->faker->randomDigit()
+                'index'         => $this->faker->word,
+                'index_type'    => $this->faker->word,
+                'doc'           => $this->faker->randomDigit(),
+                'version'       => $this->faker->unique()->randomDigit(),
+                'resource_id'   => $resource,
             ];
 
             try {
@@ -1135,7 +1143,7 @@ class DatabaseTest extends TestCase
     {
         $dataSets = DataSet::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
         $organisations = Organisation::select('id')->limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
-        $resources = Resource::limit(self::CUSTOM_SETTING_RECORDS)->get()->toArray();
+
         // Test creation
         foreach (range(1, self::CUSTOM_SETTING_RECORDS) as $i) {
             $organisation = $this->faker->randomElement($organisations)['id'];

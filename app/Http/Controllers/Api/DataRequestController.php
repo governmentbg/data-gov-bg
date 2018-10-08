@@ -36,8 +36,9 @@ class DataRequestController extends ApiController
     public function sendDataRequest(Request $request)
     {
         $requestData = $request->all();
+
         $validator = Validator::make($requestData, [
-            'data'                  => 'required|array',
+            'data'  => 'required|array',
         ]);
 
         if (!$validator->fails()) {
@@ -123,7 +124,7 @@ class DataRequestController extends ApiController
                 Module::add($logData);
 
                 return $this->successResponse(['request_id' => $dataRequest->id], true);
-            } catch (QueryException $e) {
+            } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -228,7 +229,7 @@ class DataRequestController extends ApiController
             }
         }
 
-    return $this->errorResponse(__('custom.edit_request_fail'), $validator->errors()->messages());
+        return $this->errorResponse(__('custom.edit_request_fail'), $validator->errors()->messages());
     }
 
     /**

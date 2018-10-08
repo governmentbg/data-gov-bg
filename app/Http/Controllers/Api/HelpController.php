@@ -39,7 +39,7 @@ class HelpController extends ApiController
                 'title.*'   => 'max:191',
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
-                'active'    => 'required|boolean',
+                'active'    => 'required|int',
                 'ordering'  => 'nullable|int'
             ]);
 
@@ -110,7 +110,7 @@ class HelpController extends ApiController
                 'title.*'   => 'max:191',
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
-                'active'    => 'required|boolean',
+                'active'    => 'required|int',
                 'ordering'  => 'nullable|int'
             ]);
 
@@ -133,10 +133,10 @@ class HelpController extends ApiController
                     $section->save();
 
                     $logData = [
-                        'module_name'      => Module::getModuleName(Module::HELP_SECTIONS),
-                        'action'           => ActionsHistory::TYPE_MOD,
-                        'action_object'    => $section->id,
-                        'action_msg'       => 'Edited help section',
+                        'module_name'   => Module::getModuleName(Module::HELP_SECTIONS),
+                        'action'        => ActionsHistory::TYPE_MOD,
+                        'action_object' => $section->id,
+                        'action_msg'    => 'Edited help section',
                     ];
 
                     Module::add($logData);
@@ -170,10 +170,10 @@ class HelpController extends ApiController
                 $section->delete();
 
                 $logData = [
-                    'module_name'      => Module::getModuleName(Module::HELP_SECTIONS),
-                    'action'           => ActionsHistory::TYPE_DEL,
-                    'action_object'    => $request->id,
-                    'action_msg'       => 'Deleted help section ',
+                    'module_name'   => Module::getModuleName(Module::HELP_SECTIONS),
+                    'action'        => ActionsHistory::TYPE_DEL,
+                    'action_object' => $request->id,
+                    'action_msg'    => 'Deleted help section ',
                 ];
 
                 Module::add($logData);
@@ -349,8 +349,8 @@ class HelpController extends ApiController
                 'title'         => 'required_with:locale|max:191',
                 'title.bg'      => 'required_without:locale|string|max:191',
                 'title.*'       => 'max:191',
-                'body'          => 'required_with:locale|max:191',
-                'body.bg'       => 'required_without:locale|string|max:191',
+                'body'          => 'required_with:locale|max:8000',
+                'body.bg'       => 'required_without:locale|string|max:8000',
                 'body.*'        => 'max:8000',
                 'ordering'      => 'nullable|int',
                 'active'        => 'required|boolean',
@@ -380,10 +380,10 @@ class HelpController extends ApiController
                     $helpPage->save();
 
                     $logData = [
-                        'module_name'      => Module::getModuleName(Module::HELP_PAGES),
-                        'action'           => ActionsHistory::TYPE_ADD,
-                        'action_object'    => $helpPage->id,
-                        'action_msg'       => 'Added help page',
+                        'module_name'   => Module::getModuleName(Module::HELP_PAGES),
+                        'action'        => ActionsHistory::TYPE_ADD,
+                        'action_object' => $helpPage->id,
+                        'action_msg'    => 'Added help page',
                     ];
 
                     Module::add($logData);
@@ -434,8 +434,8 @@ class HelpController extends ApiController
                 'title'         => 'required_with:locale|max:191',
                 'title.bg'      => 'required_without:locale|string|max:191',
                 'title.*'       => 'max:191',
-                'body'          => 'required_with:locale|max:191',
-                'body.bg'       => 'required_without:locale|string|max:191',
+                'body'          => 'required_with:locale|max:8000',
+                'body.bg'       => 'required_without:locale|string|max:8000',
                 'body.*'        => 'max:8000',
                 'ordering'      => 'nullable|int',
                 'active'        => 'required|boolean',
@@ -471,10 +471,10 @@ class HelpController extends ApiController
                     $helpPage->save();
 
                     $logData = [
-                        'module_name'      => Module::getModuleName(Module::HELP_PAGES),
-                        'action'           => ActionsHistory::TYPE_MOD,
-                        'action_object'    => $helpPage->id,
-                        'action_msg'       => 'Added help page',
+                        'module_name'   => Module::getModuleName(Module::HELP_PAGES),
+                        'action'        => ActionsHistory::TYPE_MOD,
+                        'action_object' => $helpPage->id,
+                        'action_msg'    => 'Added help page',
                     ];
 
                     Module::add($logData);
@@ -508,10 +508,10 @@ class HelpController extends ApiController
                 $page->delete();
 
                 $logData = [
-                    'module_name'      => Module::getModuleName(Module::HELP_PAGES),
-                    'action'           => ActionsHistory::TYPE_DEL,
-                    'action_object'    => $request->page_id,
-                    'action_msg'       => 'Deleted help page',
+                    'module_name'   => Module::getModuleName(Module::HELP_PAGES),
+                    'action'        => ActionsHistory::TYPE_DEL,
+                    'action_object' => $request->page_id,
+                    'action_msg'    => 'Deleted help page',
                 ];
 
                 Module::add($logData);

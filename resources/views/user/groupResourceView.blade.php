@@ -68,8 +68,11 @@
                                             @endforeach
                                         </table>
                                         <a
-                                           class="badge badge-pill pull-right"
-                                           href="{{ url('/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
+                                            class="badge badge-pill pull-right js-ga-event"
+                                            data-ga-action="download"
+                                            data-ga-label="resource download"
+                                            data-ga-category="data"
+                                            href="{{ url('/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
                                         >{{ uctrans('custom.download') }}</a>
                                     @endif
                                 </div>

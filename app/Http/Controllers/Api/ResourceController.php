@@ -261,14 +261,15 @@ class ResourceController extends ApiController
                     'resource_id'   => $id
                 ]);
 
+                // Filter data for containing personal info
+                $filteredData = $this->checkData($post['data']);
+
                 \Elasticsearch::index([
-                    'body'  => ['rows' => $post['data']],
+                    'body'  => ['rows' => $filteredData],
                     'index' => $index,
                     'type'  => ElasticDataSet::ELASTIC_TYPE,
                     'id'    => $id .'_1',
                 ]);
-
-                DB::commit();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -278,6 +279,8 @@ class ResourceController extends ApiController
                 ];
 
                 Module::add($logData);
+
+                DB::commit();
 
                 return $this->successResponse();
             } catch (\Exception $ex) {
@@ -509,6 +512,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                DB::beginTransaction();
+
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $newVersion = strval(intval($resource->version) + 1);
                 $dataset = DataSet::where('id', $resource->data_set_id);
@@ -518,11 +523,11 @@ class ResourceController extends ApiController
                         Module::RESOURCES,
                         RoleRight::RIGHT_EDIT,
                         [
-                            'org_id' => $dataset->org_id
+                            'org_id'    => $dataset->org_id
                         ],
                         [
-                            'created_by' => $dataset->created_by,
-                            'org_id'     => $dataset->org_id
+                            'created_by'    => $dataset->created_by,
+                            'org_id'        => $dataset->org_id
                         ]
                     );
                 } else {
@@ -531,7 +536,7 @@ class ResourceController extends ApiController
                         RoleRight::RIGHT_EDIT,
                         [],
                         [
-                            'created_by' => $resource->created_by
+                            'created_by'    => $resource->created_by
                         ]
                     );
                 }
@@ -542,6 +547,12 @@ class ResourceController extends ApiController
 
                 $id = $resource->id;
                 $index = $resource->dataSet->id;
+
+                // update signals status after resource version update and mark resource as not reported
+                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                $resource->is_reported = Resource::REPORTED_FALSE;
+                $resource->version = $newVersion;
+                $resource->save();
 
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
@@ -558,12 +569,6 @@ class ResourceController extends ApiController
                     'id'    => $id .'_'. $newVersion,
                 ]);
 
-                // update signals status after resource version update and mark resource as not reported
-                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
-                $resource->is_reported = Resource::REPORTED_FALSE;
-                $resource->version = $newVersion;
-                $resource->save();
-
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,
@@ -573,8 +578,12 @@ class ResourceController extends ApiController
 
                 Module::add($logData);
 
+                DB::commit();
+
                 return $this->successResponse();
             } catch (\Exception $ex) {
+                DB::rollback();
+
                 Log::error($ex->getMessage());
             }
         }
@@ -595,7 +604,9 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
+        $validator = \Validator::make($post, [
+            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
+        ]);
 
         if (!$validator->fails()) {
             try {
@@ -1374,5 +1385,128 @@ class ResourceController extends ApiController
         }
 
         return false;
+    }
+
+    /**
+     * Check if data contains potential personal info
+     *
+     * @param array $data - required
+     * @return array $data with hidden personal info
+     */
+    private function checkData($data)
+    {
+        array_walk_recursive($data, function(&$item, $key) {
+            $replaceWith = '**********';
+            $pattern = '/[0-9]{10}/';
+
+            if (!is_object($item)) {
+                if (preg_match_all($pattern, $item, $match)) {
+                    foreach ($match as $k => $value) {
+                        foreach ($value as $v) {
+                            if ($this->isPersonalInfo($v)) {
+                                $item = str_replace($v, $replaceWith, $item);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return $data;
+    }
+
+    /**
+     * Check if given string is personal information (egn/lnch)
+     *
+     * @param string $string - required
+     * @return true if is valid personal information, false otherwise
+     */
+    private function isPersonalInfo($string)
+    {
+        if ($this->checkEGN($string)) {
+            return true;
+        } else if ($this->checkPNF($string)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if given string is valid EGN (identification number)
+     *
+     * @param string $egn - required
+     * @return true if is valid EGN, false otherwise
+     */
+    private function checkEGN($egn)
+    {
+        $egnWeights = [2, 4, 8, 5, 10, 9, 7, 3, 6];
+
+        if (strlen($egn) != 10) {
+            return false;
+        }
+
+        $year = substr($egn, 0, 2);
+        $mon = substr($egn, 2, 2);
+        $day = substr($egn, 4, 2);
+
+        if ($mon > 40) {
+            if (!checkdate($mon - 40, $day, $year + 2000)) {
+                return false;
+            }
+        } else if ($mon > 20) {
+            if (!checkdate($mon - 20, $day, $year + 1800)) {
+                return false;
+            }
+        } else {
+            if (!checkdate($mon, $day, $year + 1900)) {
+                return false;
+            }
+        }
+
+        $checkSum = substr($egn, 9, 1);
+        $egnSum = 0;
+
+        for ($i = 0; $i < 9; $i++) {
+            $egnSum += substr($egn, $i, 1) * $egnWeights[$i];
+        }
+
+        $validCheckSum = $egnSum % 11;
+
+        if ($validCheckSum == 10) {
+            $validCheckSum = 0;
+        }
+
+        if ($checkSum == $validCheckSum) {
+            return true;
+        }
+    }
+
+    /*
+     * Check if given string is valid LNCH (personal number of a foreigner)
+     *
+     * @param string $pnForeigner - required
+     * @return true if is valid LNCH, false otherwise
+     */
+    private function checkPNF($pnForeigner)
+    {
+        $pnfWeights = [21, 19, 17, 13, 11, 9, 7, 3, 1];
+
+        if (strlen($pnForeigner) != 10) {
+            return false;
+        }
+
+        $checkSum = substr($pnForeigner, 9, 1);
+        $pnfSum = 0;
+
+        for ($i = 0; $i < 9; $i++) {
+            $pnfSum += substr($pnForeigner, $i, 1) * $pnfWeights[$i];
+        }
+
+        $validCheckSum = $pnfSum % 10;
+
+        if ($checkSum == $validCheckSum) {
+            return true;
+        }
     }
 }

@@ -14,16 +14,19 @@ class PageTest extends TestCase
     use WithFaker;
     use DatabaseTransactions;
 
-    private $locale = 'en';
-
+    /**
+     * Test page creation
+     *
+     * @return void
+     */
     public function testAddPage()
     {
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/addPage'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing data
+        // Test missing data
         $this->post(
             url('api/addPage'),
             [
@@ -40,8 +43,8 @@ class PageTest extends TestCase
             url('api/addPage'),
             [
                 'api_key'   => $this->getApiKey(),
-                'locale'    => 'bg',
                 'data'      => [
+                    'locale'            => $this->locale,
                     'title'             => $this->faker->word(),
                     'body'              => $this->faker->word(),
                     'head_title'        => $this->faker->word(),
@@ -55,38 +58,32 @@ class PageTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // check that a record is made
+        // Check that a record is made
         $this->assertTrue($count + 1 == Page::all()->count());
     }
 
-
+    /**
+     * Test page modification
+     *
+     * @return void
+     */
     public function testEditPage()
     {
-        $page = Page::create([
-            'title'             => ApiController::trans($this->locale, $this->faker->word()),
-            'body'              => ApiController::trans($this->locale, $this->faker->word()),
-            'head_title'        => ApiController::trans($this->locale, $this->faker->word()),
-            'meta_descript'     => ApiController::trans($this->locale, $this->faker->word()),
-            'meta_key_words'    => ApiController::trans($this->locale, $this->faker->word()),
-            'forum_link'        => $this->faker->word,
-            'active'            => $this->faker->boolean,
-            'valid_from'        => $this->faker->date,
-            'valid_to'          => $this->faker->date
-        ]);
+        $page = $this->getNewPage();
 
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/editPage'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing page id
+        // Test missing page id
         $this->post(
             url('api/editPage'),
             [
                 'api_key'   => $this->getApiKey(),
                 'page_id'   => null,
-                'locale'    => 'en',
                 'data'      => [
+                    'locale'    => $this->locale,
                     'title'               => $this->faker->word(),
                     'body'                => $this->faker->word(),
                     'head_title'          => $this->faker->word(),
@@ -102,7 +99,7 @@ class PageTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        //test missing data
+        // Test missing data
         $this->post(
             url('api/editPage'),
             [
@@ -114,16 +111,19 @@ class PageTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful testEdit
+        // Test successful testEdit
         $this->post(
             url('api/editPage'),
             [
                 'api_key'       => $this->getApiKey(),
                 'page_id'       => $page->id,
-                'locale'        => 'en',
                 'data'          => [
-                      'body'    => $this->faker->word(),
-                      'active'  => 1
+                    'locale'        => $this->locale,
+                    'title'         => $this->faker->word(),
+                    'body'          => $this->faker->word(),
+                    'abstract'      => $this->faker->word(),
+                    'head_title'    => $this->faker->word(),
+                    'active'        => 1
                 ],
             ]
         )
@@ -131,21 +131,16 @@ class PageTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test page deletion
+     *
+     * @return void
+     */
     public function testDeletePage()
     {
-        $page = Page::create([
-            'title'             => ApiController::trans($this->locale, $this->faker->word()),
-            'body'              => ApiController::trans($this->locale, $this->faker->word()),
-            'head_title'        => ApiController::trans($this->locale, $this->faker->word()),
-            'meta_descript'     => ApiController::trans($this->locale, $this->faker->word()),
-            'meta_key_words'    => ApiController::trans($this->locale, $this->faker->word()),
-            'forum_link'        => $this->faker->word,
-            'active'            => $this->faker->boolean,
-            'valid_from'        => $this->faker->date,
-            'valid_to'          => $this->faker->date
-        ]);
+        $page = $this->getNewPage();
 
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/deletePage'),
             [
                 'api_key' => null,
@@ -155,7 +150,7 @@ class PageTest extends TestCase
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing page id
+        // Test missing page id
         $this->post(
             url('api/deletePage'),
             [
@@ -168,7 +163,7 @@ class PageTest extends TestCase
 
         $count = Page::all()->count();
 
-        //test successful delete
+        // Test successful delete
         $this->post(
             url('api/deletePage'),
             [
@@ -179,10 +174,15 @@ class PageTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // check that a record is missing
+        // Check that a record is missing
         $this->assertTrue($count - 1 == Page::all()->count());
     }
 
+    /**
+     * Test page list
+     *
+     * @return void
+     */
     public function testList()
     {
         $response = $this->post(

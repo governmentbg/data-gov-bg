@@ -23,6 +23,7 @@ class ActionsHistory extends Model
     const TYPE_FOLLOW = 11;
     const TYPE_UNFOLLOW = 12;
     const TYPE_LOGIN = 13;
+    const TYPE_CONFIRM_ACCOUNT = 14;
 
     public $timestamps = false;
     protected $guarded = ['id'];
@@ -36,16 +37,17 @@ class ActionsHistory extends Model
     public static function getTypes()
     {
         return [
-            self::TYPE_SEE            => __('custom.saw'),
-            self::TYPE_ADD            => __('custom.added'),
-            self::TYPE_MOD            => __('custom.modified'),
-            self::TYPE_DEL            => __('custom.deleted'),
-            self::TYPE_ADD_MEMBER     => __('custom.add_members'),
-            self::TYPE_EDIT_MEMBER    => __('custom.edit_member'),
-            self::TYPE_DEL_MEMBER     => __('custom.del_member'),
-            self::TYPE_FOLLOW         => __('custom.followed'),
-            self::TYPE_UNFOLLOW       => __('custom.unfollowed'),
-            self::TYPE_LOGIN          => __('custom.login')
+            self::TYPE_SEE             => __('custom.saw'),
+            self::TYPE_ADD             => __('custom.added'),
+            self::TYPE_MOD             => __('custom.modified'),
+            self::TYPE_DEL             => __('custom.deleted'),
+            self::TYPE_ADD_MEMBER      => __('custom.add_members'),
+            self::TYPE_EDIT_MEMBER     => __('custom.edit_member'),
+            self::TYPE_DEL_MEMBER      => __('custom.del_member'),
+            self::TYPE_FOLLOW          => __('custom.followed'),
+            self::TYPE_UNFOLLOW        => __('custom.unfollowed'),
+            self::TYPE_LOGIN           => __('custom.login'),
+            self::TYPE_CONFIRM_ACCOUNT => __('custom.confirm_account'),
         ];
     }
 

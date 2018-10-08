@@ -12,16 +12,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\RoleController as ApiRole;
 
 class RoleController extends AdminController {
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct() {
-
-    }
-
     /**
      * Show the role list.
      *

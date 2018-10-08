@@ -55,12 +55,52 @@
         }
     }
 
-    .save-btn {
-        background-color: $brand-success !important;
-        border-color: $brand-success !important;
-    }
-
     .form-group {
         overflow: hidden;
     }
+}
+
+.save-btn {
+    background-color: $brand-success !important;
+    border-color: $brand-success !important;
+}
+
+.tool-history {
+
+    .history-filters {
+        color: black !important;
+        padding: 25px 20px 5px 15px;
+        border: 1px #c02e54 solid;
+        border-radius: 10px;
+
+        .date {
+            padding-right: 0px;
+        }
+
+        .last {
+            padding-right: 10px;
+        }
+    }
+
+    .history-row {
+        border-left: 2px #c02e54 solid;
+        padding-left: 20px;
+        padding-bottom: 50px;
+
+        &:last-child {
+            padding-bottom: 0px;
+        }
+
+        span {
+            word-break: break-word;
+        }
+    }
+
+    .succ-lbl {
+        margin-left: 27px !important;
+    }
+}
+
+.dropdown-menu {
+    z-index: 999 !important;
 }

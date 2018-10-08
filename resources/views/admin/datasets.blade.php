@@ -15,10 +15,13 @@
             <form method="GET">
                 <input
                     type="text"
-                    class="m-t-md input-border-r-12 form-control"
+                    class="m-t-md input-border-r-12 form-control js-ga-event"
                     placeholder="{{ __('custom.search') }}.."
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"
+                    data-ga-action="search"
+                    data-ga-label="data search"
+                    data-ga-category="data"
                 >
                 @foreach (app('request')->except(['q', 'page']) as $key => $value)
                     @if (is_array($value))

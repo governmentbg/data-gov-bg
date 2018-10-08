@@ -13,16 +13,19 @@ class DocumentTest extends TestCase
     use WithFaker;
     use DatabaseTransactions;
 
-    private $locale = 'en';
-
+    /**
+     * Test document creation
+     *
+     * @return void
+     */
     public function testAddDocument()
     {
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/addDocument'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing data
+        // Test missing data
         $this->post(
             url('api/addDocument'),
             [
@@ -40,7 +43,7 @@ class DocumentTest extends TestCase
             [
                 'api_key'   => $this->getApiKey(),
                 'data'      => [
-                    'locale'       => 'en',
+                    'locale'       => $this->locale,
                     'name'         => $this->faker->word(),
                     'description'  => $this->faker->word(),
                     'filename'     => $this->faker->word(),
@@ -52,26 +55,25 @@ class DocumentTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // check that a record is made
+        // Check that a record is made
         $this->assertTrue($count + 1 == Document::all()->count());
     }
 
+    /**
+     * Test document modification
+     *
+     * @return void
+     */
     public function testEditDocument()
     {
-        $document = Document::create([
-            'name'         => ApiController::trans($this->locale, $this->faker->word()),
-            'descript'     => ApiController::trans($this->locale, $this->faker->word()),
-            'file_name'    => $this->faker->word(),
-            'mime_type'    => $this->faker->word(),
-            'data'         => $this->faker->word()
-        ]);
+        $document = $this->getNewDocument();
 
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/addDocument'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing doc id
+        // Test missing doc id
         $this->post(
             url('api/editDocument'),
             [
@@ -85,7 +87,7 @@ class DocumentTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        //test missing data
+        // Test missing data
         $this->post(
             url('api/editDocument'),
             [
@@ -97,14 +99,14 @@ class DocumentTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful test Edit
+        // Test successful test Edit
         $this->post(
             url('api/editDocument'),
             [
                 'api_key'   => $this->getApiKey(),
                 'doc_id'    => $document->id,
                 'data'      => [
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'name'          => $this->faker->word(),
                     'description'   => $this->faker->word(),
                     'filename'      => $this->faker->word(),
@@ -115,24 +117,25 @@ class DocumentTest extends TestCase
         )
             ->assertStatus(200)
             ->assertJson(['success' => true]);
+
+        @unlink('storage/docs/'. $document->id);
     }
 
+    /**
+     * Test document deletion
+     *
+     * @return void
+     */
     public function testDeleteDocument()
     {
-        $document = Document::create([
-            'name'         => ApiController::trans($this->locale, $this->faker->word()),
-            'descript'     => ApiController::trans($this->locale, $this->faker->word()),
-            'file_name'    => $this->faker->word(),
-            'mime_type'    => $this->faker->word(),
-            'data'         => $this->faker->word()
-        ]);
+        $document = $this->getNewDocument();
 
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/deleteDocument'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing document id
+        // Test missing document id
         $this->post(
             url('api/deleteDocument'),
             [
@@ -145,7 +148,7 @@ class DocumentTest extends TestCase
 
         $count = Document::all()->count();
 
-        //test successful delete
+        // Test successful delete
         $this->post(
             url('api/deleteDocument'),
             [
@@ -156,8 +159,10 @@ class DocumentTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // check that a record is missing
+        // Check that a record is missing
         $this->assertTrue($count - 1 == Document::all()->count());
+
+        @unlink('storage/docs/'. $document->id);
     }
 
     public function testList()
@@ -172,20 +177,14 @@ class DocumentTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test document search
+     *
+     * @return void
+     */
     public function testSearchDocument()
     {
-        // test missing criteria
-        $this->post(
-            url('api/listDocuments'),
-            [
-                'api_key'   => $this->getApiKey(),
-                'criteria'  => [],
-            ]
-        )
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
-
-        //test successful search
+        // Test successful search
         $this->post(
             url('api/listDocuments'),
             [

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Module;
 use App\Resource;
 use App\DataQuery;
+use Carbon\Carbon;
 use App\ActionsHistory;
 use App\ConnectionSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Database\QueryException;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiHistory;
 
@@ -492,18 +494,32 @@ class ToolController extends Controller
         $post = $request->all();
         $modules = Module::getToolModules();
         $actionTypes = ActionsHistory::getTypes();
+        $connectionTypes = $this->getDrivers();
+        $today = Carbon::now();
 
         $range = [
             'from'  => isset($request->period_from) ? $request->period_from : null,
             'to'    => isset($request->period_to) ? $request->period_to : null
         ];
 
+        $time = [
+            'from'  => isset($request->time_from) ? $request->time_from : null,
+            'to'    => isset($request->time_to) ? $request->time_to : null
+        ];
+
+        $hourFrom = $request->offsetGet('time_from') ?: '';
+        $hourTo = $request->offsetGet('time_to') ?: '23:59';
+
         if (!empty($request->offsetGet('period_from'))) {
-            $params['criteria']['period_from'] = date_format(date_create($request->offsetGet('period_from')), 'Y-m-d H:i:s');
+            $params['criteria']['period_from'] = date_format(date_create($request->offsetGet('period_from') .' '. $hourFrom), 'Y-m-d H:i:s');
+        } else if (!empty($request->offsetGet('time_from'))) {
+            $params['criteria']['period_from'] = date_format(date_create($today->toDateString() .' '. $request->offsetGet('time_from')), 'Y-m-d H:i:s');
         }
 
         if (!empty($request->offsetGet('period_to'))) {
-            $params['criteria']['period_to'] = date_format(date_create($request->offsetGet('period_to') .' 23:59'), 'Y-m-d H:i:s');;
+            $params['criteria']['period_to'] = date_format(date_create($request->offsetGet('period_to') .' '. $hourTo), 'Y-m-d H:i:s');
+        } else if (!empty($request->offsetGet('time_to'))) {
+            $params['criteria']['period_to'] = date_format(date_create($today->toDateString() .' '. $request->offsetGet('time_to')), 'Y-m-d H:i:s');
         }
 
         if (isset($post['status'])) {
@@ -512,6 +528,10 @@ class ToolController extends Controller
 
         if (!empty($request->offsetGet('source_type'))) {
             $params['criteria']['module'] = $request->offsetGet('source_type');
+        }
+
+        if (!empty($request->offsetGet('db_type'))) {
+            $params['criteria']['source_db_type'] = $request->offsetGet('db_type');
         }
 
         if (!empty($request->offsetGet('q'))) {
@@ -524,6 +544,15 @@ class ToolController extends Controller
 
         $history = $res->success ? $res->actions_history : [];
 
-        return view('tool/history', compact('class', 'modules', 'range', 'history', 'actionTypes', 'post'));
+        return view('tool/history', compact(
+            'class',
+            'modules',
+            'range',
+            'history',
+            'actionTypes',
+            'post',
+            'connectionTypes',
+            'time'
+        ));
     }
 }

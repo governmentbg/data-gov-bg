@@ -201,10 +201,13 @@
                         >
                             <input
                                 type="text"
-                                class="m-t-md input-border-r-12 form-control"
+                                class="m-t-md input-border-r-12 form-control js-ga-event"
                                 placeholder="{{ __('custom.search') }}"
                                 value="{{ isset($search) ? $search : '' }}"
                                 name="q"
+                                data-ga-action="search"
+                                data-ga-label="data search"
+                                data-ga-category="data"
                             >
                             @if (isset(app('request')->input()['status']))
                                 <input type="hidden" name="status" value="{{ app('request')->input()['status'] }}">

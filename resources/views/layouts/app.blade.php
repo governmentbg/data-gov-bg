@@ -13,7 +13,7 @@
         <meta name="description" content="{{ $description }}">
     @endif
     @if (!empty($keywords))
-        <meta name="keywords" content="{{$keywords}}">
+        <meta name="keywords" content="{{ $keywords }}">
     @endif
     <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
     <!-- Styles -->
@@ -28,7 +28,28 @@
     <link href="{{ asset('css/summernote/summernote-bs4.css') }}" rel="stylesheet">
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
+    @if (isset($link))
+        <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}"/>
+    @endif
+    @if (isset($datasetLink))
+        <link rel="alternate" type="application/rss+xml" title="Datasets" href="{{ url('/datasets/rss') }}"/>
+    @endif
+    @if (isset($newsLink))
+        <link rel="alternate" type="application/rss+xml" title="News" href="{{ url('/news/rss') }}"/>
+    @endif
     @yield('css')
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    @if (!empty(env('GA_TRACKING_ID')))
+        <script async src="{{ 'https://www.googletagmanager.com/gtag/js?id='. env('GA_TRACKING_ID') }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', '{{ env('GA_TRACKING_ID') }}');
+        </script>
+    @endif
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">
@@ -95,7 +116,13 @@
                                         </a>
                                     </span>
                                     <span class="login-link">
-                                        <a href="{{ url('/logout') }}"> {{ __('custom.logout') }}</a>
+                                        <a
+                                            href="{{ url('/logout') }}"
+                                            class="js-ga-event"
+                                            data-ga-action="logout"
+                                            data-ga-label="logout attempt"
+                                            data-ga-category="users"
+                                        > {{ __('custom.logout') }}</a>
                                     </span>
                                 @else
                                     <span class="login-link">>
@@ -103,8 +130,15 @@
                                     </span>
                                 @endif
                                 <span class="search-input">
-                                    <form action="{{ action('DataController@list') }}" class="inline-block">
-                                        <input type="text" name="q" placeholder="{{ __('custom.search') }}">
+                                    <form action="{{ action('DataController@list') }}" class="inline-block js-ga-event">
+                                        <input
+                                            type="text"
+                                            name="q"
+                                            placeholder="{{ __('custom.search') }}"
+                                            data-ga-action="search"
+                                            data-ga-label="data search"
+                                            data-ga-category="data"
+                                        >
                                     </form>
                                 </span>
                             @endif
@@ -166,9 +200,6 @@
                                 <li class="request {{ Request::segment(1) == 'request' ? 'active' : '' }}">
                                     <a href="{{ url('/request') }}">{{ __('custom.data_requests') }}</a>
                                 </li>
-                                <li class="visualisation {{ Request::segment(1) == 'visualisation' ? 'active' : '' }}">
-                                    <a href="{{ url('/visualisation') }}">{{ uctrans('custom.visualizations') }}</a>
-                                </li>
                                 <li class="news {{ Request::segment(1) == 'news' ? 'active' : '' }}">
                                     <a href="{{ url('/news') }}">{{ __('custom.news_events') }}</a>
                                 </li>
@@ -212,6 +243,10 @@
                                     <li class="hidden-lg hidden-md hidden-sm index">
                                         <a
                                             href="{{ url('/logout') }}"
+                                            class="js-ga-event"
+                                            data-ga-action="logout"
+                                            data-ga-label="logout attempt"
+                                            data-ga-category="users"
                                         >{{ uctrans('custom.logout') }}&nbsp;<i class="fa fa-sign-out"></i></a>
                                     @endif
                                 </li>
@@ -219,7 +254,10 @@
                                     <input
                                         type="text"
                                         placeholder="{{ __('custom.search') }}"
-                                        class="form-control rounded-input input-long"
+                                        class="form-control rounded-input input-long js-ga-event"
+                                        data-ga-action="search"
+                                        data-ga-label="data search"
+                                        data-ga-category="data"
                                     >
                                 </li>
                                 <li class="hidden-lg hidden-md hidden-sm icons">
@@ -234,7 +272,31 @@
                         </ul>
                     </div>
                 </div>
-                <div class="underline"></div>
+                <div class="underline">
+                    <div class="help-ico js-help">
+                        @if (!empty($help))
+                            <span class="js-open-help glyphicon glyphicon-question-sign"></span>
+                            @include('components.help', ['help' => $help])
+                        @elseif (\Auth::check() && App\Role::isAdmin())
+                            <span class="js-open-help glyphicon glyphicon-question-sign"></span>
+                            <div class="js-help-bar help-container hidden">
+                                <div class="help-content">
+                                    <div class="close"><span class="close-btn">X</span></div>
+                                    <h3>{{ __('custom.no_help') }}</h3>
+                                    <a
+                                        class="btn-primary btn"
+                                        href="{{
+                                            route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
+                                                ? 'home'
+                                                : str_replace(env('APP_URL') .'/','',\Request::url())
+                                            ])
+                                        }}"
+                                    >{{ __('custom.add') }}</a>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </nav>
 
             <div class="js-content">
@@ -278,6 +340,7 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
+    <script src="{{ asset('js/bootstrap-clockpicker.min.js') }}"></script>
     @yield('js')
 </body>
 </html>

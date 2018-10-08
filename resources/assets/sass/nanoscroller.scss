@@ -70,5 +70,6 @@ $contentClass: "nano-content" !default;
     &.flashed {
         visibility: visible\9; // Target only IE7 and IE8 with this hack
         opacity: 0.99;
+        z-index: 999;
     }
 }

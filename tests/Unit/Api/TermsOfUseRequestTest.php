@@ -9,7 +9,7 @@ use App\TermsOfUseRequest;
 
 class TermsOfUseRequestTest extends TestCase
 {
-use DatabaseTransactions;
+    use DatabaseTransactions;
     use WithFaker;
 
     /**
@@ -17,12 +17,12 @@ use DatabaseTransactions;
      */
     public function testAddTermsOfUseRequest()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/sendTermsOfUseRequest'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/sendTermsOfUseRequest'),
             [
@@ -33,7 +33,7 @@ use DatabaseTransactions;
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section create
+        // Test successful section create
         $this->post(
             url('api/sendTermsOfUseRequest'),
             [
@@ -43,7 +43,7 @@ use DatabaseTransactions;
                     'firstname'     => $this->faker->name(),
                     'lastname'      => $this->faker->name(),
                     'email'         => $this->faker->email(),
-                    'status'        => $this->faker->numberBetween(1, 10),
+                    'status'        => TermsOfUseRequest::STATUS_NEW,
                 ]
             ]
         )
@@ -61,16 +61,15 @@ use DatabaseTransactions;
             'firstname'     => $this->faker->name(),
             'lastname'      => $this->faker->name(),
             'email'         => $this->faker->email(),
-            'status'        => $this->faker->numberBetween(1, 10),
-            'created_by'    => 1,
+            'status'        => TermsOfUseRequest::STATUS_NEW,
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/editTermsOfUseRequest'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(
             url('api/editTermsOfUseRequest'),
             [
@@ -78,17 +77,17 @@ use DatabaseTransactions;
                 'data'      => [
                     'name'          => $this->faker->word(),
                     'description'   => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'is_default'    => $this->faker->boolean(),
-                    'ordering'      => $this->faker->numberBetween(1, 10),
+                    'ordering'      => TermsOfUseRequest::STATUS_NEW,
                 ]
             ]
         )
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/editTermsOfUseRequest'),
             [
@@ -100,7 +99,7 @@ use DatabaseTransactions;
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section edit
+        // Test successful section edit
         $this->post(
             url('api/editTermsOfUseRequest'),
             [
@@ -111,7 +110,7 @@ use DatabaseTransactions;
                     'firstname'     => $this->faker->name(),
                     'lastname'      => $this->faker->name(),
                     'email'         => $this->faker->email(),
-                    'status'        => $this->faker->numberBetween(1, 10),
+                    'status'        => TermsOfUseRequest::STATUS_NEW,
                 ]
             ]
         )
@@ -129,21 +128,20 @@ use DatabaseTransactions;
             'firstname'     => $this->faker->name(),
             'lastname'      => $this->faker->name(),
             'email'         => $this->faker->email(),
-            'status'        => $this->faker->numberBetween(1, 10),
-            'created_by'    => 1,
+            'status'        => TermsOfUseRequest::STATUS_NEW,
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/deleteTermsOfUseRequest'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(url('api/deleteTermsOfUseRequest'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section delete
+        // Test successful section delete
         $this->post(
             url('api/deleteTermsOfUseRequest'),
             [
@@ -160,12 +158,12 @@ use DatabaseTransactions;
      */
     public function testListTermsOfUseRequest()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/listTermsOfUseRequests'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty criteria
+        // Test empty criteria
         $this->post(
             url('api/listTermsOfUseRequests'),
             [
@@ -176,7 +174,7 @@ use DatabaseTransactions;
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test successful section list
+        // Test successful section list
         $this->post(
             url('api/listTermsOfUseRequests'),
             [

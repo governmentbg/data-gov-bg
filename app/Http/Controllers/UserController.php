@@ -196,7 +196,8 @@ class UserController extends Controller {
         $params = [
             'api_key'           => \Auth::user()->api_key,
             'criteria'          => [
-                'keywords'          => $search
+                'keywords'          => $search,
+                'created_by'        => \Auth::user()->id
             ],
             'records_per_page'  => $perPage,
             'page_number'       => !empty($request->page) ? $request->page : 1,
@@ -214,6 +215,13 @@ class UserController extends Controller {
         );
 
         $buttons['add'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['view'] = $rightCheck;
 
         foreach ($datasets as $dataset) {
             $rightCheck = RoleRight::checkUserRight(
@@ -514,15 +522,16 @@ class UserController extends Controller {
                 'group_id'      => $groupId,
             ];
 
-            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
-            $added = $api->addDataSetToGroup($addGroup)->getData();
+            if (!is_null($groupId)) {
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
 
-            if (!$added->success) {
-                session()->flash('alert-danger', __('custom.edit_error'));
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
 
-                return redirect()->back()->withInput()->withErrors($added->errors);
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
             }
-
             if ($request->has('publish')) {
                 $editData['status'] = DataSet::STATUS_PUBLISHED;
             }
@@ -871,9 +880,9 @@ class UserController extends Controller {
             $result = $api->deleteDataset($apiRequest)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+                session()->flash('alert-success', __('custom.success_dataset_delete'));
             } else {
-                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+                session()->flash('alert-danger', __('custom.fail_dataset_delete'));
             }
         }
 
@@ -2019,6 +2028,7 @@ class UserController extends Controller {
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $fromOrg = Organisation::where('uri', $orgUri)->first();
+        $root = isset(\Auth::user()->is_admin) ? 'admin' : 'user';
 
         if (DataSet::where('uri', $datasetUri)->count()) {
             if (!is_null($fromOrg)) {
@@ -2129,6 +2139,7 @@ class UserController extends Controller {
             'fields'      => $this->getResourceTransFields(),
             'fromOrg'     => $fromOrg,
             'dataSetName' => isset($dataSetName) ? $dataSetName : null,
+            'root'        => $root
         ]);
     }
 
@@ -2514,9 +2525,9 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $request = Request::create('/api/searchOrganisations', 'POST', $params);
+        $request = Request::create('/api/listOrganisations', 'POST', $params);
         $api = new ApiOrganisation($request);
-        $result = $api->searchOrganisations($request)->getData();
+        $result = $api->listOrganisations($request)->getData();
         $organisations = !empty($result->organisations) ? $result->organisations : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
@@ -2621,9 +2632,9 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $request = Request::create('/api/searchDataset', 'POST', $params);
+        $request = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($request);
-        $result = $api->searchDataset($request)->getData();
+        $result = $api->listDatasets($request)->getData();
         $datasets = !empty($result->datasets) ? $result->datasets : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
 
@@ -2634,16 +2645,23 @@ class UserController extends Controller {
 
         $buttons['add'] = $rightCheck;
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['view'] = $rightCheck;
+
         foreach ($datasets as $dataset) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::DATA_SETS,
                 RoleRight::RIGHT_VIEW,
                 [
-                    'org_id'       => $dataset->id
+                    'org_id'       => $dataset->org_id
                 ],
                 [
                     'created_by' => $dataset->created_by,
-                    'org_id'     => $dataset->id
+                    'org_id'     => $dataset->org_id
                 ]
             );
 
@@ -2653,11 +2671,11 @@ class UserController extends Controller {
                 Module::DATA_SETS,
                 RoleRight::RIGHT_EDIT,
                 [
-                    'org_id'       => $dataset->id
+                    'org_id'       => $dataset->org_id
                 ],
                 [
                     'created_by' => $dataset->created_by,
-                    'org_id'     => $dataset->id,
+                    'org_id'     => $dataset->org_id,
                 ]
             );
 
@@ -2667,11 +2685,11 @@ class UserController extends Controller {
                 Module::DATA_SETS,
                 RoleRight::RIGHT_ALL,
                 [
-                    'org_id'       => $dataset->id
+                    'org_id'       => $dataset->org_id
                 ],
                 [
                     'created_by' => $dataset->created_by,
-                    'org_id'     => $dataset->id
+                    'org_id'     => $dataset->org_id
                 ]
             );
 
@@ -2742,7 +2760,7 @@ class UserController extends Controller {
      * @return view to view the a registered organisation
      */
     public function viewOrg(Request $request, $uri)
-{
+    {
         $request = Request::create('/api/getOrganisationDetails', 'POST', ['org_uri' => $uri]);
         $api = new ApiOrganisation($request);
         $result = $api->getOrganisationDetails($request)->getData();
@@ -3966,21 +3984,46 @@ class UserController extends Controller {
     public function confirmation(Request $request)
     {
         $class = 'user';
+        $confirmed = false;
         $hash = $request->offsetGet('hash');
 
         if ($hash) {
             $user = User::where('hash_id', $hash)->first();
 
             if ($user) {
-                $user->active = true;
+                $confirmed = ActionsHistory::where('user_id', $user->id)
+                    ->where('action', ActionsHistory::TYPE_CONFIRM_ACCOUNT)
+                    ->first()
+                        ? true
+                        : false;
 
-                try {
-                    $user->save();
-                    $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
+                if (!$confirmed) {
+                    DB::beginTransaction();
+                    $user->active = true;
 
-                    return redirect('login');
-                } catch (QueryException $ex) {
-                    Log::error($ex->getMessage());
+                    try {
+                        $user->save();
+                        $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
+
+                        $dbData = [
+                            'module_name'   => Module::getModuleName(Module::USERS),
+                            'action'        => ActionsHistory::TYPE_CONFIRM_ACCOUNT,
+                            'action_msg'    => 'Confirmed account',
+                            'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
+                            'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
+                            'occurrence'    => date('Y-m-d H:i:s'),
+                            'user_id'       => $user->id,
+                            'action_object' => '',
+                        ];
+
+                        ActionsHistory::create($dbData);
+                        DB::commit();
+
+                        return redirect('login');
+                    } catch (QueryException $ex) {
+                        DB::rollback();
+                        Log::error($ex->getMessage());
+                    }
                 }
             }
         }
@@ -4006,7 +4049,7 @@ class UserController extends Controller {
             return redirect('login');
         }
 
-        return view('confirmError', compact('class'));
+        return view('confirmError', compact('class', 'confirmed'));
     }
 
     /**
@@ -4069,9 +4112,9 @@ class UserController extends Controller {
             ],
         ];
 
-        $searchReq = Request::create('/api/searchUsers', 'POST', $params);
+        $searchReq = Request::create('/api/listUsers', 'POST', $params);
         $api = new ApiUser($searchReq);
-        $result = $api->searchUsers($searchReq)->getData();
+        $result = $api->listUsers($searchReq)->getData();
 
         $users = !empty($result->users) ? $result->users : [];
         $count = !empty($result->total_records) ? $result->total_records : 0;
@@ -4831,11 +4874,15 @@ class UserController extends Controller {
         $class = 'user';
         $apiKey = \Auth::user()->api_key;
         $actMenu = 'group';
+        $search = $request->q;
         $groups = [];
         $perPage = 6;
         $params = [
             'api_key'          => $apiKey,
             'records_per_page' => $perPage,
+            'criteria' => [
+                'keywords'         => $search
+            ],
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
@@ -4916,6 +4963,7 @@ class UserController extends Controller {
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => $actMenu,
+                'search'        => $search,
                 'buttons'       => $buttons,
                 'uri'           => $uri,
                 'group'         => $groupData
@@ -5296,9 +5344,9 @@ class UserController extends Controller {
             ]
         ];
 
-        $searchRq = Request::create('/api/searchGroups', 'POST', $params);
+        $searchRq = Request::create('/api/listGroups', 'POST', $params);
         $api = new ApiOrganisation($searchRq);
-        $grpData = $api->searchGroups($searchRq)->getData();
+        $grpData = $api->listGroups($searchRq)->getData();
 
         $groups = !empty($grpData->groups) ? $grpData->groups : [];
         $count = !empty($grpData->total_records) ? $grpData->total_records : 0;
@@ -5313,6 +5361,13 @@ class UserController extends Controller {
         );
 
         $buttons['add'] = $rightCheck;
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_VIEW
+        );
+
+        $buttons['view'] = $rightCheck;
 
         foreach ($groups as $group) {
             $rightCheck = RoleRight::checkUserRight(

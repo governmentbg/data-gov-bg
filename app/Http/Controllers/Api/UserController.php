@@ -4,16 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Role;
 use App\User;
+use Exception;
 use App\Locale;
 use App\Module;
+use App\DataSet;
+use App\Resource;
 use PDOException;
 use App\RoleRight;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
 use App\ActionsHistory;
-use App\DataSet;
-use App\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -203,76 +204,6 @@ class UserController extends ApiController
         }
 
         return $this->errorResponse(__('custom.list_users_fail'), $validator->errors()->messages());
-    }
-
-    /**
-     * Search in user records by given keywords
-     *
-     * @param string api_key - required
-     * @param array criteria - required
-     * @param string criteria[keywords] - required
-     * @param string criteria[order][type] - optional
-     * @param string criteria[order][field] - optional
-     * @param integer records_per_page - optional
-     * @param integer page_number - optional
-     *
-     * @return json response with found users or error
-     */
-    public function searchUsers(Request $request)
-    {
-        $search = $request->all();
-
-        $validator = \Validator::make($search, [
-            'records_per_page'      => 'nullable|int|digits_between:1,10',
-            'page_number'           => 'nullable|int|digits_between:1,10',
-            'criteria'              => 'required|array',
-        ]);
-
-        if (!$validator->fails()) {
-            $validator = \Validator::make($search['criteria'], [
-                'keywords'     => 'required|string|max:191',
-                'order'        => 'nullable|array',
-            ]);
-        }
-
-        $order = isset($search['criteria']['order']) ? $search['criteria']['order'] :[];
-
-        if (!$validator->fails()) {
-            $validator = \Validator::make($order, [
-                'type'   => 'nullable|string|max:191',
-                'field'  => 'nullable|string|max:191',
-            ]);
-        }
-
-        if (!$validator->fails()) {
-            $ids = User::search($search['criteria']['keywords'])->get()->pluck('id');
-            $query = User::whereIn('id', $ids)->with('userToOrgRole');
-
-            $count = $query->count();
-
-            $query->forPage(
-                $request->offsetGet('page_number'),
-                $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-            );
-
-            try {
-                $data = $query->get();
-
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::USERS),
-                    'action'           => ActionsHistory::TYPE_SEE,
-                    'action_msg'       => 'Searched users',
-                ];
-
-                Module::add($logData);
-
-                return $this->successResponse(['users' => $data, 'total_records' => $count], true);
-            } catch (QueryException $ex) {
-                Log::error($ex->getMessage());
-            }
-        }
-
-        return $this->errorResponse(__('custom.search_users_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -580,7 +511,7 @@ class UserController extends ApiController
                 DB::rollback();
 
                 Log::error($ex->getMessage());
-            } catch (\Swift_TransportException $ex) {
+            } catch (Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -972,12 +903,12 @@ class UserController extends ApiController
 
         if (isset($post['data']['org_id'])) {
             if ($orgData = Organisation::where('id', $post['data']['org_id'])->first()) {
-                if( $orgData->type == Organisation::TYPE_GROUP) {
+                if ($orgData->type == Organisation::TYPE_GROUP) {
                     $rightCheck = RoleRight::checkUserRight(
                         Module::GROUPS,
                         RoleRight::RIGHT_EDIT,
                         [
-                            'group_id'       => $orgData->id
+                            'group_id'      => $orgData->id
                         ],
                         [
                             'created_by'    => $orgData->created_by,
@@ -989,11 +920,11 @@ class UserController extends ApiController
                         Module::ORGANISATIONS,
                         RoleRight::RIGHT_EDIT,
                         [
-                            'org_id'       => $orgData->id
+                            'org_id'        => $orgData->id
                         ],
                         [
-                            'created_by' => $orgData->created_by,
-                            'org_id'     => $orgData->id
+                            'created_by'    => $orgData->created_by,
+                            'org_id'        => $orgData->id
                         ]
                     );
                 }
@@ -1065,6 +996,15 @@ class UserController extends ApiController
                     }
                 }
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::USERS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $user->id,
+                    'action_msg'       => 'Invited user',
+                ];
+
+                Module::add($logData);
+
                 DB::commit();
             } catch (QueryException $e) {
                 $mailData = null;
@@ -1100,15 +1040,6 @@ class UserController extends ApiController
                 return $this->errorResponse(__('custom.invite_user_fail'), $validator->errors()->messages());
             }
         }
-
-        $logData = [
-            'module_name'      => Module::getModuleName(Module::USERS),
-            'action'           => ActionsHistory::TYPE_ADD,
-            'action_object'    => $user->id,
-            'action_msg'       => 'Invited user',
-        ];
-
-        Module::add($logData);
 
         return $this->successResponse();
     }

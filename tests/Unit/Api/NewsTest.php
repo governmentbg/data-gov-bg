@@ -12,16 +12,19 @@ class NewsTest extends TestCase
     use WithFaker;
     use DatabaseTransactions;
 
-    private $locale = 'en';
-
+    /**
+     * Test news creation
+     *
+     * @return void
+     */
     public function testAddNews()
     {
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/addNews'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing data
+        // Test missing data
         $this->post(
             url('api/addNews'),
             [
@@ -39,7 +42,7 @@ class NewsTest extends TestCase
             [
                 'api_key'   => $this->getApiKey(),
                 'data'      => [
-                    'locale'    => 'en',
+                    'locale'    => $this->locale,
                     'title'     => $this->faker->word(),
                     'abstract'  => $this->faker->word(),
                     'body'      => $this->faker->word(),
@@ -50,23 +53,25 @@ class NewsTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // check that a record is made
+        // Check that a record is made
         $this->assertTrue($count + 1 == Page::all()->count());
     }
 
+    /**
+     * Test news modification
+     *
+     * @return void
+     */
     public function testEditNews()
     {
-        $news = Page::create([
-            'title'     => ApiController::trans($this->locale, $this->faker->word()),
-            'active'    => true,
-        ]);
+        $news = $this->getNewPage(['type' => Page::TYPE_NEWS]);
 
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/addNews'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing news id
+        // Test missing news id
         $this->post(
             url('api/editNews'),
             [
@@ -80,7 +85,7 @@ class NewsTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        //test missing data
+        // Test missing data
         $this->post(
             url('api/editNews'),
             [
@@ -92,14 +97,15 @@ class NewsTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful test edit
+        // Test successful test edit
         $this->post(
             url('api/editNews'),
             [
                 'api_key'       => $this->getApiKey(),
                 'news_id'       => $news->id,
                 'data'          => [
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
+                    'title'         => $this->faker->word(),
                     'body'          => $this->faker->word(),
                     'abstract'      => $this->faker->word(),
                     'head_title'    => $this->faker->word(),
@@ -110,19 +116,21 @@ class NewsTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test news deletion
+     *
+     * @return void
+     */
     public function testDeleteNews()
     {
-        $news = Page::create([
-            'title'     => ApiController::trans($this->locale, $this->faker->word()),
-            'active'    => true,
-        ]);
+        $news = $this->getNewPage(['type' => Page::TYPE_NEWS]);
 
-        //test missing api key
+        // Test missing api key
         $this->post(url('api/deleteNews'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        //test missing news id
+        // Test missing news id
         $this->post(
             url('api/deleteNews'),
             [
@@ -135,7 +143,7 @@ class NewsTest extends TestCase
 
         $count = Page::all()->count();
 
-        //test successful delete
+        // Test successful delete
         $this->post(
             url('api/deleteNews'),
             [
@@ -146,10 +154,15 @@ class NewsTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // check that a record is missing
+        // Check that a record is missing
         $this->assertTrue($count - 1 == Page::all()->count());
     }
 
+    /**
+     * Test news list
+     *
+     * @return void
+     */
     public function testListNews()
     {
         $this->post(
@@ -160,9 +173,14 @@ class NewsTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
+    /**
+     * Test news search
+     *
+     * @return void
+     */
     public function testSearchNews()
     {
-        // test missing criteria
+        // Test missing criteria
         $this->post(
             url('api/searchNews'),
             [
@@ -172,7 +190,7 @@ class NewsTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        //test successful search
+        // Test successful search
         $this->post(
             url('api/searchNews'),
             [

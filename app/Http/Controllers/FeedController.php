@@ -6,6 +6,7 @@ use App\Organisation;
 use App\ActionsHistory;
 use App\DataSet;
 use App\Module;
+use App\Page;
 
 class FeedController extends Controller
 {
@@ -93,6 +94,48 @@ class FeedController extends Controller
         if ($history) {
             return response()
             ->view('feeds/datasetFeed', compact('history'))
+            ->header('Content-Type', 'text/xml');
+        }
+    }
+
+    /**
+     * Returns an xml containing active on the portal
+     *
+     * @return xml view for rss feed
+     */
+    public function getNewsHistory()
+    {
+        $history = Page::select(
+            'id',
+            'type',
+            'title',
+            'abstract',
+            'active',
+            'valid_from',
+            'valid_to',
+            'created_at'
+        )
+            ->where('active', '!=', Page::ACTIVE_FALSE)
+            ->where('type', Page::TYPE_NEWS)
+            ->where(function($a) {
+                $a->where('valid_from', null)
+                    ->where('valid_to', null);
+            })->orWhere(function($b) {
+                $b->where('valid_from', null)
+                    ->where('valid_to', '>=', date(now()));
+            })->orWhere(function($c) {
+                $c->where('valid_from', '<=', date(now()))
+                    ->where('valid_to', null);
+            })->orWhere(function ($d) {
+                $d->where('valid_from', '<=', date(now()))
+                    ->where('valid_to', '>=', date(now()));
+            })
+            ->limit(1000)
+            ->get();
+
+        if ($history) {
+            return response()
+            ->view('feeds/newsFeed', compact('history'))
             ->header('Content-Type', 'text/xml');
         }
     }

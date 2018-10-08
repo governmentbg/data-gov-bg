@@ -854,5 +854,9 @@ return [
     'discussion' => 'дискусия',
     'post_preview' => 'Преглед на отговор',
     'clear_filter' => 'изчисти филтъра',
-
+    'no_help' => 'Липства помощна страница',
+    'already_confirmed_account' => 'Профилът Ви е потвърден!',
+    'confirm_account' => 'потвърди профил',
+    'connection' => 'Връзка',
+    'done' => 'готово',
 ];

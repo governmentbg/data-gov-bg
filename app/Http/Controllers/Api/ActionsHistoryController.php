@@ -6,6 +6,7 @@ use App\Role;
 use \Validator;
 use App\Module;
 use App\ActionsHistory;
+use App\ConnectionSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
@@ -90,6 +91,13 @@ class ActionsHistoryController extends ApiController
 
         if (env('IS_TOOL')) {
             $history = ActionsHistory::select();
+
+            if (isset($criteria['source_db_type'])) {
+                $connections = ConnectionSetting::where('source_db_type', $criteria['source_db_type'])
+                    ->pluck('connection_name');
+
+                $history->whereIn('action_object', $connections);
+            }
         } else {
             $history = ActionsHistory::select(
                 'actions_history.id',

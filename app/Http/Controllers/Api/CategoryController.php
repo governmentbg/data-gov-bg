@@ -33,9 +33,9 @@ class CategoryController extends ApiController
      */
     public function addMainCategory(Request $request)
     {
-        $post = $request->all();
+        $data = $request->get('data', []);
 
-        $validator = \Validator::make($request->get('data', []), [
+        $validator = \Validator::make($data, [
             'name'              => 'required_with:locale|max:191',
             'name.bg'           => 'required_without:locale|string|max:191',
             'name.*'            => 'max:191',
@@ -67,32 +67,19 @@ class CategoryController extends ApiController
 
         // add main category
         if (!$validator->fails()) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::MAIN_CATEGORIES,
-                RoleRight::RIGHT_EDIT
-            );
+            $rightCheck = RoleRight::checkUserRight(Module::MAIN_CATEGORIES, RoleRight::RIGHT_EDIT);
 
             if (!$rightCheck) {
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
             $catData = [
-                'name'              => $this->trans($post['locale'], $post['data']['name']),
-                'icon_file_name'    => empty($post['data']['icon_filename'])
-                    ? null
-                    : $post['data']['icon_filename'],
-                'icon_mime_type'    => empty($post['data']['icon_mimetype'])
-                    ? null
-                    : $post['data']['icon_mimetype'],
-                'icon_data'         => empty($post['data']['icon_data'])
-                    ? null
-                    : $post['data']['icon_data'],
-                'active'            => empty($post['data']['active'])
-                    ? true
-                    : $post['data']['active'],
-                'ordering'          => empty($post['data']['ordering'])
-                    ? Category::ORDERING_ASC
-                    : $post['data']['ordering'],
+                'name'              => $this->trans($data['locale'], $data['name']),
+                'icon_file_name'    => empty($data['icon_filename']) ? null : $data['icon_filename'],
+                'icon_mime_type'    => empty($data['icon_mimetype']) ? null : $data['icon_mimetype'],
+                'icon_data'         => empty($data['icon_data']) ? null : $data['icon_data'],
+                'active'            => empty($data['active']) ? true : $data['active'],
+                'ordering'          => empty($data['ordering']) ? Category::ORDERING_ASC : $data['ordering'],
             ];
 
             try {
@@ -138,6 +125,7 @@ class CategoryController extends ApiController
     public function editMainCategory(Request $request)
     {
         $post = $request->all();
+        $data = $request->get('data', []);
 
         $validator = \Validator::make($post, [
             'category_id'           => 'required|integer|digits_between:1,10',
@@ -145,7 +133,7 @@ class CategoryController extends ApiController
         ]);
 
         if (!$validator->fails()) {
-            $validator = \Validator::make($post['data'], [
+            $validator = \Validator::make($data, [
                 'name'             => 'required_with:locale|max:191',
                 'name.bg'          => 'required_without:locale|string|max:191',
                 'name.*'           => 'max:191',
@@ -177,44 +165,43 @@ class CategoryController extends ApiController
                     Module::MAIN_CATEGORIES,
                     RoleRight::RIGHT_EDIT,
                     [],
-                    [
-                        'created_by' => $category->created_by
-                    ]
+                    ['created_by' => $category->created_by]
                 );
 
                 if (!$rightCheck) {
                     return $this->errorResponse(__('custom.access_denied'));
                 }
 
-                $category->name = $post['data']['name'];
+                $category->name = $this->trans($data['locale'], $data['name']);
 
                 // add library for image manipulation
-                if (!empty($post['data']['icon_filename'])) {
-                    $category->icon_file_name = $post['data']['icon_filename'];
+                if (!empty($data['icon_filename'])) {
+                    $category->icon_file_name = $data['icon_filename'];
                 }
 
-                if (!empty($post['data']['icon_mimetype'])) {
-                    $category->icon_mime_type = $post['data']['icon_mimetype'];
+                if (!empty($data['icon_mimetype'])) {
+                    $category->icon_mime_type = $data['icon_mimetype'];
                 }
 
-                if (!empty($post['data']['icon_data'])) {
-                    $category->icon_data = $post['data']['icon_data'];
+                if (!empty($data['icon_data'])) {
+                    $category->icon_data = $data['icon_data'];
                 }
 
-                if (!empty($post['data']['active'])) {
-                    $category->active = $post['data']['active'];
+                if (!empty($data['active'])) {
+                    $category->active = $data['active'];
                 } else {
                     $category->active = Category::ACTIVE_FALSE;
                 }
 
-                if (!empty($post['data']['ordering'])) {
-                    $category->ordering = $post['data']['ordering'];
+                if (!empty($data['ordering'])) {
+                    $category->ordering = $data['ordering'];
                 }
 
                 $category->updated_by = \Auth::id();
 
                 try {
                     $category->save();
+
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::MAIN_CATEGORIES),
                         'action'           => ActionsHistory::TYPE_MOD,

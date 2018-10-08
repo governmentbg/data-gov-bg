@@ -13,18 +13,17 @@ class SectionTest extends TestCase
     use DatabaseTransactions;
     use WithFaker;
 
-    private $locale = 'en';
     /**
      * Test for SectionController@addSection
      */
     public function testAddSection()
     {
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/addSection'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/addSection'),
             [
@@ -35,14 +34,14 @@ class SectionTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section create
+        // Test successful section create
         $this->post(
             url('api/addSection'),
             [
                 'api_key'   => $this->getApiKey(),
                 'data'      => [
                     'name'          => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'read_only'     => $this->faker->boolean(),
                     'forum_link'    => $this->faker->url(),
@@ -69,19 +68,19 @@ class SectionTest extends TestCase
             'created_by'    => 1,
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/editSection'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(
             url('api/editSection'),
             [
                 'api_key'   => $this->getApiKey(),
                 'data'      => [
                     'name'          => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'read_only'     => $this->faker->boolean(),
                     'forum_link'    => $this->faker->url(),
@@ -93,7 +92,7 @@ class SectionTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test empty data
+        // Test empty data
         $this->post(
             url('api/addSection'),
             [
@@ -105,7 +104,7 @@ class SectionTest extends TestCase
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section edit
+        // Test successful section edit
         $this->post(
             url('api/editSection'),
             [
@@ -113,7 +112,7 @@ class SectionTest extends TestCase
                 'id'        => $section->id,
                 'data'      => [
                     'name'          => $this->faker->word(),
-                    'locale'        => 'en',
+                    'locale'        => $this->locale,
                     'active'        => $this->faker->boolean(),
                     'read_only'     => $this->faker->boolean(),
                     'forum_link'    => $this->faker->url(),
@@ -141,17 +140,17 @@ class SectionTest extends TestCase
             'created_by'    => 1,
         ]);
 
-        // test missing api_key
+        // Test missing api_key
         $this->post(url('api/deleteSection'), ['api_key' => null])
             ->assertStatus(403)
             ->assertJson(['success' => false]);
 
-        // test missing record id
+        // Test missing record id
         $this->post(url('api/deleteSection'), ['api_key' => $this->getApiKey()])
             ->assertStatus(500)
             ->assertJson(['success' => false]);
 
-        // test successful section delete
+        // Test successful section delete
         $this->post(
             url('api/deleteSection'),
             [
@@ -168,12 +167,7 @@ class SectionTest extends TestCase
      */
     public function testListSections()
     {
-        // test missing api_key
-        $this->post(url('api/listSections'), ['api_key' => null])
-            ->assertStatus(403)
-            ->assertJson(['success' => false]);
-
-        // test empty criteria
+        // Test empty criteria
         $this->post(
             url('api/listSections'),
             [
@@ -184,14 +178,14 @@ class SectionTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test successful section list
+        // Test successful section list
         $this->post(
             url('api/listSections'),
             [
                 'api_key'   => $this->getApiKey(),
                 'criteria'  => [
                     'active' => $this->faker->boolean(),
-                    'locale' => 'en'
+                    'locale' => $this->locale,
                 ],
             ]
         )
@@ -204,12 +198,7 @@ class SectionTest extends TestCase
      */
     public function testListSubsections()
     {
-        // test missing api_key
-        $this->post(url('api/listSubsections'), ['api_key' => null])
-            ->assertStatus(403)
-            ->assertJson(['success' => false]);
-
-        // test empty criteria
+        // Test empty criteria
         $this->post(
             url('api/listSubsections'),
             [
@@ -220,14 +209,14 @@ class SectionTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 
-        // test successful subsection list
+        // Test successful subsection list
         $this->post(
             url('api/listSubsections'),
             [
                 'api_key'   => $this->getApiKey(),
                 'criteria'  => [
                     'active' => $this->faker->boolean(),
-                    'locale' => 'en'
+                    'locale' => $this->locale,
                 ],
             ]
         )

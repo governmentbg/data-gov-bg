@@ -1,4 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.app', [
+    'link' => isset($organisation->uri) ? true : false
+])
 
 @section('content')
 <div class="container">

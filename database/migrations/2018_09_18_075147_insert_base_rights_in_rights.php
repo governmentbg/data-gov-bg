@@ -32,7 +32,7 @@ class InsertBaseRightsInRights extends Migration
                         'module_name'       => Module::USERS,
                         'right'             => RoleRight::RIGHT_ALL,
                         'limit_to_own_data' => 0,
-                        'api'               => 0,
+                        'api'               => 1,
                     ],
                     [
                         'module_name'       => Module::DATA_SETS,
@@ -254,7 +254,7 @@ class InsertBaseRightsInRights extends Migration
                         'module_name'       => Module::USERS,
                         'right'             => RoleRight::RIGHT_ALL,
                         'limit_to_own_data' => 0,
-                        'api'               => 0,
+                        'api'               => 1,
                     ],
                     [
                         'module_name'       => Module::ROLES,

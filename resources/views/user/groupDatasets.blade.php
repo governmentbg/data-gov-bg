@@ -18,13 +18,16 @@
             @include('partials.group-info', ['group' => $group])
         </div>
         <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
-            <form method="GET" action="{{ url('/user/organisations/search') }}">
+            <form method="GET">
                 <input
                     type="text"
-                    class="m-t-md input-border-r-12 form-control"
+                    class="m-t-md input-border-r-12 form-control js-ga-event"
                     placeholder="{{ __('custom.search') }}.."
                     value="{{ isset($search) ? $search : '' }}"
                     name="q"
+                    data-ga-action="search"
+                    data-ga-label="data search"
+                    data-ga-category="data"
                 >
             </form>
         </div>

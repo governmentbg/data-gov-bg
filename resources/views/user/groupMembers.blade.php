@@ -203,7 +203,7 @@
                             <div class="col-lg-10">
                                 <select
                                     class="js-ajax-autocomplete form-control"
-                                    data-url="{{ url('/api/searchUsers') }}"
+                                    data-url="{{ url('/api/listUsers') }}"
                                     data-post="{{ json_encode(['api_key' => \Auth::user()->api_key]) }}"
                                     data-parent="#invite-existing"
                                     name="user"

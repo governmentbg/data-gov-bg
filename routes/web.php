@@ -300,7 +300,7 @@ Route::middleware('auth')->group(function() {
         Route::get('admin/help/section/delete/{id}', 'Admin\HelpController@deleteHelpSection');
 
         Route::match(['get', 'post'], 'admin/help/pages/list', 'Admin\HelpController@listPages');
-        Route::match(['get', 'post'], 'admin/help/pages/add', 'Admin\HelpController@addHelpPage');
+        Route::match(['get', 'post'], 'admin/help/pages/add', 'Admin\HelpController@addHelpPage')->name('addHelpPage');
         Route::match(['get', 'post'], 'admin/help/page/edit/{id}', 'Admin\HelpController@editHelpPage');
         Route::match(['get', 'post'], 'admin/help/page/view/{id}', 'Admin\HelpController@viewHelpPage');
         Route::get('admin/help/page/delete/{id}', 'Admin\HelpController@deleteHelpPage');
@@ -336,14 +336,6 @@ Route::match(['get', 'post'], 'mailConfirmation', 'UserController@mailConfirmati
 Route::match(['get', 'post'], 'confirmError', 'UserController@confirmError')->name('confirmError');
 
 Route::match(['get', 'post'], 'delSettings', 'UserController@deleteCustomSettings');
-
-Route::get('accessibility', function () {
-    return view('accessibility', ['class' => 'index']);
-});
-
-Route::get('terms', function () {
-    return view('terms', ['class' => 'index']);
-});
 
 Route::match(['get', 'post'], 'data', 'DataController@list')->name('data');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');
@@ -386,7 +378,7 @@ Route::get('user/orgMembers', function () {
 Route::match(['get', 'post'], 'password/forgotten', 'UserController@forgottenPassword');
 Route::match(['get', 'post'], 'password/reset', 'UserController@passwordReset')->name('passReset');
 
-Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest');
+Route::match(['post', 'get'], 'request', 'RequestController@sendDataRequest')->middleware('help');
 
 Route::match(['get', 'post'], 'news', 'NewsController@listNews');
 Route::match(['get', 'post'], 'news/search', 'NewsController@searchNews');
@@ -397,14 +389,10 @@ Route::match(['get', 'post'], 'document/search', 'DocumentController@searchDocum
 Route::match(['get', 'post'], 'document/view/{id}', 'DocumentController@viewDocument');
 Route::match(['get', 'post'], 'document/download/{path}/{fileName}', 'DocumentController@downloadDocument');
 
-Route::get('contact', function () {
-    return view('contact/contact', ['class' => 'contact']);
-});
-
-Route::get('visualisation', function () {
-    return view('visualisation/visualisation', ['class' => 'visualisations']);
-});
-
 Route::get('{section}', 'StaticPageController@show');
 
 Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'LanguageController@switchLang']);
+
+Route::get('/datasets/{uri}/rss', 'FeedController@getOrganisationDatasetHistory');
+Route::get('/datasets/rss', 'FeedController@getDatasetsHistory');
+Route::get('/news/rss', 'FeedController@getNewsHistory');

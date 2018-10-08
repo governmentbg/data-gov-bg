@@ -545,8 +545,8 @@ class DataSetController extends ApiController
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
         $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
         $locale = !empty($post['criteria']['locale'])
-        ? $post['criteria']['locale']
-        : \LaravelLocalization::getCurrentLocale();
+            ? $post['criteria']['locale']
+            : \LaravelLocalization::getCurrentLocale();
 
         $validator = \Validator::make($post, [
             'api_key'                    => 'nullable|string|exists:users,api_key',
@@ -796,139 +796,6 @@ class DataSetController extends ApiController
         return $this->errorResponse(__('custom.criteria_error'), $validator->errors()->messages());
     }
 
-
-    /**
-     * API function for searching Data Sets by keywords
-     *
-     * @param array criteria - required
-     * @param string criteria[locale] - optional
-     * @param integer criteria[keywords] - required
-     * @param string criteria[order][type] - optional
-     * @param string criteria[order][field] - optional
-     * @param integer records_per_page - optional
-     * @param integer page_number - optional
-     *
-     * @return json list with found records or error
-     */
-    public function searchDataset(Request $request)
-    {
-        $post = $request->all();
-
-        $validator = \Validator::make($post, [
-            'criteria'              => 'required|array',
-            'records_per_page'      => 'nullable|int|digits_between:1,10',
-            'page_number'           => 'nullable|int|digits_between:1,10',
-        ]);
-
-        if (!$validator->fails()) {
-            $criteria = isset($post['criteria']) ? $post['criteria'] : [];
-            $validator = \Validator::make($criteria, [
-                'locale'       => 'nullable|string|max:5',
-                'keywords'     => 'required|string|max:191',
-                'user_id'      => 'nullable|integer|digits_between:1,10',
-                'order'        => 'nullable|array',
-            ]);
-        }
-
-        if (!$validator->fails()) {
-            $order = isset($criteria['order']) ? $criteria['order'] : [];
-            $validator = \Validator::make($order, [
-                'type'   => 'nullable|string|max:191',
-                'field'  => 'nullable|string|max:191',
-            ]);
-        }
-
-        if (!$validator->fails()) {
-            $data = [];
-            $criteria = $post['criteria'];
-            $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
-            $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
-            $pagination = !empty($post['records_per_page']) ? $post['records_per_page'] : null;
-            $page = !empty($post['page_number']) ? $post['page_number'] : null;
-            $search = !empty($criteria['keywords']) ? $criteria['keywords'] : null;
-
-            try {
-                if (!empty($criteria['user_id'])) {
-                    $orgIds = UserToOrgRole::where('user_id', $criteria['user_id'])->get()->pluck('org_id');
-                    $ids = DataSet::search($search, true)->get()->pluck('id');
-                    $query = DataSet::whereIn('id', $ids)->whereIn('org_id', $orgIds);
-                } else {
-                    $ids = DataSet::search($search, true)->get()->pluck('id');
-                    $query = DataSet::whereIn('id', $ids);
-
-                    $query->orWhereHas('resource', function($q) use ($ids) {
-                        $q->whereIn('data_set_id', $ids);
-                    });
-                }
-
-                $count = $query->count();
-
-                $query->forPage(
-                    $request->offsetGet('page_number'),
-                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                );
-
-                $results = [];
-
-                foreach ($query->get() as $set) {
-                    $result['id'] = $set->id;
-                    $result['uri'] = $set->uri;
-                    $result['org_id'] = $set->org_id;
-                    $result['name'] = $set->name;
-                    $result['descript'] = $set->descript;
-                    $result['category_id'] = $set->category_id;
-                    $result['terms_of_use_id'] = $set->terms_of_use_id;
-                    $result['visibility'] = $set->visibility;
-                    $result['source'] = $set->source;
-                    $result['version'] = $set->version;
-                    $result['author_name'] = $set->author_name;
-                    $result['author_email'] = $set->author_email;
-                    $result['support_name'] = $set->support_name;
-                    $result['support_email'] = $set->support_email;
-                    $result['sla'] = $set->sla;
-                    $result['status'] = $set->status;
-                    $result['followers_count'] = $set->userFollow()->count();
-                    $result['reported'] = 0;
-                    $result['created_at'] = isset($set->created_at) ? $set->created_at->toDateTimeString() : null;
-                    $result['updated_at'] = isset($set->updated_at) ? $set->updated_at->toDateTimeString() : null;
-                    $result['created_by'] = $set->created_by;
-                    $result['updated_by'] = $set->updated_by;
-
-                    $hasRes = $set->resource()->count();
-
-                    if ($hasRes) {
-                        foreach ($set->resource as $resourse) {
-                            if ($resourse->is_reported) {
-                                $result['reported'] = 1;
-                            }
-                        }
-                    }
-
-                    $results[] = $result;
-                }
-
-                $transFields = ['name', 'sla', 'descript'];
-
-                if ($order && in_array($order['field'], $transFields)) {
-                    usort($results, function($a, $b) use ($order) {
-                        return strtolower($order['type']) == 'asc'
-                            ? strcmp($a[$order['field']], $b[$order['field']])
-                            : strcmp($b[$order['field']], $a[$order['field']]);
-                    });
-                }
-
-                return $this->successResponse([
-                    'datasets'      => $results,
-                    'total_records' => $count,
-                ], true);
-            } catch (QueryException $ex) {
-                Log::error($ex->getMessage());
-            }
-        }
-
-        return $this->errorResponse(__('custom.search_dataset_fail'), $validator->errors()->messages());
-    }
-
     /**
      * API function for viewing information about an existing Data Set
      *
@@ -1073,7 +940,7 @@ class DataSetController extends ApiController
 
         $validator = \Validator::make($post, [
             'data_set_uri'  => 'required|string|exists:data_sets,uri,deleted_at,NULL|max:191',
-            'group_id'      => 'nullable|array',
+            'group_id'      => 'required|array',
             'group_id.*'    => [
                 'required',
                 'int',
@@ -1090,29 +957,27 @@ class DataSetController extends ApiController
                 $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
                 DataSetGroup::destroy($dataSetId);
 
-                if (!empty($post['group_id'])) {
-                    foreach ($post['group_id'] as $id) {
-                        $rightCheck = RoleRight::checkUserRight(
-                            Module::GROUPS,
-                            RoleRight::RIGHT_EDIT,
-                            [
-                                'group_id' => $id
-                            ],
-                            [
-                                'group_ids' => $post['group_id']
-                            ]
-                        );
+                foreach ($post['group_id'] as $id) {
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::GROUPS,
+                        RoleRight::RIGHT_EDIT,
+                        [
+                            'group_id' => $id
+                        ],
+                        [
+                            'group_ids' => $post['group_id']
+                        ]
+                    );
 
-                        if (!$rightCheck) {
-                            return $this->errorResponse(__('custom.access_denied'));
-                        }
-
-                        $setGroup = new DataSetGroup;
-                        $setGroup->data_set_id = $dataSetId;
-                        $setGroup->group_id = $id;
-
-                        $setGroup->save();
+                    if (!$rightCheck) {
+                        return $this->errorResponse(__('custom.access_denied'));
                     }
+
+                    $setGroup = new DataSetGroup;
+                    $setGroup->data_set_id = $dataSetId;
+                    $setGroup->group_id = $id;
+
+                    $setGroup->save();
                 }
 
                 $logData = [

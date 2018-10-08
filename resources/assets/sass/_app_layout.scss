@@ -17,6 +17,7 @@ body {
 
         .navbar {
             margin-bottom: 10px;
+            z-index: 99;
 
             .navbar-header {
                 width: 100%;
@@ -473,7 +474,7 @@ body {
             }
 
             .underline {
-                padding: 15px;
+                height: 30px;
             }
         }
 

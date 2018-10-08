@@ -63,7 +63,6 @@ class RoleRight extends Model
      */
     public static function checkUserRight($module, $rightType, $checkData = [], $objData = [])
     {
-
         if (!\Auth::check() && empty($checkData['user'])) {
             return false;
         }
@@ -99,7 +98,7 @@ class RoleRight extends Model
                 foreach ($singleRole['rights'] as $singleRight) {
                     if ($singleRight['module_name'] == Module::getModuleName($module)) {
                         if ($singleRight['right'] >= $rightType) {
-                            if (!empty($checkData)) {   // check additional right settings
+                            if (!empty($checkData)) { // check additional right settings
                                 if (isset($checkData['check_api']) && !empty($checkData['check_api'])) {
                                     if (!$singleRight['api']) { // action not allowed through api
                                         continue;
@@ -108,38 +107,50 @@ class RoleRight extends Model
 
                                 $check = false;
 
-                                if (isset($checkData['user_id']) && !empty($checkData['user_id'])
-                                    && isset($objData['created_by']) && !empty($objData['created_by'])) {
+                                if (
+                                    isset($checkData['user_id']) && !empty($checkData['user_id'])
+                                    && isset($objData['created_by']) && !empty($objData['created_by'])
+                                ) {
                                     if ($singleRight['limit_to_own_data'] == 1) {
                                         $check = true;
+
                                         if ($checkData['user_id'] == $objData['created_by']) {
                                             return true;
                                         }
                                     }
                                 }
 
-                                if (isset($checkData['user_id']) && !empty($checkData['user_id'])
+                                if (
+                                    isset($checkData['user_id']) && !empty($checkData['user_id'])
                                     && isset($objData['object_id']) && !empty($objData['object_id'])
-                                    && $singleRight['module_name'] == Module::getModuleName(Module::USERS)) {
+                                    && $singleRight['module_name'] == Module::getModuleName(Module::USERS)
+                                ) {
                                     if ($singleRight['limit_to_own_data'] == 1) {
                                         $check = true;
+
                                         if ($checkData['user_id'] == $objData['object_id']) {
                                             return true;
                                         }
                                     }
                                 }
 
-                                if (isset($checkData['org_id']) && !empty($checkData['org_id'])
-                                    && isset($objData['org_id']) && !empty($objData['org_id'])) {
+                                if (
+                                    isset($checkData['org_id']) && !empty($checkData['org_id'])
+                                    && isset($objData['org_id']) && !empty($objData['org_id'])
+                                ) {
                                     $check = true;
+
                                     if ($singleRole['org_id'] == $objData['org_id']) {
                                         return true;
                                     }
                                 }
 
-                                if (isset($checkData['group_id']) && !empty($checkData['group_id'])
-                                    && isset($objData['group_ids']) && !empty($objData['group_ids'])) {
+                                if (
+                                    isset($checkData['group_id']) && !empty($checkData['group_id'])
+                                    && isset($objData['group_ids']) && !empty($objData['group_ids'])
+                                ) {
                                     $check = true;
+
                                     if (in_array($singleRole['org_id'], $objData['group_ids'])) {
                                         return true;
                                     }

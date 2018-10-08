@@ -432,14 +432,6 @@ class RoleController extends ApiController
                         'module_name'   => $module['module_name']
                     ], $module);
                 }
-            } catch (QueryException $ex) {
-                Log::error($ex->getMessage());
-
-                $success = false;
-            }
-
-            if ($success) {
-                DB::commit();
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::ROLES),
@@ -449,10 +441,15 @@ class RoleController extends ApiController
                 ];
 
                 Module::add($logData);
-                return $this->successResponse();
-            }
 
-            DB::rollback();
+                DB::commit();
+
+                return $this->successResponse();
+            } catch (QueryException $ex) {
+                Log::error($ex->getMessage());
+
+                DB::rollback();
+            }
         }
 
         return $this->errorResponse(__('custom.modify_role_right_fail'), $validator->errors()->messages());

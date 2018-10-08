@@ -35,7 +35,7 @@
                             {{ csrf_field() }}
 
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}</label>
+                            <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}</label>
+                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 color-picker colorpicker-component" data-color="">
                                     <input
                                         type="text"
@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}</label>
+                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
                                 <div class="col-lg-2">
                                     <input
                                         id="order"
@@ -79,7 +79,16 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
-                                    <button type="submit" name="create" value="1" class="m-l-md btn btn-custom">{{ __('custom.add') }}</button>
+                                    <button
+                                        type="submit"
+                                        name="create"
+                                        value="1"
+                                        class="m-l-md btn btn-custom"
+                                    >{{ __('custom.add') }}</button>
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

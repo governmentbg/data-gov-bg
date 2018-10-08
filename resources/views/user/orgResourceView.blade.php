@@ -75,7 +75,10 @@
                             @if (!empty($data))
                                 <div class="{{ !empty($buttons['deleteResource']) ? 'col-xs-10' : 'col-xs-12' }} p-l-r-none text-right">
                                     <a
-                                        class="badge badge-pill pull-right"
+                                        class="badge badge-pill pull-right js-ga-event"
+                                        data-ga-action="download"
+                                        data-ga-label="resource download"
+                                        data-ga-category="data"
                                         href="{{ url('/resource/download/'. $resource->es_id. '/'. $resource->name) }}"
                                     >{{ __('custom.download') }}</a>
                                 </div>

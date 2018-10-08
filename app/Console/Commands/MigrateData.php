@@ -89,13 +89,13 @@ class MigrateData extends Command
 
     private function up()
     {
+        gc_enable();
         $migrateUserId = User::where('username', 'migrate_data')->value('id');
         \Auth::loginUsingId($migrateUserId);
 
-        ini_set('memory_limit','5120M');
+        ini_set('memory_limit', '8G');
 
         $this->migrateTags();
-        $this->migrateLicense();
 
         $this->migrateOrganisations();
         $this->migrateGroups();
@@ -243,86 +243,6 @@ class MigrateData extends Command
         return $tags;
     }
 
-    private function migrateLicense()
-    {
-        $terms = [];
-        $oldRecords = 0;
-
-        $params = [
-            'all_fields' => true
-        ];
-        $response = $this->requestUrl('license_list', $params);
-
-        if (!empty($response['result'])) {
-            $licensesIds = [];
-
-            foreach ($response['result'] as $res) {
-                $is_default = false;
-
-                $alreadySaved = DB::table('translations')
-                    ->where('label', $res['title'])
-                    ->join('terms_of_use', 'group_id', '=', 'terms_of_use.name')
-                    ->first();
-
-                if ($alreadySaved) {
-                    $oldRecords++;
-
-                    continue;
-                }
-
-                switch ($res['is_generic']) {
-                    case 'True':
-                        $is_default = true;
-
-                        break;
-                    default:
-                        $is_default = false;
-                }
-
-                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
-
-                $newData['data']['migrated_data'] = true;
-                $newData['data']['locale'] = "BG";
-                $newData['data']['name'] = $res['title'];
-                $newData['data']['description'] = !empty($res['url']) ? $res['url'] : $res['title'];
-                $newData['data']['is_default'] = $is_default;
-                $newData['data']['active'] = $res['status'] == 'active' ? true : false;
-                $newData['data']['created_by'] = User::where('username', 'migrate_data')->value('id');
-
-                $request = Request::create('/api/addTermsOfUse', 'POST', $newData);
-                $api = new ApiTermsOfUse($request);
-                $result = $api->addTermsOfUse($request)->getData();
-
-                if ($result->success) {
-                    $licensesIds['success'][$res['id']] = $result->id;
-                    Log::info('Term of use "'. $res['title'] .'" added successfully!');
-                } else {
-                    $licensesIds['error'][$res['id']] = $res['title'];
-                    Log::error('Term of use "'. $res['title'] .'" failed!');
-                }
-            }
-
-            $terms = $licensesIds;
-        }
-
-        if ($oldRecords > 0) {
-            $this->line('Already saved terms of use: '. $oldRecords);
-        } else {
-            $this->line('Terms of use total: '. (isset($response['result']) ? count($response['result']) : '0'));
-            $this->info('Terms of use successful: '. (isset($terms['success']) ? count($terms['success']) : '0'));
-            $this->error('Terms of use failed: '.(isset($terms['error']) ? count($terms['error']) : '0'));
-        }
-        $this->line('');
-
-        if (Cache::has('termsData')) {
-            Cache::add('termsData', $terms, 10080);
-        } else {
-            Cache::put('termsData', $terms, 10080);
-        }
-
-        return $terms;
-    }
-
     private function migrateOrganisations()
     {
         $organisationData = [];
@@ -330,7 +250,6 @@ class MigrateData extends Command
         $orgs = [];
         $orgWithDataSets = [];
         $oldRecords = 0;
-
 
         $params = [
             'all_fields'    => true,
@@ -425,9 +344,9 @@ class MigrateData extends Command
         ];
 
         if (Cache::has('organisationData')) {
-            Cache::add('organisationData', $organisationData, 10080);
+            Cache::add('organisationData', $organisationData, 86400);
         } else {
-            Cache::put('organisationData', $organisationData, 10080);
+            Cache::put('organisationData', $organisationData, 86400);
         }
 
         return $organisationData;
@@ -521,9 +440,9 @@ class MigrateData extends Command
         ];
 
         if (Cache::has('groupsData')) {
-            Cache::add('groupsData', $groupsData, 10080);
+            Cache::add('groupsData', $groupsData, 86400);
         } else {
-            Cache::put('groupsData', $groupsData, 10080);
+            Cache::put('groupsData', $groupsData, 86400);
         }
 
         return $groupsData;
@@ -637,9 +556,9 @@ class MigrateData extends Command
         ];
 
         if (Cache::has('userData')) {
-            Cache::add('userData', $userData, 10080);
+            Cache::add('userData', $userData, 86400);
         } else {
-            Cache::put('userData', $userData, 10080);
+            Cache::put('userData', $userData, 86400);
         }
 
         return $userData;
@@ -747,6 +666,19 @@ class MigrateData extends Command
         return $orgDataSets;
     }
 
+    private function mapTermsOfUse($oldLicense)
+    {
+        $licenses = [
+            'cc-zero'   => 1,  // Условия за предоставяне на информация без защитени авторски права.
+            'cc-by'     => 2,  // Условия за предоставяне на произведение за повторно използване. Признаване на авторските права.
+            'cc-by-sa'  => 3,  // Условия за предоставяне на произведение за повторно използване. Признаване на авторските права. Споделяне на споделеното.
+        ];
+
+        $newTerm = isset($licenses[$oldLicense]) ? $licenses[$oldLicense] : null;
+
+        return $newTerm;
+    }
+
     private function migrateDatasets($dataSet)
     {
         $addedResources = 0;
@@ -773,7 +705,7 @@ class MigrateData extends Command
                 }
 
                 $termId = isset($dataSet['license_id'])
-                    ? $terms['success'][$dataSet['license_id']]
+                    ? $this->mapTermsOfUse($dataSet['license_id'])
                     : null;
 
                 if (isset($dataSet['tags']) && !empty($dataSet['tags'])) {
@@ -856,6 +788,8 @@ class MigrateData extends Command
                                 $unsuporrtedFormat++;
                                 Log::error('Resource format "'. $fileFormat .'" unsupported.');
                             }
+
+                            unset($resource);
                         }
                     }
                     $addedDatasets++;
@@ -875,9 +809,10 @@ class MigrateData extends Command
                     return false;
                 }
             } else {
-                $this->line('Dataset already exists.');
                 Log::error('Dataset with id(uri): "'. $dataSet['id'] .'" already exists!');
             }
+
+            unset($dataSet);
         }
     }
 
@@ -1073,6 +1008,9 @@ class MigrateData extends Command
                 $reqElastic = Request::create('/addResourceData', 'POST', $saveData);
                 $api = new ApiResource($reqElastic);
                 $resultElastic = $api->addResourceData($reqElastic)->getData();
+
+                unset($elasticData, $saveData);
+                gc_collect_cycles();
 
                 if ($resultElastic->success) {
                     Log::info('Resource with id: "'. $resourceURI .'" added successfully to elastic!');
@@ -1293,20 +1231,20 @@ class MigrateData extends Command
     private function pickCategory($tags)
     {
         $categories = [
-            '1' => 0,  // 1 => 'Селско стопанство, риболов и аква култури, горско стопанство, храни',
-            '2' => 0,  // 2 => 'Образование, култура и спорт',
-            '3' => 0,  // 3 => 'Околна среда',
-            '4' => 0,  // 4 => 'Енергетика',
-            '5' => 0,  // 5 => 'Транспорт',
-            '6' => 0,  // 6 => 'Наука и технологии',
-            '7' => 0,  // 7 => 'Икономика и финанси',
-            '8' => 0,  // 8 => 'Население и социални условия',
-            '9' => 0,  // 9 => 'Правителство, публичен сектор',
-            '10' => 0, // 10 => 'Здравеопазване',
-            '11' => 0, // 11 => 'Региони, градове',
-            '12' => 0, // 12 => 'Правосъдие, правна система, обществена безопасност',
-            '13' => 0, // 13 => 'Международни въпроси'
-            '14' => 0, // 14 => 'Некатегоризирани'
+            '1'     => 0,  // 1  => 'Селско стопанство, риболов и аква култури, горско стопанство, храни',
+            '2'     => 0,  // 2  => 'Образование, култура и спорт',
+            '3'     => 0,  // 3  => 'Околна среда',
+            '4'     => 0,  // 4  => 'Енергетика',
+            '5'     => 0,  // 5  => 'Транспорт',
+            '6'     => 0,  // 6  => 'Наука и технологии',
+            '7'     => 0,  // 7  => 'Икономика и финанси',
+            '8'     => 0,  // 8  => 'Население и социални условия',
+            '9'     => 0,  // 9  => 'Правителство, публичен сектор',
+            '10'    => 0,  // 10 => 'Здравеопазване',
+            '11'    => 0,  // 11 => 'Региони, градове',
+            '12'    => 0,  // 12 => 'Правосъдие, правна система, обществена безопасност',
+            '13'    => 0,  // 13 => 'Международни въпроси',
+            '14'    => 0,  // 14 => 'Некатегоризирани'
         ];
 
         foreach($tags as $tag) {
@@ -1343,7 +1281,7 @@ class MigrateData extends Command
                 case 'zemedelska tehnika':
                 case 'агростатистика':
                 case 'земеделска и горска техника':
-                    $categories['1']++; //Селско стопанство, риболов и аква култури, горско стопанство, храни
+                    $categories['1']++; // Селско стопанство, риболов и аква култури, горско стопанство, храни
 
                     break;
                 case strpos($tag, 'гимназии'):
@@ -1381,7 +1319,7 @@ class MigrateData extends Command
                 case 'план прием':
                 case 'лека атлетика':
                 case 'паметници на културата':
-                    $categories['2']++; //Образование, култура и спорт
+                    $categories['2']++; // Образование, култура и спорт
 
                     break;
                 case strpos($tag, 'вуздух'):
@@ -1412,12 +1350,12 @@ class MigrateData extends Command
                 case 'фини прахови частици':
                 case 'фпч':
                 case 'въглероден оксид':
-                     $categories['3']++; //Околна среда
+                     $categories['3']++; // Околна среда
 
                      break;
                 case strpos($tag, 'електромери'):
                 case strpos($tag, 'белене'):
-                    $categories['4']++; //Eнергетика
+                    $categories['4']++; // Eнергетика
 
                     break;
                 case strpos($tag, 'автобус'):
@@ -1437,7 +1375,7 @@ class MigrateData extends Command
                 case 'моторни-превозни средства':
                 case 'автогара':
                 case 'автомобил':
-                    $categories['5']++; //Tранспорт
+                    $categories['5']++; // Tранспорт
 
                     break;
                 case strpos($tag, 'изследвания'):
@@ -1447,7 +1385,7 @@ class MigrateData extends Command
                 case strpos($tag, 'нау'):
                 case 'Hackathon':
                 case 'авторски права':
-                    $categories['6']++; //Наука и технологии
+                    $categories['6']++; // Наука и технологии
 
                     break;
                 case strpos($tag, 'икономическ'):
@@ -1462,7 +1400,7 @@ class MigrateData extends Command
                 case strpos($tag, 'себра'):
                 case strpos($tag, 'дарен'):
                 case 'SEBRA':
-                    $categories['7']++; //Икономика и финанси
+                    $categories['7']++; // Икономика и финанси
 
                     break;
                 case strpos($tag, 'пенсии'):
@@ -1481,7 +1419,7 @@ class MigrateData extends Command
                 case 'Агенция за хората с увреждания специализирани предприятия':
                 case 'Агенция по заетостта':
                 case 'Бюро по труда':
-                    $categories['8']++; //Население и социални условия
+                    $categories['8']++; // Население и социални условия
 
                     break;
                 case strpos($tag, 'избори'):
@@ -1496,7 +1434,7 @@ class MigrateData extends Command
                 case strpos($tag, 'разрешител'):
                 case strpos($tag, 'цик'):
                 case 'proekti':
-                    $categories['9']++; //Правителство, публичен сектор
+                    $categories['9']++; // Правителство, публичен сектор
 
                     break;
                 case strpos($tag, 'зъбо'):
@@ -1515,7 +1453,7 @@ class MigrateData extends Command
                 case strpos($tag, 'медико'):
                 case 'здравеопазване':
                 case 'магистър-фармацевти':
-                    $categories['10']++; //Здравеопазване
+                    $categories['10']++; // Здравеопазване
 
                     break;
                 case strpos($tag, 'общин'):
@@ -1535,7 +1473,7 @@ class MigrateData extends Command
                 case strpos($tag, 'обл.'):
                 case strpos($tag, 'обс'):
                 case strpos($tag, 'община'):
-                    $categories['11']++; //Региони, градове, общини
+                    $categories['11']++; // Региони, градове, общини
 
                     break;
                 case strpos($tag, 'юрист'):
@@ -1546,7 +1484,7 @@ class MigrateData extends Command
                 case strpos($tag, 'убийств'):
                 case strpos($tag, 'престъпления'):
                 case 'prestupleniya_sreshtu_lichnostta _sobstvenostta_ikonomicheski':
-                    $categories['12']++; //Правосъдие, правна система, обществена безопасност
+                    $categories['12']++; // Правосъдие, правна система, обществена безопасност
 
                     break;
                 case strpos($tag, 'европ'):
@@ -1559,7 +1497,7 @@ class MigrateData extends Command
                 case strpos($tag, 'външна политика'):
                 case strpos($tag, 'международ'):
                 case 'european elections':
-                    $categories['13']++; //Международни въпроси
+                    $categories['13']++; // Международни въпроси
 
                     break;
             }

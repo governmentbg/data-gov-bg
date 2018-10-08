@@ -129,14 +129,8 @@ class InsertTermsInTermsOfUse extends Migration
     {
         if (!env('IS_TOOL')) {
             foreach ($this->termsOfUse as $termData) {
-                $deleteTerm = DB::table('terms_of_use')
-                    ->select('terms_of_use.id as id')
-                    ->join('translations', 'translations.group_id', '=', 'terms_of_use.name')
-                    ->where('translations.label', $termData['name'])
-                    ->first();
-
-                if ($term = TermsOfUse::find($deleteTerm->id)) {
-                    $term->delete();
+                if (TermsOfUse::where($termData)->count()) {
+                    TermsOfUse::where($termData)->get()->delete();
                 }
             }
         }

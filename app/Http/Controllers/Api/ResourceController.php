@@ -1399,11 +1399,13 @@ class ResourceController extends ApiController
             $replaceWith = '**********';
             $pattern = '/[0-9]{10}/';
 
-            if (preg_match_all($pattern, $item, $match)) {
-                foreach ($match as $k => $value) {
-                    foreach ($value as $v) {
-                        if ($this->isPersonalInfo($v)) {
-                            $item = str_replace($v, $replaceWith, $item);
+            if (!is_object($item)) {
+                if (preg_match_all($pattern, $item, $match)) {
+                    foreach ($match as $k => $value) {
+                        foreach ($value as $v) {
+                            if ($this->isPersonalInfo($v)) {
+                                $item = str_replace($v, $replaceWith, $item);
+                            }
                         }
                     }
                 }

@@ -295,6 +295,7 @@ class SectionController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
+            'api_key'               => 'nullable|string|exists:users,api_key',
             'criteria'              => 'nullable|array',
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|max:191',

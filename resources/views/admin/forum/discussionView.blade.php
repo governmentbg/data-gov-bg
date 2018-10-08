@@ -32,37 +32,37 @@
                     </div>
                     <div class="body">
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.title') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.title') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->title }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="category" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.category') }}</label>
+                            <label for="category" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.category') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->category()->first()->name }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.views')}}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.views')}}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->views }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.answer_count')}}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.answer_count')}}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->answered }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.last_reply_at') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.last_reply_at') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->last_reply_at }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.forum_link') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ isset($discussion->link) ? $discussion->link : null }}</div>
                             </div>
@@ -71,25 +71,61 @@
                             <hr>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->created_at }}</div>
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}</label>
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $discussion->created_by }}</div>
                             </div>
                         </div>
                         @if (!empty($discussion->updated_at))
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}</label>
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
                                     <div>{{ $discussion->updated_at }}</div>
                                 </div>
                             </div>
                         @endif
+                        <div class="text-right">
+                            <div class="row">
+                                <form
+                                    method="POST"
+                                    class="inline-block"
+                                    action="{{ url('admin/forum/discussions/edit/'. $discussion->id) }}"
+                                >
+                                    {{ csrf_field() }}
+                                    <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                    <input type="hidden" name="view" value="1">
+                                </form>
+                                <form
+                                    method="POST"
+                                    class="inline-block"
+                                >
+                                    {{ csrf_field() }}
+                                    <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                </form>
+                                <form
+                                    method="POST"
+                                    class="inline-block"
+                                    action="{{ url('admin/forum/discussions/delete/'. $discussion->id) }}"
+                                >
+                                    {{ csrf_field() }}
+                                    <button
+                                        class="btn del-btn btn-primary del-btn"
+                                        type="submit"
+                                        name="delete"
+                                        data-confirm="{{ __('custom.remove_data') }}"
+                                    >{{ uctrans('custom.remove') }}</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

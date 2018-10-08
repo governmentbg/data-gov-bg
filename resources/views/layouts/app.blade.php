@@ -274,10 +274,11 @@
                 </div>
                 <div class="underline">
                     <div class="help-ico js-help">
-                        @if(!empty($help))
+                        @if (!empty($help))
                             <span class="js-open-help glyphicon glyphicon-question-sign"></span>
                             @include('components.help', ['help' => $help])
-                        @elseif(\Auth::check() && App\Role::isAdmin())
+                        @elseif (\Auth::check() && App\Role::isAdmin())
+                            <span class="js-open-help glyphicon glyphicon-question-sign"></span>
                             <div class="js-help-bar help-container hidden">
                                 <div class="help-content">
                                     <div class="close"><span class="close-btn">X</span></div>

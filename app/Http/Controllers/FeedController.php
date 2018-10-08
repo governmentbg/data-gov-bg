@@ -93,8 +93,8 @@ class FeedController extends Controller
 
         if ($history) {
             return response()
-            ->view('feeds/datasetFeed', compact('history'))
-            ->header('Content-Type', 'text/xml');
+                ->view('feeds/datasetFeed', compact('history'))
+                ->header('Content-Type', 'text/xml');
         }
     }
 
@@ -135,8 +135,8 @@ class FeedController extends Controller
 
         if ($history) {
             return response()
-            ->view('feeds/newsFeed', compact('history'))
-            ->header('Content-Type', 'text/xml');
+                ->view('feeds/newsFeed', compact('history'))
+                ->header('Content-Type', 'text/xml');
         }
     }
 }

@@ -760,6 +760,8 @@ class ForumController extends AdminController
             try {
                 $post->delete();
                 $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                return redirect('/admin/forum/posts/list/'. $post->chatter_discussion_id);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
                 $request->session()->flash('alert-danger', __('custom.delete_error'));

@@ -34,6 +34,9 @@
     @if (isset($datasetLink))
         <link rel="alternate" type="application/rss+xml" title="Datasets" href="{{ url('/datasets/rss') }}"/>
     @endif
+    @if (isset($newsLink))
+        <link rel="alternate" type="application/rss+xml" title="News" href="{{ url('/news/rss') }}"/>
+    @endif
     @yield('css')
     <!-- Global site tag (gtag.js) - Google Analytics -->
     @if (!empty(env('GA_TRACKING_ID')))

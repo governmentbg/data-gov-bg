@@ -395,3 +395,4 @@ Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'LanguageController@
 
 Route::get('/datasets/{uri}/rss', 'FeedController@getOrganisationDatasetHistory');
 Route::get('/datasets/rss', 'FeedController@getDatasetsHistory');
+Route::get('/news/rss', 'FeedController@getNewsHistory');

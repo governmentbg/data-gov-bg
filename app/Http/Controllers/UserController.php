@@ -3984,21 +3984,46 @@ class UserController extends Controller {
     public function confirmation(Request $request)
     {
         $class = 'user';
+        $confirmed = false;
         $hash = $request->offsetGet('hash');
 
         if ($hash) {
             $user = User::where('hash_id', $hash)->first();
 
             if ($user) {
-                $user->active = true;
+                $confirmed = ActionsHistory::where('user_id', $user->id)
+                    ->where('action', ActionsHistory::TYPE_CONFIRM_ACCOUNT)
+                    ->first()
+                        ? true
+                        : false;
 
-                try {
-                    $user->save();
-                    $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
+                if (!$confirmed) {
+                    DB::beginTransaction();
+                    $user->active = true;
 
-                    return redirect('login');
-                } catch (QueryException $ex) {
-                    Log::error($ex->getMessage());
+                    try {
+                        $user->save();
+                        $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
+
+                        $dbData = [
+                            'module_name'   => Module::getModuleName(Module::USERS),
+                            'action'        => ActionsHistory::TYPE_CONFIRM_ACCOUNT,
+                            'action_msg'    => 'Confirmed account',
+                            'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
+                            'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
+                            'occurrence'    => date('Y-m-d H:i:s'),
+                            'user_id'       => $user->id,
+                            'action_object' => '',
+                        ];
+
+                        ActionsHistory::create($dbData);
+                        DB::commit();
+
+                        return redirect('login');
+                    } catch (QueryException $ex) {
+                        DB::rollback();
+                        Log::error($ex->getMessage());
+                    }
                 }
             }
         }
@@ -4024,7 +4049,7 @@ class UserController extends Controller {
             return redirect('login');
         }
 
-        return view('confirmError', compact('class'));
+        return view('confirmError', compact('class', 'confirmed'));
     }
 
     /**

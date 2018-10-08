@@ -855,4 +855,6 @@ return [
     'clear_filter' => 'clear filter',
     'no_help' => 'Help is missing',
     'already_confirmed_account' => 'Your account is confirmed!',
+    'connection' => 'Connection',
+    'done' => 'done',
 ];

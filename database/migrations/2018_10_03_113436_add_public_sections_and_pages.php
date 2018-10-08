@@ -124,37 +124,39 @@ class AddPublicSectionsAndPages extends Migration
      */
     public function up()
     {
-        $userId = User::where('username', 'system')->value('id');
+        if (!env('IS_TOOL')) {
+            $userId = User::where('username', 'system')->value('id');
 
-        foreach ($this->sections as $key => $section) {
-            DB::beginTransaction();
+            foreach ($this->sections as $key => $section) {
+                DB::beginTransaction();
 
-            try {
-                $newSection = new Section;
+                try {
+                    $newSection = new Section;
 
-                $newSection->name = $section['name'];
-                $newSection->ordering = $section['ordering'];
-                $newSection->active = $section['active'];
-                $newSection->theme = $section['theme'];
-                $newSection->created_by = $userId;
+                    $newSection->name = $section['name'];
+                    $newSection->ordering = $section['ordering'];
+                    $newSection->active = $section['active'];
+                    $newSection->theme = $section['theme'];
+                    $newSection->created_by = $userId;
 
-                $newSection->save();
+                    $newSection->save();
 
-                $newPage = new Page;
+                    $newPage = new Page;
 
-                $newPage->title = $section['page']['title'];
-                $newPage->section_id = $newSection->id;
-                $newPage->body = $section['page']['body'];
-                $newPage->active = $section['page']['active'];
-                $newPage->type = $section['page']['type'];
-                $newPage->created_by = $userId;
+                    $newPage->title = $section['page']['title'];
+                    $newPage->section_id = $newSection->id;
+                    $newPage->body = $section['page']['body'];
+                    $newPage->active = $section['page']['active'];
+                    $newPage->type = $section['page']['type'];
+                    $newPage->created_by = $userId;
 
-                $newPage->save();
+                    $newPage->save();
 
-                DB::commit();
-            } catch (QueryException $e) {
-                DB::rollback();
-                Log::error($e->getMessage());
+                    DB::commit();
+                } catch (QueryException $e) {
+                    DB::rollback();
+                    Log::error($e->getMessage());
+                }
             }
         }
     }
@@ -166,42 +168,44 @@ class AddPublicSectionsAndPages extends Migration
      */
     public function down()
     {
-        $userId = User::where('username', 'system')->value('id');
+        if (!env('IS_TOOL')) {
+            $userId = User::where('username', 'system')->value('id');
 
-        foreach ($this->sections as $key => $section) {
-            $pageTrans = DB::table('translations')
-                ->where('label', $section['page']['title']['bg'])
-                ->where('locale', 'bg')
-                ->where('created_by', $userId)
-                ->get()
-                ->last();
+            foreach ($this->sections as $key => $section) {
+                $pageTrans = DB::table('translations')
+                    ->where('label', $section['page']['title']['bg'])
+                    ->where('locale', 'bg')
+                    ->where('created_by', $userId)
+                    ->get()
+                    ->last();
 
-            $pageGroupId = !is_null($pageTrans) ? $pageTrans->group_id : null;
+                $pageGroupId = !is_null($pageTrans) ? $pageTrans->group_id : null;
 
-            DB::table('translations')
-                ->where('group_id', $pageGroupId)
-                ->delete();
+                DB::table('translations')
+                    ->where('group_id', $pageGroupId)
+                    ->delete();
 
-            $secTrans = DB::table('translations')
-                ->where('label', $section['name']['bg'])
-                ->where('locale', 'bg')
-                ->where('created_by', $userId)
-                ->get()
-                ->last();
+                $secTrans = DB::table('translations')
+                    ->where('label', $section['name']['bg'])
+                    ->where('locale', 'bg')
+                    ->where('created_by', $userId)
+                    ->get()
+                    ->last();
 
-            $secGroupId = !is_null($secTrans) ? $secTrans->group_id : null;
+                $secGroupId = !is_null($secTrans) ? $secTrans->group_id : null;
 
-            DB::table('translations')
-                ->where('group_id', $secGroupId)
-                ->delete();
+                DB::table('translations')
+                    ->where('group_id', $secGroupId)
+                    ->delete();
 
-            Page::where('title', $pageGroupId)
-                ->where('created_by', $userId)
-                ->delete();
+                Page::where('title', $pageGroupId)
+                    ->where('created_by', $userId)
+                    ->delete();
 
-            Section::where('name', $secGroupId)
-                ->where('created_by', $userId)
-                ->delete();
+                Section::where('name', $secGroupId)
+                    ->where('created_by', $userId)
+                    ->delete();
+            }
         }
     }
 }

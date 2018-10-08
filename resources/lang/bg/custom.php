@@ -857,4 +857,6 @@ return [
     'no_help' => 'Липства помощна страница',
     'already_confirmed_account' => 'Профилът Ви е потвърден!',
     'confirm_account' => 'потвърди профил',
+    'connection' => 'Връзка',
+    'done' => 'готово',
 ];

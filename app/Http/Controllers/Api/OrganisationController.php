@@ -976,7 +976,6 @@ class OrganisationController extends ApiController
                     }
                     $count = DataSet::whereIn('id', $ids)
                         ->where('status', DataSet::STATUS_PUBLISHED)
-                        ->where('visibility', DataSet::VISIBILITY_PUBLIC)
                         ->count();
                     $result['datasets_count'] = $count;
 
@@ -1950,7 +1949,6 @@ class OrganisationController extends ApiController
                     }
                     $count = DataSet::whereIn('id', $ids)
                         ->where('status', DataSet::STATUS_PUBLISHED)
-                        ->where('visibility', DataSet::VISIBILITY_PUBLIC)
                         ->count();
                     $result['datasets_count'] = $count;
 

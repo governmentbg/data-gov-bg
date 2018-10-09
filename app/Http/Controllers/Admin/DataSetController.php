@@ -147,6 +147,19 @@ class DataSetController extends AdminController
             $perPage
         );
 
+        // handle dataset delete
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return back();
+        }
+
         return view('admin/datasets', [
             'class'                 => 'user',
             'search'                => $search,
@@ -311,6 +324,19 @@ class DataSetController extends AdminController
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        // handle dataset delete
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return back();
+        }
 
         return view('admin/datasetView', [
             'class'     => 'user',
@@ -531,52 +557,66 @@ class DataSetController extends AdminController
         if (!empty($resource)) {
             $data = [];
 
-            if (!empty($resource)) {
-                $resource->format_code = Resource::getFormatsCode($resource->file_format);
-                $resource = $this->getModelUsernames($resource);
+            $resource->format_code = Resource::getFormatsCode($resource->file_format);
+            $resource = $this->getModelUsernames($resource);
 
-                if (empty($version)) {
-                    $version = $resource->version;
-                }
-
-                if ($request->has('delete')) {
-                    $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
-                    $apiDelete = new ApiResource($reqDelete);
-                    $result = $apiDelete->deleteResource($reqDelete)->getData();
-
-                    if ($result->success) {
-                        $request->session()->flash('alert-success', __('custom.delete_success'));
-
-                        return redirect('/admin/dataset/view/'. $resource->dataset_uri);
-                    }
-
-                    $request->session()->flash('alert-success', __('custom.delete_error'));
-                }
-
-                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri, 'version' => $version]);
-                $apiEsData = new ApiResource($reqEsData);
-                $response = $apiEsData->getResourceData($reqEsData)->getData();
-
-                $data = !empty($response->data) ? $response->data : [];
-
-                if ($resource->format_code == Resource::FORMAT_XML) {
-                    $convertData = [
-                        'api_key'   => \Auth::user()->api_key,
-                        'data'      => $data,
-                    ];
-                    $reqConvert = Request::create('/json2xml', 'POST', $convertData);
-                    $apiConvert = new ApiConversion($reqConvert);
-                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
-                    $data = isset($resultConvert->data) ? $resultConvert->data : [];
-                }
-
-                return view('admin/resourceView', [
-                    'class'         => 'user',
-                    'resource'      => $resource,
-                    'data'          => $data,
-                    'versionView'   => $version,
-                ]);
+            if (empty($version)) {
+                $version = $resource->version;
             }
+
+            if ($request->has('delete')) {
+                $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+                $apiDelete = new ApiResource($reqDelete);
+                $result = $apiDelete->deleteResource($reqDelete)->getData();
+
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                    return redirect('/admin/dataset/view/'. $resource->dataset_uri);
+                }
+
+                $request->session()->flash('alert-success', __('custom.delete_error'));
+            }
+
+            $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $resource->dataset_uri]);
+            $apiDatasets = new ApiDataset($datasetReq);
+            $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+            $dataset = !empty($dataset->data) ? $dataset->data : null;
+
+            if (!is_null($dataset)) {
+                $datasetData = [
+                    'name'  => $dataset->name,
+                    'uri'   => $dataset->uri,
+                ];
+            } else {
+                $datasetData = null;
+            }
+
+            $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri, 'version' => $version]);
+            $apiEsData = new ApiResource($reqEsData);
+            $response = $apiEsData->getResourceData($reqEsData)->getData();
+
+            $data = !empty($response->data) ? $response->data : [];
+
+            if ($resource->format_code == Resource::FORMAT_XML) {
+                $convertData = [
+                    'api_key'   => \Auth::user()->api_key,
+                    'data'      => $data,
+                ];
+                $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+                $apiConvert = new ApiConversion($reqConvert);
+                $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                $data = isset($resultConvert->data) ? $resultConvert->data : [];
+            }
+
+            return view('admin/resourceView', [
+                'class'         => 'user',
+                'resource'      => $resource,
+                'data'          => $data,
+                'versionView'   => $version,
+                'dataset'       => $datasetData,
+                'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
+            ]);
         }
 
         return back();

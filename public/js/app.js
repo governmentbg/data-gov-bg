@@ -72077,7 +72077,6 @@ function initSelect2() {
                         return finalParams;
                     },
                     processResults: function processResults(data) {
-                        data.organisations = $.merge([{ uri: 0, name: $('.js-translations').data('clear-org-filter') }], data.organisations);
 
                         return {
                             results: $.map(data.organisations, function (item) {
@@ -72106,6 +72105,15 @@ function initSelect2() {
             $(this).select2(options);
         });
     }
+
+    $('.js-ajax-autocomplete-org').on('select2:open', function (e) {
+        var selectedVal = $('.js-ajax-autocomplete-org').find(':selected').val();
+
+        if (typeof selectedVal != 'undefined') {
+            var newOption = new Option($('.js-translations').data('clear-org-filter'), 0, true, true);
+            $('.js-ajax-autocomplete-org').append(newOption).trigger('change');
+        }
+    });
 };
 initSelect2();
 

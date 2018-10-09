@@ -15907,7 +15907,7 @@ textarea {
 }
 
 .btn {
-  min-width: 80px !important;
+  min-width: 30px !important;
 }
 
 .btn:hover,

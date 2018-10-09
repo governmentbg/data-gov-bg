@@ -450,7 +450,11 @@ $(function() {
 
     $(document).ready(function() {
         if ($('.js-summernote').length) {
-            $('.js-summernote').summernote();
+            $('.js-summernote').summernote(
+                {
+                    'height' : 150
+                }
+            );
         }
     });
 });

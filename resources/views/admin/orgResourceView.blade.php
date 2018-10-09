@@ -2,11 +2,7 @@
 @section('content')
     <div class="container">
         @include('partials.alerts-bar')
-        @if (Auth::user()->is_admin)
-            @include('partials.admin-nav-bar', ['view' => 'organisation'])
-        @else
-            @include('partials.user-nav-bar', ['view' => 'organisation'])
-        @endif
+        @include('partials.admin-nav-bar', ['view' => 'organisation'])
         @if (isset($fromOrg))
             @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $fromOrg])
         @endif

@@ -1,5 +1,5 @@
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
-<div class="col-xs-12 m-t-md">
+
     <div class="articles">
         <div class="col-sm-12 p-l-none">
             <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
@@ -9,6 +9,17 @@
             <p>
                 {{ utrans('custom.version_displayed') }}:&nbsp;{{ $versionView }}
             </p>
+            @if (!empty($dataset))
+                <p>
+                    <strong>{{ uctrans('custom.dataset') }}:</strong>&nbsp;
+                    <a href="{{ url('/'. $root .'/dataset/view/'. $dataset['uri']) }}">
+                        {{ $dataset['name'] }}
+                    </a>
+                </p>
+            @endif
+            @if (!empty($supportName))
+                <p><strong>{{ __('custom.contact_support_name') }}:</strong>&nbsp;{{ $supportName }}</p>
+            @endif
             @if (!empty($admin))
                 <p>
                     <strong>{{ __('custom.id') }}:</strong>
@@ -48,8 +59,8 @@
                 </div>
             @endif
 
+            <p><strong>{{ uctrans('custom.description') }}:</strong></p>
             @if (!empty($resource->description))
-                <p><strong>{{ uctrans('custom.description') }}:</strong></p>
                 <div class="m-b-sm">
                     {{ $resource->description }}
                 </div>
@@ -91,44 +102,48 @@
                 @include('partials.resource-visualisation')
             </div>
         @endif
-        <div class="col-sm-12 p-l-none">
-            <div class="col-sm-12 text-left">
-                @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
-                    <form method="POST">
-                        {{ csrf_field() }}
-                        @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
-                            <button
-                                type="button"
-                                class="btn btn-primary js-res-uri"
-                                data-toggle="modal"
-                                data-target="#embed-resource"
-                                data-uri ="{{ $resource->uri }}"
-                            >{{ uctrans('custom.embed') }}</button>
-                            @if ($resource->version == $versionView)
-                                <a
-                                    class="btn btn-primary"
-                                    href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
-                                >{{ uctrans('custom.update') }}</a>
-                            @endif
-                        @endif
+        <div class="col-sm-12 p-l-none text-left">
+            <form method="POST">
+                {{ csrf_field() }}
+                @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
+                    <button
+                        type="button"
+                        class="btn btn-primary js-res-uri"
+                        data-toggle="modal"
+                        data-target="#embed-resource"
+                        data-uri ="{{ $resource->uri }}"
+                    >{{ uctrans('custom.embed') }}</button>
+                    @if (($resource->version == $versionView) && (!empty($buttons[$resource->uri]['edit'])))
                         <a
                             class="btn btn-primary"
-                            href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
-                        >{{ uctrans('custom.edit') }}</a>
-                        <a
-                            href="{{ url('/'. $root .'/dataset/view/' . $resource->dataset_uri) }}"
-                            class="btn btn-primary"
+                            href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
                         >
-                            {{ uctrans('custom.close') }}
+                            {{ uctrans('custom.update') }}
                         </a>
-                        <button
-                            name="delete"
-                            class="btn del-btn btn-primary"
-                            data-confirm="{{ __('custom.remove_data') }}"
-                        >{{ uctrans('custom.remove') }}</button>
-                    </form>
+                    @endif
                 @endif
-            </div>
+                @if (!empty($admin) || !empty($buttons[$resource->uri]['edit']))
+                <a
+                    class="btn btn-primary"
+                    href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
+                >
+                    {{ uctrans('custom.edit') }}
+                </a>
+                @endif
+                <a
+                    href="{{ url('/'. $root .'/dataset/view/' . $resource->dataset_uri) }}"
+                    class="btn btn-primary"
+                >
+                    {{ uctrans('custom.close') }}
+                </a>
+                @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
+                    <button
+                        name="delete"
+                        class="btn del-btn btn-primary"
+                        data-confirm="{{ __('custom.remove_data') }}"
+                    >{{ uctrans('custom.remove') }}</button>
+                @endif
+            </form>
         </div>
 
         <!-- IF there are old versions of this article -->
@@ -148,5 +163,5 @@
         @endif
         @include('components.signal-box', ['signals' => $resource->signals])
     </div>
-</div>
+
 @include('partials.resource-embed')

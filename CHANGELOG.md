@@ -13,6 +13,11 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Added
+- Api removeDatasetFromGroup parameter group_id now is a array of IDs.
+
+### Fixed
+- Edit dataset cant deselect groups and organisation
+- Refactored and optimised dataset sections in Organisations and Groups
 
 ## [0.6.0] - 2018-10-08
 ### Added

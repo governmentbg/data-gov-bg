@@ -605,8 +605,9 @@
                                             </span>
                                         </div>
                                         <div class="col-xs-6">
-                                            <form method="POST" action="{{ url('/admin/dataset/delete') }}">
+                                            <form method="POST">
                                                 {{ csrf_field() }}
+                                                <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
                                                 <div class="col-xs-6 text-right">
                                                     <button
                                                         class="badge badge-pill m-b-sm del-btn"
@@ -615,7 +616,6 @@
                                                         data-confirm="{{ __('custom.remove_data') }}"
                                                     >{{ uctrans('custom.remove') }}</button>
                                                 </div>
-                                                <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
                                             </form>
                                         </div>
                                     </div>

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Role;
 use App\User;
+use App\Module;
 use App\Section;
+use App\RoleRight;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,8 +15,10 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Controllers\Api\SectionController as ApiSection;
 use App\Http\Controllers\Api\ThemeController as ApiTheme;
+use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
+use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 
 class Controller extends BaseController
 {
@@ -204,6 +209,99 @@ class Controller extends BaseController
         }
 
         return $data;
+    }
+
+    /**
+     * Prepares an array of organisations
+     *
+     * @return array organisations
+     */
+    protected function prepareOrganisations()
+    {
+        $params = [];
+
+        $params['api_key'] = \Auth::user()->api_key;
+
+        if (!Role::isAdmin()) {
+            $params['criteria']['user_id'] = \Auth::user()->id;
+        }
+
+        $request = Request::create('/api/listOrganisations', 'POST', $params);
+        $api = new ApiOrganisation($request);
+        $result = $api->listOrganisations($request)->getData();
+        $organisations = [];
+
+        foreach ($result->organisations as $row) {
+            $organisations[$row->id] = $row->name;
+        }
+
+        return $organisations;
+    }
+
+    /**
+     * Prepares an array of groups
+     *
+     * @return array groups
+     */
+    protected function prepareGroups()
+    {
+        $params = [];
+
+        if (!Role::isAdmin()) {
+            $params['criteria']['user_id'] = \Auth::user()->id;
+        }
+
+        $request = Request::create('/api/listGroups', 'POST', $params);
+        $api = new ApiOrganisation($request);
+        $result = $api->listGroups($request)->getData();
+        $groups = [];
+
+        foreach ($result->groups as $row) {
+            $groups[$row->id] = $row->name;
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Attempts to delete a dataset based on uri
+     *
+     * @param Request $request
+     * @return true on success and false on failure
+     *
+     */
+    protected function datasetDelete($uri)
+    {
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $datasetData = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!isset($datasetData)) {
+            return back();
+        }
+
+        $rightCheck = RoleRight::checkUserRight(
+            Module::DATA_SETS,
+            RoleRight::RIGHT_ALL,
+            [],
+            [
+                'created_by' => $datasetData->created_by
+            ]
+        );
+
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
+
+        $params['api_key'] = \Auth::user()->api_key;
+        $params['dataset_uri'] = $uri;
+
+        $request = Request::create('/api/deleteDataset', 'POST', $params);
+        $api = new ApiDataSet($request);
+        $datasets = $api->deleteDataset($request)->getData();
+
+        return $datasets->success;
     }
 
     /**

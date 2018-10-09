@@ -1,19 +1,17 @@
 @extends('layouts.app')
-
+@php $root = empty(Auth::user()->is_admin) ? 'user' : 'admin'; @endphp
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @if (Auth::user()->is_admin)
-        @include('partials.admin-nav-bar', ['view' => 'group'])
-    @else
-        @include('partials.user-nav-bar', ['view' => 'group'])
-    @endif
+    @include('partials.'. $root .'-nav-bar', ['view' => 'group'])
     @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $group])
     @include('partials.pagination')
     <div class="row">
         <div class="col-sm-3 col-xs-12 text-left sidenav">
         @if ($buttons['add'])
-            <span class="badge badge-pill m-t-lg new-data user-add-btn"><a href="{{ url('/user/groups/dataset/create/'. $uri) }}">{{ __('custom.add_new_dataset') }}</a></span>
+            <span class="badge badge-pill m-t-lg new-data user-add-btn">
+                <a href="{{ url('/'. $root .'/groups/dataset/create/'. $uri) }}">{{ __('custom.add_new_dataset') }}</a>
+            </span>
         @endif
             @include('partials.group-info', ['group' => $group])
         </div>
@@ -38,7 +36,7 @@
                         <div class="article m-b-lg col-xs-12 user-dataset">
                             <div>{{ __('custom.date_added') }}: {{ $set->created_at }}</div>
                             <div class="col-sm-12 p-l-none">
-                                <a href="{{ route('groupDatasetView', ['uri' => $set->uri, 'grpUri' => $group->uri]) }}">
+                                <a href="{{ route($root .'GroupDatasetView', ['uri' => $set->uri, 'grpUri' => $group->uri]) }}">
                                     <h2 class="m-t-xs">{{ $set->name }}</h2>
                                 </a>
                                 <div class="desc">
@@ -49,7 +47,9 @@
                                         <div class="col-xs-6">
                                         @if ($buttons[$set->uri]['edit'])
                                             <span class="badge badge-pill m-r-md m-b-sm">
-                                                <a href="{{ url('/user/group/'. $group->uri .'/dataset/edit/'. $set->uri) }}">{{ uctrans('custom.edit') }}</a>
+                                                <a href="{{ url('/'. $root .'/group/'. $group->uri .'/dataset/edit/'. $set->uri) }}">
+                                                    {{ uctrans('custom.edit') }}
+                                                </a>
                                             </span>
                                         @endif
                                         </div>
@@ -62,7 +62,7 @@
                                                             class="badge badge-pill m-b-sm del-btn"
                                                             type="submit"
                                                             name="delete"
-                                                            onclick="return confirm('Изтриване на данните?');"
+                                                            data-confirm="{{ __('custom.remove_data') }}"
                                                         >{{ uctrans('custom.remove') }}</button>
                                                     </div>
                                                     <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
@@ -71,7 +71,11 @@
                                         @endif
                                     </div>
                                     <div class="pull-right">
-                                        <span><a href="{{ route('datasetView', ['uri' => $set->uri]) }}">{{ __('custom.see_more') }}</a></span>
+                                        <span>
+                                            <a href="{{ route($root .'GroupDatasetView', ['uri' => $set->uri, 'grpUri' => $group->uri]) }}">
+                                                {{ __('custom.see_more') }}
+                                            </a>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -85,12 +89,6 @@
             </div>
         </div>
     </div>
-    @if (isset($pagination))
-        <div class="row">
-            <div class="col-xs-12 text-center pagination">
-                {{ $pagination->render() }}
-            </div>
-        </div>
-    @endif
+    @include('partials.pagination')
 </div>
 @endsection

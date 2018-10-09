@@ -1,8 +1,8 @@
-<div class="col-xs-12 sidenav m-t-lg m-b-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg m-b-lg">
     <span class="my-profile m-l-sm">{{uctrans('custom.dataset_edit')}}</span>
 </div>
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
-<div class="col-xs-12 m-t-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
     <form method="POST">
         {{ csrf_field() }}
@@ -149,7 +149,6 @@
                     data-placeholder="{{ utrans('custom.groups', 1) }}"
                     multiple="multiple"
                 >
-                    <option></option>
                     @foreach ($groups as $id => $group)
                         <option
                             value="{{ $id }}"
@@ -226,7 +225,8 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('author_name')) ? $dataSet->author_name : old('author_name') }}"
                     type="text"
-                    placeholder="{{ __('custom.author') }}">
+                    placeholder="{{ __('custom.author') }}"
+                >
                 <span class="error">{{ $errors->first('author_name') }}</span>
             </div>
         </div>

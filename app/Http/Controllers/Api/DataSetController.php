@@ -122,7 +122,7 @@ class DataSetController extends ApiController
                 'descript'          => empty($data['description']) ? null : $this->trans($locale, $data['description']),
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
                 'org_id'            => empty($data['org_id']) ? null : $data['org_id'],
-                'visibility'        => DataSet::VISIBILITY_PRIVATE,
+                'visibility'        => empty($data['visibility']) ? DataSet::VISIBILITY_PRIVATE : $data['visibility'],
                 'version'           => 1,
                 'status'            => DataSet::STATUS_DRAFT,
                 'category_id'       => $data['category_id'],
@@ -262,7 +262,7 @@ class DataSetController extends ApiController
                 'name.bg'               => 'required_without:locale|string|max:8000',
                 'description'           => 'nullable|max:8000',
                 'category_id'           => 'required|int|digits_between:1,10',
-                'org_id'                => 'nullable|int|digits_between:1,10|exists:organisations,id',
+                'org_id'                => 'nullable|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
                 'uri'                   => 'nullable|string|unique:data_sets,uri',
                 'tags.*.name'           => 'nullable|string|max:191',
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10',
@@ -347,9 +347,8 @@ class DataSetController extends ApiController
                     $dataSet->category_id = $post['data']['category_id'];
                 }
 
-                if (!empty($post['data']['org_id'])) {
-                    $dataSet->org_id = $post['data']['org_id'];
-                }
+                // if NULL passed - dataset not connected to organisation
+                $dataSet->org_id = $post['data']['org_id'];
 
                 if (!empty($post['data']['uri'])) {
                     $dataSet->uri = $post['data']['uri'];
@@ -1017,8 +1016,15 @@ class DataSetController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'group_id'      => 'required|int|digits_between:1,10',
             'data_set_uri'  => 'required|string|max:191',
+            'group_id'      => 'required|array',
+            'group_id.*'    => [
+                'required',
+                'int',
+                Rule::exists('organisations', 'id')->where(function ($query) {
+                    $query->where('type', Organisation::TYPE_GROUP);
+                }),
+            ],
         ]);
 
         if (!$validator->fails()) {
@@ -1026,25 +1032,26 @@ class DataSetController extends ApiController
 
             if ($dataSet) {
                 try {
-                    $rightCheck = RoleRight::checkUserRight(
-                        Module::GROUPS,
-                        RoleRight::RIGHT_EDIT,
-                        [
-                            'group_id' => $post['group_id']
-                        ],
-                        [
-                            'group_ids' => [$post['group_id']]
-                        ]
-                    );
+                    foreach ($post['group_id'] as $id) {
+                        $rightCheck = RoleRight::checkUserRight(
+                            Module::GROUPS,
+                            RoleRight::RIGHT_EDIT,
+                            [
+                                'group_id' => $id
+                            ],
+                            [
+                                'group_ids' => $post['group_id']
+                            ]
+                        );
 
-                    if (!$rightCheck) {
-                        return $this->errorResponse(__('custom.access_denied'));
+                        if (!$rightCheck) {
+                            return $this->errorResponse(__('custom.access_denied'));
+                        }
                     }
 
-                    if (DataSetGroup::where([
-                            'group_id'      => $post['group_id'],
-                            'data_set_id'   => $dataSet->id,
-                        ])->delete()
+                    if (DataSetGroup::where('data_set_id', $dataSet->id)
+                            ->whereIn('group_id', $post['group_id'])
+                            ->delete()
                     ) {
                         $logData = [
                             'module_name'      => Module::getModuleName(Module::DATA_SETS),

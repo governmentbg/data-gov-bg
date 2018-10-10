@@ -3,7 +3,7 @@
         <div class="nano">
             <div class="nano-content">
                 <div class="help-content">
-                    <span class="glyphicon glyphicon-question-sign"></span>
+                    <img class="help-icon-open" src="{{ asset('/img/help-icon.svg') }}">
                     <div class="close"><span class="close-btn">X</span></div>
                     <h3>{{ $help->title }}</h3>
                     <div class="p-b-md">

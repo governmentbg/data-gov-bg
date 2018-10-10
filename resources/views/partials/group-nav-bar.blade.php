@@ -53,12 +53,12 @@
                             @if ($isAdmin)
                                 <a
                                     class="{{ $view == 'chronology' ? 'active' : null }}"
-                                    href="{{ url('/admin/groups/'. $group->uri .'/chronology') }}"
+                                    href="{{ url('/admin/groups/chronology/'. $group->uri) }}"
                                 >{{ ultrans('custom.chronology') }}</a>
                             @else
                                 <a
                                     class="{{ $view == 'chronology' ? 'active' : null }}"
-                                    href="{{ url('/user/groups/'. $group->uri .'/chronology') }}"
+                                    href="{{ url('/user/groups/chronology/'. $group->uri) }}"
                                 >{{ ultrans('custom.chronology') }}</a>
                             @endif
                         </li>

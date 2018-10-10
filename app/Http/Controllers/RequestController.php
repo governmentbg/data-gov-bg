@@ -55,7 +55,6 @@ class RequestController extends Controller {
             [
                 'class'          => 'request',
                 'orgList'        => $organisations,
-                'activeSections' => $this->getActiveSections()
             ]
         );
     }

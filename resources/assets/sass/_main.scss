@@ -725,56 +725,54 @@ textarea {
 }
 
 .pages-list {
+    &.section {
+        padding-right: 0px !important;
+        .section-nav-bar {
+            .filter-type {
+                border-radius: 10px;
+                &.index {
+                    border: 1px solid $themeIndex;
+                }
 
-    .page-item:hover {
-        box-shadow: 0 0 11px rgba(33,33,33,.2);
-      }
+                &.data {
+                    border: 1px solid $themeData;
+                }
 
-    .page-item {
-        padding-top: 40px;
-        padding-bottom: 40px;
-        border-radius: 15px;
+                &.data-attention {
+                    border: 1px solid $themeDataAttention;
+                }
 
-        &.index {
-            border: 1px solid $themeIndex;
-        }
+                &.organisation {
+                    border: 1px solid $themeOrganisation;
+                }
 
-        &.data {
-            border: 1px solid $themeData;
-        }
+                &.request {
+                    border: 1px solid $themeRequest;
+                }
 
-        &.data-attention {
-            border: 1px solid $themeDataAttention;
-        }
+                &.visualisation {
+                    border: 1px solid $themeVisualisations;
+                }
 
-        &.organisation {
-            border: 1px solid $themeOrganisation;
-        }
+                &.news {
+                    border: 1px solid $themeNews;
+                }
 
-        &.request {
-            border: 1px solid $themeRequest;
-        }
+                &.document {
+                    border: 1px solid $themeDocuments;
+                }
 
-        &.visualisation {
-            border: 1px solid $themeVisualisations;
-        }
+                &.contact {
+                    border: 1px solid $themeContact;
+                }
 
-        &.news {
-            border: 1px solid $themeNews;
-        }
-
-        &.document {
-            border: 1px solid $themeDocuments;
-        }
-
-        &.contact {
-            border: 1px solid $themeContact;
-        }
-
-        &.user {
-            border: 1px solid $themeUser;
+                &.user {
+                    border: 1px solid $themeUser;
+                }
+            }
         }
     }
+
 }
 
 .chatter-alert {
@@ -797,4 +795,13 @@ textarea {
 
 .text-area {
     max-width: 100%;
+}
+
+.static-pages {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.discussion {
+    padding-top: 50px;
 }

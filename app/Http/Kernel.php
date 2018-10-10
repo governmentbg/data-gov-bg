@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             'locale',
             'tool',
             'help',
+            'sections',
         ],
 
         'api' => [
@@ -70,5 +71,6 @@ class Kernel extends HttpKernel
         'locale'               => \App\Http\Middleware\SetLocale::class,
         'check.resources'      => \App\Http\Middleware\CheckReportedResources::class,
         'help'                 => \App\Http\Middleware\CheckHelp::class,
+        'sections'             => \App\Http\Middleware\ShareActiveSections::class,
     ];
 }

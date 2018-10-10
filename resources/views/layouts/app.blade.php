@@ -206,6 +206,9 @@
                                 <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
                                     <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
                                 </li>
+                                <li class="help {{ Request::segment(1) == 'help' ? 'active' : '' }}">
+                                    <a href="{{ url('/help') }}">{{ __('custom.help_sections') }}</a>
+                                </li>
                                 @if (isset($activeSections))
                                     @foreach ($activeSections as $section)
                                         <li
@@ -273,12 +276,12 @@
                     </div>
                 </div>
                 <div class="underline">
-                    <div class="help-ico js-help">
+                    <div class="help-btn js-help">
                         @if (!empty($help))
-                            <span class="js-open-help glyphicon glyphicon-question-sign"></span>
+                            <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
                             @include('components.help', ['help' => $help])
                         @elseif (\Auth::check() && App\Role::isAdmin())
-                            <span class="js-open-help glyphicon glyphicon-question-sign"></span>
+                            <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
                             <div class="js-help-bar help-container hidden">
                                 <div class="help-content">
                                     <div class="close"><span class="close-btn">X</span></div>
@@ -288,7 +291,7 @@
                                         href="{{
                                             route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
                                                 ? 'home'
-                                                : str_replace(env('APP_URL') .'/','',\Request::url())
+                                                : \Request::getPathInfo()
                                             ])
                                         }}"
                                     >{{ __('custom.add') }}</a>

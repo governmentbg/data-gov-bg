@@ -630,7 +630,7 @@ class HelpController extends ApiController
                 'created_at'    => $page->created_at->toDateTimeString(),
                 'updated_by'    => $page->updated_by,
                 'updated_at'    => isset($page->updated_at) ? $page->updated_at->toDateTimeString() : null,
-                'section_name'  => isset($page->section->name) ? $page->section->name : null,
+                'section_name'  => isset($page->section->title) ? $page->section->title : null,
             ];
         }
 

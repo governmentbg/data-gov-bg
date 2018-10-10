@@ -437,6 +437,20 @@ body {
                         }
                     }
 
+                    &.help {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeHelp !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeHelp;
+                            }
+                        }
+                    }
+
                     &.contact {
                         &:hover, &.active {
                             @include smMobile() {

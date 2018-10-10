@@ -14,7 +14,7 @@
                                 <ul class="nav filter-type right-border">
                                     <li><a class="active p-l-none" href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ __('custom.profile') }}</a></li>
                                     <li><a href="{{ url('/organisation/'. $organisation->uri .'/datasets') }}">{{ __('custom.data') }}</a></li>
-                                    <li><a href="{{ url('/organisation/'. $organisation->uri .'/chronology') }}">{{ __('custom.chronology') }}</a></li>
+                                    <li><a href="{{ url('/organisation/chronology/'. $organisation->uri ) }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>
                         </div>

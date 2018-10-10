@@ -5129,7 +5129,7 @@ class UserController extends Controller {
                 $request->session()->flash('alert-success', __('custom.edit_success'));
                 $root = Role::isAdmin() ? 'admin' : 'user';
 
-                return redirect(url('/'. $root .'/group/'. $group->uri .'/dataset/edit/'. $newURI));
+                return redirect(url('/'. $root .'/group/dataset/edit/'. $group->uri .'/'. $newURI));
             } else {
                 session()->flash('alert-danger', __('custom.edit_error'));
 

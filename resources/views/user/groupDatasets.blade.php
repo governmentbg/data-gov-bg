@@ -47,7 +47,7 @@
                                         <div class="col-xs-6">
                                         @if ($buttons[$set->uri]['edit'])
                                             <span class="badge badge-pill m-r-md m-b-sm">
-                                                <a href="{{ url('/'. $root .'/group/'. $group->uri .'/dataset/edit/'. $set->uri) }}">
+                                                <a href="{{ url('/'. $root .'/group/dataset/edit/'. $group->uri .'/'. $set->uri) }}">
                                                     {{ uctrans('custom.edit') }}
                                                 </a>
                                             </span>

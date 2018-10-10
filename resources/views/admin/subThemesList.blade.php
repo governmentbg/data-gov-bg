@@ -10,18 +10,18 @@
         </div>
         <div class="row m-b-md">
             <div class="col-md-6 col-sm-8 col-xs-12 pull-right">
-                    <form method="GET" action="{{ url('admin/categories/search') }}">
-                        <input
-                            type="text"
-                            class="input-border-r-12 form-control js-ga-event"
-                            placeholder="{{ __('custom.search') }}"
-                            value="{{ isset($search) ? $search : '' }}"
-                            name="q"
-                            data-ga-action="search"
-                            data-ga-label="data search"
-                            data-ga-category="data"
-                        >
-                    </form>
+                <form method="GET" action="{{ url('admin/categories/search') }}">
+                    <input
+                        type="text"
+                        class="input-border-r-12 form-control js-ga-event"
+                        placeholder="{{ __('custom.search') }}"
+                        value="{{ isset($search) ? $search : '' }}"
+                        name="q"
+                        data-ga-action="search"
+                        data-ga-label="data search"
+                        data-ga-category="data"
+                    >
+                </form>
             </div>
         </div>
         <div class="row m-b-lg">

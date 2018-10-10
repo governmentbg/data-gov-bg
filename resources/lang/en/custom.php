@@ -857,4 +857,6 @@ return [
     'already_confirmed_account' => 'Your account is confirmed!',
     'connection' => 'Connection',
     'done' => 'done',
+    'search_found' => 'Your search found %s results',
+    'link' => 'link',
 ];

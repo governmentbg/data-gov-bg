@@ -99,6 +99,7 @@ $(function() {
     $('.clicable').each(function() {
         var $this = $(this).closest('.js-show-submenu');
         var $childMenu = $this.children('.sidebar-submenu');
+        $childMenu.hide();
 
         $('a', $childMenu).each(function () {
             if ($(this).hasClass('active')) {
@@ -352,9 +353,7 @@ function helpBar() {
         var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
         var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
         var footerHeight = getInt($footer.css('height'));
-        console.log(headerTop);
         var height;
-
 
         if (windowTop > top) {
             $helpBar.addClass('stick');

@@ -23,12 +23,12 @@ class CheckHelp
         if (!env('IS_TOOL')) {
             $pages = HelpPage::where('active', true)->get();
 
-            foreach ($pages as $page) {
-                if ($request->is($page->name)) {
-                    view()->share('help', $page);
+            $name = $request->getPathInfo();
+            $name = preg_replace('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}+/', '', $name);
+            $name = preg_replace('/[0-9]+/', '', $name);
 
-                    return $next($request);
-                } elseif ($request->is($page->name .'/*')) {
+            foreach ($pages as $page) {
+                if ($name == $page->name) {
                     view()->share('help', $page);
 
                     return $next($request);

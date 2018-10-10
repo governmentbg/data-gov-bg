@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             'locale',
             'tool',
+            'help',
         ],
 
         'api' => [

@@ -139,7 +139,6 @@ class OrganisationController extends Controller
                 'orgTypes'       => $orgTypes,
                 'getParams'      => $getParams,
                 'buttons'        => $buttons,
-                'activeSections' => $this->getActiveSections()
             ]
         );
     }
@@ -246,7 +245,6 @@ class OrganisationController extends Controller
                     'childOrgs'      => $childOrgs,
                     'parentOrg'      => $parentOrg,
                     'buttons'        => $buttons,
-                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }
@@ -667,7 +665,6 @@ class OrganisationController extends Controller
                     'getParams'          => $getParams,
                     'display'            => $display,
                     'buttons'            => $buttons,
-                    'activeSections'     => $this->getActiveSections()
                 ]
             );
         }
@@ -852,7 +849,6 @@ class OrganisationController extends Controller
                         'dataset'        => $dataset,
                         'resources'      => $resources,
                         'buttons'        => $buttons,
-                        'activeSections' => $this->getActiveSections()
                     ]
                 );
             }
@@ -997,7 +993,6 @@ class OrganisationController extends Controller
                             'versionView'    => $version,
                             'userData'       => $userData,
                             'buttons'        => $buttons,
-                            'activeSections' => $this->getActiveSections()
                         ]
                     );
                 }
@@ -1167,7 +1162,6 @@ class OrganisationController extends Controller
                     'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
-                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }

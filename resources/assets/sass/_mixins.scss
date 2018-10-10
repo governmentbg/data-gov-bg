@@ -31,6 +31,12 @@
     $secondary: white;
 
     .#{$name} {
+        a {
+            &.active {
+                color: $primary;
+            }
+        }
+
         .section-line {
             height: 1px;
             margin: 0 1%;

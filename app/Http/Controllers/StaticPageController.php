@@ -16,7 +16,7 @@ use DevDojo\Chatter\Controllers\ChatterDiscussionController;
 class StaticPageController extends Controller {
 
     public $page = 1;
-    public $perPage = 10;
+    public $perPage = 5;
     public $class = null;
     public $section = null;
     public $activeSections = [];
@@ -87,6 +87,10 @@ class StaticPageController extends Controller {
                         ]
                     );
                 }
+
+                if (count($this->section->pages) == 1) {
+                    return redirect($this->section->pages[0]->base_url);
+                }
             }
         }
 
@@ -108,8 +112,27 @@ class StaticPageController extends Controller {
 
     public function subsection($id)
     {
-        $subParams = ['criteria' => ['id' => $id]];
-        $subsection = $this->getSubsections($subParams, true);
+        $subParams = ['criteria' => ['section_id' => $this->section->id]];
+        $subsections = $this->getSubsections($subParams, false);
+
+        $subsection = $subsections
+            ? array_filter(
+                $subsections,
+                function ($item) use ($id) {
+                    $item->base_url = $this->getBaseURL(
+                        $this->sectionSlugName,
+                        [
+                            'section'    => $item->parent_id,
+                            'subsection' => $item->id
+                        ]
+                    );
+
+                    return $item->id == $id;
+                }
+            )
+            : null;
+
+        $subsection = empty($subsection) ? null : array_values($subsection)[0];
 
         if ($subsection) {
             $subsection->base_url = $this->getBaseURL(
@@ -138,6 +161,10 @@ class StaticPageController extends Controller {
                         ]
                     );
                 }
+
+                if (count($subsection->pages) == 1) {
+                    return redirect($subsection->pages[0]->base_url);
+                }
             }
         }
 
@@ -146,6 +173,7 @@ class StaticPageController extends Controller {
             'class'          => $this->class,
             'activeSections' => $this->activeSections,
             'subsection'     => $subsection,
+            'subsections'    => $subsections,
             'pagination'     => isset($paginatedPages) ? $paginatedPages['pagination'] : null,
         ];
 
@@ -163,24 +191,44 @@ class StaticPageController extends Controller {
         $api = new ApiPage($req);
         $result = $api->listPages($req)->getData();
         $page = isset($result->pages[0]) ? $result->pages[0] : null;
+        $sectionId = $page ? $page->section_id : null;
 
-        if ($page && $page->section_id != $this->section->id) {
-            $subParams = ['criteria' => ['id' => $page->section_id, 'parent_id' => $this->section->id]];
-            $subsection = $this->getSubsections($subParams, true);
+        $subParams = ['criteria' => ['section_id' => $this->section->id]];
+        $subsections = $this->getSubsections($subParams, false);
 
-            $page->subsection = $subsection;
+        $subsection = $subsections
+            ? array_filter(
+                $subsections,
+                function ($item) use ($sectionId) {
+                    $item->base_url = $this->getBaseURL(
+                        $this->sectionSlugName,
+                        [
+                            'section'    => $item->parent_id,
+                            'subsection' => $item->id
+                        ]
+                    );
 
-            if ($subsection) {
-                $page->subsection->base_url = $subsection
-                    ? $this->getBaseURL(
+                    return $item->id == $sectionId;
+                }
+            )
+            : null;
+
+        $subsection = empty($subsection) ? null : array_values($subsection)[0];
+        $pages = $subsection ? $subsection->pages : $this->section->pages;
+
+        if (!empty($pages)) {
+            array_walk_recursive(
+                $pages, function ($item) use ($subsection) {
+                    $item->base_url = $this->getBaseURL(
                         $this->sectionSlugName,
                         [
                             'section'    => $this->section->id,
-                            'subsection' => $page->subsection->id
+                            'subsection' => isset($subsection->id) ? $subsection->id : null,
+                            'item'       => $item->id,
                         ]
-                    )
-                    : null;
-            }
+                    );
+                }
+            );
         }
 
         $title = $page ? $page->head_title : null;
@@ -192,7 +240,9 @@ class StaticPageController extends Controller {
             'class'          => $this->class,
             'activeSections' => $this->activeSections,
             'page'           => $page,
+            'pages'          => $pages,
             'description'    => $description,
+            'subsections'    => $subsections,
             'keywords'       => $keywords,
             'title'          => $title
         ];

@@ -3711,7 +3711,7 @@ class UserController extends Controller {
                     'actionTypes'    => $actTypes,
                     'filterData'     => isset($filters[$filter]) ? $filters[$filter] : [],
                     'filter'         => $filter,
-                    'objIdFilter'    => $objIdFilter
+                    'objIdFilter'    => $objIdFilter,
                 ]
             );
         }

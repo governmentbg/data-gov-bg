@@ -279,6 +279,10 @@ body {
             }
 
             .navbar-nav {
+                &.sections {
+                    justify-content: left !important;
+                }
+
                 width: 100%;
                 display: flex;
                 flex-wrap: wrap;

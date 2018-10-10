@@ -33,7 +33,6 @@ class NewsController extends Controller {
                 [
                     'class'          => 'news',
                     'newsList'       => $newsList->news,
-                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }
@@ -75,7 +74,6 @@ class NewsController extends Controller {
                 'class'          => 'news',
                 'newsList'       => $paginationData['items'],
                 'pagination'     => $paginationData['paginate'],
-                'activeSections' => $this->getActiveSections()
             ]
         );
     }
@@ -114,7 +112,6 @@ class NewsController extends Controller {
             'newsList'       => $paginationData['items'],
             'pagination'     => $paginationData['paginate'],
             'search'         => $search,
-            'activeSections' => $this->getActiveSections()
         ]);
     }
 }

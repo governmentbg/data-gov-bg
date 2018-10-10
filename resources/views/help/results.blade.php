@@ -37,8 +37,10 @@
                                             <a
                                                 @if (!empty($record->parent[0]->id))
                                                     href="{{ url('help/view/'. $record->parent[0]->id) }}"
-                                                @else
+                                                @elseif (!empty($record->section_id))
                                                     href="{{ url('help/view/'. $record->section_id) }}"
+                                                @else
+                                                    href="#"
                                                 @endif
                                             >{{ __('custom.link') }}</a>
                                         </div>

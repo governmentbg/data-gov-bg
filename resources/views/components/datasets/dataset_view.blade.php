@@ -205,7 +205,7 @@
                     <a
                         class="btn btn-primary"
                         @if (isset($group))
-                            href="{{ url('/'. $root .'/group/'. $group->uri .'/dataset/edit/'. $dataset->uri) }}"
+                            href="{{ url('/'. $root .'/group/dataset/edit/'. $group->uri .'/'. $dataset->uri) }}"
                         @elseif (isset($fromOrg))
                             href="{{ url('/'. $root .'/organisation/'. $fromOrg->uri .'/dataset/edit/'. $dataset->uri) }}"
                         @else

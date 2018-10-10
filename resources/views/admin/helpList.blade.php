@@ -52,7 +52,7 @@
                                         <td>{{ $record->name }}</td>
                                         <td>{{ $record->title }}</td>
                                         <td>{{ $record->active ? __('custom.yes') : __('custom.no') }}</td>
-                                        <td>{{ App\Category::getOrdering()[$record->ordering] }}</td>
+                                        <td>{{  $record->ordering }}</td>
                                         <td class="buttons">
                                             <a
                                                 class="link-action"

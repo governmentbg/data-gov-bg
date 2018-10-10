@@ -55,12 +55,12 @@
                             @if ($isAdmin)
                                 <a
                                     class="{{ $view == 'chronology' ? 'active' : null }}"
-                                    href="{{ url('/admin/organisations/'. $organisation->uri .'/chronology') }}"
+                                    href="{{ url('/admin/organisations/chronology/'. $organisation->uri) }}"
                                 >{{ ultrans('custom.chronology') }}</a>
                             @else
                                 <a
                                     class="{{ $view == 'chronology' ? 'active' : null }}"
-                                    href="{{ url('/user/organisations/'. $organisation->uri .'/chronology') }}"
+                                    href="{{ url('/user/organisations/chronology/'. $organisation->uri) }}"
                                 >{{ ultrans('custom.chronology') }}</a>
                             @endif
                         </li>

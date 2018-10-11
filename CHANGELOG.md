@@ -37,6 +37,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Refactored and optimised tests
 - Activation link for deactivated users
+- Admin subsections listing
 
 ## [0.5.1] - 2018-10-03
 ### Fixed

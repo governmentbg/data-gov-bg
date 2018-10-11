@@ -566,8 +566,8 @@ class SectionController extends ApiController
     {
         $pages = [];
 
-        if (is_array($pages)) {
-            foreach ($result as $key => $page) {
+        foreach ($result as $key => $page) {
+            if ($page->active) {
                 $pages[$key]['id'] = $page->id;
                 $pages[$key]['type'] = $page->type;
                 $pages[$key]['section_id'] = $page->section_id;

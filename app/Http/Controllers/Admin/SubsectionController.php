@@ -266,7 +266,8 @@ class SubsectionController extends AdminController
 
     public function getMainSections($parse = false)
     {
-        $request = Request::create('/api/listSections', 'POST', []);
+        $params = ['api_key' => \Auth::user()->api_key];
+        $request = Request::create('/api/listSections', 'POST', $params);
         $api = new ApiSection($request);
         $result = $api->listSections($request)->getData();
         $sections = isset($result->sections) ? $result->sections : [];

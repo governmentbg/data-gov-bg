@@ -497,7 +497,7 @@ class GroupController extends AdminController
             $actObjData[$objType][$group->id] = [
                 'obj_id'        => $group->uri,
                 'obj_name'      => $group->name,
-                'obj_module'    => Str::lower(utrans('custom.organisations')),
+                'obj_module'    => Str::lower(utrans('custom.groups')),
                 'obj_type'      => 'org',
                 'obj_view'      => '/admin/groups/view/'. $group->uri,
                 'parent_obj_id' => ''

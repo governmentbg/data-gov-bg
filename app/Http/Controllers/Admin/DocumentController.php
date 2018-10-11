@@ -163,7 +163,7 @@ class DocumentController extends AdminController
             $params = [];
 
             if (!empty($request->document)) {
-                $maxFileSize = env('FILE_MAX_SIZE');
+                $maxFileSize = env('FILE_MAX_SIZE', 16777215);
                 $params['filename'] = $request->document->getClientOriginalName();
                 $path = $request->document->getPathName();
 
@@ -251,7 +251,7 @@ class DocumentController extends AdminController
 
         if ($request->has('edit')) {
             if (!empty($request->document)) {
-                $maxFileSize = env('FILE_MAX_SIZE');
+                $maxFileSize = env('FILE_MAX_SIZE', 16777215);
                 $params['filename'] = $request->document->getClientOriginalName();
                 $path = $request->document->getPathName();
                 $params['mimetype'] = $request->document->getMimeType();
@@ -327,7 +327,7 @@ class DocumentController extends AdminController
     public function appendFileData(&$handle, $id)
     {
         if (isset($handle)) {
-            $maxFileSize = env('FILE_MAX_SIZE');
+            $maxFileSize = env('FILE_MAX_SIZE', 16777215);
 
             while (!feof($handle)) {
                 $contents = fread($handle, $maxFileSize);

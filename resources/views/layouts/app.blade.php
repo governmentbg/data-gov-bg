@@ -69,6 +69,11 @@
                             </a>
                             <a href="#"><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
                         </div>
+                        <div class="access-terms-icons">
+                            <a href="{{ url('/help') }}">
+                                <img class="help-section" title="{{ __('custom.help') }}" src="{{ asset('/img/help_section.svg') }}">
+                            </a>
+                        </div>
                         @if (!env('IS_TOOL'))
                             <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
                                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#my-navbar">
@@ -185,9 +190,6 @@
                                 </li>
                                 <li class="document {{ Request::segment(1) == 'document' ? 'active' : '' }}">
                                     <a href="{{ url('/document') }}">{{ __('custom.documents') }}</a>
-                                </li>
-                                <li class="help {{ Request::segment(1) == 'help' ? 'active' : '' }}">
-                                    <a href="{{ url('/help') }}">{{ __('custom.help_sections') }}</a>
                                 </li>
                                 @if (isset($activeSections))
                                     @foreach ($activeSections as $section)

@@ -45,7 +45,6 @@ class HelpController extends Controller
 
         return view('help/list', [
             'class'             => 'index',
-            'activeSections'    => $this->getActiveSections(),
             'sections'          => $paginationData['items'],
             'pagination'        => $paginationData['paginate'],
             'subsections'       => $subsections,
@@ -79,7 +78,6 @@ class HelpController extends Controller
             'records'           => $records,
             'class'             => 'index',
             'search'            => $search,
-            'activeSections'    => $this->getActiveSections(),
         ]);
     }
 
@@ -114,7 +112,14 @@ class HelpController extends Controller
             'subsections'       => $subsections,
             'pages'             => $pages,
             'class'             => 'index',
-            'activeSections'    => $this->getActiveSections(),
         ]);
+    }
+
+    public function pageView(Request $request, $id)
+    {
+        $class = 'index';
+        $page = HelpPage::find($id);
+
+        return view('help/pageView', compact('page', 'class'));
     }
 }

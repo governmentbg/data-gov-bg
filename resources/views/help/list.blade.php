@@ -8,7 +8,7 @@
                 <form method="GET" action="{{ url('help/search') }}">
                     <input
                         type="text"
-                        class="input-border-r-12 form-control js-ga-event"
+                        class="input-border-r-12 form-control js-ga-event m-t-lg"
                         placeholder="{{ __('custom.search') }}"
                         value="{{ isset($search) ? $search : '' }}"
                         name="q"

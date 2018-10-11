@@ -5694,7 +5694,7 @@ class UserController extends Controller {
             $actObjData[$objType][$group->id] = [
                 'obj_id'        => $group->uri,
                 'obj_name'      => $group->name,
-                'obj_module'    => ultrans('custom.organisations'),
+                'obj_module'    => ultrans('custom.groups'),
                 'obj_type'      => 'org',
                 'obj_view'      => '/user/groups/view/'. $group->uri,
                 'parent_obj_id' => ''

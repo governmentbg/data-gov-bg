@@ -317,6 +317,7 @@ Route::middleware('auth')->group(function() {
 Route::match(['get', 'post'], 'help', 'HelpController@list');
 Route::match(['get', 'post'], 'help/search', 'HelpController@search');
 Route::match(['get', 'post'], 'help/view/{id}', 'HelpController@view');
+Route::match(['get', 'post'], 'help/page/view/{id}', 'HelpController@pageView');
 
 Route::match(['get', 'post'], 'tool', 'ToolController@config');
 Route::match(['get', 'post'], 'tool/chronology', 'ToolController@configHistory');

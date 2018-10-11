@@ -859,4 +859,5 @@ return [
     'done' => 'done',
     'search_found' => 'Your search found %s results',
     'link' => 'link',
+    'help' => 'Help',
 ];

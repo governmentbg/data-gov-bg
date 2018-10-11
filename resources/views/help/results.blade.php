@@ -8,7 +8,7 @@
                 <form method="GET" action="{{ url('help/search') }}">
                     <input
                         type="text"
-                        class="input-border-r-12 form-control js-ga-event"
+                        class="input-border-r-12 form-control js-ga-event m-t-lg"
                         placeholder="{{ __('custom.search') }}"
                         value="{{ isset($search) ? $search : '' }}"
                         name="q"
@@ -29,20 +29,21 @@
                                     @foreach ($records as $record)
                                         <div class="result m-b-md">
                                             <span class="info">"{{ $search }}" - </span>
-                                            @if (!empty($record->parent[0]->title))
-                                                {{ $record->parent[0]->title }} /
-                                            @endif
-                                            {{ $record->section_name }} /
-                                            {{ $record->title }} -
                                             <a
                                                 @if (!empty($record->parent[0]->id))
                                                     href="{{ url('help/view/'. $record->parent[0]->id) }}"
                                                 @elseif (!empty($record->section_id))
                                                     href="{{ url('help/view/'. $record->section_id) }}"
                                                 @else
-                                                    href="#"
+                                                    href="{{ url('help/page/view/'. $record->id) }}"
                                                 @endif
-                                            >{{ __('custom.link') }}</a>
+                                            >
+                                                @if (!empty($record->parent[0]->title))
+                                                    {{ $record->parent[0]->title }} /
+                                                @endif
+                                                {{ $record->section_name }} /
+                                                {{ $record->title }}
+                                            </a>
                                         </div>
                                     @endforeach
                                 </div>

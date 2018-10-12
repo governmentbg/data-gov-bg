@@ -8,7 +8,7 @@
                 <div class="filter-content">
                     <div class="col-md-12">
                         <div class="row">
-                            <div class="col-md-6 text-center p-l-none">
+                            <div class="col-md-6 p-l-none">
                                 <div>
                                     <ul class="nav filter-type right-border">
                                         @foreach ($orgTypes as $orgType)
@@ -43,7 +43,7 @@
                 </span>
             @endif
             </div>
-            <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 p-w-xl search-field">
+            <div class="col-lg-9 col-md-6 col-sm-12 col-xs-12 search-field">
                 <form method="GET" action="{{ url('/organisation') }}">
                     <input
                         type="text"
@@ -63,10 +63,10 @@
         </div>
         <div class="row">
             @if (count($organisations))
-                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 m-t-lg col-xs-offset-3 p-w-xl">
+                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 m-t-lg col-xs-offset-3">
                     {{ __('custom.order_by_name') }}
                 </div>
-                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 m-t-md col-xs-offset-3 p-w-xl">
+                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 m-t-md col-xs-offset-3">
                     <a
                         href="{{
                             action(

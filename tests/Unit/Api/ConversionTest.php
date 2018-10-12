@@ -192,6 +192,56 @@ class ConversionTest extends TestCase
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
+    public function testOdsToJson()
+    {
+        $this->post(url('api/ods2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.ods'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testSlkToJson()
+    {
+        $this->post(url('api/slk2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.slk'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testTsvToJson()
+    {
+        $this->post(url('api/tsv2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => storage_path('tests/sample.tsv'),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testXsdToJson()
+    {
+        libxml_disable_entity_loader(false);
+        $this->post(url('api/xsd2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => storage_path('tests/sample.xsd'),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testRtfToJson()
+    {
+        $this->post(url('api/rtf2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.rtf'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    public function testOdtToJson()
+    {
+        $this->post(url('api/odt2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.odt'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+
     public function testXlsxToJson()
     {
         $this->post(url('api/xls2json'), [

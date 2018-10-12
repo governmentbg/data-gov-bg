@@ -69,11 +69,6 @@
                             </a>
                             <a href="#"><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
                         </div>
-                        <div class="access-terms-icons">
-                            <a href="{{ url('/help') }}">
-                                <img class="help-section" title="{{ __('custom.help') }}" src="{{ asset('/img/help_section.svg') }}">
-                            </a>
-                        </div>
                         @if (!env('IS_TOOL'))
                             <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
                                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#my-navbar">

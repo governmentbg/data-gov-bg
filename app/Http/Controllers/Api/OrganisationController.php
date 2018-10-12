@@ -2060,7 +2060,7 @@ class OrganisationController extends ApiController
                 foreach ($orgTypes as $typeId => $typeName) {
                     $results[] = [
                         'id'     => $typeId,
-                        'name'   => utrans($typeName, 2, [], $locale),
+                        'name'   => ultrans($typeName, 2, [], $locale),
                         'locale' => $locale,
                     ];
                 }

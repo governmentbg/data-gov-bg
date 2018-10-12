@@ -170,7 +170,7 @@
                         </form>
                     </div>
                     <div class="col-sm-4 text-right p-l-none">
-                        <button type="button" class="badge badge-pill m-b-sm" data-toggle="modal" data-target="#addSignal">{{ __('custom.signal') }}</button>
+                        <button type="button" class="badge badge-pill m-b-sm" data-toggle="modal" data-target="#addSignal">{{ uctrans('custom.signal') }}</button>
                     </div>
                 </div>
 

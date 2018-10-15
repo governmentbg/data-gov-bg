@@ -511,15 +511,27 @@ class ToolController extends Controller
         $hourTo = $request->offsetGet('time_to') ?: '23:59';
 
         if (!empty($request->offsetGet('period_from'))) {
-            $params['criteria']['period_from'] = date_format(date_create($request->offsetGet('period_from') .' '. $hourFrom), 'Y-m-d H:i:s');
+            $params['criteria']['period_from'] = date_format(
+                date_create($request->offsetGet('period_from') .' '. $hourFrom),
+                'Y-m-d H:i:s'
+            );
         } else if (!empty($request->offsetGet('time_from'))) {
-            $params['criteria']['period_from'] = date_format(date_create($today->toDateString() .' '. $request->offsetGet('time_from')), 'Y-m-d H:i:s');
+            $params['criteria']['period_from'] = date_format(
+                date_create($today->toDateString() .' '. $request->offsetGet('time_from')),
+                'Y-m-d H:i:s'
+            );
         }
 
         if (!empty($request->offsetGet('period_to'))) {
-            $params['criteria']['period_to'] = date_format(date_create($request->offsetGet('period_to') .' '. $hourTo), 'Y-m-d H:i:s');
+            $params['criteria']['period_to'] = date_format(
+                date_create($request->offsetGet('period_to') .' '. $hourTo),
+                'Y-m-d H:i:s'
+            );
         } else if (!empty($request->offsetGet('time_to'))) {
-            $params['criteria']['period_to'] = date_format(date_create($today->toDateString() .' '. $request->offsetGet('time_to')), 'Y-m-d H:i:s');
+            $params['criteria']['period_to'] = date_format(
+                date_create($today->toDateString() .' '. $request->offsetGet('time_to')),
+                'Y-m-d H:i:s'
+            );
         }
 
         if (isset($post['status'])) {
@@ -538,9 +550,18 @@ class ToolController extends Controller
             $params['criteria']['query_name'] = $request->offsetGet('q');
         }
 
+        $perPage = 8;
+        $params = array_merge($params, [
+            'records_per_page' => $perPage,
+            'page_number'      => !empty($request->page) ? $request->page : 1,
+        ]);
+
         $rq = Request::create('api/listActionHistory', 'POST', $params);
         $api = new ApiHistory($rq);
         $res = $api->listActionHistory($rq)->getData();
+        $res->actions_history = isset($res->actions_history) ? $res->actions_history : [];
+        $paginationData = $this->getPaginationData($res->actions_history, $res->total_records, [], $perPage);
+        $pagination = !empty($paginationData['paginate']) ? $paginationData['paginate'] : [];
 
         $history = $res->success ? $res->actions_history : [];
 
@@ -552,6 +573,7 @@ class ToolController extends Controller
             'actionTypes',
             'post',
             'connectionTypes',
+            'pagination',
             'time'
         ));
     }

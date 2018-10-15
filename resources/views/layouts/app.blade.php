@@ -150,6 +150,24 @@
                                         target="_blank"
                                         href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"
                                     ><span class="fa fa-linkedin"></span></a>
+                                    @if (isset($newsLink))
+                                        <a
+                                            target="_blank"
+                                            href="{{ url('/news/rss') }}" class="in"
+                                        ><span class="fa fa-rss"></span></a>
+                                    @endif
+                                    @if (isset($datasetLink))
+                                        <a
+                                            target="_blank"
+                                            href="{{ url('/datasets/rss') }}" class="in"
+                                        ><span class="fa fa-rss"></span></a>
+                                    @endif
+                                    @if (isset($link))
+                                        <a
+                                            target="_blank"
+                                            href="{{ url('/datasets/'. $organisation->uri .'/rss') }}" class="in"
+                                        ><span class="fa fa-rss"></span></a>
+                                    @endif
                                 </span>
                             @endif
 

@@ -13511,7 +13511,7 @@ body #app .navbar .navbar-header > div.nav-controls > span {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons {
-  width: 130px;
+  width: auto;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons a {

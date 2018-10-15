@@ -141,6 +141,78 @@ class ResourceController extends Controller {
                             Session::put('elasticData', json_decode($content, true));
 
                             break;
+                        case 'tsv':
+                            $convertData['data'] = base64_encode($convertData['data']);
+                            $reqConvert = Request::create('/tsv2json', 'POST', $convertData);
+                            $api = new ApiConversion($reqConvert);
+                            $resultConvert = $api->tsv2json($reqConvert)->getData();
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['tsvData'] = $elasticData;
+                            }
+
+                            break;
+                        case 'xsd':
+                            $convertData['data'] = base64_encode($convertData['data']);
+                            $reqConvert = Request::create('/xsd2json', 'POST', $convertData);
+                            $api = new ApiConversion($reqConvert);
+                            $resultConvert = $api->xsd2json($reqConvert)->getData();
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['xsdData'] = $elasticData;
+                            }
+
+                            break;
+                        case 'ods':
+                            $convertData['data'] = base64_encode($convertData['data']);
+                            $reqConvert = Request::create('/ods2json', 'POST', $convertData);
+                            $api = new ApiConversion($reqConvert);
+                            $resultConvert = $api->ods2json($reqConvert)->getData();
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['odsData'] = $elasticData;
+                            }
+
+                            break;
+                        case 'slk':
+                            $convertData['data'] = base64_encode($convertData['data']);
+                            $reqConvert = Request::create('/slk2json', 'POST', $convertData);
+                            $api = new ApiConversion($reqConvert);
+                            $resultConvert = $api->slk2json($reqConvert)->getData();
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['slkData'] = $elasticData;
+                            }
+
+                            break;
+                        case 'rtf':
+                            $convertData['data'] = base64_encode($convertData['data']);
+                            $reqConvert = Request::create('/rtf2json', 'POST', $convertData);
+                            $api = new ApiConversion($reqConvert);
+                            $resultConvert = $api->rtf2json($reqConvert)->getData();
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['rtfData'] = $elasticData;
+                            }
+
+                            break;
+                        case 'odt':
+                            $convertData['data'] = base64_encode($convertData['data']);
+                            $reqConvert = Request::create('/odt2json', 'POST', $convertData);
+                            $api = new ApiConversion($reqConvert);
+                            $resultConvert = $api->odt2json($reqConvert)->getData();
+                            if ($resultConvert->success) {
+                                $elasticData = $resultConvert->data;
+                                Session::put('elasticData', $elasticData);
+                                $data['odtData'] = $elasticData;
+                            }
+
+                            break;
                         case 'csv':
                             $reqConvert = Request::create('/csv2json', 'POST', $convertData);
                             $api = new ApiConversion($reqConvert);

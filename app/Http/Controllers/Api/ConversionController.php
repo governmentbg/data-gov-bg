@@ -475,8 +475,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                $data = base64_decode($post['data']);
 
-                $data = explode("\r\n", file_get_contents($post['data']));
+                $data = explode("\r\n", $data);
 
                 foreach ($data as $single) {
                     $data2d[] = explode("\t", $single);
@@ -508,12 +509,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $doc = new \DOMDocument;
-                $doc->load($post['data']);
-                $doc->save(storage_path('tests/temp.xml'));
-                $xml = file_get_contents(storage_path('tests/temp.xml'));
-                $parseObj = str_replace($doc->lastChild->prefix.':',"", $xml);
-                $data = simplexml_load_string($parseObj);
+                $data = base64_decode($post['data']);
+
+                $data = explode("\r\n", $data);
 
                 return $this->successResponse($data);
             } catch (\Exception $ex) {
@@ -531,7 +529,7 @@ class ConversionController extends ApiController
      * @param string api_key - required
      * @param string data - required
      *
-     * @return json with tsv text or error
+     * @return json with rtf text or error
      */
     public function rtf2json(Request $request)
     {
@@ -559,7 +557,7 @@ class ConversionController extends ApiController
      * @param string api_key - required
      * @param string data - required
      *
-     * @return json with tsv text or error
+     * @return json with odt text or error
      */
     public function odt2json(Request $request)
     {
@@ -843,7 +841,7 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get ellastic search data
+     * Get elastic search data
      *
      * @param string api_key - required
      * @param string es_id - required
@@ -886,7 +884,7 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get ellastic search data
+     * Get elastic search data
      *
      * @param string api_key - required
      * @param string es_id - required

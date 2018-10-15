@@ -212,16 +212,15 @@ class ConversionTest extends TestCase
     {
         $this->post(url('api/tsv2json'), [
             'api_key'   => $this->getApiKey(),
-            'data'      => storage_path('tests/sample.tsv'),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.tsv'))),
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
 
     public function testXsdToJson()
     {
-        libxml_disable_entity_loader(false);
         $this->post(url('api/xsd2json'), [
             'api_key'   => $this->getApiKey(),
-            'data'      => storage_path('tests/sample.xsd'),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.xsd'))),
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
 

@@ -1,5 +1,6 @@
 $footerHeight: 50px;
 $footerMobileHeight: 140px;
+$headerUnderlineHeight: 30px;
 
 body {
     cursor: default;
@@ -492,7 +493,7 @@ body {
             }
 
             .underline {
-                height: 30px;
+                height: $headerUnderlineHeight;
             }
         }
 

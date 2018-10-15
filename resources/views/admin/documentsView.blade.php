@@ -11,6 +11,7 @@
                     <div class="articles">
                         <div class="article">
                             <div class="m-b-lg">
+                            <h2>{{ uctrans('custom.document_preview') }}</h2>
                                 <div class="col-sm-12 p-l-none article-underline">
                                     <h2 class="m-t-xs">{{ $document->name }}</h2>
                                     <p>{!! nl2br(e($document->description)) !!}</p>
@@ -50,6 +51,35 @@
                 </div>
             </div>
         </div>
+        <div class="text-center m-b-lg terms-hr">
+            <hr>
+        </div>
+        <div class="form-group row m-b-lg m-t-md">
+            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+            <div class="col-sm-6 col-xs-12">
+                <div>{{ $document->created_by }}</div>
+            </div>
+        </div>
+        <div class="form-group row m-b-lg m-t-md">
+            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+            <div class="col-sm-6 col-xs-12">
+                <div>{{ $document->created_at }}</div>
+            </div>
+        </div>
+        @if ($document->created_at != $document->updated_at)
+            <div class="form-group row m-b-lg m-t-md">
+                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                <div class="col-sm-6 col-xs-12">
+                    <div>{{ $document->updated_by }}</div>
+                </div>
+            </div>
+            <div class="form-group row m-b-lg m-t-md">
+                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                <div class="col-sm-6 col-xs-12">
+                    <div>{{ $document->updated_at }}</div>
+                </div>
+            </div>
+        @endif
     @else
         <div class="row">
             <div class="col-sm-12 m-t-lg text-center">

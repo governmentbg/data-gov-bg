@@ -71661,15 +71661,14 @@ function helpBar() {
         var top = $content.offset().top;
         var headerTop = $head.offset().top;
         var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
-        var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
-        var footerHeight = getInt($footer.css('height'));
+        var headerHeight = parseFloat($head.css('height')) + parseFloat($head.css('margin-bottom'));
+        var footerHeight = parseFloat($footer.css('height'));
         var height;
 
         if (windowTop > top) {
             $helpBar.addClass('stick');
             height = windowHeight;
         } else {
-
             $helpBar.removeClass('stick');
             height = windowHeight - headerHeight + footerHeight - headerTop - 9;
         }
@@ -71680,17 +71679,13 @@ function helpBar() {
 
 function stickyFooter() {
     var windowHeight = $(document).height() > 0 ? $(document).height() : screen.height;
-    var headerHeight = getInt($head.css('height')) + getInt($head.css('margin-bottom'));
-    var footerHeight = getInt($footer.css('height'));
+    var headerHeight = parseFloat($head.css('height')) + parseFloat($head.css('margin-bottom'));
+    var footerHeight = parseFloat($footer.css('height'));
     var contentHeight = windowHeight - headerHeight - footerHeight;
 
     $content.css('min-height', contentHeight);
 
     $footer.removeClass('hidden');
-}
-
-function getInt(string) {
-    return parseInt(string.replace(/[^0-9]/g, ''));
 }
 
 $(function () {

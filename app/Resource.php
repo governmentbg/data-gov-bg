@@ -63,6 +63,9 @@ class Resource extends Model implements TranslatableInterface
     public static function getFormatsCode($format)
     {
         switch (strtoupper($format)) {
+            case 'TSV':
+            case 'ODS':
+            case 'SLK':
             case 'CSV':
             case 'XLS':
             case 'XLSX':
@@ -75,18 +78,10 @@ class Resource extends Model implements TranslatableInterface
                 return self::FORMAT_WMS;
             case 'XML':
                 return self::FORMAT_XML;
-            case 'TSV':
-                return self::FORMAT_TSV;
             case 'XSD':
-                return self::FORMAT_XSD;
-            case 'ODS':
-                return self::FORMAT_ODS;
-            case 'SLK':
-                return self::FORMAT_SLK;
             case 'RTF':
-                return self::FORMAT_RTF;
             case 'ODT':
-                return self::FORMAT_ODT;
+                return self::FORMAT_XSD;
             default:
                 return self::FORMAT_JSON;
         }

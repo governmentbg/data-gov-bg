@@ -4,12 +4,7 @@
     @if (empty($data))
         <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
     @else
-        @if (
-            $resource->format_code == App\Resource::FORMAT_CSV
-            || $resource->format_code == App\Resource::FORMAT_TSV
-            || $resource->format_code == App\Resource::FORMAT_ODS
-            || $resource->format_code == App\Resource::FORMAT_SLK
-        )
+        @if ($resource->format_code == App\Resource::FORMAT_CSV)
             <div class="m-b-lg overflow-x-auto js-show-on-load">
                 <table class="data-table">
                     <thead>
@@ -39,11 +34,7 @@
             ></textarea>
         @elseif ($resource->format_code == App\Resource::FORMAT_JSON && isset($data->text))
             <p>@php echo nl2br(e($data->text)) @endphp</p>
-        @elseif (
-                $resource->format_code == App\Resource::FORMAT_XSD
-                || $resource->format_code == App\Resource::FORMAT_RTF
-                || $resource->format_code == App\Resource::FORMAT_ODT
-        )
+        @elseif ($resource->format_code == App\Resource::FORMAT_XSD)
             @foreach ($data as $row)
                 <p>{{ $row }}</p>
             @endforeach

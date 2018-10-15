@@ -735,6 +735,7 @@
             border: none;
         }
     }
+
     .group-desc {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -743,6 +744,7 @@
         -webkit-line-clamp: 7;
         height: 150px;
     }
+
     .group-name {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -750,30 +752,19 @@
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
     }
+
     .logo {
         &img {
             height: 200px;
         }
     }
+
     .show-more {
         margin-top: 10px;
     }
+
     .group-col {
         margin-bottom: 30px;
-    }
-    .pagination {
-        li {
-            &.active {
-                span {
-                    background-color: #108f9e;
-                    border-color: #108f9e;
-                    color: white;
-                }
-            }
-            span, a {
-                color: #108f9e;
-            }
-        }
     }
 }
 

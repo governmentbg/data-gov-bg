@@ -44,7 +44,7 @@
         <script async src="{{ 'https://www.googletagmanager.com/gtag/js?id='. env('GA_TRACKING_ID') }}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
+            function gtag(){ dataLayer.push(arguments); }
             gtag('js', new Date());
 
             gtag('config', '{{ env('GA_TRACKING_ID') }}');
@@ -258,6 +258,14 @@
                     </div>
                 </div>
                 <div class="underline">
+                    @if (env('IS_TOOL'))
+                       <div class="container">
+                           <a
+                                class="tool-version"
+                                href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
+                            >{{ exec('git describe') }}</a>
+                       </div>
+                    @endif
                     <div class="help-btn js-help">
                         @if (!empty($help))
                             <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">

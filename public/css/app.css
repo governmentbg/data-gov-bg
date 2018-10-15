@@ -1,5 +1,15 @@
 @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);@charset "UTF-8";
 
+.theme-index .pagination li.active span {
+  background-color: #c02e54;
+  border-color: #c02e54;
+}
+
+.theme-index .pagination li span,
+.theme-index .pagination li a {
+  color: #c02e54;
+}
+
 .theme-index a.active {
   color: #c02e54;
 }
@@ -409,6 +419,16 @@
 .opn-tbl table tbody tr td.buttons > button:after,
 .opn-tbl table tbody tr td.buttons > a:after {
   background: #c02e54;
+}
+
+.theme-data .pagination li.active span {
+  background-color: #4e57aa;
+  border-color: #4e57aa;
+}
+
+.theme-data .pagination li span,
+.theme-data .pagination li a {
+  color: #4e57aa;
 }
 
 .theme-data a.active {
@@ -822,6 +842,16 @@
   background: #4e57aa;
 }
 
+.theme-data-attention .pagination li.active span {
+  background-color: #d32a31;
+  border-color: #d32a31;
+}
+
+.theme-data-attention .pagination li span,
+.theme-data-attention .pagination li a {
+  color: #d32a31;
+}
+
 .theme-data-attention a.active {
   color: #d32a31;
 }
@@ -1231,6 +1261,16 @@
 .opn-tbl table tbody tr td.buttons > button:after,
 .opn-tbl table tbody tr td.buttons > a:after {
   background: #d32a31;
+}
+
+.theme-organisation .pagination li.active span {
+  background-color: #76ad3f;
+  border-color: #76ad3f;
+}
+
+.theme-organisation .pagination li span,
+.theme-organisation .pagination li a {
+  color: #76ad3f;
 }
 
 .theme-organisation a.active {
@@ -1644,6 +1684,16 @@
   background: #76ad3f;
 }
 
+.theme-request .pagination li.active span {
+  background-color: #e8d429;
+  border-color: #e8d429;
+}
+
+.theme-request .pagination li span,
+.theme-request .pagination li a {
+  color: #e8d429;
+}
+
 .theme-request a.active {
   color: #e8d429;
 }
@@ -2053,6 +2103,16 @@
 .opn-tbl table tbody tr td.buttons > button:after,
 .opn-tbl table tbody tr td.buttons > a:after {
   background: #e8d429;
+}
+
+.theme-visualisations .pagination li.active span {
+  background-color: #e98911;
+  border-color: #e98911;
+}
+
+.theme-visualisations .pagination li span,
+.theme-visualisations .pagination li a {
+  color: #e98911;
 }
 
 .theme-visualisations a.active {
@@ -2466,6 +2526,16 @@
   background: #e98911;
 }
 
+.theme-visualisation .pagination li.active span {
+  background-color: #e98911;
+  border-color: #e98911;
+}
+
+.theme-visualisation .pagination li span,
+.theme-visualisation .pagination li a {
+  color: #e98911;
+}
+
 .theme-visualisation a.active {
   color: #e98911;
 }
@@ -2875,6 +2945,16 @@
 .opn-tbl table tbody tr td.buttons > button:after,
 .opn-tbl table tbody tr td.buttons > a:after {
   background: #e98911;
+}
+
+.theme-news .pagination li.active span {
+  background-color: #0a7b5d;
+  border-color: #0a7b5d;
+}
+
+.theme-news .pagination li span,
+.theme-news .pagination li a {
+  color: #0a7b5d;
 }
 
 .theme-news a.active {
@@ -3288,6 +3368,16 @@
   background: #0a7b5d;
 }
 
+.theme-documents .pagination li.active span {
+  background-color: #145c99;
+  border-color: #145c99;
+}
+
+.theme-documents .pagination li span,
+.theme-documents .pagination li a {
+  color: #145c99;
+}
+
 .theme-documents a.active {
   color: #145c99;
 }
@@ -3697,6 +3787,16 @@
 .opn-tbl table tbody tr td.buttons > button:after,
 .opn-tbl table tbody tr td.buttons > a:after {
   background: #145c99;
+}
+
+.theme-document .pagination li.active span {
+  background-color: #145c99;
+  border-color: #145c99;
+}
+
+.theme-document .pagination li span,
+.theme-document .pagination li a {
+  color: #145c99;
 }
 
 .theme-document a.active {
@@ -4110,6 +4210,16 @@
   background: #145c99;
 }
 
+.theme-contact .pagination li.active span {
+  background-color: #791292;
+  border-color: #791292;
+}
+
+.theme-contact .pagination li span,
+.theme-contact .pagination li a {
+  color: #791292;
+}
+
 .theme-contact a.active {
   color: #791292;
 }
@@ -4519,6 +4629,16 @@
 .opn-tbl table tbody tr td.buttons > button:after,
 .opn-tbl table tbody tr td.buttons > a:after {
   background: #791292;
+}
+
+.theme-user .pagination li.active span {
+  background-color: #108f9e;
+  border-color: #108f9e;
+}
+
+.theme-user .pagination li span,
+.theme-user .pagination li a {
+  color: #108f9e;
 }
 
 .theme-user a.active {
@@ -14584,6 +14704,14 @@ label {
   color: #C02E54;
 }
 
+.success {
+  color: #2ab27b;
+}
+
+.form-control {
+  height: 28px !important;
+}
+
 .hidden {
   display: none;
 }
@@ -15052,7 +15180,7 @@ textarea {
   cursor: pointer;
 }
 
-.radio-label div {
+.radio-label > div {
   display: inline-block;
   margin-left: 10px;
 }
@@ -16863,17 +16991,6 @@ textarea {
 
 .user-group .group-col {
   margin-bottom: 30px;
-}
-
-.user-group .pagination li.active span {
-  background-color: #108f9e;
-  border-color: #108f9e;
-  color: white;
-}
-
-.user-group .pagination li span,
-.user-group .pagination li a {
-  color: #108f9e;
 }
 
 .del-btn {
@@ -19970,6 +20087,20 @@ table.dataTable td {
   }
 }
 
+nav .tool-version {
+  color: white;
+  font-size: 18px;
+  float: right;
+  margin-right: 8px;
+  line-height: 30px;
+}
+
+nav .tool-version:hover {
+  color: black !important;
+  text-decoration: none;
+  font-weight: bold;
+}
+
 .config-form .config-control-form {
   max-width: 500px;
   margin: 20px auto 0 auto;
@@ -20037,19 +20168,45 @@ table.dataTable td {
   border-color: #2ab27b !important;
 }
 
+.tool-history {
+  padding-top: 20px;
+}
+
 .tool-history .history-filters {
+  margin-bottom: 20px;
+}
+
+.tool-history .history-filters form {
   color: black !important;
   padding: 25px 20px 5px 15px;
   border: 1px #c02e54 solid;
   border-radius: 10px;
 }
 
-.tool-history .history-filters .date {
-  padding-right: 0px;
+.tool-history .history-filters form table {
+  width: 100%;
 }
 
-.tool-history .history-filters .last {
-  padding-right: 10px;
+.tool-history .history-filters form table tr td {
+  padding-bottom: 10px;
+}
+
+.tool-history .history-filters form table tr td > div {
+  padding-right: 0 !important;
+}
+
+.tool-history .history-filters form table tr td > div label {
+  width: 100%;
+  margin-bottom: 0px;
+}
+
+.tool-history .history-filters form table tr td:first-child {
+  width: 1px;
+  font-weight: bold;
+}
+
+.tool-history .history-filters form .date {
+  padding-right: 0px;
 }
 
 .tool-history .history-row {
@@ -20064,10 +20221,6 @@ table.dataTable td {
 
 .tool-history .history-row span {
   word-break: break-word;
-}
-
-.tool-history .succ-lbl {
-  margin-left: 27px !important;
 }
 
 .dropdown-menu {

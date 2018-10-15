@@ -860,4 +860,8 @@ return [
     'search_found' => 'Your search found %s results',
     'link' => 'link',
     'help' => 'Help',
+    'time' => 'Time',
+    'success' => 'Success',
+    'failure' => 'Failure',
+    'search_button' => 'Search',
 ];

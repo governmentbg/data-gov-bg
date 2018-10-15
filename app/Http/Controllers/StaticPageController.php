@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\ThemeController as ApiTheme;
 use App\Http\Controllers\Api\SectionController as ApiSection;
 use DevDojo\Chatter\Controllers\ChatterDiscussionController;
 
-
 class StaticPageController extends Controller {
 
     public $page = 1;

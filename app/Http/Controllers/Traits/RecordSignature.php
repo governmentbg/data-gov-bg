@@ -10,7 +10,7 @@ trait RecordSignature
     protected static function bootRecordSignature()
     {
         $userId = null;
-        error_log('label: '. print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), true));
+
         if (Auth::check()) {
             $userId = Auth::user()->id;
         } else if (!empty($system = User::select('id')->where('username', 'system')->first())) {

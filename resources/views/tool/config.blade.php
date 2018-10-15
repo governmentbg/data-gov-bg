@@ -37,7 +37,7 @@
                 <label class="col-sm-4 col-xs-12 col-form-label m-b-sm">{{ __('custom.connection_type') }}:</label>
                 @foreach ($sourceTypes as $i => $name)
                     <div class="col-sm-4 col-xs-6 m-b-md">
-                        <label class="radio-label {{ $i == 2 ? 'pull-right m-r-sm' : null }}">
+                        <label class="radio-label {{ $i == 2 ? 'pull-right' : null }}">
                             {{ uctrans('custom.'. $name) }}
                             <div class="js-check js-submit">
                                 <input

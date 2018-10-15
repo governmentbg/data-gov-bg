@@ -22,6 +22,14 @@ label {
     color: $error-color;
 }
 
+.success {
+    color: $brand-success;
+}
+
+.form-control {
+    height: 28px !important;
+}
+
 .hidden {
     display: none;
 }
@@ -405,7 +413,7 @@ textarea {
 .radio-label {
     cursor: pointer;
 
-    div {
+    > div {
         display: inline-block;
         margin-left: 10px;
     }

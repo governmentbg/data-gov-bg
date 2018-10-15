@@ -94,7 +94,7 @@
                             </div>
                             @if ($page->created_at != $page->updated_at)
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}</label>
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
                                     <div class="col-sm-6 col-xs-12">
                                         <div>{{ $page->updated_by }}</div>
                                     </div>

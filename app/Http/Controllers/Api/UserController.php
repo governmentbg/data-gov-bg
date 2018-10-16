@@ -987,10 +987,10 @@ class UserController extends ApiController
                     'pass'      => $password,
                 ];
 
-                if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
-                    $defaultRole = Role::where('default_user', 1)->first()->id;
-                    $this->addRoles($user->id, $defaultRole, $empty);
+                $defaultRole = Role::where('default_user', 1)->first()->id;
+                $this->addRoles($user->id, $defaultRole, $empty);
 
+                if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
                     foreach ($post['data']['role_id'] as $role) {
                         $this->addRoles($user->id, $role, $post['data']['org_id']);
                     }

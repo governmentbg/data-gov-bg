@@ -44,6 +44,11 @@
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
                     <input type="hidden" name="action" value="{{ $action }}">
+                    @if (!empty($group))
+                        <input type="hidden" name="group_uri" value="{{ $group->uri }}">
+                    @elseif (!empty($fromOrg))
+                        <input type="hidden" name="org_uri" value="{{ $fromOrg->uri }}">
+                    @endif
                     <a
                         type="button"
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
@@ -60,7 +65,12 @@
             action="{{ url('importElastic') }}"
         >
             {{ csrf_field() }}
-            <textarea class="js-xml-prev col-xs-12 m-b-md" data-xml-data="{{ $xmlData }}" rows="20"></textarea>
+            <textarea
+                class="js-xml-prev col-xs-12 m-b-md"
+                data-xml-data="{{ $xmlData }}"
+                rows="20"
+                readonly
+            ></textarea>
             <div class="form-group row">
                 <div class="col-sm-12 text-right m-b-sm">
                     @if (!empty($admin))
@@ -68,6 +78,11 @@
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
                     <input type="hidden" name="action" value="{{ $action }}">
+                    @if (!empty($group))
+                        <input type="hidden" name="group_uri" value="{{ $group->uri }}">
+                    @elseif (!empty($fromOrg))
+                        <input type="hidden" name="org_uri" value="{{ $fromOrg->uri }}">
+                    @endif
                     <a
                         type="button"
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
@@ -92,6 +107,11 @@
                     @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
                     <input type="hidden" name="action" value="{{ $action }}">
+                    @if (!empty($group))
+                        <input type="hidden" name="group_uri" value="{{ $group->uri }}">
+                    @elseif (!empty($fromOrg))
+                        <input type="hidden" name="org_uri" value="{{ $fromOrg->uri }}">
+                    @endif
                     <a
                         type="button"
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"

@@ -1,8 +1,8 @@
-<div class="col-xs-12 sidenav m-t-lg m-b-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg m-b-lg">
     <span class="my-profile m-l-sm">{{uctrans('custom.dataset_edit')}}</span>
 </div>
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
-<div class="col-xs-12 m-t-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
     <form method="POST">
         {{ csrf_field() }}
@@ -149,8 +149,7 @@
                     data-placeholder="{{ utrans('custom.groups', 1) }}"
                     multiple="multiple"
                 >
-                    <option></option>
-                    @foreach ($groups as $id => $group)
+                    @foreach ($groups as $id => $groupName)
                         <option
                             value="{{ $id }}"
                             {{
@@ -160,7 +159,7 @@
                                 && in_array($id, $setGroups)
                                 ? 'selected' : ''
                             }}
-                        >{{ $group }}</option>
+                        >{{ $groupName }}</option>
                     @endforeach
                 </select>
                 <span class="error">{{ $errors->first('group_id') }}</span>
@@ -226,7 +225,8 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('author_name')) ? $dataSet->author_name : old('author_name') }}"
                     type="text"
-                    placeholder="{{ __('custom.author') }}">
+                    placeholder="{{ __('custom.author') }}"
+                >
                 <span class="error">{{ $errors->first('author_name') }}</span>
             </div>
         </div>
@@ -298,7 +298,13 @@
             <div class="col-xs-12 text-right mng-btns">
                 <a
                     class="btn btn-primary"
-                    href="{{ url('/'. $root .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @if (isset($group))
+                            href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @elseif (isset($fromOrg))
+                            href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @else
+                            href="{{ url('/'. $root .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @endif
                 >{{ uctrans('custom.add_resource') }}</a>
                 @if ($hasResources)
                     <button
@@ -307,14 +313,27 @@
                         class="btn btn-primary"
                     >{{ uctrans('custom.publish') }}</button>
                 @endif
+                @php
+                    if (isset($fromOrg)):
+                        $close = url($root .'/organisations/datasets/'. $fromOrg->uri);
+                        $preview = route($root .'OrgDatasetView', ['uri' => $dataSet->uri]);
+                    elseif (isset($group)):
+                        $close = url($root .'/groups/datasets/'. $group->uri);
+                        $preview = route($root .'GroupDatasetView', ['uri' => $dataSet->uri, 'grpUri' => $group->uri]);
+                    else:
+                        $close = url($root .'/datasets/');
+                        $preview = route($root .'DatasetView', ['uri' => $dataSet->uri]);
+                    endif;
+                @endphp
                 <a
                     type="button"
                     class="btn btn-primary"
-                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    href="{{ $preview }}"
                 >{{ uctrans('custom.preview') }}</a>
                 <a
-                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    type="button"
                     class="btn btn-primary"
+                    href="{{ $close }}"
                 >
                     {{ uctrans('custom.close') }}
                 </a>

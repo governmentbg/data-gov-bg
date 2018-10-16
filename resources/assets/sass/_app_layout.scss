@@ -1,5 +1,6 @@
 $footerHeight: 50px;
 $footerMobileHeight: 140px;
+$headerUnderlineHeight: 30px;
 
 body {
     cursor: default;
@@ -279,6 +280,10 @@ body {
             }
 
             .navbar-nav {
+                &.sections {
+                    justify-content: left !important;
+                }
+
                 width: 100%;
                 display: flex;
                 flex-wrap: wrap;
@@ -437,6 +442,20 @@ body {
                         }
                     }
 
+                    &.help {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeHelp !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeHelp;
+                            }
+                        }
+                    }
+
                     &.contact {
                         &:hover, &.active {
                             @include smMobile() {
@@ -474,7 +493,7 @@ body {
             }
 
             .underline {
-                height: 30px;
+                height: $headerUnderlineHeight;
             }
         }
 

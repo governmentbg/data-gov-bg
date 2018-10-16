@@ -587,7 +587,7 @@ class OrganisationController extends AdminController
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $result->data->uri,
+                                'obj_view'          => '/user/organisations/'. $result->data->uri .'/resource/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),
@@ -646,5 +646,59 @@ class OrganisationController extends AdminController
         }
 
         return redirect('admin/organisations');
+    }
+
+    public function orgDatasets(Request $request, $uri)
+    {
+        $org = Organisation::where('uri', $uri)->first();
+        $orgId = !is_null($org) ? $org->id : null;
+
+        if (!$orgId) {
+            return back();
+        }
+
+        $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
+        $perPage = 6;
+        $params = [
+            'api_key'           => \Auth::user()->api_key,
+            'criteria'          => [
+                'org_ids'       => [$orgId],
+            ],
+            'records_per_page'  => $perPage,
+            'page_number'       => !empty($request->page) ? $request->page : 1,
+        ];
+
+        if ($request->has('q')) {
+            $params['criteria']['keywords'] = $request->offsetGet('q');
+        }
+
+        $rq = Request::create('/api/listDatasets', 'POST', $params);
+        $api = new ApiDataSet($rq);
+        $datasets = $api->listDatasets($rq)->getData();
+        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+
+        // handle dataset delete
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return back();
+        }
+
+        return view(
+            'admin/orgDatasets',
+            [
+                'class'         => 'user',
+                'datasets'      => $paginationData['items'],
+                'pagination'    => $paginationData['paginate'],
+                'activeMenu'    => 'organisation',
+                'organisation'  => $org
+            ]
+        );
     }
 }

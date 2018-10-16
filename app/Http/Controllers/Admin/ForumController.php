@@ -117,6 +117,10 @@ class ForumController extends AdminController
     {
         $categories = Models::category()->get();
 
+        if ($request->has('back')) {
+            return redirect('/admin/forum/discussions/list');
+        }
+
         if ($request->has('create')) {
 
             $validator = \Validator::make($request->all(), [
@@ -192,6 +196,10 @@ class ForumController extends AdminController
 
     public function addCategory(Request $request)
     {
+        if ($request->has('back')) {
+            return redirect('/admin/forum/categories/list');
+        }
+
         if ($request->has('create')) {
 
             $validator = \Validator::make($request->all(), [
@@ -245,6 +253,10 @@ class ForumController extends AdminController
     {
         $mainCatId = Models::category()->where('id', $id)->where('parent_id', null)->value('id');
         $categories = Models::category()->where('parent_id', null)->get();
+
+        if ($request->has('back')) {
+            return redirect('/admin/forum/subcategories/list/'. $id);
+        }
 
         if ($request->has('create')) {
 
@@ -311,6 +323,10 @@ class ForumController extends AdminController
         $discussion = Models::discussion()->with('category')->where('id', $id)->first();
 
         if (!is_null($discussion)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/discussions/list');
+            }
+
             $discussion->created_by = User::where('id', $discussion->user_id)->value('username');
             $categorySlug = Models::category()->where('id', $discussion->chatter_category_id)->value('slug');
             $discussion->link = '/'. config('chatter.routes.home') .'/'. config('chatter.routes.discussion') .'/'. $categorySlug .'/'. $discussion->slug;
@@ -340,6 +356,9 @@ class ForumController extends AdminController
         $category = Models::category()->where('id', $id)->first();
 
         if (!is_null($category)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/categories/list');
+            }
 
             return view(
                 'admin/forum/categoryView',
@@ -366,6 +385,10 @@ class ForumController extends AdminController
         $category = Models::category()->where('id', $id)->where('parent_id', '!=', null)->first();
 
         if (!is_null($category)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/subcategories/list/'. $category->parent_id);
+            }
+
             $mainCatName = Models::category()->where('id', $category->parent_id)->value('name');
 
             return view(
@@ -395,6 +418,10 @@ class ForumController extends AdminController
         $categories = Models::category()->get();
 
         if (!is_null($discussion)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/discussions/list');
+            }
+
             $discussion->created_by = User::where('id', $discussion->user_id)->value('username');
 
             if ($request->has('edit')) {
@@ -452,6 +479,10 @@ class ForumController extends AdminController
         $category = Models::category()->where('id', $id)->first();
 
         if (!is_null($category)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/categories/list');
+            }
+
             if ($request->has('edit')) {
                 $validator = \Validator::make($request->all(), [
                     'name'   => 'required|max:191',
@@ -509,6 +540,10 @@ class ForumController extends AdminController
         $mainCategories = Models::category()->where('parent_id', null)->get();
 
         if (!is_null($category)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/subcategories/list/'. $category->parent_id);
+            }
+
             if ($request->has('edit')) {
                 $validator = \Validator::make($request->all(), [
                     'name'      => 'required|max:191',
@@ -687,7 +722,16 @@ class ForumController extends AdminController
         $post = Models::post()->where('id', $id)->first();
 
         if (!is_null($post)) {
+            if ($request->has('back')) {
+                return redirect('/admin/forum/posts/list/'. $post->chatter_discussion_id);
+            }
+
+            $adminPost = Models::post()->where('chatter_discussion_id', $post->chatter_discussion_id)
+                ->orderBy('created_at', 'asc')
+                ->first();
+
             $post->user = User::where('id', $post->user_id)->value('username');
+            $post->delete = $post->id == $adminPost->id ? false : true;
 
             return view(
                 'admin/forum/postView',
@@ -716,6 +760,8 @@ class ForumController extends AdminController
             try {
                 $post->delete();
                 $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                return redirect('/admin/forum/posts/list/'. $post->chatter_discussion_id);
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
                 $request->session()->flash('alert-danger', __('custom.delete_error'));

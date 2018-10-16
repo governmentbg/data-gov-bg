@@ -86,8 +86,6 @@ class HomeController extends Controller {
         $resultCategories = $categoryApi->listMainCategories($categoryReq)->getData();
         $categories = $resultCategories->categories;
 
-        $activeSections = $this->getActiveSections();
-
         return view('/home/index', compact(
             'class',
             'updates',
@@ -96,8 +94,7 @@ class HomeController extends Controller {
             'datasets',
             'lastMonth',
             'mostActiveOrg',
-            'categories',
-            'activeSections'
+            'categories'
         ));
     }
 }

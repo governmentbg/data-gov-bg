@@ -275,13 +275,23 @@ class HelpController extends AdminController
      */
     public function addHelpPage(Request $request, $page = null)
     {
+        $sections = [];
+
         $rq = Request::create('/api/listHelpSections', 'POST', [
             'api_key' => Auth::user()->api_key,
         ]);
         $api = new ApiHelp($rq);
         $result = $api->listHelpSections($rq)->getData();
-
         $helpSections = $result->success ? $result->sections : [];
+
+        $rq = Request::create('/api/listHelpSubsections', 'POST', [
+            'api_key' => Auth::user()->api_key,
+        ]);
+        $api = new ApiHelp($rq);
+        $result = $api->listHelpSubsections($rq)->getData();
+        $helpSubsections = $result->success ? $result->subsections : [];
+
+        $sections = array_merge($helpSections, $helpSubsections);
 
         if ($request->has('back')) {
             return redirect('admin/help/pages/list');
@@ -316,8 +326,8 @@ class HelpController extends AdminController
         return view('admin/addHelpPage', [
             'fields'    => self::getHelpPagesTransFields(),
             'ordering'  => Category::getOrdering(),
-            'sections'  => $helpSections,
-            'page'      => $request->offsetGet('page') ? preg_replace('/[0-9]+/', '', $request->offsetGet('page')) : '',
+            'sections'  => $sections,
+            'page'      => $request->offsetGet('page') ? $this->formatUrl($request->offsetGet('page')) : '',
         ]);
     }
 
@@ -337,13 +347,23 @@ class HelpController extends AdminController
      */
     public function editHelpPage(Request $request, $id)
     {
+        $sections = [];
+
         $rq = Request::create('/api/listHelpSections', 'POST', [
             'api_key' => Auth::user()->api_key,
         ]);
         $api = new ApiHelp($rq);
         $result = $api->listHelpSections($rq)->getData();
-
         $helpSections = $result->success ? $result->sections : [];
+
+        $rq = Request::create('/api/listHelpSubsections', 'POST', [
+            'api_key' => Auth::user()->api_key,
+        ]);
+        $api = new ApiHelp($rq);
+        $result = $api->listHelpSubsections($rq)->getData();
+        $helpSubsections = $result->success ? $result->subsections : [];
+
+        $sections = array_merge($helpSections, $helpSubsections);
 
         $page = HelpPage::find($id);
 
@@ -388,7 +408,7 @@ class HelpController extends AdminController
             'page'      => $page,
             'fields'    => self::getHelpPagesTransFields(),
             'ordering'  => Category::getOrdering(),
-            'sections'  => $helpSections,
+            'sections'  => $sections,
         ]);
     }
 
@@ -402,7 +422,6 @@ class HelpController extends AdminController
         $result = $api->getHelpPageDetails($rq)->getData();
 
         $page = $result->page;
-
 
         $page->created_by = User::find($page->created_by)->username;
 
@@ -452,5 +471,12 @@ class HelpController extends AdminController
         }
 
         return false;
+    }
+
+    public function formatUrl($url)
+    {
+        $url = preg_replace('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}+/', '', $url);
+
+        return preg_replace('/[0-9]+/', '', $url);
     }
 }

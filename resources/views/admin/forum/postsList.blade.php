@@ -48,7 +48,7 @@
                                         <th>{{ __('custom.action') }}</th>
                                     </thead>
                                     <tbody>
-                                        @foreach ($posts as $post)
+                                        @foreach ($posts as $key => $post)
                                             <tr>
                                                 <td class="name">{{ isset($post->user) ? $post->user : $post->user_id }}</td>
                                                 <td class="name">{{ isset($discussion) ? $discussion : '' }}</td>
@@ -59,11 +59,13 @@
                                                         class="link-action"
                                                         href="{{ url('admin/forum/posts/view/'. $post->id) }}"
                                                     >{{ utrans('custom.preview') }}</a>
-                                                    <a
-                                                        class="link-action red"
-                                                        data-confirm="{{ __('custom.remove_data') }}"
-                                                        href="{{ url('admin/forum/posts/delete/'. $post->id) }}"
-                                                    >{{ __('custom.delete') }}</a>
+                                                    @if ($key)
+                                                        <a
+                                                            class="link-action red"
+                                                            data-confirm="{{ __('custom.remove_data') }}"
+                                                            href="{{ url('admin/forum/posts/delete/'. $post->id) }}"
+                                                        >{{ __('custom.delete') }}</a>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

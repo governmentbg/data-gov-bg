@@ -165,7 +165,6 @@
                                         data-placeholder="{{__('custom.main_org')}}"
                                         name="parent"
                                     >
-                                        <option></option>
                                         @if (isset($selectedOrg) && !is_null($selectedOrg))
                                             <option value="{{ $selectedOrg->uri }}" selected>{{ $selectedOrg->name }}</option>
                                         @endif

@@ -147,6 +147,19 @@ class DataSetController extends AdminController
             $perPage
         );
 
+        // handle dataset delete
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return back();
+        }
+
         return view('admin/datasets', [
             'class'                 => 'user',
             'search'                => $search,
@@ -312,6 +325,19 @@ class DataSetController extends AdminController
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        // handle dataset delete
+        if ($request->has('delete')) {
+            $uri = $request->offsetGet('dataset_uri');
+
+            if ($this->datasetDelete($uri)) {
+                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+            } else {
+                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+            }
+
+            return back();
+        }
+
         return view('admin/datasetView', [
             'class'     => 'user',
             'dataset'   => $this->getModelUsernames($dataset),
@@ -358,7 +384,7 @@ class DataSetController extends AdminController
         $result = $api->getDatasetDetails($setRq)->getData();
 
         if (!$result->success) {
-            $request->session()->flash('alert-danger', __('custom.no_dataset'));
+            $request->session()->flash('alert-danger', __('custom.no_dataset_found'));
 
             return back();
         }
@@ -374,7 +400,6 @@ class DataSetController extends AdminController
             }
 
             $editData = $this->prepareTags($editData);
-
             $groupId = $request->offsetGet('group_id');
 
             $post = [
@@ -383,13 +408,31 @@ class DataSetController extends AdminController
                 'group_id'      => $groupId,
             ];
 
-            $addGroup = Request::create('/api/addDatasetToGroup', 'POST', $post);
-            $added = $api->addDatasetToGroup($addGroup)->getData();
+            // if all groups are deselected
+            if (count($setGroups) && is_null($groupId)) {
+                $post['group_id'] = $setGroups;
+                $removeGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $post);
+                $api = new ApiDataSet($removeGroup);
+                $remove = $api->removeDatasetFromGroup($removeGroup)->getData();
 
-            if (!$added->success) {
-                session()->flash('alert-danger', __('custom.edit_error'));
+                if (!$remove->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
 
-                return redirect()->back()->withInput()->withErrors($added->errors);
+                    return redirect()->back()->withInput()->withErrors($remove->errors);
+                }
+            }
+
+            if (!is_null($groupId)) {
+                $post['group_id'] = $groupId;
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $api = new ApiDataSet($addGroup);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
             }
 
             if ($request->has('publish')) {
@@ -472,45 +515,50 @@ class DataSetController extends AdminController
         $class = 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
-        $root = 'admin';
+        $dataset = DataSet::where('uri', $datasetUri)->first();
 
-        if (DataSet::where('uri', $datasetUri)->count()) {
-            if ($request->has('ready_metadata')) {
-                $data = $request->except('file');
-                $file = $request->file('file');
+        if (empty($dataset)) {
+            session()->flash('alert-danger', __('custom.no_dataset_found'));
 
-                $response = ResourceController::addMetadata($datasetUri, $data, $file);
-
-                if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
-                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/admin/resource/view/'. $response['uri']);
-                    }
-
-                    return view('admin/resourceImport', array_merge([
-                        'class'         => $class,
-                        'types'         => $types,
-                        'resourceUri'   => $response['uri'],
-                        'action'        => 'create',
-                    ], $response['data']));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
-
-                    return redirect()->back()->withInput()->withErrors($response['errors']);
-                }
-            }
-        } else {
-            return redirect('/admin/datasets');
+            return redirect('/user/datasets');
         }
 
-        return view('admin/resourceCreate', [
-            'class'     => $class,
-            'uri'       => $datasetUri,
-            'types'     => $types,
-            'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields(),
-            'root'      => $root
+        if ($request->has('ready_metadata')) {
+            $data = $request->except('file');
+            $file = $request->file('file');
+            $data['description'] = $data['descript'];
+
+            $response = ResourceController::addMetadata($datasetUri, $data, $file);
+
+            if ($response['success']) {
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                    return redirect('/admin/resource/view/'. $response['uri']);
+                }
+
+                return view('admin/resourceImport', array_merge([
+                    'class'         => $class,
+                    'types'         => $types,
+                    'resourceUri'   => $response['uri'],
+                    'action'        => 'create',
+                ], $response['data']));
+            } else {
+                // delete resource record on fail
+                $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+
+                return redirect()->back()->withInput()->withErrors($response['errors']);
+            }
+        }
+
+        return view('user/resourceCreate', [
+            'class'         => $class,
+            'uri'           => $datasetUri,
+            'types'         => $types,
+            'reqTypes'      => $reqTypes,
+            'fields'        => $this->getResourceTransFields(),
+            'dataSetName'   => $dataset->name,
         ]);
     }
 
@@ -526,60 +574,73 @@ class DataSetController extends AdminController
         $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiMetadata = new ApiResource($reqMetadata);
         $result = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
-        $resource = !empty($result->resource) ? $result->resource : null;
 
-        if (!empty($resource)) {
-            $data = [];
-
-            if (!empty($resource)) {
-                $resource->format_code = Resource::getFormatsCode($resource->file_format);
-                $resource = $this->getModelUsernames($resource);
-
-                if (empty($version)) {
-                    $version = $resource->version;
-                }
-
-                if ($request->has('delete')) {
-                    $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
-                    $apiDelete = new ApiResource($reqDelete);
-                    $result = $apiDelete->deleteResource($reqDelete)->getData();
-
-                    if ($result->success) {
-                        $request->session()->flash('alert-success', __('custom.delete_success'));
-
-                        return redirect('/admin/dataset/view/'. $resource->dataset_uri);
-                    }
-
-                    $request->session()->flash('alert-success', __('custom.delete_error'));
-                }
-
-                $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri, 'version' => $version]);
-                $apiEsData = new ApiResource($reqEsData);
-                $response = $apiEsData->getResourceData($reqEsData)->getData();
-
-                $data = !empty($response->data) ? $response->data : [];
-
-                if ($resource->format_code == Resource::FORMAT_XML) {
-                    $convertData = [
-                        'api_key'   => \Auth::user()->api_key,
-                        'data'      => $data,
-                    ];
-                    $reqConvert = Request::create('/json2xml', 'POST', $convertData);
-                    $apiConvert = new ApiConversion($reqConvert);
-                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
-                    $data = isset($resultConvert->data) ? $resultConvert->data : [];
-                }
-
-                return view('admin/resourceView', [
-                    'class'         => 'user',
-                    'resource'      => $resource,
-                    'data'          => $data,
-                    'versionView'   => $version,
-                ]);
-            }
+        if (empty($result->resource)) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
         }
 
-        return back();
+        $resource = $this->getModelUsernames($result->resource);
+        $resource->format_code = Resource::getFormatsCode($resource->file_format);
+
+        if (empty($version)) {
+            $version = $resource->version;
+        }
+
+        $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $resource->dataset_uri]);
+        $apiDatasets = new ApiDataset($datasetReq);
+        $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
+        $dataset = !empty($dataset->data) ? $dataset->data : null;
+
+        if (!is_null($dataset)) {
+            $datasetData = [
+                'name'  => $dataset->name,
+                'uri'   => $dataset->uri,
+            ];
+        } else {
+            $datasetData = null;
+        }
+
+        // get elastic search data for the resource
+        $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri, 'version' => $version]);
+        $apiEsData = new ApiResource($reqEsData);
+        $response = $apiEsData->getResourceData($reqEsData)->getData();
+
+        $data = !empty($response->data) ? $response->data : [];
+
+        if ($resource->format_code == Resource::FORMAT_XML) {
+            $convertData = [
+                'api_key'   => \Auth::user()->api_key,
+                'data'      => $data,
+            ];
+            $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+            $apiConvert = new ApiConversion($reqConvert);
+            $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+            $data = isset($resultConvert->data) ? $resultConvert->data : [];
+        }
+
+        // handle delete request
+        if ($request->has('delete')) {
+            $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
+            $apiDelete = new ApiResource($reqDelete);
+            $result = $apiDelete->deleteResource($reqDelete)->getData();
+
+            if ($result->success) {
+                $request->session()->flash('alert-success', __('custom.delete_success'));
+
+                return redirect('/admin/dataset/view/'. $resource->dataset_uri);
+            }
+
+            $request->session()->flash('alert-success', __('custom.delete_error'));
+        }
+
+        return view('admin/resourceView', [
+            'class'         => 'user',
+            'resource'      => $resource,
+            'data'          => $data,
+            'versionView'   => $version,
+            'dataset'       => $datasetData,
+            'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
+        ]);
     }
 
     /**
@@ -596,19 +657,13 @@ class DataSetController extends AdminController
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
 
-        if (!$res->success) {
-            return redirect()->back();
-        }
-
-        $resourceData = !empty($res->resource) ? $res->resource : null;
-
-        if (!isset($resourceData)) {
+        if (empty($res->resource)) {
             return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
         }
 
-        $class = 'user';
+        $resourceData = $res->resource;
+
         $types = Resource::getTypes();
-        $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $uri)->first()->loadTranslations();
         $custFields = CustomSetting::where('resource_id', $resource->id)->get()->loadTranslations();
 
@@ -627,8 +682,8 @@ class DataSetController extends AdminController
                     'schema_url'            => $request->offsetGet('schema_url'),
                     'custom_fields'         => $request->offsetGet('custom_fields'),
                     'is_reported'           => is_null($request->offsetGet('reported'))
-                                                ? Resource::REPORTED_FALSE
-                                                : Resource::REPORTED_TRUE
+                        ? Resource::REPORTED_FALSE
+                        : Resource::REPORTED_TRUE
                     ];
 
                 if ($resource->resource_type == Resource::TYPE_HYPERLINK) {
@@ -659,14 +714,14 @@ class DataSetController extends AdminController
         }
 
         return view('admin/resourceEdit', [
-            'class'         => $class,
+            'class'         => 'user',
             'resource'      => $resource,
             'uri'           => $uri,
             'types'         => $types,
-            'reqTypes'      => $reqTypes,
+            'custFields'    => $custFields,
             'fields'        => $this->getResourceTransFields(),
             'parent'        => isset($parent) ? $parent : false,
-            'custFields'    => $custFields,
+            'dataseUri'     => $resourceData->dataset_uri
         ]);
     }
 
@@ -678,26 +733,27 @@ class DataSetController extends AdminController
      *
      * @return view - resource edit page
      */
-    public function resourceUpdate(Request $request, $resourceUri)
+    public function resourceUpdate(Request $request, $resourceUri, $parentUri = null)
     {
         $rq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $resourceUri]);
         $api = new ApiResource($rq);
         $res = $api->getResourceMetadata($rq)->getData();
 
-        if (!$res->success) {
-            return redirect()->back();
-        }
-
-        $resourceData = !empty($res->resource) ? $res->resource : null;
-
-        if (!isset($resourceData)) {
+        if (empty($res->resource)) {
             return back()->withErrors(session()->flash('alert-danger', __('custom.record_not_found')));
         }
+
+        $resourceData = $res->resource;
 
         $class = 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $resourceUri)->first()->loadTranslations();
+
+        if ($parentUri) {
+            $parent = Organisation::where('uri', $parentUri)->first();
+            $parent->logo = $this->getImageData($parent->logo_data, $parent->logo_mime_type, $parent->type == Organisation::TYPE_GROUP ? 'group' : 'org');
+        }
 
         if ($resource) {
             if ($request->has('ready_metadata')) {
@@ -719,6 +775,11 @@ class DataSetController extends AdminController
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/admin/resource/view/'. $response['uri']);
+                    }
+
+                    if (!empty($parent)) {
+                        $key = $parent->type == Organisation::TYPE_GROUP ? 'group' : 'fromOrg';
+                        $response['data'][$key] = $parent;
                     }
 
                     return view('admin/resourceImport', array_merge([
@@ -743,7 +804,9 @@ class DataSetController extends AdminController
             'uri'       => $resourceUri,
             'types'     => $types,
             'reqTypes'  => $reqTypes,
-            'fields'    => $this->getResourceTransFields()
+            'fields'    => $this->getResourceTransFields(),
+            'parent'    => isset($parent) ? $parent : false,
+            'dataseUri' => $resourceData->dataset_uri
         ]);
     }
 }

@@ -46,6 +46,7 @@ class SubsectionController extends AdminController
         if (isset($mainSection->id)) {
             $perPage = 10;
             $params = [
+                'api_key'          => \Auth::user()->api_key,
                 'records_per_page' => $perPage,
                 'page_number'      => !empty($request->page) ? $request->page : 1,
                 'criteria'         => [
@@ -149,6 +150,7 @@ class SubsectionController extends AdminController
         $sections = $this->getMainSections(true);
         $perPage = 10;
         $params = [
+            'api_key'          => \Auth::user()->api_key,
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
             'criteria'         => [
@@ -264,7 +266,8 @@ class SubsectionController extends AdminController
 
     public function getMainSections($parse = false)
     {
-        $request = Request::create('/api/listSections', 'POST', []);
+        $params = ['api_key' => \Auth::user()->api_key];
+        $request = Request::create('/api/listSections', 'POST', $params);
         $api = new ApiSection($request);
         $result = $api->listSections($request)->getData();
         $sections = isset($result->sections) ? $result->sections : [];

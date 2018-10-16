@@ -11,10 +11,27 @@ Removed - for now removed features.
 Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
-## [Unreleased]
-### Added
+## [Unreleased] - XXXX-XX-XX
 
-## [0.6.0]
+## [0.6.1] - 2018-10-16
+### Added
+- Api removeDatasetFromGroup parameter group_id now is a array of ids
+- Add api connnection for files, soft deletes and update history (Tool)
+- Version link (Tool)
+- History pagination (Tool)
+- Visual impovements
+
+### Fixed
+- Help sections optimisation
+- Datasets and resources version bug
+- Resources and datasets refactoring and optimisation
+- Edit dataset can not deselect groups and organisation
+- Dataset edit groups and organisation inputs
+- Show inactive subsections and sections in admin area
+- Invite bug
+- Sticky footer
+
+## [0.6.0] - 2018-10-08
 ### Added
 - Change log
 - Tool history page
@@ -29,8 +46,9 @@ Security - in case of vulnerabilities.
 - Map old license ids with the new terms of use
 
 ### Fixed
-- Refactured and optimised tests
+- Refactored and optimised tests
 - Activation link for deactivated users
+- Admin subsections listing
 
 ## [0.5.1] - 2018-10-03
 ### Fixed
@@ -58,6 +76,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.4.1...v0.5.0

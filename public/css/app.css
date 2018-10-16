@@ -20226,6 +20226,11 @@ nav .tool-version:hover {
   z-index: 999 !important;
 }
 
+.new-file {
+  min-width: 80px !important;
+  margin-right: 15px;
+}
+
 .help-section {
   height: 28px;
   margin-top: 8px;

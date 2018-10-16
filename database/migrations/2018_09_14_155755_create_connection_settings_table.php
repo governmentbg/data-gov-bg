@@ -27,6 +27,7 @@ class CreateConnectionSettingsTable extends Migration
                 $table->string('source_db_pass')->nullable();
                 $table->string('notification_email')->nullable();
                 $table->timestamps();
+                $table->softDeletes();
             });
         }
     }

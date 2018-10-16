@@ -67,6 +67,12 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-xs-12 m-t-sm p-l-none text-right m-b-lg">
+                                        <a
+                                            href="{{ url('admin/images/list') }}"
+                                            class="badge badge-pill"
+                                        >
+                                            {{ uctrans('custom.close') }}
+                                        </a>
                                         <button name="edit" class="badge badge-pill" type="submit">{{ uctrans('custom.edit') }}</button>
                                         <span class="badge badge-pill red">
                                             <a

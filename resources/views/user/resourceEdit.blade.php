@@ -10,19 +10,13 @@
             <div class="col-sm-3 col-xs-12">
                 @include('partials.group-info', ['group' => $parent])
             </div>
-            <div class="col-sm-9 col-xs-12">
-                @include('components.datasets.resource_edit_metadata', ['parent' => $parent])
-            </div>
         @else
             @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $parent])
             @include('partials.org-info', ['organisation' => $parent])
-            <div class="col-sm-9 col-xs-12">
-                @include('components.datasets.resource_edit_metadata', ['parent' => $parent])
-            </div>
         @endif
     @else
         @include('partials.user-nav-bar', ['view' => 'dataset'])
-        @include('components.datasets.resource_edit_metadata')
     @endif
+    @include('components.datasets.resource_edit_metadata')
 </div>
 @endsection

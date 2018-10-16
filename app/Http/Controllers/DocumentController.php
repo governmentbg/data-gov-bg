@@ -30,7 +30,6 @@ class DocumentController extends Controller {
                 [
                     'class'          => 'documents',
                     'document'       => $documents,
-                    'activeSections' => $this->getActiveSections()
                 ]
             );
         }
@@ -67,7 +66,6 @@ class DocumentController extends Controller {
             'class'            => 'documents',
             'documents'        => $paginationData['items'],
             'pagination'       => $paginationData['paginate'],
-            'activeSections'   => $this->getActiveSections()
         ]);
     }
 
@@ -105,7 +103,6 @@ class DocumentController extends Controller {
             'documents'      => $paginationData['items'],
             'pagination'     => $paginationData['paginate'],
             'search'         => $search,
-            'activeSections' => $this->getActiveSections()
         ]);
     }
 }

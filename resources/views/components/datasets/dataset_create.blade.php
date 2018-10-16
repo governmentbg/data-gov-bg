@@ -1,10 +1,26 @@
-<div class="col-xs-12 sidenav m-t-lg m-b-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} col-xs-12 sidenav m-t-lg m-b-lg">
     <span class="my-profile m-l-sm">{{uctrans('custom.dataset_add')}}</span>
 </div>
-<div class="col-xs-12 m-t-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} col-xs-12 m-t-lg">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
     <form method="POST">
         {{ csrf_field() }}
+        <div class="form-group row">
+            <div class="col-xs-12 text-right mng-btns">
+                @if (!empty($admin) || !empty($buttons['addResource']))
+                    <button
+                        type="submit"
+                        name="add_resource"
+                        class="btn btn-primary"
+                    >{{ uctrans('custom.add_resource') }}</button>
+                @endif
+                <button
+                    type="submit"
+                    name="create"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.save') }}</button>
+            </div>
+        </div>
         <div class="form-group row">
             <label
                 for="identifier"
@@ -112,7 +128,17 @@
                     @foreach ($organisations as $id => $org)
                         <option
                             value="{{ $id }}"
-                            {{ $id == old('org_id') ? 'selected' : '' }}
+                            @if (
+                                !empty(old('org_id'))
+                                && $id == old('org_id')
+                            )
+                                {{ 'selected' }}
+                            @elseif (
+                                !empty($fromOrg)
+                                && $fromOrg->id == $id
+                            )
+                                {{ 'selected' }}
+                            @endif
                         >{{ $org }}</option>
                     @endforeach
                 </select>
@@ -134,11 +160,21 @@
                     multiple="multiple"
                 >
                     <option></option>
-                    @foreach ($groups as $id => $group)
+                    @foreach ($groups as $id => $groupName)
                         <option
                             value="{{ $id }}"
-                            {{ !empty(old('group_id')) && in_array($id, old('group_id')) ? 'selected' : '' }}
-                        >{{ $group }}</option>
+                            @if (
+                                !empty(old('group_id'))
+                                && in_array($id, old('group_id'))
+                            )
+                                {{ 'selected' }}
+                            @elseif (
+                                !empty($group)
+                                && $group->id == $id
+                            )
+                                {{ 'selected' }}
+                            @endif
+                        >{{ $groupName }}</option>
                     @endforeach
                 </select>
                 <span class="error">{{ $errors->first('group_id') }}</span>
@@ -199,7 +235,8 @@
                     class="input-border-r-12 form-control"
                     value="{{ old('author_name') }}"
                     type="text"
-                    placeholder="{{ __('custom.author') }}">
+                    placeholder="{{ __('custom.author') }}"
+                >
                 <span class="error">{{ $errors->first('author_name') }}</span>
             </div>
         </div>
@@ -273,7 +310,7 @@
                     name="back"
                     class="btn btn-primary"
                 >{{ uctrans('custom.close') }}</button>
-                @if (!empty($admin) || !empty($buttons['add']))
+                @if (!empty($admin) || !empty($buttons['addResource']))
                     <button
                         type="submit"
                         name="add_resource"

@@ -27,7 +27,7 @@
                             type="text"
                             class="input-border-r-12 form-control"
                             name="file_conn_name"
-                            value="{{ old('file_conn_name', empty($post['file_conn_name']) ? '' : $post['file_conn_name']) }}"
+                            value="{{ old('file_conn_name', empty($post['file_conn_name']) || !$edit ? '' : $post['file_conn_name']) }}"
                         >
                         <span class="error">{{ $errors->first('file_conn_name') }}</span>
                     @endif
@@ -37,7 +37,7 @@
                 <label class="col-sm-4 col-xs-12 col-form-label m-b-sm">{{ __('custom.connection_type') }}:</label>
                 @foreach ($sourceTypes as $i => $name)
                     <div class="col-sm-4 col-xs-6 m-b-md">
-                        <label class="radio-label {{ $i == 2 ? 'pull-right m-r-sm' : null }}">
+                        <label class="radio-label {{ $i == 2 ? 'pull-right' : null }}">
                             {{ uctrans('custom.'. $name) }}
                             <div class="js-check js-submit">
                                 <input
@@ -313,6 +313,23 @@
                 @endforeach
             @endif
         @else
+            <div class="data-query">
+                @if (old('edit', $edit))
+                    <input
+                        type="submit"
+                        class="btn btn-primary save-btn new-file pull-right"
+                        name="new"
+                        value="{{ uctrans('custom.new') }}"
+                    >
+                @endif
+                @if (!empty($post['file_conn_name']))
+                    <input
+                        type="hidden"
+                        name="conn_id"
+                        value="{{ old('conn_id', empty($post['conn_id']) ? '' : $post['conn_id']) }}"
+                    >
+                @endif
+            </div>
             <div class="js-file-form file-form">
                 <div class="form-group required">
                     <label for="file" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}</label>
@@ -321,7 +338,7 @@
                             type="file"
                             name="file"
                             class="input-border-r-12 form-control doc-upload-input js-doc-input"
-                            value="{{ old('file', empty($post['file']) ? '' : $post['file']) }}"
+                            value="{{ old('file', empty($post['file']) || !$edit ? '' : $post['file']) }}"
                         >
                         @if (isset($errors) && $errors->has('file'))
                             <span class="error">{{ $errors->first('file') }}</span>
@@ -337,7 +354,7 @@
                         <input
                             class="form-control"
                             name="file_nt_email"
-                            value="{{ old('file_nt_email', empty($post['file_nt_email']) ? '' : $post['file_nt_email']) }}"
+                            value="{{ old('file_nt_email', empty($post['file_nt_email']) || !$edit ? '' : $post['file_nt_email']) }}"
                         >
                         <span class="error">{{ $errors->first('file_nt_email') }}</span>
                     </div>
@@ -357,7 +374,7 @@
                         <input
                             class="form-control"
                             name="file_api_key"
-                            value="{{ old('file_api_key', empty($post['file_api_key']) ? '' : $post['file_api_key']) }}"
+                            value="{{ old('file_api_key', empty($post['file_api_key']) || !$edit ? '' : $post['file_api_key']) }}"
                         >
                         <span class="error">{{ $errors->first('file_api_key') }}</span>
                     </div>
@@ -368,7 +385,7 @@
                         <input
                             class="form-control"
                             name="file_rs_key"
-                            value="{{ old('file_rs_key', empty($post['file_rs_key']) ? '' : $post['file_rs_key']) }}"
+                            value="{{ old('file_rs_key', empty($post['file_rs_key']) || !$edit ? '' : $post['file_rs_key']) }}"
                         >
                         <span class="error">{{ $errors->first('file_rs_key') }}</span>
                     </div>
@@ -379,7 +396,7 @@
                         <input
                             class="form-control freq-number"
                             name="file_upl_freq"
-                            value="{{ old('file_upl_freq', empty($post['file_upl_freq']) ? '' : $post['file_upl_freq']) }}"
+                            value="{{ old('file_upl_freq', empty($post['file_upl_freq']) || !$edit ? '' : $post['file_upl_freq']) }}"
                         >
                         <select
                             name="file_upl_freq_type"
@@ -388,7 +405,11 @@
                             @foreach ($freqTypes as $freqTypeId => $freqType)
                                 <option
                                     value="{{ $freqTypeId }}"
-                                    {{ $freqTypeId == old('file_upl_freq_type', empty($post['file_upl_freq_type']) ? '' : $post['file_upl_freq_type']) ? 'selected' : '' }}
+                                    {{
+                                        $freqTypeId == old('file_upl_freq_type', empty($post['file_upl_freq_type']) || !$edit
+                                            ? ''
+                                            : $post['file_upl_freq_type']) ? 'selected' : ''
+                                    }}
                                 >{{ $freqType }}</option>
                             @endforeach
                         </select>
@@ -396,12 +417,14 @@
                     </div>
                 </div>
                 <div class="form-group col-md-9 col-md-offset-3">
-                    <input
-                        type="submit"
-                        class="btn btn-primary save-btn"
-                        name="send_file"
-                        value="{{ uctrans('custom.send') }}"
-                    >
+                    @if (old('edit', $edit))
+                        <input
+                            type="submit"
+                            class="btn btn-primary save-btn"
+                            name="send_file"
+                            value="{{ uctrans('custom.send') }}"
+                        >
+                    @endif
                     <input
                         type="submit"
                         class="btn btn-primary save-btn pull-right"
@@ -410,6 +433,34 @@
                     >
                 </div>
             </div>
+            @if (!empty($files))
+                @foreach ($files as $file)
+                    @foreach ($file->dataQueries as $query)
+                        <div class="data-query">
+                            <span>{{ $file->connection_name .'('. $query->name .')' }}</span>
+                            <input
+                                type="submit"
+                                class="btn btn-primary pull-right"
+                                name="delete_file[{{ $file->id }}]"
+                                value="{{ uctrans('custom.delete') }}"
+                                data-confirm="{{ __('custom.remove_data') }}"
+                            >
+                            <input
+                                type="submit"
+                                class="btn btn-primary pull-right"
+                                name="file_conn_id[{{ $file->id }}]"
+                                value="{{ uctrans('custom.edit') }}"
+                            >
+                            <input
+                                type="submit"
+                                class="btn btn-primary save-btn pull-right"
+                                name="send_query[{{ $query->id }}]"
+                                value="{{ uctrans('custom.send') }}"
+                            >
+                        </div>
+                    @endforeach
+                @endforeach
+            @endif
         @endif
     </div>
 </form>

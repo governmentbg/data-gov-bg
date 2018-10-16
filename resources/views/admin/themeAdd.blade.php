@@ -37,7 +37,7 @@
                                     @endif
                                 </div>
                                 <div class="col-sm-3 text-right">
-                                    <button type="submit" class="btn btn-custom js-doc-btn">{{ __('custom.select_file') }}:</button>
+                                    <button type="submit" class="btn btn-custom js-doc-btn">{{ __('custom.select_file') }}</button>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">

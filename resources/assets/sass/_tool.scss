@@ -1,3 +1,19 @@
+nav {
+    .tool-version {
+        color: white;
+        font-size: 18px;
+        float: right;
+        margin-right: 8px;
+        line-height: $headerUnderlineHeight;
+
+        &:hover {
+            color: black !important;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    }
+}
+
 .config-form {
     .config-control-form {
         max-width: 500px;
@@ -66,19 +82,44 @@
 }
 
 .tool-history {
+    padding-top: 20px;
 
     .history-filters {
-        color: black !important;
-        padding: 25px 20px 5px 15px;
-        border: 1px #c02e54 solid;
-        border-radius: 10px;
+        margin-bottom: 20px;
 
-        .date {
-            padding-right: 0px;
-        }
+        form {
+            color: black !important;
+            padding: 25px 20px 5px 15px;
+            border: 1px #c02e54 solid;
+            border-radius: 10px;
 
-        .last {
-            padding-right: 10px;
+            table {
+                width: 100%;
+
+                tr {
+                    td {
+                        padding-bottom: 10px;
+
+                        > div {
+                            padding-right: 0 !important;
+
+                            label {
+                                width: 100%;
+                                margin-bottom: 0px;
+                            }
+                        }
+
+                        &:first-child {
+                            width: 1px;
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+
+            .date {
+                padding-right: 0px;
+            }
         }
     }
 
@@ -95,12 +136,13 @@
             word-break: break-word;
         }
     }
-
-    .succ-lbl {
-        margin-left: 27px !important;
-    }
 }
 
 .dropdown-menu {
     z-index: 999 !important;
+}
+
+.new-file {
+    min-width: 80px !important;
+    margin-right: 15px;
 }

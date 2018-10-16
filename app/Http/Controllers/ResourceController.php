@@ -129,118 +129,7 @@ class ResourceController extends Controller {
                 if ($metadata['data']['type'] == Resource::TYPE_HYPERLINK) {
                     $success = true;
                 } else if (!empty($extension)) {
-                    $convertData = [
-                        'api_key'   => $apiKey,
-                        'data'      => $content,
-                    ];
-
-                    Session::forget('elasticData');
-
-                    switch ($extension) {
-                        case 'json':
-                            Session::put('elasticData', json_decode($content, true));
-
-                            break;
-                        case 'csv':
-                            $reqConvert = Request::create('/csv2json', 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->csv2json($reqConvert)->getData();
-
-                            if ($resultConvert->success) {
-                                $elasticData = $resultConvert->data;
-                                Session::put('elasticData', $elasticData);
-                                $data['csvData'] = $elasticData;
-                            }
-
-                            break;
-                        case 'xml':
-                            if (($pos = strpos($content, '?>')) !== false) {
-                                $trimContent = substr($content, $pos + 2);
-                                $convertData['data'] = trim($trimContent);
-                            }
-
-                            $reqConvert = Request::create('/xml2json', 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->xml2json($reqConvert)->getData(true);
-
-                            if ($resultConvert['success']) {
-                                $elasticData = $resultConvert['data'];
-                                Session::put('elasticData', $elasticData);
-                                $data['xmlData'] = $content;
-                            }
-
-                            break;
-                        case 'kml':
-                            $method = $extension .'2json';
-                            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->$method($reqConvert)->getData(true);
-
-                            if ($resultConvert['success']) {
-                                $elasticData = $resultConvert['data'];
-                                Session::put('elasticData', $elasticData);
-                            }
-
-                            break;
-                        case 'rdf':
-                            $method = $extension .'2json';
-                            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->$method($reqConvert)->getData(true);
-
-                            if ($resultConvert['success']) {
-                                $elasticData = $resultConvert['data'];
-                                Session::put('elasticData', $elasticData);
-                                $data['xmlData'] = $content;
-                            }
-
-                            break;
-                        case 'pdf':
-                        case 'doc':
-                            $method = $extension .'2json';
-                            $convertData['data'] = base64_encode($convertData['data']);
-                            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->$method($reqConvert)->getData(true);
-
-                            if ($resultConvert['success']) {
-                                Session::put('elasticData', ['text' => $resultConvert['data']]);
-                                $data['text'] = $resultConvert['data'];
-                            }
-
-                            break;
-                        case 'xls':
-                        case 'xlsx':
-                            $method = 'xls2json';
-                            $convertData['data'] = base64_encode($convertData['data']);
-                            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->$method($reqConvert)->getData(true);
-
-                            if ($resultConvert['success']) {
-                                Session::put('elasticData', $resultConvert['data']);
-                                $data['csvData'] = $resultConvert['data'];
-                            }
-
-                            break;
-                        case 'txt':
-                            Session::put('elasticData', ['text' => $convertData['data']]);
-
-                            $data['text'] = $convertData['data'];
-
-                            break;
-                        default:
-                            $method = 'img2json';
-                            $convertData['data'] = base64_encode($convertData['data']);
-                            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
-                            $api = new ApiConversion($reqConvert);
-                            $resultConvert = $api->$method($reqConvert)->getData(true);
-
-                            if ($resultConvert['success']) {
-                                Session::put('elasticData', ['text' => $resultConvert['data']]);
-                                $data['text'] = $resultConvert['data'];
-                            }
-                        }
+                    $data = self::callConversions($apiKey, $extension, $content);
                 }
 
                 if (Session::has('elasticData')) {
@@ -252,6 +141,128 @@ class ResourceController extends Controller {
         }
 
         return compact('errors', 'data', 'success', 'uri');
+    }
+
+
+
+    public static function callConversions($apiKey, $extension, $content)
+    {
+        $data = [];
+
+        $convertData = [
+            'api_key'   => $apiKey,
+            'data'      => $content,
+        ];
+
+        Session::forget('elasticData');
+
+        switch ($extension) {
+            case 'json':
+                Session::put('elasticData', json_decode($content, true));
+
+                break;
+            case 'csv':
+                $reqConvert = Request::create('/csv2json', 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->csv2json($reqConvert)->getData();
+
+                if ($resultConvert->success) {
+                    $elasticData = $resultConvert->data;
+                    Session::put('elasticData', $elasticData);
+                    $data['csvData'] = $elasticData;
+                }
+
+                break;
+            case 'xml':
+                if (($pos = strpos($content, '?>')) !== false) {
+                    $trimContent = substr($content, $pos + 2);
+                    $convertData['data'] = trim($trimContent);
+                }
+
+                $reqConvert = Request::create('/xml2json', 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->xml2json($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    $elasticData = $resultConvert['data'];
+                    Session::put('elasticData', $elasticData);
+                    $data['xmlData'] = $content;
+                }
+
+                break;
+            case 'kml':
+                $method = $extension .'2json';
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    $elasticData = $resultConvert['data'];
+                    Session::put('elasticData', $elasticData);
+                }
+
+                break;
+            case 'rdf':
+                $method = $extension .'2json';
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    $elasticData = $resultConvert['data'];
+                    Session::put('elasticData', $elasticData);
+                    $data['xmlData'] = $content;
+                }
+
+                break;
+            case 'pdf':
+            case 'doc':
+                $method = $extension .'2json';
+                $convertData['data'] = base64_encode($convertData['data']);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    Session::put('elasticData', ['text' => $resultConvert['data']]);
+                    $data['text'] = $resultConvert['data'];
+                }
+
+                break;
+            case 'xls':
+            case 'xlsx':
+                $method = 'xls2json';
+                $convertData['data'] = base64_encode($convertData['data']);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    Session::put('elasticData', $resultConvert['data']);
+                    $data['csvData'] = $resultConvert['data'];
+                }
+
+                break;
+            case 'txt':
+                Session::put('elasticData', ['text' => $convertData['data']]);
+
+                $data['text'] = $convertData['data'];
+
+                break;
+            default:
+                $method = 'img2json';
+                $convertData['data'] = base64_encode($convertData['data']);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    Session::put('elasticData', ['text' => $resultConvert['data']]);
+                    $data['text'] = $resultConvert['data'];
+                }
+        }
+
+        return $data;
     }
 
     /**

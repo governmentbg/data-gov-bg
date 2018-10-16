@@ -867,4 +867,5 @@ return [
     'success' => 'Успешна',
     'failure' => 'Неуспешна',
     'search_button' => 'Търси',
+    'document_preview' => 'преглед на документ'
 ];

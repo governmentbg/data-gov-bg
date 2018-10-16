@@ -303,7 +303,7 @@
                         @elseif (isset($fromOrg))
                             href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/resource/create/'. $dataSet->uri) }}"
                         @else
-                            href="{{ url('/'. $root .'/dataset/resource/create/'. $dataset->uri) }}"
+                            href="{{ url('/'. $root .'/dataset/resource/create/'. $dataSet->uri) }}"
                         @endif
                 >{{ uctrans('custom.add_resource') }}</a>
                 @if ($hasResources)

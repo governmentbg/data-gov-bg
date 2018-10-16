@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Resource;
+use App\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -309,6 +310,18 @@ class ResourceController extends Controller {
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
+                    if ($request->has('org_uri')) {
+                        $orgUri = $request->offsetGet('org_uri');
+
+                        return redirect('/'. $root .'/organisations/'. $orgUri.'/resource/'. $uri);
+                    }
+
+                    if ($request->has('group_uri')) {
+                        $goupUri = $request->offsetGet('group_uri');
+
+                        return redirect('/'. $root .'/groups/'. $goupUri.'/resource/'. $uri);
+                    }
+
                     return redirect('/'. $root .'/resource/view/'. $uri);
                 }
 
@@ -362,6 +375,18 @@ class ResourceController extends Controller {
 
                 if ($resultElastic->success) {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
+
+                    if ($request->has('org_uri')) {
+                        $orgUri = $request->offsetGet('org_uri');
+
+                        return redirect('/'. $root .'/organisations/'. $orgUri.'/resource/'. $uri);
+                    }
+
+                    if ($request->has('group_uri')) {
+                        $goupUri = $request->offsetGet('group_uri');
+
+                        return redirect('/'. $root .'/groups/'. $goupUri.'/resource/'. $uri);
+                    }
 
                     return redirect('/'. $root .'/resource/view/'. $uri);
                 }

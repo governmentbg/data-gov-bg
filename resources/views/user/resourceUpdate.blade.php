@@ -3,7 +3,20 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    @include('partials.user-nav-bar', ['view' => 'datasets'])
+    @if ($parent)
+        @include('partials.user-nav-bar', ['view' => $parent->type == App\Organisation::TYPE_GROUP ? 'group' : 'organisation'])
+        @if ($parent->type == App\Organisation::TYPE_GROUP)
+            @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $parent])
+            <div class="col-sm-3 col-xs-12">
+                @include('partials.group-info', ['group' => $parent])
+            </div>
+        @else
+            @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $parent])
+            @include('partials.org-info', ['organisation' => $parent])
+        @endif
+    @else
+        @include('partials.user-nav-bar', ['view' => 'dataset'])
+    @endif
     @include('components.datasets.resource_update_version')
 </div>
 @endsection

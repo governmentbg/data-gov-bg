@@ -587,7 +587,7 @@ class OrganisationController extends AdminController
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $result->data->uri,
+                                'obj_view'          => '/user/organisations/'. $result->data->uri .'/resource/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),

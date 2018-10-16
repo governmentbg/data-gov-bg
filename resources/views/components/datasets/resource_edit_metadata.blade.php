@@ -1,17 +1,4 @@
-@php
-    $root = empty($admin) ? 'user' : 'admin';
-
-    if (empty($parent)):
-        $uri = '/'. $root .'/resource/view/'. $resource->uri;
-    else:
-        if ($parent->type == App\Organisation::TYPE_GROUP):
-            $uri = '/user/group/'. $parent->uri .'/resource/'. $resource->uri;
-        else:
-            $uri = '/user/organisations/datasets/resourceView/'. $resource->uri .'/'. $parent->uri;
-        endif;
-    endif;
-@endphp
-<div class="col-xs-12 m-t-lg">
+<div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg">
         {{ csrf_field() }}
@@ -25,11 +12,6 @@
                 @include(
                     'components.form_groups.translation_textarea',
                     ['field' => $field, 'model' => $resource]
-                )
-            @elseif($field['view'] == 'translation_custom')
-                @include(
-                    'components.form_groups.translation_custom_fields',
-                    ['field' => $field, 'model' => $custFields]
                 )
             @endif
         @endforeach
@@ -106,17 +88,41 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-12 text-right mng-btns">
+
+        @foreach ($fields as $field)
+            @if ($field['view'] == 'translation_custom')
+                @include(
+                    'components.form_groups.translation_custom_fields',
+                    ['field' => $field, 'model' => $custFields, 'result' => session('result')]
+                )
+            @endif
+        @endforeach
+
+        <div class="col-xs-12 p-r-none text-right mng-btns">
+            @php
+                $root = empty($admin) ? 'user' : 'admin';
+
+                if (empty($parent)):
+                    $url = url('/'. $root .'/resource/view/'. $resource->uri);
+                    $href = route($root .'DatasetView', ['uri' => $dataseUri]);
+                else:
+                    if ($parent->type == App\Organisation::TYPE_GROUP):
+                        $url = url('/'. $root .'/groups/'. $parent->uri .'/resource/'. $resource->uri);
+                        $href = route($root .'GroupDatasetView', ['uri' => $dataseUri, 'grpUri' => $parent->uri]);
+                    else:
+                        $url = url('/'. $root .'/organisations/'. $parent->uri .'/resource/'. $resource->uri);
+                        $href = route($root .'OrgDatasetView', ['uri' => $dataseUri]);
+                    endif;
+                endif;
+            @endphp
             <a
-                href="{{ url('/'. $root .'/resource/view/' . $resource->uri) }}"
+                href="{{ $href }}"
                 class="btn btn-primary"
-            >
-                {{ uctrans('custom.close') }}
-            </a>
+            >{{ uctrans('custom.close') }}</a>
             <a
                 type="button"
                 class="btn btn-primary"
-                href="{{ url($uri) }}"
+                href="{{ url($url) }}"
             >{{ uctrans('custom.preview') }}</a>
             <button name="ready_metadata" type="submit" class="btn btn-custom">{{ uctrans('custom.save') }}</button>
         </div>

@@ -153,8 +153,10 @@
                         @if (!empty($admin) || !empty($buttons[$resource->uri]['view']))
                             <div class="{{ $resource->reported ? 'signaled' : '' }}">
                                 <a
-                                    @if (isset($fromOrg))
-                                        href="{{ url('/'. $root. '/organisations/datasets/resourceView/'. $resource->uri .'/'. $fromOrg->uri) }}"
+                                    @if (!empty($fromOrg))
+                                        href="{{ url('/'. $root. '/organisations/'. $fromOrg->uri .'/resource/'. $resource->uri) }}"
+                                    @elseif (!empty($group))
+                                        href="{{ url('/'. $root. '/groups/'. $group->uri .'/resource/'. $resource->uri) }}"
                                     @else
                                         href="{{ url('/'. $root .'/resource/view/'. $resource->uri) }}"
                                     @endif
@@ -198,16 +200,22 @@
                 @if (!empty($admin) || !empty($buttons['addResource']))
                     <a
                         class="btn btn-primary"
-                        href="{{ url('/'. $root .'/dataset/resource/create/'. $dataset->uri) }}"
+                        @if (isset($group))
+                            href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/resource/create/'. $dataset->uri) }}"
+                        @elseif (isset($fromOrg))
+                            href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/resource/create/'. $dataset->uri) }}"
+                        @else
+                            href="{{ url('/'. $root .'/dataset/resource/create/'. $dataset->uri) }}"
+                        @endif
                     >{{ uctrans('custom.add_resource') }}</a>
                 @endif
                 @if (!empty($admin) || !empty($buttons[$dataset->uri]['edit']))
                     <a
                         class="btn btn-primary"
                         @if (isset($group))
-                            href="{{ url('/'. $root .'/group/dataset/edit/'. $group->uri .'/'. $dataset->uri) }}"
+                            href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/edit/'. $dataset->uri) }}"
                         @elseif (isset($fromOrg))
-                            href="{{ url('/'. $root .'/organisation/'. $fromOrg->uri .'/dataset/edit/'. $dataset->uri) }}"
+                            href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/edit/'. $dataset->uri) }}"
                         @else
                             href="{{ url('/'. $root .'/dataset/edit/'. $dataset->uri) }}"
                         @endif

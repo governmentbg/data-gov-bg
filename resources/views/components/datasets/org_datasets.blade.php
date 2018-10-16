@@ -48,7 +48,7 @@
                                         <div class="col-xs-6">
                                             <span class="badge badge-pill m-r-md m-b-sm">
                                                 <a
-                                                    href="{{ url('/'. $root .'/organisation/'. $organisation->uri .'/dataset/edit/'. $set->uri) }}"
+                                                    href="{{ url('/'. $root .'/organisations/'. $organisation->uri .'/dataset/edit/'. $set->uri) }}"
                                                 >{{ uctrans('custom.edit') }}</a>
                                             </span>
                                         </div>

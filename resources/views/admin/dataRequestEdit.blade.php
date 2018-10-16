@@ -30,70 +30,61 @@
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="published_url" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.published_url') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                                        <div class="js-check">
-                                            <input
-                                                type="text"
-                                                name="published_url"
-                                                class="input-border-r-12 form-control"
-                                                value="{{ !empty($dataRequest->published_url) ? $dataRequest->published_url : '' }}"
-                                            >
-                                            @if (isset($errors) && $errors->has('published_url'))
-                                                <span class="error">{{ $errors->first('published_url') }}</span>
-                                            @endif
-                                        </div>
+                                    <div class="col-sm-9">
+                                        <input
+                                            type="text"
+                                            name="published_url"
+                                            class="input-border-r-12 form-control"
+                                            value="{{ !empty($dataRequest->published_url) ? $dataRequest->published_url : '' }}"
+                                        >
+                                        @if (isset($errors) && $errors->has('published_url'))
+                                            <span class="error">{{ $errors->first('published_url') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="contact_name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.contact_person_org') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                                        <div class="js-check">
-                                            <input
-                                                type="text"
-                                                name="contact_name"
-                                                class="input-border-r-12 form-control"
-                                                value="{{ !empty($dataRequest->contact_name) ? $dataRequest->contact_name : '' }}"
-                                            >
-                                            @if (isset($errors) && $errors->has('contact_name'))
-                                                <span class="error">{{ $errors->first('contact_name') }}</span>
-                                            @endif
-                                        </div>
+                                    <div class="col-sm-9">
+                                        <input
+                                            type="text"
+                                            name="contact_name"
+                                            class="input-border-r-12 form-control"
+                                            value="{{ !empty($dataRequest->contact_name) ? $dataRequest->contact_name : '' }}"
+                                        >
+                                        @if (isset($errors) && $errors->has('contact_name'))
+                                            <span class="error">{{ $errors->first('contact_name') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="email" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.email') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                                        <div class="js-check">
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                class="input-border-r-12 form-control"
-                                                value="{{ !empty($dataRequest->email) ? $dataRequest->email : '' }}"
-                                            >
-                                            @if (isset($errors) && $errors->has('email'))
-                                                <span class="error">{{ $errors->first('email') }}</span>
-                                            @endif
-                                        </div>
+                                    <div class="col-sm-9">
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            class="input-border-r-12 form-control"
+                                            value="{{ !empty($dataRequest->email) ? $dataRequest->email : '' }}"
+                                        >
+                                        @if (isset($errors) && $errors->has('email'))
+                                            <span class="error">{{ $errors->first('email') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="notes" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.notes') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                                        <div class="js-check">
-                                            <textarea
-                                                name="notes"
-                                                class="input-border-r-12 form-control"
-                                            >{{ !empty($dataRequest->contact_name) ? $dataRequest->notes : '' }}</textarea>
-                                            @if (isset($errors) && $errors->has('notes'))
-                                                <span class="error">{{ $errors->first('notes') }}</span>
-                                            @endif
-                                        </div>
+                                    <div class="col-sm-9">
+                                        <textarea
+                                            name="notes"
+                                            class="input-border-r-12 form-control"
+                                        >{{ !empty($dataRequest->contact_name) ? $dataRequest->notes : '' }}</textarea>
+                                        @if (isset($errors) && $errors->has('notes'))
+                                            <span class="error">{{ $errors->first('notes') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="org_id" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisation') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                                        <div class="js-check">
+                                    <div class="col-sm-9">
                                         <select
                                             class="js-autocomplete form-control"
                                             name="org_id"
@@ -114,16 +105,14 @@
                                                 @endforeach
                                             @endif
                                         </select>
-                                            @if (isset($errors) && $errors->has('organisation'))
-                                                <span class="error">{{ $errors->first('organisation') }}</span>
-                                            @endif
-                                        </div>
+                                        @if (isset($errors) && $errors->has('organisation'))
+                                            <span class="error">{{ $errors->first('organisation') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="status" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.status') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                                        <div class="js-check">
+                                    <div class="col-sm-9">
                                         <select
                                             class="form-control"
                                             name="status"
@@ -142,10 +131,9 @@
                                                 @endforeach
                                             @endif
                                         </select>
-                                            @if (isset($errors) && $errors->has('status'))
-                                                <span class="error">{{ $errors->first('status') }}</span>
-                                            @endif
-                                        </div>
+                                        @if (isset($errors) && $errors->has('status'))
+                                            <span class="error">{{ $errors->first('status') }}</span>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row">

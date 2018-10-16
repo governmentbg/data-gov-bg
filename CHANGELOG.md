@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 ### Added
 - Api removeDatasetFromGroup parameter group_id now is a array of IDs.
 - Help section for non-admin users
+- Removed invite bug
 
 ### Fixed
 - Edit dataset cant deselect groups and organisation

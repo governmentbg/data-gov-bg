@@ -16,7 +16,7 @@
                     @include('partials.org-info', ['organisation' => $fromOrg])
                 @endif
                 <div class="col-sm-9 col-xs-12 m-t-lg side-info">
-                    @include('components.datasets.resource_view')
+                    @include('components.datasets.resource_view', ['admin' => Auth::user()->is_admin])
                 </div>
             </div>
         @else

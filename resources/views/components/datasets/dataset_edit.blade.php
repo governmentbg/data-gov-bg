@@ -149,7 +149,7 @@
                     data-placeholder="{{ utrans('custom.groups', 1) }}"
                     multiple="multiple"
                 >
-                    @foreach ($groups as $id => $group)
+                    @foreach ($groups as $id => $groupName)
                         <option
                             value="{{ $id }}"
                             {{
@@ -159,7 +159,7 @@
                                 && in_array($id, $setGroups)
                                 ? 'selected' : ''
                             }}
-                        >{{ $group }}</option>
+                        >{{ $groupName }}</option>
                     @endforeach
                 </select>
                 <span class="error">{{ $errors->first('group_id') }}</span>
@@ -298,7 +298,13 @@
             <div class="col-xs-12 text-right mng-btns">
                 <a
                     class="btn btn-primary"
-                    href="{{ url('/'. $root .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @if (isset($group))
+                            href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @elseif (isset($fromOrg))
+                            href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/resource/create/'. $dataSet->uri) }}"
+                        @else
+                            href="{{ url('/'. $root .'/dataset/resource/create/'. $dataset->uri) }}"
+                        @endif
                 >{{ uctrans('custom.add_resource') }}</a>
                 @if ($hasResources)
                     <button
@@ -307,14 +313,27 @@
                         class="btn btn-primary"
                     >{{ uctrans('custom.publish') }}</button>
                 @endif
+                @php
+                    if (isset($fromOrg)):
+                        $close = url($root .'/organisations/datasets/'. $fromOrg->uri);
+                        $preview = route($root .'OrgDatasetView', ['uri' => $dataSet->uri]);
+                    elseif (isset($group)):
+                        $close = url($root .'/groups/datasets/'. $group->uri);
+                        $preview = route($root .'GroupDatasetView', ['uri' => $dataSet->uri, 'grpUri' => $group->uri]);
+                    else:
+                        $close = url($root .'/datasets/');
+                        $preview = route($root .'DatasetView', ['uri' => $dataSet->uri]);
+                    endif;
+                @endphp
                 <a
                     type="button"
                     class="btn btn-primary"
-                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    href="{{ $preview }}"
                 >{{ uctrans('custom.preview') }}</a>
                 <a
-                    href="{{ url('/'. $root .'/dataset/view/'. $dataSet->uri) }}"
+                    type="button"
                     class="btn btn-primary"
+                    href="{{ $close }}"
                 >
                     {{ uctrans('custom.close') }}
                 </a>

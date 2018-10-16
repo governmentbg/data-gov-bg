@@ -515,7 +515,7 @@ class GroupController extends AdminController
                         'obj_name'      => $dataset->name,
                         'obj_module'    => Str::lower(__('custom.dataset')),
                         'obj_type'      => 'dataset',
-                        'obj_view'      => '/user/group/'. $group->uri .'/dataset/'. $dataset->uri,
+                        'obj_view'      => '/user/groups/'. $group->uri .'/dataset/'. $dataset->uri,
                         'parent_obj_id' => ''
                     ];
 
@@ -527,7 +527,7 @@ class GroupController extends AdminController
                                 'obj_name'          => $resource->name,
                                 'obj_module'        => Str::lower(__('custom.resource')),
                                 'obj_type'          => 'resource',
-                                'obj_view'          => '/user/group/'. $group->uri .'/resource/'. $resource->uri,
+                                'obj_view'          => '/user/groups/'. $group->uri .'/resource/'. $resource->uri,
                                 'parent_obj_id'     => $dataset->uri,
                                 'parent_obj_name'   => $dataset->name,
                                 'parent_obj_module' => Str::lower(__('custom.dataset')),

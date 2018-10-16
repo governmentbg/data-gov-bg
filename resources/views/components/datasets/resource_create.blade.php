@@ -1,4 +1,5 @@
-<div class="col-xs-12 m-t-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
+    <h3>{{ uctrans('custom.add_resource_dataset').' - '. $dataSetName }}</h3>
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg" enctype="multipart/form-data">
         {{ csrf_field() }}
@@ -11,11 +12,6 @@
             @elseif ($field['view'] == 'translation_txt')
                 @include(
                     'components.form_groups.translation_textarea',
-                    ['field' => $field, 'result' => session('result')]
-                )
-            @elseif($field['view'] == 'translation_custom')
-                @include(
-                    'components.form_groups.translation_custom_fields',
                     ['field' => $field, 'result' => session('result')]
                 )
             @endif
@@ -146,6 +142,15 @@
             </div>
         </div>
 
+        @foreach ($fields as $field)
+            @if ($field['view'] == 'translation_custom')
+                @include(
+                    'components.form_groups.translation_custom_fields',
+                    ['field' => $field, 'result' => session('result')]
+                )
+            @endif
+        @endforeach
+
         <div class="form-group row">
             <div class="col-sm-12 text-right">
                 <a
@@ -154,7 +159,11 @@
                 >
                     {{ uctrans('custom.close') }}
                 </a>
-                <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
+                <button
+                    name="ready_metadata"
+                    type="submit"
+                    class="m-l-md btn btn-custom"
+                >{{ uctrans('custom.save') }}</button>
             </div>
         </div>
     </form>

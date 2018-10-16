@@ -628,8 +628,6 @@ class ToolController extends Controller
         $response = json_decode($response, true);
         curl_close($ch);
 
-        error_log('response: '. print_r($response, true));
-
         return $response;
     }
 

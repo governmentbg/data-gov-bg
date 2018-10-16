@@ -39,8 +39,9 @@ class Module extends Model
     const CUSTOM_SETTINGS = 24;
     const RIGHTS = 25;
     const THEMES = 26;
-    const TOOL_DBMS = 27;
+    const TOOL_DB_CONNECTION = 27;
     const TOOL_FILE = 28;
+    const TOOL_DB_QUERY = 29;
 
     /**
      * Gives back the available user actions.
@@ -81,8 +82,9 @@ class Module extends Model
     public static function getToolModules()
     {
         return [
-            self::TOOL_DBMS => 'DBMS',
-            self::TOOL_FILE => 'File',
+            self::TOOL_DB_CONNECTION    => 'DB Connection',
+            self::TOOL_DB_QUERY         => 'DB Query',
+            self::TOOL_FILE             => 'File',
         ];
     }
 

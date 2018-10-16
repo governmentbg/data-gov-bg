@@ -25,6 +25,7 @@ class CreateDataQueriesTable extends Migration
                 $table->tinyInteger('upl_freq_type');
                 $table->timestamp('last_upl')->nullable();
                 $table->timestamps();
+                $table->softDeletes();
                 $table->foreign('connection_id')->references('id')->on('connection_settings')->onDelete('cascade');
             });
         }

@@ -13,6 +13,12 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [0.6.2] - 2018-10-17
+### Fixed
+- Organisations search
+- Delete own account
+- Account creator
+
 ## [0.6.1] - 2018-10-16
 ### Added
 - Api removeDatasetFromGroup parameter group_id now is a array of ids
@@ -76,7 +82,8 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
-[0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.0...v0.6.1
+[0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.4.1...v0.5.0

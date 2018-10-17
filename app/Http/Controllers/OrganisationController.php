@@ -85,6 +85,7 @@ class OrganisationController extends Controller
         } else {
             $params['criteria']['order']['field'] = 'name';
         }
+
         if ($request->has('order')) {
             $params['criteria']['order']['type'] = $request->order;
             $getParams['order'] = $request->order;

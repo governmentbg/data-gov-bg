@@ -13,6 +13,9 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+### Fixed
+- User delete bug
+
 ## [0.6.1] - 2018-10-16
 ### Added
 - Api removeDatasetFromGroup parameter group_id now is a array of ids

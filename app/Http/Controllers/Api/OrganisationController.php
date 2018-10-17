@@ -622,12 +622,12 @@ class OrganisationController extends ApiController
                 }
 
                 if (!empty($request->criteria['org_ids'])) {
-                    $query->whereIn('id', $request->criteria['org_ids']);
+                    $query->whereIn('organisations.id', $request->criteria['org_ids']);
                 }
 
                 if (!empty($request->criteria['keywords'])) {
                     $ids = Organisation::search($request->criteria['keywords'])->get()->pluck('id');
-                    $query->whereIn('id', $ids);
+                    $query->whereIn('organisations.id', $ids);
                 }
 
                 if (!empty($criteria['user_id'])) {

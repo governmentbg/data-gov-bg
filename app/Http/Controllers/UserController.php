@@ -1360,7 +1360,7 @@ class UserController extends Controller {
                     [],
                     [
                         'created_by' => $user->created_by,
-                        'object_id'  => $user->id
+                        'object_id'  => $user->id,
                     ]
                 );
 

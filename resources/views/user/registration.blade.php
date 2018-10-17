@@ -103,7 +103,7 @@
                             <label for="newsLetter" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.newsletter_subscription') }}:</label>
                             <div class="col-sm-3 col-xs-6 p-r-none">
                                 <select
-                                    class="input-border-r-12 form-control open-select"
+                                    class="js-select form-control"
                                     name="user_settings[newsletter_digest]"
                                     size="5"
                                 >

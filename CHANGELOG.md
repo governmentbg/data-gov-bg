@@ -20,6 +20,9 @@ Security - in case of vulnerabilities.
 
 ### Fixed
 - WYSIWYG editor code view, full screen mode
+- Missing conversion methods
+- Unclosed span tag
+- Search pagination
 
 ## [0.6.2] - 2018-10-17
 ### Fixed

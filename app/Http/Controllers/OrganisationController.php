@@ -177,6 +177,7 @@ class OrganisationController extends Controller
             $childOrgs = !empty($res->organisations) ? $res->organisations : [];
 
             $parentOrg = null;
+
             if (isset($organisation->parent_org_id)) {
                 // get parent organisation details
                 $params = [
@@ -186,15 +187,18 @@ class OrganisationController extends Controller
                 $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
                 $api = new ApiOrganisation($rq);
                 $res = $api->getOrganisationDetails($rq)->getData();
+
                 if ($res->success) {
                     $parentOrg = $res->data;
                 }
             }
 
             $buttons = [];
+
             if ($authUser = \Auth::user()) {
                 $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+
                 if ($rightCheck) {
                     $userData = [
                         'api_key' => $authUser->api_key,
@@ -203,6 +207,7 @@ class OrganisationController extends Controller
 
                     // get followed organisations
                     $followed = [];
+
                     if ($this->getFollowed($userData, 'org_id', $followed)) {
                         if (!in_array($organisation->id, $followed)) {
                             $buttons['follow'] = true;
@@ -213,6 +218,7 @@ class OrganisationController extends Controller
                         // follow / unfollow organisation
                         $followReq = $request->only(['follow', 'unfollow']);
                         $followResult = $this->followObject($followReq, $userData, $followed, 'org_id', [$organisation->id]);
+
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }

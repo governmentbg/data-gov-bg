@@ -26,7 +26,7 @@
                     </tbody>
                 </table>
             </div>
-        @elseif ($resource->format_code == App\Resource::FORMAT_XML)
+        @elseif ($resource->format_code == App\Resource::FORMAT_XML || $resource->format_code == App\Resource::FORMAT_RDF)
             <textarea
                 class="js-xml-prev col-xs-12 m-b-md"
                 data-xml-data="{{ $data }}"
@@ -45,26 +45,55 @@
             {{ csrf_field() }}
             <input
                 hidden
+                name="resource"
+                type="text"
+                value="{{ $resource->id }}"
+            >
+            <input
+                hidden
+                name="version"
+                type="text"
+                value="{{ $versionView }}"
+            >
+            <input
+                hidden
                 name="name"
                 type="text"
                 value="{{ $resource->name }}"
             >
-            <input
-                hidden
-                name="format"
-                type="text"
-                value="{{ $resource->file_format }}"
-            >
-            <button
-                name="download"
-                type="submit"
-                class="badge badge-pill pull-right js-ga-event"
-                data-ga-action="download"
-                data-ga-label="resource download"
-                data-ga-category="data"
-            >{{ uctrans('custom.download') }}</button>
+            <div class="form-group row">
+                <label
+                    for="format"
+                    class="col-sm-3 col-xs-12 col-form-label"
+                >{{ uctrans('custom.format') }}:</label>
+                <div class="col-sm-9">
+                    <select
+                        id="format"
+                        name="format"
+                        class="js-select form-control"
+                    >
+                        <option></option>
+                        @foreach ($formats as $id => $format)
+                            <option
+                                value="{{ $format }}"
+                                {{ $format == $resource->file_format ? 'selected' : '' }}
+                            >{{ $format }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error">{{ $errors->first('category_id') }}</span>
+                </div>
+            </div>
+
+            <div class="row text-right download-btns">
+                <button
+                    name="download"
+                    type="submit"
+                    class="btn btn-primary js-ga-event"
+                    data-ga-action="download"
+                    data-ga-label="resource download"
+                    data-ga-category="data"
+                >{{ uctrans('custom.download') }}</button>
+            </div>
         </form>
     @endif
 @endif
-
-

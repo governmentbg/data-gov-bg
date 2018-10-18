@@ -132,6 +132,13 @@ Route::middleware(['auth.api' /*'throttle:60,1'*/])->group(function () {
 
     Route::post('xml2json', 'Api\ConversionController@xml2json');
     Route::post('json2xml', 'Api\ConversionController@json2xml');
+    Route::post('ods2json', 'Api\ConversionController@ods2json');
+    Route::post('slk2json', 'Api\ConversionController@slk2json');
+    Route::post('txt2json', 'Api\ConversionController@txt2json');
+    Route::post('tsv2json', 'Api\ConversionController@tsv2json');
+    Route::post('xsd2json', 'Api\ConversionController@xsd2json');
+    Route::post('odt2json', 'Api\ConversionController@odt2json');
+    Route::post('rtf2json', 'Api\ConversionController@rtf2json');
     Route::post('csv2json', 'Api\ConversionController@csv2json');
     Route::post('json2csv', 'Api\ConversionController@json2csv');
     Route::post('kml2json', 'Api\ConversionController@kml2json');

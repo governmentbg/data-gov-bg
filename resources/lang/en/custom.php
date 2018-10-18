@@ -871,5 +871,6 @@ return [
     'failure' => 'Failure',
     'search_button' => 'Search',
     'document_preview' => 'document preview',
-    'activef' => 'active'
+    'activef' => 'active',
+    'remove_set' => 'remove',
 ];

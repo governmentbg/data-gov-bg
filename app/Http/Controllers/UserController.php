@@ -817,7 +817,7 @@ class UserController extends Controller {
         }
 
         $params['api_key'] = \Auth::user()->api_key;
-        $params['group_id'] = $groupId;
+        $params['group_id'] = [$groupId];
         $params['data_set_uri'] = $uri;
 
         $request = Request::create('/api/removeDataSetFromGroup', 'POST', $params);

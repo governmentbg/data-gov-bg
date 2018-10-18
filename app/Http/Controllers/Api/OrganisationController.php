@@ -1779,12 +1779,12 @@ class OrganisationController extends ApiController
                 $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
                 if (!empty($criteria['group_ids'])) {
-                    $query->whereIn('id', $criteria['group_ids']);
+                    $query->whereIn('organisations.id', $criteria['group_ids']);
                 }
 
                 if (!empty($criteria['keywords'])) {
                     $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
-                    $query->whereIn('id', $ids);
+                    $query->whereIn('organisations.id', $ids);
                 }
 
                 if (!empty($criteria['dataset_id'])) {
@@ -1795,7 +1795,7 @@ class OrganisationController extends ApiController
 
                 if (!empty($criteria['user_id'])) {
                     $query->whereHas('userToOrgRole', function($q) use ($criteria) {
-                        $q->where('user_id', $criteria['user_id']);
+                        $q->where('user_to_org_role.user_id', $criteria['user_id']);
                     });
                 }
 

@@ -1,5 +1,5 @@
 @if (isset($pagination))
-    <div class="row m-t-md">
+    <div class="row">
         <div class="col-xs-12 text-center">
             {{ $pagination->render() }}
         </div>

@@ -86,7 +86,7 @@
                 <div class="conversation">
                     <ul class="discussions no-bg" style="display:block;">
                         @foreach($posts as $post)
-                            <li data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
+                            <li class="forum-box" data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
                                 <span class="chatter_posts">
                                     @if(!Auth::guest() && (Auth::user()->id == $post->user->id))
                                         <div id="delete_warning_{{ $post->id }}" class="chatter_warning_delete">
@@ -124,7 +124,7 @@
 
                                     <div class="chatter_middle">
                                         <span class="chatter_middle_details"><a href="{{ \DevDojo\Chatter\Helpers\ChatterHelper::userLink($post->user) }}">{{ ucfirst($post->user->{Config::get('chatter.user.database_field_with_user_name')}) }}</a> <span class="ago chatter_middle_details">{{ \Carbon\Carbon::createFromTimeStamp(strtotime($post->created_at))->diffForHumans() }}</span></span>
-                                        <div class="chatter_body">
+                                        <div class="chatter_body word-break">
 
                                             @if($post->markdown)
                                                 <pre class="chatter_body_md">{{ $post->body }}</pre>

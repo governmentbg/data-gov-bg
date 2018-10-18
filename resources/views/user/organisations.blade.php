@@ -17,7 +17,7 @@
                 @endif
             </div>
             @if ($buttons['view'])
-                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
+                <div class="col-lg-8 col-md-7 col-xs-12 search-field p-l-lg">
                     <form method="GET" action="{{ url('/user/organisations/search') }}">
                         <input
                             type="text"
@@ -39,17 +39,23 @@
                     @foreach ($organisations as $key => $organisation)
                         @if ($buttons[$organisation->uri]['view'])
                             <div class="col-md-4 col-sm-12 org-col">
+                                <div class="cust-tooltip user">{{ $organisation->name }}</div>
                                 <div class="col-xs-12 m-t-lg">
                                     <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}">
                                         <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
+                                    <a
+                                        href="{{ url('/user/organisations/view/'. $organisation->uri) }}"
+                                    ><h3 class="org-name">{{ $organisation->name }}</h3></a>
                                     <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
-                                        <p class="text-right show-more">
-                                            <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                                        </p>
+                                    <p class="text-right show-more">
+                                        <a
+                                            href="{{ url('/user/organisations/view/'. $organisation->uri) }}"
+                                            class="view-profile"
+                                        >{{ __('custom.see_more') }}</a>
+                                    </p>
                                 </div>
                                 <div class="col-xs-12 ch-del-btns">
                                     <div class="row">
@@ -87,7 +93,7 @@
                         @endif
                     @endforeach
                 @else
-                    <div class="col-sm-12 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

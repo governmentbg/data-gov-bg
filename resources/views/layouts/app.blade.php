@@ -29,6 +29,13 @@
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
+
+    @if (isset($cssPaths))
+        @foreach ($cssPaths as $path)
+            <link href="{{ asset($path) }}" rel="stylesheet">
+        @endforeach
+    @endif
+
     @if (isset($link))
         <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}"/>
     @endif
@@ -67,7 +74,7 @@
                                     src="{{ asset('img/euro-union.svg') }}"
                                 >
                             </a>
-                            <a href="#"><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
+                            <a><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
                         </div>
                         @if (!env('IS_TOOL'))
                             <div class="access-terms-icons">
@@ -155,6 +162,24 @@
                                         target="_blank"
                                         href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"
                                     ><span class="fa fa-linkedin"></span></a>
+                                    @if (isset($newsLink))
+                                        <a
+                                            target="_blank"
+                                            href="{{ url('/news/rss') }}" class="in"
+                                        ><span class="fa fa-rss"></span></a>
+                                    @endif
+                                    @if (isset($datasetLink))
+                                        <a
+                                            target="_blank"
+                                            href="{{ url('/datasets/rss') }}" class="in"
+                                        ><span class="fa fa-rss"></span></a>
+                                    @endif
+                                    @if (isset($link))
+                                        <a
+                                            target="_blank"
+                                            href="{{ url('/datasets/'. $organisation->uri .'/rss') }}" class="in"
+                                        ><span class="fa fa-rss"></span></a>
+                                    @endif
                                 </span>
                             @endif
 
@@ -297,26 +322,6 @@
             </div>
 
             <footer class="footer js-footer hidden">
-                <div class="image-links text-right col-xs-12">
-                    <a href="{{ url('/terms') }}">
-                        <span class="svg-icons">
-                            <svg class="puzzle" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.99 25.99">
-                                <path d="M25.62.75l0,0L25.44.56l0,0a1.69,1.69,0,0,0-1-.38H1.67A1.66,1.66,0,0,0,0,1.8V24.48A1.61,1.61,0,0,0,.46,25.6a.3.3,0,0,0,.08.08,1.65,1.65,0,0,0,1.13.45H24.35A1.65,1.65,0,0,0,26,24.48V1.8A1.59,1.59,0,0,0,25.62.75ZM22.06,10.87a2.87,2.87,0,0,0-.89-2.08,2.84,2.84,0,0,0-2-.81h-.1a2.89,2.89,0,0,0-2.8,2.81,3,3,0,0,0,.47,1.66h-3v-4A.69.69,0,0,0,13,7.73a2.13,2.13,0,0,0-1.31.46,1.52,1.52,0,0,1-1,.31h0a1.51,1.51,0,0,1-1-2.57,1.52,1.52,0,0,1,2-.15A2.22,2.22,0,0,0,13,6.24a.68.68,0,0,0,.68-.69v-4H24.35a.28.28,0,0,1,.27.28V12.45h-3A2.85,2.85,0,0,0,22.06,10.87ZM12.32,4.56a2.89,2.89,0,1,0-1.66,5.32h.07a2.88,2.88,0,0,0,1.59-.47v3h-4a.69.69,0,0,0-.68.71,2.16,2.16,0,0,0,.46,1.32,1.52,1.52,0,0,1-1.15,2.44H6.84a1.49,1.49,0,0,1-1-.42,1.51,1.51,0,0,1-.47-1.09,1.45,1.45,0,0,1,.32-.92,2.22,2.22,0,0,0,.46-1.35.69.69,0,0,0-.69-.69h-4V1.8a.29.29,0,0,1,.28-.28H12.32ZM1.39,13.83h3A2.82,2.82,0,0,0,4,15.41a2.87,2.87,0,0,0,.88,2.08,2.9,2.9,0,0,0,2,.81H7a2.89,2.89,0,0,0,2.8-2.81,2.85,2.85,0,0,0-.47-1.66h3v4a.7.7,0,0,0,.71.69,2.11,2.11,0,0,0,1.32-.47,1.58,1.58,0,0,1,1-.31h0a1.53,1.53,0,0,1,1.47,1.47,1.49,1.49,0,0,1-.42,1.11,1.5,1.5,0,0,1-1.09.46,1.55,1.55,0,0,1-.93-.31A2.17,2.17,0,0,0,13,20a.69.69,0,0,0-.69.69v4H1.67a.29.29,0,0,1-.28-.28Zm12.3,7.89a2.9,2.9,0,0,0,3.67-.42,2.9,2.9,0,0,0-2-4.91h-.09a3,3,0,0,0-1.58.47v-3h4a.7.7,0,0,0,.69-.72A2.13,2.13,0,0,0,18,11.8a1.49,1.49,0,0,1-.32-1,1.54,1.54,0,0,1,1.47-1.48h.06a1.5,1.5,0,0,1,1,.43,1.55,1.55,0,0,1,.46,1.09,1.5,1.5,0,0,1-.31.92,2.17,2.17,0,0,0-.47,1.35.69.69,0,0,0,.69.69h4V24.48a.28.28,0,0,1-.27.28H13.69Z" transform="translate(-0.01 -0.14)"/>
-                            </svg>
-                        </span>
-                    </a>
-                    <a href="{{ url('/accessibility') }}">
-                        <span class="svg-icons">
-                            <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 53 26">
-                                <g>
-                                    <path d="M16.73,20.73H7.49L5.73,26H.12L9.65.41h4.89L24.12,26H18.51ZM8.91,16.46h6.4L12.09,6.88Z"/>
-                                    <path d="M36.31,22.19H29.63L28.36,26H24.31L31.19,7.52h3.53L41.64,26h-4Zm-5.65-3.08h4.62L33,12.19Z"/>
-                                    <path d="M49.15,23.66H45L44.26,26H41.77L46,14.63h2.17L52.44,26h-2.5Zm-3.47-1.9h2.84L47.09,17.5Z"/>
-                                </g>
-                            </svg>
-                        </span>
-                    </a>
-                </div>
                 <div class="copiright text-center col-xs-12">
                     <div class="row">
                         <strong>Copyright &copy; 2018 </strong>
@@ -330,10 +335,25 @@
 
     @include('partials.js-translations')
     <!-- Scripts -->
+    @if (isset($jsPaths))
+        @foreach ($jsPaths as $path)
+            <script src="{{ asset($path) }}"></script>
+        @endforeach
+    @endif
+
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/jquery.smartmenus.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.smartmenus.bootstrap.min.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
     <script src="{{ asset('js/bootstrap-clockpicker.min.js') }}"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
+
+    @if (isset($script))
+        {!! $script !!}
+    @endif
+
     @yield('js')
 </body>
 </html>

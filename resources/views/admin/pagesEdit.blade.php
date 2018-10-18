@@ -1,4 +1,28 @@
-@extends('layouts.app')
+@extends(
+    'layouts.app',
+    [
+        'script' => !empty($script) ? $script : null,
+        'jsPaths' => [
+            'js/visualizations/d3.v3.min.js',
+            'js/visualizations/crossfilter.min.js',
+            'js/visualizations/dc.min.js',
+            'js/visualizations/leaflet.js',
+            'js/visualizations/topojson.min.js',
+            'js/visualizations/queue.min.js',
+            'js/visualizations/charts.js',
+            'js/visualizations/d3.min.js',
+            'js/visualizations/d3.slider.js',
+            'js/visualizations/open-charts.js',
+            'js/visualizations/charts.js',
+        ],
+        'cssPaths' => [
+            'css/visualizations/leaflet.css',
+            'css/visualizations/d3.slider.css',
+            'css/visualizations/jquery.smartmenus.bootstrap.css',
+            'css/visualizations/dc.css',
+        ]
+    ]
+)
 
 @section('content')
     <div class="container">
@@ -49,7 +73,7 @@
                                     <span class="error">{{ $errors->first('section_id') }}</span>
                                 </div>
                             </div>
-                            <div class="form-group row m-b-lg m-t-md">
+                            <div class="form-group row m-b-sm m-t-md">
                                 <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-9">
                                     <input
@@ -84,28 +108,36 @@
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
                                 <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}:</label>
-                                <div class="col-sm-4 m-b-sm">
-                                    <div class="col-xs-3">{{ __('custom.from') .': ' }}</div>
-                                    <div class="col-xs-9 text-left search-field admin">
-                                        <input class="datepicker input-border-r-12 form-control" name="valid_from" value="{{ !empty($model->valid_from) ? $model->valid_from : '' }}">
+                                <div class="col-sm-9 m-b-sm">
+                                    <div class=" row">
+                                        <div class="col-sm-6 m-b-sm">
+                                            <div class="row">
+                                                <div class="col-xs-3">{{ __('custom.from') .': ' }}</div>
+                                                <div class="col-xs-9 text-left search-field admin">
+                                                    <input class="datepicker input-border-r-12 form-control" name="valid_from" value="{{ !empty($model->valid_from) ? $model->valid_from : '' }}">
+                                                </div>
+                                                @if (isset($errors) && $errors->has('valid_from'))
+                                                    <span class="error">{{ $errors->first('valid_from') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 m-b-sm">
+                                            <div class="row">
+                                                <div class="col-xs-3">{{ __('custom.to') .': ' }}</div>
+                                                <div class="col-xs-9 text-left search-field admin">
+                                                    <input class="datepicker input-border-r-12 form-control" name="valid_to" value="{{ !empty($model->valid_to) ? $model->valid_to : '' }}">
+                                                </div>
+                                                @if (isset($errors) && $errors->has('valid_to'))
+                                                    <span class="error">{{ $errors->first('valid_to') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                    @if (isset($errors) && $errors->has('valid_from'))
-                                        <span class="error">{{ $errors->first('valid_from') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-sm-4 m-b-sm">
-                                    <div class="col-xs-3">{{ __('custom.to') .': ' }}</div>
-                                    <div class="col-xs-9 text-left search-field admin">
-                                        <input class="datepicker input-border-r-12 form-control" name="valid_to" value="{{ !empty($model->valid_to) ? $model->valid_to : '' }}">
-                                    </div>
-                                    @if (isset($errors) && $errors->has('valid_to'))
-                                        <span class="error">{{ $errors->first('valid_to') }}</span>
-                                    @endif
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.activef') }}:</label>
-                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                <label for="active" class="col-lg-3 col-sm-3 col-xs-4 col-form-label">{{ utrans('custom.activef') }}:</label>
+                                <div class="col-lg-2 col-sm-9 col-xs-8">
                                     <div class="js-check">
                                         <input
                                             type="checkbox"
@@ -123,7 +155,7 @@
                                 <div class="col-sm-12 text-right">
                                     <a
                                         href="{{ url('admin/pages/list') }}"
-                                        class="m-l-md btn btn-custom"
+                                        class="btn brn-primary"
                                     >
                                         {{ uctrans('custom.close') }}
                                     </a>

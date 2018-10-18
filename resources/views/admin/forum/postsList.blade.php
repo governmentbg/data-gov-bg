@@ -5,24 +5,28 @@
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         @include('partials.pagination')
-        <div class="col-xs-2 m-t-lg m-b-lg">
-            <span class="my-profile head">{{ utrans('custom.discussion_posts') }}</span>
-        </div>
-        <div class="col-xs-10 m-t-lg text-right section">
-            <div class="filter-content section-nav-bar">
-                <ul class="nav filter-type right-border">
-                    <li>
-                        <a
-                            class="active"
-                            href="{{ url('/admin/forum/discussions/list') }}"
-                        >{{ __('custom.discussions') }}</a>
-                    </li>
-                    <li>
-                        <a
-                        href="{{ url('/admin/forum/categories/list') }}"
-                        >{{ __('custom.categories') }}</a>
-                    </li>
-                </ul>
+        <div class="col-xs-12">
+            <div class="row">
+                <div class="col-xs-2 m-t-lg m-b-lg">
+                    <span class="my-profile head">{{ utrans('custom.discussion_posts') }}</span>
+                </div>
+                <div class="col-xs-10 m-t-lg text-right section">
+                    <div class="filter-content section-nav-bar">
+                        <ul class="nav filter-type right-border">
+                            <li>
+                                <a
+                                    class="active"
+                                    href="{{ url('/admin/forum/discussions/list') }}"
+                                >{{ __('custom.discussions') }}</a>
+                            </li>
+                            <li>
+                                <a
+                                href="{{ url('/admin/forum/categories/list') }}"
+                                >{{ __('custom.categories') }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row m-b-sm">
@@ -76,7 +80,7 @@
                     </div>
                 </form>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

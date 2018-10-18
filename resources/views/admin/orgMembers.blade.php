@@ -45,42 +45,48 @@
     <div class="row">
         <div class="col-xs-12 m-t-md m-b-md">
             <div class="row">
-                <div class="col-sm-3 sidenav">
-                    <ul class="nav">
-                        <li>
-                            <ul class="sidebar-submenu open">
-                                @foreach ($roles as $role)
-                                    <li>
-                                        <a
-                                            class="{{ $filter == $role->id ? 'active' : null }}"
-                                            href="{{ route('adminOrgMembersView', [
-                                                'uri'       => $organisation->uri,
-                                                'filter'    => $filter == $role->id ? null : $role->id,
-                                                'keywords'  => $keywords,
-                                            ]) }}"
-                                        >{{ $role->name }}</a>
-                                    </li>
-                                @endforeach
+                <div class="col-sm-3">
+                    <div class="row">
+                        <div class="col-sm-12 sidenav">
+                            <ul class="nav">
                                 <li>
-                                    <a
-                                        class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                                        href="{{ route('adminOrgMembersView', [
-                                            'uri'       => $organisation->uri,
-                                            'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                            'keywords'  => $keywords,
-                                        ]) }}"
-                                    >{{ __('custom.for_approval') }}</a>
+                                    <ul class="sidebar-submenu open">
+                                        @foreach ($roles as $role)
+                                            <li>
+                                                <a
+                                                    class="{{ $filter == $role->id ? 'active' : null }}"
+                                                    href="{{ route('adminOrgMembersView', [
+                                                        'uri'       => $organisation->uri,
+                                                        'filter'    => $filter == $role->id ? null : $role->id,
+                                                        'keywords'  => $keywords,
+                                                    ]) }}"
+                                                >{{ $role->name }}</a>
+                                            </li>
+                                        @endforeach
+                                        <li>
+                                            <a
+                                                class="{{ $filter == 'for_approval' ? 'active' : null }}"
+                                                href="{{ route('adminOrgMembersView', [
+                                                    'uri'       => $organisation->uri,
+                                                    'filter'    => $filter == 'for_approval' ? null : 'for_approval',
+                                                    'keywords'  => $keywords,
+                                                ]) }}"
+                                            >{{ __('custom.for_approval') }}</a>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
-                        </li>
-                    </ul>
-                    <div class="org m-t-lg side-info">
-                        <img src="{{ $organisation->logo }}">
-                        <h2>{{ $organisation->name }}</h2>
-                        <h4>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h4>
-                        <p class="text-right show-more">
-                            <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                        </p>
+                        </div>
+                        <div class="col-xs-12 org m-t-lg side-info">
+                            <div class="org-logo">
+                                <img src="{{ $organisation->logo }}">
+                            </div>
+                            <h4>{{ $organisation->name }}</h4>
+                            <h5>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h5>
+                            <p class="text-right show-more">
+                                <a href="{{ url('/admin/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
@@ -91,14 +97,14 @@
                         data-target="#sidebar-wrapper"
                     ><span><i class="fa fa-angle-right"></i></span></button>
                 </div>
-                <div class="col-sm-9 cl-xs-12 ">
+                <div class="col-sm-9 cl-xs-12">
                     <div class="filter-content tex">
                         <div class="p-l-r-none m-b-lg m-t-md col-md-6">
                             <form class="js-keywords-form">
                                 @foreach (app('request')->except(['keywords']) as $key => $value)
                                     <input name="{{ $key }}" type="hidden" value="{{ $value }}">
                                 @endforeach
-                                <input name="keywords" class="rounded-input" type="text" value="{{ $keywords }}">
+                                <input name="keywords" class="input-border-r-12 form-control" type="text" value="{{ $keywords }}" placeholder="{{ __('custom.search') }}">
                                 <input type="submit" class="hidden">
                             </form>
                         </div>
@@ -201,7 +207,7 @@
                                 </div>
                             @endif
                         @else
-                            <div class="m-t-xl no-info">
+                            <div class="m-t-md no-info">
                                 {{ __('custom.no_info') }}
                             </div>
                         @endif

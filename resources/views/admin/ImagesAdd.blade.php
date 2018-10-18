@@ -45,8 +45,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
-                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                <label for="active" class="col-xs-3 col-form-label">{{ uctrans('custom.active') }}:</label>
+                                <div class="col-xs-9">
                                     <div class="js-check">
                                         <input
                                             type="checkbox"
@@ -64,7 +64,7 @@
                                     <input
                                         type="file"
                                         name="image"
-                                        class="input-border-r-12 form-control doc-upload-input js-doc-input"
+                                        class="input-border-r-12 form-control doc-upload-input js-doc-input m-b-sm"
                                         value="{{ old('image') }}"
                                     >
                                     @if (isset($errors) && $errors->has('image'))

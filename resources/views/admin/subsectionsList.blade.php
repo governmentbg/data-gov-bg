@@ -4,10 +4,13 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'sections'])
-        <div class="col-lg-6 col-sm-5 col-xs-2 m-t-lg">
-            <span class="my-profile head elipsis">{{ isset($sectionName) ? $sectionName : '' }}</span>
+        <div class="col-xs-12 m-t-lg">
+            <span class="my-profile head elipsis">{{ __('custom.subsections_list') }}</span>
         </div>
-        <div class="col-lg-6 col-sm-7 col-xs-10 m-t-lg text-right section">
+        <div class="col-xs-12 m-t-sm m-b-sm">
+            <span class="my-profile head">{{ isset($sectionName) ? $sectionName : '' }}</span>
+        </div>
+        <div class="col-xs-12 m-t-md m-b-sm text-right section">
             <div class="filter-content section-nav-bar">
                 <ul class="nav filter-type right-border">
                     <li>
@@ -25,9 +28,6 @@
             </div>
         </div>
         @include('partials.pagination')
-        <div class="col-xs-12 m-t-lg m-b-lg">
-            <span class="my-profile head">{{ __('custom.subsections_list') }}</span>
-        </div>
         <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
@@ -79,7 +79,7 @@
                     </div>
                 </form>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

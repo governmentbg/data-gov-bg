@@ -1,4 +1,4 @@
-<div class="col-xs-12 m-t-lg">
+<div class="col-xs-12 m-t-lg p-l-r-none">
     <div>
         <h2>{{ __('custom.edit_group') }}</h2>
         <p class="req-fields m-t-lg m-b-lg">{{ __('custom.all_fields_required') }}</p>
@@ -15,7 +15,7 @@
                         alt="Лого на група"
                     />
                 </div>
-                <div class="inline-block">
+                <div class="inline-block choose-img">
                     <span class="badge badge-pill">
                         <label class="js-logo">{{ uctrans('custom.select_image') }}</label>
                     </span>

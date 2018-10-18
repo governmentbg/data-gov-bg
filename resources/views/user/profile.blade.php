@@ -33,7 +33,7 @@
             </div>
             <div class="row basic-stats">
                 <div class="col-md-4">
-                    <a href="#" class="reg-users">
+                    <a class="reg-users">
                         <p>{{ $followersCount }}</p>
                         <hr>
                         <p>{{ __('custom.followers') }}</p>

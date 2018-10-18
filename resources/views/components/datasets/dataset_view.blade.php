@@ -2,7 +2,7 @@
 @if (isset($dataset->name))
         <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} user-dataset">
             <h2>{{ $dataset->name }}</h2>
-            <div class="col-sm-12 p-l-none m-b-lg">
+            <div class="col-xs-12 p-l-none m-b-lg">
                 <div class="tags pull-left">
                     @foreach ($dataset->tags as $tag)
                         <span class="badge badge-pill">{{ $tag->name }}</span>
@@ -98,7 +98,7 @@
                     (!empty($admin) || !empty($buttons['addToGroup']))
                     && !empty($groups)
                 )
-                <div class="row">
+                <div class="col-xs-12 p-l-r-none">
                     <form method="POST" class="col-lg-4">
                         {{ csrf_field() }}
                         <div class="form-group row">
@@ -147,7 +147,7 @@
                     </div>
                 @endforeach
             @endif
-            <div class="col-sm-12 pull-left m-t-md p-l-none">
+            <div class="col-xs-12 pull-left m-t-md p-l-none">
                 <div class="pull-left history">
                     @foreach ($resources as $resource)
                         @if (!empty($admin) || !empty($buttons[$resource->uri]['view']))
@@ -196,7 +196,7 @@
                 </ul>
             </div>
 
-            <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} mng-btns">
+            <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-xs-12' }} mng-btns p-l-r-none">
                 @if (!empty($admin) || !empty($buttons['addResource']))
                     <a
                         class="btn btn-primary"

@@ -19,8 +19,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xs-12 m-t-sm p-l-none text-right">
-                        <a href="{{ url('admin/documents/list') }}" class="badge badge-pill">{{ __('custom.back') }}</a>
+                        <div class="col-xs-12 m-t-sm m-b-md p-l-none text-right">
+                            <a href="{{ url('admin/documents/list') }}" class="badge badge-pill m-b-sm">{{ __('custom.back') }}</a>
                             <form
                                 method="POST"
                                 class="inline-block"
@@ -28,19 +28,19 @@
                             >
                                 {{ csrf_field() }}
                                 <button
-                                    class="badge badge-pill js-ga-event"
+                                    class="badge badge-pill js-ga-event m-b-sm"
                                     type="submit"
                                     data-ga-action="download"
                                     data-ga-label="document download"
                                     data-ga-category="data"
                                 >{{ uctrans('custom.download') }}</button>
                             </form>
-                            <span class="badge badge-pill">
+                            <span class="badge badge-pill m-b-sm">
                                 <a
                                     href="{{ url('/admin/documents/edit/'. $document->id) }}"
                                 >{{ utrans('custom.edit') }}</a>
                             </span>
-                            <span class="badge badge-pill red">
+                            <span class="badge badge-pill red m-b-sm">
                                 <a
                                     href="{{ url('/admin/documents/delete/'. $document->id) }}"
                                     data-confirm="{{ __('custom.remove_data') }}"
@@ -82,7 +82,7 @@
         @endif
     @else
         <div class="row">
-            <div class="col-sm-12 m-t-lg text-center">
+            <div class="col-sm-12 m-t-md text-center">
                 {{ __('custom.no_info') }}
             </div>
         </div>

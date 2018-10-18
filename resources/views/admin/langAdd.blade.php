@@ -13,8 +13,8 @@
                     <h3 class="col-lg-12">{{ __('custom.add_language') }}</h3>
                 </div>
                 <div class="form-group row">
-                    <label for="lang" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.language') }}:</label>
-                    <div class="col-lg-9">
+                    <label for="lang" class="col-lg-2 col-sm-3 col-xs-4 col-form-label">{{ utrans('custom.language') }}:</label>
+                    <div class="col-lg-4 col-sm-6 col-xs-8">
                         <select
                             class="js-autocomplete"
                             name="lang"
@@ -33,8 +33,8 @@
                     <!-- <input type="text" class="input-border-r-12 col-sm-9" id="lang_name" name="name" value="{{ old('name') }}"> -->
                 </div>
                 <div class="form-group row">
-                    <label for="lang_active" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
-                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                    <label for="lang_active" class="col-lg-2 col-sm-3 col-xs-4 col-form-label">{{ utrans('custom.active') }}:</label>
+                    <div class="col-lg-2 col-sm-9 col-xs-8">
                         <div class="js-check">
                             <input
                                 type="checkbox"

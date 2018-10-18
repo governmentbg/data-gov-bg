@@ -25,8 +25,8 @@
                                     @endif
                                 @endforeach
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                    <label for="active" class="col-sm-3 col-xs-4 col-form-label">{{ uctrans('custom.active') }}:</label>
+                                    <div class="col-lg-2 col-sm-9 col-xs-8">
                                         <div class="js-check">
                                             <input
                                                 type="checkbox"
@@ -166,7 +166,7 @@
                 </div>
                 <div class="col-md-2 col-sm-1"></div>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

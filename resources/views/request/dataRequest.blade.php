@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-    <div class="col-xs-12 p-lg">
+    <div class="col-xs-12 m-b-md">
         <div>
             <p class="request-data">
             {!! __('custom.data_req_info') !!}

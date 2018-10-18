@@ -131,6 +131,7 @@ class OrganisationController extends ApiController
         $errors = $validator->errors()->messages();
 
         if ($validator->passes() && !$imageError) {
+            $locale = isset($data['locale']) ? $data['locale'] : null;
             $organisation->type = $data['type'];
 
             DB::beginTransaction();
@@ -167,10 +168,21 @@ class OrganisationController extends ApiController
 
                 if (!empty($data['custom_fields'])) {
                     foreach ($data['custom_fields'] as $fieldSet) {
-                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                        if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                $customFields[] = [
+                                    'value' => $fieldSet['value'],
+                                    'label' => $fieldSet['label'],
+                                ];
+                            }
+                        } elseif (!empty($fieldSet['label'])) {
                             $customFields[] = [
-                                'value' => $fieldSet['value'],
-                                'label' => $fieldSet['label'],
+                                'value' => [
+                                    $locale => $fieldSet['value']
+                                ],
+                                'label' =>[
+                                    $locale => $fieldSet['label']
+                                ]
                             ];
                         }
                     }
@@ -1394,6 +1406,8 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
 
             if (!isset($newGroup->logo_data) || !$imageError) {
+                $locale = isset($post['locale']) ? $post['locale'] : null;
+
                 DB::beginTransaction();
 
                 try {
@@ -1410,10 +1424,21 @@ class OrganisationController extends ApiController
 
                     if (!empty($post['custom_fields'])) {
                         foreach ($post['custom_fields'] as $fieldSet) {
-                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                                if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                    $customFields[] = [
+                                        'value' => $fieldSet['value'],
+                                        'label' => $fieldSet['label'],
+                                    ];
+                                }
+                            } elseif (!empty($fieldSet['label'])) {
                                 $customFields[] = [
-                                    'value' => $fieldSet['value'],
-                                    'label' => $fieldSet['label'],
+                                    'value' => [
+                                        $locale => $fieldSet['value']
+                                    ],
+                                    'label' =>[
+                                        $locale => $fieldSet['label']
+                                    ]
                                 ];
                             }
                         }
@@ -1779,12 +1804,12 @@ class OrganisationController extends ApiController
                 $query = Organisation::where('type', Organisation::TYPE_GROUP);
 
                 if (!empty($criteria['group_ids'])) {
-                    $query->whereIn('id', $criteria['group_ids']);
+                    $query->whereIn('organisations.id', $criteria['group_ids']);
                 }
 
                 if (!empty($criteria['keywords'])) {
                     $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
-                    $query->whereIn('id', $ids);
+                    $query->whereIn('organisations.id', $ids);
                 }
 
                 if (!empty($criteria['dataset_id'])) {
@@ -1795,7 +1820,7 @@ class OrganisationController extends ApiController
 
                 if (!empty($criteria['user_id'])) {
                     $query->whereHas('userToOrgRole', function($q) use ($criteria) {
-                        $q->where('user_id', $criteria['user_id']);
+                        $q->where('user_to_org_role.user_id', $criteria['user_id']);
                     });
                 }
 
@@ -2060,7 +2085,7 @@ class OrganisationController extends ApiController
                 foreach ($orgTypes as $typeId => $typeName) {
                     $results[] = [
                         'id'     => $typeId,
-                        'name'   => utrans($typeName, 2, [], $locale),
+                        'name'   => ultrans($typeName, 2, [], $locale),
                         'locale' => $locale,
                     ];
                 }
@@ -2387,18 +2412,20 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
             try {
                 $result = DB::table('actions_history')
-                    ->select('organisations.uri', DB::raw('count(organisations.id) as count'))
+                    ->select('user_to_org_role.org_id', DB::raw('count(user_to_org_role.org_id) as count'))
                     ->leftJoin('user_to_org_role', 'user_to_org_role.user_id', '=', 'actions_history.user_id')
-                    ->leftJoin('organisations', 'organisations.id', '=', 'user_to_org_role.org_id')
-                    ->where('organisations.type', '!=', Organisation::TYPE_GROUP)
-                    ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
-                    ->groupBy('organisations.uri')
+                    ->whereNotIn('user_to_org_role.org_id', Organisation::where('type', '=', Organisation::TYPE_GROUP)->get()->pluck('id'))
+                    ->whereMonth('actions_history.occurrence', '=', 10)
+                    ->groupBy('user_to_org_role.org_id')
                     ->orderBy('count', 'desc')
                     ->limit(1)
                     ->first();
 
                 if (!empty($result)) {
-                    $result->name = Organisation::where('uri', $result->uri)->first()->name;
+                    $org = Organisation::where('id', $result->org_id)->first();
+                    $result->uri = $org->uri;
+                    $result->name = $org->name;
+                    $result->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
                 } else {
                     $result = ['uri' => null, 'name' => __('custom.missing_most_active_org'), 'count' => 0];
                 }

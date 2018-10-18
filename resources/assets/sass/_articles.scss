@@ -32,6 +32,10 @@
                     }
                 }
             }
+
+            @include xsMobile() {
+                margin-left: -9px;
+            }
         }
 
         .rounded-input {
@@ -109,8 +113,14 @@
                         font-size: 20px;
                     }
 
-                    .logo  {
+                    .logo {
                         margin: 0 auto;
+                    }
+                }
+
+                @include xsMobile() {
+                    .logo {
+                        padding-right: 0px;
                     }
                 }
             }
@@ -133,6 +143,12 @@
                         border-radius: 30px;
                         padding: 2px 5px;
                     }
+                }
+
+                @include xsMobile() {
+                    margin-left: 20px;
+                    margin-top: 8px;
+                    margin-bottom: 12px;
                 }
             }
 
@@ -224,7 +240,7 @@
     @include xsMobile() {
 
         .sort-by {
-            text-align: center;
+            /*text-align: center;*/
 
             > li {
                 display: inline !important;

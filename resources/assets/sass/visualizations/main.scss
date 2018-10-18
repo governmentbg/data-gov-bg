@@ -1,0 +1,474 @@
+
+.sortedBars .bar rect {
+    fill: #0d90d1;
+}
+
+.sortedBars .bar rect:hover {
+    fill: #a9dffa;
+}
+
+  .sortedBars .bar text {
+    font: 10px sans-serif;
+    fill: #000;
+}
+
+.sortedBars .axis {
+    font: 8px sans-serif;
+}
+
+.sortedBars .axis path,
+.sortedBars .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.dualLineChart .x-axis path,
+.dualLineChart .y-axis-left path,
+.dualLineChart .y-axis-right path {
+    stroke: #D3D3D3;
+    stroke-width: 1;
+    fill: none;
+}
+
+.dualLineChart .y-axis-left text,
+.dualLineChart .y-axis-right text {
+    fill: #b5b5b5;
+    font: 10px sans-serif;
+}
+
+.dualLineChart .x-axis text {
+    font: 10px sans-serif;
+}
+
+.dualLineChart path {
+    stroke-width: 2;
+    fill: none;
+}
+
+.dualLineChart .line-values1 text,
+.dualLineChart .line-values2 text {
+    font: 10px sans-serif;
+    fill: #444444;
+}
+
+.multiLineChart .x.axis path,
+.multiLineChart .y.axis path {
+    stroke: #D3D3D3;
+    stroke-width: 1;
+    fill: none;
+}
+
+.multiLineChart .y.axis text {
+    fill: #938b8b;
+    font: 10px sans-serif;
+}
+
+.multiLineChart .x.axis text {
+    font: 10px sans-serif;
+}
+
+.multiLineChart path {
+    stroke-width: 2;
+    fill: none;
+}
+
+.multiLineChart .line-values text {
+    font: 10px sans-serif;
+    fill: #444444;
+}
+
+.multiLineChart text {
+    font: 10px sans-serif;
+}
+
+// education
+.education {
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    /* Second nav bar style */
+    .nav>li>a:hover {
+      background-color: transparent;
+    }
+
+    /* Styling the html layout */
+    .sidebyside {
+      display: inline-block;
+      width: 95%;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+    .vdivider {
+      height:5px;
+    }
+
+    /* Leaflet stylings nav bar style */
+    .leaflet-popup-content {
+      width: 400px;
+      font-size: 12px;
+    }
+
+    #schoolTbl tbody tr {
+      height: 20px;
+    }
+
+    /* Visual stylings nav bar style */
+    svg {
+      position: relative;
+    }
+
+    path {
+      stroke: #fff;
+      stroke-width: 1.5px;
+    }
+
+    path:hover {
+      fill: brown;
+      fill-opacity: .7;
+    }
+
+    .histChart, .sideCharts {
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+
+    rect.total {
+      color: #fff;
+      stroke: #3994b6;
+      fill: white;
+    }
+
+    text.total {
+      fill: #3994b6;
+      font-family: sans-serif;
+      font-size: 12px;
+    }
+
+    rect.progress {
+      color: #fff;
+      stroke: transparent;
+      fill: steelblue;
+    }
+
+    text.progress {
+      /*fill: 'red';*/
+      font-family: sans-serif;
+      font-size: 12px;
+    }
+
+    .bars rect {
+      fill: steelblue;
+    }
+
+    .bar text {
+      fill: #fff;
+      font: 8px sans-serif;
+    }
+
+    .axis text {
+      font: 7px sans-serif;
+    }
+
+    .axis path, .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+
+    .info h2 {
+      margin: 0 0 5px;
+      color: #777;
+    }
+
+    .legend {
+      text-align: left;
+      line-height: 18px;
+      color: #555;
+    }
+
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+
+    path.slice{
+      stroke-width:2px;
+    }
+}
+
+//grao
+.grao {
+    svg {
+        position: relative;
+    }
+
+    circle {
+        fill: none;
+        stroke: #999;
+    }
+
+    circle.incre {
+        fill: #a1d99b;
+        stroke: #fff;
+    }
+
+    circle.decre {
+        fill: #fc9272;
+        stroke: #fff;
+    }
+
+    path {
+        fill-opacity: .7;
+        stroke: #fff;
+        stroke-width: 1.5px;
+    }
+
+    #path-tooltip {
+        position: absolute;
+        width: 200px;
+        height: auto;
+        padding: 10px;
+        background-color: white;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+        z-index: 100;
+    }
+
+    #path-tooltip.path-hidden {
+        opacity: 0;
+    }
+
+    #path-tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 16px;
+        line-height: 20px;
+    }
+
+    #play, #slider-container {
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    #play {
+        width: 53px;
+        height: 53px;
+        background-image: url(/img/play.png);
+        border-radius: 5px;
+        margin-left: 20px;
+        cursor: pointer;
+    }
+
+    #play:hover {
+        background-position: 0 -53px;
+    }
+
+    #play.pause {
+        background-image: url(/img/pause.png);
+    }
+
+    #slider-container {
+        position: relative;
+    }
+
+    #slider-div {
+        margin-left: 25px;
+        margin-top: 10px;
+    }
+}
+
+//crimes
+.crime {
+    @media screen and (max-width: 400px) {
+        body {
+          font-size: 8px;
+        }
+    }
+
+    @media screen and (max-width: 810px) {
+        body {
+          font-size: 10px;
+        }
+    }
+
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    .navbar-header, .navbar-nav {
+      width: auto !important;
+    }
+
+    .navbar-nav {
+      margin-top: 7px !important;
+    }
+
+    /* Styling the html layout */
+    .sidebyside {
+      display: inline-block;
+      width: 49%;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+
+    .div-right {
+      text-align: right;
+    }
+
+    .to-top {
+      vertical-align: top;
+    }
+
+    .vdivider {
+      height:5px;
+    }
+
+    /* Legend styling*/
+    .title {
+      text-align: center;
+    }
+
+    #mapregionlegend .list-inline {
+      margin-left: 0px;
+    }
+
+    .list-inline li {
+      display: inline-block;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+
+    li.key {
+      border-top-width: 15px;
+      border-top-style: solid;
+      font-size: .75em;
+      width: 25%;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    svg.legend-bubble {
+      position: relative;
+      left: 75%;
+      -webkit-transform: translateX(-50%);
+      -ms-transform: translateX(-50%);
+      transform: translateX(-50%);
+    }
+
+    #play, #slider-container {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    #play {
+      width: 53px;
+      height: 53px;
+      background-image: url(/img/play.png);
+      border-radius: 5px;
+      margin-left: 20px;
+      cursor: pointer;
+    }
+
+    #play:hover {
+      background-position: 0 -53px;
+    }
+
+    #play.pause {
+      background-image: url(/img/pause.png);
+    }
+
+    #slider-container {
+      position: relative;
+    }
+
+    #slider-div {
+      margin-left: 25px;
+      margin-top: 10px;
+    }
+
+    /* Legend styling*/
+    #barChartOccuredTitle,
+    {
+      width: 50%;
+    }
+
+    label {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    /* Disorganized */
+    .boundary path {
+      fill-opacity: .7;
+      stroke: #fff;
+      stroke-width: 1.5px;
+    }
+
+    .boundary path:hover {
+      fill-opacity: .2;
+    }
+
+    #path-tooltip {
+      position: absolute;
+      width: 200px;
+      height: auto;
+      padding: 10px;
+      background-color: white;
+      -webkit-border-radius: 10px;
+      -moz-border-radius: 10px;
+      border-radius: 10px;
+      -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+      -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+      box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    #path-tooltip.path-hidden {
+      opacity: 0;
+    }
+
+    #path-tooltip p {
+      margin: 0;
+      font-family: sans-serif;
+      font-size: 16px;
+      line-height: 20px;
+    }
+}
+
+
+

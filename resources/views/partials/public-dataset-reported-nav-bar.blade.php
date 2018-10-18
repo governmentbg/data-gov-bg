@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-sm-9 col-xs-11 pull-right p-sm">
+    <div class="col-sm-9 col-xs-12 p-sm col-sm-offset-3">
         <div class="filter-content">
             <div class="col-md-12">
                 <div class="row">
@@ -12,9 +12,9 @@
                             </ul>
                         </div>
                         @if (isset($extended) && $extended)
-                            <div class="m-t-sm">
+                            <div class="m-t-sm reported-data-nav-bar">
                                 <ul class="nav filter-type right-border">
-                                    <li><a class="p-l-none" href="{{ route('groups', ['dataset' => $dataset->uri]) }}">{{ untrans('custom.groups', 2) }}</a></li>
+                                    <li><a href="{{ route('groups', ['dataset' => $dataset->uri]) }}">{{ untrans('custom.groups', 2) }}</a></li>
                                     <li><a href="{{ route('dataChronology', ['uri' => $dataset->uri, 'type' => 'reported']) }}">{{ __('custom.chronology') }}</a></li>
                                 </ul>
                             </div>

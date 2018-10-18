@@ -5,7 +5,7 @@
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         <div class="row">
-            <div class="col-xs-10 m-t-lg text-right section">
+            <div class="col-md-10 col-xs-11 m-t-lg text-right section">
                 <div class="filter-content section-nav-bar">
                     <ul class="nav filter-type right-border">
                         <li>
@@ -35,7 +35,7 @@
                             {{ csrf_field() }}
 
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
+                                <label for="name" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                                     <input
                                         type="text"
@@ -49,7 +49,7 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md required">
-                            <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}:</label>
+                                <label for="color" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.color') }}:</label>
                                 <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 color-picker colorpicker-component" data-color="">
                                     <input
                                         type="text"
@@ -64,8 +64,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
-                                <div class="col-lg-2">
+                                <label for="order" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.ordering') }}:</label>
+                                <div class="col-sm-9">
                                     <input
                                         id="order"
                                         name="order"
@@ -78,7 +78,7 @@
                                 </div>
                             </div>
                             <div class="form-group row required">
-                            <label for="parent_id" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.category') }}:</label>
+                                <label for="parent_id" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.category') }}:</label>
                                 <div class="col-sm-9">
                                     <select
                                         id="parent_id"
@@ -104,15 +104,15 @@
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
                                     <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                    <button
                                         type="submit"
                                         name="create"
                                         value="1"
                                         class="m-l-md btn btn-custom"
                                     >{{ __('custom.add') }}</button>
-                                    <button
-                                        name="back"
-                                        class="btn btn-primary"
-                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

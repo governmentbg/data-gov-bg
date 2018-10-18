@@ -45,7 +45,7 @@
                         <li>
                             <a
                                 class="{{ $view == 'statsAnalytics' ? 'active' : '' }}"
-                                href="#"
+                                href="https://accounts.google.com"
                             >{{ __('custom.stats_analytics') }}</a>
                         </li>
                         <li>

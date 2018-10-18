@@ -1,5 +1,5 @@
 $footerHeight: 50px;
-$footerMobileHeight: 140px;
+$footerMobileHeight: 85px;
 $headerUnderlineHeight: 30px;
 
 body {
@@ -102,7 +102,7 @@ body {
                             vertical-align: middle;
 
                             &.social-icons {
-                                width: 130px;
+                                width: auto;
 
                                 a {
                                     font-size: 14px;
@@ -270,6 +270,7 @@ body {
                                     img {
                                         background: white;
                                         width: 26px;
+                                        height: 26px;
                                         margin: 3px;
                                     }
                                 }
@@ -298,6 +299,7 @@ body {
                         background-color: transparent !important;
                         font-size: 14px;
                         padding-top: 5px;
+                        padding-left: 5px;
                         padding-bottom: 5px;
                         margin-top: 4px;
                         margin-bottom: 8px;

@@ -5,7 +5,7 @@
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         <div class="row">
-            <div class="col-xs-10 m-t-lg text-right section">
+            <div class="col-md-10 col-xs-11 m-t-lg text-right section">
                 <div class="filter-content section-nav-bar">
                     <ul class="nav filter-type right-border">
                         <li>
@@ -64,8 +64,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
-                                <div class="col-lg-2">
+                                <label for="order" class="col-sm-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
+                                <div class="col-sm-2">
                                     <input
                                         id="order"
                                         name="order"
@@ -119,15 +119,15 @@
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
                                     <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                    <button
                                         type="submit"
                                         name="edit"
                                         value="1"
                                         class="m-l-md btn btn-custom"
                                     >{{ uctrans('custom.edit') }}</button>
-                                    <button
-                                        name="back"
-                                        class="btn btn-primary"
-                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

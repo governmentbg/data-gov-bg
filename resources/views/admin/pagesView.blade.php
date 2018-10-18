@@ -1,4 +1,28 @@
-@extends('layouts.app')
+@extends(
+    'layouts.app',
+    [
+        'script' => !empty($script) ? $script : null,
+        'jsPaths' => [
+            'js/visualizations/d3.v3.min.js',
+            'js/visualizations/crossfilter.min.js',
+            'js/visualizations/dc.min.js',
+            'js/visualizations/leaflet.js',
+            'js/visualizations/topojson.min.js',
+            'js/visualizations/queue.min.js',
+            'js/visualizations/charts.js',
+            'js/visualizations/d3.min.js',
+            'js/visualizations/d3.slider.js',
+            'js/visualizations/open-charts.js',
+            'js/visualizations/charts.js',
+        ],
+        'cssPaths' => [
+            'css/visualizations/leaflet.css',
+            'css/visualizations/d3.slider.css',
+            'css/visualizations/jquery.smartmenus.bootstrap.css',
+            'css/visualizations/dc.css',
+        ]
+    ]
+)
 
 @section('content')
     <div class="container">
@@ -59,8 +83,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.content') }}</label>
-                                <div class="col-sm-6 col-xs-12">
+                                <label class="col-xs-12 col-form-label">{{ utrans('custom.content') }}:</label>
+                                <div class="col-xs-12">
                                     <div class="page-cont">{!! $page->body !!}</div>
                                 </div>
                             </div>
@@ -115,7 +139,7 @@
                                             action="{{ url('admin/pages/edit/'. $page->id) }}"
                                         >
                                             {{ csrf_field() }}
-                                            <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                            <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                             <input type="hidden" name="view" value="1">
                                         </form>
                                         <form
@@ -125,7 +149,7 @@
                                             {{ csrf_field() }}
                                         <button
                                             name="back"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary m-b-sm"
                                         >{{ uctrans('custom.close') }}</button>
                                         </form>
                                         <form
@@ -135,7 +159,7 @@
                                         >
                                             {{ csrf_field() }}
                                                 <button
-                                                    class="btn del-btn btn-primary del-btn"
+                                                    class="btn btn-primary del-btn m-b-sm"
                                                     type="submit"
                                                     name="delete"
                                                     data-confirm="{{ __('custom.remove_data') }}"
@@ -149,7 +173,7 @@
                 </div>
                 <div class="col-md-2 col-sm-1"></div>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

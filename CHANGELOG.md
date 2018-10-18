@@ -12,6 +12,26 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- TNT search indexes refresh command
+- Visualizations pages
+
+### Changed
+- Translations table text column length
+- Group datasets delete button changed to remove
+- Group datasets edit button removed
+
+### Fixed
+- WYSIWYG editor code view, full screen mode
+- Missing conversion methods
+- Unclosed span tag
+- Search pagination
+- HTML error when creating dataset form API
+- Bug in showing inactive news to logged users
+- Visual glitches in IE and mobile version
+- Bugs in showing system information about records
+- Dubious column names in documents and organisations
+- Resource download
 
 ## [0.6.2] - 2018-10-17
 ### Fixed

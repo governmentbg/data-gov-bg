@@ -131,6 +131,7 @@ class OrganisationController extends ApiController
         $errors = $validator->errors()->messages();
 
         if ($validator->passes() && !$imageError) {
+            $locale = isset($data['locale']) ? $data['locale'] : null;
             $organisation->type = $data['type'];
 
             DB::beginTransaction();
@@ -167,11 +168,22 @@ class OrganisationController extends ApiController
 
                 if (!empty($data['custom_fields'])) {
                     foreach ($data['custom_fields'] as $fieldSet) {
-                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                            $customFields[] = [
-                                'value' => $fieldSet['value'],
-                                'label' => $fieldSet['label'],
-                            ];
+                        if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                $customFields[] = [
+                                    'value' => $fieldSet['value'],
+                                    'label' => $fieldSet['label'],
+                                ];
+                            } elseif (!empty($fieldSet['label'])) {
+                                $customFields[] = [
+                                    'value' => [
+                                        $locale => $fieldSet['value']
+                                    ],
+                                    'label' =>[
+                                        $locale => $fieldSet['label']
+                                    ]
+                                ];
+                            }
                         }
                     }
                 }
@@ -1394,6 +1406,8 @@ class OrganisationController extends ApiController
         if (!$validator->fails()) {
 
             if (!isset($newGroup->logo_data) || !$imageError) {
+                $locale = isset($post['locale']) ? $post['locale'] : null;
+
                 DB::beginTransaction();
 
                 try {
@@ -1410,11 +1424,22 @@ class OrganisationController extends ApiController
 
                     if (!empty($post['custom_fields'])) {
                         foreach ($post['custom_fields'] as $fieldSet) {
-                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                                $customFields[] = [
-                                    'value' => $fieldSet['value'],
-                                    'label' => $fieldSet['label'],
-                                ];
+                            if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                                if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                    $customFields[] = [
+                                        'value' => $fieldSet['value'],
+                                        'label' => $fieldSet['label'],
+                                    ];
+                                } elseif (!empty($fieldSet['label'])) {
+                                    $customFields[] = [
+                                        'value' => [
+                                            $locale => $fieldSet['value']
+                                        ],
+                                        'label' =>[
+                                            $locale => $fieldSet['label']
+                                        ]
+                                    ];
+                                }
                             }
                         }
                     }

@@ -94,6 +94,7 @@ class ResourceController extends ApiController
         });
 
         if (!$validator->fails()) {
+            $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
             $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
             if (isset($dataset->org_id)) {
                 $rightCheck = RoleRight::checkUserRight(
@@ -162,11 +163,22 @@ class ResourceController extends ApiController
 
                 if (!empty($post['data']['custom_fields'])) {
                     foreach ($post['data']['custom_fields'] as $fieldSet) {
-                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                            $customFields[] = [
-                                'value' => $fieldSet['value'],
-                                'label' => $fieldSet['label'],
-                            ];
+                        if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                $customFields[] = [
+                                    'value' => $fieldSet['value'],
+                                    'label' => $fieldSet['label'],
+                                ];
+                            } elseif (!empty($fieldSet['label'])) {
+                                $customFields[] = [
+                                    'value' => [
+                                        $locale => $fieldSet['value']
+                                    ],
+                                    'label' =>[
+                                        $locale => $fieldSet['label']
+                                    ]
+                                ];
+                            }
                         }
                     }
 
@@ -366,6 +378,7 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
             $dataset = DataSet::where('id', $resource->data_set_id);
+            $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
 
             if (isset($dataset->org_id)) {
                 $rightCheck = RoleRight::checkUserRight(
@@ -453,11 +466,22 @@ class ResourceController extends ApiController
 
                 if (!empty($post['data']['custom_fields'])) {
                     foreach ($post['data']['custom_fields'] as $fieldSet) {
-                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
-                            $customFields[] = [
-                                'value' => $fieldSet['value'],
-                                'label' => $fieldSet['label'],
-                            ];
+                        if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                $customFields[] = [
+                                    'value' => $fieldSet['value'],
+                                    'label' => $fieldSet['label'],
+                                ];
+                            } elseif (!empty($fieldSet['label'])) {
+                                $customFields[] = [
+                                    'value' => [
+                                        $locale => $fieldSet['value']
+                                    ],
+                                    'label' =>[
+                                        $locale => $fieldSet['label']
+                                    ]
+                                ];
+                            }
                         }
                     }
 

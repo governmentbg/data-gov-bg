@@ -163,7 +163,7 @@
                 <div class="history-row">
                     <div>
                         {{
-                            $actionTypes[$record->action] .' '. __('custom.'. $record->module) .' "'. $record->action_object .'" '
+                            mb_ucfirst($actionTypes[$record->action]) .' '. __('custom.'. $record->module) .' "'. $record->action_object .'" '
                             . sprintf(
                                 __('custom.at_x_time_on_date'),
                                 date('H:i', strtotime($record->occurrence)),

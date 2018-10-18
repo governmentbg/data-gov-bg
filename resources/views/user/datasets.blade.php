@@ -42,7 +42,7 @@
                         <div class="article m-b-lg col-xs-12 user-dataset">
                             <div>{{ __('custom.date_added') }}: {{ $set->created_at }}</div>
                             <div class="col-sm-12 p-l-none">
-                                <a href="{{ route('datasetView', ['uri' => $set->uri]) }}">
+                                <a href="{{ route('userDatasetView', ['uri' => $set->uri]) }}">
                                     <h2 class="m-t-xs {{$set->reported ? 'error' : '' }}">{{ $set->name }}</h2>
                                 </a>
                                 @if ($set->status == 1)
@@ -83,7 +83,7 @@
                                     </div>
                                     <div class="pull-right">
                                         <span>
-                                            <a href="{{ route('datasetView', ['uri' => $set->uri]) }}">
+                                            <a href="{{ route('userDatasetView', ['uri' => $set->uri]) }}">
                                                 {{ __('custom.see_more') }}
                                             </a>
                                         </span>

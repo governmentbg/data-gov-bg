@@ -765,17 +765,19 @@ class UserController extends ApiController
             return $this->errorResponse(__('custom.delete_user_fail'));
         }
 
-        $rightCheck = RoleRight::checkUserRight(
-            Module::USERS,
-            RoleRight::RIGHT_ALL,
-            [],
-            [
-                'created_by' => $user->created_by
-            ]
-        );
+        if (Auth::id() != $id) {
+            $rightCheck = RoleRight::checkUserRight(
+                Module::USERS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $user->created_by
+                ]
+            );
 
-        if (!$rightCheck) {
-            return $this->errorResponse(__('custom.access_denied'));
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
         }
 
         try {
@@ -987,10 +989,10 @@ class UserController extends ApiController
                     'pass'      => $password,
                 ];
 
-                if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
-                    $defaultRole = Role::where('default_user', 1)->first()->id;
-                    $this->addRoles($user->id, $defaultRole, $empty);
+                $defaultRole = Role::where('default_user', 1)->first()->id;
+                $this->addRoles($user->id, $defaultRole, $empty);
 
+                if (isset($post['data']['role_id']) && isset($post['data']['org_id'])) {
                     foreach ($post['data']['role_id'] as $role) {
                         $this->addRoles($user->id, $role, $post['data']['org_id']);
                     }
@@ -1113,6 +1115,12 @@ class UserController extends ApiController
                 $user->remember_token = null;
 
                 $registered = $user->save();
+
+                if ($registered) {
+                    $user->created_by = $user->id;
+
+                    $user->save();
+                }
 
                 if (!empty($data['org_id'])) {
                     $defaultRole = Role::where('default_user', 1)->first()->id;

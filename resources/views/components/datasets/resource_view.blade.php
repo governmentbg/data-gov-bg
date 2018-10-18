@@ -62,7 +62,7 @@
             <p><strong>{{ uctrans('custom.description') }}:</strong></p>
             @if (!empty($resource->description))
                 <div class="m-b-sm">
-                    {{ $resource->description }}
+                    {!! nl2br(e($resource->description)) !!}
                 </div>
             @endif
             @if (!empty($resource->schema_description))
@@ -113,19 +113,34 @@
                         data-target="#embed-resource"
                         data-uri ="{{ $resource->uri }}"
                     >{{ uctrans('custom.embed') }}</button>
-                    @if (($resource->version == $versionView) && (!empty($buttons[$resource->uri]['edit'])))
+                    @if (
+                        ($resource->version == $versionView)
+                        && (!empty($admin) || !empty($buttons['edit']))
+                    )
                         <a
                             class="btn btn-primary"
-                            href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
+                            @if (!empty($fromOrg))
+                                href="{{ url('/'. $root .'/organisations/resource/update/'. $resource->uri) .'/'. $fromOrg->uri }}"
+                            @elseif (!empty($group))
+                                href="{{ url('/'. $root .'/groups/resource/update/'. $resource->uri) .'/'. $group->uri }}"
+                            @else
+                                href="{{ url('/'. $root .'/resource/update/'. $resource->uri) }}"
+                            @endif
                         >
                             {{ uctrans('custom.update') }}
                         </a>
                     @endif
                 @endif
-                @if (!empty($admin) || !empty($buttons[$resource->uri]['edit']))
+                @if (!empty($admin) || !empty($buttons['edit']))
                 <a
                     class="btn btn-primary"
-                    href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
+                    @if (!empty($fromOrg))
+                        href="{{ url('/'. $root .'/organisations/resource/edit/'. $resource->uri) .'/'. $fromOrg->uri }}"
+                    @elseif (!empty($group))
+                        href="{{ url('/'. $root .'/groups/resource/edit/'. $resource->uri) .'/'. $group->uri }}"
+                    @else
+                        href="{{ url('/'. $root .'/resource/edit/'. $resource->uri) }}"
+                    @endif
                 >
                     {{ uctrans('custom.edit') }}
                 </a>
@@ -136,7 +151,7 @@
                 >
                     {{ uctrans('custom.close') }}
                 </a>
-                @if (!empty($admin) || !empty($buttons[$resource->uri]['delete']))
+                @if (!empty($admin) || !empty($buttons['delete']))
                     <button
                         name="delete"
                         class="btn del-btn btn-primary"
@@ -152,7 +167,15 @@
                 <div class="pull-left history">
                     @foreach ($resource->versions_list as $version)
                     <div>
-                        <a href="{{ url('/'. $root .'/resource/view/'. $resource->uri .'/'. $version) }}">
+                        <a
+                            @if (!empty($fromOrg))
+                                href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $resource->uri .'/'. $version)}}"
+                            @elseif (!empty($group))
+                                href="{{ url('/'. $root .'/groups/'. $group->uri .'/resource/'. $resource->uri .'/'. $version)}}"
+                            @else
+                                href="{{ url('/'. $root .'/resource/view/'. $resource->uri .'/'. $version) }}"
+                            @endif
+                        >
                             <span class="version-heading">{{ uctrans('custom.version') }}</span>
                             <span class="version">&nbsp;&#8211;&nbsp;{{ $version }}</span>
                         </a>

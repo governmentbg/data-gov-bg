@@ -1,4 +1,4 @@
-<div class="col-xs-12 m-t-lg">
+<div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg" enctype="multipart/form-data">
         {{ csrf_field() }}
@@ -110,10 +110,30 @@
 
         <div class="form-group row">
             <div class="col-sm-12 text-right">
+                @php
+                    $root = empty($admin) ? 'user' : 'admin';
+
+                    if (empty($parent)):
+                        $url = '/'. $root .'/resource/view/'. $resource->uri;
+                        $href = route($root .'DatasetView', ['uri' => $dataseUri]);
+                    else:
+                        if ($parent->type == App\Organisation::TYPE_GROUP):
+                            $url = '/'. $root .'/groups/'. $parent->uri .'/resource/'. $resource->uri;
+                            $href = route($root .'GroupDatasetView', ['uri' => $dataseUri, 'grpUri' => $parent->uri]);
+                        else:
+                            $url = '/'. $root .'/organisations/'. $parent->uri .'/resource/'. $resource->uri;
+                            $href = route($root .'OrgDatasetView', ['uri' => $dataseUri]);
+                        endif;
+                    endif;
+                @endphp
+                <a
+                    href="{{ $href }}"
+                    class="btn btn-primary"
+                >{{ uctrans('custom.close') }}</a>
                 <a
                     type="button"
                     class="btn btn-primary"
-                    href="{{ url($uri) }}"
+                    href="{{ url($url) }}"
                 >{{ uctrans('custom.preview') }}</a>
                 <button name="ready_metadata" type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
             </div>

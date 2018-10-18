@@ -121,7 +121,7 @@ class ApiController extends Controller
      * @param array $data
      * @param string $xmlData
      */
-    public static function arrayToXml($data, &$xmlData, $parentKey = '')
+    public static function arrayToXml($data, &$xmlData, $parentKey = 'data')
     {
         foreach ($data as $key => $value) {
             if (is_numeric($key)) {

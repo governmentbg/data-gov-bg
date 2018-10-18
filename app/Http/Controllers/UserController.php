@@ -1847,7 +1847,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/user/resource/view/'. $response['uri']);
+                        return redirect('/user/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1916,7 +1916,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/user/resource/view/'. $response['uri']);
+                        return redirect('/user/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1977,6 +1977,7 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
+        $formats = Resource::getFormats();
 
         if (empty($version)) {
             $version = $resource->version;
@@ -2035,14 +2036,18 @@ class UserController extends Controller {
 
         $data = !empty($response->data) ? $response->data : [];
 
-        if ($resource->format_code == Resource::FORMAT_XML) {
+        if (
+            $resource->format_code == Resource::FORMAT_XML
+            || $resource->format_code == Resource::FORMAT_RDF
+        ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+            $method = 'json2'. strtolower($resource->file_format);
+            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
-            $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+            $resultConvert = $apiConvert->$method($reqConvert)->getData();
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
@@ -2080,6 +2085,7 @@ class UserController extends Controller {
             'buttons'       => $buttons,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
+            'formats'       => $formats,
         ]);
     }
 
@@ -2111,6 +2117,7 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
+        $formats = Resource::getFormats();
 
         if (empty($version)) {
             $version = $resource->version;
@@ -2173,14 +2180,18 @@ class UserController extends Controller {
         $response = $api->getResourceData($rq)->getData();
         $data = !empty($response->data) ? $response->data : [];
 
-        if ($resource->format_code == Resource::FORMAT_XML) {
+        if (
+            $resource->format_code == Resource::FORMAT_XML
+            || $resource->format_code == Resource::FORMAT_RDF
+        ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+            $method = 'json2'. strtolower($resource->file_format);
+            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
-            $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+            $resultConvert = $apiConvert->$method($reqConvert)->getData();
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
@@ -2226,6 +2237,7 @@ class UserController extends Controller {
             'fromOrg'       => $fromOrg,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
+            'formats'       => $formats,
         ]);
     }
 
@@ -5078,6 +5090,7 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
+        $formats = Resource::getFormats();
 
         if (empty($version)) {
             $version = $resource->version;
@@ -5142,14 +5155,18 @@ class UserController extends Controller {
         $response = $apiEsData->getResourceData($reqEsData)->getData();
         $data = !empty($response->data) ? $response->data : [];
 
-        if ($resource->format_code == Resource::FORMAT_XML) {
+        if (
+            $resource->format_code == Resource::FORMAT_XML
+            || $resource->format_code == Resource::FORMAT_RDF
+        ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+            $method = 'json2'. strtolower($resource->file_format);
+            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
-            $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+            $resultConvert = $apiConvert->$method($reqConvert)->getData();
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
@@ -5182,6 +5199,7 @@ class UserController extends Controller {
             'group'         => $group,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
+            'formats'       => $formats,
         ]);
     }
 

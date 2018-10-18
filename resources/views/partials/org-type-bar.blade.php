@@ -18,7 +18,7 @@
                                         )
                                     }}"
                                     class="{{ (isset($getParams['type']) && $getParams['type'] == $orgType->id) ? 'active' : '' }}"
-                                >{{ $orgType->name }}</a>
+                                >{{ uctrans($orgType->name) }}</a>
                             </li>
                         @endforeach
                     </ul>

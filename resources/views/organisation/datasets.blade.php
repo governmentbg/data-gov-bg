@@ -12,13 +12,13 @@
 
                 <div class="col-xs-12 col-sm-offset-0 col-xs-offset-1">
                     <div class="row">
-                        <div class="filter-content">
-                            <div class="col-xs-12 org-nav-bar">
+                        <div class="col-xs-12 filter-content">
+                            <div class="org-nav-bar">
                                 <div>
                                     <ul class="nav filter-type right-border">
                                         <li><a href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ __('custom.profile') }}</a></li>
                                         <li><a class="active" href="{{ url('/organisation/'. $organisation->uri .'/datasets') }}">{{ __('custom.data') }}</a></li>
-                                        <li><a href="{{ url('/organisation/chronology/'. $organisation->uri) }}">{{ __('custom.chronology') }}</a></li>
+                                        <li><a href="{{ url('/organisation/chronology/'. $organisation->uri ) }}">{{ __('custom.chronology') }}</a></li>
                                     </ul>
                                 </div>
                                 <div>
@@ -264,7 +264,7 @@
                                     <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                                 </a>
                                 <p>{!! nl2br(e($dataset->descript)) !!}</p>
-                                <div class="col-sm-12 p-l-none">
+                                <div class="col-xs-12 p-l-none">
                                     <div class="tags pull-left">
                                         @if (isset($dataset->tags) && count($dataset->tags) > 0)
                                             @foreach ($dataset->tags as $tag)
@@ -286,7 +286,7 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="col-sm-12 m-t-md text-center no-info">
+                    <div class="col-xs-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

@@ -4,7 +4,7 @@
     <div class="container">
         @include('partials.alerts-bar')
         <div class="row">
-            <div class="col-sm-9 col-xs-12 p-sm col-sm-offset-3">
+            <div class="col-sm-9 col-xs-12 p-sm col-sm-offset-3 col-xs-offset-2">
                 @include('partials.org-type-bar', ['orgTypes' => $orgTypes])
             </div>
         </div>
@@ -16,7 +16,7 @@
                 </span>
             @endif
             </div>
-            <div class="col-lg-9 col-md-6 col-sm-12 col-xs-12 search-field">
+            <div class="col-lg-9 col-md-6 col-sm-12 col-xs-12 search-field p-l-lg m-t-xs">
                 <form method="GET" action="{{ url('/organisation') }}">
                     <input
                         type="text"
@@ -36,10 +36,10 @@
         </div>
         <div class="row">
             @if (count($organisations))
-                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 m-t-lg col-xs-offset-3">
+                <div class="col-sm-9 col-xs-12 m-t-lg col-sm-offset-3 p-w-sm">
                     {{ __('custom.order_by_name') }}
                 </div>
-                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 m-t-md col-xs-offset-3">
+                <div class="col-sm-9 col-xs-12 m-t-sm col-sm-offset-3 p-w-sm">
                     <a
                         href="{{
                             action(

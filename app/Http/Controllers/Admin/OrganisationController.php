@@ -219,7 +219,7 @@ class OrganisationController extends AdminController
         $result = $api->getOrganisationDetails($request)->getData();
 
         if ($result->success) {
-            return view('admin/orgView', ['class' => 'user', 'organisation' => $result->data]);
+            return view('admin/orgView', ['class' => 'user', 'organisation' => $this->getModelUsernames($result->data)]);
         }
 
         return redirect('/admin/organisations');

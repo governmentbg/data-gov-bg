@@ -4,7 +4,7 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'dataset'])
-    <div class="col-xs-12 m-t-md">
+    <div class="col-xs-12 m-t-md p-l-r-none">
         @include('components.datasets.resource_view', ['admin' => true])
     </div>
 </div>

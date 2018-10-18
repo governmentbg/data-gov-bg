@@ -147,4 +147,18 @@
             }
         }
     }
+
+    .data-nav-bar .filter-type {
+        border-radius: 5px;
+        border: 1px solid $themeData;
+    }
+
+    .reported-data-nav-bar .filter-type {
+        border-radius: 5px;
+        border: 1px solid $themeDataAttention;
+    }
+
+    textarea.form-control {
+        height: auto !important;
+    }
 }

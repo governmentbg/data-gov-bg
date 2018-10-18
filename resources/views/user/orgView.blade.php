@@ -10,7 +10,7 @@
             <div class="col-xs-12 info-box">
                 <div class="row">
                     <div class="col-lg-4 col-md-5 col-xs-12">
-                        <a href="" class="followers">
+                        <a class="followers">
                             <p>{{ $organisation->followers_count }}</p>
                             <hr>
                             <p>{{ __('custom.followers') }} </p>
@@ -18,7 +18,7 @@
                         </a>
                     </div>
                     <div class="col-lg-4 col-md-5 col-xs-12">
-                        <a href="" class="data-sets">
+                        <a href="{{ url('/user/organisations/datasets/'. $organisation->uri) }}" class="data-sets">
                             <p>{{ $organisation->datasets_count }}</p>
                             <hr>
                             <p>{{ __('custom.data_sets') }}</p>

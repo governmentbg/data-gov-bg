@@ -11,4 +11,4 @@
     data-first="{{ __('custom.first') }}"
     data-last="{{ __('custom.last') }}"
     data-clear-org-filter="{{ __('custom.clear_filter') }}"
->
+></span>

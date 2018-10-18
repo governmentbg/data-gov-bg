@@ -45,48 +45,56 @@
     <div class="row">
         <div class="col-xs-12 m-t-md m-b-md">
             <div class="row">
-                <div class="col-sm-3 sidenav">
-                    <ul class="nav">
-                        <li>
-                            <ul class="sidebar-submenu open">
-                                @foreach ($roles as $role)
-                                    <li>
-                                        <a
-                                            class="{{ $filter == $role->id ? 'active' : null }}"
-                                            href="{{ route('adminGroupMembersView', [
-                                                'uri'       => $group->uri,
-                                                'filter'    => $filter == $role->id ? null : $role->id,
-                                                'keywords'  => $keywords,
-                                            ]) }}"
-                                        >{{ $role->name }}</a>
-                                    </li>
-                                @endforeach
+                <div class="col-sm-3 col-xs-12">
+                    <div class="row">
+                        <div class="col-sm-12 sidenav">
+                            <ul class="nav">
+                                <li>
+                                    <ul class="sidebar-submenu open">
+                                        @foreach ($roles as $role)
+                                            <li>
+                                                <a
+                                                    class="{{ $filter == $role->id ? 'active' : null }}"
+                                                    href="{{ route('adminGroupMembersView', [
+                                                        'uri'       => $group->uri,
+                                                        'filter'    => $filter == $role->id ? null : $role->id,
+                                                        'keywords'  => $keywords,
+                                                    ]) }}"
+                                                >{{ $role->name }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </li>
                             </ul>
-                        </li>
-                    </ul>
-                    @include('partials.group-info', ['group' => $group])
+                        </div>
+                        <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
+                            <button
+                                type="button"
+                                class="navbar-toggle btn-sidebar"
+                                data-toggle="collapse"
+                                data-target="#sidebar-wrapper"
+                            ><span><i class="fa fa-angle-right"></i></span></button>
+                        </div>
+
+                        <div class="col-xs-12">
+                            @include('partials.group-info', ['group' => $group])
+                        </div>
+                    </div>
+
                 </div>
-                <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
-                    <button
-                        type="button"
-                        class="navbar-toggle btn-sidebar"
-                        data-toggle="collapse"
-                        data-target="#sidebar-wrapper"
-                    ><span><i class="fa fa-angle-right"></i></span></button>
-                </div>
-                <div class="col-sm-9 cl-xs-12">
-                    <div class="filter-content tex">
-                        <div class="p-l-r-none m-b-lg m-t-md col-md-6">
+                <div class="col-sm-9 col-xs-12">
+                    <div class="col-xs-12 filter-content tex">
+                        <div class="p-l-r-none m-b-lg m-t-md col-md-7 col-xs-12">
                             <form class="js-keywords-form">
                                 @foreach (app('request')->except(['keywords']) as $key => $value)
                                     <input name="{{ $key }}" type="hidden" value="{{ $value }}">
                                 @endforeach
-                                <input name="keywords" class="rounded-input" type="text" value="{{ $keywords }}">
+                                <input name="keywords" class="rounded-input" type="text" value="{{ $keywords }}" placeholder="{{ __('custom.search') }}">
                                 <input type="submit" class="hidden">
                             </form>
                         </div>
                         @if ($isAdmin)
-                            <div class="m-r-md p-h-xs col-md-6 invite-choice">
+                            <div class="m-r-md p-h-xs col-md-6 col-xs-12 invite-choice">
                                 <div>{{ __('custom.add_members') }}</div>
                                 <ul class="input-border-r-12">
                                     <li>
@@ -119,7 +127,7 @@
                                 </div>
                             @endif
                             @foreach ($members as $member)
-                                <div class="col-xs-12 p-l-none">
+                                <div class="col-xs-12 p-w-sm">
                                     <h3 class="m-b-md"><a href="{{ url('/admin/users/edit/'. $member->id) }}">{{
                                         empty($member->firstname)
                                         ? $member->username
@@ -184,7 +192,7 @@
                                 </div>
                             @endif
                         @else
-                            <div class="m-t-xl text-center">
+                            <div class="m-t-md text-center">
                                 {{ __('custom.no_info') }}
                             </div>
                         @endif

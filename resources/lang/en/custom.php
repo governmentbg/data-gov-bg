@@ -182,6 +182,9 @@ return [
     'sla_agreement' => 'Service level agreement',
     'value' => 'Value',
     'add_resource' => 'add resource',
+    'edit_resource' => 'edit resource metadata',
+    'update_resource' => 'update resource data',
+    'download_resource' => 'download resource',
     'add_resource_dataset' => 'add resource to dataset',
     'publish' => 'publish',
     'edit' => 'edit',
@@ -322,6 +325,7 @@ return [
     'get_tags_fail' => 'Get tag details failure',
     'search_tags_fail' => 'Search tag details failure',
     'converse_fail' => 'Conversion failure',
+    'converse_unavailable' => 'Conversion unavailable',
     'no_text_found' => 'No text found!',
     'invalid_file' => 'Invalid :type file!',
     'invalid_xml' => 'Invalid xml syntax!',
@@ -871,5 +875,6 @@ return [
     'failure' => 'Failure',
     'search_button' => 'Search',
     'document_preview' => 'document preview',
-    'activef' => 'active'
+    'activef' => 'active',
+    'remove_set' => 'remove',
 ];

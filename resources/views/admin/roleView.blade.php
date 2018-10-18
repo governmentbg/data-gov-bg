@@ -17,8 +17,8 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="role_active" class="col-sm-11 col-form-label">{{ utrans('custom.active') }}:</label>
-                <div class="col-sm-1 text-right">
+                <label for="role_active" class="col-sm-3 col-xs-10 col-form-label">{{ utrans('custom.active') }}:</label>
+                <div class="col-lg-2 col-sm-9 col-xs-2 text-right">
                     <div class="js-check">
                         <input
                             type="checkbox"
@@ -32,8 +32,8 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="for_org" class="col-sm-11 col-form-label">{{ utrans('custom.for_org') }}:</label>
-                <div class="col-sm-1 text-right">
+                <label for="for_org" class="col-sm-3 col-xs-10 col-form-label">{{ utrans('custom.for_org') }}:</label>
+                <div class="col-lg-2 col-sm-9 col-xs-2 text-right">
                     <div class="js-check">
                         <input
                             type="checkbox"
@@ -47,8 +47,8 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="for_group" class="col-sm-11 col-form-label">{{ utrans('custom.for_group') }}:</label>
-                <div class="col-sm-1 text-right">
+                <label for="for_group" class="col-sm-3 col-xs-10 col-form-label">{{ utrans('custom.for_group') }}:</label>
+                <div class="col-lg-2 col-sm-9 col-xs-2 text-right">
                     <div class="js-check">
                         <input
                             type="checkbox"
@@ -64,9 +64,9 @@
             <div class="form-group row">
                 <label
                     for="default_user"
-                    class="col-sm-11 col-form-label"
+                    class="col-md-6 col-sm-7 col-xs-10 col-form-label"
                 >{{ __('custom.by_default') }} {{ __('custom.for') }} {{ ultrans('custom.users') }}:</label>
-                <div class="col-sm-1 text-right">
+                <div class="col-md-6 col-sm-5 col-xs-2 text-right">
                     <div class="js-check">
                         <input
                             type="checkbox"
@@ -82,14 +82,14 @@
             <div class="form-group row">
                 <label
                     for="default_org_admin"
-                    class="col-sm-11 col-form-label"
+                    class="col-md-6 col-sm-7 col-xs-10 col-form-label"
                 >
                     {{ __('custom.by_default') }}
                     {{ __('custom.for') }}
                     {{ __('custom.admin_of') }}
                     {{ ultrans('custom.organisations') }}:
                 </label>
-                <div class="col-sm-1 text-right">
+                <div class="col-md-6 col-sm-5 col-xs-2 text-right">
                     <div class="js-check">
                         <input
                             type="checkbox"
@@ -105,14 +105,14 @@
             <div class="form-group row">
                 <label
                     for="default_group_admin"
-                    class="col-sm-11 col-form-label"
+                    class="col-md-6 col-sm-7 col-xs-10 col-form-label"
                 >
                     {{ __('custom.by_default') }}
                     {{ __('custom.for') }}
                     {{ __('custom.admin_of') }}
                     {{ ultrans('custom.groups') }}:
                 </label>
-                <div class="col-sm-1 text-right">
+                <div class="col-md-6 col-sm-5 col-xs-2 text-right">
                     <div class="js-check">
                         <input
                             type="checkbox"
@@ -125,6 +125,35 @@
                     </div>
                 </div>
             </div>
+            <div class="text-center m-b-md terms-hr">
+                <hr>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+                <div class="col-sm-6 col-xs-12">
+                    <div>{{ $role[0]->created_at }}</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+                <div class="col-sm-6 col-xs-12">
+                    <div>{{ $role[0]->created_by }}</div>
+                </div>
+            </div>
+            @if ($role[0]->created_at != $role[0]->updated_at)
+                <div class="form-group row">
+                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                    <div class="col-sm-6 col-xs-12">
+                        <div>{{ $role[0]->updated_at }}</div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                    <div class="col-sm-6 col-xs-12">
+                        <div>{{ $role[0]->updated_by }}</div>
+                    </div>
+                </div>
+            @endif
             <div class="form-group text-right">
                 @if (\App\Role::isAdmin())
                     <div class="text-right">

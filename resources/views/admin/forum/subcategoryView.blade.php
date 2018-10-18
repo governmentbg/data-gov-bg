@@ -5,7 +5,7 @@
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         <div class="row">
-            <div class="col-xs-10 m-t-lg text-right section">
+            <div class="col-md-10 col-xs-11 m-t-lg text-right section">
                 <div class="filter-content section-nav-bar">
                     <ul class="nav filter-type right-border">
                         <li>
@@ -64,7 +64,7 @@
                                 <div>{{ $category->created_at }}</div>
                             </div>
                         </div>
-                        @if (!empty($category->updated_at))
+                        @if ($category->created_at != $category->updated_at)
                             <div class="form-group row m-b-lg m-t-md">
                                 <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
@@ -80,7 +80,7 @@
                                     action="{{ url('admin/forum/subcategories/edit/'. $category->id) }}"
                                 >
                                     {{ csrf_field() }}
-                                    <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                    <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                     <input type="hidden" name="view" value="1">
                                 </form>
                                 <form
@@ -90,7 +90,7 @@
                                     {{ csrf_field() }}
                                     <button
                                         name="back"
-                                        class="btn btn-primary"
+                                        class="btn btn-primary m-b-sm"
                                     >{{ uctrans('custom.close') }}</button>
                                 </form>
                                 <form
@@ -100,7 +100,7 @@
                                 >
                                     {{ csrf_field() }}
                                     <button
-                                        class="btn del-btn btn-primary del-btn"
+                                        class="btn btn-primary del-btn m-b-sm"
                                         type="submit"
                                         name="delete"
                                         data-confirm="{{ __('custom.remove_data') }}"

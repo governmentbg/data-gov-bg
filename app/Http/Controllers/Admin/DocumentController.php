@@ -222,6 +222,7 @@ class DocumentController extends AdminController
         $doc = isset($result->documents[0]) ? $result->documents[0] : null;
 
         if (!is_null($doc)) {
+            $doc = $this->getModelUsernames($doc);
 
             return view(
                 'admin/documentsView',

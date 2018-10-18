@@ -4,8 +4,8 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'group'])
-        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
-            <span class="my-profile m-l-sm">{{uctrans('custom.groups_list')}}</span>
+        <div class="col-xs-12 m-t-lg p-l-r-none">
+            <span class="my-profile m-l-sm">{{ uctrans('custom.groups_list') }}</span>
         </div>
         <div class="row">
             <div class="col-sm-3 col-xs-12 text-left">
@@ -13,7 +13,7 @@
                     <a href="{{ url('/admin/groups/register') }}">{{ __('custom.add_new_group') }}</a>
                 </span>
             </div>
-            <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
+            <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field admin">
                 <form method="GET" action="{{ url('/admin/groups/search') }}">
                     <input
                         type="text"
@@ -34,6 +34,7 @@
                 @if (count($groups))
                     @foreach ($groups as $group)
                         <div class="col-md-4 col-sm-12 org-col">
+                                <div class="cust-tooltip user">{{ $group->name }}</div>
                             <div class="col-xs-12 m-t-lg">
                                 <a href="{{ url('/admin/groups/view/'. $group->uri) }}">
                                     <img class="img-responsive logo" src="{{ $group->logo }}"/>
@@ -73,7 +74,7 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="col-sm-12 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

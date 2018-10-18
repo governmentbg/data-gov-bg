@@ -10,7 +10,7 @@
             <div class="col-xs-12 info-box p-l-lg">
                 <div class="row">
                     <div class="col-lg-4 col-md-5 col-xs-12">
-                        <a href="" class="followers">
+                        <a class="followers">
                             <p>{{ $organisation->followers_count }}</p>
                             <hr>
                             <p>{{ __('custom.followers') }} </p>
@@ -18,7 +18,7 @@
                         </a>
                     </div>
                     <div class="col-lg-4 col-md-5 col-xs-12">
-                        <a href="" class="data-sets">
+                        <a href="{{ url('/admin/organisations/datasets/'. $organisation->uri) }}" class="data-sets">
                             <p>{{ $organisation->datasets_count }}</p>
                             <hr>
                             <p>{{ __('custom.data_sets') }}</p>
@@ -34,7 +34,7 @@
                     <div class="col-xs-12 page-content p-sm">
                         <div class="col-xs-12 list-orgs">
                             <div class="row">
-                                <div class="col-xs-12 p-md">
+                                <div class="col-xs-12 p-l-r-none">
                                     <div class="col-xs-12 org-logo">
                                         <img class="img-responsive" src="{{ $organisation->logo }}"/>
                                     </div>
@@ -64,9 +64,38 @@
                                                 </div>
                                             @endforeach
                                         @endif
+                                        <div class="text-center m-b-lg terms-hr">
+                                            <hr>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+                                            <div class="col-sm-6 col-xs-12">{{ $organisation->created_by }}</div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+                                            <div class="col-sm-6 col-xs-12">
+                                                <div>{{ $organisation->created_at }}</div>
+                                            </div>
+                                        </div>
+                                        @if (!empty($organisation->updated_by))
+                                            <div class="form-group row">
+                                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <div>{{ $organisation->updated_by }}</div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if (!empty($organisation->updated_at))
+                                            <div class="form-group row">
+                                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <div>{{ $organisation->updated_at }}</div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                     @if (\App\Role::isAdmin())
-                                        <div class="col-xs-12 view-btns m-t-lg">
+                                        <div class="col-xs-12 view-btns p-w-md">
                                             <div class="row">
                                                 <form
                                                     method="POST"
@@ -74,7 +103,7 @@
                                                     action="{{ url('/admin/organisations/edit/'. $organisation->uri) }}"
                                                 >
                                                     {{ csrf_field() }}
-                                                    <button class="btn btn-primary" type="submit" name="edit">{{ uctrans('custom.edit') }}</button>
+                                                    <button class="btn btn-primary m-b-sm" type="submit" name="edit">{{ uctrans('custom.edit') }}</button>
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
                                                 <form
@@ -84,7 +113,7 @@
                                                     {{ csrf_field() }}
                                                     <button
                                                         name="back"
-                                                        class="btn btn-primary"
+                                                        class="btn btn-primary m-b-sm"
                                                     >{{ uctrans('custom.close') }}</button>
                                                 </form>
                                                 <form
@@ -94,7 +123,7 @@
                                                 >
                                                     {{ csrf_field() }}
                                                         <button
-                                                            class="btn del-btn btn-primary"
+                                                            class="btn del-btn btn-primary m-b-sm"
                                                             type="submit"
                                                             name="delete"
                                                             class="del-btn"

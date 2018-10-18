@@ -219,7 +219,7 @@ class OrganisationController extends AdminController
         $result = $api->getOrganisationDetails($request)->getData();
 
         if ($result->success) {
-            return view('admin/orgView', ['class' => 'user', 'organisation' => $result->data]);
+            return view('admin/orgView', ['class' => 'user', 'organisation' => $this->getModelUsernames($result->data)]);
         }
 
         return redirect('/admin/organisations');
@@ -609,6 +609,7 @@ class OrganisationController extends AdminController
 
                 if ($res->success && !empty($res->types)) {
                     $linkWords = ActionsHistory::getTypesLinkWords();
+
                     foreach ($res->types as $type) {
                         $actTypes[$type->id] = [
                             'name'     => $type->name,

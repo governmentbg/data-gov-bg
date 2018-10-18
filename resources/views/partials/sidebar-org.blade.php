@@ -1,7 +1,11 @@
 <div class="col-sm-3 sidenav p-l-r-none hidden-xs">
+    @include('partials.sidebar-org-body')
     <ul class="nav">
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.topics') }}</a>
+            <button type="button" class="navbar-toggle btn-sidebar pull-right" data-toggle="collapse" data-target="#sidebar-wrapper">
+                <span><i class="fa fa-angle-left"></i></span>
+            </button>
             <ul class="sidebar-submenu">
             @if (count($categories) > 0)
                 @foreach ($categories as $category)
@@ -253,4 +257,16 @@
             </ul>
         </li>
     </ul>
+</div>
+
+
+<div class="navbar-header col-xs-1 hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
+    <button type="button" class="navbar-toggle btn-sidebar pull-left" data-toggle="collapse" data-target="#sidebar-wrapper">
+        <span><i class="fa fa-angle-right"></i></span>
+    </button>
+</div>
+
+
+<div class="sidenav js-sidenav p-l-r-none hidden-lg hidden-md hidden-sm" id="sidebar-wrapper">
+    @include('partials.sidebar-org-body')
 </div>

@@ -17,7 +17,7 @@
                     <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md">
                         <img class="preview js-preview hidden" src="#" alt="organisation logo" />
                     </div>
-                    <div class="inline-block">
+                    <div class="inline-block choose-img">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ uctrans('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
                     </div>
@@ -86,9 +86,9 @@
                 @endif
             @endforeach
             <div class="form-group row {{ !empty($errors->type) ? 'has-error' : '' }} required">
-                <label for="type" class="col-lg-3 col-sm-3 col-xs-12 col-form-label">{{ __('custom.type') }}:</label>
+                <label for="type" class="col-md-3 col-sm-2 col-xs-12 col-form-label">{{ __('custom.type') }}:</label>
                 @foreach (\App\Organisation::getPublicTypes() as $id => $name)
-                    <div class="col-md-4 col-xs-12 m-b-md">
+                    <div class="col-sm-4 col-xs-6 m-b-m p-r-none">
                         <label class="radio-label">
                             {{ utrans($name) }}
                             <div class="js-check">
@@ -115,28 +115,32 @@
                 @endif
             </div>
             <div class="form-group row">
-                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.activef') }}:</label>
-                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                    <div class="js-check">
-                        <input
-                            type="checkbox"
-                            name="active"
-                            value="{{ old('active') != null ? old('active') : '1' }}"
-                            {{ !empty(old('active')) ? 'checked' : '' }}
-                        >
+                <div class="col-md-6 col-xs-12 p-l-none">
+                    <label for="active" class="col-sm-2 col-xs-4 col-form-label">{{ uctrans('custom.activef') }}:</label>
+                    <div class="col-lg-4 col-sm-4 col-xs-8">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="active"
+                                value="{{ old('active') != null ? old('active') : '1' }}"
+                                {{ !empty(old('active')) ? 'checked' : '' }}
+                            >
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.org_approved') }}:</label>
-                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-                    <div class="js-check">
-                        <input
-                            type="checkbox"
-                            name="approved"
-                            value="1"
-                            {{ !empty(old('approved')) ? 'checked' : '' }}
-                        >
+                <div class="col-md-6 col-xs-12 p-l-none">
+                    <label for="active" class="col-sm-2 col-xs-4 col-form-label">{{ __('custom.org_approved') }}:</label>
+                    <div class="col-lg-4 col-sm-4 col-xs-8">
+                        <div class="js-check">
+                            <input
+                                type="checkbox"
+                                name="approved"
+                                value="1"
+                                {{ !empty(old('approved')) ? 'checked' : '' }}
+                            >
+                        </div>
                     </div>
                 </div>
             </div>

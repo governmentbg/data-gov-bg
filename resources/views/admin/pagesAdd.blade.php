@@ -49,7 +49,7 @@
                                     <span class="error">{{ $errors->first('section_id') }}</span>
                                 </div>
                             </div>
-                            <div class="form-group row m-b-lg m-t-md">
+                            <div class="form-group row m-b-sm m-t-md">
                                 <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-9">
                                     <input
@@ -84,28 +84,37 @@
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
                                 <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}:</label>
-                                <div class="col-sm-4 m-b-sm">
-                                    <div class="col-xs-3">{{ __('custom.from') .': ' }}</div>
-                                    <div class="col-xs-9 text-left search-field admin">
-                                        <input class="datepicker input-border-r-12 form-control" name="valid_from" value="{{ old('valid_from') }}">
+                                <div class="col-sm-9 m-b-sm">
+                                    <div class=" row">
+                                        <div class="col-sm-6 m-b-sm">
+                                            <div class="row">
+                                                <div class="col-xs-3">{{ __('custom.from') .': ' }}</div>
+                                                <div class="col-xs-9 text-left search-field admin">
+                                                    <input class="datepicker input-border-r-12 form-control" name="valid_from" value="{{ old('valid_from') }}">
+                                                </div>
+                                                @if (isset($errors) && $errors->has('valid_from'))
+                                                    <span class="error">{{ $errors->first('valid_from') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 m-b-sm">
+                                            <div class="row">
+                                                <div class="col-xs-3">{{ __('custom.to') .': ' }}</div>
+                                                <div class="col-xs-9 text-left search-field admin">
+                                                    <input class="datepicker input-border-r-12 form-control" name="valid_to" value="{{ old('valid_to') }}">
+                                                </div>
+                                                @if (isset($errors) && $errors->has('valid_to'))
+                                                    <span class="error">{{ $errors->first('valid_to') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                    @if (isset($errors) && $errors->has('valid_from'))
-                                        <span class="error">{{ $errors->first('valid_from') }}</span>
-                                    @endif
                                 </div>
-                                <div class="col-sm-4 m-b-sm">
-                                    <div class="col-xs-3">{{ __('custom.to') .': ' }}</div>
-                                    <div class="col-xs-9 text-left search-field admin">
-                                        <input class="datepicker input-border-r-12 form-control" name="valid_to" value="{{ old('valid_to') }}">
-                                    </div>
-                                    @if (isset($errors) && $errors->has('valid_to'))
-                                        <span class="error">{{ $errors->first('valid_to') }}</span>
-                                    @endif
-                                </div>
+
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.activef') }}:</label>
-                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                <label for="active" class="col-lg-3 col-sm-3 col-xs-4 col-form-label">{{ uctrans('custom.activef') }}:</label>
+                                <div class="col-lg-2 col-sm-9 col-xs-8">
                                     <div class="js-check">
                                         <input
                                             type="checkbox"

@@ -4,20 +4,20 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'termsConditions'])
-    <div class="col-xs-12 sidenav m-t-lg">
+    <div class="col-xs-12 m-t-lg p-l-r-none">
         <span class="my-profile m-l-sm">{{ uctrans('custom.terms_and_conditions_list') }}</span>
     </div>
     @include('partials.pagination')
     <div class="row m-b-lg">
         <form method="POST" class="form-horizontal">
             {{ csrf_field() }}
-            <div class="col-lg-12">
+            <div class="col-xs-12">
                 <a
                     class="btn btn-primary {{ count($terms) ? 'pull-right' : 'pull-left m-l-sm' }} add"
                     href="{{ url('/admin/terms-of-use/add') }}"
                 >{{ uctrans('custom.add') }}</a>
             </div>
-            <div class="col-lg-12 m-l-sm">
+            <div class="col-xs-12 m-l-sm">
                 @if (count($terms))
                     <div class="table-responsive opn-tbl text-center">
                         <table class="table">

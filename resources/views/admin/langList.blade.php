@@ -4,15 +4,17 @@
 <div class="container admin">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'languages'])
-    <h3>{{ __('custom.language_list') }}</h3>
+    <div class="col-xs-12 m-t-lg p-l-r-none">
+        <span class="my-profile m-l-sm">{{ uctrans('custom.language_list') }}</span>
+    </div>
 
     <div class="row">
         <form method="POST" class="form-horizontal">
             {{ csrf_field() }}
-            <div class="col-lg-12">
+            <div class="col-xs-12">
                 <a class="btn btn-primary pull-right add" href="{{ url('/admin/languages/add') }}">{{ uctrans('custom.add') }}</a>
             </div>
-            <div class="col-lg-12">
+            <div class="col-xs-12">
                 <div class="table-responsive opn-tbl text-center">
                     <table class="table">
                         <thead>

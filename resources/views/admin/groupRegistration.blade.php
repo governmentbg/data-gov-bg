@@ -14,10 +14,10 @@
             <div class="form-group row {{ isset(session('result')->errors->logo) ? 'has-error' : '' }}">
                 <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.image') }}:</label>
                 <div class="col-sm-9">
-                    <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md">
+                    <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md m-b-sm">
                         <img class="preview js-preview hidden" src="#" alt="organisation logo" />
                     </div>
-                    <div class="inline-block">
+                    <div class="inline-block choose-img">
                         <span class="badge badge-pill"><label class="js-logo" for="logo">{{ uctrans('custom.select_image') }}</label></span>
                         <input class="hidden js-logo-input" type="file" name="logo">
                     </div>

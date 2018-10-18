@@ -28,6 +28,12 @@ class Resource extends Model implements TranslatableInterface
     const FORMAT_RDF = 4;
     const FORMAT_XML = 5;
     const FORMAT_WMS = 6;
+    const FORMAT_TSV = 7;
+    const FORMAT_XSD = 8;
+    const FORMAT_ODS = 9;
+    const FORMAT_SLK = 10;
+    const FORMAT_RTF = 11;
+    const FORMAT_ODT = 12;
 
     const HTTP_POST = 1;
     const HTTP_GET = 2;
@@ -57,6 +63,9 @@ class Resource extends Model implements TranslatableInterface
     public static function getFormatsCode($format)
     {
         switch (strtoupper($format)) {
+            case 'TSV':
+            case 'ODS':
+            case 'SLK':
             case 'CSV':
             case 'XLS':
             case 'XLSX':
@@ -69,6 +78,10 @@ class Resource extends Model implements TranslatableInterface
                 return self::FORMAT_WMS;
             case 'XML':
                 return self::FORMAT_XML;
+            case 'XSD':
+            case 'RTF':
+            case 'ODT':
+                return self::FORMAT_XSD;
             default:
                 return self::FORMAT_JSON;
         }
@@ -83,6 +96,12 @@ class Resource extends Model implements TranslatableInterface
             self::FORMAT_RDF    => 'RDF',
             self::FORMAT_WMS    => 'WMS',
             self::FORMAT_XML    => 'XML',
+            self::FORMAT_TSV    => 'TSV',
+            self::FORMAT_XSD    => 'XSD',
+            self::FORMAT_ODS    => 'ODS',
+            self::FORMAT_SLK    => 'SLK',
+            self::FORMAT_RTF    => 'RTF',
+            self::FORMAT_ODT    => 'ODT',
         ];
     }
 
@@ -131,7 +150,7 @@ class Resource extends Model implements TranslatableInterface
     public static function getAllowedFormats()
     {
         return [
-            'CSV', 'JSON', 'KML','RDF','WMS','XML','XLSX', 'XLS', 'TXT',
+            'CSV', 'JSON', 'KML','RDF','WMS','XML','XLSX', 'XLS', 'TXT', 'TSV', 'XSD', 'ODS', 'SLK', 'RTF', 'ODT'
         ];
     }
 }

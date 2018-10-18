@@ -1,0 +1,16 @@
+ID;PCALCOOO32
+C;X1;Y1;K"Text in cell a row 1"
+C;X2;Y1;K"Text in cell b row 1"
+C;X3;Y1;K1111123
+C;X4;Y1;K1211
+C;X1;Y2;K"Text in cell a row 2"
+C;X2;Y2;K"Text in cell b row 2"
+C;X3;Y2;K21212121
+C;X4;Y2;K1111
+C;X2;Y3;K"Text in cell b row 3"
+C;X1;Y4;K"Text in cell a row 2"
+C;X2;Y4;K"Text in cell b row 2"
+C;X3;Y4;K21212121
+C;X4;Y4;K1111
+C;X5;Y4;K1111
+E

@@ -404,7 +404,183 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get ellastic search data
+     * Convert from ods base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with ods text or error
+     */
+    public function ods2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $data = $this->fromCells($post['data'], false);
+
+                return $this->successResponse($data);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'ods']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from slk base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with slk text or error
+     */
+    public function slk2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $data = $this->fromCells($post['data'], false);
+
+                return $this->successResponse($data);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'slk']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from tsv data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with tsv text or error
+     */
+    public function tsv2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $data = base64_decode($post['data']);
+
+                $data = explode("\r\n", $data);
+
+                foreach ($data as $single) {
+                    $data2d[] = explode("\t", $single);
+                }
+
+                return $this->successResponse($data2d);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'tsv']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from xsd data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with xsd text or error
+     */
+    public function xsd2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $data = base64_decode($post['data']);
+
+                $data = explode("\r\n", $data);
+
+                return $this->successResponse($data);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'xsd']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from rtf base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with rtf text or error
+     */
+    public function rtf2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $result = $this->fromWORD($post['data']);
+
+                return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'rtf']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Convert from odt base64 encoded data and return text
+     *
+     * @param string api_key - required
+     * @param string data - required
+     *
+     * @return json with odt text or error
+     */
+    public function odt2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, ['data' => 'required']);
+
+        if (!$validator->fails()) {
+            try {
+                $result = $this->fromWORD($post['data']);
+
+                return $this->successResponse($result);
+            } catch (\Exception $ex) {
+                Log::error($ex->getMessage());
+                $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'odt']));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    /**
+     * Get elastic search data
      *
      * @param string api_key - required
      * @param string es_id - required
@@ -431,7 +607,7 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get ellastic search data
+     * Get elastic search data
      *
      * @param string api_key - required
      * @param string es_id - required
@@ -527,7 +703,14 @@ class ConversionController extends ApiController
                 $result = utf8_encode($text);
             }
         } else {
-            $result = \PhpOffice\PhpWord\IOFactory::load($path);
+            if (mime_content_type($path) == 'text/rtf') {
+                $result = \PhpOffice\PhpWord\IOFactory::load($path, 'RTF');
+            } else if (mime_content_type($path) == 'application/vnd.oasis.opendocument.text') {
+                $result = \PhpOffice\PhpWord\IOFactory::load($path, 'ODText');
+            } else {
+                $result = \PhpOffice\PhpWord\IOFactory::load($path);
+            }
+
             $result->save($pathOut, 'HTML');
             $result = $this->fromHTML(file_get_contents($pathOut));
         }
@@ -658,7 +841,7 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get ellastic search data
+     * Get elastic search data
      *
      * @param string api_key - required
      * @param string es_id - required
@@ -701,7 +884,7 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get ellastic search data
+     * Get elastic search data
      *
      * @param string api_key - required
      * @param string es_id - required

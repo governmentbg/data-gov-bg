@@ -34,6 +34,10 @@
             ></textarea>
         @elseif ($resource->format_code == App\Resource::FORMAT_JSON && isset($data->text))
             <p>@php echo nl2br(e($data->text)) @endphp</p>
+        @elseif ($resource->format_code == App\Resource::FORMAT_XSD)
+            @foreach ($data as $row)
+                <p>{{ $row }}</p>
+            @endforeach
         @else
             <p>{{ uctrans('custom.resource_no_visualization') }}</p>
         @endif

@@ -45,11 +45,16 @@
                                     </a>
                                 </div>
                                 <div class="col-xs-12">
-                                    <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}"><h3 class="org-name">{{ $organisation->name }}</h3></a>
+                                    <a
+                                        href="{{ url('/user/organisations/view/'. $organisation->uri) }}"
+                                    ><h3 class="org-name">{{ $organisation->name }}</h3></a>
                                     <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
-                                        <p class="text-right show-more">
-                                            <a href="{{ url('/user/organisations/view/'. $organisation->uri) }}" class="view-profile">{{ __('custom.see_more') }}</a>
-                                        </p>
+                                    <p class="text-right show-more">
+                                        <a
+                                            href="{{ url('/user/organisations/view/'. $organisation->uri) }}"
+                                            class="view-profile"
+                                        >{{ __('custom.see_more') }}</a>
+                                    </p>
                                 </div>
                                 <div class="col-xs-12 ch-del-btns">
                                     <div class="row">

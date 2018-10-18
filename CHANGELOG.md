@@ -17,6 +17,8 @@ Security - in case of vulnerabilities.
 
 ### Changed
 - Translations table text column length
+- Group datasets delete button changed to remove
+- Group datasets edit button removed
 
 ### Fixed
 - WYSIWYG editor code view, full screen mode

@@ -53,30 +53,19 @@
                                         </div>
                                         <div class="col-sm-12 p-l-none btns">
                                             <div class="pull-left row">
-                                                <div class="col-xs-6">
-                                                @if ($buttons[$set->uri]['edit'])
-                                                    <span class="badge badge-pill m-r-md m-b-sm">
-                                                <a href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/edit/'. $set->uri) }}">
-                                                            {{ uctrans('custom.edit') }}
-                                                        </a>
-                                                    </span>
-                                                @endif
-                                                </div>
                                                 @if ($buttons[$set->uri]['delete'])
-                                                    <div class="col-xs-6">
-                                                        <form method="POST">
-                                                            {{ csrf_field() }}
-                                                            <div class="col-xs-6 text-right">
-                                                                <button
-                                                                    class="badge badge-pill m-b-sm del-btn"
-                                                                    type="submit"
-                                                                    name="delete"
-                                                                    data-confirm="{{ __('custom.remove_data') }}"
-                                                                >{{ uctrans('custom.remove') }}</button>
-                                                            </div>
-                                                            <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
-                                                        </form>
-                                                    </div>
+                                                    <form method="POST">
+                                                        {{ csrf_field() }}
+                                                        <div class="col-xs-6 text-right">
+                                                            <button
+                                                                class="badge badge-pill m-b-sm del-btn"
+                                                                type="submit"
+                                                                name="delete"
+                                                                data-confirm="{{ __('custom.remove_data') }}"
+                                                            >{{ uctrans('custom.remove_set') }}</button>
+                                                        </div>
+                                                        <input type="hidden" name="dataset_uri" value="{{ $set->uri }}">
+                                                    </form>
                                                 @endif
                                             </div>
                                             <div class="pull-right">

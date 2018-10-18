@@ -869,5 +869,6 @@ return [
     'success' => 'Успешна',
     'failure' => 'Неуспешна',
     'search_button' => 'Търси',
-    'document_preview' => 'преглед на документ'
+    'document_preview' => 'преглед на документ',
+    'remove_set' => 'премахни',
 ];

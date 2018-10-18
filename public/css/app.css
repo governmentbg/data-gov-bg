@@ -15469,6 +15469,10 @@ textarea {
   max-width: 420px;
 }
 
+.input-group .note-editor.no-max-width {
+  max-width: none;
+}
+
 .input-group .note-editor iframe {
   width: 100%;
   height: 220px;
@@ -15480,6 +15484,8 @@ textarea {
 
 .page-cont {
   word-break: break-all;
+  overflow: auto;
+  max-height: 100vh;
 }
 
 .discussion-btn {
@@ -15567,6 +15573,488 @@ textarea {
 
 .discussion {
   padding-top: 50px;
+}
+
+.CodeMirror {
+  /* Set height, width, borders, and global font properties here */
+  font-family: monospace;
+  height: 300px;
+}
+
+.CodeMirror-scroll {
+  /* Set scrolling behaviour here */
+  overflow: auto;
+}
+
+/* PADDING */
+
+.CodeMirror-lines {
+  padding: 4px 0;
+  /* Vertical padding around content */
+}
+
+.CodeMirror pre {
+  padding: 0 4px;
+  /* Horizontal padding of content */
+}
+
+.CodeMirror-scrollbar-filler,
+.CodeMirror-gutter-filler {
+  background-color: white;
+  /* The little square between H and V scrollbars */
+}
+
+/* GUTTER */
+
+.CodeMirror-gutters {
+  border-right: 1px solid #ddd;
+  background-color: #f7f7f7;
+  white-space: nowrap;
+}
+
+.CodeMirror-linenumber {
+  padding: 0 3px 0 5px;
+  min-width: 20px;
+  text-align: right;
+  color: #999;
+}
+
+.CodeMirror div.CodeMirror-cursor {
+  border-left: 1px solid black;
+  z-index: 3;
+}
+
+/* Shown when moving in bi-directional text */
+
+.CodeMirror div.CodeMirror-secondarycursor {
+  border-left: 1px solid silver;
+}
+
+.CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor {
+  width: auto;
+  border: 0;
+  background: #7e7;
+  z-index: 1;
+}
+
+/* Can style cursor different in overwrite (non-insert) mode */
+
+.cm-tab {
+  display: inline-block;
+}
+
+/* DEFAULT THEME */
+
+.cm-s-default .cm-keyword {
+  color: #708;
+}
+
+.cm-s-default .cm-atom {
+  color: #219;
+}
+
+.cm-s-default .cm-number {
+  color: #164;
+}
+
+.cm-s-default .cm-def {
+  color: #00f;
+}
+
+.cm-s-default .cm-variable {
+  color: black;
+}
+
+.cm-s-default .cm-variable-2 {
+  color: #05a;
+}
+
+.cm-s-default .cm-variable-3 {
+  color: #085;
+}
+
+.cm-s-default .cm-property {
+  color: black;
+}
+
+.cm-s-default .cm-operator {
+  color: black;
+}
+
+.cm-s-default .cm-comment {
+  color: #a50;
+}
+
+.cm-s-default .cm-string {
+  color: #a11;
+}
+
+.cm-s-default .cm-string-2 {
+  color: #f50;
+}
+
+.cm-s-default .cm-meta {
+  color: #555;
+}
+
+.cm-s-default .cm-qualifier {
+  color: #555;
+}
+
+.cm-s-default .cm-builtin {
+  color: #30a;
+}
+
+.cm-s-default .cm-bracket {
+  color: #997;
+}
+
+.cm-s-default .cm-tag {
+  color: #170;
+}
+
+.cm-s-default .cm-attribute {
+  color: #00c;
+}
+
+.cm-s-default .cm-header {
+  color: blue;
+}
+
+.cm-s-default .cm-quote {
+  color: #090;
+}
+
+.cm-s-default .cm-hr {
+  color: #999;
+}
+
+.cm-s-default .cm-link {
+  color: #00c;
+}
+
+.cm-negative {
+  color: #d44;
+}
+
+.cm-positive {
+  color: #292;
+}
+
+.cm-header,
+.cm-strong {
+  font-weight: bold;
+}
+
+.cm-em {
+  font-style: italic;
+}
+
+.cm-link {
+  text-decoration: underline;
+}
+
+.cm-s-default .cm-error {
+  color: #f00;
+}
+
+.cm-invalidchar {
+  color: #f00;
+}
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+  color: #0f0;
+}
+
+div.CodeMirror span.CodeMirror-nonmatchingbracket {
+  color: #f22;
+}
+
+.CodeMirror-activeline-background {
+  background: #e8f2ff;
+}
+
+/* STOP */
+
+/* The rest of this file contains styles related to the mechanics of
+     the editor. You probably shouldn't touch them. */
+
+.CodeMirror {
+  line-height: 1;
+  position: relative;
+  overflow: hidden;
+  background: white;
+  color: black;
+}
+
+.CodeMirror-scroll {
+  /* 30px is the magic margin used to hide the element's real scrollbars */
+  /* See overflow: hidden in .CodeMirror */
+  margin-bottom: -30px;
+  margin-right: -30px;
+  padding-bottom: 30px;
+  padding-right: 30px;
+  height: 100%;
+  outline: none;
+  /* Prevent dragging from highlighting the element */
+  position: relative;
+  -webkit-box-sizing: content-box;
+          box-sizing: content-box;
+}
+
+.CodeMirror-sizer {
+  position: relative;
+}
+
+/* The fake, visible scrollbars. Used to force redraw during scrolling
+     before actuall scrolling happens, thus preventing shaking and
+     flickering artifacts. */
+
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar,
+.CodeMirror-scrollbar-filler,
+.CodeMirror-gutter-filler {
+  position: absolute;
+  z-index: 6;
+  display: none;
+}
+
+.CodeMirror-vscrollbar {
+  right: 0;
+  top: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.CodeMirror-hscrollbar {
+  bottom: 0;
+  left: 0;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
+.CodeMirror-scrollbar-filler {
+  right: 0;
+  bottom: 0;
+}
+
+.CodeMirror-gutter-filler {
+  left: 0;
+  bottom: 0;
+}
+
+.CodeMirror-gutters {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding-bottom: 30px;
+  z-index: 3;
+}
+
+.CodeMirror-gutter {
+  white-space: normal;
+  height: 100%;
+  -webkit-box-sizing: content-box;
+          box-sizing: content-box;
+  padding-bottom: 30px;
+  margin-bottom: -32px;
+  display: inline-block;
+  /* Hack to make IE7 behave */
+  *zoom: 1;
+  *display: inline;
+}
+
+.CodeMirror-gutter-elt {
+  position: absolute;
+  cursor: default;
+  z-index: 4;
+}
+
+.CodeMirror-lines {
+  cursor: text;
+}
+
+.CodeMirror pre {
+  /* Reset some styles that the rest of the page might have set */
+  border-radius: 0;
+  border-width: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0;
+  white-space: pre;
+  word-wrap: normal;
+  line-height: inherit;
+  color: inherit;
+  z-index: 2;
+  position: relative;
+  overflow: visible;
+}
+
+.CodeMirror-wrap pre {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+.CodeMirror-code pre {
+  border-right: 30px solid transparent;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.CodeMirror-wrap .CodeMirror-code pre {
+  border-right: none;
+  width: auto;
+}
+
+.CodeMirror-linebackground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.CodeMirror-linewidget {
+  position: relative;
+  z-index: 2;
+  overflow: auto;
+}
+
+.CodeMirror-wrap .CodeMirror-scroll {
+  overflow-x: hidden;
+}
+
+.CodeMirror-measure {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.CodeMirror-measure pre {
+  position: static;
+}
+
+.CodeMirror div.CodeMirror-cursor {
+  position: absolute;
+  visibility: hidden;
+  border-right: none;
+  width: 0;
+}
+
+.CodeMirror-focused div.CodeMirror-cursor {
+  visibility: visible;
+}
+
+.CodeMirror-selected {
+  background: #d9d9d9;
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+  background: #d7d4f0;
+}
+
+.cm-searching {
+  background: #ffa;
+  background: rgba(255, 255, 0, 0.4);
+}
+
+/* IE7 hack to prevent it from returning funny offsetTops on the spans */
+
+.CodeMirror span {
+  *vertical-align: text-bottom;
+}
+
+/* Based on Sublime Text's Monokai theme */
+
+.cm-s-monokai.CodeMirror {
+  background: #272822;
+  color: #f8f8f2;
+}
+
+.cm-s-monokai div.CodeMirror-selected {
+  background: #49483E !important;
+}
+
+.cm-s-monokai .CodeMirror-gutters {
+  background: #272822;
+  border-right: 0px;
+}
+
+.cm-s-monokai .CodeMirror-linenumber {
+  color: #d0d0d0;
+}
+
+.cm-s-monokai .CodeMirror-cursor {
+  border-left: 1px solid #f8f8f0 !important;
+}
+
+.cm-s-monokai span.cm-comment {
+  color: #75715e;
+}
+
+.cm-s-monokai span.cm-atom {
+  color: #ae81ff;
+}
+
+.cm-s-monokai span.cm-number {
+  color: #ae81ff;
+}
+
+.cm-s-monokai span.cm-property,
+.cm-s-monokai span.cm-attribute {
+  color: #a6e22e;
+}
+
+.cm-s-monokai span.cm-keyword {
+  color: #f92672;
+}
+
+.cm-s-monokai span.cm-string {
+  color: #e6db74;
+}
+
+.cm-s-monokai span.cm-variable {
+  color: #a6e22e;
+}
+
+.cm-s-monokai span.cm-variable-2 {
+  color: #9effff;
+}
+
+.cm-s-monokai span.cm-def {
+  color: #fd971f;
+}
+
+.cm-s-monokai span.cm-bracket {
+  color: #f8f8f2;
+}
+
+.cm-s-monokai span.cm-tag {
+  color: #f92672;
+}
+
+.cm-s-monokai span.cm-link {
+  color: #ae81ff;
+}
+
+.cm-s-monokai span.cm-error {
+  background: #f92672;
+  color: #f8f8f0;
+}
+
+.cm-s-monokai .CodeMirror-activeline-background {
+  background: #373831 !important;
+}
+
+.cm-s-monokai .CodeMirror-matchingbracket {
+  text-decoration: underline;
+  color: white !important;
 }
 
 .container .filter-content .filter-type,
@@ -20468,5 +20956,475 @@ nav .tool-version:hover {
   .stick {
     right: 10px;
   }
+}
+
+.sortedBars .bar rect {
+  fill: #0d90d1;
+}
+
+.sortedBars .bar rect:hover {
+  fill: #a9dffa;
+}
+
+.sortedBars .bar text {
+  font: 10px sans-serif;
+  fill: #000;
+}
+
+.sortedBars .axis {
+  font: 8px sans-serif;
+}
+
+.sortedBars .axis path,
+.sortedBars .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dualLineChart .x-axis path,
+.dualLineChart .y-axis-left path,
+.dualLineChart .y-axis-right path {
+  stroke: #D3D3D3;
+  stroke-width: 1;
+  fill: none;
+}
+
+.dualLineChart .y-axis-left text,
+.dualLineChart .y-axis-right text {
+  fill: #b5b5b5;
+  font: 10px sans-serif;
+}
+
+.dualLineChart .x-axis text {
+  font: 10px sans-serif;
+}
+
+.dualLineChart path {
+  stroke-width: 2;
+  fill: none;
+}
+
+.dualLineChart .line-values1 text,
+.dualLineChart .line-values2 text {
+  font: 10px sans-serif;
+  fill: #444444;
+}
+
+.multiLineChart .x.axis path,
+.multiLineChart .y.axis path {
+  stroke: #D3D3D3;
+  stroke-width: 1;
+  fill: none;
+}
+
+.multiLineChart .y.axis text {
+  fill: #938b8b;
+  font: 10px sans-serif;
+}
+
+.multiLineChart .x.axis text {
+  font: 10px sans-serif;
+}
+
+.multiLineChart path {
+  stroke-width: 2;
+  fill: none;
+}
+
+.multiLineChart .line-values text {
+  font: 10px sans-serif;
+  fill: #444444;
+}
+
+.multiLineChart text {
+  font: 10px sans-serif;
+}
+
+.education {
+  /* Second nav bar style */
+  /* Styling the html layout */
+  /* Leaflet stylings nav bar style */
+  /* Visual stylings nav bar style */
+}
+
+.education body {
+  padding: 0;
+  margin: 0;
+}
+
+.education html,
+.education body {
+  height: 100%;
+  width: 100%;
+}
+
+.education .nav > li > a:hover {
+  background-color: transparent;
+}
+
+.education .sidebyside {
+  display: inline-block;
+  width: 95%;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.education .vdivider {
+  height: 5px;
+}
+
+.education .leaflet-popup-content {
+  width: 400px;
+  font-size: 12px;
+}
+
+.education #schoolTbl tbody tr {
+  height: 20px;
+}
+
+.education svg {
+  position: relative;
+}
+
+.education path {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.education path:hover {
+  fill: brown;
+  fill-opacity: .7;
+}
+
+.education .histChart,
+.education .sideCharts {
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.education rect.total {
+  color: #fff;
+  stroke: #3994b6;
+  fill: white;
+}
+
+.education text.total {
+  fill: #3994b6;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
+.education rect.progress {
+  color: #fff;
+  stroke: transparent;
+  fill: steelblue;
+}
+
+.education text.progress {
+  /*fill: 'red';*/
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
+.education .bars rect {
+  fill: steelblue;
+}
+
+.education .bar text {
+  fill: #fff;
+  font: 8px sans-serif;
+}
+
+.education .axis text {
+  font: 7px sans-serif;
+}
+
+.education .axis path,
+.education .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.education .info {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.education .info h2 {
+  margin: 0 0 5px;
+  color: #777;
+}
+
+.education .legend {
+  text-align: left;
+  line-height: 18px;
+  color: #555;
+}
+
+.education .legend i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+.education path.slice {
+  stroke-width: 2px;
+}
+
+.grao svg {
+  position: relative;
+}
+
+.grao circle {
+  fill: none;
+  stroke: #999;
+}
+
+.grao circle.incre {
+  fill: #a1d99b;
+  stroke: #fff;
+}
+
+.grao circle.decre {
+  fill: #fc9272;
+  stroke: #fff;
+}
+
+.grao path {
+  fill-opacity: .7;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.grao #path-tooltip {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.grao #path-tooltip.path-hidden {
+  opacity: 0;
+}
+
+.grao #path-tooltip p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.grao #play,
+.grao #slider-container {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.grao #play {
+  width: 53px;
+  height: 53px;
+  background-image: url(/img/play.png);
+  border-radius: 5px;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.grao #play:hover {
+  background-position: 0 -53px;
+}
+
+.grao #play.pause {
+  background-image: url(/img/pause.png);
+}
+
+.grao #slider-container {
+  position: relative;
+}
+
+.grao #slider-div {
+  margin-left: 25px;
+  margin-top: 10px;
+}
+
+.crime {
+  /* Styling the html layout */
+  /* Legend styling*/
+  /* Legend styling*/
+  /* Disorganized */
+}
+
+@media screen and (max-width: 400px) {
+  .crime body {
+    font-size: 8px;
+  }
+}
+
+@media screen and (max-width: 810px) {
+  .crime body {
+    font-size: 10px;
+  }
+}
+
+.crime body {
+  padding: 0;
+  margin: 0;
+}
+
+.crime html,
+.crime body {
+  height: 100%;
+  width: 100%;
+}
+
+.crime .navbar-header,
+.crime .navbar-nav {
+  width: auto !important;
+}
+
+.crime .navbar-nav {
+  margin-top: 7px !important;
+}
+
+.crime .sidebyside {
+  display: inline-block;
+  width: 49%;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.crime .div-right {
+  text-align: right;
+}
+
+.crime .to-top {
+  vertical-align: top;
+}
+
+.crime .vdivider {
+  height: 5px;
+}
+
+.crime .title {
+  text-align: center;
+}
+
+.crime #mapregionlegend .list-inline {
+  margin-left: 0px;
+}
+
+.crime .list-inline li {
+  display: inline-block;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.crime li.key {
+  border-top-width: 15px;
+  border-top-style: solid;
+  font-size: .75em;
+  width: 25%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.crime svg.legend-bubble {
+  position: relative;
+  left: 75%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
+
+.crime #play,
+.crime #slider-container {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.crime #play {
+  width: 53px;
+  height: 53px;
+  background-image: url(/img/play.png);
+  border-radius: 5px;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.crime #play:hover {
+  background-position: 0 -53px;
+}
+
+.crime #play.pause {
+  background-image: url(/img/pause.png);
+}
+
+.crime #slider-container {
+  position: relative;
+}
+
+.crime #slider-div {
+  margin-left: 25px;
+  margin-top: 10px;
+}
+
+.crime #barChartOccuredTitle {
+  width: 50%;
+}
+
+.crime label {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.crime .boundary path {
+  fill-opacity: .7;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.crime .boundary path:hover {
+  fill-opacity: .2;
+}
+
+.crime #path-tooltip {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  padding: 10px;
+  background-color: white;
+  border-radius: 10px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.crime #path-tooltip.path-hidden {
+  opacity: 0;
+}
+
+.crime #path-tooltip p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 20px;
 }
 

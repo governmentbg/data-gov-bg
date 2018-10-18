@@ -12,6 +12,14 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Visualizations pages
+
+### Changed
+- Translations table text column length
+
+### Fixed
+- WYSIWYG editor code view, full screen mode
 
 ## [0.6.2] - 2018-10-17
 ### Fixed

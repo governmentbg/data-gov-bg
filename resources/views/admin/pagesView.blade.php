@@ -1,4 +1,28 @@
-@extends('layouts.app')
+@extends(
+    'layouts.app',
+    [
+        'script' => !empty($script) ? $script : null,
+        'jsPaths' => [
+            'js/visualizations/d3.v3.min.js',
+            'js/visualizations/crossfilter.min.js',
+            'js/visualizations/dc.min.js',
+            'js/visualizations/leaflet.js',
+            'js/visualizations/topojson.min.js',
+            'js/visualizations/queue.min.js',
+            'js/visualizations/charts.js',
+            'js/visualizations/d3.min.js',
+            'js/visualizations/d3.slider.js',
+            'js/visualizations/open-charts.js',
+            'js/visualizations/charts.js',
+        ],
+        'cssPaths' => [
+            'css/visualizations/leaflet.css',
+            'css/visualizations/d3.slider.css',
+            'css/visualizations/jquery.smartmenus.bootstrap.css',
+            'css/visualizations/dc.css',
+        ]
+    ]
+)
 
 @section('content')
     <div class="container">
@@ -59,8 +83,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.content') }}</label>
-                                <div class="col-sm-6 col-xs-12">
+                                <label class="col-xs-12 col-form-label">{{ utrans('custom.content') }}:</label>
+                                <div class="col-xs-12">
                                     <div class="page-cont">{!! $page->body !!}</div>
                                 </div>
                             </div>

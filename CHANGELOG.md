@@ -13,7 +13,6 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Added
-<<<<<<< Updated upstream
 - Visualizations pages
 
 ### Changed
@@ -21,13 +20,9 @@ Security - in case of vulnerabilities.
 
 ### Fixed
 - WYSIWYG editor code view, full screen mode
-=======
 - Missing conversion methods
-
-### Fixed
 - Unclosed span tag
 - Search pagination
->>>>>>> Stashed changes
 
 ## [0.6.2] - 2018-10-17
 ### Fixed

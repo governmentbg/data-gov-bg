@@ -228,11 +228,11 @@ class UserController extends Controller {
             'page_number'      => !empty($request->page) ? $request->page : 1,
         ];
 
-        $search = null;
+        $q = null;
 
         if ($request->has('q')) {
-            $search = $request->offsetGet('q');
-            $params['criteria']['keywords'] = $search;
+            $q = $request->offsetGet('q');
+            $params['criteria']['keywords'] = $q;
         }
 
         $hasRole = !is_null(UserToOrgRole::where('user_id', \Auth::user()->id)->where('org_id', $orgId)->first());
@@ -241,7 +241,7 @@ class UserController extends Controller {
             $rq = Request::create('/api/listDatasets', 'POST', $params);
             $api = new ApiDataSet($rq);
             $datasets = $api->listDatasets($rq)->getData();
-            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+            $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, compact($q), $perPage);
         } else {
             $paginationData = $this->getPaginationData([], 0, [], $perPage);
         }
@@ -260,10 +260,10 @@ class UserController extends Controller {
                     Module::DATA_SETS,
                     RoleRight::RIGHT_VIEW,
                     [
-                        'org_id'       => $orgId
+                        'org_id'    => $orgId
                     ],
                     [
-                        'org_id'        => $orgId
+                        'org_id'    => $orgId
                     ]
                 );
 
@@ -317,9 +317,9 @@ class UserController extends Controller {
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => 'organisation',
-                'search'        => $search,
+                'search'        => $q,
                 'buttons'       => $buttons,
-                'organisation'  => $org
+                'organisation'  => $org,
             ]
         );
     }
@@ -3572,6 +3572,7 @@ class UserController extends Controller {
                 $rq = Request::create('/api/listActionTypes', 'GET', ['locale' => $locale, 'publicOnly' => true]);
                 $api = new ApiActionsHistory($rq);
                 $res = $api->listActionTypes($rq)->getData();
+
                 if ($res->success && !empty($res->types)) {
                     $linkWords = ActionsHistory::getTypesLinkWords();
                     foreach ($res->types as $type) {
@@ -3880,28 +3881,31 @@ class UserController extends Controller {
         $perPage = 6;
         $class = 'user';
         $users = [];
+        $q = null;
         $params = [
             'records_per_page'  => $perPage,
             'page_number'       => !empty($request->page) ? $request->page : 1,
             'criteria'          => [
                 'active'            => Organisation::ACTIVE_TRUE,
-            ]
+            ],
         ];
 
-        if ($request->has('search')) {
-            $params['criteria']['keywords'] = $request->offsetGet('search');
+        if ($request->has('q')) {
+            $q = $request->get('q');
+            $params['criteria']['keywords'] = $q;
         }
 
         $listReq = Request::create('/api/listUsers', 'POST', $params);
         $api = new ApiUser($listReq);
         $result = $api->listUsers($listReq)->getData();
 
-        $paginationData = $this->getPaginationData($result->users, $result->total_records, [], $perPage);
+        $paginationData = $this->getPaginationData($result->users, $result->total_records, compact('q'), $perPage);
 
         return view('/user/list', [
             'class'         => $class,
             'users'         => $paginationData['items'],
             'pagination'    => $paginationData['paginate'],
+            'search'        => $q,
         ]);
     }
 
@@ -4351,7 +4355,7 @@ class UserController extends Controller {
             'class'         => 'user',
             'groups'        => $paginationData['items'],
             'pagination'    => $paginationData['paginate'],
-            'buttons'       => $buttons
+            'buttons'       => $buttons,
         ]);
     }
 
@@ -4689,17 +4693,18 @@ class UserController extends Controller {
         if (!Role::isAdmin()) {
             $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
         }
-        $search = null;
+
+        $q = null;
 
         if ($request->has('q')) {
-            $search = $request->offsetGet('q');
-            $params['criteria']['keywords'] = $search;
+            $q = $request->offsetGet('q');
+            $params['criteria']['keywords'] = $q;
         }
 
         $dataRq = Request::create('/api/listDatasets', 'POST', $params);
         $dataApi = new ApiDataSet($dataRq);
         $datasets = $dataApi->listDatasets($dataRq)->getData();
-        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, [], $perPage);
+        $paginationData = $this->getPaginationData($datasets->datasets, $datasets->total_records, compact('q'), $perPage);
 
         // rights checks
         $rightCheck = RoleRight::checkUserRight(
@@ -4774,7 +4779,7 @@ class UserController extends Controller {
                 'datasets'      => $paginationData['items'],
                 'pagination'    => $paginationData['paginate'],
                 'activeMenu'    => 'group',
-                'search'        => $search,
+                'search'        => $q,
                 'buttons'       => $buttons,
                 'uri'           => $uri,
                 'group'         => $groupData
@@ -5668,6 +5673,7 @@ class UserController extends Controller {
 
                 if ($res->success && !empty($res->types)) {
                     $linkWords = ActionsHistory::getTypesLinkWords();
+
                     foreach ($res->types as $type) {
                         $actTypes[$type->id] = [
                             'name'     => $type->name,
@@ -5797,6 +5803,7 @@ class UserController extends Controller {
 
                 if ($res->success && !empty($res->types)) {
                     $linkWords = ActionsHistory::getTypesLinkWords();
+
                     foreach ($res->types as $type) {
                         $actTypes[$type->id] = [
                             'name'     => $type->name,

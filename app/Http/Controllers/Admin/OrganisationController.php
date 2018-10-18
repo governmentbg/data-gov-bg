@@ -609,6 +609,7 @@ class OrganisationController extends AdminController
 
                 if ($res->success && !empty($res->types)) {
                     $linkWords = ActionsHistory::getTypesLinkWords();
+
                     foreach ($res->types as $type) {
                         $actTypes[$type->id] = [
                             'name'     => $type->name,

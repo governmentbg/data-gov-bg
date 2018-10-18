@@ -95,14 +95,14 @@ class MigrateData extends Command
 
         ini_set('memory_limit', '8G');
 
-        $this->migrateTags();
-
-        $this->migrateOrganisations();
-        $this->migrateGroups();
-        $this->migrateUsers();
+//        $this->migrateTags();
+//
+//        $this->migrateOrganisations();
+//        $this->migrateGroups();
+//        $this->migrateUsers();
 
         $this->getUsersDatasets();
-        $this->getUsersDatasets();
+        $this->getOrgsDatasets();
 
         $this->migrateUserToOrgRole();
         $this->migrateFollowers();
@@ -1048,35 +1048,38 @@ class MigrateData extends Command
         $users = $userData['users'];
         $usersOldIds = isset($users['success']) ? $users['success'] : null;
 
+
         //Add user followers
-        foreach ($usersOldIds as $k => $v) {
-            $params = [
-                'id' => $k
-            ];
-            $response = $this->requestUrl('user_follower_list', $params, $header);
+        if ($usersOldIds) {
+            foreach ($usersOldIds as $k => $v) {
+                $params = [
+                    'id' => $k
+                ];
+                $response = $this->requestUrl('user_follower_list', $params, $header);
 
-            if (isset($response['result']) && !empty($response['result'])) {
-                foreach ($response['result'] as $res) {
-                    if (isset($usersOldIds[$res['id']])) {
-                        $userFollowExists = UserFollow::where('user_id', $usersOldIds[$res['id']])
-                            ->where('follow_user_id', $v)
-                            ->first();
+                if (isset($response['result']) && !empty($response['result'])) {
+                    foreach ($response['result'] as $res) {
+                        if (isset($usersOldIds[$res['id']])) {
+                            $userFollowExists = UserFollow::where('user_id', $usersOldIds[$res['id']])
+                                ->where('follow_user_id', $v)
+                                ->first();
 
-                        if ($userFollowExists) {
-                            continue;
+                            if ($userFollowExists) {
+                                continue;
+                            }
+
+                            $countFollowers++;
+                            $newUserFollow['api_key'] = $apiKey;
+                            $newUserFollow['user_id'] = $usersOldIds[$res['id']];
+                            $newUserFollow['follow_user_id'] = $v;
+
+                            $userReq = Request::create('/api/addFollow', 'POST', $newUserFollow);
+                            $api = new ApiFollow($userReq);
+                            $api->addFollow($userReq)->getData();
                         }
 
-                        $countFollowers++;
-                        $newUserFollow['api_key'] = $apiKey;
-                        $newUserFollow['user_id'] = $usersOldIds[$res['id']];
-                        $newUserFollow['follow_user_id'] = $v;
-
-                        $userReq = Request::create('/api/addFollow', 'POST', $newUserFollow);
-                        $api = new ApiFollow($userReq);
-                        $api->addFollow($userReq)->getData();
+                        continue;
                     }
-
-                    continue;
                 }
             }
         }

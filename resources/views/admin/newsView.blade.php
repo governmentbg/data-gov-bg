@@ -9,7 +9,7 @@
                 <div class="col-md-2 col-sm-1"></div>
                 <div class="col-md-8 col-sm-10">
                     <div class="frame add-terms">
-                        <div class="p-w-md text-center m-b-lg m-t-lg">
+                        <div class="p-w-md text-center m-t-lg">
                             <h2>{{ __('custom.news_preview') }}</h2>
                         </div>
                         <div class="body">
@@ -109,7 +109,7 @@
                                             action="{{ url('admin/news/edit/'. $news->id) }}"
                                         >
                                             {{ csrf_field() }}
-                                            <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                            <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                             <input type="hidden" name="view" value="1">
                                         </form>
                                         <form
@@ -119,7 +119,7 @@
                                             {{ csrf_field() }}
                                         <button
                                             name="back"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary m-b-sm"
                                         >{{ uctrans('custom.close') }}</button>
                                         </form>
                                         <form
@@ -129,7 +129,7 @@
                                         >
                                             {{ csrf_field() }}
                                                 <button
-                                                    class="btn del-btn btn-primary del-btn"
+                                                    class="btn btn-primary del-btn m-b-sm"
                                                     type="submit"
                                                     name="delete"
                                                     data-confirm="{{ __('custom.remove_data') }}"
@@ -143,7 +143,7 @@
                 </div>
                 <div class="col-md-2 col-sm-1"></div>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

@@ -10,7 +10,7 @@
             <div class="col-xs-12 info-box p-l-lg">
                 <div class="row">
                     <div class="col-lg-4 col-md-5 col-xs-12">
-                        <a href="" class="followers">
+                        <a class="followers">
                             <p>{{ $group->followers_count }}</p>
                             <hr>
                             <p>{{ __('custom.followers') }} </p>
@@ -18,7 +18,7 @@
                         </a>
                     </div>
                     <div class="col-lg-4 col-md-5 col-xs-12">
-                        <a href="" class="data-sets">
+                        <a href="{{ url('/admin/groups/datasets/'. $group->uri) }}" class="data-sets">
                             <p>{{ $group->datasets_count }}</p>
                             <hr>
                             <p>{{ __('custom.data_sets') }}</p>
@@ -29,12 +29,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12 m-t-md">
+            <div class="col-xs-12 m-t-sm">
                 <div class="row">
                     <div class="col-xs-12 page-content p-sm">
-                        <div class="col-xs-12 list-orgs">
+                        <div class="col-xs-12 list-orgs p-l-r-none">
                             <div class="row">
-                                <div class="col-xs-12 p-md">
+                                <div class="col-xs-12">
                                     <div class="col-xs-12 org-logo">
                                         <img class="img-responsive" src="{{ $group->logo }}"/>
                                     </div>
@@ -74,7 +74,7 @@
                                                     action="{{ url('/admin/groups/edit/'. $group->uri) }}"
                                                 >
                                                     {{ csrf_field() }}
-                                                    <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                                    <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                                     <input type="hidden" name="view" value="1">
                                                 </form>
                                                 <form
@@ -84,7 +84,7 @@
                                                     {{ csrf_field() }}
                                                 <button
                                                     name="back"
-                                                    class="btn btn-primary"
+                                                    class="btn btn-primary m-b-sm"
                                                 >{{ uctrans('custom.close') }}</button>
                                                 </form>
                                                 <form
@@ -94,7 +94,7 @@
                                                 >
                                                     {{ csrf_field() }}
                                                         <button
-                                                            class="btn del-btn btn-primary del-btn"
+                                                            class="btn del-btn btn-primary del-btn m-b-sm"
                                                             type="submit"
                                                             name="delete"
                                                             data-confirm="{{ __('custom.delete_group_confirm') }}"

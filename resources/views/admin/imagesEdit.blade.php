@@ -52,8 +52,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
-                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                    <label for="active" class="col-xs-3 col-form-label">{{ uctrans('custom.active') }}:</label>
+                                    <div class="col-xs-9">
                                         <div class="js-check">
                                             <input
                                                 type="checkbox"
@@ -66,7 +66,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-xs-12 m-t-sm p-l-none text-right m-b-lg">
+                                    <div class="col-xs-12 m-t-sm p-l-r-none text-right m-b-lg">
                                         <a
                                             href="{{ url('admin/images/list') }}"
                                             class="badge badge-pill"
@@ -74,7 +74,7 @@
                                             {{ uctrans('custom.close') }}
                                         </a>
                                         <button name="edit" class="badge badge-pill" type="submit">{{ uctrans('custom.edit') }}</button>
-                                        <span class="badge badge-pill red">
+                                        <span class="badge badge-pill red m-l-sm">
                                             <a
                                                 href="{{ url('/admin/images/delete/'. $model->id) }}"
                                                 data-confirm="{{ __('custom.remove_data') }}"
@@ -139,7 +139,7 @@
                 </div>
                 <div class="col-md-2 col-sm-1"></div>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

@@ -1,4 +1,4 @@
-<div class="col-md-12">
+<div class="col-xs-12">
     @foreach ($signals as $signal)
         <div class="row signal-box">
             <div class="col-md-1 col-sm-4"></div>

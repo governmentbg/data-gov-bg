@@ -5,7 +5,7 @@
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         <div class="row">
-            <div class="col-xs-10 m-t-lg text-right section">
+            <div class="col-md-10 col-xs-11 m-t-lg text-right section">
                 <div class="filter-content section-nav-bar">
                     <ul class="nav filter-type right-border">
                         <li>
@@ -34,7 +34,7 @@
                         <div class="form-group row m-b-lg m-t-md">
                             <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.content') }}:</label>
                             <div class="col-sm-6 col-xs-12">
-                                <div>{!! $post->body !!}</div>
+                                <div class="word-break">{!! $post->body !!}</div>
                             </div>
                         </div>
                         <div class="text-center m-b-lg terms-hr">

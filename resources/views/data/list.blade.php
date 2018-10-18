@@ -6,129 +6,133 @@
 <div class="container">
     <div class="row">
         @include('partials.sidebar', ['action' => 'list'])
-        <div class="col-sm-9 col-xs-12 p-sm page-content">
-            <div class="filter-content">
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="col-lg-12 p-l-r-none">
-                            <div>
-                                <ul class="nav filter-type right-border">
-                                    <li><a class="active p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
-                                    <li><a href="{{ url('/data/linkedData') }}">{{ __('custom.linked_data') }}</a></li>
-                                    <li><a href="{{ url('/data/reported') }}">{{ __('custom.signal_data') }}</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <div class="m-r-md p-h-xs search-field">
-                                    <form method="GET" action="{{ url('/data/') }}">
-                                        <input
-                                            type="text"
-                                            class="m-t-md m-b-md input-border-r-12 form-control js-ga-event"
-                                            placeholder="{{ __('custom.search') }}"
-                                            value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
-                                            name="q"
-                                            data-ga-action="search"
-                                            data-ga-label="data search"
-                                            data-ga-category="data"
-                                        >
-                                        @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
-                                            @if (is_array($qpv))
-                                                @foreach ($qpv as $pk => $pv)
-                                                    <input type="hidden" name="{{ $qp .'['. $pk .']' }}" value="{{ $pv }}"/>
+        <div class="col-sm-9 col-xs-12 p-sm page-content p-t-25-xs">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="filter-content">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-lg-12 p-l-r-none">
+                                    <div>
+                                        <ul class="nav filter-type right-border">
+                                            <li><a class="active p-l-none" href="{{ url('/data') }}">{{ __('custom.data') }}</a></li>
+                                            <li><a href="{{ url('/data/linkedData') }}">{{ __('custom.linked_data') }}</a></li>
+                                            <li><a href="{{ url('/data/reported') }}">{{ __('custom.signal_data') }}</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <div class="m-r-md p-sm search-field">
+                                            <form method="GET" action="{{ url('/data/') }}">
+                                                <input
+                                                    type="text"
+                                                    class="m-t-md m-b-md input-border-r-12 form-control js-ga-event"
+                                                    placeholder="{{ __('custom.search') }}"
+                                                    value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
+                                                    name="q"
+                                                    data-ga-action="search"
+                                                    data-ga-label="data search"
+                                                    data-ga-category="data"
+                                                >
+                                                @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
+                                                    @if (is_array($qpv))
+                                                        @foreach ($qpv as $pk => $pv)
+                                                            <input type="hidden" name="{{ $qp .'['. $pk .']' }}" value="{{ $pv }}"/>
+                                                        @endforeach
+                                                    @else
+                                                        <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
+                                                    @endif
                                                 @endforeach
-                                            @else
-                                                <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
-                                            @endif
-                                        @endforeach
-                                    </form>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div>
+                        @if ($resultsCount > 0)
+                            <div class="m-r-md p-h-xs">
+                                <p>{{ __('custom.order_by') }}:</p>
+                                <ul class="nav sort-by p-l-r-none">
+                                    <li>
+                                        <a
+                                            href="{{
+                                                action(
+                                                    'DataController@list',
+                                                    array_merge(
+                                                        array_except(app('request')->input(), ['sort', 'order', 'page']),
+                                                        ['sort' => 'relevance']
+                                                    )
+                                                )
+                                            }}"
+                                            class="{{
+                                                isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'relevance'
+                                                    ? 'active'
+                                                    : ''
+                                            }} p-l-none"
+                                        >{{ __('custom.relevance') }}</a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="{{
+                                                action(
+                                                    'DataController@list',
+                                                    array_merge(
+                                                        array_except(app('request')->input(), ['sort', 'order', 'page']),
+                                                        ['sort' => 'name', 'order' => 'asc']
+                                                    )
+                                                )
+                                            }}"
+                                            class="{{
+                                                isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'name' &&
+                                                isset(app('request')->input()['order']) && app('request')->input()['order'] == 'asc'
+                                                    ? 'active'
+                                                    : ''
+                                            }}"
+                                        >{{ __('custom.names_asc') }}</a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="{{
+                                                action(
+                                                    'DataController@list',
+                                                    array_merge(
+                                                        array_except(app('request')->input(), ['sort', 'order', 'page']),
+                                                        ['sort' => 'name', 'order' => 'desc']
+                                                    )
+                                                )
+                                            }}"
+                                            class="{{
+                                                isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'name' &&
+                                                isset(app('request')->input()['order']) && app('request')->input()['order'] == 'desc'
+                                                    ? 'active'
+                                                    : ''
+                                            }}"
+                                        >{{ __('custom.names_desc') }}</a>
+                                    </li>
+                                    <li>
+                                        <a
+                                            href="{{
+                                                action(
+                                                    'DataController@list',
+                                                    array_merge(
+                                                        array_except(app('request')->input(), ['sort', 'order', 'page']),
+                                                        ['sort' => 'updated_at', 'order' => 'desc']
+                                                    )
+                                                )
+                                            }}"
+                                            class="{{
+                                                isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'updated_at' &&
+                                                isset(app('request')->input()['order']) && app('request')->input()['order'] == 'desc'
+                                                    ? 'active'
+                                                    : ''
+                                            }}"
+                                        >{{ __('custom.last_change') }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        @endif
+                        </div>
                     </div>
-                </div>
-                <div>
-                @if ($resultsCount > 0)
-                    <div class="m-r-md p-h-xs">
-                        <p>{{ __('custom.order_by') }}:</p>
-                        <ul class="nav sort-by p-l-r-none">
-                            <li>
-                                <a
-                                    href="{{
-                                        action(
-                                            'DataController@list',
-                                            array_merge(
-                                                array_except(app('request')->input(), ['sort', 'order', 'page']),
-                                                ['sort' => 'relevance']
-                                            )
-                                        )
-                                    }}"
-                                    class="{{
-                                        isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'relevance'
-                                            ? 'active'
-                                            : ''
-                                    }}"
-                                >{{ __('custom.relevance') }}</a>
-                            </li>
-                            <li>
-                                <a
-                                    href="{{
-                                        action(
-                                            'DataController@list',
-                                            array_merge(
-                                                array_except(app('request')->input(), ['sort', 'order', 'page']),
-                                                ['sort' => 'name', 'order' => 'asc']
-                                            )
-                                        )
-                                    }}"
-                                    class="{{
-                                        isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'name' &&
-                                        isset(app('request')->input()['order']) && app('request')->input()['order'] == 'asc'
-                                            ? 'active'
-                                            : ''
-                                    }}"
-                                >{{ __('custom.names_asc') }}</a>
-                            </li>
-                            <li>
-                                <a
-                                    href="{{
-                                        action(
-                                            'DataController@list',
-                                            array_merge(
-                                                array_except(app('request')->input(), ['sort', 'order', 'page']),
-                                                ['sort' => 'name', 'order' => 'desc']
-                                            )
-                                        )
-                                    }}"
-                                    class="{{
-                                        isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'name' &&
-                                        isset(app('request')->input()['order']) && app('request')->input()['order'] == 'desc'
-                                            ? 'active'
-                                            : ''
-                                    }}"
-                                >{{ __('custom.names_desc') }}</a>
-                            </li>
-                            <li>
-                                <a
-                                    href="{{
-                                        action(
-                                            'DataController@list',
-                                            array_merge(
-                                                array_except(app('request')->input(), ['sort', 'order', 'page']),
-                                                ['sort' => 'updated_at', 'order' => 'desc']
-                                            )
-                                        )
-                                    }}"
-                                    class="{{
-                                        isset(app('request')->input()['sort']) && app('request')->input()['sort'] == 'updated_at' &&
-                                        isset(app('request')->input()['order']) && app('request')->input()['order'] == 'desc'
-                                            ? 'active'
-                                            : ''
-                                    }}"
-                                >{{ __('custom.last_change') }}</a>
-                            </li>
-                        </ul>
-                    </div>
-                @endif
                 </div>
             </div>
             @if (isset($buttons['add']) && $buttons['add'])
@@ -288,14 +292,16 @@
                     </div>
                 @endforeach
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif
             </div>
-            @if ($resultsCount > 0)
-                @include('partials.pagination')
-            @endif
+            <div class="col-xs-12 m-t-md text-center">
+                @if ($resultsCount > 0)
+                    @include('partials.pagination')
+                @endif
+            </div>
         </div>
     </div>
 </div>

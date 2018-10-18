@@ -31,8 +31,8 @@
                             @endforeach
 
                             <div class="form-group row m-b-lg m-t-md required">
-                                <label for="active" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.active') }}:</label>
-                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                <label for="active" class="col-lg-3 col-sm-4 col-xs-7 col-form-label">{{ uctrans('custom.active') }}:</label>
+                                <div class="col-lg-2 col-sm-8 col-xs-5">
                                     <div class="js-check">
                                         <input
                                             type="checkbox"
@@ -45,8 +45,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="default" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.by_default') }}:</label>
-                                <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+                                <label for="default" class="col-lg-3 col-sm-4 col-xs-7 col-form-label">{{ uctrans('custom.by_default') }}:</label>
+                                <div class="col-lg-2 col-sm-8 col-xs-5">
                                     <div class="js-check">
                                         <input
                                             type="checkbox"
@@ -59,8 +59,8 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
-                                <div class="col-lg-2">
+                                <label for="order" class="col-lg-3 col-sm-4 col-form-label">{{ uctrans('custom.ordering') }}:</label>
+                                <div class="col-lg-2 col-sm-4">
                                     <input
                                         id="order"
                                         name="order"

@@ -4,11 +4,11 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'users'])
-    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
-        <span class="my-profile m-l-sm">{{uctrans('custom.users_edit')}}</span>
+    <div class="col-xs-12 m-t-lg p-l-r-none">
+        <span class="my-profile m-l-sm">{{ uctrans('custom.users_edit') }}</span>
     </div>
-    <div class="col-xs-12 m-t-lg">
-        <form class="m-t-lg p-sm" method="post">
+    <div class="col-xs-12 m-t-lg p-l-r-none">
+        <form class="m-t-lg p-w-sm" method="post">
             {{ csrf_field() }}
             <div class="form-group row required">
                 <label for="fname" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.name') }}:</label>
@@ -234,8 +234,9 @@
                 </div>
             </div>
             <div class="form-group row">
-                    <label for="is_admin" class="col-lg-2 col-sm-3 col-xs-12 col-form-label">{{ __('custom.admin') }}:</label>
-                    <div class="col-lg-2 col-md-9 col-sm-9 col-xs-12">
+                <div class="col-xs-12 p-l-r-none">
+                    <label for="is_admin" class="col-lg-2 col-sm-3 col-xs-5 col-form-label">{{ __('custom.admin') }}:</label>
+                    <div class="col-lg-2 col-sm-9 col-xs-7">
                         <div class="js-check">
                             <input
                                 type="checkbox"
@@ -245,8 +246,10 @@
                             >
                         </div>
                     </div>
-                    <label for="invite" class="col-lg-2 col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.approved') }}:</label>
-                    <div class="col-lg-2 col-md-9 col-sm-9 col-xs-12">
+                </div>
+                <div class="col-xs-12 p-l-r-none">
+                    <label for="invite" class="col-lg-2 col-sm-3 col-xs-5 col-form-label">{{ utrans('custom.approved') }}:</label>
+                    <div class="col-lg-2 col-sm-9 col-xs-7">
                         <div class="js-check">
                             <input
                                 type="checkbox"
@@ -256,8 +259,10 @@
                             >
                         </div>
                     </div>
-                    <label for="active" class="col-lg-2 col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
-                    <div class="col-lg-2 col-md-9 col-sm-9 col-xs-12">
+                </div>
+                <div class="col-xs-12 p-l-r-none">
+                    <label for="active" class="col-lg-2 col-sm-3 col-xs-5 col-form-label">{{ utrans('custom.active') }}:</label>
+                    <div class="col-lg-2 col-sm-9 col-xs-7">
                         <div class="js-check">
                             <input
                                 type="checkbox"
@@ -268,7 +273,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group row text-right">
+            </div>
+            <div class="form-group row text-right">
+                <div class="col-xs-12 p-l-r-none">
                     <a
                         href="{{ url('admin/users') }}"
                         class="btn btn-primary"
@@ -277,6 +284,7 @@
                     </a>
                     <button type="submit" name="save" class="btn btn-primary">{{ uctrans('custom.save') }}</button>
                 </div>
+            </div>
         </form>
         <div class="form-group row p-h-lg">
             <div class="col-xs-12">
@@ -369,7 +377,7 @@
                 <div class="modal-body">
                     <a type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></a>
                     <span>
-                    {{ __('custom.delete_account_message_admin') }}
+                        {{ __('custom.delete_account_message_admin') }}
                         <p class="small-text">
                         {{ __('custom.delete_account_continue') }}
                         </p>

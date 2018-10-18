@@ -1,7 +1,7 @@
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
 
     <div class="articles">
-        <div class="col-sm-12 p-l-none">
+        <div class="col-xs-12 p-l-r-none">
             <h2 class="{{ $resource->reported ? 'error' : '' }}">{{ $resource->name }}</h2>
             <p>
                 {{ utrans('custom.version_current') }}:&nbsp;{{ $resource->version }}
@@ -87,8 +87,8 @@
                 @endforeach
             @endif
         </div>
-        <div class="info-bar-sm col-sm-7 col-xs-12 p-l-none">
-            <ul class="p-l-none">
+        <div class="info-bar-sm col-sm-7 col-xs-12 p-l-r-none">
+            <ul class="p-l-r-none">
                 <li>{{ __('custom.created_at') }}: {{ $resource->created_at }}</li>
                 <li>{{ __('custom.created_by') }}: {{ $resource->created_by }}</li>
                 @if (!empty($resource->updated_by))
@@ -98,17 +98,17 @@
             </ul>
         </div>
         @if ($resource->resource_type !== \App\Resource::TYPE_HYPERLINK)
-            <div class="col-sm-12 m-t-lg p-l-r-none">
+            <div class="col-xs-12 m-t-lg p-l-r-none">
                 @include('partials.resource-visualisation')
             </div>
         @endif
-        <div class="col-sm-12 p-l-none text-left">
+        <div class="col-xs-12 p-l-r-none text-left m-t-sm">
             <form method="POST">
                 {{ csrf_field() }}
                 @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
                     <button
                         type="button"
-                        class="btn btn-primary js-res-uri"
+                        class="btn btn-primary js-res-uri m-b-sm"
                         data-toggle="modal"
                         data-target="#embed-resource"
                         data-uri ="{{ $resource->uri }}"
@@ -118,7 +118,7 @@
                         && (!empty($admin) || !empty($buttons['edit']))
                     )
                         <a
-                            class="btn btn-primary"
+                            class="btn btn-primary m-b-sm"
                             @if (!empty($fromOrg))
                                 href="{{ url('/'. $root .'/organisations/resource/update/'. $resource->uri) .'/'. $fromOrg->uri }}"
                             @elseif (!empty($group))
@@ -133,7 +133,7 @@
                 @endif
                 @if (!empty($admin) || !empty($buttons['edit']))
                 <a
-                    class="btn btn-primary"
+                    class="btn btn-primary m-b-sm"
                     @if (!empty($fromOrg))
                         href="{{ url('/'. $root .'/organisations/resource/edit/'. $resource->uri) .'/'. $fromOrg->uri }}"
                     @elseif (!empty($group))
@@ -147,14 +147,14 @@
                 @endif
                 <a
                     href="{{ url('/'. $root .'/dataset/view/' . $resource->dataset_uri) }}"
-                    class="btn btn-primary"
+                    class="btn btn-primary m-b-sm"
                 >
                     {{ uctrans('custom.close') }}
                 </a>
                 @if (!empty($admin) || !empty($buttons['delete']))
                     <button
                         name="delete"
-                        class="btn del-btn btn-primary"
+                        class="btn del-btn btn-primary m-b-sm"
                         data-confirm="{{ __('custom.remove_data') }}"
                     >{{ uctrans('custom.remove') }}</button>
                 @endif
@@ -163,7 +163,7 @@
 
         <!-- IF there are old versions of this article -->
         @if (!empty($resource->versions_list))
-            <div class="col-sm-12 pull-left m-t-md p-l-none">
+            <div class="col-xs-12 pull-left m-t-md p-l-r-none">
                 <div class="pull-left history">
                     @foreach ($resource->versions_list as $version)
                     <div>

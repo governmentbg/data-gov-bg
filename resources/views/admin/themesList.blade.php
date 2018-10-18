@@ -4,7 +4,7 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'topicsSubtopics'])
-        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <div class="col-xs-12 m-t-lg p-l-r-none">
             <span class="my-profile m-l-sm">{{ __('custom.main_themes_list') }}</span>
         </div>
         <div class="m-b-md col-xs-12 m-t-lg text-right section">
@@ -36,53 +36,55 @@
         </div>
         @include('partials.pagination')
         <div class="row m-b-lg">
-            <div class="col-xs-12 m-t-md text-right section">
+            <div class="col-xs-12 m-t-md text-right">
                 <span class="badge badge-pill long-badge">
                     <a href="{{ url('/admin/themes/add') }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
             @if (count($themes))
-                <form method="POST" class="form-horizontal inline-block">
-                    {{ csrf_field() }}
-                    <div class="col-xs-12 m-l-sm">
-                        <div class="m-t-md">
-                            <div class="table-responsive opn-tbl text-center">
-                                <table class="table">
-                                    <thead>
-                                        <th>{{ utrans('custom.name') }}</th>
-                                        <th>{{ utrans('custom.active') }}</th>
-                                        <th>{{ __('custom.action') }}</th>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($themes as $theme)
-                                            <tr>
-                                                <td class="name">{{ $theme->name }}</td>
-                                                <td>{{ $theme->active ? __('custom.yes') : __('custom.no') }}</td>
-                                                <td class="buttons">
-                                                    <a
-                                                        class="link-action"
-                                                        href="{{ url('admin/themes/edit/'. $theme->id) }}"
-                                                    >{{ utrans('custom.edit') }}</a>
-                                                    <a
-                                                        class="link-action"
-                                                        href="{{ url('admin/themes/view/'. $theme->id) }}"
-                                                    >{{ utrans('custom.preview') }}</a>
-                                                    <a
-                                                        class="link-action red"
-                                                        href="{{ url('admin/themes/delete/'. $theme->id) }}"
-                                                        data-confirm="{{ __('custom.remove_data') }}"
-                                                    >{{ __('custom.delete') }}</a>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                <div class="col-xs-12 m-t-md p-l-r-none">
+                    <form method="POST" class="form-horizontal">
+                        {{ csrf_field() }}
+                        <div class="col-xs-12">
+                            <div class="m-t-md">
+                                <div class="table-responsive opn-tbl text-center">
+                                    <table class="table">
+                                        <thead>
+                                            <th>{{ utrans('custom.name') }}</th>
+                                            <th>{{ utrans('custom.active') }}</th>
+                                            <th>{{ __('custom.action') }}</th>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($themes as $theme)
+                                                <tr>
+                                                    <td class="name">{{ $theme->name }}</td>
+                                                    <td>{{ $theme->active ? __('custom.yes') : __('custom.no') }}</td>
+                                                    <td class="buttons">
+                                                        <a
+                                                            class="link-action"
+                                                            href="{{ url('admin/themes/edit/'. $theme->id) }}"
+                                                        >{{ utrans('custom.edit') }}</a>
+                                                        <a
+                                                            class="link-action"
+                                                            href="{{ url('admin/themes/view/'. $theme->id) }}"
+                                                        >{{ utrans('custom.preview') }}</a>
+                                                        <a
+                                                            class="link-action red"
+                                                            href="{{ url('admin/themes/delete/'. $theme->id) }}"
+                                                            data-confirm="{{ __('custom.remove_data') }}"
+                                                        >{{ __('custom.delete') }}</a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-xs-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

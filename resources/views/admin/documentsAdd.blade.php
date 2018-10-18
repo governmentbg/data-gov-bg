@@ -42,9 +42,9 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="form-group row m-b-lg m-t-md required">
+                            <div class="form-group row m-t-sm required">
                                 <label for="document" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}:</label>
-                                <div class="col-sm-6">
+                                <div class="col-sm-6 m-b-sm">
                                     <input
                                         type="file"
                                         name="document"

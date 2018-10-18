@@ -138,6 +138,10 @@ class RoleController extends AdminController {
         $result = $api->listRoles($rq)->getData();
         $role = isset($result->roles) ? $result->roles : [];
 
+        if (!is_null($role)) {
+            $role = $this->getModelUsernames($role);
+        }
+
         return view('admin/roleView', compact('class', 'role'));
     }
 

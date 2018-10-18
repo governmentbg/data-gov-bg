@@ -24,14 +24,33 @@
 
     .adm-filter {
         label {
-            font-size: 15pt;
+            font-size: 15pt !important;
             font-weight: 100;
+
+            @include mdMobile() {
+                margin-right: 10px;
+            }
+
+            @include smMobile() {
+                margin-right: 0;
+            }
         }
 
         div {
             margin-top: 3px;
             padding-left: 17px;
         }
+    }
+}
+
+.adm-filter {
+    label {
+        font-size: 15pt !important;
+        font-weight: 100;
+    }
+
+    .icheckbox_square-green {
+        margin-top: 4px;
     }
 }
 
@@ -81,8 +100,8 @@
             color: #108f9e;
         }
 
-        padding-bottom: 10px;
-        padding-top: 10px;
+        padding-bottom: 5px;
+        padding-top: 5px;
 
         border-right: 1px solid #108f9e;
         height: 20px;
@@ -115,6 +134,10 @@
         &:first-child() {
             padding-left: 0px;
         }
+
+        @include mobile() {
+            padding: 5px 10px;
+        }
     }
 }
 
@@ -133,6 +156,10 @@
 .sort-links {
     a {
         padding: 10px 10px 10px 6px !important;
+
+        @include mobile() {
+            padding: 3px 10px 3px 6px !important;
+        }
     }
 }
 

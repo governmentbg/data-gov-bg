@@ -28,6 +28,10 @@ label {
 
 .form-control {
     height: 28px !important;
+
+    &[type=file] {
+        padding: 2px 12px;
+    }
 }
 
 .hidden {
@@ -1235,3 +1239,4 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
         background-color: $themeUser;
     }
 }
+

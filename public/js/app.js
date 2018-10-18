@@ -12889,7 +12889,7 @@ function buildLineContent(cm, lineView) {
   var builder = {pre: eltP("pre", [content], "CodeMirror-line"), content: content,
                  col: 0, pos: 0, cm: cm,
                  trailingSpace: false,
-                 splitSpaces: cm.getOption("lineWrapping")};
+                 splitSpaces: (ie || webkit) && cm.getOption("lineWrapping")};
   lineView.measure = {};
 
   // Iterate over the logical lines that make up this visual line.
@@ -13010,8 +13010,6 @@ function buildToken(builder, text, style, startStyle, endStyle, title, css) {
   builder.content.appendChild(content);
 }
 
-// Change some spaces to NBSP to prevent the browser from collapsing
-// trailing spaces at the end of a line when rendering text (issue #1362).
 function splitSpaces(text, trailingBefore) {
   if (text.length > 1 && !/  /.test(text)) { return text }
   var spaceBefore = trailingBefore, result = "";
@@ -18323,9 +18321,8 @@ function onMouseDown(e) {
     }
     return
   }
-  var button = e_button(e);
-  if (button == 3 && captureRightClick ? contextMenuInGutter(cm, e) : clickInGutter(cm, e)) { return }
-  var pos = posFromMouse(cm, e), repeat = pos ? clickRepeat(pos, button) : "single";
+  if (clickInGutter(cm, e)) { return }
+  var pos = posFromMouse(cm, e), button = e_button(e), repeat = pos ? clickRepeat(pos, button) : "single";
   window.focus();
 
   // #3261: make sure, that we're not starting a second selection
@@ -20765,7 +20762,7 @@ CodeMirror$1.fromTextArea = fromTextArea;
 
 addLegacyProps(CodeMirror$1);
 
-CodeMirror$1.version = "5.40.2";
+CodeMirror$1.version = "5.40.0";
 
 return CodeMirror$1;
 
@@ -21177,7 +21174,7 @@ if (token) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.11';
+  var VERSION = '4.17.10';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -21441,7 +21438,7 @@ if (token) {
   var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboRange + rsVarRange + ']');
 
   /** Used to detect strings that need a more robust regexp to match words. */
-  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
@@ -22387,6 +22384,20 @@ if (token) {
       }
     }
     return result;
+  }
+
+  /**
+   * Gets the value at `key`, unless `key` is "__proto__".
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @param {string} key The key of the property to get.
+   * @returns {*} Returns the property value.
+   */
+  function safeGet(object, key) {
+    return key == '__proto__'
+      ? undefined
+      : object[key];
   }
 
   /**
@@ -24846,7 +24857,7 @@ if (token) {
           if (isArguments(objValue)) {
             newValue = toPlainObject(objValue);
           }
-          else if (!isObject(objValue) || isFunction(objValue)) {
+          else if (!isObject(objValue) || (srcIndex && isFunction(objValue))) {
             newValue = initCloneObject(srcValue);
           }
         }
@@ -27767,22 +27778,6 @@ if (token) {
         array[length] = isIndex(index, arrLength) ? oldArray[index] : undefined;
       }
       return array;
-    }
-
-    /**
-     * Gets the value at `key`, unless `key` is "__proto__".
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {string} key The key of the property to get.
-     * @returns {*} Returns the property value.
-     */
-    function safeGet(object, key) {
-      if (key == '__proto__') {
-        return;
-      }
-
-      return object[key];
     }
 
     /**

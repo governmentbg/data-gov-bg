@@ -13,6 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Added
+- TNT search indexes refresh command
 - Visualizations pages
 
 ### Changed

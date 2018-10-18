@@ -71755,7 +71755,14 @@ $(function () {
     $(document).ready(function () {
         if ($('.js-summernote').length) {
             $('.js-summernote').summernote({
-                'height': 150
+                height: 150,
+                codemirror: {
+                    theme: 'monokai'
+                }
+            });
+
+            $('.btn-fullscreen').on('click', function () {
+                $(this).closest('.note-editor').toggleClass('no-max-width');
             });
         }
     });

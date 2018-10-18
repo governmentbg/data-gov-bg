@@ -233,6 +233,18 @@ class StaticPageController extends Controller {
         $title = $page ? $page->head_title : null;
         $keywords = $page ? $page->meta_keywords : null;
         $description = $page ? $page->meta_description : null;
+        $js = '';
+
+        if ($page) {
+            preg_match_all('#<script(.*?)</script>#is', $page->body, $matches);
+
+            if (!empty($matches[0])) {
+                foreach ($matches[0] as $value) {
+                    $js .= $value;
+                }
+                $page->body = preg_replace('#<script(.*?)</script>#is', '', $page->body);
+            }
+        }
 
         $discussion = $this->getForumDiscussion($page ? $page->forum_link : null);
         $viewParams = [
@@ -243,7 +255,8 @@ class StaticPageController extends Controller {
             'description'    => $description,
             'subsections'    => $subsections,
             'keywords'       => $keywords,
-            'title'          => $title
+            'title'          => $title,
+            'script'         => $js
         ];
 
         return view (

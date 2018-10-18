@@ -29,6 +29,13 @@
     <link href="{{ asset('css/summernote/summernote.css') }}" rel="stylesheet">
     <link href="{{ asset('css/colorpicker.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
+
+    @if (isset($cssPaths))
+        @foreach ($cssPaths as $path)
+            <link href="{{ asset($path) }}" rel="stylesheet">
+        @endforeach
+    @endif
+
     @if (isset($link))
         <link rel="alternate" type="application/rss+xml" title="{{ $organisation->name }}" href="{{ url('/datasets/'. $organisation->uri .'/rss') }}"/>
     @endif
@@ -348,10 +355,23 @@
 
     @include('partials.js-translations')
     <!-- Scripts -->
+    @if (isset($jsPaths))
+        @foreach ($jsPaths as $path)
+            <script src="{{ asset($path) }}"></script>
+        @endforeach
+    @endif
+
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/jquery.smartmenus.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.smartmenus.bootstrap.min.js') }}"></script>
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
     <script src="{{ asset('js/bootstrap-clockpicker.min.js') }}"></script>
+
+    @if (isset($script))
+        {!! $script !!}
+    @endif
+
     @yield('js')
 </body>
 </html>

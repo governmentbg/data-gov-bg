@@ -139,6 +139,15 @@ class PageController extends AdminController
         if (!is_null($page)) {
             $section = Section::where('id', $page->section_id)->where('parent_id', null)->value('name');
             $page = $this->getModelUsernames($page);
+            preg_match_all('#<script(.*?)</script>#is', $page->body, $matches);
+            $js = '';
+
+            if (!empty($matches[0])) {
+                foreach ($matches[0] as $value) {
+                    $js .= $value;
+                }
+                $page->body = preg_replace('#<script(.*?)</script>#is', '', $page->body);
+            }
 
             return view(
                 'admin/pagesView',
@@ -146,6 +155,7 @@ class PageController extends AdminController
                     'class'   => 'user',
                     'page'    => $page,
                     'section' => $section,
+                    'script'  => $js,
                 ]
             );
         }

@@ -4,35 +4,8 @@
     <div class="container">
         @include('partials.alerts-bar')
         <div class="row">
-            <div class="col-sm-9 col-xs-12 col-md-offset-3 p-h-sm p-l-r-none">
-                <div class="filter-content">
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-6 p-l-none">
-                                <div>
-                                    <ul class="nav filter-type right-border">
-                                        @foreach ($orgTypes as $orgType)
-                                            <li>
-                                                <a
-                                                    href="{{
-                                                        action(
-                                                            'OrganisationController@list',
-                                                            array_merge(
-                                                                ['type' => $orgType->id],
-                                                                array_except(app('request')->input(), ['type', 'page', 'q'])
-                                                            )
-                                                        )
-                                                    }}"
-                                                    class="{{ (isset($getParams['type']) && $getParams['type'] == $orgType->id) ? 'active' : '' }}"
-                                                >{{ $orgType->name }}</a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-sm-9 col-xs-12 p-sm col-sm-offset-3">
+                @include('partials.org-type-bar', ['orgTypes' => $orgTypes])
             </div>
         </div>
         <div class="row">
@@ -102,69 +75,78 @@
                 </div>
             @endif
         </div>
-        @if (count($organisations))
-            @include('partials.pagination')
-        @endif
+        <div class="col-xs-12 m-t-md text-center">
+            @if (count($organisations))
+                @include('partials.pagination')
+            @endif
+        </div>
         <div class="row">
             <div class="col-xs-12 list-orgs">
                 <div class="row">
                     @if (count($organisations))
                         @foreach ($organisations as $key => $organisation)
-                            <div class="col-md-4 col-sm-12 org-col">
-                                <div class="col-xs-12 m-t-lg">
-                                    <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">
-                                        <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
-                                    </a>
-                                </div>
-                                <div class="col-xs-12">
-                                    <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}">
-                                        <h3 class="org-name">{{ $organisation->name }}</h3>
-                                    </a>
-                                    <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
-                                    <p class="text-right show-more">
-                                        <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}" class="view-profile">
-                                            {{ __('custom.see_more') }}
-                                        </a>
-                                    </p>
-                                </div>
-                                <div class="col-xs-12 ch-del-btns">
-                                    <div class="row">
-                                        @if (isset($buttons[$organisation->id]['edit']) && $buttons[$organisation->id]['edit'])
-                                            <form method="POST" action="{{ url('/'. $buttons['rootUrl'] .'/organisations/edit/'. $organisation->uri) }}">
-                                                {{ csrf_field() }}
-                                                <div class="col-xs-6">
-                                                    <button type="submit">{{ uctrans('custom.edit') }}</button>
-                                                </div>
-                                            </form>
-                                        @endif
-                                        @if (isset($buttons[$organisation->id]['delete']) && $buttons[$organisation->id]['delete'])
-                                            <form method="POST" action="{{ route('orgDelete', app('request')->input()) }}">
-                                                {{ csrf_field() }}
-                                                <div class="col-xs-6 text-right">
-                                                    <button
-                                                        type="submit"
-                                                        name="delete"
-                                                        class="del-btn"
-                                                        data-confirm="{{ __('custom.delete_organisation_confirm') }}"
-                                                    >{{ uctrans('custom.remove') }}</button>
-                                                </div>
-                                                <input class="user-org-del" type="hidden" name="org_uri" value="{{ $organisation->uri }}">
-                                            </form>
-                                        @endif
+                            <div class="col-md-4 col-sm-6 col-xs-10 col-sm-offset-0 col-xs-offset-1">
+                                <div class="row">
+                                    <div class="col-xs-12 org-col p-l-r-none">
+                                        <div class="cust-tooltip organisation">{{ $organisation->name }}</div>
+                                        <div class="col-xs-12 m-t-lg logo-box">
+                                            <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">
+                                                <img class="img-responsive logo" src="{{ $organisation->logo }}"/>
+                                            </a>
+                                        </div>
+                                        <div class="col-xs-12">
+                                            <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}">
+                                                <h3 class="org-name">{{ $organisation->name }}</h3>
+                                            </a>
+                                            <div class="org-desc">{!! nl2br(e($organisation->description)) !!}</div>
+                                            <p class="text-right show-more">
+                                                <a href="{{ route('orgProfile', array_merge(app('request')->input(), ['uri' => $organisation->uri])) }}" class="view-profile">
+                                                    {{ __('custom.see_more') }}
+                                                </a>
+                                            </p>
+                                        </div>
+                                        <div class="col-xs-12 ch-del-btns">
+                                            <div class="row">
+                                                @if (isset($buttons[$organisation->id]['edit']) && $buttons[$organisation->id]['edit'])
+                                                    <form method="POST" action="{{ url('/'. $buttons['rootUrl'] .'/organisations/edit/'. $organisation->uri) }}">
+                                                        {{ csrf_field() }}
+                                                        <div class="col-xs-6">
+                                                            <button type="submit">{{ uctrans('custom.edit') }}</button>
+                                                        </div>
+                                                    </form>
+                                                @endif
+                                                @if (isset($buttons[$organisation->id]['delete']) && $buttons[$organisation->id]['delete'])
+                                                    <form method="POST" action="{{ route('orgDelete', app('request')->input()) }}">
+                                                        {{ csrf_field() }}
+                                                        <div class="col-xs-6 text-right">
+                                                            <button
+                                                                type="submit"
+                                                                name="delete"
+                                                                class="del-btn"
+                                                                data-confirm="{{ __('custom.delete_organisation_confirm') }}"
+                                                            >{{ uctrans('custom.remove') }}</button>
+                                                        </div>
+                                                        <input class="user-org-del" type="hidden" name="org_uri" value="{{ $organisation->uri }}">
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                     @else
-                        <div class="col-sm-12 m-t-xl text-center no-info">
+                        <div class="col-sm-12 m-t-md text-center no-info">
                             {{ __('custom.no_info') }}
                         </div>
                     @endif
                 </div>
             </div>
         </div>
-        @if (count($organisations))
-            @include('partials.pagination')
-        @endif
+        <div class="col-xs-12 m-t-md text-center">
+            @if (count($organisations))
+                @include('partials.pagination')
+            @endif
+        </div>
     </div>
 @endsection

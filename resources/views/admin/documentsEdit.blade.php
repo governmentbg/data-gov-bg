@@ -44,7 +44,7 @@
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
                                 <label for="document" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}:</label>
-                                <div class="col-sm-6">
+                                <div class="col-sm-6 m-b-sm">
                                     <input
                                         type="text"
                                         name="document"
@@ -64,7 +64,7 @@
                                 <div class="col-sm-12 text-right">
                                     <a
                                         href="{{ url('admin/documents/list') }}"
-                                        class="m-l-md btn btn-custom"
+                                        class="btn btn-primary"
                                     >
                                         {{ uctrans('custom.close') }}
                                     </a>

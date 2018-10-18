@@ -244,6 +244,9 @@ class OrganisationController extends Controller
                 $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
             }
 
+            $result = $api->listOrganisationTypes($rq)->getData();
+            $orgTypes = $result->success ? $result->types : [];
+
             return view(
                 'organisation/profile',
                 [
@@ -252,6 +255,7 @@ class OrganisationController extends Controller
                     'childOrgs'      => $childOrgs,
                     'parentOrg'      => $parentOrg,
                     'buttons'        => $buttons,
+                    'orgTypes'       => $orgTypes,
                 ]
             );
         }
@@ -381,6 +385,9 @@ class OrganisationController extends Controller
         $api = new ApiOrganisation($rq);
         $res = $api->getOrganisationDetails($rq)->getData();
         $organisation = !empty($res->data) ? $res->data : [];
+
+        $result = $api->listOrganisationTypes($rq)->getData();
+        $orgTypes = $result->success ? $result->types : [];
 
         if (!empty($organisation) &&
             $organisation->active == Organisation::ACTIVE_TRUE &&
@@ -672,6 +679,7 @@ class OrganisationController extends Controller
                     'getParams'          => $getParams,
                     'display'            => $display,
                     'buttons'            => $buttons,
+                    'orgTypes'           => $orgTypes,
                 ]
             );
         }
@@ -1042,6 +1050,9 @@ class OrganisationController extends Controller
         $res = $api->getOrganisationDetails($rq)->getData();
         $organisation = !empty($res->data) ? $res->data : [];
 
+        $result = $api->listOrganisationTypes($rq)->getData();
+        $orgTypes = $result->success ? $result->types : [];
+
         if (!empty($organisation) &&
             $organisation->active == Organisation::ACTIVE_TRUE &&
             $organisation->approved == Organisation::APPROVED_TRUE) {
@@ -1169,6 +1180,7 @@ class OrganisationController extends Controller
                     'pagination'     => !empty($paginationData['paginate']) ? $paginationData['paginate'] : [],
                     'actionObjData'  => $actObjData,
                     'actionTypes'    => $actTypes,
+                    'orgTypes'       => $orgTypes,
                 ]
             );
         }

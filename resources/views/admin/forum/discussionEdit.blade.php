@@ -5,7 +5,7 @@
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
         <div class="row">
-            <div class="col-xs-10 m-t-lg text-right section">
+            <div class="col-md-10 col-xs-11 m-t-lg text-right section">
                 <div class="filter-content section-nav-bar">
                     <ul class="nav filter-type right-border">
                         <li>
@@ -110,15 +110,15 @@
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
                                     <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                    <button
                                         type="submit"
                                         name="edit"
                                         value="1"
                                         class="m-l-md btn btn-custom"
                                     >{{ utrans('custom.edit') }}</button>
-                                    <button
-                                        name="back"
-                                        class="btn btn-primary"
-                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

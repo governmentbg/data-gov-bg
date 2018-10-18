@@ -118,7 +118,7 @@
                                             action="{{ url('admin/images/edit/'. $image->id) }}"
                                         >
                                             {{ csrf_field() }}
-                                            <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                            <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                             <input type="hidden" name="view" value="1">
                                         </form>
                                         <form
@@ -128,7 +128,7 @@
                                             {{ csrf_field() }}
                                         <button
                                             name="back"
-                                            class="btn btn-primary"
+                                            class="btn btn-primary m-b-sm"
                                         >{{ uctrans('custom.close') }}</button>
                                         </form>
                                         <form
@@ -138,7 +138,7 @@
                                         >
                                             {{ csrf_field() }}
                                                 <button
-                                                    class="btn del-btn btn-primary del-btn"
+                                                    class="btn btn-primary del-btn m-b-sm"
                                                     type="submit"
                                                     name="delete"
                                                     data-confirm="{{ __('custom.remove_data') }}"
@@ -152,7 +152,7 @@
                 </div>
                 <div class="col-md-2 col-sm-1"></div>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

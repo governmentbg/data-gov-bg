@@ -4,11 +4,11 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'images'])
-        <div class="col-xs-12 sidenav m-t-lg m-b-lg">
+        <div class="col-xs-12 m-t-lg p-l-r-none">
             <span class="my-profile m-l-sm">{{ __('custom.images_list') }}</span>
         </div>
         @include('partials.pagination')
-        <div class="row m-b-lg">
+        <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill doc-badge">
                     <a href="{{ url('/admin/images/add') }}">{{ __('custom.add') }}</a>
@@ -19,7 +19,7 @@
             @if (count($images))
                 <form method="POST" class="form-horizontal">
                     {{ csrf_field() }}
-                    <div class="col-xs-12 m-l-sm">
+                    <div class="col-xs-12">
                         <div class="m-t-md">
                             <div class="table-responsive opn-tbl text-center">
                                 <table class="table">
@@ -65,7 +65,7 @@
                     </div>
                 </form>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

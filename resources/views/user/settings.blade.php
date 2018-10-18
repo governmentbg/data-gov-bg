@@ -8,10 +8,10 @@
     @else
         @include('partials.user-nav-bar', ['view' => 'setting'])
     @endif
-    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
-        <span class="my-profile m-l-sm">{{uctrans('custom.settings')}}</span>
+    <div class="col-xs-12 m-t-lg p-l-r-none">
+        <span class="my-profile m-l-sm">{{ uctrans('custom.settings') }}</span>
     </div>
-    <div class="col-xs-12 m-t-lg">
+    <div class="col-xs-12 p-l-r-none">
         <form class="m-t-lg p-sm" method="post">
             {{ csrf_field() }}
             <div class="form-group row required">
@@ -237,7 +237,7 @@
         <div class="modal-content">
             <div class="blue-highlight">
                 <div class="modal-body">
-                    <a type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{uctrans('custom.close')}}</span></a>
+                    <a type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{{ uctrans('custom.close') }}</span></a>
                     <span>
                     {{ __('custom.delete_account_message') }}
                         <p class="small-text">
@@ -271,7 +271,7 @@
                     <form method="post">
                         {{ csrf_field() }}
                         <a type="button" class="close" data-dismiss="modal">
-                            <span aria-hidden="true">&times;</span><span class="sr-only">{{uctrans('custom.close')}}</span>
+                            <span aria-hidden="true">&times;</span><span class="sr-only">{{ uctrans('custom.close') }}</span>
                         </a>
                         <div class="usr-delete row">
                             <span>

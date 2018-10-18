@@ -42,6 +42,35 @@
                                 <div>{{ $term->ordering }}</div>
                             </div>
                         </div>
+                        <div class="text-center m-b-md terms-hr">
+                            <hr>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+                            <div class="col-sm-6 col-xs-12">
+                                <div>{{ $term->created_at }}</div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+                            <div class="col-sm-6 col-xs-12">
+                                <div>{{ $term->created_by }}</div>
+                            </div>
+                        </div>
+                        @if ($term->created_at != $term->updated_at)
+                            <div class="form-group row">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $term->updated_at }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $term->updated_by }}</div>
+                                </div>
+                            </div>
+                        @endif
                         @if (\App\Role::isAdmin())
                             <div class="text-right">
                                 <div class="row">
@@ -51,7 +80,7 @@
                                         action="{{ url('admin/terms-of-use/edit/'. $term->id) }}"
                                     >
                                         {{ csrf_field() }}
-                                        <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                        <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                         <input type="hidden" name="view" value="1">
                                     </form>
                                     <form
@@ -61,7 +90,7 @@
                                         {{ csrf_field() }}
                                     <button
                                         name="back"
-                                        class="btn btn-primary"
+                                        class="btn btn-primary m-b-sm"
                                     >{{ uctrans('custom.close') }}</button>
                                     </form>
                                     <form
@@ -71,7 +100,7 @@
                                     >
                                         {{ csrf_field() }}
                                             <button
-                                                class="btn del-btn btn-primary del-btn"
+                                                class="btn btn-primary del-btn m-b-sm"
                                                 type="submit"
                                                 name="delete"
                                                 data-confirm="{{ __('custom.remove_data') }}"

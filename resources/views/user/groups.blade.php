@@ -17,7 +17,7 @@
             @endif
             </div>
             @if ($buttons['view'])
-                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
+                <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field p-l-lg">
                     <form method="GET" action="{{ url('/user/groups/search') }}">
                         <input
                             type="text"
@@ -81,7 +81,7 @@
                         @endif
                     @endforeach
                 @else
-                    <div class="col-sm-12 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

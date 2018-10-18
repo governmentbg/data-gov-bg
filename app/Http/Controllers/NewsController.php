@@ -42,9 +42,6 @@ class NewsController extends Controller {
     {
         $perPage = 6;
         $pageNumber = !empty($request->page) ? $request->page : 1;
-        if (\Auth::check()) {
-            $params['api_key'] = \Auth::user()->api_key;
-        }
 
         $params = [
             'records_per_page' => $perPage,
@@ -57,6 +54,10 @@ class NewsController extends Controller {
                 ]
             ]
         ];
+
+        if (\Auth::check()) {
+            $params['api_key'] = \Auth::user()->api_key;
+        }
 
         $newsRequest = Request::create('/api/listNews', 'POST', $params);
         $apiNews = new ApiNews($newsRequest);

@@ -4,39 +4,41 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'forum'])
-        @include('partials.pagination')
-        <div class="col-xs-2 m-t-lg m-b-lg">
-            <span class="my-profile head">{{ utrans('custom.forum') }}</span>
-        </div>
-        <div class="col-xs-10 m-t-lg text-right section">
-            <div class="filter-content section-nav-bar">
-                <ul class="nav filter-type right-border">
-                    <li>
-                        <a
-                            class="active"
-                            href="{{ url('/admin/forum/discussions/list') }}"
-                        >{{ __('custom.discussions') }}</a>
-                    </li>
-                    <li>
-                        <a
-                        href="{{ url('/admin/forum/categories/list') }}"
-                        >{{ __('custom.categories') }}</a>
-                    </li>
-                </ul>
+        <div class="col-xs-12">
+            <div class="row">
+                <div class="col-xs-2 m-t-md p-l-r-none">
+                    <span class="my-profile head">{{ utrans('custom.forum') }}</span>
+                </div>
+                <div class="col-xs-10 m-t-md m-b-md text-right section">
+                    <div class="filter-content section-nav-bar">
+                        <ul class="nav filter-type right-border">
+                            <li>
+                                <a
+                                    class="active"
+                                    href="{{ url('/admin/forum/discussions/list') }}"
+                                >{{ __('custom.discussions') }}</a>
+                            </li>
+                            <li>
+                                <a
+                                href="{{ url('/admin/forum/categories/list') }}"
+                                >{{ __('custom.categories') }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row m-b-sm">
+        <div class="row m-b-lg">
+            @include('partials.pagination')
             <div class="col-xs-12 text-right">
                 <span class="badge badge-pill long-badge">
                     <a href="{{ url('/admin/forum/discussions/add') }}">{{ __('custom.add') }}</a>
                 </span>
             </div>
-        </div>
-        <div class="row m-b-lg">
             @if (count($discussions))
                 <form method="POST" class="form-horizontal">
                     {{ csrf_field() }}
-                    <div class="col-xs-12 m-l-sm">
+                    <div class="col-xs-12">
                         <div class="m-t-md">
                             <div class="table-responsive opn-tbl text-center">
                                 <table class="table">
@@ -84,7 +86,7 @@
                     </div>
                 </form>
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

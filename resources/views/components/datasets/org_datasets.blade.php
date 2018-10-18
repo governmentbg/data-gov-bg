@@ -10,7 +10,7 @@
         </div>
     @endif
     @if ((!empty($admin)) || !empty($buttons['view']))
-        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
+        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field p-l-lg">
             <form method="GET">
                 <input
                     type="text"
@@ -27,7 +27,9 @@
     @endif
 </div>
 <div class="row">
-    @include('partials.org-info', ['organisation' => $organisation])
+    <div class="col-sm-3 col-xs-12 text-left p-l-none">
+        @include('partials.org-info', ['organisation' => $organisation])
+    </div>
     <div class="col-sm-9 col-xs-12 m-t-md">
         <div class="row">
             <div class="articles m-t-lg">
@@ -82,7 +84,7 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="col-sm-12 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

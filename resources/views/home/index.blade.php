@@ -56,7 +56,7 @@
             <p>{{ __('custom.most_active_agency') }} {{ $lastMonth }}</p>
             <hr>
             <span>{{ isset($mostActiveOrg->name) ? $mostActiveOrg->name : null }}</span>
-            <img src="{{ asset('img/open-data.png') }}">
+            <img class="org-logo" src="{{ isset($mostActiveOrg->logo) ? $mostActiveOrg->logo : asset('img/open-data.png') }}">
         </a>
     </div>
 </div>

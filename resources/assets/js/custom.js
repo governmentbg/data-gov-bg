@@ -394,6 +394,7 @@ $(function () {
                     $('.alert-success').fadeTo(3000, 500).slideUp(500, function () {
                         $('.alert-success').slideUp(500);
                     });
+                    $( 'button:submit').attr('disabled','disabled');
                 } else {
                     $('#js-alert-danger').show();
                     $('.alert-danger').fadeTo(3000, 500).slideUp(500, function () {
@@ -545,4 +546,14 @@ $(function() {
             }
         }
     });
+});
+
+$('.org-col').mouseenter(function() {
+    var $tooltip = $(this).children('.cust-tooltip');
+    $tooltip.slideDown(500);
+});
+
+$('.org-col').mouseleave(function() {
+    var $tooltip = $(this).children('.cust-tooltip');
+    $tooltip.slideUp(100);
 });

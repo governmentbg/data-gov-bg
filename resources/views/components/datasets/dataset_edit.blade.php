@@ -2,7 +2,7 @@
     <span class="my-profile m-l-sm">{{uctrans('custom.dataset_edit')}}</span>
 </div>
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp
-<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg p-l-r-none">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
     <form method="POST">
         {{ csrf_field() }}

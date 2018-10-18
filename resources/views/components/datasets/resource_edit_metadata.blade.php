@@ -98,7 +98,7 @@
             @endif
         @endforeach
 
-        <div class="col-xs-12 p-r-none text-right mng-btns">
+        <div class="col-xs-12 text-right mng-btns p-l-r-none">
             @php
                 $root = empty($admin) ? 'user' : 'admin';
 

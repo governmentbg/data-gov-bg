@@ -95,11 +95,11 @@ class MigrateData extends Command
 
         ini_set('memory_limit', '8G');
 
-//        $this->migrateTags();
-//
-//        $this->migrateOrganisations();
-//        $this->migrateGroups();
-//        $this->migrateUsers();
+        $this->migrateTags();
+
+        $this->migrateOrganisations();
+        $this->migrateGroups();
+        $this->migrateUsers();
 
         $this->getUsersDatasets();
         $this->getOrgsDatasets();

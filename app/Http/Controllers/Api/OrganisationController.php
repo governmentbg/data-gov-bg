@@ -174,16 +174,16 @@ class OrganisationController extends ApiController
                                     'value' => $fieldSet['value'],
                                     'label' => $fieldSet['label'],
                                 ];
-                            } elseif (!empty($fieldSet['label'])) {
-                                $customFields[] = [
-                                    'value' => [
-                                        $locale => $fieldSet['value']
-                                    ],
-                                    'label' =>[
-                                        $locale => $fieldSet['label']
-                                    ]
-                                ];
                             }
+                        } elseif (!empty($fieldSet['label'])) {
+                            $customFields[] = [
+                                'value' => [
+                                    $locale => $fieldSet['value']
+                                ],
+                                'label' =>[
+                                    $locale => $fieldSet['label']
+                                ]
+                            ];
                         }
                     }
                 }
@@ -1430,16 +1430,16 @@ class OrganisationController extends ApiController
                                         'value' => $fieldSet['value'],
                                         'label' => $fieldSet['label'],
                                     ];
-                                } elseif (!empty($fieldSet['label'])) {
-                                    $customFields[] = [
-                                        'value' => [
-                                            $locale => $fieldSet['value']
-                                        ],
-                                        'label' =>[
-                                            $locale => $fieldSet['label']
-                                        ]
-                                    ];
                                 }
+                            } elseif (!empty($fieldSet['label'])) {
+                                $customFields[] = [
+                                    'value' => [
+                                        $locale => $fieldSet['value']
+                                    ],
+                                    'label' =>[
+                                        $locale => $fieldSet['label']
+                                    ]
+                                ];
                             }
                         }
                     }

@@ -169,16 +169,16 @@ class ResourceController extends ApiController
                                     'value' => $fieldSet['value'],
                                     'label' => $fieldSet['label'],
                                 ];
-                            } elseif (!empty($fieldSet['label'])) {
-                                $customFields[] = [
-                                    'value' => [
-                                        $locale => $fieldSet['value']
-                                    ],
-                                    'label' =>[
-                                        $locale => $fieldSet['label']
-                                    ]
-                                ];
                             }
+                        } elseif (!empty($fieldSet['label'])) {
+                            $customFields[] = [
+                                'value' => [
+                                    $locale => $fieldSet['value']
+                                ],
+                                'label' =>[
+                                    $locale => $fieldSet['label']
+                                ]
+                            ];
                         }
                     }
 
@@ -472,16 +472,16 @@ class ResourceController extends ApiController
                                     'value' => $fieldSet['value'],
                                     'label' => $fieldSet['label'],
                                 ];
-                            } elseif (!empty($fieldSet['label'])) {
-                                $customFields[] = [
-                                    'value' => [
-                                        $locale => $fieldSet['value']
-                                    ],
-                                    'label' =>[
-                                        $locale => $fieldSet['label']
-                                    ]
-                                ];
                             }
+                        } elseif (!empty($fieldSet['label'])) {
+                            $customFields[] = [
+                                'value' => [
+                                    $locale => $fieldSet['value']
+                                ],
+                                'label' =>[
+                                    $locale => $fieldSet['label']
+                                ]
+                            ];
                         }
                     }
 

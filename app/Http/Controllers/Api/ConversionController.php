@@ -63,7 +63,6 @@ class ConversionController extends ApiController
     public function json2xml(Request $request)
     {
         $post = $request->all();
-        error_log(var_export($post['data'], true));
 
         $validator = \Validator::make($post, ['data' => 'required']);
 

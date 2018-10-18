@@ -161,10 +161,21 @@ class DataSetController extends ApiController
 
             if (!empty($data['custom_fields'])) {
                 foreach ($data['custom_fields'] as $fieldSet) {
-                    if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                    if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                        if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                            $customFields[] = [
+                                'value' => $fieldSet['value'],
+                                'label' => $fieldSet['label'],
+                            ];
+                        }
+                    } elseif (!empty($fieldSet['label'])) {
                         $customFields[] = [
-                            'value' => $fieldSet['value'],
-                            'label' => $fieldSet['label'],
+                            'value' => [
+                               $locale => $fieldSet['value']
+                            ],
+                            'label' =>[
+                                $locale => $fieldSet['label']
+                             ]
                         ];
                     }
                 }
@@ -1135,37 +1146,29 @@ class DataSetController extends ApiController
             if ($datasetId) {
                 DB::beginTransaction();
 
+                CustomSetting::where('data_set_id', $datasetId)->delete();
+
                 foreach ($customFields as $field) {
-                    if (!empty($field['value'])) {
-                        if (!empty($field['sett_id'])) {
-                            $saveField = CustomSetting::find($field['sett_id']);
+                    if (!empty($field['label']) && !empty($field['value'])) {
+                        foreach ($field['label'] as $locale => $label) {
+                            if (
+                                (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                                || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
 
-                            $saveField->updated_by = \Auth::user()->id;
-                            $saveField->value = $this->trans($locale, $field['value']);
+                            ) {
+                                DB::rollback();
 
-                            if (isset($field['label'])) {
-                                foreach ($field['label'] as $lang => $string) {
-                                    $oldVal = Translation::where([
-                                        'group_id'  => $saveField['key'],
-                                        'locale'    => $lang,
-                                    ])->first();
-
-                                    $oldVal->label = $string;
-
-                                    $oldVal->save();
-                                }
+                                return false;
                             }
-
-                            $saveField->save();
-                        } else {
-                            $saveField = new CustomSetting;
-                            $saveField->data_set_id = $datasetId;
-                            $saveField->created_by = \Auth::user()->id;
-                            $saveField->key = $this->trans($locale, $field['label']);
-                            $saveField->value = $this->trans($locale, $field['value']);
-
-                            $saveField->save();
                         }
+
+                        $saveField = new CustomSetting;
+                        $saveField->data_set_id = $datasetId;
+                        $saveField->created_by = \Auth::user()->id;
+                        $saveField->key = $this->trans($empty, $field['label']);
+                        $saveField->value = $this->trans($empty, $field['value']);
+
+                        $saveField->save();
                     } else {
                         DB::rollback();
 

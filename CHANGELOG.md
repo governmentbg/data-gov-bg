@@ -23,6 +23,7 @@ Security - in case of vulnerabilities.
 - Missing conversion methods
 - Unclosed span tag
 - Search pagination
+- HTML error when creating dataset form API
 
 ## [0.6.2] - 2018-10-17
 ### Fixed

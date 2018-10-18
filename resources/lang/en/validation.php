@@ -198,7 +198,6 @@ return [
         'locale' => 'locale',
         'tag_id' => 'tag id',
         'data' => 'data',
-        'es_id' => 'elastic set',
         'request_id' => 'request id',
         'org_id' => 'org id',
         'terms_of_use_id' => 'terms of use id',

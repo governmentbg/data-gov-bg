@@ -63,6 +63,7 @@ class ConversionController extends ApiController
     public function json2xml(Request $request)
     {
         $post = $request->all();
+        error_log(var_export($post['data'], true));
 
         $validator = \Validator::make($post, ['data' => 'required']);
 
@@ -583,7 +584,8 @@ class ConversionController extends ApiController
      * Get elastic search data
      *
      * @param string api_key - required
-     * @param string es_id - required
+     * @param string resource_id - required
+     * @param string version - optional
      *
      * @return json with json data or error
      */
@@ -591,11 +593,21 @@ class ConversionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['es_id' => 'required|int|exists:elastic_data_set,id']);
+        $validator = \Validator::make($post, [
+            'resource_id'   => 'required|int|exists:resources,id',
+            'version'       => 'sometimes|int|exists:elastic_data_set,version',
+        ]);
 
         if (!$validator->fails()) {
+            if (!isset($post['version'])) {
+                $resource = Resource::find($post['resource_id']);
+                $version = $resource->version;
+            } else {
+                $version = $post['version'];
+            }
+
             try {
-                $data = ElasticDataSet::getElasticData($post['es_id']);
+                $data = ElasticDataSet::getElasticData($post['resource_id'], $version);
 
                 return $this->successResponse($data);
             } catch (\Exception $ex) {
@@ -610,7 +622,8 @@ class ConversionController extends ApiController
      * Get elastic search data
      *
      * @param string api_key - required
-     * @param string es_id - required
+     * @param string resource_id - required
+     * @param string version - optional
      *
      * @return json with xml data or error
      */
@@ -618,11 +631,21 @@ class ConversionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['es_id' => 'required|int|exists:elastic_data_set,id']);
+        $validator = \Validator::make($post, [
+            'resource_id'   => 'required|int|exists:resources,id',
+            'version'       => 'sometimes|int|exists:elastic_data_set,version',
+        ]);
 
         if (!$validator->fails()) {
+            if (!isset($post['version'])) {
+                $resource = Resource::find($post['resource_id']);
+                $version = $resource->version;
+            } else {
+                $version = $post['version'];
+            }
+
             try {
-                $data = ElasticDataSet::getElasticData($post['es_id']);
+                $data = ElasticDataSet::getElasticData($post['resource_id'], $version);
                 $data = $this->getXML($data);
 
                 return $this->successResponse($data);
@@ -654,7 +677,8 @@ class ConversionController extends ApiController
      * Get ellastic search data
      *
      * @param string api_key - required
-     * @param string es_id - required
+     * @param string resource_id - required
+     * @param string version - optional
      *
      * @return json with csv data or error
      */
@@ -662,11 +686,21 @@ class ConversionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['es_id' => 'required|int|exists:elastic_data_set,id']);
+        $validator = \Validator::make($post, [
+            'resource_id'   => 'required|int|exists:resources,id',
+            'version'       => 'sometimes|int|exists:elastic_data_set,version',
+        ]);
 
         if (!$validator->fails()) {
+            if (!isset($post['version'])) {
+                $resource = Resource::find($post['resource_id']);
+                $version = $resource->version;
+            } else {
+                $version = $post['version'];
+            }
+
             try {
-                $data = ElasticDataSet::getElasticData($post['es_id']);
+                $data = ElasticDataSet::getElasticData($post['resource_id'], $version);
                 $data = $this->getCSV($data);
 
                 return $this->successResponse($data);
@@ -844,7 +878,8 @@ class ConversionController extends ApiController
      * Get elastic search data
      *
      * @param string api_key - required
-     * @param string es_id - required
+     * @param string resource_id - required
+     * @param string version - optional
      *
      * @return json with kml data or error
      */
@@ -852,11 +887,21 @@ class ConversionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['es_id' => 'required|int|exists:elastic_data_set,id']);
+        $validator = \Validator::make($post, [
+            'resource_id'   => 'required|int|exists:resources,id',
+            'version'       => 'sometimes|int|exists:elastic_data_set,version',
+        ]);
 
         if (!$validator->fails()) {
+            if (!isset($post['version'])) {
+                $resource = Resource::find($post['resource_id']);
+                $version = $resource->version;
+            } else {
+                $version = $post['version'];
+            }
+
             try {
-                $data = ElasticDataSet::getElasticData($post['es_id']);
+                $data = ElasticDataSet::getElasticData($post['resource_id'], $version);
                 $data = $this->getKML($data);
 
                 return $this->successResponse($data);
@@ -887,7 +932,8 @@ class ConversionController extends ApiController
      * Get elastic search data
      *
      * @param string api_key - required
-     * @param string es_id - required
+     * @param string resource_id - required
+     * @param string version - optional
      *
      * @return json with rdf data or error
      */
@@ -895,11 +941,21 @@ class ConversionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['es_id' => 'required|int|exists:elastic_data_set,id']);
+        $validator = \Validator::make($post, [
+            'resource_id'   => 'required|int|exists:resources,id',
+            'version'       => 'sometimes|int|exists:elastic_data_set,version',
+        ]);
 
         if (!$validator->fails()) {
+            if (!isset($post['version'])) {
+                $resource = Resource::find($post['resource_id']);
+                $version = $resource->version;
+            } else {
+                $version = $post['version'];
+            }
+
             try {
-                $data = ElasticDataSet::getElasticData($post['es_id']);
+                $data = ElasticDataSet::getElasticData($post['resource_id'], $version);
                 $data = $this->getRDF($data);
 
                 return $this->successResponse($data);

@@ -2411,12 +2411,11 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $orgIds = Organisation::where('type', '=', Organisation::TYPE_GROUP)->get()->pluck('id');
                 $result = DB::table('actions_history')
                     ->select('user_to_org_role.org_id', DB::raw('count(user_to_org_role.org_id) as count'))
                     ->leftJoin('user_to_org_role', 'user_to_org_role.user_id', '=', 'actions_history.user_id')
                     ->whereNotIn('user_to_org_role.org_id', Organisation::where('type', '=', Organisation::TYPE_GROUP)->get()->pluck('id'))
-                    ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
+                    ->whereMonth('actions_history.occurrence', '=', 10)
                     ->groupBy('user_to_org_role.org_id')
                     ->orderBy('count', 'desc')
                     ->limit(1)

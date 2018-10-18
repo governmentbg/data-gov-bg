@@ -423,7 +423,7 @@ class DocumentController extends ApiController
 
         if (isset($criteria['keywords'])) {
             $ids = Document::search($criteria['keywords'])->get()->pluck('id');
-            $query = Document::whereIn('id', $ids);
+            $query = Document::whereIn('documents.id', $ids);
         }
 
         if (isset($criteria['order']['field'])) {
@@ -433,14 +433,14 @@ class DocumentController extends ApiController
         }
 
         if (isset($criteria['doc_id'])) {
-            $query->where('id', $criteria['doc_id']);
+            $query->where('documents.id', $criteria['doc_id']);
         }
 
-        $filterColumn = 'created_at';
+        $filterColumn = 'documents.created_at';
 
         if (isset($criteria['date_type'])) {
             if (strtolower($criteria['date_type']) == Document::DATE_TYPE_UPDATED) {
-                $filterColumn = 'updated_at';
+                $filterColumn = 'documents.updated_at';
             }
         }
 

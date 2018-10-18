@@ -1,3 +1,6 @@
+<div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg m-b-lg">
+    <span class="my-profile m-l-sm">{{uctrans('custom.edit_resource')}}</span>
+</div>
 <div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg">

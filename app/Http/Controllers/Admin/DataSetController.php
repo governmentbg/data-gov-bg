@@ -581,6 +581,7 @@ class DataSetController extends AdminController
 
         $resource = $this->getModelUsernames($result->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
+        $formats = Resource::getFormats();
 
         if (empty($version)) {
             $version = $resource->version;
@@ -607,14 +608,18 @@ class DataSetController extends AdminController
 
         $data = !empty($response->data) ? $response->data : [];
 
-        if ($resource->format_code == Resource::FORMAT_XML) {
+        if (
+            $resource->format_code == Resource::FORMAT_XML
+            || $resource->format_code == Resource::FORMAT_RDF
+        ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $reqConvert = Request::create('/json2xml', 'POST', $convertData);
+            $method = 'json2'. strtolower($resource->file_format);
+            $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
-            $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+            $resultConvert = $apiConvert->$method($reqConvert)->getData();
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
@@ -640,6 +645,7 @@ class DataSetController extends AdminController
             'versionView'   => $version,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
+            'formats'       => $formats,
         ]);
     }
 

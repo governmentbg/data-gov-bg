@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Resource;
 use App\Organisation;
+use App\ElasticDataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -21,8 +22,8 @@ class ResourceController extends Controller {
         if (Auth::check()) {
             $apiKey = Auth::user()->api_key;
             $metadata = [
-                'api_key'       => $apiKey,
-                'data'          => $resourceData,
+                'api_key'   => $apiKey,
+                'data'      => $resourceData,
             ];
 
             if ($isUpdate) {
@@ -492,20 +493,27 @@ class ResourceController extends Controller {
     public function resourceDownload(Request $request)
     {
         $fileName = $request->offsetGet('name');
-        $esid = $request->offsetGet('es_id');
+        $resourceId = (int) $request->offsetGet('resource');
+        $version = (int) $request->offsetGet('version');
         $format = $request->offsetGet('format');
-        $method = 'to'. $format;
-        $convertReq = Request::create('/api/'. $method, 'POST', ['es_id' => $esid]);
-        $apiResources = new ApiConversion($convertReq);
-        $resource = $apiResources->$method($convertReq)->getData();
+        $data = ElasticDataSet::getElasticData($resourceId, $version);
 
-        if (strtolower($format) == 'json') {
-            $fileData = json_encode($resource->data);
-        } else {
+        if (strtolower($format) != 'json') {
+            $method = 'json2'. strtolower($format);
+            $convertReq = Request::create('/api/'. $method, 'POST', ['data' => $data]);
+            $apiResources = new ApiConversion($convertReq);
+            $resource = $apiResources->$method($convertReq)->getData();
+
+            if (!$resource->success) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.converse_unavailable')));
+            }
+
             $fileData = $resource->data;
+        } else {
+            $fileData = json_encode($data);
         }
 
-        if (!empty($resource->data)) {
+        if (!empty($fileData)) {
             $handle = fopen('../storage/app/'. $fileName, 'w+');
             $path = stream_get_meta_data($handle)['uri'];
 
@@ -514,7 +522,7 @@ class ResourceController extends Controller {
             fclose($handle);
 
             $headers = array(
-                'Content-Type' => 'text/'. strtolower($method),
+                'Content-Type' => 'text/'. strtolower($format),
             );
 
             return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);

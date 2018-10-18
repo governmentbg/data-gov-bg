@@ -16901,6 +16901,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .home-stats .most-active a img.org-logo {
   width: 60px;
   height: auto;
+  max-height: 60px;
 }
 
 .home-stats .most-active a hr {
@@ -17998,6 +17999,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .mng-btns .btn {
   margin-bottom: 5px;
   margin-top: 5px;
+}
+
+.download-btns .btn {
+  margin: 5px;
 }
 
 .no-info {

@@ -1,12 +1,12 @@
 @if (!empty($dataset))
     <div class="row">
-        <div class="col-sm-9 col-xs-11 page-content col-sm-offset-3">
+        <div class="col-sm-9 col-xs-12 page-content col-sm-offset-3 p-h-sm">
             <div class="articles">
-                <div class="article col-xs-12 p-l-none">
+                <div class="article col-xs-12">
                     <div>
                     @if (!empty($organisation))
                         <div class="col-sm-7 col-xs-12 p-l-r-none m-t-lg m-b-md">
-                            <div class="col-xs-6 logo-img">
+                            <div class="col-md-8 col-sm-10 col-xs-12 logo-img p-l-r-none">
                                 <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" title="{{ $organisation->name }}">
                                     <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
                                 </a>
@@ -35,7 +35,7 @@
                         </div>
                     @endif
                     </div>
-                    <div class="col-xs-12 p-l-none m-t-md m-b-md">
+                    <div class="col-xs-12 p-l-r-none m-t-md m-b-md">
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
                                 <div class="p-w-sm">
@@ -176,7 +176,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-9 col-xs-11 page-content p-sm col-sm-offset-3 mng-btns">
+        <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns">
             @if (isset($buttons['addResource']) && $buttons['addResource'])
                 <a
                     class="btn btn-primary badge badge-pill"

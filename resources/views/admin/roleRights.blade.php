@@ -20,10 +20,10 @@
                 <tbody>
                     @foreach ($modules as $i => $module)
                         <tr>
-                            <td>{{ __('custom.' . $module) }}</td>
+                            <td width="17%">{{ __('custom.' . $module) }}</td>
                             <td>
                                 @foreach ($rightTypes as $key => $rightType)
-                                    <label class="m-l-r-xs">
+                                    <label>
                                         {{ $rightType }}
                                         <div class="js-check js-uncheck inline-block m-l-r-xs">
                                             <input
@@ -42,7 +42,7 @@
                                 @endforeach
                             </td>
                             <td class="shrink">
-                                <label class="m-l-r-xs">
+                                <label>
                                     {{ __('custom.for_own_records') }}
                                     <div class="js-check inline-block m-l-r-xs">
                                         <input
@@ -53,7 +53,7 @@
                                         >
                                     </div>
                                 </label>
-                                <label class="m-l-r-xs">
+                                <label>
                                     {{ __('custom.for_api') }}
                                     <div class="js-check inline-block m-l-r-xs">
                                         <input

@@ -6,8 +6,8 @@
     @include('partials.admin-nav-bar', ['view' => 'help'])
     <h3>{{ uctrans('custom.help_sections') .' / '. uctrans('custom.subsections') }}</h3>
     <div class="row">
-        <div class="col-xs-12 m-t-lg m-b-lg text-right section">
-            <div class="filter-content section-nav-bar">
+        <div class="col-xs-12 m-b-sm m-b-lg text-right section">
+            <div class="filter-content section-nav-bar p-w-sm">
                 <ul class="nav filter-type right-border">
                     <li>
                         <a
@@ -74,7 +74,7 @@
                         </table>
                     </div>
                 @else
-                    <div class="col-sm-12 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

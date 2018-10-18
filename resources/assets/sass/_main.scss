@@ -34,7 +34,7 @@ label {
     display: none;
 }
 
-.sidenav, .sidenav-open {
+.sidenav, .sidenav-open, .cust-sidenav {
     height: 100%;
     display: inline-block;
 
@@ -59,6 +59,12 @@ label {
             font-size: 22px;
             display: inline-block;
             background-color: transparent;
+
+            &.clicable {
+                @include mobile() {
+                    font-size: 19px !important;
+                }
+            }
         }
 
         @include smMobile() {
@@ -87,12 +93,17 @@ label {
         content:' ';
         position: absolute;
         display:block;
-        width: 48%;
+        width: 50%;
         margin: 0;
         border-radius:4px;
         box-shadow:inset 0 1px 1px rgba(0, 0, 0, .05);
-        left: 40%;
+        left: 39%;
         transform: translateX(-50%);
+
+        @include mobile() {
+            width: 65%;
+            left: 53%;
+        }
     }
 
     & li.js-show-submenu:last-child:after, .remove-after:after {
@@ -187,6 +198,25 @@ label {
         position: absolute;
         z-index: 30;
         top: 105px;
+
+        .icheckbox_square-green {
+            background: url(/css/green2.png) no-repeat;
+            background-position: -120px 0 !important;
+
+            &.hover {
+                background-position: -240px 0 !important;
+            }
+
+            &.checked {
+                background-position: -264px 0 !important;
+            }
+        }
+    }
+}
+
+.cust-sidenav {
+    @include smMobile() {
+        display: contents;
     }
 }
 
@@ -221,6 +251,7 @@ ul > li {
 
     &:hover {
         transition: 0.5s ease-in;
+        color: white !important;
     }
 
     a, a:hover{
@@ -269,10 +300,6 @@ ul > li {
 
     @include smMobile() {
         text-align: left !important;
-
-        &:not(.form-control) {
-            margin-left: 10px;
-        }
     }
 }
 
@@ -379,16 +406,42 @@ textarea {
 }
 
 #sidebar-wrapper {
+    min-width: 200px;
+
     .btn-sidebar {
         background-color: transparent !important;
-        margin-top: -10px;
+        margin-top: 0;
         margin-bottom: 0;
+        margin-right: 9px;
+
+        i.fa {
+            font-size: 25px;
+        }
+    }
+
+    li {
+        a {
+            color: white;
+        }
+
+        span {
+            font-size: 14px;
+            margin-left: 9px;
+        }
+
+        &.js-show-submenu:after {
+            border: none;
+        }
     }
 }
 
 @include xsMobile() {
     h2, .version-heading {
         font-size: 20px !important;
+    }
+
+    .p-t-25-xs {
+        padding-top: 25px;
     }
 }
 
@@ -425,6 +478,12 @@ textarea {
 
 .user-add-btn, .m-l-10 {
     margin-left: 10px;
+}
+
+.user-add-btn {
+    @include mobile() {
+        margin-left: 2px !important;
+    }
 }
 
 .pagination {
@@ -465,16 +524,7 @@ textarea {
     }
 
     @include mobile() {
-        margin-left: 40px;
-        &.admin {
-            margin-left: 0px;
-            input {
-                margin-left: 0px;
-            }
-        }
-    }
-
-    @include mobile() {
+        margin-left: 12px;
         padding-right: 60px;
         &.admin {
             margin-left: 0px;
@@ -484,16 +534,9 @@ textarea {
         }
     }
 
-    @include smMobile() {
-        text-align: left !important;
-        margin-left: 10px;
-        padding-right: 50px;
-        &.admin {
-            margin-left: 0px;
-            input {
-                margin-left: 0px;
-            }
-        }
+    @include xsMobile() {
+        padding-right: 15px;
+        margin-left: -22px;
     }
 }
 
@@ -672,6 +715,10 @@ textarea {
             text-align: left;
         }
     }
+
+    @include smMobile() {
+        padding: 10px 20px;
+    }
 }
 
 .elipsis-1 {
@@ -733,8 +780,39 @@ textarea {
 
 .side-info {
     img {
-        height: 200px !important;
-        max-width: 245px;
+        height: 200px;
+        max-width: 200px !important;
+
+        @include xsMobile() {
+            max-width: 100% !important;
+        }
+    }
+
+    @include mdMobile() {
+        img {
+            height: 130px;
+            max-width: 170px;
+        }
+
+        h3 {
+            font-size: 18px;
+        }
+    }
+
+    @include xsMobile() {
+        img {
+            max-width: 90%;
+            height: auto;
+        }
+
+        h3, h4 {
+        }
+    }
+}
+
+.choose-img {
+    @include mobile() {
+        margin-top: 10px;
     }
 }
 
@@ -1116,4 +1194,44 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 .cm-s-monokai .CodeMirror-matchingbracket {
     text-decoration: underline;
     color: white !important;
+}
+
+.word-break {
+    word-break: break-word;
+}
+
+.forum-box {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.modal-content {
+    padding: 0 5px;
+}
+
+.mx-auto {
+    margin: 0 auto;
+}
+
+.cust-tooltip {
+    bottom: 0;
+    width: inherit;
+    color: #fff;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 38;
+    left: 0px;
+    cursor: pointer;
+    text-align: left;
+    display: none;
+
+    &.organisation {
+        background-color: $themeOrganisation;
+    }
+
+    &.user {
+        background-color: $themeUser;
+    }
 }

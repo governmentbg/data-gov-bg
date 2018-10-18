@@ -1,5 +1,5 @@
 $footerHeight: 50px;
-$footerMobileHeight: 140px;
+$footerMobileHeight: 85px;
 $headerUnderlineHeight: 30px;
 
 body {
@@ -270,6 +270,7 @@ body {
                                     img {
                                         background: white;
                                         width: 26px;
+                                        height: 26px;
                                         margin: 3px;
                                     }
                                 }

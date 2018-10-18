@@ -4,8 +4,8 @@
 <div class="container">
     @include('partials.alerts-bar')
     @include('partials.user-nav-bar', ['view' => 'dataset'])
-    <div class="col-xs-12 sidenav m-t-lg m-b-lg">
-        <span class="my-profile m-l-sm">{{uctrans('custom.datasets_list')}}</span>
+    <div class="col-xs-12 m-t-lg p-l-r-none">
+        <span class="my-profile m-l-sm">{{ uctrans('custom.datasets_list') }}</span>
     </div>
     @include('partials.pagination')
     <div class="row">
@@ -17,7 +17,7 @@
         </div>
     @endif
     @if ($buttons['view'])
-        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field">
+        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 search-field p-l-lg">
             <form method="GET">
                 <input
                     type="text"
@@ -94,7 +94,7 @@
                         @endif
                     @endforeach
                 @else
-                    <div class="col-sm-12 m-t-xl text-center no-info">
+                    <div class="col-sm-12 m-t-md text-center no-info">
                         {{ __('custom.no_info') }}
                     </div>
                 @endif

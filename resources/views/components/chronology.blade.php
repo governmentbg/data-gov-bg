@@ -6,13 +6,13 @@
     </div>
 @endif
 <div class="row">
-    @if ($organisation->type == App\Organisation::TYPE_GROUP)
-        <div class="col-sm-3 col-xs-12">
+    <div class="col-sm-3 col-xs-12">
+        @if ($organisation->type == App\Organisation::TYPE_GROUP)
             @include('partials.group-info', ['group' => $organisation])
-        </div>
-    @else
-        @include('partials.org-info', ['organisation' => $organisation])
-    @endif
+        @else
+            @include('partials.org-info', ['organisation' => $organisation])
+        @endif
+    </div>
     <div class="col-sm-9 col-xs-12 p-md">
         @if (count($chronology))
             <div class="col-xs-12 p-sm">
@@ -45,10 +45,10 @@
                         $parentObjId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_id'];
                     @endphp
                     <div class="row">
-                        <div class="col-md-1 p-l-none">
+                        <div class="col-md-1 col-sm-2 col-xs-3 p-l-none">
                             <img class="img-thumnail" src="{{ asset('img/'. $objType .'-icon.svg') }}"/>
                         </div>
-                        <div class="col-md-11 p-h-sm">
+                        <div class="col-md-11 col-sm-10 col-xs-9 p-h-sm">
                             <div class="col-md-1 col-xs-2 logo-img">
                             @if (isset($objOwnerLogo))
                                 <a href="{{ url($objOwnerView) }}">

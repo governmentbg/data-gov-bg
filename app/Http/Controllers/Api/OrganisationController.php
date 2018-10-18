@@ -2386,19 +2386,22 @@ class OrganisationController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                $orgIds = Organisation::where('type', '=', Organisation::TYPE_GROUP)->get()->pluck('id');
                 $result = DB::table('actions_history')
-                    ->select('organisations.uri', DB::raw('count(organisations.id) as count'))
+                    ->select('user_to_org_role.org_id', DB::raw('count(user_to_org_role.org_id) as count'))
                     ->leftJoin('user_to_org_role', 'user_to_org_role.user_id', '=', 'actions_history.user_id')
-                    ->leftJoin('organisations', 'organisations.id', '=', 'user_to_org_role.org_id')
-                    ->where('organisations.type', '!=', Organisation::TYPE_GROUP)
+                    ->whereNotIn('user_to_org_role.org_id', Organisation::where('type', '=', Organisation::TYPE_GROUP)->get()->pluck('id'))
                     ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
-                    ->groupBy('organisations.uri')
+                    ->groupBy('user_to_org_role.org_id')
                     ->orderBy('count', 'desc')
                     ->limit(1)
                     ->first();
 
                 if (!empty($result)) {
-                    $result->name = Organisation::where('uri', $result->uri)->first()->name;
+                    $org = Organisation::where('id', $result->org_id)->first();
+                    $result->uri = $org->uri;
+                    $result->name = $org->name;
+                    $result->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
                 } else {
                     $result = ['uri' => null, 'name' => __('custom.missing_most_active_org'), 'count' => 0];
                 }

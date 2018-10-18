@@ -58,7 +58,7 @@
                                 <div>{{ $category->created_at }}</div>
                             </div>
                         </div>
-                        @if (!empty($category->updated_at))
+                        @if ($category->created_at != $category->updated_at)
                             <div class="form-group row m-b-lg m-t-md">
                                 <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
                                 <div class="col-sm-6 col-xs-12">
@@ -94,7 +94,7 @@
                                 >
                                     {{ csrf_field() }}
                                     <button
-                                        class="btn del-btn btn-primary del-btn"
+                                        class="btn btn-primary del-btn"
                                         type="submit"
                                         name="delete"
                                         data-confirm="{{ __('custom.remove_data') }}"

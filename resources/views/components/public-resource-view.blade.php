@@ -1,12 +1,12 @@
 @if (!empty($resource))
     <div class="row">
-        <div class="col-sm-9 col-xs-11 page-content col-sm-offset-3">
+        <div class="col-sm-9 col-xs-12 page-content col-sm-offset-3">
             <div class="articles">
-                <div class="article col-xs-12 p-l-none">
+                <div class="article col-xs-12 p-l-r-none">
                     <div>
                     @if (!empty($organisation))
                         <div class="col-sm-7 col-xs-12 p-l-r-none m-t-lg m-b-md">
-                            <div class="col-xs-6 logo-img">
+                            <div class="col-md-8 col-sm-10 col-xs-12 logo-img p-l-r-none">
                                 <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" title="{{ $organisation->name }}">
                                     <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
                                 </a>
@@ -67,7 +67,7 @@
                             <p><strong>{{ __('custom.description') }}:</strong></p>
                             <p>{!! nl2br(e($resource->description)) !!}</p>
                         @endif
-                        <div class="col-sm-12 p-l-none">
+                        <div class="col-xs-12 p-l-none">
                             <div class="pull-left m-b-md">
                                 @if (isset($dataset->tags) && count($dataset->tags) > 0)
                                     @foreach ($dataset->tags as $tag)
@@ -120,24 +120,24 @@
                                 @endif
                             </ul>
                         </div>
-                        <div class="col-sm-12 p-l-none">
+                        <div class="col-xs-12 p-l-none">
                             <div class="tags"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-sm-12 m-t-lg p-l-none">
+                <div class="col-xs-12 m-t-lg p-l-r-none">
                     @include('partials.resource-visualisation')
                 </div>
 
-                <div class="col-sm-12 m-t-lg p-l-r-none p-h-sm m-b-md">
-                    <div class="col-sm-8 text-left p-l-r-none">
+                <div class="col-xs-12 m-t-md p-l-r-none p-h-sm">
+                    <div class="col-sm-9 col-xs-12 text-left p-l-r-none">
                         <form method="POST">
                             {{ csrf_field() }}
                             @if ($resource->type != App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
                                 <button
                                     type="button"
-                                    class="btn btn-primary badge badge-pill js-res-uri"
+                                    class="btn btn-primary badge badge-pill js-res-uri m-b-sm"
                                     data-toggle="modal"
                                     data-target="#embed-resource"
                                     data-uri ="{{ $resource->uri }}"
@@ -145,7 +145,7 @@
                                 @if ($resource->version == $versionView)
                                     @if (isset($buttons['update']) && $buttons['update'])
                                         <a
-                                            class="btn btn-primary badge badge-pill"
+                                            class="btn btn-primary badge badge-pill m-b-sm"
                                             href="{{ url('/'. $buttons['rootUrl'] .'/resource/update/'. $resource->uri) }}"
                                         >{{ uctrans('custom.update') }}</a>
                                     @endif
@@ -153,7 +153,7 @@
                             @endif
                             @if (isset($buttons['edit']) && $buttons['edit'])
                                 <a
-                                    class="btn btn-primary badge badge-pill"
+                                    class="btn btn-primary badge badge-pill m-b-sm"
                                     href="{{ url(
                                         '/'. $buttons['rootUrl'] .'/resource/edit/'. $resource->uri .
                                         (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
@@ -163,20 +163,20 @@
                             @if (isset($buttons['delete']) && $buttons['delete'])
                                 <button
                                     name="delete"
-                                    class="btn del-btn btn-primary badge badge-pill"
+                                    class="btn del-btn btn-primary badge badge-pill m-b-sm"
                                     data-confirm="{{ __('custom.remove_data') }}"
                                 >{{ uctrans('custom.remove') }}</button>
                             @endif
                         </form>
                     </div>
-                    <div class="col-sm-4 text-right p-l-none">
+                    <div class="col-sm-3 col-xs-12 text-right p-l-none">
                         <button type="button" class="badge badge-pill m-b-sm" data-toggle="modal" data-target="#addSignal">{{ uctrans('custom.signal') }}</button>
                     </div>
                 </div>
 
                 <!-- IF there are old versions of this article -->
                 @if (!empty($resource->versions_list))
-                    <div class="col-sm-12 pull-left p-l-none m-b-md">
+                    <div class="col-xs-12 pull-left p-l-none m-b-md">
                         <div class="pull-left history">
                             @foreach ($resource->versions_list as $version)
                                 @if ($version != $versionView)
@@ -193,11 +193,11 @@
                 @endif
 
                 <div class="article col-xs-12 m-t-md m-b-md">
-                    <div class="col-sm-12 p-l-none">
+                    <div class="col-xs-12 p-l-r-none">
                         <!-- signals -->
                         @if (!empty($resource->signals))
                             @foreach ($resource->signals as $signal)
-                                <div class="col-sm-12 pull-left m-t-md p-l-none">
+                                <div class="col-xs-12 pull-left m-t-md p-l-r-none">
                                     <div class="comments">
                                         <div class="comment-box p-lg m-b-lg">
                                             <img class="img-rounded coment-avatar" src="{{ asset('img/test-img/avatar.png') }}"/>

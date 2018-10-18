@@ -288,6 +288,35 @@
                     >{{ utrans('custom.delete_profile') }}</button>
             </div>
         </div>
+        <div class="text-center m-b-lg terms-hr">
+            <hr>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+            <div class="col-sm-6 col-xs-12">{{ $user->created_by }}</div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+            <div class="col-sm-6 col-xs-12">
+                <div>{{ $user->created_at }}</div>
+            </div>
+        </div>
+        @if (!empty($user->updated_by))
+            <div class="form-group row">
+                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                <div class="col-sm-6 col-xs-12">
+                    <div>{{ $user->updated_by }}</div>
+                </div>
+            </div>
+        @endif
+        @if (!empty($user->updated_at))
+            <div class="form-group row">
+                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                <div class="col-sm-6 col-xs-12">
+                    <div>{{ $user->updated_at }}</div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

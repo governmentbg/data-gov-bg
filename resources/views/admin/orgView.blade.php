@@ -64,6 +64,35 @@
                                                 </div>
                                             @endforeach
                                         @endif
+                                        <div class="text-center m-b-lg terms-hr">
+                                            <hr>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+                                            <div class="col-sm-6 col-xs-12">{{ $organisation->created_by }}</div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+                                            <div class="col-sm-6 col-xs-12">
+                                                <div>{{ $organisation->created_at }}</div>
+                                            </div>
+                                        </div>
+                                        @if (!empty($organisation->updated_by))
+                                            <div class="form-group row">
+                                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <div>{{ $organisation->updated_by }}</div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        @if (!empty($organisation->updated_at))
+                                            <div class="form-group row">
+                                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                                                <div class="col-sm-6 col-xs-12">
+                                                    <div>{{ $organisation->updated_at }}</div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                     @if (\App\Role::isAdmin())
                                         <div class="col-xs-12 view-btns m-t-lg">

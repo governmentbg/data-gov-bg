@@ -193,7 +193,7 @@ class UserController extends AdminController {
         $result = $api->listUsers($rq)->getData();
 
         if ($result->success) {
-            $user = $result->users[0];
+            $user = $this->getModelUsernames($result->users[0]);
             $orgRoles = [];
             $roleIds = [];
 

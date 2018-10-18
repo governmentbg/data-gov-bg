@@ -70,6 +70,11 @@
                             <a href="#"><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
                         </div>
                         @if (!env('IS_TOOL'))
+                            <div class="access-terms-icons">
+                                <a href="{{ url('/help') }}">
+                                    <img class="help-section" title="{{ __('custom.help') }}" src="{{ asset('/img/help_section.svg') }}">
+                                </a>
+                            </div>
                             <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
                                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#my-navbar">
                                     <span class="icon-bar"></span>
@@ -283,7 +288,7 @@
                         @if (!empty($help))
                             <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
                             @include('components.help', ['help' => $help])
-                        @elseif (\Auth::check() && App\Role::isAdmin())
+                        @elseif (!env('IS_TOOL') && \Auth::check() && App\Role::isAdmin())
                             <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
                             <div class="js-help-bar help-container hidden">
                                 <div class="help-content">

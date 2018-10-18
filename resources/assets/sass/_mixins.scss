@@ -23,6 +23,11 @@
         @content;
     }
 }
+@mixin xssMobile {
+    @media screen and (max-width: #{($xssWidth - 1)}) {
+        @content;
+    }
+}
 
 @mixin theme($name, $primary) {
     $primary: $primary;
@@ -188,7 +193,7 @@
                 }
             }
 
-            .sidenav {
+            .sidenav, .cust-sidenav {
                 color: $primary;
 
                 li {
@@ -492,6 +497,10 @@
                 }
             }
         }
+    }
+
+    .forum-box {
+        border: 1px solid $primary;
     }
 }
 

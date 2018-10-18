@@ -87,7 +87,7 @@
 
     .fileinput-new.thumbnai {
         width: 180px;
-        height: 105px;
+        height: 105px !important;
         padding: 0px;
         margin-bottom: -10px;
         display: inline-block;
@@ -244,8 +244,11 @@
     }
 
     .org-logo {
+        height: 120px;
         img {
-            height: 140px;
+            height: auto;
+            max-height: 120px;
+            max-width: 435px;
         }
     }
 
@@ -270,7 +273,8 @@
     }
 
     .user-orgs {
-        padding: 50px;
+        padding: 10px 50px 50px;
+
         .ch-del-btns {
             margin-top: 10px;
             margin-bottom: 35px;
@@ -292,19 +296,28 @@
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
-             -webkit-box-orient: vertical;
-             -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 6;
             height: 130px;
+            max-height: 9rem;
         }
+
+        .logo-box {
+            height: 120px
+        }
+
         .org-name {
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 1;
+            max-height: 3rem;
         }
+
         .logo {
-            height: 120px;
+            max-height: 120px;
+            height: auto;
             margin: 0 auto;
         }
         .show-more {
@@ -314,13 +327,21 @@
 
         .org-col {
             margin: 10px;
-            height: 450px;
+            height: 470px;
             width: 310px;
             border: 1px #888888;
             box-shadow: 0px 0px 6px 0px #888888;
 
             &:hover {
                 box-shadow: 0px 0px 18px 0px #108f9e;
+            }
+
+            @include smMobile() {
+                margin: 20px auto;
+            }
+
+            @include xsMobile() {
+                width: 280px;
             }
         }
     }
@@ -377,7 +398,7 @@
 
         .user-orgs {
             padding: 0;
-            margin-top: 50px;
+            margin-top: 10px;
         }
 
         .my-profile {
@@ -791,7 +812,7 @@
 
 .no-info {
     padding: 0;
-    font-size: 33px;
+    font-size: 28px;
 }
 
 .cust-btn {
@@ -816,6 +837,11 @@
         margin-left: 5px;
         margin-right: 5px;
     }
+
+    @include xsMobile() {
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 
 .signal-box {
@@ -824,4 +850,12 @@
     margin-bottom: 10px;
     border-radius: 10px;
     border: 1px solid #C02E54;
+}
+
+.user-list {
+    padding: 0 25px 50px !important;
+
+    @include mobile() {
+        padding: 0 50px !important;
+    }
 }

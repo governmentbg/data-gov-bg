@@ -1,10 +1,10 @@
-<div class="col-sm-3 col-xs-12 m-t-lg side-info">
-    <div><img src="{{ $organisation->logo }}"></div>
-    <h2 class="elipsis-1">{{ $organisation->name }}</h2>
+<div class="org m-t-lg side-info col-xs-12">
+    <div class="org-logo"><img src="{{ $organisation->logo }}"></div>
+    <h4>{{ $organisation->name }}</h4>
     @if (isset($organisation->descript))
-        <h4>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h4>
+        <h5>{!! nl2br(truncate(e($organisation->descript), 150)) !!}</h5>
     @elseif (isset($organisation->description))
-        <h4>{!! nl2br(truncate(e($organisation->description), 150)) !!}</h4>
+        <h5>{!! nl2br(truncate(e($organisation->description), 150)) !!}</h5>
     @endif
     <p class="text-right show-more">
         @if (\Auth::user()->is_admin)

@@ -98,15 +98,15 @@
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
                                     <button
+                                        name="back"
+                                        class="btn btn-primary"
+                                    >{{ uctrans('custom.close') }}</button>
+                                    <button
                                         type="submit"
                                         name="create"
                                         value="1"
                                         class="m-l-md btn btn-custom"
                                     >{{ __('custom.add') }}</button>
-                                    <button
-                                        name="back"
-                                        class="btn btn-primary"
-                                    >{{ uctrans('custom.close') }}</button>
                                 </div>
                             </div>
                         </form>

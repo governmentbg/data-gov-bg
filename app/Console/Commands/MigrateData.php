@@ -102,7 +102,7 @@ class MigrateData extends Command
         $this->migrateUsers();
 
         $this->getUsersDatasets();
-        $this->getUsersDatasets();
+        $this->getOrgsDatasets();
 
         $this->migrateUserToOrgRole();
         $this->migrateFollowers();

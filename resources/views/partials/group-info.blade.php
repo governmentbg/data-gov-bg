@@ -1,10 +1,10 @@
-<div class="org m-t-lg side-info">
+<div class="org m-t-lg side-info col-xs-12 p-r-none">
     <img src="{{ $group->logo }}">
-    <h2>{{ $group->name }}</h2>
+    <h3>{{ $group->name }}</h3>
     @if (isset($group->descript))
-        <h4>{!! nl2br(truncate(e($group->descript), 150)) !!}</h4>
+        <h5>{!! nl2br(truncate(e($group->descript), 150)) !!}</h5>
     @elseif (isset($group->description))
-        <h4>{!! nl2br(truncate(e($group->description), 150)) !!}</h4>
+        <h5>{!! nl2br(truncate(e($group->description), 150)) !!}</h5>
     @endif
     <p class="text-right show-more">
         @if (\Auth::user()->is_admin)

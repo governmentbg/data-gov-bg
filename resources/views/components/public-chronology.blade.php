@@ -9,7 +9,7 @@
                         </div>
                     </div>
                 @endif
-                <div class="col-xs-12 col-xs-offset-1 chronology">
+                <div class="col-xs-12 p-w-md">
                     @foreach ($chronology as $chr)
                         @php
                             $actObj = [];
@@ -36,39 +36,41 @@
                             }
                         @endphp
                         <div class="row">
-                            <div class="col-xs-1 info-icon">
+                            <div class="col-sm-1 col-xs-2">
                                 <img class="img-responsive m-xs m-t-md" src="{{ asset('img/'. $objType .'-icon.svg') }}"/>
                             </div>
-                            <div class="col-xs-11 p-h-sm">
-                                <div class="col-md-1 col-xs-2 logo-img">
-                                    @if (isset($objOwnerLogo))
-                                        <a href="{{ url($objOwnerView) }}">
-                                            <img class="img-responsive m-xs m-t-sm" src="{{ $objOwnerLogo }}" title="{{ $objOwnerName }}"/>
-                                        </a>
-                                    @endif
-                                </div>
-                                <div class="col-md-10 col-xs-10 m-t-md p-l-none">
-                                    <p>
-                                        <a href="{{ url('/user/profile/'. $chr->user_id) }}">
-                                            <b>{{ ($chr->user_firstname || $chr->user_lastname) ? trim($chr->user_firstname .' '. $chr->user_lastname) : $chr->user }}</b>
-                                        </a>
-                                        {{ $actionTypes[$chr->action]['name'] .' '. $objModule }}
-                                        <a href="{{ url($objView) }}">
-                                            <b>"{{ $objName }}"</b>
-                                        </a>
-                                        @if ($parentObjId != '')
-                                            {{ $actionTypes[$chr->action]['linkWord'] }}
-                                            {{ $actObj['parent_obj_module'] }}
-                                             <a href="{{ url($actObj['parent_obj_view']) }}">
-                                                <b>{{ $actObj['parent_obj_name'] }}</b>
+                            <div class="col-sm-11 col-xs-10 p-sm p-l-none">
+                                <div class="row">
+                                    <div class="col-sm-1 col-xs-2 logo-img">
+                                        @if (isset($objOwnerLogo))
+                                            <a href="{{ url($objOwnerView) }}">
+                                                <img class="img-responsive m-xs m-t-sm" src="{{ $objOwnerLogo }}" title="{{ $objOwnerName }}"/>
                                             </a>
                                         @endif
-                                        {{ sprintf(
-                                            __('custom.at_x_time_on_date'),
-                                            date('H:i', strtotime($chr->occurrence)),
-                                            date('d.m.Y', strtotime($chr->occurrence))
-                                        ) }}
-                                    </p>
+                                    </div>
+                                    <div class="col-sm-10 col-xs-12 m-t-md p-l-none">
+                                        <p>
+                                            <a href="{{ url('/user/profile/'. $chr->user_id) }}">
+                                                <b>{{ ($chr->user_firstname || $chr->user_lastname) ? trim($chr->user_firstname .' '. $chr->user_lastname) : $chr->user }}</b>
+                                            </a>
+                                            {{ $actionTypes[$chr->action]['name'] .' '. $objModule }}
+                                            <a href="{{ url($objView) }}">
+                                                <b>"{{ $objName }}"</b>
+                                            </a>
+                                            @if ($parentObjId != '')
+                                                {{ $actionTypes[$chr->action]['linkWord'] }}
+                                                {{ $actObj['parent_obj_module'] }}
+                                                 <a href="{{ url($actObj['parent_obj_view']) }}">
+                                                    <b>{{ $actObj['parent_obj_name'] }}</b>
+                                                </a>
+                                            @endif
+                                            {{ sprintf(
+                                                __('custom.at_x_time_on_date'),
+                                                date('H:i', strtotime($chr->occurrence)),
+                                                date('d.m.Y', strtotime($chr->occurrence))
+                                            ) }}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -82,7 +84,7 @@
                     </div>
                 @endif
             @else
-                <div class="col-sm-12 m-t-xl text-center no-info">
+                <div class="col-sm-12 m-t-md text-center no-info">
                     {{ __('custom.no_info') }}
                 </div>
             @endif

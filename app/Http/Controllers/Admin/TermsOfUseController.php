@@ -94,7 +94,11 @@ class TermsOfUseController extends AdminController
         $result = $api->getTermsOfUseDetails($request)->getData();
 
         if ($result->success) {
-            return view('admin/termsOfUseView', ['class' => 'user', 'term' => $result->data]);
+            if (!is_null($result->data)) {
+                $data = $this->getModelUsernames($result->data);
+                
+                return view('admin/termsOfUseView', ['class' => 'user', 'term' => $data]);
+            }
         }
 
         return redirect('/admin/terms-of-use/list');

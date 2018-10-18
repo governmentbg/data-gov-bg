@@ -84,7 +84,7 @@
                                         action="{{ url('admin/themes/edit/'. $theme->id) }}"
                                     >
                                         {{ csrf_field() }}
-                                        <button class="btn btn-primary" type="submit">{{ uctrans('custom.edit') }}</button>
+                                        <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
                                         <input type="hidden" name="view" value="1">
                                     </form>
                                     <form
@@ -94,7 +94,7 @@
                                         {{ csrf_field() }}
                                     <button
                                         name="back"
-                                        class="btn btn-primary"
+                                        class="btn btn-primary m-b-sm"
                                     >{{ uctrans('custom.close') }}</button>
                                     </form>
                                     <form
@@ -104,7 +104,7 @@
                                     >
                                         {{ csrf_field() }}
                                             <button
-                                                class="btn del-btn btn-primary del-btn"
+                                                class="btn del-btn btn-primary del-btn m-b-sm"
                                                 type="submit"
                                                 name="delete"
                                                 data-confirm="{{ __('custom.delete_theme_confirm') }}"

@@ -12,6 +12,14 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Changed
+- Help stays open until closed
+- Help no longer transparent
+- Help close icon changed
+
+### Fixed
+- Bug in editing active and inactive help sections and pages
+- Scroll shows in help container
 
 ## [0.6.3] - 2018-10-18
 ### Added

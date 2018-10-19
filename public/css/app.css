@@ -21446,12 +21446,15 @@ nav .tool-version:hover {
 .help-icon-open {
   height: 21px;
   position: relative;
-  bottom: 9px;
+  top: 3px;
+  padding-left: 5px;
 }
 
 .help-icon {
   position: absolute;
+  padding-left: 5px;
   height: 21px;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 1199px) {
@@ -21466,13 +21469,23 @@ nav .tool-version:hover {
   }
 }
 
+.close-help {
+  position: relative;
+  float: right;
+  top: 4px;
+  padding-right: 5px;
+  height: 19px;
+}
+
 .help-container {
-  background: rgba(0, 0, 0, 0.8);
+  background: black;
   position: absolute;
   color: white;
   width: 275px;
   top: 0px;
   left: auto;
+  height: 765px;
+  overflow: hidden;
 }
 
 @media screen and (max-width: 1199px) {
@@ -21494,9 +21507,30 @@ nav .tool-version:hover {
   }
 }
 
+.help-container .nav a {
+  color: white;
+}
+
+.help-container .nav a:hover {
+  color: white;
+  background: none;
+}
+
+.help-container .nav a:focus {
+  background: none;
+}
+
+.help-container .nav .subsection-cont {
+  font-size: 13pt;
+}
+
+.help-container .help-page {
+  height: 350px;
+}
+
 .help-container .help-content {
-  padding: 10px;
-  height: 100%;
+  padding: 0 15px;
+  height: 90%;
   width: 100%;
   word-wrap: break-word;
   font-size: 12pt;
@@ -21516,8 +21550,17 @@ nav .tool-version:hover {
   height: 150px;
 }
 
+.help-container .help-content .help-edit {
+  margin-bottom: 20px;
+  padding-right: 15px;
+}
+
 .help-container .help-content .help-edit a {
   color: white !important;
+}
+
+.help-container .help-content .nano-content ul {
+  padding: 0px !important;
 }
 
 .help-container .close {

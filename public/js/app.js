@@ -71630,6 +71630,7 @@ $(function () {
 // Sticky footer
 var $head = $('.js-head');
 var $content = $('.js-content');
+var $nanoContent = $('.js-nano-content');
 var $footer = $('.js-footer');
 
 if ($head && $content && $footer) {
@@ -71651,10 +71652,17 @@ function resize() {
 
 function scroll() {
     helpBar();
+
+    if ($('.help-nano').length) {
+        $('.help-nano').nanoScroller({});
+    }
 }
 
 function helpBar() {
+
+    // console.log("here");
     $helpBar = $('.js-help-bar');
+    $helpBody = $('.js-help-body');
 
     if ($helpBar.length) {
         var windowTop = $(window).scrollTop();
@@ -71674,7 +71682,30 @@ function helpBar() {
         }
 
         $helpBar.css('height', height + 'px');
+
+        // if ($helpBody.hasClass('active')) {
+        //     $helpBody.show();
+        // }
     }
+}
+
+if ($('.js-help').length) {
+    if (sessionStorage.help == 'true') {
+        $('.help-container').removeClass('hidden');
+        $('.js-open-help').toggle();
+    }
+
+    $('.js-open-help').on('click', function () {
+        $('.help-container').removeClass('hidden');
+        $('.js-open-help').toggle();
+        sessionStorage.help = true;
+    });
+
+    $('.close-btn').on('click', function () {
+        $('.help-container').addClass('hidden');
+        $('.js-open-help').toggle();
+        sessionStorage.help = false;
+    });
 }
 
 function stickyFooter() {
@@ -71797,13 +71828,6 @@ $('.js-hide-button').click(function () {
     $($(this).data('target')).hide();
     $(this).hide();
 });
-
-if ($('.js-help').length) {
-    $('.js-open-help, .close-btn').on('click', function () {
-        $('.help-container').toggleClass('hidden');
-        $('.js-open-help').toggle();
-    });
-}
 
 /**
  * Handle google ga events

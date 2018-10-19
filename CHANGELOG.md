@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [0.6.4] - 2018-10-19
 ### Added
 - Forum discussions to public data and documents sections
 - Cron task to initiate search indexes update every 5 minutes
@@ -122,7 +124,8 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
-[0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3
+[0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.1...v0.6.0

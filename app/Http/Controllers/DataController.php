@@ -673,18 +673,23 @@ class DataController extends Controller {
             }
 
             $dataset = $this->getModelUsernames($dataset);
+            $discussion = $this->getForumDiscussion($dataset->forum_link);
 
-            return view(
+            $viewParams = [
+                'class'          => 'data',
+                'organisation'   => $organisation,
+                'user'           => $user,
+                'approved'       => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
+                'dataset'        => $dataset,
+                'resources'      => $resources,
+                'buttons'        => $buttons
+            ];
+
+            return view (
                 'data/view',
-                [
-                    'class'          => 'data',
-                    'organisation'   => $organisation,
-                    'user'           => $user,
-                    'approved'       => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
-                    'dataset'        => $dataset,
-                    'resources'      => $resources,
-                    'buttons'        => $buttons
-                ]
+                !empty($discussion)
+                    ? array_merge($viewParams, $discussion)
+                    : $viewParams
             );
         }
 

@@ -16,8 +16,7 @@
         "jquery": "^3.2",
         "laravel-mix": "^2.1.14",
         "lodash": "^4.17.4",
-        "postcss-cli": "^4.1.1",
-        "vue": "2.5.17"
+        "postcss-cli": "^4.1.1"
     },
     "dependencies": {
         "codemirror": "^5.40.0",

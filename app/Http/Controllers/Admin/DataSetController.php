@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
+use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
+use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class DataSetController extends AdminController
@@ -325,6 +327,30 @@ class DataSetController extends AdminController
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        // get category details
+        if (!empty($dataset->category_id)) {
+            $params = [
+                'category_id' => $dataset->category_id,
+            ];
+            $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
+            $api = new ApiCategory($rq);
+            $res = $api->getMainCategoryDetails($rq)->getData();
+
+            $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
+        }
+
+        // get terms of use details
+        if (!empty($dataset->terms_of_use_id)) {
+            $params = [
+                'terms_id' => $dataset->terms_of_use_id,
+            ];
+            $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
+            $api = new ApiTermsOfUse($rq);
+            $res = $api->getTermsOfUseDetails($rq)->getData();
+
+            $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
+        }
+
         // handle dataset delete
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
@@ -581,7 +607,7 @@ class DataSetController extends AdminController
 
         $resource = $this->getModelUsernames($result->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
-        $formats = Resource::getFormats();
+        $formats = Resource::getFormats(true);
 
         if (empty($version)) {
             $version = $resource->version;

@@ -1,5 +1,5 @@
 $footerHeight: 50px;
-$footerMobileHeight: 85px;
+$footerMobileHeight: 130px;
 $headerUnderlineHeight: 30px;
 
 body {
@@ -613,17 +613,32 @@ body {
                 padding-right: 2px;
 
                 .svg-icons > svg {
-                    fill: white;
+                    border: 1px solid white;
                     width: 60px;
                     height: 30px;
                     margin: 20px 12px 0px;
 
-                    &.puzzle {
+                    &.help-section {
                         max-width: 30px;
+                        fill: none;
+
+                        .cls-2 {
+                          fill: none;
+                        }
+
+                        .cls-3 {
+                          fill: #fff;
+                        }
                     }
 
                     &:hover {
-                        fill: black;
+                        .cls-3 {
+                            fill: black;
+                        }
+                    }
+
+                    &:hover {
+                        border: 1px solid #000;
                     }
                 }
             }

@@ -19,6 +19,18 @@ class AppServiceProvider extends ServiceProvider
     {
         if (!env('IS_TOOL')) {
             app('url')->forceRootUrl(env('APP_URL'));
+
+            \App\Category::disableSearchSyncing();
+            \App\DataSet::disableSearchSyncing();
+            \App\Document::disableSearchSyncing();
+            \App\HelpPage::disableSearchSyncing();
+            \App\HelpSection::disableSearchSyncing();
+            \App\Organisation::disableSearchSyncing();
+            \App\Page::disableSearchSyncing();
+            \App\Resource::disableSearchSyncing();
+            \App\Signal::disableSearchSyncing();
+            \App\TermsOfUseRequest::disableSearchSyncing();
+            \App\User::disableSearchSyncing();
         }
 
         Schema::defaultStringLength(191);

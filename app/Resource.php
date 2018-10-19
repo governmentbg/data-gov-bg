@@ -84,21 +84,29 @@ class Resource extends Model implements TranslatableInterface
         }
     }
 
-    public static function getFormats()
+    public static function getFormats($forDownload = false)
     {
-        return [
+        $formats = [
             self::FORMAT_CSV    => 'CSV',
             self::FORMAT_JSON   => 'JSON',
             self::FORMAT_KML    => 'KML',
             self::FORMAT_RDF    => 'RDF',
             self::FORMAT_XML    => 'XML',
-            self::FORMAT_TSV    => 'TSV',
-            self::FORMAT_XSD    => 'XSD',
-            self::FORMAT_ODS    => 'ODS',
-            self::FORMAT_SLK    => 'SLK',
-            self::FORMAT_RTF    => 'RTF',
-            self::FORMAT_ODT    => 'ODT',
         ];
+
+        if (!$forDownload) {
+            $formats = $formats +
+                [
+                    self::FORMAT_TSV    => 'TSV',
+                    self::FORMAT_XSD    => 'XSD',
+                    self::FORMAT_ODS    => 'ODS',
+                    self::FORMAT_SLK    => 'SLK',
+                    self::FORMAT_RTF    => 'RTF',
+                    self::FORMAT_ODT    => 'ODT',
+                ];
+        }
+
+        return $formats;
     }
 
     public static function getRequestTypes()

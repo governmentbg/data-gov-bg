@@ -60,7 +60,7 @@
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">
-        <div class="nano-content">
+        <div class="nano-content js-nano-content">
             <nav class="navbar navbar-default navbar-static-top js-head">
                 <div class="container">
                     <div class="navbar-header">
@@ -290,30 +290,31 @@
                                 href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
                             >{{ exec('git describe') }}</a>
                        </div>
-                    @endif
-                    <div class="help-btn js-help">
-                        @if (!empty($help))
-                            <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
-                            @include('components.help', ['help' => $help])
-                        @elseif (!env('IS_TOOL') && \Auth::check() && App\Role::isAdmin())
-                            <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
-                            <div class="js-help-bar help-container hidden">
-                                <div class="help-content">
-                                    <div class="close"><span class="close-btn">X</span></div>
-                                    <h3>{{ __('custom.no_help') }}</h3>
-                                    <a
-                                        class="btn-primary btn"
-                                        href="{{
-                                            route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
-                                                ? 'home'
-                                                : \Request::getPathInfo()
-                                            ])
-                                        }}"
-                                    >{{ __('custom.add') }}</a>
+                    @else
+                        <div class="help-btn js-help">
+                            @if (\Auth::check() && App\Role::isAdmin() && empty($help))
+                                <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
+                                <div class="js-help-bar help-container hidden">
+                                    <div class="help-content">
+                                    <img class="close-help close-btn" src="{{ asset('/img/X.svg') }}">
+                                        <h3>{{ __('custom.no_help') }}</h3>
+                                        <a
+                                            class="btn-primary btn"
+                                            href="{{
+                                                route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
+                                                    ? 'home'
+                                                    : \Request::getPathInfo()
+                                                ])
+                                            }}"
+                                        >{{ __('custom.add') }}</a>
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
-                    </div>
+                            @else
+                                <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
+                                @include('components.help', ['help' => !empty($help) ? $help : []])
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </nav>
 
@@ -322,6 +323,26 @@
             </div>
 
             <footer class="footer js-footer hidden">
+                <div class="image-links text-right col-xs-12 m-b-n-sm">
+                    <a href="{{ url('/help') }}">
+                        <span class="svg-icons">
+                            <svg class="help-section" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26">
+                                <rect class="cls-1" width="26" height="26" rx="1.62" ry="1.62"/>
+                                <rect class="cls-2" width="26" height="26" rx="12" ry="12"/>
+                                <g>
+                                  <path class="cls-3" d="M6.94,15.8V12.94a.08.08,0,0,0,0,0,4.74,4.74,0,0,1-1,.11,4.9,4.9,0,0,1-1-.11v2.9a1,1,0,1,0,2.05,0Z" transform="translate(0 0)"/>
+                                  <path class="cls-3" d="M10.64,7.88A4.72,4.72,0,1,0,5.92,12.6,4.73,4.73,0,0,0,10.64,7.88Zm-8.21,0a3.49,3.49,0,1,1,3.49,3.49A3.49,3.49,0,0,1,2.43,7.88Z" transform="translate(0 0)"/>
+                                  <path class="cls-3" d="M4.59,7.09c.22-.36.33-1.06,0-1.17s-.7.41-.87.77a2.83,2.83,0,0,0,.72,3.38C4.71,10.07,3.72,8.52,4.59,7.09Z" transform="translate(0 0)"/>
+                                </g>
+                                <rect class="cls-3" x="12.57" y="5.94" width="11.99" height="1.27" rx="0.59" ry="0.59"/>
+                                <rect class="cls-3" x="12.57" y="9.41" width="11.99" height="1.27" rx="0.59" ry="0.59"/>
+                                <rect class="cls-3" x="12.62" y="13.01" width="11.93" height="1.27" rx="0.59" ry="0.59"/>
+                                <rect class="cls-3" x="1.49" y="19.14" width="23.07" height="1.27" rx="0.59" ry="0.59"/>
+                                <rect class="cls-3" x="1.49" y="22.58" width="23.07" height="1.27" rx="0.59" ry="0.59"/>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
                 <div class="copiright text-center col-xs-12">
                     <div class="row">
                         <strong>Copyright &copy; 2018 </strong>
@@ -347,8 +368,8 @@
     <script src="{{ asset('js/jquery.nanoscroller.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap-colorpicker.js') }}"></script>
     <script src="{{ asset('js/bootstrap-clockpicker.min.js') }}"></script>
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
 
     @if (isset($script))
         {!! $script !!}

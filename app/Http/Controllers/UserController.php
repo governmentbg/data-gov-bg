@@ -576,6 +576,30 @@ class UserController extends Controller {
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        // get category details
+        if (!empty($dataset->category_id)) {
+            $params = [
+                'category_id' => $dataset->category_id,
+            ];
+            $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
+            $api = new ApiCategory($rq);
+            $res = $api->getMainCategoryDetails($rq)->getData();
+
+            $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
+        }
+
+        // get terms of use details
+        if (!empty($dataset->terms_of_use_id)) {
+            $params = [
+                'terms_id' => $dataset->terms_of_use_id,
+            ];
+            $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
+            $api = new ApiTermsOfUse($rq);
+            $res = $api->getTermsOfUseDetails($rq)->getData();
+
+            $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
+        }
+
         foreach ($resources->resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
@@ -749,6 +773,30 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+
+        // get category details
+        if (!empty($datasetData->category_id)) {
+            $params = [
+                'category_id' => $datasetData->category_id,
+            ];
+            $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
+            $api = new ApiCategory($rq);
+            $res = $api->getMainCategoryDetails($rq)->getData();
+
+            $datasetData->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
+        }
+
+        // get terms of use details
+        if (!empty($datasetData->terms_of_use_id)) {
+            $params = [
+                'terms_id' => $datasetData->terms_of_use_id,
+            ];
+            $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
+            $api = new ApiTermsOfUse($rq);
+            $res = $api->getTermsOfUseDetails($rq)->getData();
+
+            $datasetData->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
+        }
 
         foreach ($resources->resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
@@ -1977,7 +2025,7 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
-        $formats = Resource::getFormats();
+        $formats = Resource::getFormats(true);
 
         if (empty($version)) {
             $version = $resource->version;
@@ -2117,7 +2165,7 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
-        $formats = Resource::getFormats();
+        $formats = Resource::getFormats(true);
 
         if (empty($version)) {
             $version = $resource->version;
@@ -4867,6 +4915,30 @@ class UserController extends Controller {
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        // get category details
+        if (!empty($datasetData->category_id)) {
+            $params = [
+                'category_id' => $datasetData->category_id,
+            ];
+            $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
+            $api = new ApiCategory($rq);
+            $res = $api->getMainCategoryDetails($rq)->getData();
+
+            $datasetData->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
+        }
+
+        // get terms of use details
+        if (!empty($datasetData->terms_of_use_id)) {
+            $params = [
+                'terms_id' => $datasetData->terms_of_use_id,
+            ];
+            $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
+            $api = new ApiTermsOfUse($rq);
+            $res = $api->getTermsOfUseDetails($rq)->getData();
+
+            $datasetData->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
+        }
+
         foreach ($resources->resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
@@ -5090,7 +5162,7 @@ class UserController extends Controller {
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
-        $formats = Resource::getFormats();
+        $formats = Resource::getFormats(true);
 
         if (empty($version)) {
             $version = $resource->version;

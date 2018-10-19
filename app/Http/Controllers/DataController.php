@@ -744,7 +744,7 @@ class DataController extends Controller {
 
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
-                $formats = Resource::getFormats();
+                $formats = Resource::getFormats(true);
 
                 if (empty($version)) {
                     $version = $resource->version;

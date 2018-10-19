@@ -82,7 +82,6 @@ class HomeController extends Controller {
             ]
         ];
 
-        error_log('label: '. print_r(Session::all(), true));
         $categoryReq = Request::create('/api/listMainCategories', 'POST', $params);
         $categoryApi = new ApiCategories($categoryReq);
         $resultCategories = $categoryApi->listMainCategories($categoryReq)->getData();

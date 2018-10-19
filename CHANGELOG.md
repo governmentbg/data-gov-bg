@@ -22,6 +22,9 @@ Security - in case of vulnerabilities.
 - Translations table text column length
 - Group datasets delete button changed to remove
 - Group datasets edit button removed
+- Help stays open until closed
+- Help no longer transparent
+- Help close icon changed
 
 ### Fixed
 - WYSIWYG editor code view, full screen mode
@@ -34,6 +37,8 @@ Security - in case of vulnerabilities.
 - Bugs in showing system information about records
 - Dubious column names in documents and organisations
 - Resource download
+- Bug in editing active and inactive help sections and pages
+- Scroll shows in help container
 
 ## [0.6.2] - 2018-10-17
 ### Fixed

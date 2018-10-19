@@ -129,10 +129,12 @@ class HelpController extends AdminController
 
     public function deleteHelpSection(Request $request, $id)
     {
-        if ($this->delete($id)) {
+        $result = $this->delete($id);
+
+        if ($result->success) {
             $request->session()->flash('alert-success', __('custom.delete_success'));
         } else {
-            $request->session()->flash('alert-danger', __('custom.delete_error'));
+            $request->session()->flash('alert-danger', $result->error->message);
         }
 
         return redirect('admin/help/sections/list');
@@ -453,11 +455,7 @@ class HelpController extends AdminController
         $api = new ApiHelp($rq);
         $result = $api->deleteHelpSection($rq)->getData();
 
-        if ($result->success) {
-            return true;
-        }
-
-        return false;
+        return $result;
     }
 
     public function deletePage($id)

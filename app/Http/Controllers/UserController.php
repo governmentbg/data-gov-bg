@@ -897,7 +897,7 @@ class UserController extends Controller {
                     return redirect(url('/user/dataset/resource/create/'. $save->uri));
                 }
 
-                return redirect()->route('datasetView', ['uri' => $save->uri]);
+                return redirect()->route('userDatasetView', ['uri' => $save->uri]);
             }
 
             $request->session()->flash('alert-danger', $save->error->message);

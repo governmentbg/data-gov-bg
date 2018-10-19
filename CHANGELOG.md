@@ -20,6 +20,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Bug in editing active and inactive help sections and pages
 - Scroll shows in help container
+- Redirect after dataset creation
 
 ## [0.6.3] - 2018-10-18
 ### Added

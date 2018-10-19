@@ -20,6 +20,8 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Bug in editing active and inactive help sections and pages
 - Scroll shows in help container
+- Bug in hovering main categories
+- Show help section icon in footer on mobile view
 
 ## [0.6.3] - 2018-10-18
 ### Added

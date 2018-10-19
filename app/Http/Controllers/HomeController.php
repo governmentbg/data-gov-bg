@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategories;
@@ -81,6 +82,7 @@ class HomeController extends Controller {
             ]
         ];
 
+        error_log('label: '. print_r(Session::all(), true));
         $categoryReq = Request::create('/api/listMainCategories', 'POST', $params);
         $categoryApi = new ApiCategories($categoryReq);
         $resultCategories = $categoryApi->listMainCategories($categoryReq)->getData();

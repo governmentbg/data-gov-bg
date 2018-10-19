@@ -42,4 +42,25 @@ class CheckHelp
 
         return $next($request);
     }
+
+    private static function getSectionFromPage($page)
+    {
+        $section = $page->section;
+
+        if (!empty($section)) {
+            if ($section->parent_id) {
+                $section = HelpSection::find($section->parent_id);
+            }
+            $subsections = $section->subsections()->get();
+            $pages = $section->pages()->get();
+
+            return collect([
+                'section'       => $section,
+                'subsections'   => $subsections,
+                'pages'         => $pages,
+            ]);
+        }
+
+        return $page;
+    }
 }

@@ -117,12 +117,15 @@
 .help-icon-open {
     height: 21px;
     position: relative;
-    bottom: 9px;
+    top: 3px;
+    padding-left: 5px;
 }
 
 .help-icon {
     position: absolute;
+    padding-left: 5px;
     height: 21px;
+    cursor: pointer;
 
     @include mobile {
         right: 35px;
@@ -133,13 +136,23 @@
     }
  }
 
+ .close-help {
+     position: relative;
+     float: right;
+     top: 4px;
+     padding-right: 5px;
+     height: 19px;
+ }
+
 .help-container {
-    background: rgba(0, 0, 0, 0.8);
+    background: black;
     position: absolute;
     color: white;
     width: 275px;
     top: 0px;
     left: auto;
+    height: 765px;
+    overflow: hidden;
 
     @include mobile {
         right: -75px;
@@ -154,9 +167,31 @@
         width: 180px;
     }
 
+    .nav {
+        a {
+            color: white;
+            &:hover {
+                color:white;
+                background: none;
+            }
+
+            &:focus {
+                background: none;
+            }
+        }
+
+        .subsection-cont {
+            font-size: 13pt;
+        }
+    }
+
+    .help-page {
+        height: 350px;
+    }
+
     .help-content {
-        padding: 10px;
-        height: 100%;
+        padding: 0 15px;
+        height: 90%;
         width: 100%;
         word-wrap: break-word;
         font-size: 12pt;
@@ -176,8 +211,17 @@
         }
 
         .help-edit {
+            margin-bottom: 20px;
+            padding-right: 15px;
+
             a {
                 color: white !important;
+            }
+        }
+
+        .nano-content {
+            ul {
+                padding: 0px !important
             }
         }
     }

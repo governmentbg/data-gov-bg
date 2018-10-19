@@ -13,6 +13,26 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [0.6.4] - 2018-10-19
+### Added
+- Forum discussions to public data and documents sections
+- Cron task to initiate search indexes update every 5 minutes
+
+### Changed
+- Help stays open until closed
+- Help no longer transparent
+- Help close icon changed
+- Optimised tnt search indexes refresh command
+- Remove searchable models automatic index sync on create and update
+
+### Fixed
+- Editing active and inactive help sections and pages
+- Scroll shows in help container
+- Redirect after dataset creation
+- Hovering main categories
+- Show help section icon in footer on mobile view
+- Filter resource download formats
+
 ## [0.6.3] - 2018-10-18
 ### Added
 - TNT search indexes refresh command
@@ -104,7 +124,8 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
-[0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3
+[0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.5.1...v0.6.0

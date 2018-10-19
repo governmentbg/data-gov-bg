@@ -70,7 +70,13 @@
                     <a
                         href="{{ route('data', ['category' => [$category->id]]) }}"
                     >
-                        <img class="home-icon cls-1" src="{{  $category->icon }}"/>
+                        @if (isset($category->icon_data))
+                            <span class="svg">
+                                {!! $category->icon_data !!}
+                            </span>
+                        @else
+                            <img class="home-icon cls-1" src="{{  $category->icon }}" />
+                        @endif
                         <p>{{$category->name}}</p>
                     </a>
                 @endforeach

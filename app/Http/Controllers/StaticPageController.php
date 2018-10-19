@@ -334,29 +334,4 @@ class StaticPageController extends Controller {
 
         return $result;
     }
-
-    public function getForumDiscussion($link)
-    {
-        if ($link) {
-            $segments = explode('/', parse_url($link)['path']);
-
-            if (count($segments) > 2) {
-                $discSlug = $segments[count($segments) - 1];
-                $categorySlug = $segments[count($segments) - 2];
-
-                $disc = Models::discussion()->where('slug', $discSlug)->count();
-                $discCategory = Models::category()->where('slug', $categorySlug)->count();
-
-                if ($disc && $discCategory) {
-                    $rq = Request::create($link, 'GET', []);
-                    $chatterDisc = new ChatterDiscussionController($rq);
-                    $discussion = $chatterDisc->show($categorySlug, $discSlug)->getData();
-
-                    return $discussion;
-                }
-            }
-        }
-
-        return [];
-    }
 }

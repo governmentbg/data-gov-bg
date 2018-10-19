@@ -72,7 +72,6 @@
                         name="format"
                         class="js-select form-control"
                     >
-                        <option></option>
                         @foreach ($formats as $id => $format)
                             <option
                                 value="{{ $format }}"

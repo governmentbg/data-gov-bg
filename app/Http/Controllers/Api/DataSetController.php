@@ -80,6 +80,7 @@ class DataSetController extends ApiController
                 'support_name'          => 'nullable|string|max:191',
                 'support_email'         => 'nullable|email|max:191',
                 'sla'                   => 'nullable|max:8000',
+                'forum_link'            => 'nullable|string|max:191',
                 'custom_fields.*.label' => 'nullable|max:191',
                 'custom_fields.*.value' => 'nullable|max:8000',
             ]);
@@ -131,7 +132,8 @@ class DataSetController extends ApiController
                 'author_name'       => empty($data['author_name']) ? null : $data['author_name'],
                 'author_email'      => empty($data['author_email']) ? null : $data['author_email'],
                 'support_name'      => empty($data['support_name']) ? null : $data['support_name'],
-                'support_email'     => empty($data['support_email']) ? null : $data['support_email']
+                'support_email'     => empty($data['support_email']) ? null : $data['support_email'],
+                'forum_link'        => empty($data['forum_link']) ? null : $data['forum_link'],
             ];
 
             if (
@@ -284,6 +286,7 @@ class DataSetController extends ApiController
                 'support_name'          => 'nullable|string|max:191',
                 'support_email'         => 'nullable|email|max:191',
                 'sla'                   => 'nullable|max:8000',
+                'forum_link'            => 'nullable|string|max:191',
                 'status'                => 'nullable|int|in:'. implode(',', array_flip($statusTypes)),
                 'custom_fields.*.label' => 'nullable|max:191',
                 'custom_fields.*.value' => 'nullable|max:8000',
@@ -392,6 +395,11 @@ class DataSetController extends ApiController
                 if (!empty($post['data']['support_email'])) {
                     $dataSet->support_email = $post['data']['support_email'];
                 }
+
+
+                $dataSet->forum_link = !empty($post['data']['forum_link'])
+                    ? $post['data']['forum_link']
+                    : null;
 
                 if (!empty($post['data']['status'])) {
                     $dataSet->status = $post['data']['status'];
@@ -756,6 +764,7 @@ class DataSetController extends ApiController
                     $result['support_email'] = $set->support_email;
                     $result['sla'] = $set->sla;
                     $result['status'] = $set->status;
+                    $result['forum_link'] = $set->forum_link;
                     $result['followers_count'] = $set->userFollow()->count();
                     $result['reported'] = 0;
                     $result['created_at'] = isset($set->created_at) ? $set->created_at->toDateTimeString() : null;
@@ -881,6 +890,7 @@ class DataSetController extends ApiController
                     $data['sla'] = $data->sla;
                     $data['description'] = $data->description;
                     $data['reported'] = 0;
+                    $data['forum_link'] = $data->forum_link;
 
                     $hasRes = $data->resource()->count();
 

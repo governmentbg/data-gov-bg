@@ -110,7 +110,7 @@ class HelpController extends ApiController
                 'title.*'   => 'max:191',
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
-                'active'    => 'required|int',
+                'active'    => 'required|boolean',
                 'ordering'  => 'nullable|int'
             ]);
 
@@ -165,6 +165,10 @@ class HelpController extends ApiController
 
         if (!$validator->fails()) {
             $section = HelpSection::find($request->id);
+
+            if (!empty($section->subsections)) {
+                return $this->errorResponse(__('custom.delete_help_section_fail_subsection'));
+            }
 
             try {
                 $section->delete();

@@ -320,6 +320,7 @@ $(function() {
 // Sticky footer
 var $head = $('.js-head');
 var $content = $('.js-content');
+var $nanoContent = $('.js-nano-content');
 var $footer = $('.js-footer');
 
 if ($head && $content && $footer) {
@@ -331,6 +332,7 @@ if ($head && $content && $footer) {
         $(window).resize(resize);
 
         $('#app').on('update', scroll);
+
     });
 }
 
@@ -340,11 +342,17 @@ function resize() {
 }
 
 function scroll() {
+    showHelp();
     helpBar();
+
+    if ($('.help-nano').length) {
+        $('.help-nano').nanoScroller({});
+    }
 }
 
 function helpBar() {
     $helpBar = $('.js-help-bar');
+    $helpBody = $('.js-help-body');
 
     if ($helpBar.length) {
         var windowTop = $(window).scrollTop();
@@ -355,7 +363,6 @@ function helpBar() {
         var footerHeight = parseFloat($footer.css('height'));
         var height;
 
-
         if (windowTop > top) {
             $helpBar.addClass('stick');
             height = windowHeight;
@@ -365,6 +372,27 @@ function helpBar() {
         }
 
         $helpBar.css('height', height + 'px');
+    }
+}
+
+function showHelp() {
+    if ($('.js-help').length) {
+        if (sessionStorage.help == 'true') {
+            $('.help-container').removeClass('hidden');
+            $('.js-open-help').toggle();
+        }
+
+        $('.js-open-help').on('click', function() {
+            $('.help-container').removeClass('hidden');
+            $('.js-open-help').toggle();
+            sessionStorage.help = true;
+        });
+
+        $('.close-btn').on('click', function() {
+            $('.help-container').addClass('hidden');
+            $('.js-open-help').toggle();
+            sessionStorage.help = false;
+        })
     }
 }
 
@@ -494,13 +522,6 @@ $('.js-hide-button').click(function() {
     $($(this).data('target')).hide();
     $(this).hide();
 });
-
-if ($('.js-help').length) {
-    $('.js-open-help, .close-btn').on('click', function() {
-        $('.help-container').toggleClass('hidden');
-        $('.js-open-help').toggle();
-    });
-}
 
 /**
  * Handle google ga events

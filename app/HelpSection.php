@@ -33,6 +33,11 @@ class HelpSection extends Model implements TranslatableInterface
         return $this->hasMany('App\HelpSection', 'parent_id');
     }
 
+    public function pages()
+    {
+        return $this->hasMany('App\HelpPage', 'section_id');
+    }
+
     public function searchableAs()
     {
         return 'help_sections';

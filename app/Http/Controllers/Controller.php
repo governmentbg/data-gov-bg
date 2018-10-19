@@ -8,13 +8,15 @@ use App\Module;
 use App\Section;
 use App\RoleRight;
 use Illuminate\Http\Request;
+use DevDojo\Chatter\Models\Models;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Http\Controllers\Api\SectionController as ApiSection;
 use App\Http\Controllers\Api\ThemeController as ApiTheme;
+use DevDojo\Chatter\Controllers\ChatterDiscussionController;
+use App\Http\Controllers\Api\SectionController as ApiSection;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\CategoryController as ApiCategory;
 use App\Http\Controllers\Api\TermsOfUseController as ApiTermsOfUse;
@@ -465,5 +467,30 @@ class Controller extends BaseController
         }
 
         return $sections;
+    }
+
+    public function getForumDiscussion($link)
+    {
+        if ($link) {
+            $segments = explode('/', parse_url($link)['path']);
+
+            if (count($segments) > 2) {
+                $discSlug = $segments[count($segments) - 1];
+                $categorySlug = $segments[count($segments) - 2];
+
+                $disc = Models::discussion()->where('slug', $discSlug)->count();
+                $discCategory = Models::category()->where('slug', $categorySlug)->count();
+
+                if ($disc && $discCategory) {
+                    $rq = Request::create($link, 'GET', []);
+                    $chatterDisc = new ChatterDiscussionController($rq);
+                    $discussion = $chatterDisc->show($categorySlug, $discSlug)->getData();
+
+                    return $discussion;
+                }
+            }
+        }
+
+        return [];
     }
 }

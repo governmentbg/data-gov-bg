@@ -1,14 +1,12 @@
 <div class="js-help-bar help-container hidden">
-    @if(!empty($help))
-        <div class="nano">
-            <div class="nano-content">
-                <div class="help-content">
-                    <img class="help-icon-open" src="{{ asset('/img/help-icon.svg') }}">
-                    <div class="close"><span class="close-btn">X</span></div>
-                    <h3>{{ $help->title }}</h3>
-                    <div class="p-b-md">
-                        {!! $help->body !!}
-                    </div>
+    <img class="help-icon-open" src="{{ asset('/img/help-icon.svg') }}">
+    <img class="close-help close-btn close" src="{{ asset('/img/X.svg') }}">
+    <div class="help-content m-t-sm">
+        @if (!empty($help))
+            <h3>{{ $help->title }}</h3>
+            <div class="nano help-nano">
+                <div class="nano-content">
+                    {!! $help->body !!}
                     @if (App\Role::isAdmin())
                         <span class="help-edit pull-right">
                             <a
@@ -18,6 +16,8 @@
                     @endif
                 </div>
             </div>
-        </div>
-    @endif
+        @else
+            <h3>{{ utrans('custom.no_help') }}</h3>
+        @endif
+    </div>
 </div>

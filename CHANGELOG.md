@@ -21,6 +21,8 @@ Security - in case of vulnerabilities.
 - Bug in editing active and inactive help sections and pages
 - Scroll shows in help container
 - Redirect after dataset creation
+- Bug in hovering main categories
+- Show help section icon in footer on mobile view
 
 ## [0.6.3] - 2018-10-18
 ### Added

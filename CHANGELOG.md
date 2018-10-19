@@ -23,6 +23,7 @@ Security - in case of vulnerabilities.
 - Redirect after dataset creation
 - Bug in hovering main categories
 - Show help section icon in footer on mobile view
+- Filter resource download formats
 
 ## [0.6.3] - 2018-10-18
 ### Added

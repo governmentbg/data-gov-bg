@@ -35,6 +35,18 @@
                 <strong>{{ __('custom.unique_identificator') }}:</strong>
                 &nbsp;{{ $dataset->uri }}
             </p>
+            @if (!empty($dataset->category_id))
+                <p>
+                    <strong>{{ __('custom.main_topic') }}:</strong>
+                    &nbsp;{{ $dataset->category_name }}
+                </p>
+            @endif
+            @if (!empty($dataset->terms_of_use_id))
+                <p>
+                    <strong>{{ utrans('custom.license', 1) }}:</strong>
+                    &nbsp;{{ $dataset->terms_of_use_name }}
+                </p>
+            @endif
             @if (!empty($dataset->source))
                 <p>
                     <strong>{{ __('custom.source') }}:</strong>

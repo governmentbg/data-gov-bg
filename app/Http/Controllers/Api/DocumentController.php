@@ -262,9 +262,7 @@ class DocumentController extends ApiController
                     $doc->mime_type = $data['mimetype'];
                 }
 
-                if (isset($data['forum_link'])) {
-                    $doc->mime_type = $data['forum_link'];
-                }
+                $doc->forum_link = isset($data['forum_link']) ? $data['forum_link'] : null;
 
                 if (isset($data['data'])) {
                     file_put_contents($this->path . $doc->id, $data['data']);
@@ -412,6 +410,7 @@ class DocumentController extends ApiController
             'name',
             'descript',
             'file_name',
+            'forum_link',
             'mime_type',
             'created_at',
             'updated_at',

@@ -58,5 +58,10 @@
             </div>
         </div>
     </div>
+    @if (isset($discussion))
+        <div class="row discussion">
+            @include('vendor.chatter.discussion')
+        </div>
+    @endif
 </div>
 @endsection

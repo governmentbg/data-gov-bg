@@ -12,6 +12,9 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Forum discussions to public data and documents sections
+
 ### Changed
 - Help stays open until closed
 - Help no longer transparent

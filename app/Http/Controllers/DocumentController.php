@@ -24,13 +24,18 @@ class DocumentController extends Controller {
         $documents = !empty($docList->documents[0]) ? $docList->documents[0] : null;
 
         if (!is_null($documents)) {
+            $discussion = $this->getForumDiscussion($documents->forum_link);
 
-            return view(
+            $viewParams =  [
+                'class'          => 'documents',
+                'document'       => $documents,
+            ];
+
+            return view (
                 'document/view',
-                [
-                    'class'          => 'documents',
-                    'document'       => $documents,
-                ]
+                !empty($discussion)
+                    ? array_merge($viewParams, $discussion)
+                    : $viewParams
             );
         }
     }

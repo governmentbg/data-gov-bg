@@ -295,6 +295,26 @@
             </div>
         </div>
 
+        @if (!empty($admin))
+            <div class="form-group row">
+                <label
+                    for="forum-link"
+                    class="col-sm-3 col-xs-12 col-form-label"
+                >{{ __('custom.forum_link') }}:</label>
+                <div class="col-sm-9">
+                    <input
+                        id="forum-link"
+                        name="forum_link"
+                        class="input-border-r-12 form-control"
+                        value="{{ old('forum_link') }}"
+                        type="text"
+                        placeholder="{{ __('custom.forum_link') }}"
+                    >
+                    <span class="error">{{ $errors->first('forum_link') }}</span>
+                </div>
+            </div>
+        @endif
+
         @foreach ($fields as $field)
             @if ($field['view'] == 'translation_custom')
                 @include(

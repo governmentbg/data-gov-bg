@@ -744,6 +744,7 @@ class DataController extends Controller {
 
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
+                $formats = Resource::getFormats();
 
                 if (empty($version)) {
                     $version = $resource->version;
@@ -786,10 +787,18 @@ class DataController extends Controller {
                 $res = $api->getResourceData($rq)->getData();
                 $data = !empty($res->data) ? $res->data : [];
 
-                if ($resource->format_code == Resource::FORMAT_XML) {
-                    $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
+                if (
+                    $resource->format_code == Resource::FORMAT_XML
+                    || $resource->format_code == Resource::FORMAT_RDF
+                ) {
+                    $convertData = [
+                        'api_key'   => \Auth::user()->api_key,
+                        'data'      => $data,
+                    ];
+                    $method = 'json2'. strtolower($resource->file_format);
+                    $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                     $apiConvert = new ApiConversion($reqConvert);
-                    $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                    $resultConvert = $apiConvert->$method($reqConvert)->getData();
                     $data = isset($resultConvert->data) ? $resultConvert->data : [];
                 }
 
@@ -826,16 +835,17 @@ class DataController extends Controller {
                 return view(
                     'data/resourceView',
                     [
-                        'class'          => 'data',
-                        'organisation'   => $organisation,
-                        'user'           => $user,
-                        'approved'       => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
-                        'dataset'        => $dataset,
-                        'resource'       => $resource,
-                        'data'           => $data,
-                        'versionView'    => $version,
-                        'userData'       => $userData,
-                        'buttons'        => $buttons
+                        'class'         => 'data',
+                        'organisation'  => $organisation,
+                        'user'          => $user,
+                        'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
+                        'dataset'       => $dataset,
+                        'resource'      => $resource,
+                        'data'          => $data,
+                        'versionView'   => $version,
+                        'userData'      => $userData,
+                        'buttons'       => $buttons,
+                        'formats'       => $formats,
                     ]
                 );
             }

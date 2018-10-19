@@ -105,6 +105,12 @@
                     @endforeach
                 </div>
             @endif
+            @if (!empty($dataset->forum_link) && !empty($admin))
+                <p>
+                    <strong>{{ __('custom.forum_link') }}:</strong>
+                    &nbsp;{{ $dataset->forum_link }}
+                </p>
+            @endif
 
             @if (
                     (!empty($admin) || !empty($buttons['addToGroup']))

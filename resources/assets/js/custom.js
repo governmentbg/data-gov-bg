@@ -351,8 +351,6 @@ function scroll() {
 }
 
 function helpBar() {
-
-// console.log("here");
     $helpBar = $('.js-help-bar');
     $helpBody = $('.js-help-body');
 
@@ -374,10 +372,6 @@ function helpBar() {
         }
 
         $helpBar.css('height', height + 'px');
-
-        // if ($helpBody.hasClass('active')) {
-        //     $helpBody.show();
-        // }
     }
 }
 

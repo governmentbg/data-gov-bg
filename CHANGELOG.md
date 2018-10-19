@@ -14,17 +14,20 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Added
 - Forum discussions to public data and documents sections
+- Cron task to initiate search indexes update every 5 minutes
 
 ### Changed
 - Help stays open until closed
 - Help no longer transparent
 - Help close icon changed
+- Optimised tnt search indexes refresh command
+- Remove searchable models automatic index sync on create and update
 
 ### Fixed
-- Bug in editing active and inactive help sections and pages
+- Editing active and inactive help sections and pages
 - Scroll shows in help container
 - Redirect after dataset creation
-- Bug in hovering main categories
+- Hovering main categories
 - Show help section icon in footer on mobile view
 - Filter resource download formats
 

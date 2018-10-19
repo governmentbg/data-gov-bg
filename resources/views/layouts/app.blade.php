@@ -60,7 +60,7 @@
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">
-        <div class="nano-content">
+        <div class="nano-content js-nano-content">
             <nav class="navbar navbar-default navbar-static-top js-head">
                 <div class="container">
                     <div class="navbar-header">
@@ -290,30 +290,31 @@
                                 href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
                             >{{ exec('git describe') }}</a>
                        </div>
-                    @endif
-                    <div class="help-btn js-help">
-                        @if (!empty($help))
-                            <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
-                            @include('components.help', ['help' => $help])
-                        @elseif (!env('IS_TOOL') && \Auth::check() && App\Role::isAdmin())
-                            <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
-                            <div class="js-help-bar help-container hidden">
-                                <div class="help-content">
-                                    <div class="close"><span class="close-btn">X</span></div>
-                                    <h3>{{ __('custom.no_help') }}</h3>
-                                    <a
-                                        class="btn-primary btn"
-                                        href="{{
-                                            route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
-                                                ? 'home'
-                                                : \Request::getPathInfo()
-                                            ])
-                                        }}"
-                                    >{{ __('custom.add') }}</a>
+                    @else
+                        <div class="help-btn js-help">
+                            @if (\Auth::check() && App\Role::isAdmin() && empty($help))
+                                <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
+                                <div class="js-help-bar help-container hidden">
+                                    <div class="help-content">
+                                    <img class="close-help close-btn" src="{{ asset('/img/X.svg') }}">
+                                        <h3>{{ __('custom.no_help') }}</h3>
+                                        <a
+                                            class="btn-primary btn"
+                                            href="{{
+                                                route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
+                                                    ? 'home'
+                                                    : \Request::getPathInfo()
+                                                ])
+                                            }}"
+                                        >{{ __('custom.add') }}</a>
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
-                    </div>
+                            @else
+                                <img class="js-open-help help-icon" src="{{ asset('/img/help-icon.svg') }}">
+                                @include('components.help', ['help' => !empty($help) ? $help : []])
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </nav>
 

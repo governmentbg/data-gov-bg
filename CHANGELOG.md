@@ -12,6 +12,11 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Users can add datasets to groups forom a public dataset view
+
+### Fixed
+- Modals not opening
 
 ## [0.6.4] - 2018-10-19
 ### Added

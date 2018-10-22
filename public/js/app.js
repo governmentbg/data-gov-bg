@@ -12672,7 +12672,7 @@ function buildLineContent(cm, lineView) {
   var builder = {pre: eltP("pre", [content], "CodeMirror-line"), content: content,
                  col: 0, pos: 0, cm: cm,
                  trailingSpace: false,
-                 splitSpaces: cm.getOption("lineWrapping")};
+                 splitSpaces: (ie || webkit) && cm.getOption("lineWrapping")};
   lineView.measure = {};
 
   // Iterate over the logical lines that make up this visual line.
@@ -12793,8 +12793,6 @@ function buildToken(builder, text, style, startStyle, endStyle, title, css) {
   builder.content.appendChild(content);
 }
 
-// Change some spaces to NBSP to prevent the browser from collapsing
-// trailing spaces at the end of a line when rendering text (issue #1362).
 function splitSpaces(text, trailingBefore) {
   if (text.length > 1 && !/  /.test(text)) { return text }
   var spaceBefore = trailingBefore, result = "";
@@ -18106,9 +18104,8 @@ function onMouseDown(e) {
     }
     return
   }
-  var button = e_button(e);
-  if (button == 3 && captureRightClick ? contextMenuInGutter(cm, e) : clickInGutter(cm, e)) { return }
-  var pos = posFromMouse(cm, e), repeat = pos ? clickRepeat(pos, button) : "single";
+  if (clickInGutter(cm, e)) { return }
+  var pos = posFromMouse(cm, e), button = e_button(e), repeat = pos ? clickRepeat(pos, button) : "single";
   window.focus();
 
   // #3261: make sure, that we're not starting a second selection
@@ -20548,7 +20545,7 @@ CodeMirror$1.fromTextArea = fromTextArea;
 
 addLegacyProps(CodeMirror$1);
 
-CodeMirror$1.version = "5.40.2";
+CodeMirror$1.version = "5.40.0";
 
 return CodeMirror$1;
 
@@ -21045,7 +21042,7 @@ module.exports = Cancel;
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(12);
-module.exports = __webpack_require__(58);
+module.exports = __webpack_require__(54);
 
 
 /***/ }),
@@ -21067,29 +21064,29 @@ __webpack_require__(13);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-__webpack_require__(40);
-__webpack_require__(41);
-__webpack_require__(42);
+__webpack_require__(36);
+__webpack_require__(37);
+__webpack_require__(38);
 
 // Dropdowns
-__webpack_require__(43);
+__webpack_require__(39);
 
 // DataTables
-__webpack_require__(44);
+__webpack_require__(40);
 
 // Checkboxes
-__webpack_require__(46);
+__webpack_require__(42);
 
 // Main js
-__webpack_require__(47);
-__webpack_require__(48);
-__webpack_require__(49);
+__webpack_require__(43);
+__webpack_require__(44);
+__webpack_require__(45);
 
 // Codemirror
 __webpack_require__(3);
 
 // Summernote wysiwyg editor
-__webpack_require__(56);
+__webpack_require__(52);
 
 /***/ }),
 /* 13 */
@@ -21169,7 +21166,7 @@ if (token) {
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.11';
+  var VERSION = '4.17.10';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -21433,7 +21430,7 @@ if (token) {
   var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboRange + rsVarRange + ']');
 
   /** Used to detect strings that need a more robust regexp to match words. */
-  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
@@ -22379,6 +22376,20 @@ if (token) {
       }
     }
     return result;
+  }
+
+  /**
+   * Gets the value at `key`, unless `key` is "__proto__".
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @param {string} key The key of the property to get.
+   * @returns {*} Returns the property value.
+   */
+  function safeGet(object, key) {
+    return key == '__proto__'
+      ? undefined
+      : object[key];
   }
 
   /**
@@ -24838,7 +24849,7 @@ if (token) {
           if (isArguments(objValue)) {
             newValue = toPlainObject(objValue);
           }
-          else if (!isObject(objValue) || isFunction(objValue)) {
+          else if (!isObject(objValue) || (srcIndex && isFunction(objValue))) {
             newValue = initCloneObject(srcValue);
           }
         }
@@ -27759,22 +27770,6 @@ if (token) {
         array[length] = isIndex(index, arrLength) ? oldArray[index] : undefined;
       }
       return array;
-    }
-
-    /**
-     * Gets the value at `key`, unless `key` is "__proto__".
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {string} key The key of the property to get.
-     * @returns {*} Returns the property value.
-     */
-    function safeGet(object, key) {
-      if (key == '__proto__') {
-        return;
-      }
-
-      return object[key];
     }
 
     /**
@@ -41568,11 +41563,7 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */
+/* 36 */
 /***/ (function(module, exports) {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -42217,7 +42208,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })(window.jQuery);
 
 /***/ }),
-/* 41 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -42687,7 +42678,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 });
 
 /***/ }),
-/* 42 */
+/* 38 */
 /***/ (function(module, exports) {
 
 /**
@@ -42707,7 +42698,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 })(jQuery);
 
 /***/ }),
-/* 43 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -43990,7 +43981,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 });
 
 /***/ }),
-/* 44 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! DataTables styling integration
@@ -44000,7 +43991,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! DataTables s
 (function( factory ){
 	if ( true ) {
 		// AMD
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(45)], __WEBPACK_AMD_DEFINE_RESULT__ = (function ( $ ) {
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1), __webpack_require__(41)], __WEBPACK_AMD_DEFINE_RESULT__ = (function ( $ ) {
 			return factory( $, window, document );
 		}).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -44034,7 +44025,7 @@ return $.fn.dataTable;
 
 
 /***/ }),
-/* 45 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! DataTables 1.10.19
@@ -59337,7 +59328,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! DataTables 1
 
 
 /***/ }),
-/* 46 */
+/* 42 */
 /***/ (function(module, exports) {
 
 /*!
@@ -59852,7 +59843,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! DataTables 1
 
 
 /***/ }),
-/* 47 */
+/* 43 */
 /***/ (function(module, exports) {
 
 // show on load functionality
@@ -60195,6 +60186,7 @@ function resize() {
 }
 
 function scroll() {
+    showHelp();
     helpBar();
 
     if ($('.help-nano').length) {
@@ -60203,8 +60195,6 @@ function scroll() {
 }
 
 function helpBar() {
-
-    // console.log("here");
     $helpBar = $('.js-help-bar');
     $helpBody = $('.js-help-body');
 
@@ -60226,30 +60216,28 @@ function helpBar() {
         }
 
         $helpBar.css('height', height + 'px');
-
-        // if ($helpBody.hasClass('active')) {
-        //     $helpBody.show();
-        // }
     }
 }
 
-if ($('.js-help').length) {
-    if (sessionStorage.help == 'true') {
-        $('.help-container').removeClass('hidden');
-        $('.js-open-help').toggle();
+function showHelp() {
+    if ($('.js-help').length) {
+        if (sessionStorage.help == 'true') {
+            $('.help-container').removeClass('hidden');
+            $('.js-open-help').toggle();
+        }
+
+        $('.js-open-help').on('click', function () {
+            $('.help-container').removeClass('hidden');
+            $('.js-open-help').toggle();
+            sessionStorage.help = true;
+        });
+
+        $('.close-btn').on('click', function () {
+            $('.help-container').addClass('hidden');
+            $('.js-open-help').toggle();
+            sessionStorage.help = false;
+        });
     }
-
-    $('.js-open-help').on('click', function () {
-        $('.help-container').removeClass('hidden');
-        $('.js-open-help').toggle();
-        sessionStorage.help = true;
-    });
-
-    $('.close-btn').on('click', function () {
-        $('.help-container').addClass('hidden');
-        $('.js-open-help').toggle();
-        sessionStorage.help = false;
-    });
 }
 
 function stickyFooter() {
@@ -60430,7 +60418,7 @@ $('.org-col').mouseleave(function () {
 });
 
 /***/ }),
-/* 48 */
+/* 44 */
 /***/ (function(module, exports) {
 
 $(function () {
@@ -60470,14 +60458,14 @@ $(function () {
 });
 
 /***/ }),
-/* 49 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_constants__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_constants__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_constants___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_constants__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_util__ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_util__ = __webpack_require__(47);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_util___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_util__);
 
 
@@ -60797,7 +60785,7 @@ $(function () {
 
 $(function () {
     if ($('.js-xml-prev').length) {
-        var format = __webpack_require__(54);
+        var format = __webpack_require__(50);
         var xmlData = $(".js-xml-prev").data('xml-data');
         var formattedXml = format(xmlData.trim());
         $('.js-xml-prev').html(formattedXml);
@@ -60805,13 +60793,13 @@ $(function () {
 });
 
 /***/ }),
-/* 50 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = {"O_RDONLY":0,"O_WRONLY":1,"O_RDWR":2,"S_IFMT":61440,"S_IFREG":32768,"S_IFDIR":16384,"S_IFCHR":8192,"S_IFBLK":24576,"S_IFIFO":4096,"S_IFLNK":40960,"S_IFSOCK":49152,"O_CREAT":512,"O_EXCL":2048,"O_NOCTTY":131072,"O_TRUNC":1024,"O_APPEND":8,"O_DIRECTORY":1048576,"O_NOFOLLOW":256,"O_SYNC":128,"O_SYMLINK":2097152,"O_NONBLOCK":4,"S_IRWXU":448,"S_IRUSR":256,"S_IWUSR":128,"S_IXUSR":64,"S_IRWXG":56,"S_IRGRP":32,"S_IWGRP":16,"S_IXGRP":8,"S_IRWXO":7,"S_IROTH":4,"S_IWOTH":2,"S_IXOTH":1,"E2BIG":7,"EACCES":13,"EADDRINUSE":48,"EADDRNOTAVAIL":49,"EAFNOSUPPORT":47,"EAGAIN":35,"EALREADY":37,"EBADF":9,"EBADMSG":94,"EBUSY":16,"ECANCELED":89,"ECHILD":10,"ECONNABORTED":53,"ECONNREFUSED":61,"ECONNRESET":54,"EDEADLK":11,"EDESTADDRREQ":39,"EDOM":33,"EDQUOT":69,"EEXIST":17,"EFAULT":14,"EFBIG":27,"EHOSTUNREACH":65,"EIDRM":90,"EILSEQ":92,"EINPROGRESS":36,"EINTR":4,"EINVAL":22,"EIO":5,"EISCONN":56,"EISDIR":21,"ELOOP":62,"EMFILE":24,"EMLINK":31,"EMSGSIZE":40,"EMULTIHOP":95,"ENAMETOOLONG":63,"ENETDOWN":50,"ENETRESET":52,"ENETUNREACH":51,"ENFILE":23,"ENOBUFS":55,"ENODATA":96,"ENODEV":19,"ENOENT":2,"ENOEXEC":8,"ENOLCK":77,"ENOLINK":97,"ENOMEM":12,"ENOMSG":91,"ENOPROTOOPT":42,"ENOSPC":28,"ENOSR":98,"ENOSTR":99,"ENOSYS":78,"ENOTCONN":57,"ENOTDIR":20,"ENOTEMPTY":66,"ENOTSOCK":38,"ENOTSUP":45,"ENOTTY":25,"ENXIO":6,"EOPNOTSUPP":102,"EOVERFLOW":84,"EPERM":1,"EPIPE":32,"EPROTO":100,"EPROTONOSUPPORT":43,"EPROTOTYPE":41,"ERANGE":34,"EROFS":30,"ESPIPE":29,"ESRCH":3,"ESTALE":70,"ETIME":101,"ETIMEDOUT":60,"ETXTBSY":26,"EWOULDBLOCK":35,"EXDEV":18,"SIGHUP":1,"SIGINT":2,"SIGQUIT":3,"SIGILL":4,"SIGTRAP":5,"SIGABRT":6,"SIGIOT":6,"SIGBUS":10,"SIGFPE":8,"SIGKILL":9,"SIGUSR1":30,"SIGSEGV":11,"SIGUSR2":31,"SIGPIPE":13,"SIGALRM":14,"SIGTERM":15,"SIGCHLD":20,"SIGCONT":19,"SIGSTOP":17,"SIGTSTP":18,"SIGTTIN":21,"SIGTTOU":22,"SIGURG":16,"SIGXCPU":24,"SIGXFSZ":25,"SIGVTALRM":26,"SIGPROF":27,"SIGWINCH":28,"SIGIO":23,"SIGSYS":12,"SSL_OP_ALL":2147486719,"SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION":262144,"SSL_OP_CIPHER_SERVER_PREFERENCE":4194304,"SSL_OP_CISCO_ANYCONNECT":32768,"SSL_OP_COOKIE_EXCHANGE":8192,"SSL_OP_CRYPTOPRO_TLSEXT_BUG":2147483648,"SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS":2048,"SSL_OP_EPHEMERAL_RSA":0,"SSL_OP_LEGACY_SERVER_CONNECT":4,"SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER":32,"SSL_OP_MICROSOFT_SESS_ID_BUG":1,"SSL_OP_MSIE_SSLV2_RSA_PADDING":0,"SSL_OP_NETSCAPE_CA_DN_BUG":536870912,"SSL_OP_NETSCAPE_CHALLENGE_BUG":2,"SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG":1073741824,"SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG":8,"SSL_OP_NO_COMPRESSION":131072,"SSL_OP_NO_QUERY_MTU":4096,"SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION":65536,"SSL_OP_NO_SSLv2":16777216,"SSL_OP_NO_SSLv3":33554432,"SSL_OP_NO_TICKET":16384,"SSL_OP_NO_TLSv1":67108864,"SSL_OP_NO_TLSv1_1":268435456,"SSL_OP_NO_TLSv1_2":134217728,"SSL_OP_PKCS1_CHECK_1":0,"SSL_OP_PKCS1_CHECK_2":0,"SSL_OP_SINGLE_DH_USE":1048576,"SSL_OP_SINGLE_ECDH_USE":524288,"SSL_OP_SSLEAY_080_CLIENT_DH_BUG":128,"SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG":0,"SSL_OP_TLS_BLOCK_PADDING_BUG":512,"SSL_OP_TLS_D5_BUG":256,"SSL_OP_TLS_ROLLBACK_BUG":8388608,"ENGINE_METHOD_DSA":2,"ENGINE_METHOD_DH":4,"ENGINE_METHOD_RAND":8,"ENGINE_METHOD_ECDH":16,"ENGINE_METHOD_ECDSA":32,"ENGINE_METHOD_CIPHERS":64,"ENGINE_METHOD_DIGESTS":128,"ENGINE_METHOD_STORE":256,"ENGINE_METHOD_PKEY_METHS":512,"ENGINE_METHOD_PKEY_ASN1_METHS":1024,"ENGINE_METHOD_ALL":65535,"ENGINE_METHOD_NONE":0,"DH_CHECK_P_NOT_SAFE_PRIME":2,"DH_CHECK_P_NOT_PRIME":1,"DH_UNABLE_TO_CHECK_GENERATOR":4,"DH_NOT_SUITABLE_GENERATOR":8,"NPN_ENABLED":1,"RSA_PKCS1_PADDING":1,"RSA_SSLV23_PADDING":2,"RSA_NO_PADDING":3,"RSA_PKCS1_OAEP_PADDING":4,"RSA_X931_PADDING":5,"RSA_PKCS1_PSS_PADDING":6,"POINT_CONVERSION_COMPRESSED":2,"POINT_CONVERSION_UNCOMPRESSED":4,"POINT_CONVERSION_HYBRID":6,"F_OK":0,"R_OK":4,"W_OK":2,"X_OK":1,"UV_UDP_REUSEADDR":4}
 
 /***/ }),
-/* 51 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -61339,7 +61327,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = __webpack_require__(52);
+exports.isBuffer = __webpack_require__(48);
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -61383,7 +61371,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = __webpack_require__(53);
+exports.inherits = __webpack_require__(49);
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -61404,7 +61392,7 @@ function hasOwnProperty(obj, prop) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(6)))
 
 /***/ }),
-/* 52 */
+/* 48 */
 /***/ (function(module, exports) {
 
 module.exports = function isBuffer(arg) {
@@ -61415,7 +61403,7 @@ module.exports = function isBuffer(arg) {
 }
 
 /***/ }),
-/* 53 */
+/* 49 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -61444,13 +61432,13 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 54 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _os = __webpack_require__(55);
+var _os = __webpack_require__(51);
 
 var stringTimesN = function stringTimesN(n, char) {
   return Array(n + 1).join(char);
@@ -61500,7 +61488,7 @@ function prettifyXml(xmlInput) {
 module.exports = prettifyXml;
 
 /***/ }),
-/* 55 */
+/* 51 */
 /***/ (function(module, exports) {
 
 exports.endianness = function () { return 'LE' };
@@ -61555,7 +61543,7 @@ exports.homedir = function () {
 
 
 /***/ }),
-/* 56 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -62181,7 +62169,7 @@ var lists = {
     unique: unique
 };
 
-var isSupportAmd = "function" === 'function' && __webpack_require__(57); // eslint-disable-line
+var isSupportAmd = "function" === 'function' && __webpack_require__(53); // eslint-disable-line
 /**
  * returns whether font is installed or not.
  *
@@ -68876,7 +68864,7 @@ $$1.summernote = $$1.extend($$1.summernote, {
 
 
 /***/ }),
-/* 57 */
+/* 53 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -68885,7 +68873,7 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
-/* 58 */
+/* 54 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

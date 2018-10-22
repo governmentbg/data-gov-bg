@@ -13,7 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Added
-- Users can add datasets to groups forom a public dataset view
+- Users can add datasets to groups from a public dataset view
 
 ### Fixed
 - Modals not opening

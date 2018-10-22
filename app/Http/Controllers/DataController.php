@@ -742,7 +742,6 @@ class DataController extends Controller {
                 }
             }
 
-
             $dataset = $this->getModelUsernames($dataset);
 
             return view(

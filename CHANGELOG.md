@@ -23,6 +23,7 @@ Security - in case of vulnerabilities.
 - Category list icon data encoding
 - Dataset buttons in public section
 - Resource redirect after delete
+- Search indexes permissions
 
 ## [0.6.4] - 2018-10-19
 ### Added

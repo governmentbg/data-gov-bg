@@ -15,9 +15,14 @@ Security - in case of vulnerabilities.
 ### Added
 - Users can add datasets to groups from a public dataset view
 
+### Changed
+- Allow only svg in admin category upload
+
 ### Fixed
 - Modals not opening
 - Category list icon data encoding
+- Dataset buttons in public section
+- Resource redirect after delete
 
 ## [0.6.4] - 2018-10-19
 ### Added
@@ -38,8 +43,6 @@ Security - in case of vulnerabilities.
 - Hovering main categories
 - Show help section icon in footer on mobile view
 - Filter resource download formats
-- Dataset buttons in public section
-- Resource redirect after delete
 
 ## [0.6.3] - 2018-10-18
 ### Added

@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\CategoryController as ApiCategory;
 
 class ThemeController extends AdminController
 {
-     /**
+    /**
      * Function for getting an array of translatable fields
      *
      * @return array of fields
@@ -89,20 +89,17 @@ class ThemeController extends AdminController
                 $params['filename'] = $request->file->getClientOriginalName();
                 $path = $request->file->getPathName();
                 $params['data'] = \File::get($path);
-                $ext = $request->file->getClientOriginalExtension();
-                $params['mimetype'] = $ext == Category::IMG_EXT_SVG
-                    ? Category::IMG_MIME_SVG
-                    : $request->file->getMimeType();
+                $params['mimetype'] = $request->file->getMimeType();
             }
 
             $rq = Request::create('/api/addMainCategory', 'POST', [
-                'data' => [
-                    'name'             => $request->offsetGet('name'),
-                    'icon_filename'    => isset($params['filename']) ? $params['filename'] : null,
-                    'icon_mimetype'    => isset($params['mimetype']) ? $params['mimetype'] : null,
-                    'icon_data'        => isset($params['data']) ? $params['data'] : null,
-                    'ordering'         => $request->offsetGet('ordering'),
-                ]
+                'data'              => [
+                    'name'              => $request->offsetGet('name'),
+                    'icon_filename'     => isset($params['filename']) ? $params['filename'] : null,
+                    'icon_mimetype'     => isset($params['mimetype']) ? $params['mimetype'] : null,
+                    'icon_data'         => isset($params['data']) ? $params['data'] : null,
+                    'ordering'          => $request->offsetGet('ordering'),
+                ],
             ]);
             $api = new ApiCategory($rq);
             $result = $api->addMainCategory($rq)->getData();
@@ -181,14 +178,14 @@ class ThemeController extends AdminController
             }
 
             $rq = Request::create('/api/editMainCategory', 'POST', [
-                'category_id' => $id,
-                'data' => [
-                    'name'             => $request->offsetGet('name'),
-                    'active'           => $request->offsetGet('active'),
-                    'icon_filename'    => isset($params['filename']) ? $params['filename'] : null,
-                    'icon_mimetype'    => isset($params['mimetype']) ? $params['mimetype'] : null,
-                    'icon_data'        => isset($params['data']) ? $params['data'] : null,
-                    'ordering'         => $request->offsetGet('ordering'),
+                'category_id'       => $id,
+                'data'              => [
+                    'name'              => $request->offsetGet('name'),
+                    'active'            => $request->offsetGet('active'),
+                    'icon_filename'     => isset($params['filename']) ? $params['filename'] : null,
+                    'icon_mimetype'     => isset($params['mimetype']) ? $params['mimetype'] : null,
+                    'icon_data'         => isset($params['data']) ? $params['data'] : null,
+                    'ordering'          => $request->offsetGet('ordering'),
                 ]
             ]);
 

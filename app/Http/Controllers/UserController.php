@@ -499,10 +499,6 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
-        if ($request->has('back')) {
-            return redirect(url('user/datasets'));
-        }
-
         $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
         $api = new ApiDataset($datasetReq);
         $result = $api->getDatasetDetails($datasetReq)->getData();
@@ -2114,12 +2110,12 @@ class UserController extends Controller {
 
             $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
             $apiDelete = new ApiResource($reqDelete);
-            $$resource = $apiDelete->deleteResource($reqDelete)->getData();
+            $resDelete = $apiDelete->deleteResource($reqDelete)->getData();
 
-            if ($$resource->success) {
+            if ($resDelete->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
+                return redirect()->route('userDatasetView', ['uri' => $resource->dataset_uri]);
             }
 
             $request->session()->flash('alert-success', __('custom.delete_error'));
@@ -5255,8 +5251,9 @@ class UserController extends Controller {
 
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
+                $root = Role::isAdmin() ? 'admin' : 'user';
 
-                return redirect()->route('groupDatasetView', ['uri' => $resource->dataset_uri, 'grpUri' => $group->uri]);
+                return redirect()->route($root .'GroupDatasetView', ['uri' => $resource->dataset_uri, 'grpUri' => $group->uri]);
             }
 
             $request->session()->flash('alert-success', __('custom.delete_error'));

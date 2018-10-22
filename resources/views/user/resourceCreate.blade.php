@@ -6,7 +6,9 @@
     @if (isset($fromOrg))
         @include('partials.'. $root .'-nav-bar', ['view' => 'organisation'])
         @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $fromOrg])
-        @include('partials.org-info', ['organisation' => $fromOrg])
+        <div class="col-sm-3 col-xs-12">
+            @include('partials.org-info', ['organisation' => $fromOrg])
+        </div>
     @elseif (isset($group))
         @include('partials.'. $root .'-nav-bar', ['view' => 'group'])
         @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $group])

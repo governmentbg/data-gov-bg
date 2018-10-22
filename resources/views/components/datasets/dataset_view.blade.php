@@ -241,10 +241,17 @@
                 @endif
                 <form method="POST" class="inline-block">
                 {{ csrf_field() }}
-                    <button
+                    <a
                         name="back"
+                        @if (isset($group))
+                            href="{{ url('/'. $root .'/groups/datasets/'. $group->uri) }}"
+                        @elseif (isset($fromOrg))
+                            href="{{ url('/'. $root .'/organisations/datasets/'. $fromOrg->uri) }}"
+                        @else
+                            href="{{ url('/'. $root .'/datasets/') }}"
+                        @endif
                         class="btn btn-primary"
-                    >{{ uctrans('custom.close') }}</button>
+                    >{{ uctrans('custom.close') }}</a>
                 </form>
                 @if (!empty($admin) || !empty($buttons[$dataset->uri]['delete']))
                     <form method="POST" class="inline-block">

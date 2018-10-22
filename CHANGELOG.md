@@ -38,6 +38,8 @@ Security - in case of vulnerabilities.
 - Hovering main categories
 - Show help section icon in footer on mobile view
 - Filter resource download formats
+- Dataset buttons in public section
+- Resource redirect after delete
 
 ## [0.6.3] - 2018-10-18
 ### Added

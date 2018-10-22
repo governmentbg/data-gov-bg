@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 
 ### Fixed
 - Modals not opening
+- Category list icon data encoding
 
 ## [0.6.4] - 2018-10-19
 ### Added

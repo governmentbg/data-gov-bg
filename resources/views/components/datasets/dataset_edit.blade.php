@@ -1,4 +1,4 @@
-<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg m-b-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg">
     <span class="my-profile m-l-sm">{{uctrans('custom.dataset_edit')}}</span>
 </div>
 @php $root = empty($admin) ? 'user' : 'admin'; @endphp

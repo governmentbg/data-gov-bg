@@ -1,5 +1,7 @@
 <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <h3>{{ uctrans('custom.add_resource_dataset').' - '. $dataSetName }}</h3>
+</div>
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class="req-fields">{{ __('custom.all_fields_required') }}</p>
     <form method="POST" class="m-t-lg" enctype="multipart/form-data">
         {{ csrf_field() }}
@@ -154,7 +156,13 @@
         <div class="form-group row">
             <div class="col-sm-12 text-right">
                 <a
-                    href="{{ url('/'. $root .'/dataset/view/'. $uri) }}"
+                    @if (isset($group))
+                        href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/'. $uri) }}"
+                    @elseif (isset($fromOrg))
+                        href="{{ url('/'. $root .'/organisations/dataset/view/'. $uri) }}"
+                    @else
+                        href="{{ url('/'. $root .'/dataset/view/'. $uri) }}"
+                    @endif
                     class="btn btn-primary del-btn"
                 >
                     {{ uctrans('custom.close') }}

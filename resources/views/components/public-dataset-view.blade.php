@@ -182,8 +182,7 @@
                     class="btn btn-primary badge badge-pill"
                     href="{{ url(
                         '/'. (isset($buttons['addResourceRootUrl']) ? $buttons['addResourceRootUrl'] : $buttons['rootUrl'] .'/dataset') .
-                        '/resource/create/'. $dataset->uri .
-                        (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                        '/resource/create/'. $dataset->uri
                     ) }}"
                 >{{ uctrans('custom.add_resource') }}</a>
             @endif

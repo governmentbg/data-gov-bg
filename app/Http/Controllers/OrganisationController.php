@@ -848,9 +848,10 @@ class OrganisationController extends Controller
                     $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
                     $buttons['delete'] = $rightCheck;
 
-                    $buttons['addResourceRootUrl'] = 'user/organisation/dataset';
+                    $root =  Role::isAdmin() ? 'admin' : 'user';
+                    $buttons['addResourceRootUrl'] = $root. '/organisations/'. $organisation->uri .'/dataset';
                     $buttons['parentUri'] = $organisation->uri;
-                    $buttons['editRootUrl'] = 'user/organisation/'. $organisation->uri .'/datasets';
+                    $buttons['editRootUrl'] = $root .'/organisations/'. $organisation->uri .'/dataset';
                 }
 
                 $dataset = $this->getModelUsernames($dataset);
@@ -916,6 +917,7 @@ class OrganisationController extends Controller
 
                     // set resource format code
                     $resource->format_code = Resource::getFormatsCode($resource->file_format);
+                    $formats = Resource::getFormats(true);
 
                     if (empty($version)) {
                         $version = $resource->version;
@@ -958,10 +960,18 @@ class OrganisationController extends Controller
                     $res = $api->getResourceData($rq)->getData();
                     $data = !empty($res->data) ? $res->data : [];
 
-                    if ($resource->format_code == Resource::FORMAT_XML) {
-                        $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
+                    if (
+                        $resource->format_code == Resource::FORMAT_XML
+                        || $resource->format_code == Resource::FORMAT_RDF
+                    ) {
+                        $convertData = [
+                            'api_key'   => \Auth::user()->api_key,
+                            'data'      => $data,
+                        ];
+                        $method = 'json2'. strtolower($resource->file_format);
+                        $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                         $apiConvert = new ApiConversion($reqConvert);
-                        $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
+                        $resultConvert = $apiConvert->$method($reqConvert)->getData();
                         $data = isset($resultConvert->data) ? $resultConvert->data : [];
                     }
 
@@ -989,7 +999,8 @@ class OrganisationController extends Controller
                         $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
                         $buttons['delete'] = $rightCheck;
 
-                        $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
+                        $root =  Role::isAdmin() ? 'admin' : 'user';
+                        $buttons['rootUrl'] = $root .'/organisations';
                         $buttons['parentUri'] = $organisation->uri;
                     }
 
@@ -999,15 +1010,16 @@ class OrganisationController extends Controller
                     return view(
                         'organisation/resourceView',
                         [
-                            'class'          => 'organisation',
-                            'organisation'   => $organisation,
-                            'approved'       => ($organisation->type == Organisation::TYPE_COUNTRY),
-                            'dataset'        => $dataset,
-                            'resource'       => $resource,
-                            'data'           => $data,
-                            'versionView'    => $version,
-                            'userData'       => $userData,
-                            'buttons'        => $buttons,
+                            'class'         => 'organisation',
+                            'organisation'  => $organisation,
+                            'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
+                            'dataset'       => $dataset,
+                            'resource'      => $resource,
+                            'data'          => $data,
+                            'versionView'   => $version,
+                            'userData'      => $userData,
+                            'buttons'       => $buttons,
+                            'formats'       => $formats,
                         ]
                     );
                 }

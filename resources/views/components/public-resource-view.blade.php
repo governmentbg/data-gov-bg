@@ -146,7 +146,10 @@
                                     @if (isset($buttons['update']) && $buttons['update'])
                                         <a
                                             class="btn btn-primary badge badge-pill m-b-sm"
-                                            href="{{ url('/'. $buttons['rootUrl'] .'/resource/update/'. $resource->uri) }}"
+                                            href="{{ url(
+                                                '/'. $buttons['rootUrl'] .'/resource/update/'. $resource->uri) .
+                                                (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                                            }}"
                                         >{{ uctrans('custom.update') }}</a>
                                     @endif
                                 @endif

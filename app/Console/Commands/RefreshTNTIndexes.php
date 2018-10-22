@@ -43,26 +43,47 @@ class RefreshTNTIndexes extends Command
 
         try {
             Artisan::call('tntsearch:import', ['model' => 'App\\Category']);
+            chmod(storage_path('categories.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\DataSet']);
+            chmod(storage_path('data_sets.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\Document']);
+            chmod(storage_path('documents.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\HelpPage']);
+            chmod(storage_path('help_pages.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\HelpSection']);
+            chmod(storage_path('help_sections.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\Organisation']);
+            chmod(storage_path('organisations.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\Page']);
+            chmod(storage_path('pages.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\Resource']);
+            chmod(storage_path('resources.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\Signal']);
+            chmod(storage_path('signals.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\TermsOfUseRequest']);
+            chmod(storage_path('terms_of_use_requests.index'), 0755);
             $this->info(Artisan::output());
+
             Artisan::call('tntsearch:import', ['model' => 'App\\User']);
+            chmod(storage_path('users.index'), 0755);
             $this->info(Artisan::output());
         } catch (Exception $ex) {
             Log::error($ex->getMessage());

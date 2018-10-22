@@ -97,7 +97,7 @@
                             </div>
                         </div>
 
-                         @if ( !empty($buttons['addGroup']) && !empty($groups))
+                         @if (!empty($buttons['addGroup']) && !empty($groups))
                             <div class="col-xs-12 p-l-r-none">
                                 <form method="POST" class="col-lg-4">
                                     {{ csrf_field() }}

@@ -24,19 +24,18 @@
                                 @if (\App\Role::isAdmin())
                                     <span class="badge badge-pill"><a href="{{ url('/admin/news/edit/' . $newsList->id) }}">{{ uctrans('custom.edit') }}</a></span>
                                 @endif
-                                <span class="badge badge-pill"><a href="#">{{ uctrans('custom.comment') }}</a></span>
                                 </div>
                             </div>
                         </div>
-                        @if (isset($discussion))
-                            <div class="row discussion">
-                                @include('vendor.chatter.discussion')
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    @if (isset($discussion))
+        <div class="row">
+            @include('vendor.chatter.discussion')
+        </div>
+    @endif
 </div>
 @endsection

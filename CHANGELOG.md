@@ -26,6 +26,7 @@ Security - in case of vulnerabilities.
 - Search indexes permissions
 - Update datasets version
 - Subsection not deleting
+- Connection to APIs for resource data
 
 ## [0.6.4] - 2018-10-19
 ### Added

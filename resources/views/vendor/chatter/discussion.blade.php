@@ -86,7 +86,7 @@
                 <div class="conversation">
                     <ul class="discussions no-bg" style="display:block;">
                         @foreach($posts as $post)
-                            <li class="forum-box" data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
+                            <li class="forum-box {{ isset($class) ? $class : '' }}" data-id="{{ $post->id }}" data-markdown="{{ $post->markdown }}">
                                 <span class="chatter_posts">
                                     @if(!Auth::guest() && (Auth::user()->id == $post->user->id))
                                         <div id="delete_warning_{{ $post->id }}" class="chatter_warning_delete">

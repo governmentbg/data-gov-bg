@@ -331,6 +331,7 @@ return [
     'invalid_xml' => 'Invalid xml syntax!',
     'invalid_json' => 'Invalid json syntax!',
     'invalid_csv' => 'Invalid csv syntax!',
+    'invalid_format_csv' => 'Invalid csv, please check if the text format is uft-8 and if the separator is comma!',
     'invalid_kml' => 'Invalid kml syntax!',
     'invalid_kml_json' => 'Invalid json kml syntax!',
     'invalid_rdf' => 'Invalid rdf syntax!',

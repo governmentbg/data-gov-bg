@@ -1645,7 +1645,10 @@ class UserController extends Controller {
             } else {
                 // delete resource record on fail
                 $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
-                $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                $request->session()->flash(
+                    'alert-danger',
+                    empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                );
 
                 return redirect()->back()->withInput()->withErrors($response['errors']);
             }
@@ -1833,7 +1836,10 @@ class UserController extends Controller {
                         'action'        => 'update',
                     ], $response['data']));
                 } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                    $request->session()->flash(
+                        'alert-danger',
+                        empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                    );
 
                     return redirect()->back()->withInput()->withErrors($response['errors']);
                 }
@@ -1902,7 +1908,12 @@ class UserController extends Controller {
                         'group'         => $group,
                     ], $response['data']));
                 } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                    // delete resource record on fail
+                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    $request->session()->flash(
+                        'alert-danger',
+                        empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                    );
 
                     return redirect()->back()->withInput()->withErrors($response['errors']);
                 }
@@ -1971,7 +1982,12 @@ class UserController extends Controller {
                         'fromOrg'       => $fromOrg,
                     ], $response['data']));
                 } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                    // Delete resource record on fail
+                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    $request->session()->flash(
+                        'alert-danger',
+                        empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                    );
 
                     return redirect()->back()->withInput()->withErrors($response['errors']);
                 }

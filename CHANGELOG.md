@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Added
 - Users can add datasets to groups from a public dataset view
+- More specific error message for resources upload
 
 ### Changed
 - Allow only svg in admin category upload

@@ -166,10 +166,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/tsv2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->tsv2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['tsvData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -178,10 +181,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/xsd2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->xsd2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['xsdData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -190,10 +196,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/ods2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->ods2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['odsData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -202,10 +211,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/slk2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->slk2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['slkData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -214,10 +226,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/rtf2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->rtf2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', [$elasticData]);
                     $data['rtfData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -231,6 +246,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', [$elasticData]);
                     $data['odtData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -243,6 +260,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['csvData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -260,6 +279,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData', $elasticData);
                     $data['xmlData'] = $content;
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -272,6 +293,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData', $elasticData);
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -285,6 +308,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData', $elasticData);
                     $data['xmlData'] = $content;
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -299,6 +324,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     Session::put('elasticData', ['text' => $resultConvert['data']]);
                     $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -313,6 +340,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     Session::put('elasticData', $resultConvert['data']);
                     $data['csvData'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -332,6 +361,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     Session::put('elasticData', ['text' => $resultConvert['data']]);
                     $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
         }
 

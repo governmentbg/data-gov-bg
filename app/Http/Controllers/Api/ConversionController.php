@@ -786,7 +786,7 @@ class ConversionController extends ApiController
         $temp = tmpfile();
         $path = stream_get_meta_data($temp)['uri'];
         fwrite($temp, $csv ? $data : base64_decode($data));
-    error_log('file_get_contents: '. print_r(file_get_contents($path), true));
+
         $spreadsheet = IOFactory::load($path);
         $worksheet = $spreadsheet->getActiveSheet();
         $rows = [];
@@ -828,9 +828,8 @@ class ConversionController extends ApiController
                 }
             }
         }
-error_log('rows: '. print_r($rows, true));
-        return $rows;
 
+        return $rows;
     }
 
     /**

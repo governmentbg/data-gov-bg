@@ -268,7 +268,7 @@
                                     <div class="tags pull-left">
                                         @if (isset($dataset->tags) && count($dataset->tags) > 0)
                                             @foreach ($dataset->tags as $tag)
-                                                <span class="badge badge-pill m-b-sm">{{ $tag->name }}</span>
+                                                <span class="badge badge-pill m-b-sm whitespace">{{ $tag->name }}</span>
                                             @endforeach
                                         @else
                                             <div class="p-h-xs"></div>

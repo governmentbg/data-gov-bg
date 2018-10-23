@@ -5,7 +5,7 @@
             <div class="col-xs-12 p-l-none m-b-lg">
                 <div class="tags pull-left">
                     @foreach ($dataset->tags as $tag)
-                        <span class="badge badge-pill">{{ $tag->name }}</span>
+                        <span class="badge badge-pill whitespace">{{ $tag->name }}</span>
                     @endforeach
                 </div>
             </div>

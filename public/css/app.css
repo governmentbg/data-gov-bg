@@ -15382,6 +15382,9 @@ ul > li {
 .form-control {
   border-radius: 12px;
   padding: 6px 12px;
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media screen and (max-width: 767px) {
@@ -16471,6 +16474,14 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   padding: 10px;
 }
 
+.forum-box.news {
+  border: 1px solid #0a7b5d;
+}
+
+.forum-box.documents {
+  border: 1px solid #145c99;
+}
+
 .modal-content {
   padding: 0 5px;
 }
@@ -16498,6 +16509,12 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .cust-tooltip.user {
   background-color: #108f9e;
+}
+
+.whitespace {
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .container .filter-content .filter-type,
@@ -17390,6 +17407,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   font-weight: normal;
   font-size: 100%;
   border-radius: 9px;
+  white-space: pre-line;
 }
 
 .theme-user .open-select {

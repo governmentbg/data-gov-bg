@@ -43,9 +43,9 @@ class ResourceController extends Controller {
                     $metadata['data']['file_format'] = $extension;
                     $content = file_get_contents($file->getRealPath());
                 }
-            } else if (
+            } elseif (
                 $metadata['data']['type'] == Resource::TYPE_API
-                && isset($data['resource_url'])
+                && isset($resourceData['resource_url'])
             ) {
                 $reqHeaders = [];
 
@@ -53,17 +53,17 @@ class ResourceController extends Controller {
 
                 curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
-                if (isset($data['http_headers'])) {
-                    $reqHeaders = preg_split('/\r\n|\r|\n/', $data['http_headers']);
+                if (isset($resourceData['http_headers'])) {
+                    $reqHeaders = preg_split('/\r\n|\r|\n/', $resourceData['http_headers']);
                 }
 
                 // by default curl uses GET
-                if ($data['http_rq_type'] == 'POST') {
+                if ($resourceData['http_rq_type'] == 'POST') {
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
-                    if (!empty($data['post_data'])) {
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $data['post_data']);
-                        $length = 'Content-Length: ' . strlen($data['post_data']);
+                    if (!empty($resourceData['post_data'])) {
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $resourceData['post_data']);
+                        $length = 'Content-Length: ' . strlen($resourceData['post_data']);
                         array_push($reqHeaders, $length);
                     }
                 }
@@ -72,7 +72,7 @@ class ResourceController extends Controller {
                     CURLOPT_HTTPHEADER      => $reqHeaders,
                     CURLOPT_RETURNTRANSFER  => true,
                     CURLOPT_TIMEOUT         => 60,
-                    CURLOPT_URL             => $data['resource_url'],
+                    CURLOPT_URL             => $resourceData['resource_url'],
                 ]);
 
                 $responseHeaders = [];

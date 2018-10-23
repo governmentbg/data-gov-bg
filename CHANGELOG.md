@@ -24,6 +24,7 @@ Security - in case of vulnerabilities.
 - Dataset buttons in public section
 - Resource redirect after delete
 - Search indexes permissions
+- Update datasets version
 
 ## [0.6.4] - 2018-10-19
 ### Added

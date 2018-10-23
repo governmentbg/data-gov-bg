@@ -541,7 +541,7 @@ class ResourceController extends Controller {
 
             $fileData = $resource->data;
         } else {
-            $fileData = json_encode($data);
+            $fileData = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
 
         if (!empty($fileData)) {

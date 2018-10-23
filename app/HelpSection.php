@@ -19,6 +19,34 @@ class HelpSection extends Model implements TranslatableInterface
 
     protected static $translatable = ['title' => 'label'];
 
+    protected static function boot() {
+        parent::boot();
+
+        static::deleting(function($section) {
+            if (!empty($section->pages())) {
+                if (!empty($section->pages())) {
+                    foreach ($section->pages()->get() as $page) {
+                        $page->section_id = null;
+                        $page->save();
+                    }
+                }
+            }
+
+            if (!empty($section->subsections())) {
+                foreach ($section->subsections()->get() as $subsec) {
+                    if (!empty($subsec->pages())) {
+                        foreach ($subsec->pages()->get() as $page) {
+                            $page->section_id = null;
+                            $page->save();
+                        }
+                    }
+                }
+
+                $section->subsections()->delete();
+            }
+        });
+    }
+
     public function toSearchableArray()
     {
         return [

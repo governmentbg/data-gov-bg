@@ -742,6 +742,7 @@ return [
     'add_help_section_fail' => 'Add Help section failure',
     'edit_help_section_fail' => 'Help section edit failure',
     'delete_help_section_fail' => 'Help section deletion failure',
+    'delete_help_subsection' => 'The deleting of a section will lead to the deletion of its subsections',
     'delete_help_section_fail_subsection' => 'Delete failure, there are subsection connected to this section',
     'list_help_section_fail' => 'List Help sections failure',
     'add_help_page_fail' => 'Add Help page failure',

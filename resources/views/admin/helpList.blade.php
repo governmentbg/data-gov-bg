@@ -67,7 +67,7 @@
                                             <a
                                                 class="link-action red"
                                                 href="{{ url('/admin/help/section/delete/'. $record->id) }}"
-                                                data-confirm="{{ __('custom.remove_data') }}"
+                                                data-confirm="{{ __('custom.delete_help_subsection') }}"
                                             >{{ __('custom.delete') }}</a>
                                             <a
                                                 class="link-action"

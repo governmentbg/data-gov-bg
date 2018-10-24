@@ -29,6 +29,7 @@ Security - in case of vulnerabilities.
 - Subsection not deleting
 - Connection to APIs for resource data
 - On user login set locale from user settings
+- listUsers() response in xml and without api key
 
 ## [0.6.4] - 2018-10-19
 ### Added

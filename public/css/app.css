@@ -16575,6 +16575,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .container .filter-content .invite-choice > ul {
+  white-space: normal;
   display: inline-block;
   vertical-align: top;
   margin-left: 20px;

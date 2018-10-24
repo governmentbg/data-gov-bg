@@ -1,5 +1,5 @@
 <div class="col-sm-3 sidenav p-l-r-none hidden-xs">
-    @include('partials.sidebar-body', ['action' => 'list'])
+    @include('partials.sidebar-body')
 </div>
 
 <div class="navbar-header hidden-lg hidden-md hidden-sm p-l-r-none sidebar-open">
@@ -9,5 +9,5 @@
 </div>
 
 <div class="sidenav js-sidenav p-l-r-none hidden-lg hidden-md hidden-sm" id="sidebar-wrapper">
-    @include('partials.sidebar-body', ['action' => 'list'])
+    @include('partials.sidebar-body')
 </div>

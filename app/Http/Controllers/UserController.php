@@ -1869,6 +1869,7 @@ class UserController extends Controller {
         }
 
         $class = 'user';
+        $root = Role::isAdmin() ? 'admin' : 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
 
@@ -1880,7 +1881,7 @@ class UserController extends Controller {
         if (empty($group)) {
             session()->flash('alert-danger', __('custom.no_group_found'));
 
-            return redirect('/user/groups');
+            return redirect('/'. $root .'/groups');
         }
 
         $dataset = DataSet::where('uri', $datasetUri)->first();
@@ -1897,7 +1898,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/user/groups/'. $group->uri .'/resource/'. $response['uri']);
+                        return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1921,11 +1922,11 @@ class UserController extends Controller {
         } else {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
 
-            return redirect('/user/groups/datasets/'. $grpUri);
+            return redirect('/'. $root .'/groups/datasets/'. $grpUri);
         }
 
         return view('user/resourceCreate', [
-            'class'         => 'user',
+            'class'         => $class,
             'uri'           => $datasetUri,
             'types'         => $types,
             'reqTypes'      => $reqTypes,
@@ -1944,6 +1945,7 @@ class UserController extends Controller {
         }
 
         $class = 'user';
+        $root = Role::isAdmin() ? 'admin' : 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
 
@@ -1952,7 +1954,7 @@ class UserController extends Controller {
         if (empty($fromOrg)) {
             session()->flash('alert-danger', __('custom.no_org_found'));
 
-            return redirect('/user/organisations');
+            return redirect('/'. $root .'/organisations');
         }
 
         $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
@@ -1971,7 +1973,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/user/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
+                        return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1995,11 +1997,11 @@ class UserController extends Controller {
         } else {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
 
-            return redirect('/user/organisations/datasets/'. $orgUri);
+            return redirect('/'. $root .'/organisations/datasets/'. $orgUri);
         }
 
         return view('user/resourceCreate', [
-            'class'         => 'user',
+            'class'         => $class,
             'uri'           => $datasetUri,
             'types'         => $types,
             'reqTypes'      => $reqTypes,

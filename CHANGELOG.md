@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [0.6.5] - 2018-10-24
 ### Added
 - Users can add datasets to groups from a public dataset view
 - More specific error message for resources upload
@@ -142,6 +144,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.1...v0.6.2

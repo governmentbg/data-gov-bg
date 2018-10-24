@@ -25,30 +25,30 @@
                                     </div>
                                 </div>
                                 <div class="col-md-8 col-xs-12">
-                                        <div class="m-r-md search-field">
-                                            <form method="GET" action="{{ url('/data/reported/') }}">
-                                                <input
-                                                    type="text"
-                                                    class="m-t-md m-b-md input-border-r-12 form-control js-ga-event"
-                                                    placeholder="{{ __('custom.search') }}"
-                                                    value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
-                                                    name="q"
-                                                    data-ga-action="search"
-                                                    data-ga-label="data search"
-                                                    data-ga-category="data"
-                                                >
-                                                @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
-                                                    @if (is_array($qpv))
-                                                        @foreach ($qpv as $pk => $pv)
-                                                            <input type="hidden" name="{{ $qp .'['. $pk .']' }}" value="{{ $pv }}"/>
-                                                        @endforeach
-                                                    @else
-                                                        <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
-                                                    @endif
-                                                @endforeach
-                                            </form>
-                                        </div>
+                                    <div class="m-r-md search-field">
+                                        <form method="GET" action="{{ url('/data/reported/') }}">
+                                            <input
+                                                type="text"
+                                                class="m-t-md m-b-md input-border-r-12 form-control js-ga-event"
+                                                placeholder="{{ __('custom.search') }}"
+                                                value="{{ isset($getParams['q']) ? $getParams['q'] : '' }}"
+                                                name="q"
+                                                data-ga-action="search"
+                                                data-ga-label="data search"
+                                                data-ga-category="data"
+                                            >
+                                            @foreach (array_except($getParams, ['q', 'page']) as $qp => $qpv)
+                                                @if (is_array($qpv))
+                                                    @foreach ($qpv as $pk => $pv)
+                                                        <input type="hidden" name="{{ $qp .'['. $pk .']' }}" value="{{ $pv }}"/>
+                                                    @endforeach
+                                                @else
+                                                    <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
+                                                @endif
+                                            @endforeach
+                                        </form>
                                     </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-xs-12">

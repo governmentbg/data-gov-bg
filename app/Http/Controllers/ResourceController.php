@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Role;
 use App\Resource;
 use App\Organisation;
 use App\ElasticDataSet;
@@ -379,8 +380,7 @@ class ResourceController extends Controller {
     public function importCsvData(Request $request)
     {
         if ($request->has('ready_data') && $request->has('resource_uri')) {
-            $admin = $request->offsetGet('admin');
-            $root = empty($admin) ? 'user' : 'admin';
+            $root = Role::isAdmin() ? 'admin' : 'user';
             $uri = $request->offsetGet('resource_uri');
             $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData');
@@ -458,8 +458,7 @@ class ResourceController extends Controller {
     public function importElasticData(Request $request)
     {
         if ($request->has('ready_data') && $request->has('resource_uri')) {
-            $admin = $request->offsetGet('admin');
-            $root = empty($admin) ? 'user' : 'admin';
+            $root = Role::isAdmin() ? 'admin' : 'user';
             $uri = $request->offsetGet('resource_uri');
             $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData');

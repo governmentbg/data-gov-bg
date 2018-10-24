@@ -28,6 +28,7 @@ Security - in case of vulnerabilities.
 - Update datasets version
 - Subsection not deleting
 - Connection to APIs for resource data
+- On user login set locale from user settings
 
 ## [0.6.4] - 2018-10-19
 ### Added

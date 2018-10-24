@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Role;
 use App\Resource;
 use App\Organisation;
 use App\ElasticDataSet;
@@ -43,9 +44,9 @@ class ResourceController extends Controller {
                     $metadata['data']['file_format'] = $extension;
                     $content = file_get_contents($file->getRealPath());
                 }
-            } else if (
+            } elseif (
                 $metadata['data']['type'] == Resource::TYPE_API
-                && isset($data['resource_url'])
+                && isset($resourceData['resource_url'])
             ) {
                 $reqHeaders = [];
 
@@ -53,17 +54,17 @@ class ResourceController extends Controller {
 
                 curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 
-                if (isset($data['http_headers'])) {
-                    $reqHeaders = preg_split('/\r\n|\r|\n/', $data['http_headers']);
+                if (isset($resourceData['http_headers'])) {
+                    $reqHeaders = preg_split('/\r\n|\r|\n/', $resourceData['http_headers']);
                 }
 
                 // by default curl uses GET
-                if ($data['http_rq_type'] == 'POST') {
+                if ($resourceData['http_rq_type'] == 'POST') {
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
-                    if (!empty($data['post_data'])) {
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $data['post_data']);
-                        $length = 'Content-Length: ' . strlen($data['post_data']);
+                    if (!empty($resourceData['post_data'])) {
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $resourceData['post_data']);
+                        $length = 'Content-Length: ' . strlen($resourceData['post_data']);
                         array_push($reqHeaders, $length);
                     }
                 }
@@ -72,7 +73,7 @@ class ResourceController extends Controller {
                     CURLOPT_HTTPHEADER      => $reqHeaders,
                     CURLOPT_RETURNTRANSFER  => true,
                     CURLOPT_TIMEOUT         => 60,
-                    CURLOPT_URL             => $data['resource_url'],
+                    CURLOPT_URL             => $resourceData['resource_url'],
                 ]);
 
                 $responseHeaders = [];
@@ -166,10 +167,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/tsv2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->tsv2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['tsvData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -178,10 +182,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/xsd2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->xsd2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['xsdData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -190,10 +197,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/ods2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->ods2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['odsData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -202,10 +212,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/slk2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->slk2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['slkData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -214,10 +227,13 @@ class ResourceController extends Controller {
                 $reqConvert = Request::create('/rtf2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->rtf2json($reqConvert)->getData();
+
                 if ($resultConvert->success) {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', [$elasticData]);
                     $data['rtfData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -231,6 +247,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', [$elasticData]);
                     $data['odtData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -243,6 +261,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert->data;
                     Session::put('elasticData', $elasticData);
                     $data['csvData'] = $elasticData;
+                } else {
+                    $data['error'] = $resultConvert->error->message;
                 }
 
                 break;
@@ -260,6 +280,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData', $elasticData);
                     $data['xmlData'] = $content;
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -272,6 +294,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData', $elasticData);
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -285,6 +309,8 @@ class ResourceController extends Controller {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData', $elasticData);
                     $data['xmlData'] = $content;
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -299,6 +325,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     Session::put('elasticData', ['text' => $resultConvert['data']]);
                     $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -313,6 +341,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     Session::put('elasticData', $resultConvert['data']);
                     $data['csvData'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
 
                 break;
@@ -332,6 +362,8 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     Session::put('elasticData', ['text' => $resultConvert['data']]);
                     $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
                 }
         }
 
@@ -348,8 +380,7 @@ class ResourceController extends Controller {
     public function importCsvData(Request $request)
     {
         if ($request->has('ready_data') && $request->has('resource_uri')) {
-            $admin = $request->offsetGet('admin');
-            $root = empty($admin) ? 'user' : 'admin';
+            $root = Role::isAdmin() ? 'admin' : 'user';
             $uri = $request->offsetGet('resource_uri');
             $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData');
@@ -427,8 +458,7 @@ class ResourceController extends Controller {
     public function importElasticData(Request $request)
     {
         if ($request->has('ready_data') && $request->has('resource_uri')) {
-            $admin = $request->offsetGet('admin');
-            $root = empty($admin) ? 'user' : 'admin';
+            $root = Role::isAdmin() ? 'admin' : 'user';
             $uri = $request->offsetGet('resource_uri');
             $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData');
@@ -510,7 +540,7 @@ class ResourceController extends Controller {
 
             $fileData = $resource->data;
         } else {
-            $fileData = json_encode($data);
+            $fileData = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
 
         if (!empty($fileData)) {

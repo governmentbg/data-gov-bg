@@ -166,10 +166,6 @@ class HelpController extends ApiController
         if (!$validator->fails()) {
             $section = HelpSection::find($request->id);
 
-            if (!empty($section->subsections)) {
-                return $this->errorResponse(__('custom.delete_help_section_fail_subsection'));
-            }
-
             try {
                 $section->delete();
 

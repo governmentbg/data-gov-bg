@@ -301,6 +301,9 @@ ul > li {
 .input-border-r-12, .bootstrap-tagsinput, .form-control {
     border-radius: 12px;
     padding: 6px 12px;
+    white-space: pre-line;
+    overflow : hidden;
+    text-overflow: ellipsis;
 
     @include smMobile() {
         text-align: left !important;
@@ -1209,6 +1212,14 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
     margin-bottom: 10px;
     border-radius: 10px;
     padding: 10px;
+
+    &.news {
+        border: 1px solid #0a7b5d;
+    }
+
+    &.documents {
+        border: 1px solid #145c99;
+    }
 }
 
 .modal-content {
@@ -1240,3 +1251,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
     }
 }
 
+.whitespace {
+    white-space: pre-line;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

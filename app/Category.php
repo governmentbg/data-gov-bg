@@ -25,7 +25,7 @@ class Category extends Model implements TranslatableInterface
     const ACTIVE_FALSE = 0;
 
     const IMG_EXT_SVG = 'svg';
-    const IMG_MIME_SVG = 'image/svg+xml';
+    const IMG_MIMES_SVG = ['text/plain', 'text/html', 'image/svg+xml', 'application/svg+xml'];
 
     public static function getTransFields()
     {
@@ -34,7 +34,7 @@ class Category extends Model implements TranslatableInterface
 
     public static function getOrdering() {
         return [
-            self::ORDERING_ASC => __('custom.order_asc'),
+            self::ORDERING_ASC  => __('custom.order_asc'),
             self::ORDERING_DESC => __('custom.order_desc'),
         ];
     }

@@ -28,12 +28,18 @@ class NewsController extends Controller {
         }
 
         if (!is_null($newsList->news)) {
-            return view(
+            $discussion = $this->getForumDiscussion($newsList ? $newsList->news->forum_link : null);
+
+            $viewParams = [
+                'class'          => 'news',
+                'newsList'       => $newsList->news,
+            ];
+
+            return view (
                 'news/view',
-                [
-                    'class'          => 'news',
-                    'newsList'       => $newsList->news,
-                ]
+                !empty($discussion)
+                    ? array_merge($viewParams, $discussion)
+                    : $viewParams
             );
         }
     }

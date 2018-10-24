@@ -499,10 +499,6 @@ class UserController extends Controller {
     {
         $params['dataset_uri'] = $uri;
 
-        if ($request->has('back')) {
-            return redirect(url('user/datasets'));
-        }
-
         $datasetReq = Request::create('/api/getDatasetDetails', 'POST', ['dataset_uri' => $uri]);
         $api = new ApiDataset($datasetReq);
         $result = $api->getDatasetDetails($datasetReq)->getData();
@@ -1649,7 +1645,10 @@ class UserController extends Controller {
             } else {
                 // delete resource record on fail
                 $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
-                $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                $request->session()->flash(
+                    'alert-danger',
+                    empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                );
 
                 return redirect()->back()->withInput()->withErrors($response['errors']);
             }
@@ -1837,7 +1836,10 @@ class UserController extends Controller {
                         'action'        => 'update',
                     ], $response['data']));
                 } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                    $request->session()->flash(
+                        'alert-danger',
+                        empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                    );
 
                     return redirect()->back()->withInput()->withErrors($response['errors']);
                 }
@@ -1867,6 +1869,7 @@ class UserController extends Controller {
         }
 
         $class = 'user';
+        $root = Role::isAdmin() ? 'admin' : 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
 
@@ -1878,7 +1881,7 @@ class UserController extends Controller {
         if (empty($group)) {
             session()->flash('alert-danger', __('custom.no_group_found'));
 
-            return redirect('/user/groups');
+            return redirect('/'. $root .'/groups');
         }
 
         $dataset = DataSet::where('uri', $datasetUri)->first();
@@ -1895,7 +1898,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/user/groups/'. $group->uri .'/resource/'. $response['uri']);
+                        return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1906,7 +1909,12 @@ class UserController extends Controller {
                         'group'         => $group,
                     ], $response['data']));
                 } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                    // delete resource record on fail
+                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    $request->session()->flash(
+                        'alert-danger',
+                        empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                    );
 
                     return redirect()->back()->withInput()->withErrors($response['errors']);
                 }
@@ -1914,11 +1922,11 @@ class UserController extends Controller {
         } else {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
 
-            return redirect('/user/groups/datasets/'. $grpUri);
+            return redirect('/'. $root .'/groups/datasets/'. $grpUri);
         }
 
         return view('user/resourceCreate', [
-            'class'         => 'user',
+            'class'         => $class,
             'uri'           => $datasetUri,
             'types'         => $types,
             'reqTypes'      => $reqTypes,
@@ -1937,6 +1945,7 @@ class UserController extends Controller {
         }
 
         $class = 'user';
+        $root = Role::isAdmin() ? 'admin' : 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
 
@@ -1945,7 +1954,7 @@ class UserController extends Controller {
         if (empty($fromOrg)) {
             session()->flash('alert-danger', __('custom.no_org_found'));
 
-            return redirect('/user/organisations');
+            return redirect('/'. $root .'/organisations');
         }
 
         $fromOrg->logo = $this->getImageData($fromOrg->logo_data, $fromOrg->logo_mime_type);
@@ -1964,7 +1973,7 @@ class UserController extends Controller {
                     $request->session()->flash('alert-success', __('custom.changes_success_save'));
 
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
-                        return redirect('/user/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
+                        return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1975,7 +1984,12 @@ class UserController extends Controller {
                         'fromOrg'       => $fromOrg,
                     ], $response['data']));
                 } else {
-                    $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
+                    // Delete resource record on fail
+                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    $request->session()->flash(
+                        'alert-danger',
+                        empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
+                    );
 
                     return redirect()->back()->withInput()->withErrors($response['errors']);
                 }
@@ -1983,11 +1997,11 @@ class UserController extends Controller {
         } else {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
 
-            return redirect('/user/organisations/datasets/'. $orgUri);
+            return redirect('/'. $root .'/organisations/datasets/'. $orgUri);
         }
 
         return view('user/resourceCreate', [
-            'class'         => 'user',
+            'class'         => $class,
             'uri'           => $datasetUri,
             'types'         => $types,
             'reqTypes'      => $reqTypes,
@@ -2114,12 +2128,12 @@ class UserController extends Controller {
 
             $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
             $apiDelete = new ApiResource($reqDelete);
-            $$resource = $apiDelete->deleteResource($reqDelete)->getData();
+            $resDelete = $apiDelete->deleteResource($reqDelete)->getData();
 
-            if ($$resource->success) {
+            if ($resDelete->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
 
-                return redirect()->route('datasetView', ['uri' => $resource->dataset_uri]);
+                return redirect()->route('userDatasetView', ['uri' => $resource->dataset_uri]);
             }
 
             $request->session()->flash('alert-success', __('custom.delete_error'));
@@ -5255,8 +5269,9 @@ class UserController extends Controller {
 
             if ($result->success) {
                 $request->session()->flash('alert-success', __('custom.delete_success'));
+                $root = Role::isAdmin() ? 'admin' : 'user';
 
-                return redirect()->route('groupDatasetView', ['uri' => $resource->dataset_uri, 'grpUri' => $group->uri]);
+                return redirect()->route($root .'GroupDatasetView', ['uri' => $resource->dataset_uri, 'grpUri' => $group->uri]);
             }
 
             $request->session()->flash('alert-success', __('custom.delete_error'));

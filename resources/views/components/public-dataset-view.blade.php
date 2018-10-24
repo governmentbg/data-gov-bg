@@ -91,11 +91,50 @@
                             <div class="pull-left">
                                 @if (isset($dataset->tags) && count($dataset->tags) > 0)
                                     @foreach ($dataset->tags as $tag)
-                                        <span class="badge badge-pill m-b-sm">{{ $tag->name }}</span>
+                                        <span class="badge badge-pill m-b-sm whitespace">{{ $tag->name }}</span>
                                     @endforeach
                                 @endif
                             </div>
                         </div>
+
+                         @if (!empty($buttons['addGroup']) && !empty($groups))
+                            <div class="col-xs-12 p-l-r-none">
+                                <form method="POST" class="col-lg-4">
+                                    {{ csrf_field() }}
+                                    <div class="form-group row">
+                                        <select
+                                            id="group"
+                                            name="group_id[]"
+                                            class="js-autocomplete form-control"
+                                            data-placeholder="{{ utrans('custom.groups', 1) }}"
+                                            multiple="multiple"
+                                        >
+                                            <option></option>
+                                            @foreach ($groups as $id => $groupName)
+                                                <option
+                                                    value="{{ $id }}"
+                                                    {{
+                                                        !empty(old('group_id'))
+                                                        && in_array($id, old('group_id'))
+                                                        || !empty($setGroups)
+                                                        && in_array($id, $setGroups)
+                                                        ? 'selected' : ''
+                                                    }}
+                                                >{{ $groupName }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group row">
+                                        <button
+                                            type="submit"
+                                            name="save"
+                                            class="btn btn-primary"
+                                        >{{ uctrans('custom.save') }}</button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
+
                         @if (count($resources) > 0)
                         <div class="col-sm-12 pull-left p-h-sm p-l-none">
                             <div class="pull-left history">
@@ -182,8 +221,7 @@
                     class="btn btn-primary badge badge-pill"
                     href="{{ url(
                         '/'. (isset($buttons['addResourceRootUrl']) ? $buttons['addResourceRootUrl'] : $buttons['rootUrl'] .'/dataset') .
-                        '/resource/create/'. $dataset->uri .
-                        (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                        '/resource/create/'. $dataset->uri
                     ) }}"
                 >{{ uctrans('custom.add_resource') }}</a>
             @endif

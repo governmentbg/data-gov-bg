@@ -13,6 +13,26 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [0.6.5] - 2018-10-24
+### Added
+- Users can add datasets to groups from a public dataset view
+- More specific error message for resources upload
+
+### Changed
+- Allow only svg in admin category upload
+
+### Fixed
+- Modals not opening
+- Category list icon data encoding
+- Dataset buttons in public section
+- Resource redirect after delete
+- Search indexes permissions
+- Update datasets version
+- Subsection not deleting
+- Connection to APIs for resource data
+- On user login set locale from user settings
+- listUsers() response in xml and without api key
+
 ## [0.6.4] - 2018-10-19
 ### Added
 - Forum discussions to public data and documents sections
@@ -124,6 +144,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.1...v0.6.2

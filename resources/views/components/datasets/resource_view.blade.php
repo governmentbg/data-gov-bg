@@ -146,7 +146,13 @@
                 </a>
                 @endif
                 <a
-                    href="{{ url('/'. $root .'/dataset/view/' . $resource->dataset_uri) }}"
+                    @if (isset($group))
+                        href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/'. $resource->dataset_uri) }}"
+                    @elseif (isset($fromOrg))
+                        href="{{ url('/'. $root .'/organisations/dataset/view/'. $resource->dataset_uri) }}"
+                    @else
+                        href="{{ url('/'. $root .'/dataset/view/'. $resource->dataset_uri) }}"
+                    @endif
                     class="btn btn-primary m-b-sm"
                 >
                     {{ uctrans('custom.close') }}

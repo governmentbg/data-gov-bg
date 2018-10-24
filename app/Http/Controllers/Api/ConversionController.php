@@ -98,6 +98,10 @@ class ConversionController extends ApiController
             try {
                 $data = $this->fromCells($post['data']);
 
+                if ($this->emptyRecursive($data)) {
+                    return $this->errorResponse(__('custom.invalid_format_csv'));
+                }
+
                 return $this->successResponse($data);
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
@@ -106,6 +110,21 @@ class ConversionController extends ApiController
         }
 
         return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
+    private function emptyRecursive($value)
+    {
+        if (is_array($value)) {
+            $empty = true;
+
+            array_walk_recursive($value, function($item) use (&$empty) {
+                $empty = $empty && empty($item);
+            });
+        } else {
+            $empty = empty($value);
+        }
+
+        return $empty;
     }
 
     /**
@@ -767,6 +786,7 @@ class ConversionController extends ApiController
         $temp = tmpfile();
         $path = stream_get_meta_data($temp)['uri'];
         fwrite($temp, $csv ? $data : base64_decode($data));
+
         $spreadsheet = IOFactory::load($path);
         $worksheet = $spreadsheet->getActiveSheet();
         $rows = [];
@@ -810,7 +830,6 @@ class ConversionController extends ApiController
         }
 
         return $rows;
-
     }
 
     /**
@@ -864,6 +883,7 @@ class ConversionController extends ApiController
         $temp = tmpfile();
         $path = stream_get_meta_data($temp)['uri'];
         $writer->setEnclosure('"');
+        $writer->setUseBOM(true);
         $writer->save($path);
 
         $data = file_get_contents($path);

@@ -13,7 +13,9 @@
         @if (isset($resource->name))
             <div class="row">
                 @if (isset($fromOrg))
-                    @include('partials.org-info', ['organisation' => $fromOrg])
+                    <div class="col-sm-3 col-xs-12">
+                        @include('partials.org-info', ['organisation' => $fromOrg])
+                    </div>
                 @endif
                 <div class="col-sm-9 col-xs-12 m-t-lg side-info">
                     @include('components.datasets.resource_view', ['admin' => Auth::user()->is_admin])

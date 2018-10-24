@@ -122,7 +122,7 @@ class ResourceController extends ApiController
 
             try {
                 $dbData = [
-                    'data_set_id'       => DataSet::where('uri', $post['dataset_uri'])->first()->id,
+                    'data_set_id'       => $dataset->id,
                     'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
                     'descript'          => isset($post['data']['description'])
                         ? $this->trans($post['data']['locale'], $post['data']['description'])
@@ -235,7 +235,7 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
-            $dataset = DataSet::where('id', $resource->data_set_id);
+            $dataset = DataSet::where('id', $resource->data_set_id)->first();
 
             if (isset($dataset->org_id)) {
                 $rightCheck = RoleRight::checkUserRight(
@@ -264,6 +264,8 @@ class ResourceController extends ApiController
             try {
                 $id = $resource->id;
                 $index = $resource->data_set_id;
+                $dataset->version = intval($dataset->version) + 1;
+                $dataset->save();
 
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
@@ -377,7 +379,7 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $resource = Resource::where('uri', $post['resource_uri'])->first();
-            $dataset = DataSet::where('id', $resource->data_set_id);
+            $dataset = DataSet::where('id', $resource->data_set_id)->first();
             $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
 
             if (isset($dataset->org_id)) {
@@ -540,7 +542,7 @@ class ResourceController extends ApiController
 
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $newVersion = strval(intval($resource->version) + 1);
-                $dataset = DataSet::where('id', $resource->data_set_id);
+                $dataset = DataSet::where('id', $resource->data_set_id)->first();
 
                 if (isset($dataset->org_id)) {
                     $rightCheck = RoleRight::checkUserRight(
@@ -577,6 +579,16 @@ class ResourceController extends ApiController
                 $resource->is_reported = Resource::REPORTED_FALSE;
                 $resource->version = $newVersion;
                 $resource->save();
+                // increase dataset version withot goint to new full version
+                $versionParts = explode('.', $dataset->version);
+
+                if (isset($versionParts[1])) {
+                    $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
+                } else {
+                    $dataset->version = $versionParts[0] .'.1';
+                }
+
+                $dataset->save();
 
                 $elasticDataSet = ElasticDataSet::create([
                     'index'         => $index,
@@ -635,7 +647,7 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             try {
                 $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $dataset = DataSet::where('id', $resource->data_set_id);
+                $dataset = DataSet::where('id', $resource->data_set_id)->first();
 
                 if (isset($dataset->org_id)) {
                     $rightCheck = RoleRight::checkUserRight(

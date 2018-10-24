@@ -1,4 +1,4 @@
-<div class="col-xs-12 m-t-lg">
+<div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">
     <p class="m-b-md">{{ uctrans('custom.confirm_resource_import') }}</p>
     @if (!empty($csvData))
         <form
@@ -39,9 +39,6 @@
 
             <div class="form-group row">
                 <div class="col-sm-12 text-right">
-                    @if (!empty($admin))
-                        <input type="hidden" name="admin" value="1">
-                    @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
                     <input type="hidden" name="action" value="{{ $action }}">
                     @if (!empty($group))
@@ -73,9 +70,6 @@
             ></textarea>
             <div class="form-group row">
                 <div class="col-sm-12 text-right m-b-sm">
-                    @if (!empty($admin))
-                        <input type="hidden" name="admin" value="1">
-                    @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
                     <input type="hidden" name="action" value="{{ $action }}">
                     @if (!empty($group))
@@ -102,9 +96,6 @@
             <p>@php echo isset($text) ? nl2br(e($text)) : uctrans('custom.resource_no_visualization') @endphp</p>
             <div class="form-group row">
                 <div class="col-sm-12 text-right m-b-sm">
-                    @if (!empty($admin))
-                        <input type="hidden" name="admin" value="1">
-                    @endif
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">
                     <input type="hidden" name="action" value="{{ $action }}">
                     @if (!empty($group))

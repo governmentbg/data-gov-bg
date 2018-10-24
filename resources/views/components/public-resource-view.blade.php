@@ -71,7 +71,7 @@
                             <div class="pull-left m-b-md">
                                 @if (isset($dataset->tags) && count($dataset->tags) > 0)
                                     @foreach ($dataset->tags as $tag)
-                                        <span class="badge badge-pill m-b-sm">{{ $tag->name }}</span>
+                                        <span class="badge badge-pill m-b-sm whitespace">{{ $tag->name }}</span>
                                     @endforeach
                                 @endif
                             </div>
@@ -146,7 +146,10 @@
                                     @if (isset($buttons['update']) && $buttons['update'])
                                         <a
                                             class="btn btn-primary badge badge-pill m-b-sm"
-                                            href="{{ url('/'. $buttons['rootUrl'] .'/resource/update/'. $resource->uri) }}"
+                                            href="{{ url(
+                                                '/'. $buttons['rootUrl'] .'/resource/update/'. $resource->uri) .
+                                                (isset($buttons['parentUri']) ? '/'. $buttons['parentUri'] : '')
+                                            }}"
                                         >{{ uctrans('custom.update') }}</a>
                                     @endif
                                 @endif

@@ -85,15 +85,9 @@ class UserController extends ApiController
         }
 
         if (!$validator->fails()) {
-            $query = User::select()->with('userToOrgRole');
-
-            if (isset($criteria['keywords'])) {
-                $ids = User::search($criteria['keywords'])->get()->pluck('id');
-                $query = User::whereIn('id', $ids)->with('userToOrgRole');
-            }
-
             if (isset($data['api_key'])) {
                 $user = User::where('api_key', $data['api_key'])->first();
+
                 $rightCheck = RoleRight::checkUserRight(
                     Module::USERS,
                     RoleRight::RIGHT_VIEW,
@@ -106,11 +100,32 @@ class UserController extends ApiController
                     return $this->errorResponse(__('custom.access_denied'));
                 }
 
+                $query = User::select()->with('userToOrgRole');
+
                 if (isset($criteria['active'])) {
                     $query->where('active', $criteria['active']);
                 }
             } else {
-                $query->where('active', 1);
+                $fields = [
+                    'id',
+                    'username',
+                    'email',
+                    'firstname',
+                    'lastname',
+                    'add_info',
+                    'active',
+                    'approved',
+                    'created_at',
+                    'created_by',
+                    'updated_by',
+                    'updated_by',
+                ];
+                $query = User::select($fields)->where('active', 1);
+            }
+
+            if (isset($criteria['keywords'])) {
+                $ids = User::search($criteria['keywords'])->get()->pluck('id');
+                $query->whereIn('id', $ids);
             }
 
             if (isset($criteria['approved'])) {
@@ -185,7 +200,7 @@ class UserController extends ApiController
             );
 
             try {
-                $users = $query->get();
+                $users = $query->get()->toArray();
 
                 if (Auth::user() !== null) {
                     $logData = [

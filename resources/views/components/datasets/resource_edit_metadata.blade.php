@@ -1,4 +1,4 @@
-<div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg m-b-lg">
+<div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg">
     <span class="my-profile m-l-sm">{{uctrans('custom.edit_resource')}}</span>
 </div>
 <div class="{{ !empty($parent) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg">

@@ -78,6 +78,10 @@ class LoginController extends Controller
                 if (Auth::attempt($credentials, $rememberMe)) {
                     $user = User::where('username', $request->username)->first();
                     $result = User::getUserRoles($user->id);
+                    if (!$user->is_admin) {
+                        $settings = $user->userSetting;
+                        Session::put('locale', $settings->locale);
+                    }
 
                     Session::put('roles', $result);
 

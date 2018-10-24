@@ -12,7 +12,9 @@
             </div>
         @else
             @include('partials.org-nav-bar', ['view' => 'dataset', 'organisation' => $parent])
-            @include('partials.org-info', ['organisation' => $parent])
+            <div class="col-sm-3 col-xs-12">
+                @include('partials.org-info', ['organisation' => $parent])
+            </div>
         @endif
     @else
         @include('partials.admin-nav-bar', ['view' => 'dataset'])

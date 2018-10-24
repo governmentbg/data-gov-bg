@@ -298,7 +298,7 @@ class DataSetController extends ApiController
         }
 
         if (empty($errors)) {
-            $dataSet = DataSet::where('uri', $post['dataset_uri'])->first();
+            $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
             $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
 
             if (isset($post['data']['org_id'])) {
@@ -310,7 +310,7 @@ class DataSetController extends ApiController
                         'org_id' => $organisation->id
                     ],
                     [
-                        'created_by' => $dataSet->created_by,
+                        'created_by' => $dataset->created_by,
                         'org_id'     => $organisation->id
                     ]
                 );
@@ -346,70 +346,79 @@ class DataSetController extends ApiController
                 DB::beginTransaction();
 
                 if (!empty($post['data']['name'])) {
-                    $dataSet->name = $this->trans($locale, $post['data']['name']);
+                    $dataset->name = $this->trans($locale, $post['data']['name']);
                 }
 
                 if (!empty($post['data']['sla'])) {
-                    $dataSet->sla = $this->trans($locale, $post['data']['sla']);
+                    $dataset->sla = $this->trans($locale, $post['data']['sla']);
                 }
 
                 if (!empty($post['data']['description'])) {
-                    $dataSet->descript = $this->trans($locale, $post['data']['description']);
+                    $dataset->descript = $this->trans($locale, $post['data']['description']);
                 }
 
                 if (!empty($post['data']['category_id'])) {
-                    $dataSet->category_id = $post['data']['category_id'];
+                    $dataset->category_id = $post['data']['category_id'];
+                }
+
+                // increase dataset version withot goint to new full version
+                $versionParts = explode('.', $dataset->version);
+
+                if (isset($versionParts[1])) {
+                    $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
+                } else {
+                    $dataset->version = $versionParts[0] .'.1';
                 }
 
                 // if NULL passed - dataset not connected to organisation
-                $dataSet->org_id = $post['data']['org_id'];
+                $dataset->org_id = $post['data']['org_id'];
 
                 if (!empty($post['data']['uri'])) {
-                    $dataSet->uri = $post['data']['uri'];
+                    $dataset->uri = $post['data']['uri'];
                 }
 
                 if (!empty($post['data']['terms_of_use_id'])) {
-                    $dataSet->terms_of_use_id = $post['data']['terms_of_use_id'];
+                    $dataset->terms_of_use_id = $post['data']['terms_of_use_id'];
                 }
 
                 if (!empty($post['data']['visibility'])) {
-                    $dataSet->visibility = $post['data']['visibility'];
+                    $dataset->visibility = $post['data']['visibility'];
                 }
 
                 if (!empty($post['data']['source'])) {
-                    $dataSet->source = $post['data']['source'];
+                    $dataset->source = $post['data']['source'];
                 }
 
                 if (!empty($post['data']['author_name'])) {
-                    $dataSet->author_name = $post['data']['author_name'];
+                    $dataset->author_name = $post['data']['author_name'];
                 }
 
                 if (!empty($post['data']['author_email'])) {
-                    $dataSet->author_email = $post['data']['author_email'];
+                    $dataset->author_email = $post['data']['author_email'];
                 }
 
                 if (!empty($post['data']['support_name'])) {
-                    $dataSet->support_name = $post['data']['support_name'];
+                    $dataset->support_name = $post['data']['support_name'];
                 }
 
                 if (!empty($post['data']['support_email'])) {
-                    $dataSet->support_email = $post['data']['support_email'];
+                    $dataset->support_email = $post['data']['support_email'];
                 }
 
 
-                $dataSet->forum_link = !empty($post['data']['forum_link'])
+                $dataset->forum_link = !empty($post['data']['forum_link'])
                     ? $post['data']['forum_link']
                     : null;
 
                 if (!empty($post['data']['status'])) {
-                    $dataSet->status = $post['data']['status'];
+                    $dataset->status = $post['data']['status'];
                 }
 
-                $flag = $dataSet->save();
+                $flag = $dataset->save();
 
                 if ($flag) {
                     if (!empty($customFields)) {
-                        if (!$this->checkAndCreateCustomSettings($customFields, $dataSet->id)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $dataset->id)) {
                             DB::rollback();
 
                             return $this->errorResponse(__('custom.edit_dataset_fail'));
@@ -417,7 +426,7 @@ class DataSetController extends ApiController
                     }
 
                     if (!empty($post['data']['tags'])) {
-                        if (!$this->checkAndCreateTags($dataSet, $post['data']['tags'])) {
+                        if (!$this->checkAndCreateTags($dataset, $post['data']['tags'])) {
                             DB::rollback();
 
                             return $this->errorResponse(__('custom.edit_dataset_fail'));
@@ -429,7 +438,7 @@ class DataSetController extends ApiController
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::DATA_SETS),
                         'action'           => ActionsHistory::TYPE_MOD,
-                        'action_object'    => $dataSet->id,
+                        'action_object'    => $dataset->id,
                         'action_msg'       => 'Edited dataset',
                     ];
 

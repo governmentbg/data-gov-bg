@@ -6,7 +6,7 @@
         @foreach (['danger', 'warning', 'success', 'info'] as $msg)
             @if(Session::has('alert-' . $msg))
                 <p class="alert alert-{{ $msg }}">
-                    {{ Session::get('alert-' . $msg) }}
+                    {{ Session::get('alert-'. $msg) }}
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 </p>
             @endif
@@ -56,7 +56,10 @@
             <p>{{ __('custom.most_active_agency') }} {{ $lastMonth }}</p>
             <hr>
             <span>{{ isset($mostActiveOrg->name) ? $mostActiveOrg->name : null }}</span>
-            <img class="org-logo" src="{{ isset($mostActiveOrg->logo) ? $mostActiveOrg->logo : asset('img/open-data.png') }}">
+            <img
+                class="org-logo"
+                src="{{ isset($mostActiveOrg->logo) ? $mostActiveOrg->logo : asset('img/open-data.png') }}"
+            >
         </a>
     </div>
 </div>
@@ -75,9 +78,9 @@
                                 {!! $category->icon_data !!}
                             </span>
                         @else
-                            <img class="home-icon cls-1" src="{{  $category->icon }}" />
+                            <img class="home-icon cls-1" src="{{ $category->icon }}" />
                         @endif
-                        <p>{{$category->name}}</p>
+                        <p>{{ $category->name }}</p>
                     </a>
                 @endforeach
             </div>

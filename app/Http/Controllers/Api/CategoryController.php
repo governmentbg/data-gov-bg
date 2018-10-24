@@ -36,23 +36,25 @@ class CategoryController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($data, [
-            'name'              => 'required_with:locale|max:191',
-            'name.bg'           => 'required_without:locale|string|max:191',
-            'name.*'            => 'max:191',
-            'locale'            => 'nullable|string|max:5',
-            'icon'              => 'nullable|string|max:191',
-            'icon_filename'     => 'nullable|string|max:191',
-            'icon_mimetype'     => 'nullable|string|max:191|in:'. env('THEME_FILE_MIMES'),
-            'icon_data'         => 'nullable|string|max:16777215',
-            'active'            => 'nullable|boolean',
-            'ordering'          => 'nullable|integer|digits_between:1,3',
+            'name'          => 'required_with:locale|max:191',
+            'name.bg'       => 'required_without:locale|string|max:191',
+            'name.*'        => 'max:191',
+            'locale'        => 'nullable|string|max:5',
+            'icon'          => 'nullable|string|max:191',
+            'icon_filename' => 'nullable|string|max:191',
+            'icon_mimetype' => 'nullable|string|max:191|in:'. implode(', ', Category::IMG_MIMES_SVG),
+            'icon_data'     => 'nullable|string|max:16777215',
+            'active'        => 'nullable|boolean',
+            'ordering'      => 'nullable|integer|digits_between:1,3',
         ]);
 
         $validator->after(function ($validator) {
             if ($validator->errors()->has('icon_mimetype')) {
                 $validator->errors()->add(
                     'file',
-                    $validator->errors()->first('icon_mimetype') .' '. __('custom.valid_file_types') .': '. env('THEME_FILE_MIMES')
+                    $validator->errors()->first('icon_mimetype')
+                    .' '. __('custom.valid_file_types')
+                    .': '. Category::IMG_EXT_SVG
                 );
             }
 
@@ -128,26 +130,35 @@ class CategoryController extends ApiController
         $data = $request->get('data', []);
 
         $validator = \Validator::make($post, [
-            'category_id'           => 'required|integer|digits_between:1,10',
-            'data'                  => 'required|array',
+            'category_id'   => 'required|integer|digits_between:1,10',
+            'data'          => 'required|array',
         ]);
 
         if (!$validator->fails()) {
             $validator = \Validator::make($data, [
-                'name'             => 'required_with:locale|max:191',
-                'name.bg'          => 'required_without:locale|string|max:191',
-                'name.*'           => 'max:191',
-                'locale'           => 'nullable|string|max:5',
-                'icon'             => 'nullable|string|max:191',
-                'icon_filename'    => 'nullable|string|max:191',
-                'icon_mimetype'    => 'nullable|string|max:191',
-                'icon_data'        => 'nullable|string|max:16777215',
-                'active'           => 'nullable|boolean',
-                'ordering'         => 'nullable|integer|digits_between:1,3',
+                'name'          => 'required_with:locale|max:191',
+                'name.bg'       => 'required_without:locale|string|max:191',
+                'name.*'        => 'max:191',
+                'locale'        => 'nullable|string|max:5',
+                'icon'          => 'nullable|string|max:191',
+                'icon_filename' => 'nullable|string|max:191',
+                'icon_mimetype' => 'nullable|string|max:191|in:'. implode(', ', Category::IMG_MIMES_SVG),
+                'icon_data'     => 'nullable|string|max:16777215',
+                'active'        => 'nullable|boolean',
+                'ordering'      => 'nullable|integer|digits_between:1,3',
             ]);
         }
 
         $validator->after(function ($validator) {
+            if ($validator->errors()->has('icon_mimetype')) {
+                $validator->errors()->add(
+                    'file',
+                    $validator->errors()->first('icon_mimetype')
+                    .' '. __('custom.valid_file_types')
+                    .': '. Category::IMG_EXT_SVG
+                );
+            }
+
             if ($validator->errors()->has('icon_filename')) {
                 $validator->errors()->add('file', $validator->errors()->first('icon_filename'));
             }
@@ -362,7 +373,6 @@ class CategoryController extends ApiController
                 'locale',
                 'active',
                 'ordering',
-                'icon',
                 'created_at',
                 'created_by',
                 'updated_at',
@@ -406,8 +416,7 @@ class CategoryController extends ApiController
                         'locale'        => \LaravelLocalization::getCurrentLocale(),
                         'active'        => $category->active,
                         'ordering'      => $category->ordering,
-                        'icon'          => $this->getImageData($category->icon_data, $category->icon_mime_type, 'theme'),
-                        'icon_data'     => $category->icon_data,
+                        'icon_data'     => utf8_encode($category->icon_data),
                         'created_at'    => date($category->created_at),
                         'created_by'    => $category->created_by,
                         'updated_at'    => date($category->updated_at),

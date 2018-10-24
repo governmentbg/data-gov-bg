@@ -20,9 +20,6 @@ Route::middleware('auth')->group(function() {
     Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
     Route::post('/admin/adminChangePassword', 'Admin\UserController@adminChangePassword');
 
-    Route::get('/images/item/{id}', 'Admin\ImageController@viewImage');
-    Route::get('/images/thumb/{id}', 'Admin\ImageController@viewImage');
-
     Route::middleware('check.resources')->group(function () {
         Route::middleware('admin')->group(function () {
             Route::match(['get', 'post'], 'admin/organisations/dataset/create/{uri}', 'UserController@orgDatasetCreate');
@@ -339,7 +336,7 @@ Route::middleware('auth')->group(function() {
 
 Route::match(['get', 'post'], 'help', 'HelpController@list');
 Route::match(['get', 'post'], 'help/search', 'HelpController@search');
-Route::match(['get', 'post'], 'help/view/{id}', 'HelpController@view');
+Route::match(['get', 'post'], 'help/view/{id}/{activePage?}', 'HelpController@view');
 Route::match(['get', 'post'], 'help/page/view/{id}', 'HelpController@pageView');
 
 Route::match(['get', 'post'], 'tool', 'ToolController@config');
@@ -431,3 +428,6 @@ Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => 'LanguageController@
 Route::get('/datasets/{uri}/rss', 'FeedController@getOrganisationDatasetHistory');
 Route::get('/datasets/rss', 'FeedController@getDatasetsHistory');
 Route::get('/news/rss', 'FeedController@getNewsHistory');
+
+Route::get('/images/item/{id}', 'DocumentController@viewImage');
+Route::get('/images/thumb/{id}', 'DocumentController@viewImage');

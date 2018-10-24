@@ -21,7 +21,7 @@ class CheckHelp
     public function handle(Request $request, Closure $next)
     {
         if (!env('IS_TOOL')) {
-            $pages = HelpPage::where('active', true)->get();
+            $pages = HelpPage::select()->get();
 
             $name = $request->getPathInfo();
             $name = preg_replace('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}+/', '', $name);

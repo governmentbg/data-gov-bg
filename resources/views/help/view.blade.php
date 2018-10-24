@@ -35,10 +35,13 @@
                                             @foreach ($sub->pages as $page)
                                                 <ul class="sidebar-submenu">
                                                     <li class="js-show-submenu">
-                                                        <a href="#" class="clicable page">{{ $page->title }}&nbsp;&nbsp;<i class="fa fa-angle-down"></i></a>
+                                                        <a
+                                                            href="#"
+                                                            class="clicable {{ !empty($activePage) && $activePage == $page->id ? 'active' : '' }}"
+                                                        >{{ $page->title }}&nbsp;&nbsp;<i class="fa fa-angle-down"></i></a>
                                                         <ul class="sidebar-submenu">
                                                             <li>
-                                                                {!!  $page->body !!}
+                                                                {!! $page->body !!}
                                                             </li>
                                                         </ul>
                                                     </li>
@@ -51,10 +54,13 @@
                                     @if ($page->section_id == $section->id)
                                         <ul class="nav">
                                             <li class="js-show-submenu">
-                                                <a href="#" class="clicable">{{ $page->title }}&nbsp;&nbsp;<i class="fa fa-angle-down"></i></a>
+                                                <a
+                                                    href="#"
+                                                    class="clicable {{ !empty($activePage) && $activePage == $page->id ? 'active' : '' }}"
+                                                >{{ $page->title }}&nbsp;&nbsp;<i class="fa fa-angle-down"></i></a>
                                                 <ul class="sidebar-submenu">
                                                     <li>
-                                                        {!!  $page->body !!}
+                                                        {!! $page->body !!}
                                                     </li>
                                                 </ul>
                                             </li>

@@ -12,6 +12,10 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Help page stays open after being selected
+- Images uploaded from admin panel show for all users
+- If help page is inactive you can go to edit from the help sidebar
 
 ## [0.6.5] - 2018-10-24
 ### Added

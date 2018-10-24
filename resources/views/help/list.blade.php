@@ -40,7 +40,7 @@
                                                                 @if ($page->section_id == $sub->id)
                                                                     <ul class="sidebar-submenu">
                                                                         <li>
-                                                                            <a href="{{ url('help/view/'. $section->id) }}">{{ $page->title }}</a>
+                                                                            <a href="{{ url('help/view/'. $section->id .'/'. $page->id) }}">{{ $page->title }}</a>
                                                                         </li>
                                                                     </ul>
                                                                 @endif
@@ -53,7 +53,7 @@
                                                 @if ($page->section_id == $section->id)
                                                     <ul class="nav">
                                                         <li>
-                                                            <a href="{{ url('help/view/'. $section->id) }}">{{ $page->title }}</a>
+                                                            <a href="{{ url('help/view/'. $section->id .'/'. $page->id) }}">{{ $page->title }}</a>
                                                         </li>
                                                     </ul>
                                                 @endif

@@ -59945,15 +59945,18 @@ $(function () {
     });
 
     $('.clicable').each(function () {
-        var $this = $(this).closest('.js-show-submenu');
+        var $this = $(this).parent('.js-show-submenu');
         var $childMenu = $this.children('.sidebar-submenu');
-        $childMenu.hide();
 
-        $('a', $childMenu).each(function () {
-            if ($(this).hasClass('active')) {
-                $childMenu.show();
-                $this.addClass('remove-after');
-            }
+        $childMenu.each(function () {
+            $('a', $this).each(function () {
+                if ($(this).hasClass('active')) {
+                    $this.addClass('remove-after');
+                    $childMenu.show();
+                } else if (!$this.hasClass('remove-after')) {
+                    $childMenu.hide();
+                }
+            });
         });
     });
 });
@@ -60169,6 +60172,7 @@ var $nanoContent = $('.js-nano-content');
 var $footer = $('.js-footer');
 
 if ($head && $content && $footer) {
+    showHelp();
     helpBar();
 
     $(window).bind('load', function () {

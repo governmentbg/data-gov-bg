@@ -12,6 +12,12 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Changed
+- Search engine sqlite indexes to mysql
+
+### Remove
+- Cron job for sqlite index updates
+
 ### Fixed
 - Help page stays open after being selected
 - Images uploaded from admin panel show for all users
@@ -36,6 +42,8 @@ Security - in case of vulnerabilities.
 - Connection to APIs for resource data
 - On user login set locale from user settings
 - listUsers() response in xml and without api key
+- Cyrillic letters in downloaded json
+- Dataset filters in public section
 
 ## [0.6.4] - 2018-10-19
 ### Added

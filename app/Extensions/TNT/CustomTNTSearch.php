@@ -4,17 +4,64 @@ namespace App\Extensions\TNT;
 
 use PDO;
 use TeamTNT\TNTSearch\TNTSearch;
-use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
+use TeamTNT\TNTSearch\Support\Tokenizer;
 use TeamTNT\TNTSearch\Indexer\TNTIndexer;
-use TeamTNT\TNTSearch\Stemmer\PorterStemmer;
 use TeamTNT\TNTSearch\Support\Collection;
 use TeamTNT\TNTSearch\Support\Expression;
 use TeamTNT\TNTSearch\Support\Highlighter;
-use TeamTNT\TNTSearch\Support\Tokenizer;
+use TeamTNT\TNTSearch\Stemmer\PorterStemmer;
 use TeamTNT\TNTSearch\Support\TokenizerInterface;
+use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 
 class CustomTNTSearch extends TNTSearch
 {
+    public $indexName = null;
+
+    /**
+     * @param string $indexName
+     *
+     * @throws IndexNotFoundException
+     */
+    public function selectIndex($indexName)
+    {
+        $this->indexName = $indexName;
+        $this->index = app('db')->connection('mysqltnt')->getPDO();
+        $this->index->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->setStemmer();
+    }
+
+    /**
+     * @param string $indexName
+     * @param boolean $disableOutput
+     *
+     * @return CustomTNTIndexer
+     */
+    public function createIndex($indexName, $disableOutput = false)
+    {
+        $indexer = new CustomTNTIndexer;
+        $indexer->loadConfig($this->config);
+        $indexer->disableOutput = $disableOutput;
+
+        if ($this->dbh) {
+            $indexer->setDatabaseHandle($this->dbh);
+        }
+
+        return $indexer->createIndex($indexName);
+    }
+
+    /**
+     * @return CustomTNTIndexer
+     */
+    public function getIndex()
+    {
+        $indexer = new CustomTNTIndexer;
+        $indexer->inMemory = false;
+        $indexer->setIndex($this->index);
+        $indexer->setStemmer($this->stemmer, $this->indexName);
+
+        return $indexer;
+    }
+
     /**
      * @param string $phrase
      * @param int    $numOfResults
@@ -38,16 +85,14 @@ class CustomTNTSearch extends TNTSearch
 
         foreach ($keywords as $index => $term) {
             $isLastKeyword = ($keywords->count() - 1) == $index;
-            $df = $this->totalMatchingDocuments($term, $isLastKeyword, $fuzzy);
+            $df = $this->totalMatchingDocuments($term, $isLastKeyword);
+            $idf = log($count / max(1, $df));
 
-            foreach ($this->getAllDocumentsForKeyword($term, false, $isLastKeyword, $fuzzy) as $document) {
+            foreach ($this->getAllDocumentsForKeyword($term, false, $isLastKeyword) as $document) {
                 $docID = $document['doc_id'];
                 $tf = $document['hit_count'];
-                $idf = log($count / $df);
                 $num = ($tfWeight + 1) * $tf;
-                $denom = $tfWeight
-                    * ((1 - $dlWeight) + $dlWeight)
-                    + $tf;
+                $denom = $tfWeight * ((1 - $dlWeight) + $dlWeight) + $tf;
                 $score = $idf * ($num / $denom);
                 $docScores[$docID] = isset($docScores[$docID]) ?
                 $docScores[$docID] + $score : $score;
@@ -58,19 +103,10 @@ class CustomTNTSearch extends TNTSearch
 
         $docs = new Collection($docScores);
 
-        $counter = 0;
         $totalHits = $docs->count();
         $docs = $docs->map(function ($doc, $key) {
             return $key;
-        })->filter(function ($item) use (&$counter, $numOfResults) {
-            $counter++;
-
-            if ($counter <= $numOfResults) {
-                return true;
-            }
-
-            return false; // ?
-        });
+        })->take($numOfResults);
 
         $stopTimer = microtime(true);
 
@@ -81,7 +117,7 @@ class CustomTNTSearch extends TNTSearch
         return [
             'ids'            => array_keys($docs->toArray()),
             'hits'           => $totalHits,
-            'execution_time' => round($stopTimer - $startTimer, 7) * 1000 ." ms"
+            'execution_time' => round($stopTimer - $startTimer, 7) * 1000 .' ms'
         ];
     }
 
@@ -143,12 +179,13 @@ class CustomTNTSearch extends TNTSearch
             $fuzzySearchResults = $this->fuzzySearch($keyword);
         }
 
-        $searchWordlist = "SELECT * FROM wordlist WHERE term like :keyword";
+        $searchWordlist = "SELECT * FROM ". $this->getTNTName($this->indexName, 'wordlist') ." WHERE term like :keyword";
         $stmtWord       = $this->index->prepare($searchWordlist);
 
         if ($this->asYouType && $isLastWord) {
-            $searchWordlist = "SELECT * FROM wordlist WHERE term like :keyword ORDER BY length(term) ASC, num_hits DESC LIMIT 1";
-            $stmtWord       = $this->index->prepare($searchWordlist);
+            $searchWordlist = "SELECT * FROM ". $this->getTNTName($this->indexName, 'wordlist') ." WHERE term
+                like :keyword ORDER BY length(term) ASC, num_hits DESC LIMIT 1";
+            $stmtWord = $this->index->prepare($searchWordlist);
             $stmtWord->bindValue(':keyword', mb_strtolower($keyword) ."%");
         } else {
             $stmtWord->bindValue(':keyword', "%". mb_strtolower($keyword) ."%");
@@ -170,10 +207,12 @@ class CustomTNTSearch extends TNTSearch
     {
         $criteria = implode(', ', array_column($word, 'id'));
 
-        $query = "SELECT * FROM doclist WHERE term_id IN ($criteria) ORDER BY hit_count DESC LIMIT {$this->maxDocs}";
+        $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'doclist') ."
+            WHERE term_id IN ($criteria) ORDER BY hit_count DESC LIMIT {$this->maxDocs}";
 
         if ($noLimit) {
-            $query = "SELECT * FROM doclist WHERE term_id IN ($criteria) ORDER BY hit_count DESC";
+            $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'doclist') ."
+                WHERE term_id IN ($criteria) ORDER BY hit_count DESC";
         }
 
         $stmtDoc = $this->index->prepare($query);
@@ -191,10 +230,18 @@ class CustomTNTSearch extends TNTSearch
     private function getAllDocumentsForFuzzyKeyword($words, $noLimit)
     {
         $binding_params = implode(',', array_fill(0, count($words), '?'));
-        $query = "SELECT * FROM doclist WHERE term_id in ($binding_params) ORDER BY hit_count DESC LIMIT {$this->maxDocs}";
+        $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'doclist') ."
+            WHERE term_id in ($binding_params) ORDER BY CASE term_id";
+        $order_counter = 1;
 
-        if ($noLimit) {
-            $query = "SELECT * FROM doclist WHERE term_id in ($binding_params) ORDER BY hit_count DESC";
+        foreach ($words as $word) {
+            $query .= " WHEN " . $word['id'] . " THEN " . $order_counter++;
+        }
+
+        $query .= " END";
+
+        if (!$noLimit) {
+            $query .= " LIMIT {$this->maxDocs}";
         }
 
         $stmtDoc = $this->index->prepare($query);
@@ -208,5 +255,35 @@ class CustomTNTSearch extends TNTSearch
         $stmtDoc->execute($ids);
 
         return new Collection($stmtDoc->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    public function setStemmer()
+    {
+        $stemmer = $this->getValueFromInfoTable('stemmer');
+
+        if ($stemmer) {
+            $this->stemmer = new $stemmer;
+        } else {
+            $this->stemmer = isset($this->config['stemmer']) ? new $this->config['stemmer'] : new PorterStemmer;
+        }
+    }
+
+    public function getValueFromInfoTable($value)
+    {
+        $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'info') ." WHERE index_key = '$value'";
+        $docs = $this->index->query($query);
+
+        return $docs->fetch(PDO::FETCH_ASSOC)['value'];
+    }
+
+    public static function getTNTName($name, $id = null)
+    {
+        $result = $name;
+
+        if (isset($id)) {
+            $result .= '_'. $id;
+        }
+
+        return $result;
     }
 }

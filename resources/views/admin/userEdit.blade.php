@@ -293,7 +293,7 @@
                     class="col-xs-12 btn btn-primary del-btn"
                     data-toggle="modal"
                     data-target="#delete-confirm"
-                    >{{ utrans('custom.delete_profile') }}</button>
+                    >{{ uctrans('custom.delete_profile') }}</button>
             </div>
         </div>
         <div class="text-center m-b-lg terms-hr">

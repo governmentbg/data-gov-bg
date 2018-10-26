@@ -24,6 +24,9 @@ class Page extends Model implements TranslatableInterface
     const TYPE_NEWS = 1;
     const TYPE_PAGE = 2;
 
+    const RESOURCE_RESPONSE_JSON = 1;
+    const RESOURCE_RESPONSE_CSV = 2;
+
     protected static $translatable = [
         'title'             => 'label',
         'abstract'          => 'text',
@@ -36,6 +39,14 @@ class Page extends Model implements TranslatableInterface
     public static function getTransFields()
     {
         return self::$translatable;
+    }
+
+    public static function getResourceResponseFormats()
+    {
+        return [
+            self::RESOURCE_RESPONSE_JSON => 'JSON',
+            self::RESOURCE_RESPONSE_CSV  => 'CSV',
+        ];
     }
 
     public function toSearchableArray()

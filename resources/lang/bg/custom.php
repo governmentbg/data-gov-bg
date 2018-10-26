@@ -879,4 +879,9 @@ return [
     'search_button' => 'Търси',
     'document_preview' => 'преглед на документ',
     'remove_set' => 'премахни',
+    'resource_uri' => 'Идентификатор на ресурса',
+    'generate_script_btn' => 'Генерирай скрипт',
+    'test_script' => 'Тествай скрипта',
+    'resource_version' => 'Версия на ресурса',
+    'generate_script' => 'Генерирай скрипт със заявка към ресурс',
 ];

@@ -11,4 +11,5 @@
     data-first="{{ __('custom.first') }}"
     data-last="{{ __('custom.last') }}"
     data-clear-org-filter="{{ __('custom.clear_filter') }}"
+    data-get-resource="{{ __('custom.get_resource_data_fail') }}"
 ></span>

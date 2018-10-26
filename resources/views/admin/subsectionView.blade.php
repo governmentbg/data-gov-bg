@@ -106,6 +106,7 @@
                                         action="{{ url('admin/subsections/list/'. $section->parent_id) }}"
                                         class="inline-block"
                                     >
+                                        {{ csrf_field() }}
                                         <button
                                             name="back"
                                             class="btn btn-primary m-b-sm"
@@ -117,12 +118,12 @@
                                         action="{{ url('admin/subsections/delete/'. $section->id) }}"
                                     >
                                         {{ csrf_field() }}
-                                            <button
-                                                class="btn btn-primary del-btn m-b-sm"
-                                                type="submit"
-                                                name="delete"
-                                                data-confirm="{{ __('custom.remove_data') }}"
-                                            >{{ uctrans('custom.remove') }}</button>
+                                        <button
+                                            class="btn btn-primary del-btn m-b-sm"
+                                            type="submit"
+                                            name="delete"
+                                            data-confirm="{{ __('custom.remove_data') }}"
+                                        >{{ uctrans('custom.remove') }}</button>
                                     </form>
                                 </div>
                             </div>

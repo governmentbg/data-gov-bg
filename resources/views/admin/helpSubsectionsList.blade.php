@@ -13,7 +13,7 @@
                         <a
                             class="active"
                             href="{{ url('/admin/help/sections/list') }}"
-                        >{{ __('custom.topics_sections') }}</a>
+                        >{{ uctrans('custom.topics_sections') }}</a>
                     </li>
                     <li>
                         <a

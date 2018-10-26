@@ -4,8 +4,27 @@
     <div class="container">
         @include('partials.alerts-bar')
         @include('partials.admin-nav-bar', ['view' => 'pages'])
-        <div class="col-xs-12 m-t-lg p-l-r-none">
-            <span class="my-profile m-l-sm">{{ uctrans('custom.pages_list') }}</span>
+        <div class="row">
+            <div class="col-xs-6 m-t-lg p-l-r-none">
+                <span class="my-profile m-l-sm">{{ uctrans('custom.pages_list') }}</span>
+            </div>
+            <div class="col-xs-6 m-t-lg text-right section">
+                <div class="filter-content section-nav-bar">
+                    <ul class="nav filter-type right-border">
+                        <li>
+                            <a
+                                href="{{ url('/admin/sections/list') }}"
+                            >{{ uctrans('custom.topics_sections') }}</a>
+                        </li>
+                        <li>
+                            <a
+                                class="active"
+                                href="{{ url('/admin/pages/list') }}"
+                            >{{ __('custom.topics_pages') }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="row">
             @include('partials.admin-sidebar', [
@@ -13,12 +32,13 @@
                 'options' => ['active', 'section']
             ])
             <div class="col-sm-9 col-xs-12">
+                @include('partials.pagination')
                 <div class="row">
-                    @include('partials.pagination')
                     <div class="col-xs-12 text-right">
-                        <span class="badge badge-pill m-t-md new-data user-add-btn">
-                            <a href="{{ url('admin/pages/add') }}">{{ __('custom.add') }}</a>
-                        </span>
+                        <a
+                            class="btn btn-primary add pull-right"
+                            href="{{ url('admin/pages/add') }}"
+                        >{{ __('custom.add') }}</a>
                     </div>
                     <div class="col-xs-12 m-b-lg">
                         @if (count($pages))

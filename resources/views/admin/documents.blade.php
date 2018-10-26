@@ -124,9 +124,10 @@
                         >{{ uctrans('custom.order_desc') }}</a>
                     </div>
                     <div class="col-xs-12 text-right">
-                        <span class="badge badge-pill doc-badge">
-                            <a href="{{ url('/admin/documents/add') }}">{{ __('custom.add') }}</a>
-                        </span>
+                        <a
+                            class="btn btn-primary add pull-right"
+                            href="{{ url('/admin/documents/add') }}"
+                        >{{ __('custom.add') }}</a> 
                     </div>
                 </div>
                 <div class="row m-b-lg">

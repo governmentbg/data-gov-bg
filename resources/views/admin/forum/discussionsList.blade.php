@@ -31,9 +31,10 @@
         <div class="row m-b-lg">
             @include('partials.pagination')
             <div class="col-xs-12 text-right">
-                <span class="badge badge-pill long-badge">
-                    <a href="{{ url('/admin/forum/discussions/add') }}">{{ __('custom.add') }}</a>
-                </span>
+                <a
+                    class="btn btn-primary add pull-right"
+                    href="{{ url('/admin/forum/discussions/add') }}"
+                >{{ __('custom.add') }}</a>
             </div>
             @if (count($discussions))
                 <form method="POST" class="form-horizontal">

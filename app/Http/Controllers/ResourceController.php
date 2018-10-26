@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Page;
 use App\Role;
 use App\Resource;
 use App\Organisation;
@@ -598,6 +599,7 @@ class ResourceController extends Controller {
                 $res->success = $resultConvert->success;
             }
         } else {
+            error_log('$res: '. print_r($res, true));
             $data = isset($res->errors) ? $res->errors : [];
         }
 

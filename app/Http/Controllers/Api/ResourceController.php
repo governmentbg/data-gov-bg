@@ -1017,7 +1017,7 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
-            'version'       => 'sometimes|int',
+            'version'       => 'sometimes|nullable|int',
         ]);
 
         if (!$validator->fails()) {

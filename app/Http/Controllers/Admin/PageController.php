@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Api\HelpController as ApiHelp;
 use App\Http\Controllers\Api\PageController as ApiPage;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
-use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class PageController extends AdminController
 {
@@ -359,35 +357,5 @@ class PageController extends AdminController
         $result = $api->listHelpPages($rq)->getData();
 
         return $result->success ? $result->pages : [];
-    }
-
-    public function execResourceQueryScript(Request $request)
-    {
-        $format = $request->format;
-        $resourceParams = ['resource_uri' => $request->uri, 'version' => $request->version];
-
-        $rq = Request::create('/api/getResourceData', 'POST', $resourceParams);
-        $api = new ApiResource($rq);
-        $res = $api->getResourceData($rq)->getData();
-
-        if ($res->success) {
-            $data = isset($res->data) ? $res->data : [];
-
-            if ($format == Page::RESOURCE_RESPONSE_CSV) {
-                $convertData = ['data' => $data];
-                $reqConvert = Request::create('/json2csv', 'POST', $convertData);
-                $apiConvert = new ApiConversion($reqConvert);
-                $resultConvert = $apiConvert->json2csv($reqConvert)->getData();
-                $data = isset($resultConvert->data) ? $resultConvert->data : [];
-                $res->success = $resultConvert->success;
-            }
-        } else {
-            $data = isset($res->errors) ? $res->errors : [];
-        }
-
-        return [
-            'success' => $res->success,
-            'data'    => json_encode($data)
-        ];
     }
 }

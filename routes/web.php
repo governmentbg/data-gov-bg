@@ -369,7 +369,7 @@ Route::match(['get', 'post'], 'confirmError', 'UserController@confirmError')->na
 
 Route::match(['get', 'post'], 'delSettings', 'UserController@deleteCustomSettings');
 
-Route::match(['get', 'post'], 'execResourceQueryScript', 'Admin\PageController@execResourceQueryScript');
+Route::match(['get', 'post'], 'execResourceQueryScript', 'ResourceController@execResourceQueryScript');
 
 Route::match(['get', 'post'], 'data', 'DataController@list')->name('data');
 Route::match(['get', 'post'], 'data/view/{uri}', 'DataController@view')->name('dataView');

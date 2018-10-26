@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
-use App\Http\Controllers\Api\ResourceController as ApiResource;
-use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class ResourceController extends Controller {
     public static function addMetadata($recordUri, $resourceData, $file = null, $isUpdate = false)

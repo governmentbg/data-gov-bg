@@ -882,4 +882,9 @@ return [
     'document_preview' => 'document preview',
     'activef' => 'active',
     'remove_set' => 'remove',
+    'resource_uri' => 'Resource identifier',
+    'generate_script_btn' => 'Generate script',
+    'test_script' => 'Test script',
+    'resource_version' => 'Resource version',
+    'generate_script' => 'Generate script',
 ];

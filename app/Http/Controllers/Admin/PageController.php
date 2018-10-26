@@ -246,6 +246,7 @@ class PageController extends AdminController
         $sections = Section::select()->get();
         $sections = $this->prepareSections($sections);
         $helpPages = $this->getHelpPages();
+        $resourceFormats = Page::getResourceResponseFormats();
 
         if ($request->has('back')) {
             return redirect()->route('adminPages');
@@ -295,10 +296,11 @@ class PageController extends AdminController
         }
 
         return view('admin/pagesAdd', [
-            'class'     => 'user',
-            'fields'    => self::getPageTransFields(),
-            'sections'  => $sections,
-            'helpPages' => $helpPages,
+            'class'           => 'user',
+            'fields'          => self::getPageTransFields(),
+            'sections'        => $sections,
+            'helpPages'       => $helpPages,
+            'resourceFormats' => $resourceFormats
         ]);
     }
 

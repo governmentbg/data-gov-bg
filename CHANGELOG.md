@@ -12,6 +12,9 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Resource queries tool in admin add pages section
+
 ### Changed
 - Search engine sqlite indexes to mysql
 

@@ -160,7 +160,7 @@ class OrganisationController extends ApiController
                     }
                 }
 
-                if (!empty($data['approved'])) {
+                if (!empty($data['approved']) && Role::isAdmin()) {
                     $organisation->approved = $data['approved'];
                 } else {
                     $organisation->approved = \Auth::user()->approved;
@@ -394,7 +394,7 @@ class OrganisationController extends ApiController
                     $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-                if (!empty($data['approved'])) {
+                if (!empty($data['approved']) && Role::isAdmin()) {
                     $orgData['approved'] = $data['approved'];
                 } else {
                     $orgData['approved'] = Organisation::APPROVED_FALSE;

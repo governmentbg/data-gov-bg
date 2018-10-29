@@ -13,9 +13,11 @@ class AddForumLinkToDataSets extends Migration
      */
     public function up()
     {
-        Schema::table('data_sets', function (Blueprint $table) {
-            $table->string('forum_link', 191)->nullable();
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('data_sets', function (Blueprint $table) {
+                $table->string('forum_link', 191)->nullable();
+            });
+        }
     }
 
     /**
@@ -25,8 +27,10 @@ class AddForumLinkToDataSets extends Migration
      */
     public function down()
     {
-        Schema::table('data_sets', function (Blueprint $table) {
-            $table->dropColumn('forum_link');
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('data_sets', function (Blueprint $table) {
+                $table->dropColumn('forum_link');
+            });
+        }
     }
 }

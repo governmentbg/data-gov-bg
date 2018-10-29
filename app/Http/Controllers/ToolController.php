@@ -142,18 +142,26 @@ class ToolController extends Controller
 
                 if (!empty($dbData)) {
                     $hasDb = true;
-                    $post = array_merge($post, [
+                    $dbPostData = [
                         'connection_name'       => $dbData['connection_name'],
                         'source_db_host'        => $dbData['source_db_host'],
                         'source_db_name'        => $dbData['source_db_name'],
                         'source_db_user'        => $dbData['source_db_user'],
                         'source_db_pass'        => $dbData['source_db_pass'],
                         'notification_email'    => $dbData['notification_email'],
-                    ]);
+                    ];
+
+                    $post = array_merge($post, $dbPostData);
 
                     if ($request->has('save_query')) {
+                        if (empty($post['id'])) {
+                            $nameRule = ['name' => 'required|string|max:191|unique:data_queries,name'];
+                        } else {
+                            $nameRule = ['name' => 'required|string|max:191'];
+                        }
+
                         $validator = \Validator::make($post, [
-                            'name'          => 'required|string|max:191|unique:data_queries,name',
+                            $nameRule,
                             'api_key'       => 'required|string|max:191',
                             'resource_key'  => 'required|string|max:191',
                             'query'         => 'required|string|max:191',
@@ -169,15 +177,28 @@ class ToolController extends Controller
                             ];
 
                             try {
-                                $query = DataQuery::create([
-                                    'connection_id' => $dbData['id'],
-                                    'name'          => $post['name'],
-                                    'api_key'       => $post['api_key'],
-                                    'resource_key'  => $post['resource_key'],
-                                    'query'         => $post['query'],
-                                    'upl_freq'      => $post['upl_freq'],
-                                    'upl_freq_type' => $post['upl_freq_type'],
-                                ]);
+                                if (empty($post['id'])) {
+                                    $query = DataQuery::create([
+                                        'connection_id' => $dbData['id'],
+                                        'name'          => $post['name'],
+                                        'api_key'       => $post['api_key'],
+                                        'resource_key'  => $post['resource_key'],
+                                        'query'         => $post['query'],
+                                        'upl_freq'      => $post['upl_freq'],
+                                        'upl_freq_type' => $post['upl_freq_type'],
+                                    ]);
+                                } else {
+                                    $query = DataQuery::find($post['id']);
+
+                                    $query->name = $post['name'];
+                                    $query->api_key = $post['api_key'];
+                                    $query->resource_key = $post['resource_key'];
+                                    $query->query = $post['query'];
+                                    $query->upl_freq = $post['upl_freq'];
+                                    $query->upl_freq_type = $post['upl_freq_type'];
+
+                                    $query->save();
+                                }
 
                                 unset($post['name'],
                                     $post['api_key'],
@@ -219,6 +240,7 @@ class ToolController extends Controller
                             DataQuery::find($queryId)->delete();
 
                             $logVar['status'] = true;
+                            $post = $dbPostData;
 
                             session()->flash('alert-success', __('custom.query_delete_success'));
                         } catch (QueryException $e) {
@@ -240,9 +262,13 @@ class ToolController extends Controller
                             $queryId = array_keys($post['send_query'])[0];
                             $dataQuery = DataQuery::find($queryId);
 
-                            $data = $this->fetchData($dataQuery->query, $driver, $host, $dbName, $username, $password);
+                            $data = $this->fetchData($dataQuery->query, $driver, $host, $dbName, $username, $password, true);
 
-                            $response = $this->callApi($data, $dataQuery->api_key, $dataQuery->resource_key);
+                            $response = $this->updateResourceData(
+                                $dataQuery->api_key,
+                                $dataQuery->resource_key,
+                                $data
+                            );
 
                             if ($response['success']) {
                                 session()->flash('alert-success', __('custom.query_send_success'));
@@ -252,6 +278,17 @@ class ToolController extends Controller
                         } catch (\Exception $e) {
                             session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
                         }
+                    }
+
+                    if ($request->has('edit_query')) {
+                        $queryId = array_keys($post['edit_query'])[0];
+                        $dataQuery = DataQuery::find($queryId);
+
+                        $post = array_merge($dataQuery->toArray(), $dbPostData);
+                    }
+
+                    if ($request->has('new_query')) {
+                        $post = $dbPostData;
                     }
 
                     $dataQueries = DataQuery::where('connection_id', $dbData['id'])->get();
@@ -368,13 +405,12 @@ class ToolController extends Controller
 
                         $logData['action_object'] = $queryId;
 
-                        $data = [
-                            'file_api_key'  => $query->api_key,
-                            'file_rs_key'   => $query->resource_key,
-                            'file'          => $query->connection->source_file_path,
-                        ];
-
-                        $result = $this->updateResourceData($data);
+                        $result = $this->updateResourceData(
+                            $query->api_key,
+                            $query->resource_key,
+                            $query->connection->source_file_path,
+                            true
+                        );
 
                         $logData['status'] = true;
 
@@ -565,7 +601,7 @@ class ToolController extends Controller
         return false;
     }
 
-    private function fetchData($query, $driver, $host, $dbName, $username, $password = null)
+    private function fetchData($query, $driver, $host, $dbName, $username, $password = null, $toJson = false)
     {
         $driver = $this->getDrivers()[$driver];
 
@@ -576,6 +612,10 @@ class ToolController extends Controller
 
         $result = $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $result = $stmt->fetchAll();
+
+        if ($toJson) {
+            return empty($result) ? [] : $result;
+        }
 
         if (!empty($result[0])) {
             $result = array_merge([array_keys($result[0])], $result);
@@ -592,32 +632,33 @@ class ToolController extends Controller
         return $connection;
     }
 
-    private function updateResourceData($post)
+    private function updateResourceData($apiKey, $resourceUri, $data, $file = false)
     {
-        $apiKey = $post['file_api_key'];
-        $recordUri = $post['file_rs_key'];
-        $file = $post['file'];
         $baseUrl = env('TOOL_API_URL');
-        $extension = $file->getClientOriginalExtension();
-        $content = file_get_contents($file->getRealPath());
 
-        $data = [
-            'api_key'   => $post['file_api_key'],
-            'type'      => Resource::TYPE_FILE,
-        ];
+        if ($file) {
+            $file = $data;
+            $extension = $file->getClientOriginalExtension();
+            $content = file_get_contents($file->getRealPath());
 
-        if (!empty($extension)) {
-            $metadata['data']['file_format'] = $extension;
-            $content = file_get_contents($post['file']->getRealPath());
+            $data = [
+                'api_key'   => $post['file_api_key'],
+                'type'      => Resource::TYPE_FILE,
+            ];
+
+            if (!empty($extension)) {
+                $metadata['data']['file_format'] = $extension;
+                $content = file_get_contents($post['file']->getRealPath());
+            }
+
+            $data = ResourceController::callConversions($apiKey, $extension, $content);
         }
-
-        $data = ResourceController::callConversions($apiKey, $extension, $content);
 
         $requestUrl = $baseUrl .'updateResourceData';
 
         $ch = curl_init($requestUrl);
 
-        $params = ['api_key' => $apiKey, 'resource_uri' => $recordUri, 'data' => $data];
+        $params = ['api_key' => $apiKey, 'resource_uri' => $resourceUri, 'data' => $data];
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
@@ -636,7 +677,7 @@ class ToolController extends Controller
         $class = 'index';
         $params = [];
         $post = $request->all();
-        $modules = Module::getToolModules();
+        $modules = ['DB Connection', 'File'];
         $actionTypes = ActionsHistory::getTypes();
         $connectionTypes = $this->getDrivers();
         $today = Carbon::now();
@@ -684,7 +725,11 @@ class ToolController extends Controller
             $params['criteria']['status'] = $post['status'];
         }
         if (!empty($request->offsetGet('source_type'))) {
-            $params['criteria']['module'] = $request->offsetGet('source_type');
+            if ($request->offsetGet('source_type') == 'File') {
+                $params['criteria']['module'] = $request->offsetGet('source_type');
+            } else {
+                $params['criteria']['module'] = ['DB Connection', 'DB Query'];
+            }
         }
         if (!empty($request->offsetGet('db_type'))) {
             $params['criteria']['source_db_type'] = $request->offsetGet('db_type');
@@ -714,7 +759,9 @@ class ToolController extends Controller
                     ->withTrashed()
                     ->first();
 
-                $record->action_object = $data->connection_name;
+                if (!empty($data->connection_name)) {
+                    $record->action_object = $data->connection_name;
+                }
             } else {
                 $dataQuery = DataQuery::where('id', $record->action_object)
                 ->withTrashed()

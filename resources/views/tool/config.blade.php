@@ -278,6 +278,14 @@
                         </div>
                     </div>
                     <div class="form-group col-md-9 col-md-offset-3">
+                        @if (!empty($post['id']))
+                            <input
+                                type="submit"
+                                class="btn btn-primary save-btn"
+                                name="new_query"
+                                value="{{ uctrans('custom.new') }}"
+                            >
+                        @endif
                         <input
                             type="submit"
                             class="btn btn-primary save-btn pull-right"
@@ -286,6 +294,7 @@
                         >
                     </div>
                 </div>
+                <input name="id" value="{{ empty($post['id']) ? '' : $post['id'] }}" hidden>
 
                 @foreach ($dataQueries as $dataQuery)
                     <div class="data-query">

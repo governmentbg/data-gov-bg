@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -58,6 +59,8 @@ class Handler extends ExceptionHandler
         if ($exception instanceof AfterForumResponse) {
             return redirect()->back()->with('alert-success', trans('chatter::alert.success.reason.submitted_to_post'));
         }
+
+        Log::error($exception->getMessage());
 
         return parent::render($request, $exception);
     }

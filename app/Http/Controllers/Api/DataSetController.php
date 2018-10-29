@@ -23,7 +23,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiController;
-use Illuminate\Database\QueryException;
 
 class DataSetController extends ApiController
 {
@@ -217,7 +216,7 @@ class DataSetController extends ApiController
                 DB::commit();
 
                 return $this->successResponse(['uri' => $newDataSet->uri], true);
-            } catch (QueryException $ex) {
+            } catch (Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -448,7 +447,7 @@ class DataSetController extends ApiController
                 } else {
                     DB::rollback();
                 }
-            } catch (QueryException $ex) {
+            } catch (Exception $ex) {
                 Log::error($ex->getMessage());
 
                 DB::rollback();
@@ -519,7 +518,7 @@ class DataSetController extends ApiController
 
             Module::add($logData);
 
-        } catch (QueryException $ex) {
+        } catch (Exception $ex) {
             Log::error($ex->getMessage());
 
             return $this->errorResponse(__('custom.delete_dataset_fail'));
@@ -529,7 +528,7 @@ class DataSetController extends ApiController
             $dataset->deleted_by = \Auth::id();
             $dataset->save();
 
-        } catch (QueryException $ex) {
+        } catch (Exception $ex) {
             Log::error($ex->getMessage());
 
             return $this->errorResponse(__('custom.delete_dataset_fail'));
@@ -653,7 +652,7 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['keywords'])) {
-                    $ids = DataSet::search($criteria['keywords'], true)->get()->pluck('id');
+                    $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
                     $query->whereIn('id', $ids);
                 }
 
@@ -816,7 +815,7 @@ class DataSetController extends ApiController
                     'datasets'      => $results,
                     'total_records' => $count
                 ], true);
-            } catch (QueryException $ex) {
+            } catch (Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -946,7 +945,7 @@ class DataSetController extends ApiController
 
                     return $this->successResponse($data);
                 }
-            } catch (QueryException $e) {
+            } catch (Exception $e) {
                 Log::error($e->getMessage());
             }
         }
@@ -1021,7 +1020,7 @@ class DataSetController extends ApiController
                 DB::commit();
 
                 return $this->successResponse();
-            } catch (QueryException $ex) {
+            } catch (Exception $ex) {
                 DB::rollback();
 
                 Log::error($ex->getMessage());
@@ -1094,7 +1093,7 @@ class DataSetController extends ApiController
 
                         return $this->successResponse();
                     }
-                } catch (QueryException $ex) {
+                } catch (Exception $ex) {
                     Log::error($ex->getMessage());
                 }
             }
@@ -1142,7 +1141,7 @@ class DataSetController extends ApiController
             }
 
             $dataSet->tags()->sync($tagIds);
-        } catch (QueryException $ex) {
+        } catch (Exception $ex) {
             Log::error($ex->getMessage());
 
             return false;
@@ -1199,7 +1198,7 @@ class DataSetController extends ApiController
 
                 return true;
             }
-        } catch (QueryException $ex) {
+        } catch (Exception $ex) {
             Log::error($ex->getMessage());
 
             return false;
@@ -1240,7 +1239,7 @@ class DataSetController extends ApiController
                 $count = $sets->count();
 
                 return $this->successResponse(['count' => $count], true);
-            } catch (QueryException $ex) {
+            } catch (Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }

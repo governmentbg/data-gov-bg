@@ -13,9 +13,11 @@ class ChangeTranslationsTextColumnLength extends Migration
      */
     public function up()
     {
-        Schema::table('translations', function ($table) {
-            $table->string('text', 4294967295)->change();
-        });
+        if (!env('IS_TOOL')) {
+            Schema::table('translations', function ($table) {
+                $table->string('text', 4294967295)->change();
+            });
+        }
     }
 
     /**

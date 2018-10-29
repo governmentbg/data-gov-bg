@@ -14,6 +14,8 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Added
 - Resource queries tool in admin add pages section
+- Send query button functionality for the tool
+- Edit saved query functionality for the tool
 
 ### Changed
 - Search engine sqlite indexes to mysql

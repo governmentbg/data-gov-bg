@@ -599,7 +599,6 @@ class ResourceController extends Controller {
                 $res->success = $resultConvert->success;
             }
         } else {
-            error_log('$res: '. print_r($res, true));
             $data = isset($res->errors) ? $res->errors : [];
         }
 

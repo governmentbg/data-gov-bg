@@ -13,7 +13,7 @@ class CreatePagesTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('pages', function (Blueprint $table) {
                 $table->increments('id');
                 $table->unsignedTinyInteger('type');

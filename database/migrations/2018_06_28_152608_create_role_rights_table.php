@@ -13,7 +13,7 @@ class CreateRoleRightsTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('role_rights', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('role_id')->unsigned();

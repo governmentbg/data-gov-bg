@@ -18,7 +18,7 @@ class ShareActiveSections
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $activeSections = app('App\Http\Controllers\Controller')->getActiveSections();
             View::share('activeSections', $activeSections);
         }

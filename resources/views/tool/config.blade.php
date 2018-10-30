@@ -69,7 +69,7 @@
 
     <hr class="section-line"></hr>
 
-    <div class="container p-l-r-none m-b-lg">
+    <div class="container p-l-r-none">
         @if (
             empty($post['source_type']) && empty(old('source_type'))
             || !empty($post['source_type']) && $post['source_type'] == 'dbms'
@@ -331,30 +331,26 @@
                         value="{{ uctrans('custom.new') }}"
                     >
                 @endif
-                @if (!empty($post['file_conn_name']))
-                    <input
-                        type="hidden"
-                        name="conn_id"
-                        value="{{ old('conn_id', empty($post['conn_id']) ? '' : $post['conn_id']) }}"
-                    >
-                @endif
+                <input
+                    type="hidden"
+                    name="conn_id"
+                    value="{{ old('conn_id', empty($post['conn_id']) ? '' : $post['conn_id']) }}"
+                >
             </div>
             <div class="js-file-form file-form">
                 <div class="form-group required">
-                    <label for="file" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file') }}</label>
-                    <div class="col-sm-6">
+                    <label class="col-sm-3">{{ utrans('custom.file') }}</label>
+                    <div class="col-md-9">
                         <input
-                            type="file"
+                            type="text"
                             name="file"
-                            class="input-border-r-12 form-control doc-upload-input js-doc-input"
+                            class="input-border-r-12 form-control"
+                            placeholder="{{ __('custom.file_desc') }}"
                             value="{{ old('file', empty($post['file']) || !$edit ? '' : $post['file']) }}"
                         >
                         @if (isset($errors) && $errors->has('file'))
                             <span class="error">{{ $errors->first('file') }}</span>
                         @endif
-                    </div>
-                    <div class="col-sm-3 text-right">
-                        <button type="submit" class="btn btn-custom js-doc-btn">{{ __('custom.select_file') }}</button>
                     </div>
                 </div>
                 <div class="form-group">

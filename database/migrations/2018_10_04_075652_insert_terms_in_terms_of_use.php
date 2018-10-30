@@ -102,7 +102,7 @@ class InsertTermsInTermsOfUse extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             foreach ($this->termsOfUse as $i => $termData) {
                 $termData['active'] = true;
                 $termData['is_default'] = isset($termData['is_default']) ? $termData['is_default'] : false;
@@ -127,7 +127,7 @@ class InsertTermsInTermsOfUse extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             foreach ($this->termsOfUse as $termData) {
                 if (TermsOfUse::where($termData)->count()) {
                     TermsOfUse::where($termData)->get()->delete();

@@ -13,10 +13,10 @@ class CreateUserForMigrations extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $errors = [];
 
-            $password = env('SYSTEM_PASSWORD');
+            $password = config('app.SYSTEM_PASSWORD');
 
             try {
                 DB::table('users')->insert([
@@ -51,7 +51,7 @@ class CreateUserForMigrations extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             try {
                 DB::table('users')->where('username', 'migrate_data')->delete();
             } catch (\Illuminate\Database\QueryException $ex) {}

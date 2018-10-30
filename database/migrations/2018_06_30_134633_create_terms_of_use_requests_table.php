@@ -13,7 +13,7 @@ class CreateTermsOfUseRequestsTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('terms_of_use_requests', function (Blueprint $table) {
                 $table->increments('id');
                 $table->text('descript');

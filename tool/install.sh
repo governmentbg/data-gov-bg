@@ -44,7 +44,7 @@ if [ ! -d "$folder" ]; then
     echo "\`$folder\` is not a folder"
     goto folderloop
 else
-    docker run -it -d --name opendatatool -v $folder:/mnt -p $port:80 --restart always finitesoft/data-gov-bg \
+    docker run -it -d --name opendatatool -v $folder:/var/files -p $port:80 --restart always finitesoft/data-gov-bg \
     && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower
 fi
 

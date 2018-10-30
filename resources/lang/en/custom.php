@@ -887,4 +887,5 @@ return [
     'test_script' => 'Test script',
     'resource_version' => 'Resource version',
     'generate_script' => 'Generate script',
+    'newsletter' => 'Newsletter',
 ];

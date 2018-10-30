@@ -308,7 +308,7 @@ class InsertBaseRightsInRights extends Migration
                 $groupModerator->id => [
                     [
                         'module_name'       => Module::GROUPS,
-                        'right'             => RoleRight::RIGHT_VIEW,
+                        'right'             => RoleRight::RIGHT_EDIT,
                         'limit_to_own_data' => 0,
                         'api'               => 0,
                     ],

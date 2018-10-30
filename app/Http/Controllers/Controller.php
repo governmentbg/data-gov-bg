@@ -251,7 +251,20 @@ class Controller extends BaseController
         $groups = [];
 
         foreach ($result->groups as $row) {
-            $groups[$row->id] = $row->name;
+            $check = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'group_id' => $row->id
+                    ],
+                    [
+                        'group_ids' => [$row->id]
+                    ]
+                );
+
+            if ($check) {
+                $groups[$row->id] = $row->name;
+            }
         }
 
         return $groups;

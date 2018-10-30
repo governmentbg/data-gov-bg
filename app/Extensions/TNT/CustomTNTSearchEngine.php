@@ -58,10 +58,11 @@ class CustomTNTSearchEngine extends TNTSearchEngine
         $this->initIndex($models->first());
 
         $models->each(function ($model) {
-            $this->tnt->selectIndex($model->searchableAs());
+            $indexName = $model->searchableAs();
+            $this->tnt->selectIndex($indexName);
             $index = $this->tnt->getIndex();
             $index->setPrimaryKey($model->getKeyName());
-            $index->delete($model->getKey());
+            $index->delete($model->getKey(), $indexName);
         });
     }
 

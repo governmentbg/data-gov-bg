@@ -15,7 +15,7 @@
     @if (!empty($keywords))
         <meta name="keywords" content="{{ $keywords }}">
     @endif
-    <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
+    <title>{{ !empty($title) ? $title : config('app.name') }}</title>
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Roboto&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
     <link rel="stylesheet" href="/css/custom.css">

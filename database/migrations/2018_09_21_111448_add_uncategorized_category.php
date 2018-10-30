@@ -26,7 +26,7 @@ class AddUncategorizedCategory extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $currCount = Category::count();
 
             foreach ($this->categories as $catData) {
@@ -48,7 +48,7 @@ class AddUncategorizedCategory extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             foreach ($this->categories as $catData) {
                 if (Category::where($catData)->count()) {
                     Category::where($catData)->delete();

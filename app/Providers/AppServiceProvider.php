@@ -17,8 +17,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (!env('IS_TOOL')) {
-            app('url')->forceRootUrl(env('APP_URL'));
+        if (!config('app.IS_TOOL')) {
+            app('url')->forceRootUrl(config('app.APP_URL'));
         }
 
         Schema::defaultStringLength(191);

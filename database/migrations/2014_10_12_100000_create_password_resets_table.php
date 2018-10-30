@@ -13,7 +13,7 @@ class CreatePasswordResetsTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('password_resets', function (Blueprint $table) {
                 $table->string('email')->index();
                 $table->string('token');

@@ -16,7 +16,7 @@ class CreateActionsHistoryTable extends Migration
         Schema::create('actions_history', function (Blueprint $table) {
             $table->increments('id');
 
-            if (!env('IS_TOOL')) {
+            if (!config('app.IS_TOOL')) {
                 $table->integer('user_id')->unsigned();
                 $table->foreign('user_id')->references('id')->on('users');
             }
@@ -29,7 +29,7 @@ class CreateActionsHistoryTable extends Migration
             $table->string('ip_address', 15);
             $table->string('user_agent');
 
-            if (env('IS_TOOL')) {
+            if (config('app.IS_TOOL')) {
                 $table->tinyInteger('status')->nullable();
             }
         });

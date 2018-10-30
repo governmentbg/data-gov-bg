@@ -208,7 +208,7 @@ class MigrateData extends Command
                     continue;
                 }
 
-                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
+                $newData['api_key'] = config('app.MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['name'] = $res['display_name'];
@@ -283,7 +283,7 @@ class MigrateData extends Command
                         $type = Organisation::TYPE_CIVILIAN;
                 }
 
-                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
+                $newData['api_key'] = config('app.MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = 'BG';
@@ -377,7 +377,7 @@ class MigrateData extends Command
                     continue;
                 }
 
-                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
+                $newData['api_key'] = config('app.MIGRATE_USER_API_KEY');
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['locale'] = 'BG';
@@ -455,7 +455,7 @@ class MigrateData extends Command
         $usersWithDataSets = [];
         $userIds = [];
         $header = array();
-        $header[] = 'Authorization: '. env('MIGRATE_USER_API_KEY');
+        $header[] = 'Authorization: '. config('app.MIGRATE_USER_API_KEY');
         $params = [
             'all_fields' => true
         ];
@@ -730,7 +730,7 @@ class MigrateData extends Command
                     $dataSet['maintainer_email'] = '';
                 }
 
-                $newData['api_key'] = env('MIGRATE_USER_API_KEY');
+                $newData['api_key'] = config('app.MIGRATE_USER_API_KEY');
 
                 $newData['data']['category_id'] = $category;
                 $newData['data']['migrated_data'] = true;
@@ -819,7 +819,7 @@ class MigrateData extends Command
     private function migrateDatasetsResources($dataSetId, $resourceData)
     {
         $datasetUri = DataSet::where('id', $dataSetId)->value('uri');
-        $newData['api_key'] = env('MIGRATE_USER_API_KEY');
+        $newData['api_key'] = config('app.MIGRATE_USER_API_KEY');
         $newData['dataset_uri'] = $datasetUri;
 
         $newData['data']['migrated_data'] = true;
@@ -888,7 +888,7 @@ class MigrateData extends Command
 
         if (!empty($extension)) {
             $convertData = [
-                'api_key'   => env('MIGRATE_USER_API_KEY'),
+                'api_key'   => config('app.MIGRATE_USER_API_KEY'),
                 'data'      => $content,
             ];
 
@@ -1038,7 +1038,7 @@ class MigrateData extends Command
     {
         $migrationUser = User::where('username', 'migrate_data')->first();
 
-        $apiKey = env('MIGRATE_USER_API_KEY');
+        $apiKey = config('app.MIGRATE_USER_API_KEY');
         $header = array();
         $header[] = 'Authorization: '.$apiKey;
         $countFollowers = 0;

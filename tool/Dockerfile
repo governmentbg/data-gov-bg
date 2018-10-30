@@ -65,7 +65,8 @@ RUN cd /var/www/localhost \
     && cp .env.example .env \
     && sed -i '/GRAYLOG_HOST/d' ./.env \
     && sed -i '/GRAYLOG_PORT/d' ./.env \
-    && printf "IS_TOOL=true\nTOOL_API_URL=$APIURL\n\nGRAYLOG_HOST=$GRAYLOG_HOST\nGRAYLOG_PORT=$GRAYLOG_PORT\n" >> .env
+    && printf "IS_TOOL=true\nTOOL_API_URL=$APIURL\n\nGRAYLOG_HOST=$GRAYLOG_HOST\nGRAYLOG_PORT=$GRAYLOG_PORT\n" >> .env \
+    && mkdir /var/files
 
 VOLUME [ "/var/lib/mysql", "/mnt", "/var/www/localhost/htdocs" ]
 

@@ -504,7 +504,7 @@ class UserController extends ApiController
 
                 if (!isset($request->data['migrated_data'])) {
                     Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                        $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                        $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                         $m->to($user->email, $user->firstname);
                         $m->subject(__('custom.register_subject'));
                     });
@@ -627,7 +627,7 @@ class UserController extends ApiController
             ];
 
             Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {
-                $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                 $m->to($data['email'], $data['firstname']);
                 $m->subject(__('custom.email_change_header'));
             });
@@ -1045,7 +1045,7 @@ class UserController extends ApiController
 
             try {
                 Mail::send($template, $mailData, function ($m) use ($post) {
-                    $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                    $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                     $m->to($post['data']['email']);
                     $m->subject(__('custom.invite_subject'));
                 });
@@ -1205,7 +1205,7 @@ class UserController extends ApiController
                 }
 
                 Mail::send('mail/confirmationMail', $mailData, function ($m) use ($user) {
-                    $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                    $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                     $m->to($user->email, $user->firstname);
                     $m->subject(__('custom.register_subject'));
                 });
@@ -1372,7 +1372,7 @@ class UserController extends ApiController
                 ];
 
                 Mail::send('mail/passReset', $mailData, function ($m) use ($user) {
-                    $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                    $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                     $m->to($user['email'], $user['firstname']);
                     $m->subject(__('custom.pass_change').'!');
                 });

@@ -128,7 +128,7 @@ return [
     'IS_TOOL' => env('IS_TOOL'),
     'MIGRATE_USER_API_KEY' => env('MIGRATE_USER_API_KEY'),
     'APP_NAME' => env('APP_NAME'),
-    'MAIL_FROM' => env('MAIL_FROM'),
+    'MAIL_FROM' => env('MAIL_FROM', 'no-reply@finite-soft.com'),
     'TNT_DATABASE' => env('TNT_DATABASE'),
     'FILE_MAX_SIZE' => env('FILE_MAX_SIZE'),
     'IMAGE_MAX_SIZE' => env('IMAGE_MAX_SIZE'),

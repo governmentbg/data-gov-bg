@@ -41,7 +41,7 @@ class TestMail extends Command
         $to = $this->argument('to');
 
         Mail::send('contact/contact', ['class' => 'user'], function ($m) use ($to) {
-            $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+            $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
             $m->to($to, 'test user');
             $m->subject('Test mail');
         });

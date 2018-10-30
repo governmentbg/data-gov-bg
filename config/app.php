@@ -148,6 +148,7 @@ return [
     | this array to grant expanded functionality to your applications.
     |
     */
+    'NEWSLETTER_SEND_TIME' => '10:00',
 
     'providers' => [
 

@@ -27,7 +27,9 @@ class Kernel extends ConsoleKernel
         if (config('app.IS_TOOL')) {
             $schedule->command('tool:sendpending')->everyMinute();
         } else {
-
+            $schedule->command('newsletter:send daily')->dailyAt(config('app.NEWSLETTER_SEND_TIME'));
+            $schedule->command('newsletter:send weekly')->weeklyOn(1, config('app.NEWSLETTER_SEND_TIME'));
+            $schedule->command('newsletter:send monthly')->monthlyOn(1, config('app.NEWSLETTER_SEND_TIME'));
         }
     }
 

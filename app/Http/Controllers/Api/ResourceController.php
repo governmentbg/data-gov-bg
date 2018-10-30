@@ -294,6 +294,15 @@ class ResourceController extends ApiController
 
                 Module::add($logData);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $dataset->id,
+                    'action_msg'       => 'Added resource data',
+                ];
+
+                Module::add($logData);
+
                 DB::commit();
 
                 return $this->successResponse();
@@ -614,6 +623,15 @@ class ResourceController extends ApiController
 
                 Module::add($logData);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $dataset->id,
+                    'action_msg'       => 'Update resource data',
+                ];
+
+                Module::add($logData);
+
                 DB::commit();
 
                 return $this->successResponse();
@@ -684,6 +702,15 @@ class ResourceController extends ApiController
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_DEL,
                     'action_object'    => $post['resource_uri'],
+                    'action_msg'       => 'Deleted resource',
+                ];
+
+                Module::add($logData);
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $dataset->id,
                     'action_msg'       => 'Deleted resource',
                 ];
 

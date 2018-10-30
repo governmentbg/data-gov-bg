@@ -10,6 +10,7 @@ use App\Module;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use App\UserFollow;
 use App\TermsOfUse;
 use App\UserSetting;
 use App\DataSetGroup;
@@ -3744,7 +3745,14 @@ class UserController extends Controller {
                     }
 
                     $criteria['actions'] = array_keys($actTypes);
-                    $perPage = 5;
+
+                    if (isset($request->newsletter)) {
+                        $criteria = $request->all();
+                    }
+
+                    $criteria['period_from'] = !empty($request->from) ? $request->from : null;
+                    $criteria['period_to'] = !empty($request->to) ? $request->to : null;
+                    $perPage = isset($request->perPage) ? $request->perPage : 5;
                     $params = [
                         'api_key'          => $user->api_key,
                         'criteria'         => $criteria,
@@ -6085,5 +6093,63 @@ class UserController extends Controller {
         }
 
         return back();
+    }
+
+    public function sendEventNewsletter($data)
+    {
+        $column = null;
+        $modules = Module::getModules();
+
+        switch ($data['module_name']) {
+            case $modules[Module::ORGANISATIONS]:
+                $column = 'org_id';
+                break;
+            case $modules[Module::DATA_SETS]:
+                $column = 'data_set_id';
+                break;
+            default:
+                break;
+        }
+
+        if ($column) {
+            $follows = UserFollow::where($column, $data['action_object'])
+                ->with('user')
+                ->get();
+
+            if (count($follows)) {
+                foreach ($follows as $follow) {
+                    $user = $follow->user;
+                    $params = [
+                        'user_id'    => $data['user_id'],
+                        'actions'    => [$data['action']],
+                        'ip_address' => $data['ip_address'],
+                        $column .'s' => [$data['action_object']],
+                        'newsletter' => 1,
+                    ];
+
+                    $url = '/user/newsFeed?perPage=5000&'. http_build_query($params);
+                    $rq = Request::create($url, 'GET', []);
+                    $userController = new UserController($rq);
+                    $newsResult = $userController->newsFeed($rq)->getData();
+
+                    if (isset($newsResult['actionsHistory']) && is_array($newsResult['actionsHistory'])) {
+                        $newsResult['actionsHistory'] = [$newsResult['actionsHistory'][0]];
+
+                        $usrDetails = ['user' => $user->firstname, 'mail' => $user->email];
+                        $mailData = is_array($newsResult)
+                            ? array_merge($usrDetails, $newsResult)
+                            : $usrDetails;
+
+                        Mail::send('mail/newsletter', $mailData, function ($m) use ($mailData) {
+                            $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                            $m->to($mailData['mail'], $mailData['user']);
+                            $m->subject(__('custom.newsletter'));
+                        });
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }

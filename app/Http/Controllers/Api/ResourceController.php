@@ -705,14 +705,14 @@ class ResourceController extends ApiController
                     'action_msg'       => 'Deleted resource',
                 ];
 
+                Module::add($logData);
+
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DATA_SETS),
                     'action'           => ActionsHistory::TYPE_MOD,
                     'action_object'    => $dataset->id,
                     'action_msg'       => 'Deleted resource',
                 ];
-
-                Module::add($logData);
 
                 Module::add($logData);
 

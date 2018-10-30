@@ -6141,7 +6141,7 @@ class UserController extends Controller {
                             : $usrDetails;
 
                         Mail::send('mail/newsletter', $mailData, function ($m) use ($mailData) {
-                            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                            $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
                             $m->to($mailData['mail'], $mailData['user']);
                             $m->subject(__('custom.newsletter'));
                         });

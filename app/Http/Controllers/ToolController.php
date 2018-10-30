@@ -675,7 +675,6 @@ class ToolController extends Controller
             }
 
             $data = ResourceController::callConversions($apiKey, $extension, $content);
-            error_log('data: '. print_r($data, true));
         }
 
         $requestUrl = $baseUrl .'updateResourceData';

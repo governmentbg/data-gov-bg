@@ -138,8 +138,12 @@ class CustomTNTIndexer extends TNTIndexer
         $this->insert($document);
     }
 
-    public function delete($documentId)
+    public function delete($documentId, $indexName = null)
     {
+        if (empty($this->indexName)) {
+            $this->indexName = $indexName;
+        }
+
         $rows = $this->prepareAndExecuteStatement("SELECT * FROM ". CustomTNTSearch::getTNTName($this->indexName, 'doclist') ."
             WHERE doc_id = :documentId;", [
             ['key' => ':documentId', 'value' => $documentId]

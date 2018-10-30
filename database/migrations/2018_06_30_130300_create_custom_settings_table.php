@@ -13,7 +13,7 @@ class CreateCustomSettingsTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('custom_settings', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('org_id')->unsigned()->nullable();

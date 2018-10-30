@@ -19,7 +19,7 @@ class CheckTool
         if ($request->segment(1) != 'lang') {
             $isToolPath = $request->segment(1) == 'tool';
 
-            if (env('IS_TOOL')) {
+            if (config('app.IS_TOOL')) {
                 if (!$isToolPath) {
                     return redirect('tool');
                 }

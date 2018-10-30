@@ -13,7 +13,7 @@ class CreateLocaleTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('locale', function (Blueprint $table) {
                 $table->char('locale', 5)->primary();
                 $table->boolean('active');

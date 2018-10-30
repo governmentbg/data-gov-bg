@@ -888,4 +888,5 @@ return [
     'resource_version' => 'Resource version',
     'generate_script' => 'Generate script',
     'newsletter' => 'Newsletter',
+    'file_desc' => 'Enter filename from the file upload folder',
 ];

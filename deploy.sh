@@ -14,7 +14,7 @@ fi
 /usr/local/bin/composer install --no-interaction
 
 # Cache boost configuration and routes
-php artisan config:clear
+php artisan config:cache
 php artisan route:clear
 
 # Sync database changes

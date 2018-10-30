@@ -98,7 +98,7 @@ class Module extends Model
 
     public static function getModuleName($moduleIndex)
     {
-        $modules = env('IS_TOOL') ? self::getToolModules() : self::getModules();
+        $modules = config('app.IS_TOOL') ? self::getToolModules() : self::getModules();
 
         if (in_array($moduleIndex, array_flip($modules))) {
             return $modules[$moduleIndex];
@@ -119,7 +119,7 @@ class Module extends Model
      */
     public static function add($request)
     {
-        if (Auth::check() || env('IS_TOOL')) {
+        if (Auth::check() || config('app.IS_TOOL')) {
             $actions = ActionsHistory::getTypes();
 
             $validator = \Validator::make($request, [
@@ -142,7 +142,7 @@ class Module extends Model
                         'occurrence'    => date('Y-m-d H:i:s'),
                     ];
 
-                    if (!env('IS_TOOL')) {
+                    if (!config('app.IS_TOOL')) {
                         $dbData['user_id'] = Auth::user()->id;
                     }
 

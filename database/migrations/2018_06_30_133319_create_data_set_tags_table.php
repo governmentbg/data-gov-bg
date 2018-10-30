@@ -13,7 +13,7 @@ class CreateDataSetTagsTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('data_set_tags', function (Blueprint $table) {
                 $table->integer('data_set_id')->unsigned();
                 $table->foreign('data_set_id')->references('id')->on('data_sets');

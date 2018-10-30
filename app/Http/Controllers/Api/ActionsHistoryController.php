@@ -89,7 +89,7 @@ class ActionsHistoryController extends ApiController
             return $this->errorResponse(__('custom.list_action_fail'), $validator->errors()->messages());
         }
 
-        if (env('IS_TOOL')) {
+        if (config('app.IS_TOOL')) {
             $history = ActionsHistory::select();
 
             if (isset($criteria['source_db_type'])) {
@@ -235,7 +235,7 @@ class ActionsHistoryController extends ApiController
 
         if (!empty($history)) {
             foreach ($history as $key => $record) {
-                if (!env('IS_TOOL') && !empty($record->user)) {
+                if (!config('app.IS_TOOL') && !empty($record->user)) {
                     $results[] = [
                         'id'             => $record->id,
                         'user_id'        => $record->user->id,

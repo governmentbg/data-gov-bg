@@ -13,7 +13,7 @@ class CreateDataQueriesTable extends Migration
      */
     public function up()
     {
-        if (env('IS_TOOL')) {
+        if (config('app.IS_TOOL')) {
             Schema::create('data_queries', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('connection_id')->unsigned();

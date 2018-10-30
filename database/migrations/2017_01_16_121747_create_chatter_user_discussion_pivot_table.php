@@ -12,7 +12,7 @@ class CreateChatterUserDiscussionPivotTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('chatter_user_discussion', function (Blueprint $table) {
                 $table->integer('user_id')->unsigned()->index();
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

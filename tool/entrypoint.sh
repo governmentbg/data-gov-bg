@@ -15,9 +15,8 @@ if [ -d /var/lib/mysql/mysql ]; then
     echo '[i] MySQL directory already present, skipping creation'
 else
     echo "[i] CRON initializing jobs..."
-    echo "*/30 * * * * cd /var/www/localhost/htdocs/ && source deploy.sh master" > /mnt/cronjobs
-    echo "* * * * * cd /var/www/localhost/htdocs/ && php artisan schedule:run >> /dev/null 2>&1" >> /mnt/cronjobs
-    /usr/bin/crontab /mnt/cronjobs
+    echo "*/30 * * * * cd /var/www/localhost/htdocs/ && source deploy.sh master" > /usr/bin/crontab/root
+    echo "* * * * * cd /var/www/localhost/htdocs/ && php artisan schedule:run >> /dev/null 2>&1" >> /usr/bin/crontab/root
     echo "[i] CRON jobs initialized..."
 
     echo "[i] MySQL data directory not found, creating initial DBs"

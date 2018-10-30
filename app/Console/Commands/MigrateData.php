@@ -42,7 +42,7 @@ class MigrateData extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Data migration';
 
     /**
      * Create a new command instance.

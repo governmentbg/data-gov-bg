@@ -107,7 +107,7 @@ class SignalController extends ApiController
                         ];
 
                         Mail::send('mail/signalMail', $mailData, function ($m) use ($user) {
-                            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                            $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
                             $m->to($user->email, $user->firstname);
                             $m->subject(__('custom.signal_subject'));
                         });

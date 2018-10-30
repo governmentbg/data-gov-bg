@@ -65,7 +65,7 @@ class AddVisualizations extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $userId = User::where('username', 'system')->value('id');
 
             try {
@@ -97,7 +97,7 @@ class AddVisualizations extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $userId = User::where('username', 'system')->value('id');
 
             foreach ($this->pages as $page) {

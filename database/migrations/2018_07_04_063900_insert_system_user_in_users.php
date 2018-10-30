@@ -13,10 +13,10 @@ class InsertSystemUserInUsers extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $errors = [];
 
-            $password = env('SYSTEM_PASSWORD');
+            $password = config('app.SYSTEM_PASSWORD');
 
             if (!empty($password)) {
                 try {
@@ -55,7 +55,7 @@ class InsertSystemUserInUsers extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             try {
                 DB::table('users')->where('username', 'system')->delete();
             } catch (\Illuminate\Database\QueryException $ex) {}

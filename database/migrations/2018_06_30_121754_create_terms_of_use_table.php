@@ -13,7 +13,7 @@ class CreateTermsOfUseTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('terms_of_use', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('name')->unsigned();

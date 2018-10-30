@@ -8,7 +8,7 @@ if defined var (
     goto portloop
 )
 
-if "%port%"=="" ( 
+if "%port%"=="" (
     echo Port is mandatory
     goto portloop
 )
@@ -35,7 +35,7 @@ if %ERRORLEVEL% equ 0 (
 @echo off
 set /p folder="Enter file folder: "
 
-if "%folder%"=="" ( 
+if "%folder%"=="" (
     echo Folder is mandatory
     goto folderloop
 )
@@ -44,5 +44,5 @@ if not exist %folder%\ (
     echo `%folder%` is not a folder
     goto folderloop
 ) else (
-    docker run -it -d --name opendatatool -v %folder%:/mnt -p %port%:80 --restart always finitesoft/data-gov-bg && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower
+    docker run -it -d --name opendatatool -v %folder%:/var/files -p %port%:80 --restart always finitesoft/data-gov-bg && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower
 )

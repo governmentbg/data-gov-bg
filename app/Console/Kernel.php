@@ -24,6 +24,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        if (config('app.IS_TOOL')) {
+            $schedule->command('tool:sendpending')->everyMinute();
+        } else {
+
+        }
     }
 
     /**

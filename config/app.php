@@ -137,6 +137,7 @@ return [
     'SYSTEM_PASSWORD' => env('SYSTEM_PASSWORD'),
     'GA_TRACKING_ID' => env('GA_TRACKING_ID'),
     'TNT_DATABASE' => env('TNT_DATABASE'),
+    'NEWSLETTER_SEND_TIME' => '10:00',
 
     /*
     |--------------------------------------------------------------------------
@@ -148,7 +149,6 @@ return [
     | this array to grant expanded functionality to your applications.
     |
     */
-    'NEWSLETTER_SEND_TIME' => '10:00',
 
     'providers' => [
 

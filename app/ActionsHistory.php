@@ -53,6 +53,14 @@ class ActionsHistory extends Model
         ];
     }
 
+    public static function getEventNewsletterTypes()
+    {
+        return [
+            self::TYPE_MOD              => __('custom.modified'),
+            self::TYPE_DEL              => __('custom.deleted'),
+        ];
+    }
+
     /**
      * Gives back the available public user action types.
      *

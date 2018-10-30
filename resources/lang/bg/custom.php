@@ -884,4 +884,5 @@ return [
     'test_script' => 'Тествай скрипта',
     'resource_version' => 'Версия на ресурса',
     'generate_script' => 'Генерирай скрипт със заявка към ресурс',
+    'newsletter' => 'Бюлетин',
 ];

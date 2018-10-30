@@ -13,7 +13,7 @@ class AddForumLinkToDataSets extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::table('data_sets', function (Blueprint $table) {
                 $table->string('forum_link', 191)->nullable();
             });
@@ -27,7 +27,7 @@ class AddForumLinkToDataSets extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::table('data_sets', function (Blueprint $table) {
                 $table->dropColumn('forum_link');
             });

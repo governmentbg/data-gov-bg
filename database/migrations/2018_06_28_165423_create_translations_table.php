@@ -13,7 +13,7 @@ class CreateTranslationsTable extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('translations', function (Blueprint $table) {
                 $table->increments('id');
                 $table->char('locale', 5);

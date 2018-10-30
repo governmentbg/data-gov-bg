@@ -105,7 +105,7 @@ class CustomTNTSearchEngine extends TNTSearchEngine
         $indexName = $model->searchableAs();
         $db = $model->getConnection()->getPdo();
         $result = $db->query("SELECT * FROM information_schema.tables
-            WHERE table_schema = '". env('TNT_DATABASE') ."'
+            WHERE table_schema = '". config('app.TNT_DATABASE') ."'
             AND table_name = '". CustomTNTSearch::getTNTName($indexName) ."'
             LIMIT 1;
         ");

@@ -3198,7 +3198,7 @@ class UserController extends Controller {
                 ];
 
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
-                    $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                    $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                     $m->to($mailData['mail'], $mailData['user']);
                     $m->subject(__('custom.mail_change'));
                 });
@@ -4026,7 +4026,7 @@ class UserController extends Controller {
             ];
 
             Mail::send('mail/confirmationMail', $mailData, function ($m) use ($mailData) {
-                $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                 $m->to($mailData['mail'], $mailData['user']);
                 $m->subject(__('custom.register_confirmation'));
             });
@@ -6141,7 +6141,7 @@ class UserController extends Controller {
                             : $usrDetails;
 
                         Mail::send('mail/newsletter', $mailData, function ($m) use ($mailData) {
-                            $m->from(config('app.MAIL_FROM', 'no-reply@finite-soft.com'), config('app.APP_NAME'));
+                            $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                             $m->to($mailData['mail'], $mailData['user']);
                             $m->subject(__('custom.newsletter'));
                         });

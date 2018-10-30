@@ -188,7 +188,7 @@ class ApiController extends Controller
      */
     protected function checkImageSize($imageData)
     {
-        return (strlen(bin2hex($imageData)) / 2) <= config('app.IMAGE_MAX_SIZE', 16777215);
+        return (strlen(bin2hex($imageData)) / 2) <= config('app.IMAGE_MAX_SIZE');
     }
 
     /**
@@ -198,7 +198,7 @@ class ApiController extends Controller
      */
     protected function getImageSizeError()
     {
-        return __('custom.image_size_too_big'). config('app.IMAGE_MAX_SIZE', 16777215) . __('custom.bytes');
+        return __('custom.image_size_too_big'). config('app.IMAGE_MAX_SIZE') . __('custom.bytes');
     }
 
     /**
@@ -220,7 +220,7 @@ class ApiController extends Controller
      */
     protected function checkFileSize($fileData)
     {
-        return (strlen(bin2hex($fileData)) / 2) <= config('app.FILE_MAX_SIZE', 16777215);
+        return (strlen(bin2hex($fileData)) / 2) <= config('app.FILE_MAX_SIZE');
     }
 
     /**
@@ -230,6 +230,6 @@ class ApiController extends Controller
      */
     protected function getFileSizeError()
     {
-        return __('custom.file_size_too_big'). config('app.FILE_MAX_SIZE', 16777215) . __('custom.bytes');
+        return __('custom.file_size_too_big'). config('app.FILE_MAX_SIZE') . __('custom.bytes');
     }
 }

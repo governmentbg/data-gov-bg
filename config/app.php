@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Open Data Portal'),
 
     /*
     |--------------------------------------------------------------------------
@@ -127,11 +127,11 @@ return [
 
     'IS_TOOL' => env('IS_TOOL'),
     'MIGRATE_USER_API_KEY' => env('MIGRATE_USER_API_KEY'),
-    'APP_NAME' => env('APP_NAME'),
+    'APP_NAME' => env('APP_NAME', 'Open Data Portal'),
     'MAIL_FROM' => env('MAIL_FROM', 'no-reply@finite-soft.com'),
     'TNT_DATABASE' => env('TNT_DATABASE'),
-    'FILE_MAX_SIZE' => env('FILE_MAX_SIZE'),
-    'IMAGE_MAX_SIZE' => env('IMAGE_MAX_SIZE'),
+    'FILE_MAX_SIZE' => env('FILE_MAX_SIZE', 16777215),
+    'IMAGE_MAX_SIZE' => env('IMAGE_MAX_SIZE', 16777215),
     'TOOL_API_URL' => env('TOOL_API_URL'),
     'APP_URL' => env('APP_URL'),
     'SYSTEM_PASSWORD' => env('SYSTEM_PASSWORD'),

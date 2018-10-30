@@ -33,15 +33,6 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $this->to = Carbon::today();
-        /*$schedule->call(function () {
-            $dailyNewsletters = $this->getPeriodicNewsletters(UserSetting::DIGEST_FREQ_ONCE_DAY);
-            $from = Carbon::today()->subMonths(1);
-            if (false) {
-                if (count($dailyNewsletters)) {
-                    $this->sendPeriodicNewsletters($dailyNewsletters, $from, $this->to);
-                }
-            }
-        })->everyMinute();*/
 
         $schedule->call(function () {
             $dailyNewsletters = $this->getPeriodicNewsletters(UserSetting::DIGEST_FREQ_ONCE_DAY);

@@ -681,23 +681,15 @@ class DataController extends Controller {
 
                 $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
 
-                $groups = $this->prepareGroups();
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_EDIT
+                );
 
-                if (!empty($groups)) {
-                    $buttons['addGroup'] = true;
+                $buttons['addGroup'] = $rightCheck;
 
-                    foreach ($groups as $id => $name) {
-                        $check = RoleRight::checkUserRight(
-                            Module::GROUPS,
-                            RoleRight::RIGHT_EDIT,
-                            ['group_id' => $id],
-                            ['group_ids' => [$id]]
-                        );
-
-                        if (!$check) {
-                            unset($groups[$id]);
-                        }
-                    }
+                if ($buttons['addGroup']) {
+                    $groups = $this->prepareGroups();
                 }
 
                 if ($request->has('save')) {
@@ -1455,9 +1447,18 @@ class DataController extends Controller {
         $res = $api->getDataSetDetails($rq)->getData();
         $dataset = !empty($res->data) ? $res->data : [];
 
-        if (!empty($dataset) && $dataset->reported &&
+        if (
+            !empty($dataset) && $dataset->reported &&
             $dataset->status == DataSet::STATUS_PUBLISHED &&
-            $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+            $dataset->visibility == DataSet::VISIBILITY_PUBLIC
+        ) {
+            $setGroups = [];
+
+            if (!empty($dataset->groups)) {
+                foreach ($dataset->groups as $record) {
+                    $setGroups[] = (int) $record->id;
+                }
+            }
 
             $organisation = [];
             $user = [];
@@ -1599,6 +1600,58 @@ class DataController extends Controller {
                 $buttons['delete'] = $rightCheck;
 
                 $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';
+
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::GROUPS,
+                    RoleRight::RIGHT_EDIT
+                );
+
+                $buttons['addGroup'] = $rightCheck;
+
+                if ($buttons['addGroup']) {
+                    $groups = $this->prepareGroups();
+                }
+
+                if ($request->has('save')) {
+                    $groupId = $request->offsetGet('group_id');
+                    $post = [
+                        'api_key'       => $authUser->api_key,
+                        'data_set_uri'  => $dataset->uri,
+                        'group_id'      => $groupId,
+                    ];
+
+                    if (count($setGroups) && is_null($groupId)) {
+                        $post['group_id'] = $setGroups;
+                        $removeGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $post);
+                        $api = new ApiDataSet($removeGroup);
+                        $remove = $api->removeDatasetFromGroup($removeGroup)->getData();
+
+                        if (!$remove->success) {
+                            session()->flash('alert-danger', __('custom.edit_error'));
+                        } else {
+                            session()->flash('alert-success', __('custom.edit_success'));
+                        }
+
+                        $setGroups = [];
+
+                        return redirect()->back();
+                    }
+
+                    if (!is_null($groupId)) {
+                        $post['group_id'] = $groupId;
+                        $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                        $api = new ApiDataSet($addGroup);
+                        $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                        if (!$added->success) {
+                            session()->flash('alert-danger', __('custom.edit_error'));
+                        } else {
+                            session()->flash('alert-success', __('custom.edit_success'));
+                        }
+
+                        return redirect()->back();
+                    }
+                }
             }
 
             $dataset = $this->getModelUsernames($dataset);
@@ -1606,13 +1659,15 @@ class DataController extends Controller {
             return view(
                 'data/reportedView',
                 [
-                    'class'          => 'data-attention',
-                    'organisation'   => $organisation,
-                    'user'           => $user,
-                    'approved'       => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
-                    'dataset'        => $dataset,
-                    'resources'      => $resources,
-                    'buttons'        => $buttons
+                    'class'         => 'data-attention',
+                    'organisation'  => $organisation,
+                    'user'          => $user,
+                    'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
+                    'dataset'       => $dataset,
+                    'resources'     => $resources,
+                    'buttons'       => $buttons,
+                    'groups'        => $groups,
+                    'setGroups'     => isset($setGroups) ? $setGroups : [],
                 ]
             );
         }

@@ -104,12 +104,9 @@ class GroupController extends Controller
                     'created_by'  => $group->created_by
                 ];
 
-                // check rights for edit button
-                $rightCheck = RoleRight::checkUserRight(Module::GROUPS, RoleRight::RIGHT_EDIT, $checkData, $objData);
-                $buttons[$group->id]['edit'] = $rightCheck;
-
-                // check rights for delete button
+                // check rights for edit & delete button
                 $rightCheck = RoleRight::checkUserRight(Module::GROUPS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons[$group->id]['edit'] = $rightCheck;
                 $buttons[$group->id]['delete'] = $rightCheck;
             }
 
@@ -177,12 +174,9 @@ class GroupController extends Controller
                     'group_ids' => [$group->id]
                 ];
 
-                // check rights for edit button
-                $rightCheck = RoleRight::checkUserRight(Module::GROUPS, RoleRight::RIGHT_EDIT, $checkData, $objData);
-                $buttons['edit'] = $rightCheck;
-
-                // check rights for delete button
+                // check rights for edit & delete button
                 $rightCheck = RoleRight::checkUserRight(Module::GROUPS, RoleRight::RIGHT_ALL, $checkData, $objData);
+                $buttons['edit'] = $rightCheck;
                 $buttons['delete'] = $rightCheck;
 
                 $buttons['rootUrl'] = Role::isAdmin() ? 'admin' : 'user';

@@ -79,7 +79,6 @@
                             >{{ $format }}</option>
                         @endforeach
                     </select>
-                    <span class="error">{{ $errors->first('category_id') }}</span>
                 </div>
             </div>
 

@@ -21,6 +21,7 @@ Security - in case of vulnerabilities.
 - Send newsletters
 - Tool installation and docker files
 - Automated API resource upload
+- API getResourceView()
 
 ### Changed
 - Search engine sqlite indexes to mysql

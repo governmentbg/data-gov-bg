@@ -49,7 +49,7 @@ class CustomSettingsController extends ApiController
                 } else {
                     $rightCheck = RoleRight::checkUserRight(
                         Module::GROUPS,
-                        RoleRight::RIGHT_EDIT,
+                        RoleRight::RIGHT_ALL,
                         [
                             'group_id'       => $organisation->id
                         ],

@@ -15,7 +15,7 @@
     @if (!empty($keywords))
         <meta name="keywords" content="{{ $keywords }}">
     @endif
-    <title>{{ !empty($title) ? $title : config('app.name', 'Open Data Portal') }}</title>
+    <title>{{ !empty($title) ? $title : config('app.name') }}</title>
     <!-- Styles -->
     <link href="https://fonts.googleapis.com/css?family=Roboto&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
     <link rel="stylesheet" href="/css/custom.css">
@@ -47,14 +47,14 @@
     @endif
     @yield('css')
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    @if (!empty(env('GA_TRACKING_ID')))
-        <script async src="{{ 'https://www.googletagmanager.com/gtag/js?id='. env('GA_TRACKING_ID') }}"></script>
+    @if (!empty(config('app.GA_TRACKING_ID')))
+        <script async src="{{ 'https://www.googletagmanager.com/gtag/js?id='. config('app.GA_TRACKING_ID') }}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){ dataLayer.push(arguments); }
             gtag('js', new Date());
 
-            gtag('config', '{{ env('GA_TRACKING_ID') }}');
+            gtag('config', '{{ config('app.GA_TRACKING_ID') }}');
         </script>
     @endif
 </head>
@@ -76,7 +76,7 @@
                             </a>
                             <a><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
                         </div>
-                        @if (!env('IS_TOOL'))
+                        @if (!config('app.IS_TOOL'))
                             <div class="access-terms-icons">
                                 <a href="{{ url('/help') }}">
                                     <img class="help-section" title="{{ __('custom.help') }}" src="{{ asset('/img/help_section.svg') }}">
@@ -90,8 +90,8 @@
                                 </button>
                             </div>
                         @endif
-                        <div class="nav-controls text-right {{ env('IS_TOOL') ? null : 'hidden-xs' }} js-show-on-load">
-                            @if (!env('IS_TOOL'))
+                        <div class="nav-controls text-right {{ config('app.IS_TOOL') ? null : 'hidden-xs' }} js-show-on-load">
+                            @if (!config('app.IS_TOOL'))
                                 @if (\Auth::check())
                                     <span class="login-link username">
                                         <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
@@ -141,7 +141,7 @@
                                 >{{ strtoupper($altLang) }}</a>
                             </span>
 
-                            @if (!env('IS_TOOL'))
+                            @if (!config('app.IS_TOOL'))
                                 <span class="social-icons">
                                     <a
                                         target="_blank"
@@ -190,7 +190,7 @@
                             <span><img class="js-close-navbar" src="{{ asset('img/close-btn.png') }}"></span>
                         </div>
                         <ul class="nav navbar-nav sections">
-                            @if (env('IS_TOOL'))
+                            @if (config('app.IS_TOOL'))
                                 <li class="index {{ empty(Request::segment(2)) ? 'active' : '' }}">
                                     <a href="{{ url('/tool') }}">{{ uctrans('custom.config') }}</a>
                                 </li>
@@ -283,7 +283,7 @@
                     </div>
                 </div>
                 <div class="underline">
-                    @if (env('IS_TOOL'))
+                    @if (config('app.IS_TOOL'))
                        <div class="container">
                            <a
                                 class="tool-version"
@@ -301,7 +301,7 @@
                                         <a
                                             class="btn-primary btn"
                                             href="{{
-                                                route('addHelpPage', ['page' => env('APP_URL') == \Request::url()
+                                                route('addHelpPage', ['page' => config('app.APP_URL') == \Request::url()
                                                     ? 'home'
                                                     : \Request::getPathInfo()
                                                 ])

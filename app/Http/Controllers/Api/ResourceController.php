@@ -15,8 +15,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
+use App\Http\Controllers\ToolController;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class ResourceController extends ApiController
 {
@@ -77,6 +80,8 @@ class ResourceController extends ApiController
                 'custom_fields'        => 'nullable|array',
                 'custom_fields.label'  => 'nullable|string|max:191',
                 'custom_fields.value'  => 'nullable|string|max:8000',
+                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(ToolController::getFreqTypes())),
+                'upl_freq'             => 'nullable|int|max:127',
             ]);
         }
 
@@ -139,6 +144,8 @@ class ResourceController extends ApiController
                     'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
                     'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
                     'is_reported'       => 0,
+                    'upl_freq_type'     => isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null,
+                    'upl_freq'          => isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null,
                 ];
 
                  if (
@@ -294,6 +301,15 @@ class ResourceController extends ApiController
 
                 Module::add($logData);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $dataset->id,
+                    'action_msg'       => 'Added resource data',
+                ];
+
+                Module::add($logData);
+
                 DB::commit();
 
                 return $this->successResponse();
@@ -365,6 +381,8 @@ class ResourceController extends ApiController
                 'post_data'            => 'sometimes|nullable|string|max:8000',
                 'is_reported'          => 'sometimes|boolean',
                 'custom_fields'        => 'sometimes|array',
+                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(ToolController::getFreqTypes())),
+                'upl_freq'             => 'nullable|int|max:127',
             ]);
         }
 
@@ -455,6 +473,10 @@ class ResourceController extends ApiController
                 }
             }
 
+            $resource->upl_freq_type = isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null;
+
+            $resource->upl_freq = isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null;
+
             try {
                 if (isset($post['data']['name'])) {
                     $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
@@ -532,8 +554,11 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
-            'data'          => 'required|array',
+            'resource_uri'      => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
+            'data'              => 'required|array',
+            'support_email'     => 'sometimes|email',
+            'connection_name'   => 'sometimes|string|max:191',
+            'connection_query'  => 'sometimes|string',
         ]);
 
         if (!$validator->fails()) {
@@ -579,7 +604,8 @@ class ResourceController extends ApiController
                 $resource->is_reported = Resource::REPORTED_FALSE;
                 $resource->version = $newVersion;
                 $resource->save();
-                // increase dataset version withot goint to new full version
+
+                // increase dataset version without goint to new full version
                 $versionParts = explode('.', $dataset->version);
 
                 if (isset($versionParts[1])) {
@@ -590,20 +616,30 @@ class ResourceController extends ApiController
 
                 $dataset->save();
 
-                $elasticDataSet = ElasticDataSet::create([
-                    'index'         => $index,
-                    'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                    'doc'           => $id .'_'. $newVersion,
-                    'version'       => $newVersion,
-                    'resource_id'   => $id
-                ]);
+                $prevVersionData = ElasticDataSet::getElasticData($resource->id, $newVersion - 1);
 
-                $update = \Elasticsearch::index([
-                    'body'  => ['rows' => $post['data']],
-                    'index' => $index,
-                    'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id .'_'. $newVersion,
-                ]);
+                if ($prevVersionData === $post['data']) {
+                    $message = __('custom.resource_updated');
+
+                    $this->sendSupportMail(true, $post, $message);
+
+                    return $this->successResponse(['message' => $message], true);
+                } else {
+                    $elasticDataSet = ElasticDataSet::create([
+                        'index'         => $index,
+                        'index_type'    => ElasticDataSet::ELASTIC_TYPE,
+                        'doc'           => $id .'_'. $newVersion,
+                        'version'       => $newVersion,
+                        'resource_id'   => $id,
+                    ]);
+
+                    $update = \Elasticsearch::index([
+                        'body'  => ['rows' => $post['data']],
+                        'index' => $index,
+                        'type'  => ElasticDataSet::ELASTIC_TYPE,
+                        'id'    => $id .'_'. $newVersion,
+                    ]);
+                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
@@ -614,7 +650,18 @@ class ResourceController extends ApiController
 
                 Module::add($logData);
 
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $dataset->id,
+                    'action_msg'       => 'Update resource data',
+                ];
+
+                Module::add($logData);
+
                 DB::commit();
+
+                $this->sendSupportMail(true, $post);
 
                 return $this->successResponse();
             } catch (\Exception $ex) {
@@ -624,7 +671,32 @@ class ResourceController extends ApiController
             }
         }
 
+        $this->sendSupportMail(
+            false,
+            $post,
+            empty($ex) ? $validator->errors()->messages() : $ex->getMessage()
+        );
+
         return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
+    }
+
+    private function sendSupportMail($success, $post, $message = null)
+    {
+        if (!empty($post['support_email'])) {
+            $mailData = [
+                'success'   => $success,
+                'post'      => $post,
+                'username'  => Auth::user()->username,
+                'datetime'  => date('Y-m-d H:i:s'),
+                'info'      => $message,
+            ];
+
+            Mail::send('mail/resourceUpdateInfo', $mailData, function ($m) use ($mailData) {
+                $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
+                $m->to($mailData['post']['support_email'], $mailData['username']);
+                $m->subject(__('custom.resource_update_mail'));
+            });
+        }
     }
 
     /**
@@ -684,6 +756,15 @@ class ResourceController extends ApiController
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_DEL,
                     'action_object'    => $post['resource_uri'],
+                    'action_msg'       => 'Deleted resource',
+                ];
+
+                Module::add($logData);
+
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                    'action'           => ActionsHistory::TYPE_MOD,
+                    'action_object'    => $dataset->id,
                     'action_msg'       => 'Deleted resource',
                 ];
 
@@ -896,9 +977,12 @@ class ResourceController extends ApiController
                     'created_by'            => $resource->created_by,
                     'updated_at'            => isset($resource->updated_at) ? $resource->updated_at->toDateTimeString() : null,
                     'updated_by'            => $resource->updated_by,
+                    'upl_freq_type'         => $resource->upl_freq_type,
+                    'upl_freq'              => $resource->upl_freq,
                 ];
 
                 $customSett = $resource->customFields()->get()->loadTranslations();
+
                 if (!empty($customSett)) {
                     foreach ($customSett as $sett) {
                         $data['custom_settings'][] = [
@@ -909,6 +993,7 @@ class ResourceController extends ApiController
                 }
 
                 $allSignals = [];
+
                 if ($resource->is_reported) {
                     $signals = $resource->signal()->where('status', Signal::STATUS_NEW)->get();
 
@@ -938,6 +1023,7 @@ class ResourceController extends ApiController
                 // get resource versions
                 $versionsList = [];
                 $versions = $resource->elasticDataSet()->get();
+
                 if ($versions) {
                     foreach ($versions as $row) {
                         $versionsList[] = $row->version;
@@ -995,8 +1081,33 @@ class ResourceController extends ApiController
         $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
 
         if (!$validator->fails()) {
-            // TODO tool
-            return $this->successResponse(['view' => 'html'], true);
+            $formats = Resource::getFormats();
+            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $resource->format_code = $resource->file_format;
+            $resource->file_format = $formats[$resource->file_format];
+            $data = ElasticDataSet::getElasticData($resource->id, $resource->version);
+
+            if (
+                $resource->format_code == Resource::FORMAT_XML
+                || $resource->format_code == Resource::FORMAT_RDF
+            ) {
+                $convertData = [
+                    'api_key'   => \Auth::user()->api_key,
+                    'data'      => $data,
+                ];
+
+                $method = 'json2'. strtolower($resource->file_format);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $apiConvert = new ApiConversion($reqConvert);
+                $resultConvert = $apiConvert->$method($reqConvert)->getData();
+                $data = isset($resultConvert->data) ? $resultConvert->data : [];
+            }
+
+            return view('resourceiframe', [
+                'class'         => 'user',
+                'resource'      => $resource,
+                'data'          => $data,
+            ]);
         }
 
         return $this->errorResponse(__('custom.get_resource_view_fail'), $validator->errors()->messages());
@@ -1017,7 +1128,7 @@ class ResourceController extends ApiController
 
         $validator = \Validator::make($post, [
             'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
-            'version'       => 'sometimes|int',
+            'version'       => 'sometimes|nullable|int',
         ]);
 
         if (!$validator->fails()) {
@@ -1264,30 +1375,37 @@ class ResourceController extends ApiController
                     if (!empty($dsCriteria['user_ids'])) {
                         $q->whereIn('created_by', $dsCriteria['user_ids']);
                     }
+
                     if (!empty($dsCriteria['org_ids'])) {
                         $q->whereIn('org_id', $dsCriteria['org_ids']);
                     }
+
                     if (!empty($dsCriteria['group_ids'])) {
                         $q->whereHas('DataSetGroup', function($qr) use ($dsCriteria) {
                             $qr->whereIn('group_id', $dsCriteria['group_ids']);
                         });
                     }
+
                     if (!empty($dsCriteria['category_ids'])) {
                         $q->whereIn('category_id', $dsCriteria['category_ids']);
                     }
+
                     if (!empty($dsCriteria['tag_ids'])) {
                         $q->whereHas('DataSetTags', function($qr) use ($dsCriteria) {
                             $qr->whereIn('tag_id', $dsCriteria['tag_ids']);
                         });
                     }
+
                     if (!empty($dsCriteria['terms_of_use_ids'])) {
                         $q->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
                     }
+
                     $q->where('status', DataSet::STATUS_PUBLISHED);
                     $q->where('visibility', DataSet::VISIBILITY_PUBLIC);
                 });
 
                 $fileFormats = [];
+
                 if (!empty($dsCriteria['formats'])) {
                     foreach ($dsCriteria['formats'] as $format) {
                         $fileFormats[] = Resource::getFormatsCode($format);
@@ -1295,6 +1413,7 @@ class ResourceController extends ApiController
                 } else {
                     $fileFormats = array_flip($formats);
                 }
+
                 $data->whereIn(
                     'data_set_id',
                     DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
@@ -1303,7 +1422,10 @@ class ResourceController extends ApiController
                 if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
                     $data->whereIn(
                         'data_set_id',
-                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                        DB::table('resources')
+                            ->select('data_set_id')
+                            ->distinct()
+                            ->where('is_reported', Resource::REPORTED_TRUE)
                     );
                 }
 
@@ -1320,6 +1442,7 @@ class ResourceController extends ApiController
                 $data = $data->pluck('total', 'file_format')->all();
 
                 $results = [];
+
                 if (!empty($data)) {
                     foreach ($data as $key => $value) {
                         if (isset($formats[$key])) {
@@ -1332,7 +1455,6 @@ class ResourceController extends ApiController
                 }
 
                 return $this->successResponse(['data_formats' => $results], true);
-
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }

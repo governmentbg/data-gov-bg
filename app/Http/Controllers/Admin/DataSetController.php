@@ -557,8 +557,6 @@ class DataSetController extends AdminController
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
             if ($response['success']) {
-                $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                 if ($data['type'] == Resource::TYPE_HYPERLINK) {
                     return redirect('/admin/resource/view/'. $response['uri']);
                 }
@@ -792,13 +790,14 @@ class DataSetController extends AdminController
 
         if ($resource) {
             if ($request->has('ready_metadata')) {
-
                 $data = [
                     'type'          => $resource->resource_type,
                     'resource_url'  => $request->offsetGet('resource_url'),
                     'http_rq_type'  => $request->offsetGet('http_rq_type'),
                     'http_headers'  => $request->offsetGet('http_headers'),
                     'post_data'     => $request->offsetGet('post_data'),
+                    'upl_freq_type' => $request->offsetGet('upl_freq_type'),
+                    'upl_freq'      => $request->offsetGet('upl_freq'),
                 ];
 
                 $file = $request->file('file');
@@ -806,8 +805,6 @@ class DataSetController extends AdminController
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/admin/resource/view/'. $response['uri']);
                     }

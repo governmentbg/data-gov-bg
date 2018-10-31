@@ -210,35 +210,6 @@ class ImageController extends AdminController
     }
 
     /**
-     * Displays an image
-     *
-     * @param Request $request
-     * @param integer $id
-     *
-     * @return image on success
-     */
-    public function viewImage(Request $request, $id)
-    {
-        $isActive = Image::where('id', $id)->value('active');
-
-        if ($isActive) {
-            try {
-                $image = \Image::make(storage_path('images') .'/'. $id);
-
-                if ($request->segment(2) == Image::TYPE_THUMBNAIL) {
-                    $image->resize(160, 108);
-                }
-
-                return $image->response();
-            } catch (\Exception $e) {
-                Log::error($e->getMessage());
-            }
-        }
-
-        return __('custom.non_existing_image');
-    }
-
-    /**
      * Add public URIs to an image object
      *
      * @param object $image

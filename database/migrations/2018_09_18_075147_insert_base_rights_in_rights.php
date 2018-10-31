@@ -11,7 +11,7 @@ class InsertBaseRightsInRights extends Migration
 {
     public function __construct()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             $organisation = Role::where('default_org_admin', 1)->first();
             $organisationModerator = Role::where('name', 'Редактор на организация')->first();
             $organisationMember = Role::where('name', 'Член на организация')->first();
@@ -308,7 +308,7 @@ class InsertBaseRightsInRights extends Migration
                 $groupModerator->id => [
                     [
                         'module_name'       => Module::GROUPS,
-                        'right'             => RoleRight::RIGHT_VIEW,
+                        'right'             => RoleRight::RIGHT_EDIT,
                         'limit_to_own_data' => 0,
                         'api'               => 0,
                     ],
@@ -526,7 +526,7 @@ class InsertBaseRightsInRights extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             foreach ($this->rights as $roleId => $rightDataArray) {
                 foreach ($rightDataArray as $rightData) {
                     $rightData['module_name'] = Module::getModuleName($rightData['module_name']);
@@ -547,7 +547,7 @@ class InsertBaseRightsInRights extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             foreach ($this->rights as $roleId => $rightDataArray) {
                 foreach ($rightDataArray as $rightData) {
                     $rightData['module_name'] = Module::getModuleName($rightData['module_name']);

@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
-class email extends Command
+class TestMail extends Command
 {
     /**
      * The name and signature of the console command.
@@ -41,7 +41,7 @@ class email extends Command
         $to = $this->argument('to');
 
         Mail::send('contact/contact', ['class' => 'user'], function ($m) use ($to) {
-            $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+            $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
             $m->to($to, 'test user');
             $m->subject('Test mail');
         });

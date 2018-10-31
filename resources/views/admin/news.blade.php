@@ -17,9 +17,10 @@
                 <div class="row">
                     @include('partials.pagination')
                     <div class="col-xs-12 text-right">
-                        <span class="badge badge-pill new-data user-add-btn m-t-none">
-                            <a href="{{ url('admin/news/add') }}">{{ __('custom.add') }}</a>
-                        </span>
+                        <a
+                            class="btn btn-primary add pull-right"
+                            href="{{ url('admin/news/add') }}"
+                        >{{ __('custom.add') }}</a>
                     </div>
                     <div class="col-xs-12 m-b-lg p-l-r-none">
                     @if (count($news))

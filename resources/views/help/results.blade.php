@@ -31,9 +31,9 @@
                                             <span class="info">"{{ $search }}" - </span>
                                             <a
                                                 @if (!empty($record->parent[0]->id))
-                                                    href="{{ url('help/view/'. $record->parent[0]->id) }}"
+                                                    href="{{ url('help/view/'. $record->parent[0]->id .'/'. $record->id) }}"
                                                 @elseif (!empty($record->section_id))
-                                                    href="{{ url('help/view/'. $record->section_id) }}"
+                                                    href="{{ url('help/view/'. $record->section_id .'/'. $record->id) }}"
                                                 @else
                                                     href="{{ url('help/page/view/'. $record->id) }}"
                                                 @endif

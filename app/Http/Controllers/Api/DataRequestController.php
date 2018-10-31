@@ -102,7 +102,7 @@ class DataRequestController extends ApiController
                         $userData = User::where('id', $orgAdmin)->first();
                         if (!empty($userData->email)) {
                             Mail::send('mail/newDataRequest', $mailData, function ($m) use ($userData) {
-                                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                                $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                                 $m->to($userData->email, $userData->firstname);
                                 $m->subject(__('custom.new_data_request'));
                             });

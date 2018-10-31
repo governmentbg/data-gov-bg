@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Page;
 use App\Role;
 use App\Resource;
 use App\Organisation;
@@ -161,6 +162,10 @@ class ResourceController extends Controller {
             case 'json':
                 Session::put('elasticData', json_decode($content, true));
 
+                if (is_array(json_decode($content, true))) {
+                    $data = json_decode($content, true);
+                }
+
                 break;
             case 'tsv':
                 $convertData['data'] = base64_encode($convertData['data']);
@@ -315,8 +320,23 @@ class ResourceController extends Controller {
 
                 break;
             case 'pdf':
-            case 'doc':
                 $method = $extension .'2json';
+                $convertData['data'] = base64_encode($convertData['data']);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    Session::put('elasticData', ['text' => $resultConvert['data']]);
+                    $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
+                }
+
+                break;
+            case 'doc':
+            case 'docx':
+                $method = 'doc2json';
                 $convertData['data'] = base64_encode($convertData['data']);
                 $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
@@ -411,18 +431,21 @@ class ResourceController extends Controller {
                 $resultElastic = $api->$apiFunction($reqElastic)->getData();
 
                 if ($resultElastic->success) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+                    $request->session()->flash(
+                        'alert-success',
+                        empty($resultElastic->message) ? __('custom.changes_success_save') : $resultElastic->message
+                    );
 
                     if ($request->has('org_uri')) {
                         $orgUri = $request->offsetGet('org_uri');
 
-                        return redirect('/'. $root .'/organisations/'. $orgUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/organisations/'. $orgUri .'/resource/'. $uri);
                     }
 
                     if ($request->has('group_uri')) {
-                        $goupUri = $request->offsetGet('group_uri');
+                        $groupUri = $request->offsetGet('group_uri');
 
-                        return redirect('/'. $root .'/groups/'. $goupUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/groups/'. $groupUri .'/resource/'. $uri);
                     }
 
                     return redirect('/'. $root .'/resource/view/'. $uri);
@@ -476,18 +499,21 @@ class ResourceController extends Controller {
                 $resultElastic = $api->$apiFunction($reqElastic)->getData();
 
                 if ($resultElastic->success) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+                    $request->session()->flash(
+                        'alert-success',
+                        empty($resultElastic->message) ? __('custom.changes_success_save') : $resultElastic->message
+                    );
 
                     if ($request->has('org_uri')) {
                         $orgUri = $request->offsetGet('org_uri');
 
-                        return redirect('/'. $root .'/organisations/'. $orgUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/organisations/'. $orgUri .'/resource/'. $uri);
                     }
 
                     if ($request->has('group_uri')) {
-                        $goupUri = $request->offsetGet('group_uri');
+                        $groupUri = $request->offsetGet('group_uri');
 
-                        return redirect('/'. $root .'/groups/'. $goupUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/groups/'. $groupUri .'/resource/'. $uri);
                     }
 
                     return redirect('/'. $root .'/resource/view/'. $uri);
@@ -577,4 +603,33 @@ class ResourceController extends Controller {
         return back();
     }
 
+    public function execResourceQueryScript(Request $request)
+    {
+        $format = $request->format;
+        $resourceParams = ['resource_uri' => $request->uri, 'version' => $request->version];
+
+        $rq = Request::create('/api/getResourceData', 'POST', $resourceParams);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceData($rq)->getData();
+
+        if ($res->success) {
+            $data = isset($res->data) ? $res->data : [];
+
+            if ($format == Page::RESOURCE_RESPONSE_CSV) {
+                $convertData = ['data' => $data];
+                $reqConvert = Request::create('/json2csv', 'POST', $convertData);
+                $apiConvert = new ApiConversion($reqConvert);
+                $resultConvert = $apiConvert->json2csv($reqConvert)->getData();
+                $data = isset($resultConvert->data) ? $resultConvert->data : [];
+                $res->success = $resultConvert->success;
+            }
+        } else {
+            $data = isset($res->errors) ? $res->errors : [];
+        }
+
+        return [
+            'success' => $res->success,
+            'data'    => json_encode($data)
+        ];
+    }
 }

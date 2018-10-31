@@ -98,7 +98,7 @@
                             </div>
                         @endif
                         @if (isset($resource->custom_settings[0]) && !empty($resource->custom_settings[0]->key))
-                            <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                            <p><b>{{ __('custom.additional_info') }}:</b></p>
                             @foreach ($resource->custom_settings as $field)
                                 <div class="row m-b-lg">
                                     <div class="col-xs-6">{{ $field->key }}</div>

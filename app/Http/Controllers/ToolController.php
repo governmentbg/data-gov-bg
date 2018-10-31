@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiHistory;
 
@@ -31,7 +32,7 @@ class ToolController extends Controller
     const FREQ_TYPE_WEEK = 3;
     const FREQ_TYPE_MONTH = 4;
 
-    private function getDrivers()
+    public static function getDrivers()
     {
         return [
             self::DRIVER_MYSQL      => 'mysql',
@@ -50,7 +51,7 @@ class ToolController extends Controller
         ];
     }
 
-    private function getFreqTypes()
+    public static function getFreqTypes()
     {
         return [
             self::FREQ_TYPE_HOUR    => __('custom.hour'),
@@ -63,14 +64,14 @@ class ToolController extends Controller
     public function config(Request $request)
     {
         $class = 'index';
-        $edit = false;
         $hasDb = false;
         $dataQueries = [];
         $fileQueries = [];
         $foundData = false;
         $post = $request->all();
+        $edit = !empty($post['conn_id']);
         $sourceTypes = $this->getSourceTypes();
-        $freqTypes = $this->getFreqTypes();
+        $freqTypes = self::getFreqTypes();
         $files = ConnectionSetting::with('dataQueries')->where('source_type', self::SOURCE_TYPE_FILE)->get();
 
         if (
@@ -134,7 +135,7 @@ class ToolController extends Controller
                     }
                 }
 
-                if (!session()->has('alert-success')) {
+                if (!session()->has('alert-success') || $request->has('test_conn')) {
                     return back()->withInput()->withErrors($validator->errors()->messages());
                 }
             } else {
@@ -142,18 +143,22 @@ class ToolController extends Controller
 
                 if (!empty($dbData)) {
                     $hasDb = true;
-                    $post = array_merge($post, [
+                    $dbPostData = [
                         'connection_name'       => $dbData['connection_name'],
                         'source_db_host'        => $dbData['source_db_host'],
                         'source_db_name'        => $dbData['source_db_name'],
                         'source_db_user'        => $dbData['source_db_user'],
                         'source_db_pass'        => $dbData['source_db_pass'],
                         'notification_email'    => $dbData['notification_email'],
-                    ]);
+                    ];
+
+                    $post = array_merge($post, $dbPostData);
 
                     if ($request->has('save_query')) {
                         $validator = \Validator::make($post, [
-                            'name'          => 'required|string|max:191|unique:data_queries,name',
+                            'name'          => 'required|string|max:191'. (
+                                empty($post['id']) ? '|unique:data_queries,name' : ''
+                            ),
                             'api_key'       => 'required|string|max:191',
                             'resource_key'  => 'required|string|max:191',
                             'query'         => 'required|string|max:191',
@@ -164,22 +169,38 @@ class ToolController extends Controller
                         if (!$validator->fails()) {
                             $logData = [
                                 'module_name'      => Module::getModuleName(Module::TOOL_DB_QUERY),
-                                'action'           => ActionsHistory::TYPE_ADD,
                                 'action_msg'       => 'Listed data request',
                             ];
 
                             try {
-                                $query = DataQuery::create([
-                                    'connection_id' => $dbData['id'],
-                                    'name'          => $post['name'],
-                                    'api_key'       => $post['api_key'],
-                                    'resource_key'  => $post['resource_key'],
-                                    'query'         => $post['query'],
-                                    'upl_freq'      => $post['upl_freq'],
-                                    'upl_freq_type' => $post['upl_freq_type'],
-                                ]);
+                                if (empty($post['id'])) {
+                                    $logData['action'] = ActionsHistory::TYPE_ADD;
+                                    $query = DataQuery::create([
+                                        'connection_id' => $dbData['id'],
+                                        'name'          => $post['name'],
+                                        'api_key'       => $post['api_key'],
+                                        'resource_key'  => $post['resource_key'],
+                                        'query'         => $post['query'],
+                                        'upl_freq'      => $post['upl_freq'],
+                                        'upl_freq_type' => $post['upl_freq_type'],
+                                    ]);
+                                } else {
+                                    $logData['action'] = ActionsHistory::TYPE_MOD;
+                                    $query = DataQuery::find($post['id']);
 
-                                unset($post['name'],
+                                    $query->name = $post['name'];
+                                    $query->api_key = $post['api_key'];
+                                    $query->resource_key = $post['resource_key'];
+                                    $query->query = $post['query'];
+                                    $query->upl_freq = $post['upl_freq'];
+                                    $query->upl_freq_type = $post['upl_freq_type'];
+
+                                    $query->save();
+                                }
+
+                                unset(
+                                    $post['id'],
+                                    $post['name'],
                                     $post['api_key'],
                                     $post['resource_key'],
                                     $post['query'],
@@ -187,17 +208,20 @@ class ToolController extends Controller
                                     $post['upl_freq_type']
                                 );
 
-                                $logVar['status'] = true;
-                                $logVar['action_object'] = $query->id;
+                                $logData['status'] = true;
+                                $logData['action_object'] = $query->id;
 
                                 session()->flash('alert-success', __('custom.conn_save_success'));
                             } catch (QueryException $e) {
-                                $logVar['status'] = true;
+                                $logData['status'] = false;
 
-                                session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
+                                session()->flash(
+                                    'alert-danger',
+                                    __('custom.conn_save_error') .' ('. $e->getMessage() .')'
+                                );
                             }
 
-                            Module::add(array_merge($logData, $logVar));
+                            Module::add($logData);
                         }
 
                         if (!session()->has('alert-success')) {
@@ -214,23 +238,33 @@ class ToolController extends Controller
 
                         try {
                             $queryId = array_keys($post['delete_query'])[0];
-                            $logVar['action_object'] = $queryId;
+                            $logData['action_object'] = $queryId;
 
                             DataQuery::find($queryId)->delete();
 
-                            $logVar['status'] = true;
+                            $logData['status'] = true;
+                            $post = $dbPostData;
 
                             session()->flash('alert-success', __('custom.query_delete_success'));
                         } catch (QueryException $e) {
-                            $logVar['status'] = false;
+                            $logData['status'] = false;
 
-                            session()->flash('alert-danger', __('custom.query_delete_error') .' ('. $e->getMessage() .')');
+                            session()->flash(
+                                'alert-danger',
+                                __('custom.query_delete_error') .' ('. $e->getMessage() .')'
+                            );
                         }
 
-                        Module::add(array_merge($logData, $logVar));
+                        Module::add($logData);
                     }
 
                     if ($request->has('send_query')) {
+                        $logData = [
+                            'module_name'      => Module::getModuleName(Module::TOOL_DB_QUERY),
+                            'action'           => ActionsHistory::TYPE_SEND,
+                            'action_msg'       => 'Send data request',
+                        ];
+
                         try {
                             $username = $dbData['source_db_user'];
                             $host = $dbData['source_db_host'];
@@ -238,20 +272,54 @@ class ToolController extends Controller
                             $password = $dbData['source_db_pass'];
                             $driver = $dbData['source_db_type'];
                             $queryId = array_keys($post['send_query'])[0];
+                            $logData['action_object'] = $queryId;
                             $dataQuery = DataQuery::find($queryId);
 
-                            $data = $this->fetchData($dataQuery->query, $driver, $host, $dbName, $username, $password);
+                            $data = $this->fetchData($dataQuery->query, $driver, $host, $dbName, $username, $password, true);
 
-                            $response = $this->callApi($data, $dataQuery->api_key, $dataQuery->resource_key);
+                            $response = $this->updateResourceData(
+                                $dataQuery->api_key,
+                                $dataQuery->resource_key,
+                                $data,
+                                false,
+                                $dbData['notification_email'],
+                                $dbData['connection_name'],
+                                $dataQuery->query
+                            );
 
                             if ($response['success']) {
-                                session()->flash('alert-success', __('custom.query_send_success'));
+                                session()->flash(
+                                    'alert-success',
+                                    empty($response['message']) ? __('custom.query_send_success') : $response['message']
+                                );
+
+                                $logData['status'] = true;
                             } else {
-                                session()->flash('alert-danger', __('custom.query_send_error') .' ('. $response['error']['message'] .')');
+                                session()->flash(
+                                    'alert-danger',
+                                    __('custom.query_send_error') .' ('. $response['error']['message'] .')'
+                                );
+
+                                $logData['status'] = false;
                             }
                         } catch (\Exception $e) {
+                            $logData['status'] = false;
+
                             session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
                         }
+
+                        Module::add($logData);
+                    }
+
+                    if ($request->has('edit_query')) {
+                        $queryId = array_keys($post['edit_query'])[0];
+                        $dataQuery = DataQuery::find($queryId);
+
+                        $post = array_merge($dataQuery->toArray(), $dbPostData);
+                    }
+
+                    if ($request->has('new_query')) {
+                        $post = $dbPostData;
                     }
 
                     $dataQueries = DataQuery::where('connection_id', $dbData['id'])->get();
@@ -266,10 +334,8 @@ class ToolController extends Controller
             }
 
             if ($request->has('test_file') || $request->has('save_file') || $request->has('send_file')) {
-                $edit = true;
-
                 $validator = \Validator::make($post, [
-                    'file'              => 'required|file',
+                    'file'              => 'required|string',
                     'file_conn_name'    => ($request->has('test_file') ? 'nullable' : 'required') .'|string|max:191',
                     'file_nt_email'     => 'nullable|email|max:191',
                     'file_rs_key'       => ($request->has('test_file') ? 'nullable' : 'required') .'|string|max:191',
@@ -293,11 +359,18 @@ class ToolController extends Controller
                             'module_name'   => Module::getModuleName(Module::TOOL_FILE),
                             'action'        => ActionsHistory::TYPE_SEND,
                             'action_object' => $actionObject,
-                            'action_msg'    => 'Sent File connection',
+                            'action_msg'    => 'Sent file connection',
                         ];
 
                         try {
-                            $result = $this->updateResourceData($post);
+                            $result = $this->updateResourceData(
+                                $post['file_api_key'],
+                                $post['file_rs_key'],
+                                $post['file'],
+                                true,
+                                $post['file_nt_email'],
+                                $post['file_conn_name']
+                            );
 
                             if (empty($result['success'])) {
                                 $logData['status'] = false;
@@ -306,7 +379,10 @@ class ToolController extends Controller
                             } else {
                                 $logData['status'] = true;
 
-                                session()->flash('alert-success', __('custom.conn_success'));
+                                session()->flash(
+                                    'alert-success',
+                                    empty($result['message']) ? __('custom.conn_success') : $result['message']
+                                );
                             }
                         } catch (\Exception $e) {
                             $logData['status'] = false;
@@ -316,21 +392,20 @@ class ToolController extends Controller
 
                         Module::add($logData);
                     } else {
-                        $logData = [
-                            'module_name'   => Module::getModuleName(Module::TOOL_FILE),
-                            'action'        => ActionsHistory::TYPE_SEE,
-                            'action_object' => $actionObject,
-                            'action_msg'    => 'Viewed File connection',
-                            'status'        => true,
-                        ];
-                        Module::add($logData);
+                        if (file_exists('/var/files/'. $post['file'])) {
+                            session()->flash('alert-success', __('custom.conn_success'));
+                        } else {
+                            session()->flash('alert-danger', __('custom.conn_error'));
+                        }
 
-                        session()->flash('alert-success', __('custom.conn_success'));
+                        return back()->withInput(array_merge(Input::all(), ['edit' => $edit]));
                     }
                 }
 
                 if (!session()->has('alert-success')) {
-                    return back()->withInput(array_merge(Input::all(), ['edit' => true]))->withErrors($validator->errors()->messages());
+                    return back()
+                        ->withInput(array_merge(Input::all(), ['edit' => $edit]))
+                        ->withErrors($validator->errors()->messages());
                 }
             } else {
                 if ($request->has('file_conn_id')) {
@@ -368,29 +443,41 @@ class ToolController extends Controller
 
                         $logData['action_object'] = $queryId;
 
-                        $data = [
-                            'file_api_key'  => $query->api_key,
-                            'file_rs_key'   => $query->resource_key,
-                            'file'          => $query->connection->source_file_path,
-                        ];
+                        $result = $this->updateResourceData(
+                            $query->api_key,
+                            $query->resource_key,
+                            $query->connection->source_file_path,
+                            true,
+                            $query->connection->notification_email,
+                            $query->connection->connection_name
+                        );
 
-                        $result = $this->updateResourceData($data);
+                        if ($result['success']) {
+                            $logData['status'] = true;
 
-                        $logData['status'] = true;
+                            session()->flash(
+                                'alert-success',
+                                empty($result['message']) ? __('custom.query_send_success') : $result['message']
+                            );
+                        } else {
+                            $logData['status'] = false;
 
-                        session()->flash('alert-success', __('custom.query_delete_success'));
+                            session()->flash('alert-danger', __('custom.query_send_error') .': '. $result['error']['message']);
+                        }
                     } catch (QueryException $e) {
                         $logData['status'] = false;
 
-                        session()->flash('alert-danger', __('custom.query_delete_error') .' ('. $e->getMessage() .')');
+                        session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
                     }
+
+                    Module::add($logData);
                 }
 
                 if ($request->has('delete_file')) {
                     $logData = [
-                        'module_name'      => Module::getModuleName(Module::TOOL_FILE),
-                        'action'           => ActionsHistory::TYPE_DEL,
-                        'action_msg'       => 'Deleted file connection',
+                        'module_name'   => Module::getModuleName(Module::TOOL_FILE),
+                        'action'        => ActionsHistory::TYPE_DEL,
+                        'action_msg'    => 'Deleted file connection',
                     ];
 
                     try {
@@ -411,7 +498,10 @@ class ToolController extends Controller
 
                     Module::add($logData);
 
-                    return back()->withInput(['edit' => false, 'source_type' => $this->getSourceTypes()[self::SOURCE_TYPE_FILE]]);
+                    return back()->withInput([
+                        'edit'          => false,
+                        'source_type'   => $this->getSourceTypes()[self::SOURCE_TYPE_FILE]
+                    ]);
                 }
             }
         }
@@ -443,8 +533,8 @@ class ToolController extends Controller
         $settingData = [
             'connection_name'       => $data['file_conn_name'],
             'source_type'           => self::SOURCE_TYPE_FILE,
-            'source_file_type'      => Resource::getFormatsCode($file->getClientOriginalExtension()),
-            'source_file_path'      => $file->getPathname(),
+            'source_file_type'      => Resource::getFormatsCode(pathinfo($data['file'], PATHINFO_EXTENSION)),
+            'source_file_path'      => $data['file'],
             'notification_email'    => $data['file_nt_email'],
         ];
 
@@ -455,7 +545,7 @@ class ToolController extends Controller
 
                 $dataQuery = DataQuery::create([
                     'connection_id' => $setting->id,
-                    'name'          => $file->getClientOriginalName(),
+                    'name'          => $data['file'],
                     'api_key'       => $data['file_api_key'],
                     'resource_key'  => $data['file_rs_key'],
                     'upl_freq'      => $data['file_upl_freq'],
@@ -468,7 +558,7 @@ class ToolController extends Controller
                 $setting->update($settingData);
                 $dataQuery = DataQuery::where('connection_id', $setting->id)->first();
 
-                $dataQuery->name = $file->getClientOriginalName();
+                $dataQuery->name = $data['file'];
                 $dataQuery->api_key = $data['file_api_key'];
                 $dataQuery->resource_key = $data['file_rs_key'];
                 $dataQuery->upl_freq = $data['file_upl_freq'];
@@ -488,7 +578,7 @@ class ToolController extends Controller
             'module_name'   => Module::getModuleName(Module::TOOL_FILE),
             'action'        => $action,
             'action_object' => $actionObject,
-            'action_msg'    => $action == ActionsHistory::TYPE_ADD ? 'Added file connection' : 'Edited File connection',
+            'action_msg'    => $action == ActionsHistory::TYPE_ADD ? 'Added file connection' : 'Edited file connection',
             'status'        => $status,
         ];
 
@@ -565,17 +655,21 @@ class ToolController extends Controller
         return false;
     }
 
-    private function fetchData($query, $driver, $host, $dbName, $username, $password = null)
+    public static function fetchData($query, $driver, $host, $dbName, $username, $password = null, $toJson = false)
     {
-        $driver = $this->getDrivers()[$driver];
+        $driver = self::getDrivers()[$driver];
 
-        $connection = $this->getConnection($driver, $host, $dbName, $username, $password);
+        $connection = self::getConnection($driver, $host, $dbName, $username, $password);
 
         $stmt = $connection->prepare($query);
         $stmt->execute();
 
         $result = $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $result = $stmt->fetchAll();
+
+        if ($toJson) {
+            return empty($result) ? [] : $result;
+        }
 
         if (!empty($result[0])) {
             $result = array_merge([array_keys($result[0])], $result);
@@ -584,7 +678,7 @@ class ToolController extends Controller
         return empty($result) ? [] : $result;
     }
 
-    private function getConnection($driver, $host, $dbName, $username, $password)
+    public static function getConnection($driver, $host, $dbName, $username, $password)
     {
         $connection = new \PDO($driver .':host='. $host .';dbname='. $dbName, $username, $password);
         $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -592,32 +686,51 @@ class ToolController extends Controller
         return $connection;
     }
 
-    private function updateResourceData($post)
+    public static function updateResourceData($apiKey, $resourceUri, $data, $file = false, $email = null, $name = null, $query = null)
     {
-        $apiKey = $post['file_api_key'];
-        $recordUri = $post['file_rs_key'];
-        $file = $post['file'];
-        $baseUrl = env('TOOL_API_URL');
-        $extension = $file->getClientOriginalExtension();
-        $content = file_get_contents($file->getRealPath());
+        $baseUrl = config('app.TOOL_API_URL');
 
-        $data = [
-            'api_key'   => $post['file_api_key'],
-            'type'      => Resource::TYPE_FILE,
-        ];
+        if ($file) {
+            $file = $data;
+            $query = $file;
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+            $content = file_get_contents('/var/files/'. $file);
 
-        if (!empty($extension)) {
-            $metadata['data']['file_format'] = $extension;
-            $content = file_get_contents($post['file']->getRealPath());
+            if (!empty($extension)) {
+                $metadata['data']['file_format'] = $extension;
+            }
+
+            $data = ResourceController::callConversions($apiKey, $extension, $content);
+            $elasticData = Session::get('elasticData');
+            Session::forget('elasticData');
+        } else {
+            if (!empty($data)) {
+                $elasticData = [array_keys($data[0])];
+
+                foreach ($data as $row) {
+                    foreach ($row as &$val) {
+                        if (is_null($val)) {
+                            $val = '';
+                        }
+                    }
+
+                    $elasticData[] = array_values($row);
+                }
+            }
         }
-
-        $data = ResourceController::callConversions($apiKey, $extension, $content);
 
         $requestUrl = $baseUrl .'updateResourceData';
 
         $ch = curl_init($requestUrl);
 
-        $params = ['api_key' => $apiKey, 'resource_uri' => $recordUri, 'data' => $data];
+        $params = [
+            'api_key'           => $apiKey,
+            'resource_uri'      => $resourceUri,
+            'data'              => $elasticData,
+            'support_email'     => $email,
+            'connection_name'   => $name,
+            'connection_query'  => $query,
+        ];
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
@@ -636,7 +749,7 @@ class ToolController extends Controller
         $class = 'index';
         $params = [];
         $post = $request->all();
-        $modules = Module::getToolModules();
+        $modules = ['DB Connection', 'File'];
         $actionTypes = ActionsHistory::getTypes();
         $connectionTypes = $this->getDrivers();
         $today = Carbon::now();
@@ -653,8 +766,6 @@ class ToolController extends Controller
 
         $hourFrom = $request->offsetGet('time_from') ?: '';
         $hourTo = $request->offsetGet('time_to') ?: '23:59';
-
-        // $history = ActionsHistory::select();
 
         if (!empty($request->offsetGet('period_from'))) {
             $params['criteria']['period_from'] = date_format(
@@ -683,12 +794,19 @@ class ToolController extends Controller
         if (isset($post['status'])) {
             $params['criteria']['status'] = $post['status'];
         }
+
         if (!empty($request->offsetGet('source_type'))) {
-            $params['criteria']['module'] = $request->offsetGet('source_type');
+            if ($request->offsetGet('source_type') == 'File') {
+                $params['criteria']['module'] = $request->offsetGet('source_type');
+            } else {
+                $params['criteria']['module'] = ['DB Connection', 'DB Query'];
+            }
         }
+
         if (!empty($request->offsetGet('db_type'))) {
             $params['criteria']['source_db_type'] = $request->offsetGet('db_type');
         }
+
         if (!empty($request->offsetGet('q'))) {
             $params['criteria']['query_name'] = $request->offsetGet('q');
         }
@@ -714,11 +832,13 @@ class ToolController extends Controller
                     ->withTrashed()
                     ->first();
 
-                $record->action_object = $data->connection_name;
+                if (!empty($data->connection_name)) {
+                    $record->action_object = $data->connection_name;
+                }
             } else {
                 $dataQuery = DataQuery::where('id', $record->action_object)
-                ->withTrashed()
-                ->first();
+                    ->withTrashed()
+                    ->first();
 
                 $connectionName = $dataQuery->connection()->withTrashed()->first()->connection_name;
 

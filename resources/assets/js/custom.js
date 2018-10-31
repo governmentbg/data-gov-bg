@@ -21,6 +21,7 @@ $(function() {
         $dataTable.DataTable({
             pageLength: $dataTable.data('page-length') ? $dataTable.data('page-length') : 25,
             responsive: true,
+            order: [],
             language: {
                 search: $('.js-translations').data('search'),
                 info: $('.js-translations').data('info'),
@@ -97,16 +98,19 @@ $(function() {
     });
 
     $('.clicable').each(function() {
-        var $this = $(this).closest('.js-show-submenu');
+        var $this = $(this).parent('.js-show-submenu');
         var $childMenu = $this.children('.sidebar-submenu');
-        $childMenu.hide();
 
-        $('a', $childMenu).each(function () {
-            if ($(this).hasClass('active')) {
-                $childMenu.show();
-                $this.addClass('remove-after');
-            }
-        });
+        $childMenu.each(function() {
+            $('a', $this).each(function () {
+                if ($(this).hasClass('active')) {
+                    $this.addClass('remove-after');
+                    $childMenu.show();
+                } else if (!$this.hasClass('remove-after')) {
+                    $childMenu.hide();
+                }
+            });
+        })
     });
 });
 
@@ -324,6 +328,7 @@ var $nanoContent = $('.js-nano-content');
 var $footer = $('.js-footer');
 
 if ($head && $content && $footer) {
+    showHelp();
     helpBar();
 
     $(window).bind('load', function() {
@@ -577,4 +582,82 @@ $('.org-col').mouseenter(function() {
 $('.org-col').mouseleave(function() {
     var $tooltip = $(this).children('.cust-tooltip');
     $tooltip.slideUp(100);
+});
+
+$(function() {
+    $(document).ready(function() {
+        $(document).on('click', '.js-generate-resource-query, .js-test-resource-query', function() {
+            $('.js-page-err').html('');
+
+            var $uri = typeof $('.js-resource-uri').val() != 'undefined'
+                ? $('.js-resource-uri').val()
+                : null;
+            var $format = typeof $('.js-resource-format').val() != 'undefined'
+                ? $('.js-resource-format').val()
+                : null;
+            var $version = typeof $('.js-resource-version').val() != 'undefined'
+                ? $('.js-resource-version').val()
+                : null;
+            var $function = $(this).data('function');
+
+            if (typeof $function != 'undefined') {
+                if ($function == 'test') {
+                    generateScript($uri, $format, $version);
+                    testScript($uri, $format, $version);
+                } else {
+                    generateScript($uri, $format, $version);
+                }
+            }
+        });
+
+        function generateScript($uri, $format, $version) {
+            var $queryContent = $('.js-query-script');
+
+            var script = '$.ajax({url:"/execResourceQueryScript",headers:'+
+            '{"X-CSRF-TOKEN":$(\'meta[name="csrf-token"]\').attr("content")},type:"POST",data:{uri:'+
+            $uri +',format:'+ $format +',version:'+ $version +'},success:function(e){return e},error:function(r){return!1}});';
+
+            $queryContent.find('textarea').html(script);
+            $queryContent.removeClass('hidden');
+        }
+
+        function testScript($uri, $format, $version) {
+            var $resultContent = $('.js-query-result');
+            $resultContent.addClass('hidden');
+            $('.js-loader').toggleClass('hidden');
+
+            $.ajax({
+                url: '/execResourceQueryScript',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: 'POST',
+                data: {uri: $uri, format: $format, version: $version},
+                success: function(response) {
+                    setTimeout(function() {
+                        $('.js-loader').toggleClass('hidden');
+                        $resultContent.removeClass('hidden');
+                    }, 1000);
+
+                    if (response.success) {
+                        $resultContent.find('textarea').html(response.data);
+                    } else {
+                        $resultContent.find('textarea').html('');
+                        $.each($.parseJSON(response.data), function(key, val) {
+                            if ($('[name="'+ key +'"]').length) {
+                                $('[name="'+ key +'"]').siblings('.error').html(val[0]);
+                            }
+                        });
+                    }
+                },
+                error: function (error) {
+                    setTimeout(function() {
+                        $('.js-loader').toggleClass('hidden');
+                        $resultContent.find('textarea').html($('.js-translations').data('get-resource'));
+                        $resultContent.removeClass('hidden');
+                    }, 1000);
+                }
+            });
+        }
+    });
 });

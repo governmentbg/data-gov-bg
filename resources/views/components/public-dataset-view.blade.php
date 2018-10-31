@@ -187,7 +187,7 @@
                             <div class="m-b-sm"><p>{!! nl2br(e($dataset->sla)) !!}</p></div>
                         @endif
                         @if (isset($dataset->custom_settings[0]) && !empty($dataset->custom_settings[0]->key))
-                            <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                            <p><b>{{ __('custom.additional_info') }}:</b></p>
                             @foreach ($dataset->custom_settings as $field)
                                 <div class="row m-b-lg">
                                     <div class="col-xs-6">{{ $field->key }}</div>

@@ -77,6 +77,18 @@
                     {{ $resource->schema_url }}
                 </div>
             @endif
+            @if (!empty($resource->upl_freq_type))
+                <p>
+                    <strong>{{ __('custom.type_upl_freq') }}:</strong>
+                    &nbsp;{{ App\Http\Controllers\ToolController::getFreqTypes()[$resource->upl_freq_type] }}
+                </p>
+            @endif
+            @if (!empty($resource->upl_freq))
+                <p>
+                    <strong>{{ __('custom.value_upl_freq') }}:</strong>
+                    &nbsp;{{ $resource->upl_freq }}
+                </p>
+            @endif
             @if (!empty($resource->custom_settings))
                 <p><b>{{ __('custom.additional_fields') }}:</b></p>
                 @foreach ($resource->custom_settings as $field)

@@ -13,13 +13,18 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Added
+- Resource update equal data in previous version check
+- Tool mail notifications
 - Resource queries tool in admin add pages section
 - Send query button functionality for the tool
 - Edit saved query functionality for the tool
 - Send newsletters
+- Tool installation and docker files
 
 ### Changed
 - Search engine sqlite indexes to mysql
+- Add admin check for editing and adding organisations
+- Tool file uploads with docker volume
 
 ### Remove
 - Cron job for sqlite index updates
@@ -28,6 +33,9 @@ Security - in case of vulnerabilities.
 - Help page stays open after being selected
 - Images uploaded from admin panel show for all users
 - If help page is inactive you can go to edit from the help sidebar
+- Timezone to Europe/Sofia
+- Resource from docx
+- Resource visualisation ordering
 
 ## [0.6.5] - 2018-10-24
 ### Added

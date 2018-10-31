@@ -316,8 +316,23 @@ class ResourceController extends Controller {
 
                 break;
             case 'pdf':
-            case 'doc':
                 $method = $extension .'2json';
+                $convertData['data'] = base64_encode($convertData['data']);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    Session::put('elasticData', ['text' => $resultConvert['data']]);
+                    $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
+                }
+
+                break;
+            case 'doc':
+            case 'docx':
+                $method = 'doc2json';
                 $convertData['data'] = base64_encode($convertData['data']);
                 $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);

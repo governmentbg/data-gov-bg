@@ -75,100 +75,91 @@
             || !empty($post['source_type']) && $post['source_type'] == 'dbms'
             || !empty(old('source_type')) && old('source_type') == 'dbms'
         )
-            <div class="js-dbms-form dbms-form">
-                <div class="form-group required">
-                    <label class="col-md-3">{{ __('custom.host') }}:</label>
-                    <div class="col-md-9">
-                        <input
-                            class="form-control"
-                            name="source_db_host"
-                            value="{{ old('source_db_host', empty($post['source_db_host']) ? '' : $post['source_db_host']) }}"
-                            placeholder="127.0.0.1:3306"
-                        >
-                        <span class="error">{{ $errors->first('source_db_host') }}</span>
+            @if (empty($post['id']))
+                <div class="js-dbms-form dbms-form">
+                    <div class="form-group required">
+                        <label class="col-md-3">{{ __('custom.host') }}:</label>
+                        <div class="col-md-9">
+                            <input
+                                class="form-control"
+                                name="source_db_host"
+                                value="{{ old('source_db_host', empty($post['source_db_host']) ? '' : $post['source_db_host']) }}"
+                                placeholder="127.0.0.1:3306"
+                            >
+                            <span class="error">{{ $errors->first('source_db_host') }}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group required">
-                    <label class="col-md-3">{{ __('custom.user_name') }}:</label>
-                    <div class="col-md-9">
-                        <input
-                            class="form-control"
-                            name="source_db_user"
-                            value="{{ old('source_db_user', empty($post['source_db_user']) ? '' : $post['source_db_user']) }}"
-                        >
-                        <span class="error">{{ $errors->first('source_db_user') }}</span>
+                    <div class="form-group required">
+                        <label class="col-md-3">{{ __('custom.user_name') }}:</label>
+                        <div class="col-md-9">
+                            <input
+                                class="form-control"
+                                name="source_db_user"
+                                value="{{ old('source_db_user', empty($post['source_db_user']) ? '' : $post['source_db_user']) }}"
+                            >
+                            <span class="error">{{ $errors->first('source_db_user') }}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-3">{{ __('custom.password') }}:</label>
-                    <div class="col-md-9">
-                        <input
-                            class="form-control"
-                            name="source_db_pass"
-                            value="{{ old('source_db_pass', empty($post['source_db_pass']) ? '' : $post['source_db_pass']) }}"
-                        >
-                        <span class="error">{{ $errors->first('source_db_pass') }}</span>
+                    <div class="form-group">
+                        <label class="col-md-3">{{ __('custom.password') }}:</label>
+                        <div class="col-md-9">
+                            <input
+                                class="form-control"
+                                name="source_db_pass"
+                                value="{{ old('source_db_pass', empty($post['source_db_pass']) ? '' : $post['source_db_pass']) }}"
+                            >
+                            <span class="error">{{ $errors->first('source_db_pass') }}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group required">
-                    <label class="col-md-3">{{ __('custom.db_name') }}:</label>
-                    <div class="col-md-9">
-                        <input
-                            class="form-control"
-                            name="source_db_name"
-                            value="{{ old('source_db_name', empty($post['source_db_name']) ? '' : $post['source_db_name']) }}"
-                        >
-                        <span class="error">{{ $errors->first('source_db_name') }}</span>
+                    <div class="form-group required">
+                        <label class="col-md-3">{{ __('custom.db_name') }}:</label>
+                        <div class="col-md-9">
+                            <input
+                                class="form-control"
+                                name="source_db_name"
+                                value="{{ old('source_db_name', empty($post['source_db_name']) ? '' : $post['source_db_name']) }}"
+                            >
+                            <span class="error">{{ $errors->first('source_db_name') }}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-3">{{ __('custom.notification_email') }}:</label>
-                    <div class="col-md-9">
-                        <input
-                            class="form-control"
-                            name="notification_email"
-                            value="{{ old('notification_email', empty($post['notification_email']) ? '' : $post['notification_email']) }}"
-                        >
-                        <span class="error">{{ $errors->first('notification_email') }}</span>
+                    <div class="form-group">
+                        <label class="col-md-3">{{ __('custom.notification_email') }}:</label>
+                        <div class="col-md-9">
+                            <input
+                                class="form-control"
+                                name="notification_email"
+                                value="{{ old('notification_email', empty($post['notification_email']) ? '' : $post['notification_email']) }}"
+                            >
+                            <span class="error">{{ $errors->first('notification_email') }}</span>
+                        </div>
                     </div>
-                </div>
-                <!-- <div class="form-group">
-                    <label class="col-md-3"></label>
-                    <div class="col-md-9">
+                    <div class="form-group">
+                        <label class="col-md-3"></label>
+                        <div class="col-md-9">
+                            <textarea
+                                type="text"
+                                class="input-border-r-12 form-control"
+                                name="test_query"
+                            >{{ old('test_query', empty($post['test_query']) ? 'SELECT * FROM ___' : $post['test_query']) }}</textarea>
+                            <span class="error">{{ $errors->first('test_query') }}</span>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-9 col-md-offset-3">
                         <input
-                            class="btn btn-primary generate-btn form-control"
                             type="submit"
-                            name="generate"
-                            value="{{ __('custom.generate') }} {{ __('custom.command') }}"
+                            class="btn btn-primary test-btn"
+                            name="test_conn"
+                            value="{{ __('custom.test_connection') }}"
+                        >
+                        <input
+                            type="submit"
+                            class="btn btn-primary save-btn pull-right"
+                            name="save_conn"
+                            value="{{ uctrans('custom.save') }}"
                         >
                     </div>
-                </div> -->
-                <div class="form-group">
-                    <label class="col-md-3"></label>
-                    <div class="col-md-9">
-                        <textarea
-                            type="text"
-                            class="input-border-r-12 form-control"
-                            name="test_query"
-                        >{{ old('test_query', empty($post['test_query']) ? 'SELECT * FROM ___' : $post['test_query']) }}</textarea>
-                        <span class="error">{{ $errors->first('test_query') }}</span>
-                    </div>
                 </div>
-                <div class="form-group col-md-9 col-md-offset-3">
-                    <input
-                        type="submit"
-                        class="btn btn-primary test-btn"
-                        name="test_conn"
-                        value="{{ __('custom.test_connection') }}"
-                    >
-                    <input
-                        type="submit"
-                        class="btn btn-primary save-btn pull-right"
-                        name="save_conn"
-                        value="{{ uctrans('custom.save') }}"
-                    >
-                </div>
-            </div>
+            @endif
 
             @if ($foundData === [])
                 <p class="alert alert-danger">

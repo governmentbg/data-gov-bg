@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiHistory;
 
@@ -198,6 +199,7 @@ class ToolController extends Controller
                                 }
 
                                 unset(
+                                    $post['id'],
                                     $post['name'],
                                     $post['api_key'],
                                     $post['resource_key'],
@@ -450,12 +452,18 @@ class ToolController extends Controller
                             $query->connection->connection_name
                         );
 
-                        $logData['status'] = true;
+                        if ($result['success']) {
+                            $logData['status'] = true;
 
-                        session()->flash(
-                            'alert-success',
-                            empty($result['message']) ? __('custom.query_send_success') : $result['message']
-                        );
+                            session()->flash(
+                                'alert-success',
+                                empty($result['message']) ? __('custom.query_send_success') : $result['message']
+                            );
+                        } else {
+                            $logData['status'] = false;
+
+                            session()->flash('alert-danger', __('custom.query_send_error') .': '. $result['error']['message']);
+                        }
                     } catch (QueryException $e) {
                         $logData['status'] = false;
 
@@ -693,6 +701,22 @@ class ToolController extends Controller
             }
 
             $data = ResourceController::callConversions($apiKey, $extension, $content);
+            $elasticData = Session::get('elasticData');
+            Session::forget('elasticData');
+        } else {
+            if (!empty($data)) {
+                $elasticData = [array_keys($data[0])];
+
+                foreach ($data as $row) {
+                    foreach ($row as &$val) {
+                        if (is_null($val)) {
+                            $val = '';
+                        }
+                    }
+
+                    $elasticData[] = array_values($row);
+                }
+            }
         }
 
         $requestUrl = $baseUrl .'updateResourceData';
@@ -702,7 +726,7 @@ class ToolController extends Controller
         $params = [
             'api_key'           => $apiKey,
             'resource_uri'      => $resourceUri,
-            'data'              => $data,
+            'data'              => $elasticData,
             'support_email'     => $email,
             'connection_name'   => $name,
             'connection_query'  => $query,

@@ -119,7 +119,7 @@ class Module extends Model
      */
     public static function add($request)
     {
-        if (Auth::check() || config('app.IS_TOOL')) {
+        if (config('app.IS_TOOL') || Auth::check()) {
             $actions = ActionsHistory::getTypes();
 
             $validator = \Validator::make($request, [

@@ -15,6 +15,7 @@
                         $min = floor($tsDiff / 60);
                         $hours = floor($tsDiff / 3600);
                         $days = floor($tsDiff / 86000);
+
                         if (isset($actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_id'])) {
                             $objOwnerId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_id'];
                             $objOwnerName = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_name'];
@@ -22,14 +23,17 @@
                             $objOwnerLogo = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_logo'];
                         } else {
                             $objOwnerId = $actionHistory->user_id;
+
                             if ($actionHistory->user_firstname || $actionHistory->user_lastname) {
                                 $objOwnerName = trim($actionHistory->user_firstname .' '. $actionHistory->user_lastname);
                             } else {
                                 $objOwnerName = $actionHistory->user;
                             }
+
                             $objOwnerView = '/user/profile/'. $actionHistory->user_id;
                             $objOwnerLogo = null;
                         }
+
                         $objId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_id'];
                         $objName = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_name'];
                         $objModule = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_module'];
@@ -61,11 +65,13 @@
                                     >{{ $objOwnerName }}</a></h3>
                                 <p>
                                     {{ $actionTypes[$actionHistory->action]['name'] .' '. $objModule }}
+
                                     @if ($objView != '')
                                         <a href="{{ url($objView) }}" style="text-decoration: none; color: black;"><b>{{ $objName }}</b></a>
                                     @else
                                         <b>{{ $objName }}</b>
                                     @endif
+
                                     @if ($parentObjId != '')
                                         {{ $actionTypes[$actionHistory->action]['linkWord'] }}
                                         {{ $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_module'] }}

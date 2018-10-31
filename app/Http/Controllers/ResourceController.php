@@ -427,18 +427,21 @@ class ResourceController extends Controller {
                 $resultElastic = $api->$apiFunction($reqElastic)->getData();
 
                 if ($resultElastic->success) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+                    $request->session()->flash(
+                        'alert-success',
+                        empty($resultElastic->message) ? __('custom.changes_success_save') : $resultElastic->message
+                    );
 
                     if ($request->has('org_uri')) {
                         $orgUri = $request->offsetGet('org_uri');
 
-                        return redirect('/'. $root .'/organisations/'. $orgUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/organisations/'. $orgUri .'/resource/'. $uri);
                     }
 
                     if ($request->has('group_uri')) {
-                        $goupUri = $request->offsetGet('group_uri');
+                        $groupUri = $request->offsetGet('group_uri');
 
-                        return redirect('/'. $root .'/groups/'. $goupUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/groups/'. $groupUri .'/resource/'. $uri);
                     }
 
                     return redirect('/'. $root .'/resource/view/'. $uri);
@@ -492,18 +495,21 @@ class ResourceController extends Controller {
                 $resultElastic = $api->$apiFunction($reqElastic)->getData();
 
                 if ($resultElastic->success) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+                    $request->session()->flash(
+                        'alert-success',
+                        empty($resultElastic->message) ? __('custom.changes_success_save') : $resultElastic->message
+                    );
 
                     if ($request->has('org_uri')) {
                         $orgUri = $request->offsetGet('org_uri');
 
-                        return redirect('/'. $root .'/organisations/'. $orgUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/organisations/'. $orgUri .'/resource/'. $uri);
                     }
 
                     if ($request->has('group_uri')) {
-                        $goupUri = $request->offsetGet('group_uri');
+                        $groupUri = $request->offsetGet('group_uri');
 
-                        return redirect('/'. $root .'/groups/'. $goupUri.'/resource/'. $uri);
+                        return redirect('/'. $root .'/groups/'. $groupUri .'/resource/'. $uri);
                     }
 
                     return redirect('/'. $root .'/resource/view/'. $uri);

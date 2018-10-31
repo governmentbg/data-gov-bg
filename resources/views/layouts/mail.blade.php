@@ -1,9 +1,10 @@
 <table
     style="
-        width: 100%;
+        width: 680px;
         height: 1000px;
         background-repeat: no-repeat;
         background-position: center center;
+        margin: 0 auto;
     "
 >
     <tbody>
@@ -11,7 +12,6 @@
             <td
                 style="
                     vertical-align: top;
-                    padding-left: 30%;
                 "
             >
                 <a
@@ -28,7 +28,7 @@
                 <p
                     style="
                         font-family: 'Roboto', sans-serif;
-                        font-size:16px;
+                        font-size: 16px;
                     "
                 >
                     @yield('title')
@@ -36,31 +36,29 @@
                 <hr
                     style="
                         margin-top: 2em;
-                        margin-right: 40%;
                         text-align: center;
                         margin-bottom: 2em;
                     "
                 >
                 <p
                     style="
-                            font-family: 'Roboto', sans-serif;
-                            font-size: 16px;
-                            margin-right: 40%;
+                        font-family: 'Roboto', sans-serif;
+                        font-size: 16px;
                     "
                 >
                     @yield('content')
-                </p><br>
+                </p>
+                <br>
                 <div
                     style="
                         width: 100%;
                         height: 800px;
                         background: url({{ asset('img/watermark-logo.png') }});
                         background-repeat: no-repeat;
-                        background-position: left top;
+                        background-position: center top;
                         background-size: 60%;
                     "
-                >
-                </div>
+                ></div>
             </td>
         </tr>
     </tbody>

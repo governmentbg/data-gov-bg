@@ -278,11 +278,18 @@ class ToolController extends Controller
                             $response = $this->updateResourceData(
                                 $dataQuery->api_key,
                                 $dataQuery->resource_key,
-                                $data
+                                $data,
+                                false,
+                                $dbData['notification_email'],
+                                $dbData['connection_name'],
+                                $dataQuery->query
                             );
 
                             if ($response['success']) {
-                                session()->flash('alert-success', __('custom.query_send_success'));
+                                session()->flash(
+                                    'alert-success',
+                                    empty($response['message']) ? __('custom.query_send_success') : $response['message']
+                                );
 
                                 $logData['status'] = true;
                             } else {
@@ -358,7 +365,9 @@ class ToolController extends Controller
                                 $post['file_api_key'],
                                 $post['file_rs_key'],
                                 $post['file'],
-                                true
+                                true,
+                                $post['file_nt_email'],
+                                $post['file_conn_name']
                             );
 
                             if (empty($result['success'])) {
@@ -368,7 +377,10 @@ class ToolController extends Controller
                             } else {
                                 $logData['status'] = true;
 
-                                session()->flash('alert-success', __('custom.conn_success'));
+                                session()->flash(
+                                    'alert-success',
+                                    empty($result['message']) ? __('custom.conn_success') : $result['message']
+                                );
                             }
                         } catch (\Exception $e) {
                             $logData['status'] = false;
@@ -433,12 +445,17 @@ class ToolController extends Controller
                             $query->api_key,
                             $query->resource_key,
                             $query->connection->source_file_path,
-                            true
+                            true,
+                            $query->connection->notification_email,
+                            $query->connection->connection_name
                         );
 
                         $logData['status'] = true;
 
-                        session()->flash('alert-success', __('custom.query_send_success'));
+                        session()->flash(
+                            'alert-success',
+                            empty($result['message']) ? __('custom.query_send_success') : $result['message']
+                        );
                     } catch (QueryException $e) {
                         $logData['status'] = false;
 
@@ -450,9 +467,9 @@ class ToolController extends Controller
 
                 if ($request->has('delete_file')) {
                     $logData = [
-                        'module_name'      => Module::getModuleName(Module::TOOL_FILE),
-                        'action'           => ActionsHistory::TYPE_DEL,
-                        'action_msg'       => 'Deleted file connection',
+                        'module_name'   => Module::getModuleName(Module::TOOL_FILE),
+                        'action'        => ActionsHistory::TYPE_DEL,
+                        'action_msg'    => 'Deleted file connection',
                     ];
 
                     try {
@@ -661,12 +678,13 @@ class ToolController extends Controller
         return $connection;
     }
 
-    public static function updateResourceData($apiKey, $resourceUri, $data, $file = false)
+    public static function updateResourceData($apiKey, $resourceUri, $data, $file = false, $email = null, $name = null, $query = null)
     {
         $baseUrl = config('app.TOOL_API_URL');
 
         if ($file) {
             $file = $data;
+            $query = $file;
             $extension = pathinfo($file, PATHINFO_EXTENSION);
             $content = file_get_contents('/var/files/'. $file);
 
@@ -681,7 +699,14 @@ class ToolController extends Controller
 
         $ch = curl_init($requestUrl);
 
-        $params = ['api_key' => $apiKey, 'resource_uri' => $resourceUri, 'data' => $data];
+        $params = [
+            'api_key'           => $apiKey,
+            'resource_uri'      => $resourceUri,
+            'data'              => $data,
+            'support_email'     => $email,
+            'connection_name'   => $name,
+            'connection_query'  => $query,
+        ];
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));

@@ -1804,6 +1804,8 @@ class UserController extends Controller {
                     'is_reported'           => is_null($request->offsetGet('reported'))
                         ? Resource::REPORTED_FALSE
                         : Resource::REPORTED_TRUE,
+                    'upl_freq_type'         => $request->offsetGet('upl_freq_type'),
+                    'upl_freq'              => $request->offsetGet('upl_freq'),
                 ];
 
                 if ($resource->resource_type == Resource::TYPE_HYPERLINK) {

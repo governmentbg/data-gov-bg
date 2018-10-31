@@ -20,6 +20,7 @@ Security - in case of vulnerabilities.
 - Edit saved query functionality for the tool
 - Send newsletters
 - Tool installation and docker files
+- Automated API resource upload
 
 ### Changed
 - Search engine sqlite indexes to mysql

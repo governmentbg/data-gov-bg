@@ -893,4 +893,6 @@ return [
     'resource_updated' => 'A check made during the automatic data upload found no changes from the previous version. No data was uploaded.',
     'resource_update_mail' => 'Resource update info',
     'mail_conn_info' => 'Changes for %s connection with query for (%s)',
+    'type_upl_freq' => 'Upload frequency type',
+    'value_upl_freq' => 'Upload frequency value',
 ];

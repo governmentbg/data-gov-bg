@@ -162,6 +162,10 @@ class ResourceController extends Controller {
             case 'json':
                 Session::put('elasticData', json_decode($content, true));
 
+                if (is_array(json_decode($content, true))) {
+                    $data = json_decode($content, true);
+                }
+
                 break;
             case 'tsv':
                 $convertData['data'] = base64_encode($convertData['data']);

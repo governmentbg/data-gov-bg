@@ -1718,8 +1718,6 @@ class UserController extends Controller {
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
             if ($response['success']) {
-                $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                 if ($data['type'] == Resource::TYPE_HYPERLINK) {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
@@ -1906,8 +1904,6 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/user/resource/view/'. $response['uri']);
                     }
@@ -1983,8 +1979,6 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
@@ -2058,8 +2052,6 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }

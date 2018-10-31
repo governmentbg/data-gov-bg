@@ -3409,7 +3409,9 @@ class UserController extends Controller {
      */
     public function newsFeed(Request $request)
     {
-        $user = Auth::user();
+        $user = isset($request->news_user_id)
+            ? User::where('id', $request->news_user_id)->first()
+            : Auth::user();
 
         if ($user) {
             $filter = $request->offsetGet('filter');
@@ -6120,11 +6122,12 @@ class UserController extends Controller {
                 foreach ($follows as $follow) {
                     $user = $follow->user;
                     $params = [
-                        'user_id'    => $data['user_id'],
-                        'actions'    => [$data['action']],
-                        'ip_address' => $data['ip_address'],
-                        $column .'s' => [$data['action_object']],
-                        'newsletter' => 1,
+                        'user_id'      => $data['user_id'],
+                        'actions'      => [$data['action']],
+                        'ip_address'   => $data['ip_address'],
+                        $column .'s'   => [$data['action_object']],
+                        'newsletter'   => 1,
+                        'news_user_id' => $user->id,
                     ];
 
                     $url = '/user/newsFeed?perPage=5000&'. http_build_query($params);

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class ResourceController extends ApiController
 {
@@ -1080,8 +1081,33 @@ class ResourceController extends ApiController
         $validator = \Validator::make($post, ['resource_uri' => 'required|string|exists:resources,uri,deleted_at,NULL|max:191']);
 
         if (!$validator->fails()) {
-            // TODO tool
-            return $this->successResponse(['view' => 'html'], true);
+            $formats = Resource::getFormats();
+            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $resource->format_code = $resource->file_format;
+            $resource->file_format = $formats[$resource->file_format];
+            $data = ElasticDataSet::getElasticData($resource->id, $resource->version);
+
+            if (
+                $resource->format_code == Resource::FORMAT_XML
+                || $resource->format_code == Resource::FORMAT_RDF
+            ) {
+                $convertData = [
+                    'api_key'   => \Auth::user()->api_key,
+                    'data'      => $data,
+                ];
+
+                $method = 'json2'. strtolower($resource->file_format);
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $apiConvert = new ApiConversion($reqConvert);
+                $resultConvert = $apiConvert->$method($reqConvert)->getData();
+                $data = isset($resultConvert->data) ? $resultConvert->data : [];
+            }
+
+            return view('resourceiframe', [
+                'class'         => 'user',
+                'resource'      => $resource,
+                'data'          => $data,
+            ]);
         }
 
         return $this->errorResponse(__('custom.get_resource_view_fail'), $validator->errors()->messages());

@@ -51,7 +51,7 @@ class ToolController extends Controller
         ];
     }
 
-    private function getFreqTypes()
+    public static function getFreqTypes()
     {
         return [
             self::FREQ_TYPE_HOUR    => __('custom.hour'),
@@ -71,7 +71,7 @@ class ToolController extends Controller
         $post = $request->all();
         $edit = !empty($post['conn_id']);
         $sourceTypes = $this->getSourceTypes();
-        $freqTypes = $this->getFreqTypes();
+        $freqTypes = self::getFreqTypes();
         $files = ConnectionSetting::with('dataQueries')->where('source_type', self::SOURCE_TYPE_FILE)->get();
 
         if (

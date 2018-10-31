@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ApiController;
 use Illuminate\Database\QueryException;
+use App\Http\Controllers\ToolController;
 
 class ResourceController extends ApiController
 {
@@ -78,6 +79,8 @@ class ResourceController extends ApiController
                 'custom_fields'        => 'nullable|array',
                 'custom_fields.label'  => 'nullable|string|max:191',
                 'custom_fields.value'  => 'nullable|string|max:8000',
+                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(ToolController::getFreqTypes())),
+                'upl_freq'             => 'nullable|int|max:127',
             ]);
         }
 
@@ -140,6 +143,8 @@ class ResourceController extends ApiController
                     'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
                     'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
                     'is_reported'       => 0,
+                    'upl_freq_type'     => isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null,
+                    'upl_freq'          => isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null,
                 ];
 
                  if (
@@ -375,6 +380,8 @@ class ResourceController extends ApiController
                 'post_data'            => 'sometimes|nullable|string|max:8000',
                 'is_reported'          => 'sometimes|boolean',
                 'custom_fields'        => 'sometimes|array',
+                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(ToolController::getFreqTypes())),
+                'upl_freq'             => 'nullable|int|max:127',
             ]);
         }
 
@@ -464,6 +471,10 @@ class ResourceController extends ApiController
                     Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
                 }
             }
+
+            $resource->upl_freq_type = isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null;
+
+            $resource->upl_freq = isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null;
 
             try {
                 if (isset($post['data']['name'])) {
@@ -965,6 +976,8 @@ class ResourceController extends ApiController
                     'created_by'            => $resource->created_by,
                     'updated_at'            => isset($resource->updated_at) ? $resource->updated_at->toDateTimeString() : null,
                     'updated_by'            => $resource->updated_by,
+                    'upl_freq_type'         => $resource->upl_freq_type,
+                    'upl_freq'              => $resource->upl_freq,
                 ];
 
                 $customSett = $resource->customFields()->get()->loadTranslations();

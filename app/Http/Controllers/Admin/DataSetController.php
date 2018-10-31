@@ -790,13 +790,14 @@ class DataSetController extends AdminController
 
         if ($resource) {
             if ($request->has('ready_metadata')) {
-
                 $data = [
                     'type'          => $resource->resource_type,
                     'resource_url'  => $request->offsetGet('resource_url'),
                     'http_rq_type'  => $request->offsetGet('http_rq_type'),
                     'http_headers'  => $request->offsetGet('http_headers'),
                     'post_data'     => $request->offsetGet('post_data'),
+                    'upl_freq_type' => $request->offsetGet('upl_freq_type'),
+                    'upl_freq'      => $request->offsetGet('upl_freq'),
                 ];
 
                 $file = $request->file('file');

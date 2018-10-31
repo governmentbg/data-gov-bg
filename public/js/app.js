@@ -59869,6 +59869,7 @@ $(function () {
         $dataTable.DataTable({
             pageLength: $dataTable.data('page-length') ? $dataTable.data('page-length') : 25,
             responsive: true,
+            order: [],
             language: {
                 search: $('.js-translations').data('search'),
                 info: $('.js-translations').data('info'),

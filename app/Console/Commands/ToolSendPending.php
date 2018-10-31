@@ -75,7 +75,11 @@ class ToolSendPending extends Command
                             $response = ToolController::updateResourceData(
                                 $query->api_key,
                                 $query->resource_key,
-                                $data
+                                $data,
+                                false,
+                                $connection->notification_email,
+                                $connection->connection_name,
+                                $query->query
                             );
 
                             if ($response['success']) {
@@ -106,7 +110,9 @@ class ToolSendPending extends Command
                                 $query->api_key,
                                 $query->resource_key,
                                 $connection->source_file_path,
-                                true
+                                true,
+                                $connection->notification_email,
+                                $connection->connection_name
                             );
 
                             $logData['status'] = true;

@@ -448,6 +448,7 @@ return [
     'success_dataset_delete' => 'Successful dataset deletion!',
     'fail_dataset_delete' => 'Unsuccessful dataset deletion!',
     'changes_success_save' => 'Changes were successfully saved!',
+    'changes_success_update' => 'Data was successfully updated!',
     'changes_success_fail' => 'Changes were not saved!',
     'email_change_upon_confirm' => 'The email will be changed after it is confirmed!',
     'wrong_password' => 'Wrong password!',
@@ -889,4 +890,7 @@ return [
     'generate_script' => 'Generate script',
     'newsletter' => 'Newsletter',
     'file_desc' => 'Enter filename from the file upload folder',
+    'resource_updated' => 'A check made during the automatic data upload found no changes from the previous version. No data was uploaded.',
+    'resource_update_mail' => 'Resource update info',
+    'mail_conn_info' => 'Changes for %s connection with query for (%s)',
 ];

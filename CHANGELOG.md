@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.0] - 2018-10-31
 ### Added
 - Resource update equal data in previous version check
 - Tool mail notifications
@@ -20,8 +22,8 @@ Security - in case of vulnerabilities.
 - Edit saved query functionality for the tool
 - Send newsletters
 - Tool installation and docker files
-- Automated API resource upload
-- API getResourceView()
+- Automated api resource upload
+- Api getResourceView function
 
 ### Changed
 - Search engine sqlite indexes to mysql
@@ -172,6 +174,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.5...v1.0.0
 [0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3

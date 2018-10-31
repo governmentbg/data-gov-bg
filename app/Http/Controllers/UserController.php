@@ -10,6 +10,7 @@ use App\Module;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use App\UserFollow;
 use App\TermsOfUse;
 use App\UserSetting;
 use App\DataSetGroup;
@@ -631,7 +632,7 @@ class UserController extends Controller {
                     return redirect()->back()->withInput()->withErrors($remove->errors);
                 }
 
-                $setGroups = [];
+                $dataset->groups = $setGroups = [];
             }
 
             if (!is_null($groupId)) {
@@ -644,6 +645,19 @@ class UserController extends Controller {
                     session()->flash('alert-danger', __('custom.edit_error'));
 
                     return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+
+                $post = [ 'criteria' => [
+                        'group_ids' => $groupId,
+                    ],
+                ];
+
+                $getGroups = Request::create('/api/listGroups', 'POST', $post);
+                $apiGroups = new ApiOrganisation($getGroups);
+                $groupResponse = $apiGroups->listGroups($getGroups)->getData();
+
+                if ($groupResponse->success) {
+                    $dataset->groups = $groupResponse->groups;
                 }
 
                 $setGroups = $groupId;
@@ -807,6 +821,78 @@ class UserController extends Controller {
             $buttons[$resource->uri]['view'] = $rightCheck;
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addToGroup'] = $rightCheck;
+        $groups = $setGroups = [];
+
+        if ($buttons['addToGroup']) {
+            $groups = $this->prepareGroups();
+        }
+
+        if (!empty($datasetData->groups)) {
+            foreach ($datasetData->groups as $record) {
+                $setGroups[] = (int) $record->id;
+            }
+        }
+
+        // handle groups change
+        if ($request->has('save')) {
+            $groupId = $request->offsetGet('group_id');
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
+
+            // if all groups are deselected
+            if (count($setGroups) && is_null($groupId)) {
+                $post['group_id'] = $setGroups;
+                $removeGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $post);
+                $api = new ApiDataSet($removeGroup);
+                $remove = $api->removeDatasetFromGroup($removeGroup)->getData();
+
+                if (!$remove->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($remove->errors);
+                }
+
+                $datasetData->groups = $setGroups = [];
+            }
+
+            if (!is_null($groupId)) {
+                $post['group_id'] = $groupId;
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $api = new ApiDataSet($addGroup);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+
+                $post = [ 'criteria' => [
+                        'group_ids' => $groupId,
+                    ],
+                ];
+
+                $getGroups = Request::create('/api/listGroups', 'POST', $post);
+                $apiGroups = new ApiOrganisation($getGroups);
+                $groupResponse = $apiGroups->listGroups($getGroups)->getData();
+
+                if ($groupResponse->success) {
+                    $datasetData->groups = $groupResponse->groups;
+                }
+
+                $setGroups = $groupId;
+            }
+        }
+
         // handle dataset delete
         if ($request->has('delete')) {
             if ($this->datasetDelete($uri)) {
@@ -824,6 +910,8 @@ class UserController extends Controller {
             'user/orgDatasetView',
             [
                 'class'         => 'user',
+                'groups'        => $groups,
+                'setGroups'     => $setGroups,
                 'dataset'       => $datasetData,
                 'resources'     => $resources->resources,
                 'activeMenu'    => 'organisation',
@@ -1630,8 +1718,6 @@ class UserController extends Controller {
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
             if ($response['success']) {
-                $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                 if ($data['type'] == Resource::TYPE_HYPERLINK) {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
@@ -1718,6 +1804,8 @@ class UserController extends Controller {
                     'is_reported'           => is_null($request->offsetGet('reported'))
                         ? Resource::REPORTED_FALSE
                         : Resource::REPORTED_TRUE,
+                    'upl_freq_type'         => $request->offsetGet('upl_freq_type'),
+                    'upl_freq'              => $request->offsetGet('upl_freq'),
                 ];
 
                 if ($resource->resource_type == Resource::TYPE_HYPERLINK) {
@@ -1818,8 +1906,6 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/user/resource/view/'. $response['uri']);
                     }
@@ -1895,8 +1981,6 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
@@ -1970,8 +2054,6 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
                 if ($response['success']) {
-                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
-
                     if ($data['type'] == Resource::TYPE_HYPERLINK) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
@@ -3110,7 +3192,7 @@ class UserController extends Controller {
                 ];
 
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {
-                    $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                    $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                     $m->to($mailData['mail'], $mailData['user']);
                     $m->subject(__('custom.mail_change'));
                 });
@@ -3321,7 +3403,9 @@ class UserController extends Controller {
      */
     public function newsFeed(Request $request)
     {
-        $user = Auth::user();
+        $user = isset($request->news_user_id)
+            ? User::where('id', $request->news_user_id)->first()
+            : Auth::user();
 
         if ($user) {
             $filter = $request->offsetGet('filter');
@@ -3657,7 +3741,14 @@ class UserController extends Controller {
                     }
 
                     $criteria['actions'] = array_keys($actTypes);
-                    $perPage = 5;
+
+                    if (isset($request->newsletter)) {
+                        $criteria = $request->all();
+                    }
+
+                    $criteria['period_from'] = !empty($request->from) ? $request->from : null;
+                    $criteria['period_to'] = !empty($request->to) ? $request->to : null;
+                    $perPage = isset($request->perPage) ? $request->perPage : 5;
                     $params = [
                         'api_key'          => $user->api_key,
                         'criteria'         => $criteria,
@@ -3931,7 +4022,7 @@ class UserController extends Controller {
             ];
 
             Mail::send('mail/confirmationMail', $mailData, function ($m) use ($mailData) {
-                $m->from(env('MAIL_FROM', 'no-reply@finite-soft.com'), env('APP_NAME'));
+                $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
                 $m->to($mailData['mail'], $mailData['user']);
                 $m->subject(__('custom.register_confirmation'));
             });
@@ -4334,26 +4425,26 @@ class UserController extends Controller {
      */
     public function groups(Request $request)
     {
+        $class = 'user';
+        $groups = [];
+        $perPage = 6;
+
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
             RoleRight::RIGHT_VIEW
         );
 
-        $buttons['add'] = $rightCheck;
         $buttons['view'] = $rightCheck;
 
         if (!$rightCheck) {
             return view('user/groups', [
-                'class'         => 'user',
+                'class'         => $class,
                 'groups'        => [],
                 'pagination'    => null,
                 'buttons'       => $buttons
             ]);
         }
 
-        $class = 'user';
-        $groups = [];
-        $perPage = 6;
         $params = [
             'api_key'          => \Auth::user()->api_key,
             'criteria'         => [
@@ -4377,7 +4468,6 @@ class UserController extends Controller {
         );
 
         $buttons['add'] = $rightCheck;
-        $buttons['view'] = $rightCheck;
 
         foreach ($groups as $group) {
             $rightCheck = RoleRight::checkUserRight(
@@ -4396,20 +4486,6 @@ class UserController extends Controller {
 
             $rightCheck = RoleRight::checkUserRight(
                 Module::GROUPS,
-                RoleRight::RIGHT_EDIT,
-                [
-                    'group_id'       => $group->id
-                ],
-                [
-                    'created_by'    => $group->created_by,
-                    'group_ids'     => [$group->id]
-                ]
-            );
-
-            $buttons[$group->uri]['edit'] = $rightCheck;
-
-            $rightCheck = RoleRight::checkUserRight(
-                Module::GROUPS,
                 RoleRight::RIGHT_ALL,
                 [
                     'group_id'       => $group->id
@@ -4420,13 +4496,14 @@ class UserController extends Controller {
                 ]
             );
 
+            $buttons[$group->uri]['edit'] = $rightCheck;
             $buttons[$group->uri]['delete'] = $rightCheck;
         }
 
         $paginationData = $this->getPaginationData($groups, count($groups), [], $perPage);
 
         return view('/user/groups', [
-            'class'         => 'user',
+            'class'         => $class,
             'groups'        => $paginationData['items'],
             'pagination'    => $paginationData['paginate'],
             'buttons'       => $buttons,
@@ -4453,21 +4530,8 @@ class UserController extends Controller {
         $groupData = !empty($groupData->data) ? $groupData->data : null;
 
         if (!$groupData) {
-            return back();
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_group_found')));
         }
-
-        $rightCheck = RoleRight::checkUserRight(
-            Module::GROUPS,
-            RoleRight::RIGHT_EDIT,
-            [
-                'group_id'       => $groupData->id
-            ],
-            [
-                'group_ids'      => [$groupData->id]
-            ]
-        );
-
-        $buttons[$groupData->uri]['edit'] = $rightCheck;
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
@@ -4480,18 +4544,19 @@ class UserController extends Controller {
             ]
         );
 
+        $buttons[$groupData->uri]['edit'] = $rightCheck;
         $buttons[$groupData->uri]['delete'] = $rightCheck;
 
-            $request = Request::create('/api/getGroupDetails', 'POST', [
-                'group_id'  => $orgId,
-                'locale'    => \LaravelLocalization::getCurrentLocale(),
-            ]);
-            $api = new ApiOrganisation($request);
-            $result = $api->getGroupDetails($request)->getData();
+        $request = Request::create('/api/getGroupDetails', 'POST', [
+            'group_id'  => $orgId,
+            'locale'    => \LaravelLocalization::getCurrentLocale(),
+        ]);
+        $api = new ApiOrganisation($request);
+        $result = $api->getGroupDetails($request)->getData();
 
-            if ($result->success) {
-                return view('user/groupView', ['class' => 'user', 'group' => $result->data, 'id' => $orgId, 'buttons' => $buttons]);
-            }
+        if ($result->success) {
+            return view('user/groupView', ['class' => 'user', 'group' => $result->data, 'id' => $orgId, 'buttons' => $buttons]);
+        }
 
         return redirect('/user/groups');
     }
@@ -4506,24 +4571,35 @@ class UserController extends Controller {
      */
     public function deleteGroup(Request $request, $id)
     {
-        $orgId = Organisation::where('id', $id)
-            ->where('type', Organisation::TYPE_GROUP)
-            ->value('id');
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_ALL,
+            [
+                'group_id'  => $id
+            ],
+            [
+                'group_ids' => [$id]
+            ]
+        );
 
-            $delArr = [
-                'api_key'   => Auth::user()->api_key,
-                'group_id'  => $id,
-            ];
+        if (!$rightCheck) {
+            return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.access_denied')));
+        }
 
-            $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
-            $api = new ApiOrganisation($delReq);
-            $result = $api->deleteGroup($delReq)->getData();
+        $delArr = [
+            'api_key'   => Auth::user()->api_key,
+            'group_id'  => $id,
+        ];
 
-            if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
+        $delReq = Request::create('/api/deleteGroup', 'POST', $delArr);
+        $api = new ApiOrganisation($delReq);
+        $result = $api->deleteGroup($delReq)->getData();
 
-                return redirect('/user/groups');
-            }
+        if ($result->success) {
+            $request->session()->flash('alert-success', __('custom.delete_success'));
+
+            return redirect('/user/groups');
+        }
 
         $request->session()->flash('alert-danger', __('custom.delete_error'));
 
@@ -4554,12 +4630,12 @@ class UserController extends Controller {
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
-            RoleRight::RIGHT_EDIT,
+            RoleRight::RIGHT_ALL,
             [
-                'group_id'       => $groupData->id
+                'group_id'  => $groupData->id
             ],
             [
-                'group_ids'     => [$groupData->id]
+                'group_ids' => [$groupData->id]
             ]
         );
 
@@ -4966,6 +5042,78 @@ class UserController extends Controller {
             $buttons[$resource->uri]['view'] = $rightCheck;
         }
 
+        $rightCheck = RoleRight::checkUserRight(
+            Module::GROUPS,
+            RoleRight::RIGHT_EDIT
+        );
+
+        $buttons['addToGroup'] = $rightCheck;
+        $groups = $setGroups = [];
+
+        if ($buttons['addToGroup']) {
+            $groups = $this->prepareGroups();
+        }
+
+        if (!empty($datasetData->groups)) {
+            foreach ($datasetData->groups as $record) {
+                $setGroups[] = (int) $record->id;
+            }
+        }
+
+        // handle groups change
+        if ($request->has('save')) {
+            $groupId = $request->offsetGet('group_id');
+            $post = [
+                'api_key'       => Auth::user()->api_key,
+                'data_set_uri'  => $uri,
+                'group_id'      => $groupId,
+            ];
+
+            // if all groups are deselected
+            if (count($setGroups) && is_null($groupId)) {
+                $post['group_id'] = $setGroups;
+                $removeGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $post);
+                $api = new ApiDataSet($removeGroup);
+                $remove = $api->removeDatasetFromGroup($removeGroup)->getData();
+
+                if (!$remove->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($remove->errors);
+                }
+
+                $datasetData->groups = $setGroups = [];
+            }
+
+            if (!is_null($groupId)) {
+                $post['group_id'] = $groupId;
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
+                $api = new ApiDataSet($addGroup);
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+
+                    return redirect()->back()->withInput()->withErrors($added->errors);
+                }
+
+                $post = [ 'criteria' => [
+                        'group_ids' => $groupId,
+                    ],
+                ];
+
+                $getGroups = Request::create('/api/listGroups', 'POST', $post);
+                $apiGroups = new ApiOrganisation($getGroups);
+                $groupResponse = $apiGroups->listGroups($getGroups)->getData();
+
+                if ($groupResponse->success) {
+                    $datasetData->groups = $groupResponse->groups;
+                }
+
+                $setGroups = $groupId;
+            }
+        }
+
         // handle dataset delete
         if ($request->has('delete')) {
             if ($this->datasetDelete($uri)) {
@@ -4983,6 +5131,8 @@ class UserController extends Controller {
             'user/groupDatasetView',
             [
                 'class'         => 'user',
+                'groups'        => $groups,
+                'setGroups'     => $setGroups,
                 'dataset'       => $datasetData,
                 'resources'     => $resources->resources,
                 'activeMenu'    => 'group',
@@ -5356,20 +5506,6 @@ class UserController extends Controller {
 
             $rightCheck = RoleRight::checkUserRight(
                 Module::GROUPS,
-                RoleRight::RIGHT_EDIT,
-                [
-                    'group_id'       => $group->id
-                ],
-                [
-                    'created_by'    => $group->created_by,
-                    'group_ids'     => [$group->id]
-                ]
-            );
-
-            $buttons[$group->uri]['edit'] = $rightCheck;
-
-            $rightCheck = RoleRight::checkUserRight(
-                Module::GROUPS,
                 RoleRight::RIGHT_ALL,
                 [
                     'group_id'       => $group->id
@@ -5380,6 +5516,7 @@ class UserController extends Controller {
                 ]
             );
 
+            $buttons[$group->uri]['edit'] = $rightCheck;
             $buttons[$group->uri]['delete'] = $rightCheck;
         }
 
@@ -5404,9 +5541,9 @@ class UserController extends Controller {
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
-            RoleRight::RIGHT_EDIT,
+            RoleRight::RIGHT_ALL,
             [
-                'group_id'       => $group->id
+                'group_id'  => $group->id
             ],
             [
                 'created_by'    => $group->created_by,
@@ -5415,28 +5552,15 @@ class UserController extends Controller {
         );
 
         $buttons[$group->id]['edit'] = $rightCheck;
-
-        $rightCheck = RoleRight::checkUserRight(
-            Module::GROUPS,
-            RoleRight::RIGHT_ALL,
-            [
-                'group_id'       => $group->id
-            ],
-            [
-                'created_by'    => $group->created_by,
-                'group_ids'     => [$group->id]
-            ]
-        );
-
         $buttons[$group->id]['deleteMember'] = $rightCheck;
 
         if ($group) {
             if ($request->has('edit_member')) {
                 $rightCheck = RoleRight::checkUserRight(
                     Module::GROUPS,
-                    RoleRight::RIGHT_EDIT,
+                    RoleRight::RIGHT_ALL,
                     [
-                        'group_id'       => $group->id
+                        'group_id'  => $group->id
                     ]
                 );
 
@@ -5470,10 +5594,10 @@ class UserController extends Controller {
                     Module::GROUPS,
                     RoleRight::RIGHT_ALL,
                     [
-                        'group_id'       => $group->id
+                        'group_id'  => $group->id
                     ],
                     [
-                        'group_ids'      => [$group->id]
+                        'group_ids' => [$group->id]
                     ]
                 );
 
@@ -5493,12 +5617,12 @@ class UserController extends Controller {
             if ($request->has('invite_existing')) {
                 $rightCheck = RoleRight::checkUserRight(
                     Module::GROUPS,
-                    RoleRight::RIGHT_EDIT,
+                    RoleRight::RIGHT_ALL,
                     [
-                        'group_id'       => $group->id
+                        'group_id'  => $group->id
                     ],
                     [
-                        'group_ids'      => [$group->id]
+                        'group_ids' => [$group->id]
                     ]
                 );
 
@@ -5529,12 +5653,12 @@ class UserController extends Controller {
             if ($request->has('invite')) {
                 $rightCheck = RoleRight::checkUserRight(
                     Module::GROUPS,
-                    RoleRight::RIGHT_EDIT,
+                    RoleRight::RIGHT_ALL,
                     [
-                        'group_id'       => $group->id
+                        'group_id'  => $group->id
                     ],
                     [
-                        'group_ids'      => [$group->id]
+                        'group_ids' => [$group->id]
                     ]
                 );
 
@@ -5622,7 +5746,7 @@ class UserController extends Controller {
 
         $rightCheck = RoleRight::checkUserRight(
             Module::GROUPS,
-            RoleRight::RIGHT_EDIT,
+            RoleRight::RIGHT_ALL,
             [
                 'group_id'       => $group->id
             ]
@@ -5965,5 +6089,64 @@ class UserController extends Controller {
         }
 
         return back();
+    }
+
+    public function sendEventNewsletter($data)
+    {
+        $column = null;
+        $modules = Module::getModules();
+
+        switch ($data['module_name']) {
+            case $modules[Module::ORGANISATIONS]:
+                $column = 'org_id';
+                break;
+            case $modules[Module::DATA_SETS]:
+                $column = 'data_set_id';
+                break;
+            default:
+                break;
+        }
+
+        if ($column) {
+            $follows = UserFollow::where($column, $data['action_object'])
+                ->with('user')
+                ->get();
+
+            if (count($follows)) {
+                foreach ($follows as $follow) {
+                    $user = $follow->user;
+                    $params = [
+                        'user_id'      => $data['user_id'],
+                        'actions'      => [$data['action']],
+                        'ip_address'   => $data['ip_address'],
+                        $column .'s'   => [$data['action_object']],
+                        'newsletter'   => 1,
+                        'news_user_id' => $user->id,
+                    ];
+
+                    $url = '/user/newsFeed?perPage=5000&'. http_build_query($params);
+                    $rq = Request::create($url, 'GET', []);
+                    $userController = new UserController($rq);
+                    $newsResult = $userController->newsFeed($rq)->getData();
+
+                    if (isset($newsResult['actionsHistory']) && is_array($newsResult['actionsHistory'])) {
+                        $newsResult['actionsHistory'] = [$newsResult['actionsHistory'][0]];
+
+                        $usrDetails = ['user' => $user->firstname, 'mail' => $user->email];
+                        $mailData = is_array($newsResult)
+                            ? array_merge($usrDetails, $newsResult)
+                            : $usrDetails;
+
+                        Mail::send('mail/newsletter', $mailData, function ($m) use ($mailData) {
+                            $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
+                            $m->to($mailData['mail'], $mailData['user']);
+                            $m->subject(__('custom.newsletter'));
+                        });
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }

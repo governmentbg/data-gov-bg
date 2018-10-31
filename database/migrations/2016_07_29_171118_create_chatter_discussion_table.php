@@ -7,7 +7,7 @@ class CreateChatterDiscussionTable extends Migration
 {
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             Schema::create('chatter_discussion', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('chatter_category_id')->unsigned()->default('1');

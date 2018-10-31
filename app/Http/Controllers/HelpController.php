@@ -81,7 +81,7 @@ class HelpController extends Controller
         ]);
     }
 
-    public function view(Request $request, $id)
+    public function view(Request $request, $id, $activePage = null)
     {
         $section = HelpSection::find($id);
         $params = [];
@@ -112,6 +112,7 @@ class HelpController extends Controller
             'subsections'       => $subsections,
             'pages'             => $pages,
             'class'             => 'index',
+            'activePage'        => $activePage,
         ]);
     }
 

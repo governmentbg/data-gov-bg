@@ -73,7 +73,7 @@
                                 @endif
                                 @if (isset($group->custom_fields[0]) && !empty($group->custom_fields[0]->key))
                                     <div class="col-sm-8 col-xs-12 p-l-none article pull-left">
-                                        <p><b>{{ __('custom.additional_fields') }}:</b></p>
+                                        <p><b>{{ __('custom.additional_info') }}:</b></p>
                                         @foreach ($group->custom_fields as $field)
                                             <div class="row">
                                                 <div class="col-xs-6">{{ $field->key }}</div>

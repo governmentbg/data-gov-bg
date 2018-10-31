@@ -22,7 +22,7 @@ class InsertBaseLanguagesInLocale extends Migration
      */
     public function up()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             if (!Locale::all()->count()) {
                 foreach ($this->languages as $language => $active) {
                     Locale::create([
@@ -41,7 +41,7 @@ class InsertBaseLanguagesInLocale extends Migration
      */
     public function down()
     {
-        if (!env('IS_TOOL')) {
+        if (!config('app.IS_TOOL')) {
             foreach ($this->languages as $language) {
                 if (!Locale::where('locale', $language)->count()) {
                     Locale::where(['locale' => $language['name']])->delete();

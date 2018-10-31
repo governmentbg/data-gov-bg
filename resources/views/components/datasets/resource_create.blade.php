@@ -116,6 +116,40 @@
                     <span class="error">{{ $errors->first('post_data') }}</span>
                 </div>
             </div>
+
+            <div class="js-ress-api form-group row">
+                <label
+                    class="col-sm-3 col-xs-12 col-form-label"
+                >{{ __('custom.type_upl_freq') }}:</label>
+                <div class="col-sm-9">
+                    <select
+                        class="js-select input-border-r-12 form-control"
+                        name="upl_freq_type"
+                    >
+                        <option value="">{{ __('custom.type_upl_freq') }}</option>
+                        @foreach (App\Http\Controllers\ToolController::getFreqTypes() as $id => $freqType)
+                            <option
+                                value="{{ $id }}"
+                                {{ $id == old('upl_freq_type') ? 'selected' : '' }}
+                            >{{ $freqType }}</option>
+                        @endforeach
+                    </select>
+                    <span class="error">{{ $errors->first('upl_freq_type') }}</span>
+                </div>
+            </div>
+
+            <div class="form-group row js-ress-api">
+                <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.value_upl_freq') }}:</label>
+                <div class="col-sm-9">
+                    <input
+                        class="input-border-r-12 form-control"
+                        name="upl_freq"
+                        type="number"
+                        value="{{ old('upl_freq') }}"
+                    >
+                    <span class="error">{{ $errors->first('upl_freq') }}</span>
+                </div>
+            </div>
         </div>
 
         <div class="form-group row">

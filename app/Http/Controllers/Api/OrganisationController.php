@@ -160,7 +160,7 @@ class OrganisationController extends ApiController
                     }
                 }
 
-                if (!empty($data['approved'])) {
+                if (!empty($data['approved']) && Role::isAdmin()) {
                     $organisation->approved = $data['approved'];
                 } else {
                     $organisation->approved = \Auth::user()->approved;
@@ -394,7 +394,7 @@ class OrganisationController extends ApiController
                     $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-                if (!empty($data['approved'])) {
+                if (!empty($data['approved']) && Role::isAdmin()) {
                     $orgData['approved'] = $data['approved'];
                 } else {
                     $orgData['approved'] = Organisation::APPROVED_FALSE;
@@ -1539,7 +1539,7 @@ class OrganisationController extends ApiController
         if ($group) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::GROUPS,
-                RoleRight::RIGHT_EDIT,
+                RoleRight::RIGHT_ALL,
                 [
                     'group_id'       => $group->id
                 ],
@@ -1678,24 +1678,6 @@ class OrganisationController extends ApiController
         ]);
 
         $group = Organisation::find($request->group_id);
-
-        if ($group) {
-            $rightCheck = RoleRight::checkUserRight(
-                Module::GROUPS,
-                RoleRight::RIGHT_ALL,
-                [
-                    'group_id'       => $group->id
-                ],
-                [
-                    'created_by'    => $group->created_by,
-                    'group_ids'      => [$group->id]
-                ]
-            );
-
-            if (!$rightCheck) {
-                return $this->errorResponse(__('custom.access_denied'));
-            }
-        }
 
         if (empty($group) || $group->type != Organisation::TYPE_GROUP) {
             return $this->errorResponse(__('custom.no_group_found'));

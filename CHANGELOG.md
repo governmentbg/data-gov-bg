@@ -13,6 +13,34 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.0] - 2018-10-31
+### Added
+- Resource update equal data in previous version check
+- Tool mail notifications
+- Resource queries tool in admin add pages section
+- Send query button functionality for the tool
+- Edit saved query functionality for the tool
+- Send newsletters
+- Tool installation and docker files
+- Automated api resource upload
+- Api getResourceView function
+
+### Changed
+- Search engine sqlite indexes to mysql
+- Add admin check for editing and adding organisations
+- Tool file uploads with docker volume
+
+### Remove
+- Cron job for sqlite index updates
+
+### Fixed
+- Help page stays open after being selected
+- Images uploaded from admin panel show for all users
+- If help page is inactive you can go to edit from the help sidebar
+- Timezone to Europe/Sofia
+- Resource from docx
+- Resource visualisation ordering
+
 ## [0.6.5] - 2018-10-24
 ### Added
 - Users can add datasets to groups from a public dataset view
@@ -32,6 +60,8 @@ Security - in case of vulnerabilities.
 - Connection to APIs for resource data
 - On user login set locale from user settings
 - listUsers() response in xml and without api key
+- Cyrillic letters in downloaded json
+- Dataset filters in public section
 
 ## [0.6.4] - 2018-10-19
 ### Added
@@ -144,6 +174,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.5...v1.0.0
 [0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.2...v0.6.3

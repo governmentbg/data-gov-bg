@@ -16517,6 +16517,132 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   text-overflow: ellipsis;
 }
 
+.resource-query {
+  border: 1px solid #108f9e;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.dots-loader {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.dots-loader div {
+  position: absolute;
+  top: 27px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #108f9e;
+  -webkit-animation-timing-function: cubic-bezier(0, 1, 1, 0);
+          animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.dots-loader div:nth-child(1) {
+  left: 6px;
+  -webkit-animation: dots-loader1 0.6s infinite;
+          animation: dots-loader1 0.6s infinite;
+}
+
+.dots-loader div:nth-child(2) {
+  left: 6px;
+  -webkit-animation: dots-loader2 0.6s infinite;
+          animation: dots-loader2 0.6s infinite;
+}
+
+.dots-loader div:nth-child(3) {
+  left: 26px;
+  -webkit-animation: dots-loader2 0.6s infinite;
+          animation: dots-loader2 0.6s infinite;
+}
+
+.dots-loader div:nth-child(4) {
+  left: 45px;
+  -webkit-animation: dots-loader3 0.6s infinite;
+          animation: dots-loader3 0.6s infinite;
+}
+
+@-webkit-keyframes dots-loader1 {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  }
+
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+
+@keyframes dots-loader1 {
+  0% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  }
+
+  100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+
+@-webkit-keyframes dots-loader3 {
+  0% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+
+  100% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  }
+}
+
+@keyframes dots-loader3 {
+  0% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+
+  100% {
+    -webkit-transform: scale(0);
+            transform: scale(0);
+  }
+}
+
+@-webkit-keyframes dots-loader2 {
+  0% {
+    -webkit-transform: translate(0, 0);
+            transform: translate(0, 0);
+  }
+
+  100% {
+    -webkit-transform: translate(19px, 0);
+            transform: translate(19px, 0);
+  }
+}
+
+@keyframes dots-loader2 {
+  0% {
+    -webkit-transform: translate(0, 0);
+            transform: translate(0, 0);
+  }
+
+  100% {
+    -webkit-transform: translate(19px, 0);
+            transform: translate(19px, 0);
+  }
+}
+
+.js-loader {
+  height: 80px;
+}
+
 .container .filter-content .filter-type,
 .container .filter-content .sort-by {
   display: inline-block;

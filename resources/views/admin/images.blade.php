@@ -10,9 +10,10 @@
         @include('partials.pagination')
         <div class="row m-b-sm">
             <div class="col-xs-12 text-right">
-                <span class="badge badge-pill doc-badge">
-                    <a href="{{ url('/admin/images/add') }}">{{ __('custom.add') }}</a>
-                </span>
+                <a
+                    class="btn btn-primary add pull-right"
+                    href="{{ url('/admin/images/add') }}"
+                >{{ __('custom.add') }}</a>
             </div>
         </div>
         <div class="row m-b-lg">

@@ -141,6 +141,7 @@ class SectionController extends AdminController
             $params = [
                 'records_per_page' => $perPage,
                 'page_number'      => !empty($request->page) ? $request->page : 1,
+                'api_key'          => Auth::user()->api_key,
                 'criteria'         => [
                     'id' => $id
                 ]

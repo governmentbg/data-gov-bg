@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Forum discussions for public data section
 - Admin inactive sections preview
+- Admin inactive help sections creation
 
 ## [1.0.0] - 2018-10-31
 ### Added

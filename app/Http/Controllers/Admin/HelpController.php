@@ -101,7 +101,7 @@ class HelpController extends AdminController
                     'name'      => $request->offsetGet('name'),
                     'title'     => $request->offsetGet('title'),
                     'parent_id' => $request->offsetGet('parent'),
-                    'active'    => $request->offsetGet('active') ?: false,
+                    'active'    => $request->offsetGet('active'),
                     'ordering'  => $request->offsetGet('ordering'),
                 ],
             ]);

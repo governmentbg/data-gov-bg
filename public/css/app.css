@@ -16482,6 +16482,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   border: 1px solid #145c99;
 }
 
+.forum-box.data {
+  border: 1px solid #4e57aa;
+}
+
 .modal-content {
   padding: 0 5px;
 }

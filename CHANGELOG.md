@@ -16,6 +16,9 @@ Security - in case of vulnerabilities.
 - Forum discussions for public data section
 - Admin inactive sections preview
 - Admin inactive help sections creation
+- Api missing routes error
+- Api groups and organisations unique id error message
+- Api groups and organisations image upload
 
 ## [1.0.0] - 2018-10-31
 ### Added

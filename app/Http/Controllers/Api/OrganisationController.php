@@ -118,7 +118,7 @@ class OrganisationController extends ApiController
             if (isset($data['logo_filename']) && isset($data['logo_mimetype']) && isset($data['logo_data'])) {
                 $organisation->logo_file_name = $data['logo_filename'];
                 $organisation->logo_mime_type = $data['logo_mimetype'];
-                $organisation->logo_data = $data['logo_data'];
+                $organisation->logo_data = base64_decode($data['logo_data']);
             }
 
             if (isset($organisation->logo_data) && !$this->checkImageSize($organisation->logo_data)) {
@@ -340,7 +340,7 @@ class OrganisationController extends ApiController
         if (isset($data['logo_filename']) && isset($data['logo_mimetype']) && isset($data['logo_data'])) {
             $orgData['logo_file_name'] = $data['logo_filename'];
             $orgData['logo_mime_type'] = $data['logo_mimetype'];
-            $orgData['logo_data'] = $data['logo_data'];
+            $orgData['logo_data'] = base64_decode($data['logo_data']);
         }
 
         if (
@@ -1329,7 +1329,7 @@ class OrganisationController extends ApiController
      */
     public function addGroup(Request $request)
     {
-        $post = $request->offsetGet('data');
+        $post = $request->get('data', []);
 
         $validator = \Validator::make($post, [
             'locale'                => 'nullable|string|max:5',
@@ -1362,14 +1362,16 @@ class OrganisationController extends ApiController
         if (!empty($post['logo'])) {
             try {
                 $img = \Image::make($post['logo']);
+
                 $newGroup->logo_file_name = empty($post['logo_filename'])
                     ? basename($post['logo'])
                     : $post['logo_filename'];
                 $newGroup->logo_mime_type = $img->mime();
-
                 $temp = tmpfile();
                 $path = stream_get_meta_data($temp)['uri'];
+
                 $img->save($path);
+
                 $newGroup->logo_data = file_get_contents($path);
 
                 fclose($temp);
@@ -1379,10 +1381,10 @@ class OrganisationController extends ApiController
             }
         }
 
-        if (isset($post['logo_filename']) && isset ($post['logo_mimetype']) && isset($post['logo_data'])) {
+        if (isset($post['logo_filename']) && isset($post['logo_mimetype']) && isset($post['logo_data'])) {
             $newGroup->logo_file_name = $post['logo_filename'];
             $newGroup->logo_mime_type = $post['logo_mimetype'];
-            $newGroup->logo_data = $post['logo_data'];
+            $newGroup->logo_data = base64_decode($post['logo_data']);
         }
 
         if (isset($newGroup->logo_data)) {
@@ -1404,7 +1406,6 @@ class OrganisationController extends ApiController
         }
 
         if (!$validator->fails()) {
-
             if (!isset($newGroup->logo_data) || !$imageError) {
                 $locale = isset($post['locale']) ? $post['locale'] : null;
 
@@ -1577,7 +1578,7 @@ class OrganisationController extends ApiController
         if (isset($data['logo_file_name']) && isset($data['logo_mime_type']) && isset($data['logo_data'])) {
             $newGroupData['logo_file_name'] = $data['logo_file_name'];
             $newGroupData['logo_mime_type'] = $data['logo_mime_type'];
-            $newGroupData['logo_data'] = $data['logo_data'];
+            $newGroupData['logo_data'] = base64_decode($data['logo_data']);
         }
 
         if (isset($group->logo_data)) {

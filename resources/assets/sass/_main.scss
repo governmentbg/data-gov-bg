@@ -1214,11 +1214,15 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
     padding: 10px;
 
     &.news {
-        border: 1px solid #0a7b5d;
+        border: 1px solid $themeNews;
     }
 
     &.documents {
-        border: 1px solid #145c99;
+        border: 1px solid $themeDocuments;
+    }
+
+    &.data {
+        border: 1px solid $themeData;
     }
 }
 

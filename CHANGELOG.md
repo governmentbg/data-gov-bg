@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Forum discussions for public data section
 
 ## [1.0.0] - 2018-10-31
 ### Added

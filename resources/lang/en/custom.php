@@ -310,6 +310,7 @@ return [
     'add_action_fail' => 'Add action history failure',
     'list_act_types_fail' => 'List action types failure',
     'general' => 'General',
+    'unknown_error' => 'Unknown method',
     'data_failure' => 'Get data failure',
     'access_denied' => 'Access denied',
     'add_main_category' => 'Add main category failure',

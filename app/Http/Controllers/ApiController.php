@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 class ApiController extends Controller
 {
     const ERROR_GENERAL = 'custom.general';
+    const ERROR_MISSING = 'custom.unknown_error';
+
     const DEFAULT_RECORDS_PER_PAGE = 50;
     const MAX_RECORDS_PER_PAGE = 100;
 
@@ -31,6 +33,16 @@ class ApiController extends Controller
         if (is_null(self::$format) || $validator->fails()) {
             self::$format = 'json';
         }
+    }
+
+    /**
+     * Handle 404 errors
+     *
+     * @return json
+     */
+    public function handleMissingRoutes(Request $request)
+    {
+        return $this->errorResponse(null, [], 404, self::ERROR_MISSING);
     }
 
     /**

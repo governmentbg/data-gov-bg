@@ -18,8 +18,10 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->route()->getPrefix() == 'api') {
-            $controller = explode('@', class_basename($request->route()->getAction()['controller']))[0];
+        $action = $request->route()->getAction();
+
+        if ($request->route()->getPrefix() == 'api' && isset($action['controller'])) {
+            $controller = explode('@', class_basename($action['controller']))[0];
 
             if ($controller != 'LocaleController') {
                 if (isset($request->locale)) {

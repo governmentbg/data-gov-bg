@@ -20,6 +20,9 @@ Security - in case of vulnerabilities.
 - Api groups and organisations unique id error message
 - Api groups and organisations image upload
 
+### Changed
+- Statistics and analytics link in admin navigation bar
+
 ## [1.0.0] - 2018-10-31
 ### Added
 - Resource update equal data in previous version check

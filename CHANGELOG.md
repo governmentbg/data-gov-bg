@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Forum discussions for public data section
+- Admin inactive sections preview
 
 ## [1.0.0] - 2018-10-31
 ### Added

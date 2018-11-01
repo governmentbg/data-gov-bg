@@ -228,3 +228,5 @@ Route::post('getLocaleDetails', 'Api\LocaleController@getLocaleDetails');
 
 Route::post('forgottenPassword', 'Api\UserController@forgottenPassword');
 Route::post('passwordReset', 'Api\UserController@passwordReset');
+
+Route::any('{catchall}', 'ApiController@handleMissingRoutes')->where('catchall', '(.*)');

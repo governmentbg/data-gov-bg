@@ -17559,6 +17559,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   padding: 0px;
   margin-bottom: -10px;
   display: inline-block;
+  font-size: 0;
 }
 
 .theme-user .inline-block {

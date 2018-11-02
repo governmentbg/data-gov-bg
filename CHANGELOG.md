@@ -19,6 +19,8 @@ Security - in case of vulnerabilities.
 - Api missing routes error
 - Api groups and organisations unique id error message
 - Api groups and organisations image upload
+- Main category adding
+- Main category without image showing
 
 ### Changed
 - Statistics and analytics link in admin navigation bar

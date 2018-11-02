@@ -12,6 +12,12 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Statistics and analytics link in admin navigation bar
+
+### Changed
+- Images and documents to database instead of files
+
 ### Fixed
 - Forum discussions for public data section
 - Admin inactive sections preview
@@ -22,9 +28,7 @@ Security - in case of vulnerabilities.
 - Main category adding
 - Main category without image showing
 - User rights on resources in user panel
-
-### Changed
-- Statistics and analytics link in admin navigation bar
+- Microsoft Edge help icon fix
 
 ## [1.0.0] - 2018-10-31
 ### Added

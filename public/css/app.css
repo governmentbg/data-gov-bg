@@ -21679,6 +21679,7 @@ nav .tool-version:hover {
   position: absolute;
   padding-left: 5px;
   height: 21px;
+  width: 26px;
   cursor: pointer;
 }
 

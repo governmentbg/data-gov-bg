@@ -15,15 +15,8 @@ use Illuminate\Database\QueryException;
 
 class DocumentController extends ApiController
 {
-    private $path;
-
     public function __construct()
     {
-        $this->path = storage_path('docs') .'/';
-
-        if (!is_dir($this->path)) {
-            mkdir($this->path);
-        }
     }
 
     /**
@@ -90,30 +83,24 @@ class DocumentController extends ApiController
                 $doc->descript = $this->trans($post['data']['locale'], $post['data']['description']);
                 $doc->file_name = $post['data']['filename'];
                 $doc->mime_type = $post['data']['mimetype'];
-
                 $doc->forum_link = isset($post['data']['forum_link']) ? $post['data']['forum_link'] : null;
+                $data = base64_decode($post['data']['data']);
+
+                $doc->data = $data;
                 $doc->save();
 
-                if ($this->checkFileSize($post['data']['data'])) {
-                    $doc->save();
+                DB::commit();
 
-                    file_put_contents($this->path . $doc->id, $post['data']['data']);
+                $logData = [
+                    'module_name'      => Module::getModuleName(Module::DOCUMENTS),
+                    'action'           => ActionsHistory::TYPE_ADD,
+                    'action_object'    => $doc->id,
+                    'action_msg'       => 'Added new document',
+                ];
 
-                    DB::commit();
+                Module::add($logData);
 
-                    $logData = [
-                        'module_name'      => Module::getModuleName(Module::DOCUMENTS),
-                        'action'           => ActionsHistory::TYPE_ADD,
-                        'action_object'    => $doc->id,
-                        'action_msg'       => 'Added new document',
-                    ];
-
-                    Module::add($logData);
-
-                    return $this->successResponse(['doc_id' => $doc->id]);
-                }
-
-                $validator->errors()->add('logo', $this->getFileSizeError());
+                return $this->successResponse(['doc_id' => $doc->id]);
             } catch (\Exception $ex) {
                 DB::rollback();
 
@@ -122,37 +109,6 @@ class DocumentController extends ApiController
         }
 
         return $this->errorResponse(__('custom.add_document_fail'), $validator->errors()->messages());
-    }
-
-    /**
-     * Append provided data to a document
-     *
-     * @param array data - required
-     * @param int data[doc_id] - required
-     * @param string data[data] - required
-     *
-     * @return json response with doc id or error message
-     */
-    public function appendDocumentData(Request $request)
-    {
-        $data = $request->all();
-
-        $validator = Validator::make($data, [
-            'doc_id'    => 'required|int|exists:documents,id',
-            'data'      => 'required|string',
-        ]);
-
-        if (!$validator->fails()) {
-            try {
-                file_put_contents($this->path . $data['doc_id'], $data['data'], FILE_APPEND);
-
-                return $this->successResponse();
-            } catch (\Exception $ex) {
-                Log::error($ex->getMessage());
-            }
-        }
-
-        return $this->errorResponse(__('custom.append_document_fail'), $validator->errors()->messages());
     }
 
     /**
@@ -262,10 +218,12 @@ class DocumentController extends ApiController
                     $doc->mime_type = $data['mimetype'];
                 }
 
-                $doc->forum_link = isset($data['forum_link']) ? $data['forum_link'] : null;
+                if (isset($data['forum_link'])) {
+                    $doc->forum_link = $data['forum_link'];
+                }
 
                 if (isset($data['data'])) {
-                    file_put_contents($this->path . $doc->id, $data['data']);
+                    $doc->data = base64_decode($data['data']);
                 }
 
                 $doc->save();
@@ -326,8 +284,6 @@ class DocumentController extends ApiController
 
             try {
                 $deleteDocument->delete();
-
-                unlink($this->path . $post['doc_id']);
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::DOCUMENTS),
@@ -481,7 +437,7 @@ class DocumentController extends ApiController
         $results = [];
 
         foreach ($query->get() as $result) {
-            $path = base64_encode($this->path . $result->id);
+            $id = base64_encode($result->id);
 
             $itemData = [
                 'id'            => $result->id,
@@ -490,7 +446,7 @@ class DocumentController extends ApiController
                 'description'   => $result->descript,
                 'filename'      => $result->file_name,
                 'mimetype'      => $result->mime_type,
-                'data'          => url('document/download/'. $path .'/'. $result->file_name),
+                'data'          => url('document/download/'. $id .'/'. $result->file_name),
                 'forum_link'    => $result->forum_link,
                 'created_at'    => isset($result->created_at) ? $result->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($result->updated_at) ? $result->updated_at->toDateTimeString() : null,

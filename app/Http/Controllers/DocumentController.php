@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Image;
+use App\Document;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Api\DocumentController as ApiDocuments;
 
 class DocumentController extends Controller {
@@ -12,8 +14,8 @@ class DocumentController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
-
+    public function index()
+    {
     }
 
     public function viewDocument(Request $request, $id)
@@ -22,14 +24,14 @@ class DocumentController extends Controller {
         $docRequest = Request::create('/api/listDocuments', 'POST', ['criteria' => $params]);
         $apiDocuments = new ApiDocuments($docRequest);
         $docList = $apiDocuments->listDocuments($docRequest)->getData();
-        $documents = !empty($docList->documents[0]) ? $docList->documents[0] : null;
+        $document = !empty($docList->documents[0]) ? $docList->documents[0] : null;
 
-        if (!is_null($documents)) {
-            $discussion = $this->getForumDiscussion($documents->forum_link);
+        if (!is_null($document)) {
+            $discussion = $this->getForumDiscussion($document->forum_link);
 
             $viewParams =  [
                 'class'          => 'documents',
-                'document'       => $documents,
+                'document'       => $document,
             ];
 
             return view (
@@ -41,9 +43,18 @@ class DocumentController extends Controller {
         }
     }
 
-    public function downloadDocument(Request $request, $path, $fileName)
+    public function downloadDocument(Request $request, $id, $fileName)
     {
-        return response()->download(base64_decode($path), $fileName);
+        $doc = Document::find(base64_decode($id));
+
+        if (!empty('doc')) {
+            return response($doc->data, 200, [
+                'Content-Type'          => $doc->mime_type,
+                'Content-Disposition'   => 'attachment; filename="'. $fileName .'"',
+            ]);
+        }
+
+        return response()->json(['message' => 'Not Found.'], 404);
     }
 
     public function listDocuments(Request $request)
@@ -122,11 +133,11 @@ class DocumentController extends Controller {
      */
     public function viewImage(Request $request, $id)
     {
-        $isActive = Image::where('id', $id)->value('active');
+        $image = Image::find($id);
 
-        if ($isActive) {
+        if (!empty($image) && $image->active) {
             try {
-                $image = \Image::make(storage_path('images') .'/'. $id);
+                $image = \Image::make($image->data);
 
                 if ($request->segment(2) == Image::TYPE_THUMBNAIL) {
                     $image->resize(160, 108);

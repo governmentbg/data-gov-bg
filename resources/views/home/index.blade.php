@@ -73,13 +73,15 @@
                     <a
                         href="{{ route('data', ['category' => [$category->id]]) }}"
                     >
-                        @if (isset($category->icon_data))
-                            <span class="svg">
+                        <span class="svg">
+                            @if (!empty($category->icon_data))
                                 {!! $category->icon_data !!}
-                            </span>
-                        @else
-                            <img class="home-icon cls-1" src="{{ $category->icon }}" />
-                        @endif
+                            @else
+                                @if (file_exists(public_path('img/uncategorized.svg')))
+                                    {!! file_get_contents(public_path('img/uncategorized.svg')) !!}
+                                @endif
+                            @endif
+                        </span>
                         <p>{{ $category->name }}</p>
                     </a>
                 @endforeach

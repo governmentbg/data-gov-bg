@@ -21,6 +21,7 @@ Security - in case of vulnerabilities.
 - Api groups and organisations image upload
 - Main category adding
 - Main category without image showing
+- User rights on resources in user panel
 
 ### Changed
 - Statistics and analytics link in admin navigation bar

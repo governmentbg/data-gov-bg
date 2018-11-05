@@ -735,20 +735,25 @@ class DataController extends Controller {
             }
 
             $dataset = $this->getModelUsernames($dataset);
+            $discussion = $this->getForumDiscussion($dataset->forum_link);
+
+            $viewParams = [
+                'class'         => 'data',
+                'organisation'  => $organisation,
+                'user'          => $user,
+                'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
+                'dataset'       => $dataset,
+                'resources'     => $resources,
+                'buttons'       => $buttons,
+                'groups'        => $groups,
+                'setGroups'     => isset($setGroups) ? $setGroups : [],
+            ];
 
             return view(
                 'data/view',
-                [
-                    'class'         => 'data',
-                    'organisation'  => $organisation,
-                    'user'          => $user,
-                    'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
-                    'dataset'       => $dataset,
-                    'resources'     => $resources,
-                    'buttons'       => $buttons,
-                    'groups'        => $groups,
-                    'setGroups'     => isset($setGroups) ? $setGroups : [],
-                ]
+                !empty($discussion)
+                    ? array_merge($viewParams, $discussion)
+                    : $viewParams
             );
         }
 
@@ -1436,6 +1441,7 @@ class DataController extends Controller {
     public function reportedView(Request $request, $uri)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $groups = [];
 
         // get dataset details
         $params = [

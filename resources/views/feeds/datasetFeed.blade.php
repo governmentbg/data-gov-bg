@@ -1,20 +1,38 @@
 <rss version="2.0">
     @if (!empty($history))
         <channel>
-            @foreach ($history as $singleDataset)
+            <title>data.egov.bg</title>
+            <description>data.egov.bg</description>
+            <link>{{ url('data') }}</link>
+            @foreach ($history as $item)
                 <item>
-                    <dataset id="{{ $singleDataset->id }}">
-                        <title>{{ $singleDataset->name .' '. $singleDataset->action_msg .' '. $singleDataset->descript }}</title>
-                        <itemName>{{ $singleDataset->name }}</itemName>
-                        @if (is_null($singleDataset->deleted_at))
-                            <link>{{ url('data/view/'. $singleDataset->uri) }}</link>
+                    @if ($item->module_name == App\Module::getModuleName(App\Module::DATA_SETS))
+                    <dataset id="{{ $item->dataset_id }}">
+                        <title>{{ $item->action_msg .' - '. $translation[(int)$item->dataset_name] }}</title>
+                        <itemName>{{ $translation[(int)$item->dataset_name] }}</itemName>
+                        @if (is_null($item->dataset_deleted))
+                            <link>{{ url('data/view/'. $item->dataset_uri) }}</link>
                         @else
                             <link>{{ url('data') }}</link>
                         @endif
-                        <description>{{ $singleDataset->name .' '. $singleDataset->action_msg }}</description>
-                        <moment>{{ $singleDataset->occurrence }}</moment>
-                        <guid>{{ $singleDataset->ahId }}</guid>
+                        <description>{{ $item->action_msg .' - '. $translation[(int)$item->dataset_name] .' - '. $translation[(int)$item->dataset_descript] }}</description>
+                        <moment>{{ $item->occurrence }}</moment>
+                        <guid>{{ $item->ahId }}</guid>
                     </dataset>
+                    @elseif ($item->module_name == App\Module::getModuleName(App\Module::RESOURCES))
+                        <resource id="{{ $item->resource_id }}">
+                            <title>{{ $item->action_msg .' - '. $translation[$item->resource_name] }}</title>
+                            <itemName>{{ $translation[$item->resource_name] }}</itemName>
+                            @if (is_null($item->resource_deleted))
+                                <link>{{ url('data/resourceView/'. $item->resource_uri) }}</link>
+                            @else
+                                <link>{{ url('data') }}</link>
+                            @endif
+                            <description>{{ $item->action_msg .' - '. $translation[$item->resource_name] .' - '. $translation[$item->resource_descript] }}</description>
+                            <moment>{{ $item->occurrence }}</moment>
+                            <guid>{{ $item->ahId }}</guid>
+                        </resource>
+                    @endif
                 </item>
             @endforeach
         </channel>

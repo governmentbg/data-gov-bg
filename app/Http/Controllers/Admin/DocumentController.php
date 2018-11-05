@@ -14,11 +14,8 @@ use App\Http\Controllers\Api\DocumentController as ApiDocument;
 
 class DocumentController extends AdminController
 {
-    private $path;
-
     public function __construct()
     {
-        $this->path = storage_path('docs') .'/';
     }
 
      /**
@@ -128,7 +125,7 @@ class DocumentController extends AdminController
         $params = [
             'records_per_page'  => $perPage,
             'criteria'          => [
-                'keywords' => $search,
+                'keywords'          => $search,
             ]
         ];
 
@@ -163,17 +160,8 @@ class DocumentController extends AdminController
             $params = [];
 
             if (!empty($request->document)) {
-                $maxFileSize = config('app.FILE_MAX_SIZE');
                 $params['filename'] = $request->document->getClientOriginalName();
-                $path = $request->document->getPathName();
-
-                if ($request->document->getClientSize() <= $maxFileSize) {
-                    $params['data'] = \File::get($path);
-                } else {
-                    $handle = fopen($request->document->getPathName(), 'rb');
-                    $params['data'] = fread($handle, $maxFileSize);
-                }
-
+                $params['data'] = base64_encode(\File::get($request->document->getPathName()));
                 $params['mimetype'] = $request->document->getMimeType();
             }
 
@@ -191,11 +179,7 @@ class DocumentController extends AdminController
             $result = $api->addDocument($rq)->getData();
 
             if (!empty($result->success)) {
-                if ($this->appendFileData($handle, $result->data->doc_id)) {
-                    $request->session()->flash('alert-success', __('custom.add_success'));
-
-                    return redirect('/admin/documents/view/'. $result->data->doc_id);
-                }
+                return redirect('/admin/documents/view/'. $result->data->doc_id);
             } else {
                 $request->session()->flash('alert-danger', __('custom.add_error'));
 
@@ -248,21 +232,11 @@ class DocumentController extends AdminController
         $class = 'user';
         $fields = self::getDocTransFields(true);
 
-        $model = Document::find($id)->loadTranslations();
-
         if ($request->has('edit')) {
             if (!empty($request->document)) {
-                $maxFileSize = config('app.FILE_MAX_SIZE');
                 $params['filename'] = $request->document->getClientOriginalName();
-                $path = $request->document->getPathName();
                 $params['mimetype'] = $request->document->getMimeType();
-
-                if ($request->document->getClientSize() <= $maxFileSize) {
-                    $params['data'] = \File::get($path);
-                } else {
-                    $handle = fopen($request->document->getPathName(), 'rb');
-                    $params['data'] = fread($handle, $maxFileSize);
-                }
+                $params['data'] = base64_encode(\File::get($request->document->getPathName()));
             }
 
             $rq = Request::create('/api/editDocument', 'POST', [
@@ -323,34 +297,5 @@ class DocumentController extends AdminController
 
             return redirect('/admin/documents/list')->withErrors(isset($result->errors) ? $result->errors : []);
         }
-    }
-
-    public function appendFileData(&$handle, $id)
-    {
-        if (isset($handle)) {
-            $maxFileSize = config('app.FILE_MAX_SIZE');
-
-            while (!feof($handle)) {
-                $contents = fread($handle, $maxFileSize);
-                $appendRq = Request::create('/api/appendDocument', 'POST', [
-                    'data'   => $contents,
-                    'doc_id' => $id
-                ]);
-                $api = new ApiDocument($appendRq);
-                $appendResult = $api->appendDocumentData($appendRq)->getData();
-
-                if (empty($appendResult->success)) {
-                    fclose($handle);
-                    unlink($this->path . $id);
-                    Document::where('id', $id)->delete();
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-
-                    return back()->withErrors($result->errors)->withInput(Input::all());
-                }
-            }
-            fclose($handle);
-        }
-
-        return true;
     }
 }

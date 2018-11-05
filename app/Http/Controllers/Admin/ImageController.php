@@ -65,19 +65,18 @@ class ImageController extends AdminController
 
             if (!empty($request->image)) {
                 $params['filename'] = $request->image->getClientOriginalName();
-                $path = $request->image->getPathName();
-                $params['data'] = \File::get($path);
+                $params['data'] = base64_encode(\File::get($request->image->getPathName()));
                 $params['mimetype'] = $request->image->getMimeType();
             }
 
             $rq = Request::create('/api/addImage', 'POST', [
                 'data' => [
-                    'name'       => $request->offsetGet('name'),
-                    'comment'    => $request->offsetGet('comment'),
-                    'img_file'   => isset($params['filename']) ? $params['filename'] : null,
-                    'mime_type'  => isset($params['mimetype']) ? $params['mimetype'] : null,
-                    'img_data'   => isset($params['data']) ? $params['data'] : null,
-                    'active'     => $request->offsetGet('active'),
+                    'name'      => $request->offsetGet('name'),
+                    'comment'   => $request->offsetGet('comment'),
+                    'img_file'  => isset($params['filename']) ? $params['filename'] : null,
+                    'mime_type' => isset($params['mimetype']) ? $params['mimetype'] : null,
+                    'img_data'  => isset($params['data']) ? $params['data'] : null,
+                    'active'    => $request->offsetGet('active'),
                 ]
             ]);
             $api = new ApiImage($rq);
@@ -117,7 +116,7 @@ class ImageController extends AdminController
 
         if ($result->success) {
             $result->image->img_data = $this->getImageData(
-                utf8_decode($result->image->img_data),
+                base64_decode($result->image->img_data),
                 $result->image->mime_type
             );
             $result->image = $this->appendPublicURI($result->image);

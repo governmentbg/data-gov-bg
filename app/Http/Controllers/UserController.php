@@ -2119,6 +2119,7 @@ class UserController extends Controller {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
         }
 
+        $createdBy = $resource->resource->created_by;
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
         $formats = Resource::getFormats(true);
@@ -2146,7 +2147,7 @@ class UserController extends Controller {
             Module::RESOURCES,
             RoleRight::RIGHT_VIEW,
             [],
-            ['created_by' => $resource->created_by]
+            ['created_by' => $createdBy]
         );
 
         if (!$rightCheck) {
@@ -2158,7 +2159,7 @@ class UserController extends Controller {
             RoleRight::RIGHT_EDIT,
             [],
             [
-                'created_by' => $resource->created_by
+                'created_by' => $createdBy
             ]
         );
 
@@ -2168,7 +2169,7 @@ class UserController extends Controller {
             Module::RESOURCES,
             RoleRight::RIGHT_ALL,
             [],
-            ['created_by' => $resource->created_by]
+            ['created_by' => $createdBy]
         );
 
         $buttons['delete'] = $rightCheck;
@@ -2201,7 +2202,7 @@ class UserController extends Controller {
                 Module::RESOURCES,
                 RoleRight::RIGHT_ALL,
                 [],
-                ['created_by' => $resource->created_by]
+                ['created_by' => $createdBy]
             );
 
             if (!$rightCheck) {

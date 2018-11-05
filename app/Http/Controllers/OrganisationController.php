@@ -704,6 +704,7 @@ class OrganisationController extends Controller
     public function viewDataset(Request $request, $uri)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $groups = [];
 
         // get dataset details
         $params = [

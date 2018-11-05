@@ -7,6 +7,7 @@ use App\ActionsHistory;
 use App\DataSet;
 use App\Module;
 use App\Page;
+use App\Translator\Translation;
 
 class FeedController extends Controller
 {
@@ -24,7 +25,8 @@ class FeedController extends Controller
         if ($organisation) {
             $history = [];
 
-            $history = Dataset::select(
+            $locale = \LaravelLocalization::getCurrentLocale();
+            $history = ActionsHistory::select(
                 'actions_history.id AS ahId',
                 'actions_history.occurrence',
                 'actions_history.user_id',
@@ -32,28 +34,61 @@ class FeedController extends Controller
                 'actions_history.action',
                 'actions_history.action_object',
                 'actions_history.action_msg',
-                'data_sets.id',
-                'data_sets.org_id',
-                'data_sets.uri',
-                'data_sets.name',
-                'data_sets.descript',
+                'data_sets.id AS dataset_id',
+                'data_sets.uri AS dataset_uri',
+                'data_sets.name AS dataset_name',
+                'data_sets.descript AS dataset_descript',
                 'data_sets.visibility',
                 'data_sets.status',
-                'data_sets.deleted_at'
+                'data_sets.deleted_at AS dataset_delete',
+                'resources.id AS resource_id',
+                'resources.uri AS resource_uri',
+                'resources.name AS resource_name',
+                'resources.descript AS resource_descript',
+                'resources.deleted_at AS resource_delete'
             )
-                ->leftJoin('actions_history', 'actions_history.action_object', '=', 'data_sets.id')
-                ->withTrashed()
+                ->leftJoin('data_sets', 'data_sets.id', '=', 'actions_history.action_object')
+                ->leftJoin('resources', 'resources.uri', '=', 'actions_history.action_object')
                 ->where('data_sets.org_id', $organisation->id)
                 ->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC)
                 ->where('data_sets.status', DataSet::STATUS_PUBLISHED)
                 ->where('actions_history.action', '!=', ActionsHistory::TYPE_SEE)
                 ->where('actions_history.module_name', Module::getModuleName(Module::DATA_SETS))
+                ->orWhere('actions_history.module_name', Module::getModuleName(Module::RESOURCES))
                 ->orderBy('occurrence', 'desc')
                 ->limit(1000)
                 ->get();
 
+            foreach ($history as $row) {
+                if (!empty($row->resource_name)) {
+                    $translateGroups[$row->resource_name] = $row->resource_name;
+                }
+                if (!empty($row->resource_descript)) {
+                    $translateGroups[$row->resource_descript] = $row->resource_descript;
+                }
+                if (!empty($row->dataset_name)) {
+                    $translateGroups[$row->dataset_name] = $row->dataset_name;
+                }
+                if (!empty($row->dataset_descript)) {
+                    $translateGroups[$row->dataset_descript] = $row->dataset_descript;
+                }
+            }
+
+            $translationsCollection = Translation::select(
+                'translations.group_id',
+                'translations.text'
+            )
+                ->whereIn('translations.group_id', $translateGroups)
+                ->where('translations.locale', $locale)
+                ->get()
+                ->toArray();
+
+            foreach ($translationsCollection as $index => $data) {
+                $translation[$data['group_id']] = !empty($data['text']) ? $data['text'] : '';
+            }
+
             return response()
-                ->view('feeds/orgDatasetFeed', compact('history', 'organisation'))
+                ->view('feeds/orgDatasetFeed', compact('history', 'organisation', 'translation'))
                 ->header('Content-Type', 'text/xml');
         }
     }
@@ -65,7 +100,8 @@ class FeedController extends Controller
      */
     public function getDatasetsHistory()
     {
-        $history = Dataset::select(
+        $locale = \LaravelLocalization::getCurrentLocale();
+        $history = ActionsHistory::select(
             'actions_history.id AS ahId',
             'actions_history.occurrence',
             'actions_history.user_id',
@@ -73,27 +109,61 @@ class FeedController extends Controller
             'actions_history.action',
             'actions_history.action_object',
             'actions_history.action_msg',
-            'data_sets.id',
-            'data_sets.uri',
-            'data_sets.name',
-            'data_sets.descript',
+            'data_sets.id AS dataset_id',
+            'data_sets.uri AS dataset_uri',
+            'data_sets.name AS dataset_name',
+            'data_sets.descript AS dataset_descript',
             'data_sets.visibility',
             'data_sets.status',
-            'data_sets.deleted_at'
+            'data_sets.deleted_at AS dataset_delete',
+            'resources.id AS resource_id',
+            'resources.uri AS resource_uri',
+            'resources.name AS resource_name',
+            'resources.descript AS resource_descript',
+            'resources.deleted_at AS resource_delete'
         )
-            ->leftJoin('actions_history', 'actions_history.action_object', '=', 'data_sets.id')
-            ->withTrashed()
+            ->leftJoin('data_sets', 'data_sets.id', '=', 'actions_history.action_object')
+            ->leftJoin('resources', 'resources.uri', '=', 'actions_history.action_object')
             ->where('data_sets.visibility', DataSet::VISIBILITY_PUBLIC)
             ->where('data_sets.status', DataSet::STATUS_PUBLISHED)
             ->where('actions_history.action', '!=', ActionsHistory::TYPE_SEE)
             ->where('actions_history.module_name', Module::getModuleName(Module::DATA_SETS))
+            ->orWhere('actions_history.module_name', Module::getModuleName(Module::RESOURCES))
             ->orderBy('occurrence', 'desc')
             ->limit(1000)
             ->get();
 
+        foreach ($history as $row) {
+            if (!empty($row->resource_name)) {
+                $translateGroups[$row->resource_name] = $row->resource_name;
+            }
+            if (!empty($row->resource_descript)) {
+                $translateGroups[$row->resource_descript] = $row->resource_descript;
+            }
+            if (!empty($row->dataset_name)) {
+                $translateGroups[$row->dataset_name] = $row->dataset_name;
+            }
+            if (!empty($row->dataset_descript)) {
+                $translateGroups[$row->dataset_descript] = $row->dataset_descript;
+            }
+        }
+
+        $translationsCollection = Translation::select(
+            'translations.group_id',
+            'translations.text'
+        )
+            ->whereIn('translations.group_id', $translateGroups)
+            ->where('translations.locale', $locale)
+            ->get()
+            ->toArray();
+
+        foreach ($translationsCollection as $index => $data) {
+            $translation[$data['group_id']] = !empty($data['text']) ? $data['text'] : '';
+        }
+
         if ($history) {
             return response()
-                ->view('feeds/datasetFeed', compact('history'))
+                ->view('feeds/datasetFeed', compact('history', 'translation'))
                 ->header('Content-Type', 'text/xml');
         }
     }

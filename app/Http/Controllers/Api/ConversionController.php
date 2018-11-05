@@ -67,6 +67,10 @@ class ConversionController extends ApiController
         $validator = \Validator::make($post, ['data' => 'required']);
 
         if (!$validator->fails()) {
+            $post['data'] = is_string($post['data'])
+                ? json_decode($post['data'], true)
+                : $post['data'];
+
             try {
                 $data = $this->getXML($post['data']);
 
@@ -142,6 +146,10 @@ class ConversionController extends ApiController
         $validator = \Validator::make($post, ['data' => 'required']);
 
         if (!$validator->fails()) {
+            $post['data'] = is_string($post['data'])
+                ? json_decode($post['data'], true)
+                : $post['data'];
+
             try {
                 $data = $this->getCSV($post['data']);
 
@@ -200,6 +208,10 @@ class ConversionController extends ApiController
         $validator = \Validator::make($post, ['data' => 'required']);
 
         if (!$validator->fails()) {
+            $post['data'] = is_string($post['data'])
+                ? json_decode($post['data'], true)
+                : $post['data'];
+
             try {
                 $data = $this->getKML($post['data']);
 
@@ -258,6 +270,10 @@ class ConversionController extends ApiController
         $validator = \Validator::make($post, ['data' => 'required']);
 
         if (!$validator->fails()) {
+            $post['data'] = is_string($post['data'])
+                ? json_decode($post['data'], true)
+                : $post['data'];
+
             try {
                 $data = $this->getRDF($post['data']);
 

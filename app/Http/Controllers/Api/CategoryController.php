@@ -2,13 +2,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Module;
-use App\Category;
 use App\DataSet;
-use App\RoleRight;
-use App\ActionsHistory;
+use App\Category;
 use App\Resource;
+use App\RoleRight;
 use App\Organisation;
+use App\ActionsHistory;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\ApiController;
@@ -42,7 +43,12 @@ class CategoryController extends ApiController
             'locale'        => 'nullable|string|max:5',
             'icon'          => 'nullable|string|max:191',
             'icon_filename' => 'nullable|string|max:191',
-            'icon_mimetype' => 'nullable|string|max:191|in:'. implode(', ', Category::IMG_MIMES_SVG),
+            'icon_mimetype' => [
+                'nullable',
+                'string',
+                'max:191',
+                Rule::in(Category::IMG_MIMES_SVG),
+            ],
             'icon_data'     => 'nullable|string|max:16777215',
             'active'        => 'nullable|boolean',
             'ordering'      => 'nullable|integer|digits_between:1,3',
@@ -142,7 +148,12 @@ class CategoryController extends ApiController
                 'locale'        => 'nullable|string|max:5',
                 'icon'          => 'nullable|string|max:191',
                 'icon_filename' => 'nullable|string|max:191',
-                'icon_mimetype' => 'nullable|string|max:191|in:'. implode(', ', Category::IMG_MIMES_SVG),
+                'icon_mimetype' => [
+                    'nullable',
+                    'string',
+                    'max:191',
+                    Rule::in(Category::IMG_MIMES_SVG),
+                ],
                 'icon_data'     => 'nullable|string|max:16777215',
                 'active'        => 'nullable|boolean',
                 'ordering'      => 'nullable|integer|digits_between:1,3',

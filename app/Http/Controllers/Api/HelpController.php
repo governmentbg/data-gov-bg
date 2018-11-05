@@ -39,7 +39,7 @@ class HelpController extends ApiController
                 'title.*'   => 'max:191',
                 'locale'    => 'nullable|string|max:5',
                 'parent_id' => 'nullable|exists:help_sections,id',
-                'active'    => 'required|int',
+                'active'    => 'nullable|int',
                 'ordering'  => 'nullable|int'
             ]);
 

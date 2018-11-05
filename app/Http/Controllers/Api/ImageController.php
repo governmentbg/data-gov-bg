@@ -15,16 +15,11 @@ use Illuminate\Database\QueryException;
 
 class ImageController extends ApiController
 {
-    private $path;
     public function __construct()
     {
-        $this->path = storage_path('images') .'/';
-        if (!is_dir($this->path)) {
-            mkdir($this->path);
-        }
     }
 
-    /**`
+    /**
      * Add an image with provided data
      *
      * @param array data - required
@@ -103,31 +98,20 @@ class ImageController extends ApiController
                     $image->img_file = $post['data']['img_file'];
                     $image->mime_type = $post['data']['mime_type'];
 
-                    $image->save();
-
-                    file_put_contents($this->path . $image->id, $post['data']['img_data']);
-
                     try {
-                        $uploadedImage = \Image::make($this->path . $image->id);
+                        $uploadedImage = \Image::make($post['data']['img_data']);
                     } catch (\Exception $e) {
                         Log::error($e->getMessage());
-
-                        if (file_exists($this->path . $image->id)) {
-                            unlink($this->path . $image->id);
-                        }
 
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.add_error'), $validator->errors()->messages());
                     }
 
-                    $image->update(
-                        [
-                            'width'  => $uploadedImage->width(),
-                            'height' => $uploadedImage->height(),
-                            'size'   => $uploadedImage->filesize(),
-                        ]
-                    );
+                    $image->data = base64_decode($post['data']['img_data']);
+                    $image->width = $uploadedImage->width();
+                    $image->height = $uploadedImage->height();
+                    $image->size = strlen(bin2hex($post['data']['img_data'])) / 2;
                 } elseif (!empty($post['data']['img_url'])) {
                     try {
                         $content = file_get_contents($post['data']['img_url']);
@@ -139,36 +123,26 @@ class ImageController extends ApiController
                         return $this->errorResponse(__('custom.add_error'), $validator->errors()->messages());
                     }
 
-                    $image->mime_type = '';
                     $image->img_file = basename($post['data']['img_url']);
 
-                    $image->save();
-
-                    file_put_contents($this->path . $image->id, $content);
-
                     try {
-                        $uploadedImage = \Image::make($this->path . $image->id);
+                        $uploadedImage = \Image::make($content);
                     } catch (\Exception $e) {
                         Log::error($e->getMessage());
-
-                        if (file_exists($this->path . $image->id)) {
-                            unlink($this->path . $image->id);
-                        }
 
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.add_error'), $validator->errors()->messages());
                     }
 
-                    $image->update(
-                        [
-                            'width'     => $uploadedImage->width(),
-                            'height'    => $uploadedImage->height(),
-                            'size'      => $uploadedImage->filesize(),
-                            'mime_type' => $uploadedImage->mime()
-                        ]
-                    );
+                    $image->mime_type = $uploadedImage->mime();
+                    $image->data = $content;
+                    $image->width = $uploadedImage->width();
+                    $image->height = $uploadedImage->height();
+                    $image->size = strlen(bin2hex($content)) / 2;
                 }
+
+                $image->save();
 
                 $logData = [
                     'module_name'   => Module::getModuleName(Module::IMAGES),
@@ -235,12 +209,9 @@ class ImageController extends ApiController
                 }
 
                 if (isset($image->id)) {
-                    try {
-                        $imageContent = file_get_contents($this->path .'/'. $image->id);
-                        $image->img_data = utf8_encode($imageContent);
-                    } catch (\Exception $e) {
-                        $image->img_data = null;
-                    }
+                    $image->img_data = base64_encode($image->data);
+
+                    unset($image->data);
                 }
 
                 return $this->successResponse(['image' => $image], true);
@@ -333,45 +304,36 @@ class ImageController extends ApiController
                         return $this->errorResponse(__('custom.edit_error'), $validator->errors()->messages());
                     }
 
-                    $editImage->img_file = basename($post['data']['img_url']);
-
-                    file_put_contents($this->path . $editImage->id, $content);
                     try {
-                        $uploadedImage = \Image::make($this->path . $editImage->id);
+                        $uploadedImage = \Image::make($content);
                     } catch (\Exception $e) {
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.edit_error'), $validator->errors()->messages());
                     }
 
-                    $editImage->update(
-                        [
-                            'width'     => $uploadedImage->width(),
-                            'height'    => $uploadedImage->height(),
-                            'size'      => $uploadedImage->filesize(),
-                            'mime_type' => $uploadedImage->mime()
-                        ]
-                    );
+                    $editImage->img_file = basename($post['data']['img_url']);
+                    $editImage->data = $content;
+                    $editImage->width = $uploadedImage->width();
+                    $editImage->height = $uploadedImage->height();
+                    $editImage->size = strlen(bin2hex($content)) / 2;
+                    $editImage->mime_type = $uploadedImage->mime();
                 } elseif (!empty($post['data']['img_data'])) {
                     $editImage->img_file = $post['data']['img_file'];
                     $editImage->mime_type = $post['data']['mime_type'];
+                    $editImage->data = base64_decode($post['data']['img_data']);
 
-                    file_put_contents($this->path . $editImage->id, $post['data']['img_data']);
                     try {
-                        $uploadedImage = \Image::make($this->path . $editImage->id);
+                        $uploadedImage = \Image::make($editImage->data);
                     } catch (\Exception $e) {
                         DB::rollback();
 
                         return $this->errorResponse(__('custom.edit_error'), $validator->errors()->messages());
                     }
 
-                    $editImage->update(
-                        [
-                            'width'  => $uploadedImage->width(),
-                            'height' => $uploadedImage->height(),
-                            'size'   => $uploadedImage->filesize(),
-                        ]
-                    );
+                    $editImage->width = $uploadedImage->width();
+                    $editImage->height = $uploadedImage->height();
+                    $editImage->size = strlen(bin2hex($editImage->data)) / 2;
                 }
 
                 $editImage->save();
@@ -431,10 +393,6 @@ class ImageController extends ApiController
 
             try {
                 $deleteImage->delete();
-
-                if (file_exists($this->path . $deleteImage->id)) {
-                    unlink($this->path . $deleteImage->id);
-                }
 
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::IMAGES),
@@ -499,19 +457,15 @@ class ImageController extends ApiController
 
         if (count($images)) {
             foreach ($images as $key => $img) {
-                try {
-                    $imageContent = file_get_contents($this->path .'/'. $images[$key]->id);
-                    $images[$key]->img_data = utf8_encode($imageContent);
-                } catch (\Exception $e) {
-                    $images[$key]->img_data = null;
-                }
+                $images[$key]->img_data = base64_encode($img->data);
+                unset($images[$key]->data);
             }
         }
 
         $logData = [
-            'module_name'      => Module::getModuleName(Module::IMAGES),
-            'action'           => ActionsHistory::TYPE_SEE,
-            'action_msg'       => 'Listed images',
+            'module_name'  => Module::getModuleName(Module::IMAGES),
+            'action'       => ActionsHistory::TYPE_SEE,
+            'action_msg'   => 'Listed images',
         ];
 
         Module::add($logData);

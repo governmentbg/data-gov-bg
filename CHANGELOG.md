@@ -13,6 +13,28 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.1] - 2018-11-05
+### Added
+- Statistics and analytics link in admin navigation bar
+- Tool daily database external backups
+
+### Changed
+- Images and documents to database instead of files
+- Add resources info in RSS feed
+
+### Fixed
+- Forum discussions for public data section
+- Admin inactive sections preview
+- Admin inactive help sections creation
+- Api missing routes error
+- Api groups and organisations unique id error message
+- Api groups and organisations image upload
+- Main category adding
+- Main category without image showing
+- User rights on resources in user panel
+- Microsoft Edge help icon fix
+- API conversions from json format
+
 ## [1.0.0] - 2018-10-31
 ### Added
 - Resource update equal data in previous version check
@@ -174,6 +196,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.1]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.5...v1.0.0
 [0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4

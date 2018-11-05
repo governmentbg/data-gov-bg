@@ -16482,6 +16482,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   border: 1px solid #145c99;
 }
 
+.forum-box.data {
+  border: 1px solid #4e57aa;
+}
+
 .modal-content {
   padding: 0 5px;
 }
@@ -17555,6 +17559,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   padding: 0px;
   margin-bottom: -10px;
   display: inline-block;
+  font-size: 0;
 }
 
 .theme-user .inline-block {
@@ -21674,6 +21679,7 @@ nav .tool-version:hover {
   position: absolute;
   padding-left: 5px;
   height: 21px;
+  width: 26px;
   cursor: pointer;
 }
 

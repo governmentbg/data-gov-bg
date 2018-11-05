@@ -68,7 +68,7 @@ RUN cd /var/www/localhost \
     && printf "IS_TOOL=true\nTOOL_API_URL=$APIURL\n\nGRAYLOG_HOST=$GRAYLOG_HOST\nGRAYLOG_PORT=$GRAYLOG_PORT\n" >> .env \
     && mkdir /var/files
 
-VOLUME [ "/var/lib/mysql", "/mnt", "/var/www/localhost/htdocs" ]
+VOLUME [ "/var/lib/mysql" ]
 
 COPY entrypoint.sh entrypoint.sh
 

@@ -6,20 +6,19 @@ httpd
 # start cron
 crond
 
-if [ ! -d "/run/mysqld" ]; then
+if [ ! -d /run/mysqld ]; then
     mkdir -p /run/mysqld
     chown -R mysql:mysql /run/mysqld
+fi
+
+if [ ! -d /var/files/backup ]; then
+    mkdir -p /var/files/backup
 fi
 
 if [ -d /var/lib/mysql/mysql ]; then
     echo '[i] MySQL directory already present, skipping creation'
 else
-    echo "[i] CRON initializing jobs..."
-    echo "*/30 * * * * cd /var/www/localhost/htdocs/ && source deploy.sh master" > /usr/bin/crontab/root
-    echo "* * * * * cd /var/www/localhost/htdocs/ && php artisan schedule:run >> /dev/null 2>&1" >> /usr/bin/crontab/root
-    echo "[i] CRON jobs initialized..."
-
-    echo "[i] MySQL data directory not found, creating initial DBs"
+    echo '[i] MySQL data directory not found, creating initial DBs'
 
     chown -R mysql:mysql /var/lib/mysql
 
@@ -66,17 +65,27 @@ EOF
     /usr/bin/mysqld --user=mysql --bootstrap --verbose=0 < $tfile
 
     rm -f $tfile
+
+    echo '[i] CRON initializing jobs...'
+
+    echo "*/30 * * * * cd /var/www/localhost/htdocs/ && source deploy.sh master" > /mnt/cronjobs
+    echo "* * * * * cd /var/www/localhost/htdocs/ && php artisan schedule:run >> /dev/null 2>&1" >> /mnt/cronjobs
+    echo "0 */3 * * * mysqldump -u opendata -p$dbpass opendata | gzip > /var/files/backup/\`date +%Y-%m-%d\`" >> /mnt/cronjobs
+    /usr/bin/crontab /mnt/cronjobs
+    rm -f /mnt/cronjobs
+
+    echo '[i] CRON jobs initialized...'
 fi
 
-echo "[i] Starting all process"
+echo '[i] Starting all process'
 /usr/bin/mysqld --user=mysql --console &
 
 until mysqladmin ping &>/dev/null; do
-   echo -n "."; sleep 0.2
+   echo -n '.'; sleep 0.2
 done
 
-echo "[i] Executing migrations"
-/usr/bin/php /var/www/localhost/htdocs/artisan migrate
+echo '[i] Updating project'
+cd /var/www/localhost/htdocs/ && source deploy.sh master
 
 exec /bin/sh "$@"
 

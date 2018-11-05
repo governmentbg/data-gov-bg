@@ -1441,6 +1441,7 @@ class DataController extends Controller {
     public function reportedView(Request $request, $uri)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $groups = [];
 
         // get dataset details
         $params = [

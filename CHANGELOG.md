@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 
 ### Changed
 - Images and documents to database instead of files
+- Add resources info in RSS feed
 
 ### Fixed
 - Forum discussions for public data section

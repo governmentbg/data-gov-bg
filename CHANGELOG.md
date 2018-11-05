@@ -29,6 +29,7 @@ Security - in case of vulnerabilities.
 - Main category without image showing
 - User rights on resources in user panel
 - Microsoft Edge help icon fix
+- API conversions from json format
 
 ## [1.0.0] - 2018-10-31
 ### Added

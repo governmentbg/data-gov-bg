@@ -12,8 +12,11 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.1] - 2018-11-05
 ### Added
 - Statistics and analytics link in admin navigation bar
+- Tool daily database external backups
 
 ### Changed
 - Images and documents to database instead of files
@@ -193,6 +196,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.1]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.5...v1.0.0
 [0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.3...v0.6.4

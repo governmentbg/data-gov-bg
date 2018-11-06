@@ -45,6 +45,7 @@ class FeedController extends Controller
                 'resources.uri AS resource_uri',
                 'resources.name AS resource_name',
                 'resources.descript AS resource_descript',
+                'resources.data_set_id AS resource_dataset',
                 'resources.deleted_at AS resource_delete'
             )
                 ->leftJoin('data_sets', 'data_sets.id', '=', 'actions_history.action_object')
@@ -59,16 +60,27 @@ class FeedController extends Controller
                 ->limit(1000)
                 ->get();
 
-            foreach ($history as $row) {
+            $datasets = $history->pluck('dataset_id', 'dataset_id')->toArray();
+            $moduleResource = Module::getModuleName(Module::RESOURCES);
+
+            foreach ($history as $i => $row) {
+                if ($row->module_name == $moduleResource && !in_array($row->resource_dataset, $datasets )) {
+                    unset($history[$i]);
+                    continue;
+                }
+
                 if (!empty($row->resource_name)) {
                     $translateGroups[$row->resource_name] = $row->resource_name;
                 }
+
                 if (!empty($row->resource_descript)) {
                     $translateGroups[$row->resource_descript] = $row->resource_descript;
                 }
+
                 if (!empty($row->dataset_name)) {
                     $translateGroups[$row->dataset_name] = $row->dataset_name;
                 }
+
                 if (!empty($row->dataset_descript)) {
                     $translateGroups[$row->dataset_descript] = $row->dataset_descript;
                 }

@@ -19,7 +19,7 @@
                         <moment>{{ $item->occurrence }}</moment>
                         <guid>{{ $item->ahId }}</guid>
                     </dataset>
-                    @elseif ($item->module_name == App\Module::getModuleName(App\Module::RESOURCES))
+                    @elseif ($item->module_name == App\Module::getModuleName(App\Module::RESOURCES) && !empty($item->resource_name))
                         <resource id="{{ $item->resource_id }}">
                             <title>{{ $item->action_msg .' - '. $translation[$item->resource_name] }}</title>
                             <itemName>{{ $translation[$item->resource_name] }}</itemName>

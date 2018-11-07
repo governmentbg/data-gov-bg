@@ -198,7 +198,7 @@ Route::post('getResourceSchema', 'Api\ResourceController@getResourceSchema');
 Route::post('getResourceData', 'Api\ResourceController@getResourceData');
 Route::post('getResourceView', 'Api\ResourceController@getResourceView');
 Route::post('searchResourceData', 'Api\ResourceController@searchResourceData');
-Route::post('getLinkedData', 'Api\ResourceController@getLinkedData');
+Route::get('getLinkedData', 'Api\ResourceController@getLinkedData');
 Route::post('listDataCategories', 'Api\CategoryController@listDataCategories');
 
 Route::post('listMainCategories', 'Api\CategoryController@listMainCategories');

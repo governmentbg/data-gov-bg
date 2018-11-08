@@ -34,6 +34,7 @@ Security - in case of vulnerabilities.
 - User rights on resources in user panel
 - Microsoft Edge help icon fix
 - API conversions from json format
+- Hide not active sections, subsections and pages from Help guide
 
 ## [1.0.0] - 2018-10-31
 ### Added

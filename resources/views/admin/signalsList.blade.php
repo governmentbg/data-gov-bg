@@ -140,7 +140,7 @@
                                         >{{ $signal->dataset_name }}</a>
                                     </p>
                                     <p>
-                                        {{ utrans('custom.signal') }} - {{ $signal->created_by }} - {{ $signal->created_at }}
+                                        {{ utrans('custom.'. $statuses[$signal->status]) }}&nbsp;{{ __('custom.signal') }} - {{ $signal->created_by }} - {{ $signal->created_at }}
                                     </p>
                                 </div>
                                 <div

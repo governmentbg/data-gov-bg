@@ -177,6 +177,7 @@ class PageController extends AdminController
         $fields = self::getPageTransFields();
         $model = Page::find($id);
         $helpPages = $this->getHelpPages();
+        $resourceFormats = Page::getResourceResponseFormats();
         $sections = [];
 
         if (!is_null($model)) {
@@ -238,7 +239,7 @@ class PageController extends AdminController
             }
         }
 
-        return view('admin/pagesEdit', compact('class', 'fields', 'model', 'sections', 'helpPages'));
+        return view('admin/pagesEdit', compact('class', 'fields', 'model', 'sections', 'helpPages', 'resourceFormats'));
     }
 
     public function add(Request $request)

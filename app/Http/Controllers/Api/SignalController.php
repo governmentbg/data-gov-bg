@@ -72,7 +72,7 @@ class SignalController extends ApiController
                 $saved = $newSignal->save();
 
                 // mark related resource as reported
-                if ($saved) {
+                if ($saved && ($newSignal->status == Signal::STATUS_NEW)) {
                     $resource = Resource::where('id', $newSignal->resource_id)->first();
                     $resource->is_reported = Resource::REPORTED_TRUE;
                     $saved = $resource->save();
@@ -201,6 +201,17 @@ class SignalController extends ApiController
 
                 $signalToEdit->save();
 
+                $reportedResource = Resource::find($signalToEdit->resource_id);
+
+                // update reported status of resource if we delete the last of its new signals
+                if ($reportedResource->signal()->where('status', '=', Signal::STATUS_NEW)->count() == 0) {
+                    $reportedResource->is_reported = Resource::REPORTED_FALSE;
+                    $reportedResource->save();
+                } else {
+                    $reportedResource->is_reported = Resource::REPORTED_TRUE;
+                    $reportedResource->save();
+                }
+
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::SIGNALS),
                     'action'           => ActionsHistory::TYPE_MOD,
@@ -253,8 +264,8 @@ class SignalController extends ApiController
                 $signalToBeDeleted->delete();
                 $reportedResource = Resource::find($reportedResourceId);
 
-                // update reported status of resource if we delete the last of its signals
-                if ($reportedResource->signal()->count() == 0) {
+                // update reported status of resource if we delete the last of its new signals
+                if ($reportedResource->signal()->where('status', '=', Signal::STATUS_NEW)->count() == 0) {
                     $reportedResource->is_reported = Resource::REPORTED_FALSE;
                     $reportedResource->save();
                 }

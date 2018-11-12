@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Resource queries tool in admin edit pages section
 
 ## [1.0.1] - 2018-11-05
 ### Added
@@ -34,6 +36,7 @@ Security - in case of vulnerabilities.
 - User rights on resources in user panel
 - Microsoft Edge help icon fix
 - API conversions from json format
+- Hide not active sections, subsections and pages from Help guide
 
 ## [1.0.0] - 2018-10-31
 ### Added

@@ -19,6 +19,7 @@ class HelpController extends Controller
 
         if (Auth::check()) {
             $params['api_key'] = Auth::user()->api_key;
+            $params['criteria']['active'] = true;
         }
 
         $rq = Request::create('/api/listHelpSections', 'POST', $params);
@@ -30,7 +31,7 @@ class HelpController extends Controller
         $result = $api->listHelpSubsections($rq)->getData();
         $subsections = $result->success ? $result->subsections : [];
 
-        $rq = Request::create('/api/listHelpPages', 'POST');
+        $rq = Request::create('/api/listHelpPages', 'POST', $params);
         $result = $api->listHelpPages($rq)->getData();
         $pages = $result->success ? $result->pages : [];
 
@@ -92,6 +93,7 @@ class HelpController extends Controller
 
         $params['criteria'] = [
             'section_id'    => $id,
+            'active'        => true,
         ];
 
         $rq = Request::create('/api/listHelpSubsections', 'POST', $params);
@@ -104,7 +106,7 @@ class HelpController extends Controller
         $pages = $result->success ? $result->pages : [];
 
         foreach ($subsections as $sub) {
-           $sub->pages = HelpPage::where('section_id', $sub->id)->get();
+           $sub->pages = HelpPage::where('section_id', $sub->id)->where('active', 1)->get();
         }
 
         return view('help/view', [

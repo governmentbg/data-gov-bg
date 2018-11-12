@@ -346,14 +346,17 @@ class ToolController extends Controller
                 if (!$validator->fails()) {
                     if ($request->has('save_file')) {
                         try {
-                            $this->saveFile($file, $post);
+                            $actionObject = $this->saveFile($file, $post);
 
                             session()->flash('alert-success', __('custom.conn_save_success'));
                         } catch (QueryException $e) {
                             session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                         }
 
-                        return back()->withInput(array_merge(Input::all(), ['edit' => true]));
+                        return back()->withInput(array_merge(Input::all(), [
+                            'edit'      => true,
+                            'conn_id'   => $actionObject,
+                        ]));
                     } elseif ($request->has('send_file')) {
                         $logData = [
                             'module_name'   => Module::getModuleName(Module::TOOL_FILE),
@@ -428,7 +431,7 @@ class ToolController extends Controller
                         ]);
                     }
                 }
-
+error_log('post: '. print_r($post, true));
                 if ($request->has('send_query')) {
                     $logData = [
                         'module_name'   => Module::getModuleName(Module::TOOL_FILE),
@@ -583,6 +586,8 @@ class ToolController extends Controller
         ];
 
         Module::add($logData);
+
+        return $actionObject;
     }
 
     private function saveConnection($driver, $data)

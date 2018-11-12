@@ -481,7 +481,7 @@ class PageController extends ApiController
         if (!$validator->fails()) {
             if (isset($post['api_key'])) {
                 $rightCheck = RoleRight::checkUserRight(
-                    Module::SECTIONS,
+                    Module::PAGES,
                     RoleRight::RIGHT_VIEW
                 );
 

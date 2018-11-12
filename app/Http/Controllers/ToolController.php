@@ -431,7 +431,7 @@ class ToolController extends Controller
                         ]);
                     }
                 }
-error_log('post: '. print_r($post, true));
+
                 if ($request->has('send_query')) {
                     $logData = [
                         'module_name'   => Module::getModuleName(Module::TOOL_FILE),

@@ -32,6 +32,8 @@ class ToolController extends Controller
     const FREQ_TYPE_WEEK = 3;
     const FREQ_TYPE_MONTH = 4;
 
+    const DOCKER_LOCALHOST = 'host.docker.internal';
+
     public static function getDrivers()
     {
         return [
@@ -685,6 +687,14 @@ class ToolController extends Controller
 
     public static function getConnection($driver, $host, $dbName, $username, $password)
     {
+        if (file_exists('/etc/alpine-release')) {
+            $hostParts = explode(':', $host);
+
+            if (isset($hostParts[1]) && in_array($hostParts[0], ['localhost', '127.0.0.1'])) {
+                $host = self::DOCKER_LOCALHOST .':'. $hostParts[1];
+            }
+        }
+
         $connection = new \PDO($driver .':host='. $host .';dbname='. $dbName, $username, $password);
         $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 

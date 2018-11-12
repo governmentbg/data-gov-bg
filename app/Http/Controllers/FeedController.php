@@ -198,19 +198,24 @@ class FeedController extends Controller
             'created_at'
         )
             ->where('active', '!=', Page::ACTIVE_FALSE)
-            ->where('type', Page::TYPE_NEWS)
-            ->where(function($a) {
-                $a->where('valid_from', null)
-                    ->where('valid_to', null);
-            })->orWhere(function($b) {
-                $b->where('valid_from', null)
-                    ->where('valid_to', '>=', date(now()));
-            })->orWhere(function($c) {
-                $c->where('valid_from', '<=', date(now()))
-                    ->where('valid_to', null);
-            })->orWhere(function ($d) {
-                $d->where('valid_from', '<=', date(now()))
-                    ->where('valid_to', '>=', date(now()));
+            ->where('type', '=', Page::TYPE_NEWS)
+            ->where(function($query) {
+                $query->where(function($a) {
+                    $a->where('valid_from', null)
+                        ->where('valid_to', null);
+                })
+                ->orWhere(function($b) {
+                    $b->where('valid_from', null)
+                        ->where('valid_to', '>=', date(now()));
+                })
+                ->orWhere(function($c) {
+                    $c->where('valid_from', '<=', date(now()))
+                        ->where('valid_to', null);
+                })
+                ->orWhere(function ($d) {
+                    $d->where('valid_from', '<=', date(now()))
+                        ->where('valid_to', '>=', date(now()));
+                });
             })
             ->limit(1000)
             ->get();

@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Resource queries tool in admin edit pages section
 
 ## [1.0.1] - 2018-11-05
 ### Added

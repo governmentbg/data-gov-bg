@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Module;
+use App\RoleRight;
 use App\HelpPage;
 use App\HelpSection;
 use App\ActionsHistory;
@@ -44,6 +45,15 @@ class HelpController extends ApiController
             ]);
 
             if (!$validator->fails()) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::HELP_SECTIONS,
+                    RoleRight::RIGHT_EDIT
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $helpSection = new HelpSection;
 
                 $helpSection->name = $data['name'];
@@ -115,6 +125,19 @@ class HelpController extends ApiController
             ]);
 
             if (!$validator->fails()) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::HELP_SECTIONS,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => \Auth::user()->id
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $section = HelpSection::find($request->id);
 
                 $section->name = $data['name'];
@@ -165,6 +188,18 @@ class HelpController extends ApiController
 
         if (!$validator->fails()) {
             $section = HelpSection::find($request->id);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::HELP_SECTIONS,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $section->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             try {
                 $section->delete();
@@ -357,6 +392,15 @@ class HelpController extends ApiController
             ]);
 
             if (!$validator->fails()) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::HELP_PAGES,
+                    RoleRight::RIGHT_EDIT
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+
                 $helpPage = new HelpPage;
 
                 $helpPage->name = $data['name'];
@@ -443,6 +487,18 @@ class HelpController extends ApiController
 
             if (!$validator->fails()) {
                 $helpPage = HelpPage::find($request->page_id);
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::HELP_PAGES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by' => $helpPage->created_by
+                    ]
+                );
+
+                if (!$rightCheck) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
 
                 if ($helpPage->name != $data['name']) {
                     if (!HelpPage::where('name', $data['name'])->count()) {
@@ -503,6 +559,18 @@ class HelpController extends ApiController
 
         if (!$validator->fails()) {
             $page = HelpPage::find($request->page_id);
+            $rightCheck = RoleRight::checkUserRight(
+                Module::HELP_PAGES,
+                RoleRight::RIGHT_ALL,
+                [],
+                [
+                    'created_by' => $page->created_by
+                ]
+            );
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
 
             try {
                 $page->delete();

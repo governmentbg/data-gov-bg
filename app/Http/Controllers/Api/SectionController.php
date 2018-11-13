@@ -46,7 +46,6 @@ class SectionController extends ApiController
             'read_only'     => 'nullable|boolean',
             'theme'         => 'nullable|integer|digits_between:1,3',
             'forum_link'    => 'nullable|string|max:191',
-            'help_section'  => 'nullable|string|exists:help_sections,name|max:191',
         ]);
 
         if (!$validator->fails()) {
@@ -86,10 +85,6 @@ class SectionController extends ApiController
 
             if (isset($data['parent_id'])) {
                 $newSection->parent_id = $data['parent_id'];
-            }
-
-            if (isset($data['help_section'])) {
-                $newSection->help_section = $data['help_section'];
             }
 
             try {
@@ -150,7 +145,6 @@ class SectionController extends ApiController
                 'read_only'     => 'nullable|boolean',
                 'theme'         => 'nullable|integer|digits_between:1,3',
                 'forum_link'    => 'nullable|string|max:191',
-                'help_section'  => 'nullable|string|exists:help_sections,name|max:191',
             ]);
         }
 
@@ -202,10 +196,6 @@ class SectionController extends ApiController
                     $section->forum_link = $data['forum_link'];
                 } else {
                     $section->forum_link = null;
-                }
-
-                if (!empty($data['help_section'])) {
-                    $section->help_section = $data['help_section'];
                 }
 
                 $section->updated_by = \Auth::id();
@@ -366,7 +356,6 @@ class SectionController extends ApiController
             'read_only',
             'theme',
             'forum_link',
-            'help_section',
             'created_at',
             'updated_at',
             'created_by',
@@ -406,7 +395,6 @@ class SectionController extends ApiController
                 'ordering'      => $section->ordering,
                 'read_only'     => $section->read_only,
                 'forum_link'    => $section->forum_link,
-                'help_section'  => $section->help_section,
                 'theme'         => $section->theme,
                 'pages'         => $pages,
                 'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
@@ -519,7 +507,6 @@ class SectionController extends ApiController
                 'ordering'      => $section->ordering,
                 'read_only'     => $section->read_only,
                 'forum_link'    => $section->forum_link,
-                'help_section'  => $section->help_section,
                 'theme'         => $section->theme,
                 'pages'         => $pages,
                 'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,

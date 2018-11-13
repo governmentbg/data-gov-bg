@@ -85,27 +85,6 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="help_section" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.help_section') }}:</label>
-                                    <div class="col-sm-9">
-                                        <select
-                                            id="help_section"
-                                            name="help_section"
-                                            class="js-select form-control"
-                                            data-placeholder="{{ __('custom.select') }}"
-                                        >
-                                            <option></option>
-                                            <option value="0"></option>
-                                            @foreach ($helpSections as $section)
-                                                <option
-                                                    value="{{ $section->name }}"
-                                                    {{ $section->name == $model->help_section ? 'selected' : '' }}
-                                                >{{ $section->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <span class="error">{{ $errors->first('help_section') }}</span>
-                                    </div>
-                                </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
                                     <div class="col-lg-2">
@@ -157,7 +136,7 @@
                                         >
                                             {{ uctrans('custom.close') }}
                                         </a>
-                                        <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
+                                        <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
                                     </div>
                                 </div>
                             </form>

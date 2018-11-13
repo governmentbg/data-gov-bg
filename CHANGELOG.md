@@ -23,6 +23,10 @@ Security - in case of vulnerabilities.
 ### Changed
 - Images and documents to database instead of files
 - Add resources info in RSS feed
+- Remove 'help_section' parameter from API SectionController::addSection() and editSection()
+- Remove 'help_page' parameter from API SectionController::addPage() and editPage()
+- Drop 'help_section' column from 'sections' table
+- Drop 'help_page' column from 'pages' table
 
 ### Fixed
 - Forum discussions for public data section

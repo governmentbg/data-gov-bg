@@ -15,6 +15,16 @@ Security - in case of vulnerabilities.
 ### Added
 - Resource queries tool in admin edit pages section
 
+### Changed
+- Remove 'help_section' parameter from API SectionController::addSection() and editSection()
+- Remove 'help_page' parameter from API SectionController::addPage() and editPage()
+- Drop 'help_section' column from 'sections' table
+- Drop 'help_page' column from 'pages' table
+
+### Fixed
+- Hide not active sections, subsections and pages from Help guide
+- Add missing right checks API functions
+
 ## [1.0.1] - 2018-11-05
 ### Added
 - Statistics and analytics link in admin navigation bar
@@ -23,10 +33,6 @@ Security - in case of vulnerabilities.
 ### Changed
 - Images and documents to database instead of files
 - Add resources info in RSS feed
-- Remove 'help_section' parameter from API SectionController::addSection() and editSection()
-- Remove 'help_page' parameter from API SectionController::addPage() and editPage()
-- Drop 'help_section' column from 'sections' table
-- Drop 'help_page' column from 'pages' table
 
 ### Fixed
 - Forum discussions for public data section
@@ -40,7 +46,6 @@ Security - in case of vulnerabilities.
 - User rights on resources in user panel
 - Microsoft Edge help icon fix
 - API conversions from json format
-- Hide not active sections, subsections and pages from Help guide
 
 ## [1.0.0] - 2018-10-31
 ### Added

@@ -34,13 +34,13 @@
             <div class="col-sm-9 col-xs-12">
                 @include('partials.pagination')
                 <div class="row">
-                    <div class="col-xs-12 text-right">
+                    <div class="col-xs-12 text-right p-r-none">
                         <a
-                            class="btn btn-primary add pull-right"
+                            class="btn btn-primary add pull-right m-t-md"
                             href="{{ url('admin/pages/add') }}"
                         >{{ __('custom.add') }}</a>
                     </div>
-                    <div class="col-xs-12 m-b-lg">
+                    <div class="col-xs-12 m-b-lg p-r-none">
                         @if (count($pages))
                             <form method="POST" class="form-horizontal">
                                 {{ csrf_field() }}

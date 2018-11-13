@@ -167,26 +167,6 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label for="help_page" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.help_page') }}:</label>
-                                <div class="col-sm-9">
-                                    <select
-                                        id="help_page"
-                                        name="help_page"
-                                        class="js-select form-control"
-                                        data-placeholder="{{ __('custom.select') }}"
-                                    >
-                                        <option></option>
-                                        @foreach ($helpPages as $page)
-                                            <option
-                                                value="{{ $page->name }}"
-                                                {{ $page->name == $model->help_page ? 'selected' : '' }}
-                                            >{{ $page->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <span class="error">{{ $errors->first('help_page') }}</span>
-                                </div>
-                            </div>
                             <div class="form-group row m-b-lg m-t-md">
                                 <label for="valid" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.valid') }}:</label>
                                 <div class="col-sm-9 m-b-sm">
@@ -240,7 +220,7 @@
                                     >
                                         {{ uctrans('custom.close') }}
                                     </a>
-                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
+                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
                                 </div>
                             </div>
                         </form>

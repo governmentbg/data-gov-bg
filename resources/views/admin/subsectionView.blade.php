@@ -49,12 +49,6 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="forum_link" class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.help_section') }}:</label>
-                            <div class="col-sm-6 col-xs-12">
-                                <div>{{ $section->help_section }}</div>
-                            </div>
-                        </div>
-                        <div class="form-group row m-b-lg m-t-md">
                             <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->ordering }}</div>

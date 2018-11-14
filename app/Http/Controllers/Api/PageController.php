@@ -59,7 +59,6 @@ class PageController extends ApiController
                 'meta_keywords'       => 'nullable|max:191',
                 'meta_keywords.*'     => 'max:191',
                 'forum_link'          => 'nullable|string|max:191',
-                'help_page'           => 'nullable|string|exists:help_pages,name|max:191',
                 'active'              => 'nullable|boolean',
                 'valid_from'          => 'nullable|date',
                 'valid_to'            => 'nullable|date',
@@ -132,10 +131,6 @@ class PageController extends ApiController
 
                 if (isset($pageData['data']['forum_link'])) {
                     $newPage->forum_link = $pageData['data']['forum_link'];
-                }
-
-                if (isset($pageData['data']['help_page'])) {
-                    $newPage->help_page = $pageData['data']['help_page'];
                 }
 
                 if (isset($pageData['data']['valid_from'])) {
@@ -228,7 +223,6 @@ class PageController extends ApiController
                 'meta_keywords'         => 'nullable|max:191',
                 'meta_keywords.*'       => 'max:191',
                 'forum_link'            => 'nullable|string|max:191',
-                'help_page'             => 'nullable|string|exists:help_pages,name|max:191',
                 'active'                => 'nullable|boolean',
                 'valid_from'            => 'nullable|date',
                 'valid_to'              => 'nullable|date',
@@ -340,10 +334,6 @@ class PageController extends ApiController
                     $pageToEdit->forum_link = $editData['data']['forum_link'];
                 } else {
                     $pageToEdit->forum_link = null;
-                }
-
-                if (isset($editData['data']['help_page'])) {
-                    $pageToEdit->help_page = $editData['data']['help_page'];
                 }
 
                 if (isset($editData['data']['active'])) {
@@ -481,7 +471,7 @@ class PageController extends ApiController
         if (!$validator->fails()) {
             if (isset($post['api_key'])) {
                 $rightCheck = RoleRight::checkUserRight(
-                    Module::SECTIONS,
+                    Module::PAGES,
                     RoleRight::RIGHT_VIEW
                 );
 
@@ -506,7 +496,6 @@ class PageController extends ApiController
                 'meta_descript',
                 'meta_key_words',
                 'forum_link',
-                'help_page',
                 'active',
                 'valid_from',
                 'valid_to',
@@ -578,7 +567,6 @@ class PageController extends ApiController
                         'meta_description'  => $singlePage->meta_descript,
                         'meta_keywords'     => $singlePage->meta_key_words,
                         'forum_link'        => $singlePage->forum_link,
-                        'help_page'         => $singlePage->help_page,
                         'active'            => $singlePage->active,
                         'valid_from'        => date($singlePage->valid_from),
                         'valid_to'          => date($singlePage->valid_to),

@@ -82,7 +82,7 @@ class ToolSendPending extends Command
                                 $query->query
                             );
 
-                            if ($response['success']) {
+                            if (!empty($response['success'])) {
                                 $logData['status'] = true;
                                 $successCount++;
                             } else {
@@ -106,7 +106,7 @@ class ToolSendPending extends Command
                         try {
                             $logData['action_object'] = $query->id;
 
-                            $result = ToolController::updateResourceData(
+                            $response = ToolController::updateResourceData(
                                 $query->api_key,
                                 $query->resource_key,
                                 $connection->source_file_path,
@@ -115,13 +115,16 @@ class ToolSendPending extends Command
                                 $connection->connection_name
                             );
 
-                            $logData['status'] = true;
-
-                            session()->flash('alert-success', __('custom.query_send_success'));
-                        } catch (QueryException $e) {
+                            if (!empty($response['success'])) {
+                                $logData['status'] = true;
+                                $successCount++;
+                            } else {
+                                $logData['status'] = false;
+                                $errorCount++;
+                            }
+                        } catch (\Exception $e) {
                             $logData['status'] = false;
-
-                            session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
+                            $errorCount++;
                         }
                     }
 
@@ -139,25 +142,20 @@ class ToolSendPending extends Command
 
     public function isReady($query)
     {
-        $lastDate = null;
-        $historyQuery = ActionsHistory::select('occurrence')
+        $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $query->id)
             ->where('status', true)
             ->orderBy('occurrence')
             ->first();
 
-        if (empty($historyQuery)) {
-            $lastDate = $query->created_at;
-        } else {
-            $lastDate = $historyQuery->occurrence;
-        }
+        $lastDate = empty($historyRecord) ? $query->created_at : $historyRecord->occurrence;
 
         $offsetNumber = $query->upl_freq;
         $offsetType = null;
 
         switch ($query->upl_freq_type) {
             case ToolController::FREQ_TYPE_HOUR:
-                $offsetType = 'minute';
+                $offsetType = 'hour';
                 break;
             case ToolController::FREQ_TYPE_DAY:
                 $offsetType = 'day';

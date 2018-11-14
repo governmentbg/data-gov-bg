@@ -896,4 +896,5 @@ return [
     'mail_conn_info' => 'Changes for %s connection with query for (%s)',
     'type_upl_freq' => 'Upload frequency type',
     'value_upl_freq' => 'Upload frequency value',
+    'file_missing' => 'File %s is missing',
 ];

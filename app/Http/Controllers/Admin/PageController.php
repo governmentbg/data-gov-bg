@@ -176,7 +176,7 @@ class PageController extends AdminController
         $class = 'user';
         $fields = self::getPageTransFields();
         $model = Page::find($id);
-        $helpPages = $this->getHelpPages();
+        $resourceFormats = Page::getResourceResponseFormats();
         $sections = [];
 
         if (!is_null($model)) {
@@ -217,7 +217,6 @@ class PageController extends AdminController
                     'meta_keywords'     => $request->offsetGet('meta_key_words'),
                     'abstract'          => $request->offsetGet('abstract'),
                     'forum_link'        => $request->offsetGet('forum_link'),
-                    'help_page'         => $request->offsetGet('help_page'),
                     'active'            => !empty($request->offsetGet('active')),
                     'valid_from'        => $from,
                     'valid_to'          => $to,
@@ -238,14 +237,13 @@ class PageController extends AdminController
             }
         }
 
-        return view('admin/pagesEdit', compact('class', 'fields', 'model', 'sections', 'helpPages'));
+        return view('admin/pagesEdit', compact('class', 'fields', 'model', 'sections', 'resourceFormats'));
     }
 
     public function add(Request $request)
     {
         $sections = Section::select()->get();
         $sections = $this->prepareSections($sections);
-        $helpPages = $this->getHelpPages();
         $resourceFormats = Page::getResourceResponseFormats();
 
         if ($request->has('back')) {
@@ -275,7 +273,6 @@ class PageController extends AdminController
                     'meta_keywords'     => $request->offsetGet('meta_key_words'),
                     'abstract'          => $request->offsetGet('abstract'),
                     'forum_link'        => $request->offsetGet('forum_link'),
-                    'help_page'         => $request->offsetGet('help_page'),
                     'active'            => !empty($request->offsetGet('active')),
                     'valid_from'        => $from,
                     'valid_to'          => $to,
@@ -299,7 +296,6 @@ class PageController extends AdminController
             'class'           => 'user',
             'fields'          => self::getPageTransFields(),
             'sections'        => $sections,
-            'helpPages'       => $helpPages,
             'resourceFormats' => $resourceFormats
         ]);
     }
@@ -348,14 +344,5 @@ class PageController extends AdminController
         }
 
         return $result;
-    }
-
-    public function getHelpPages()
-    {
-        $rq = Request::create('/api/listHelpPages', 'POST', ['page_number' => 1, 'records_per_page' => 1000]);
-        $api = new ApiHelp($rq);
-        $result = $api->listHelpPages($rq)->getData();
-
-        return $result->success ? $result->pages : [];
     }
 }

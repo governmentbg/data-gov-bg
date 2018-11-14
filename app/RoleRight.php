@@ -107,6 +107,7 @@ class RoleRight extends Model
 
                                 $check = false;
 
+                                // check if rights are limited only to records created by the user
                                 if (
                                     isset($checkData['user_id']) && !empty($checkData['user_id'])
                                     && isset($objData['created_by']) && !empty($objData['created_by'])
@@ -120,6 +121,7 @@ class RoleRight extends Model
                                     }
                                 }
 
+                                // check if the user have rights over other users data
                                 if (
                                     isset($checkData['user_id']) && !empty($checkData['user_id'])
                                     && isset($objData['object_id']) && !empty($objData['object_id'])
@@ -134,6 +136,7 @@ class RoleRight extends Model
                                     }
                                 }
 
+                                // check if the user have rights in the given organisation
                                 if (
                                     isset($checkData['org_id']) && !empty($checkData['org_id'])
                                     && isset($objData['org_id']) && !empty($objData['org_id'])
@@ -145,6 +148,7 @@ class RoleRight extends Model
                                     }
                                 }
 
+                                // check if the user have rights in the given group
                                 if (
                                     isset($checkData['group_id']) && !empty($checkData['group_id'])
                                     && isset($objData['group_ids']) && !empty($objData['group_ids'])
@@ -160,6 +164,7 @@ class RoleRight extends Model
                                     return true;
                                 }
                             } else {
+                                // if there is no additional rights settings and the rights level is enough return true
                                 return true;
                             }
                         }

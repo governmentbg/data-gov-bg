@@ -32,6 +32,9 @@ class ToolController extends Controller
     const FREQ_TYPE_WEEK = 3;
     const FREQ_TYPE_MONTH = 4;
 
+    const DOCKER_LOCALHOST = 'host.docker.internal';
+    const DOCKER_FILE_VOLUME = '/var/files/';
+
     public static function getDrivers()
     {
         return [
@@ -287,7 +290,7 @@ class ToolController extends Controller
                                 $dataQuery->query
                             );
 
-                            if ($response['success']) {
+                            if (!empty($response['success'])) {
                                 session()->flash(
                                     'alert-success',
                                     empty($response['message']) ? __('custom.query_send_success') : $response['message']
@@ -346,14 +349,17 @@ class ToolController extends Controller
                 if (!$validator->fails()) {
                     if ($request->has('save_file')) {
                         try {
-                            $this->saveFile($file, $post);
+                            $actionObject = $this->saveFile($file, $post);
 
                             session()->flash('alert-success', __('custom.conn_save_success'));
                         } catch (QueryException $e) {
                             session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                         }
 
-                        return back()->withInput(array_merge(Input::all(), ['edit' => true]));
+                        return back()->withInput(array_merge(Input::all(), [
+                            'edit'      => true,
+                            'conn_id'   => $actionObject,
+                        ]));
                     } elseif ($request->has('send_file')) {
                         $logData = [
                             'module_name'   => Module::getModuleName(Module::TOOL_FILE),
@@ -392,7 +398,7 @@ class ToolController extends Controller
 
                         Module::add($logData);
                     } else {
-                        if (file_exists('/var/files/'. $post['file'])) {
+                        if (file_exists(self::DOCKER_FILE_VOLUME . $post['file'])) {
                             session()->flash('alert-success', __('custom.conn_success'));
                         } else {
                             session()->flash('alert-danger', __('custom.conn_error'));
@@ -452,7 +458,7 @@ class ToolController extends Controller
                             $query->connection->connection_name
                         );
 
-                        if ($result['success']) {
+                        if (!empty($result['success'])) {
                             $logData['status'] = true;
 
                             session()->flash(
@@ -583,6 +589,8 @@ class ToolController extends Controller
         ];
 
         Module::add($logData);
+
+        return $actionObject;
     }
 
     private function saveConnection($driver, $data)
@@ -680,6 +688,14 @@ class ToolController extends Controller
 
     public static function getConnection($driver, $host, $dbName, $username, $password)
     {
+        if (config('app.IS_DOCKER')) {
+            $hostParts = explode(':', $host);
+
+            if (isset($hostParts[1]) && in_array($hostParts[0], ['localhost', '127.0.0.1'])) {
+                $host = self::DOCKER_LOCALHOST .':'. $hostParts[1];
+            }
+        }
+
         $connection = new \PDO($driver .':host='. $host .';dbname='. $dbName, $username, $password);
         $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
@@ -688,13 +704,20 @@ class ToolController extends Controller
 
     public static function updateResourceData($apiKey, $resourceUri, $data, $file = false, $email = null, $name = null, $query = null)
     {
-        $baseUrl = config('app.TOOL_API_URL');
-
         if ($file) {
             $file = $data;
             $query = $file;
             $extension = pathinfo($file, PATHINFO_EXTENSION);
-            $content = file_get_contents('/var/files/'. $file);
+            $content = @file_get_contents(self::DOCKER_FILE_VOLUME . $file);
+
+            if (!file_exists()) {
+                return [
+                    'success'   => false,
+                    'error'     => [
+                        'message'   => sprintf(__('custom.missing_file'), $file),
+                    ],
+                ];
+            }
 
             if (!empty($extension)) {
                 $metadata['data']['file_format'] = $extension;
@@ -719,7 +742,7 @@ class ToolController extends Controller
             }
         }
 
-        $requestUrl = $baseUrl .'updateResourceData';
+        $requestUrl = config('app.TOOL_API_URL') .'updateResourceData';
 
         $ch = curl_init($requestUrl);
 

@@ -2149,7 +2149,12 @@ class OrganisationController extends ApiController
                 $locale = isset($criteria['locale']) ? $criteria['locale'] : \LaravelLocalization::getCurrentLocale();
 
                 $data = Organisation::join('data_sets', 'organisations.id', '=', 'org_id');
-                $data->select('organisations.id', 'organisations.name', DB::raw('count(distinct data_sets.id, data_sets.org_id) as total'));
+                $data->select(
+                    'organisations.id',
+                    'organisations.name',
+                    'organisations.uri',
+                    DB::raw('count(distinct data_sets.id, data_sets.org_id) as total')
+                );
 
                 $data->where('organisations.active', 1);
                 $data->where('organisations.approved', 1);
@@ -2218,9 +2223,10 @@ class OrganisationController extends ApiController
                 if (!empty($data)) {
                     foreach ($data as $item) {
                         $results[] = [
+                            'locale'         => $locale,
                             'id'             => $item->id,
                             'name'           => $item->name,
-                            'locale'         => $locale,
+                            'uri'            => $item->uri,
                             'datasets_count' => $item->total,
                         ];
                     }
@@ -2299,8 +2305,15 @@ class OrganisationController extends ApiController
             try {
                 $locale = isset($criteria['locale']) ? $criteria['locale'] : \LaravelLocalization::getCurrentLocale();
 
-                $data = Organisation::join('data_set_groups', 'organisations.id', '=', 'group_id')->join('data_sets', 'data_set_id', '=', 'data_sets.id');
-                $data->select('organisations.id', 'organisations.name', DB::raw('count(distinct data_set_id, group_id) as total'));
+                $data = Organisation::join('data_set_groups', 'organisations.id', '=', 'group_id')
+                    ->join('data_sets', 'data_set_id', '=', 'data_sets.id');
+
+                $data->select(
+                    'organisations.id',
+                    'organisations.name',
+                    'organisations.uri',
+                    DB::raw('count(distinct data_set_id, group_id) as total')
+                );
 
                 $data->where('organisations.type', Organisation::TYPE_GROUP);
                 $data->where('data_sets.status', DataSet::STATUS_PUBLISHED);
@@ -2363,9 +2376,10 @@ class OrganisationController extends ApiController
                 if (!empty($data)) {
                     foreach ($data as $item) {
                         $results[] = [
+                            'locale'         => $locale,
                             'id'             => $item->id,
                             'name'           => $item->name,
-                            'locale'         => $locale,
+                            'uri'            => $item->uri,
                             'datasets_count' => $item->total,
                         ];
                     }

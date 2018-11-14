@@ -12,11 +12,10 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
-### Added
-- uri in listDataGroups() and listDataOrganisations() responses
 
 ## [1.0.3] - 2018-11-14
 ### Fixed
+- uri in listDataGroups() and listDataOrganisations() responses
 - Tool install script container destroy order for windows
 - Tool graylog host
 - Tool file exists check

@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- uri in listDataGroups() and listDataOrganisations() responses
 
 ## [1.0.2] - 2018-11-14
 ### Added

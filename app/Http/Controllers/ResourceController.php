@@ -616,7 +616,7 @@ class ResourceController extends Controller {
             $data = isset($res->data) ? $res->data : [];
 
             if ($format == Page::RESOURCE_RESPONSE_CSV) {
-                $convertData = ['data' => $data];
+                $convertData = ['data' => json_decode(json_encode($data), true)];
                 $reqConvert = Request::create('/json2csv', 'POST', $convertData);
                 $apiConvert = new ApiConversion($reqConvert);
                 $resultConvert = $apiConvert->json2csv($reqConvert)->getData();

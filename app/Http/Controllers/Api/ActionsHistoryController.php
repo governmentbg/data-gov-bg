@@ -39,6 +39,7 @@ class ActionsHistoryController extends ApiController
     {
         $post = $request->all();
         $order = [];
+        $publicTypes = array_keys(ActionsHistory::getPublicTypes());
 
         $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'desc';
         $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'occurrence';
@@ -111,6 +112,32 @@ class ActionsHistoryController extends ApiController
             )->join('users', 'users.id', '=', 'actions_history.user_id');
         }
 
+        if (isset($post['api_key'])) {
+            if (isset($criteria['actions'])) {
+                if (Role::isAdmin()) {
+                    $history->whereIn('action', $criteria['actions']);
+                } else {
+                    $matchTypes = array_intersect($criteria['actions'], $publicTypes);
+                    if (count($matchTypes) != count($criteria['actions'])) {
+                        return $this->errorResponse(__('custom.access_denied'));
+                    }
+                    $history->whereIn('action', $criteria['actions']);
+                }
+            } else {
+                $history->whereIn('action', $publicTypes);
+            }
+        } else {
+            if (isset($criteria['actions'])) {
+                $matchTypes = array_intersect($criteria['actions'], $publicTypes);
+                if (count($matchTypes) != count($criteria['actions'])) {
+                    return $this->errorResponse(__('custom.access_denied'));
+                }
+                $history->whereIn('action', $criteria['actions']);
+            } else {
+                $history->whereIn('action', $publicTypes);
+            }
+        }
+
         if (isset($criteria['period_from'])) {
             $history->where('occurrence', '>=', $criteria['period_from']);
         }
@@ -145,9 +172,6 @@ class ActionsHistoryController extends ApiController
             $history->where('ip_address', $criteria['ip_address']);
         }
 
-        if (isset($criteria['actions'])) {
-            $history->whereIn('action', $criteria['actions']);
-        }
 
         $actObjCriteria = [];
 

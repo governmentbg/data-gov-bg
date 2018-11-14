@@ -91,12 +91,12 @@ class ApiResourceSendPending extends Command
                     $resultElastic = $api->updateResourceData($reqElastic)->getData();
 
                     if ($resultElastic->success) {
-                        $successCount ++;
+                        $successCount++;
                     } else {
-                        $errorCount ++;
+                        $errorCount++;
                     }
                 } else {
-                    $errorCount ++;
+                    $errorCount++;
                 }
             }
         }
@@ -112,17 +112,12 @@ class ApiResourceSendPending extends Command
 
     public function isReady($resource)
     {
-        $lastDate = null;
-        $historyQuery = ActionsHistory::select('occurrence')
+        $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $resource->uri)
             ->orderBy('occurrence')
             ->first();
 
-        if (empty($historyQuery)) {
-            $lastDate = $resource->created_at;
-        } else {
-            $lastDate = $historyQuery->occurrence;
-        }
+        $lastDate = empty($historyRecord) ? $resource->created_at : $historyRecord->occurrence;
 
         $offsetNumber = $resource->upl_freq;
         $offsetType = null;

@@ -53,6 +53,87 @@
                                     )
                                 @endif
                             @endforeach
+                            <div class="resource-query">
+                                <div class="form-group row text-center">{{ __('custom.generate_script') }}</div>
+                                <div class="form-group row">
+                                    <label for="resource_uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.resource_uri') }}:</label>
+                                    <div class="col-sm-9 col-xs-12">
+                                        <input
+                                            name="resource_uri"
+                                            class="input-border-r-12 form-control js-resource-uri"
+                                            value="{{ old('resource_uri') }}"
+                                        >
+                                        <span class="error js-page-err"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="resource_version" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.resource_version') }}:</label>
+                                    <div class="col-sm-9 col-xs-12">
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            name="version"
+                                            class="input-border-r-12 form-control js-resource-version"
+                                            value="{{ old('version') }}"
+                                        >
+                                        <span class="error js-page-err"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group row m-b-sm">
+                                    <label for="format" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.response_format') }}:</label>
+                                    <div class="col-sm-9 col-xs-12">
+                                        <select
+                                            id="format"
+                                            name="response_format"
+                                            class="js-select form-control js-resource-format"
+                                            data-placeholder="{{ __('custom.response_format') }}"
+                                        >
+                                            <option></option>
+                                            @foreach ($resourceFormats as $id => $name)
+                                                <option
+                                                    value="{{ $id }}"
+                                                    @if (!empty(old('response_format')))
+                                                        {{ $id == old('response_format') ? 'selected' : '' }}
+                                                    @else
+                                                        {{ $id == \App\Page::RESOURCE_RESPONSE_JSON ? 'selected' : '' }}
+                                                    @endif
+                                                >{{ $name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row text-center">
+                                    <div class="col-xs-12">
+                                        <span
+                                            class="btn btn-primary js-generate-resource-query"
+                                            data-function="generate"
+                                        >{{ __('custom.generate_script_btn') }}</span>
+                                    </div>
+                                </div>
+                                <div class="form-group row m-t-md hidden js-query-script">
+                                    <div class="col-xs-12">
+                                        <textarea class="input-border-r-12 form-control" readonly></textarea>
+                                    </div>
+                                    <div class="row text-center">
+                                        <div class="col-xs-12 m-t-md">
+                                            <span
+                                                class="btn btn-primary js-test-resource-query"
+                                                data-function="test"
+                                            >{{ __('custom.test_script') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row m-t-md hidden js-loader text-center">
+                                    <div class="dots-loader">
+                                        <div></div><div></div><div></div><div></div>
+                                    </div>
+                                </div>
+                                <div class="form-group row m-t-md hidden js-query-result">
+                                    <div class="col-xs-12">
+                                        <textarea class="input-border-r-12 form-control result" readonly></textarea>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group row required">
                                 <label for="section" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.section') }}:</label>
                                 <div class="col-sm-9">
@@ -84,26 +165,6 @@
                                     @if (isset($errors) && $errors->has('forum_link'))
                                         <span class="error">{{ $errors->first('forum_link') }}</span>
                                     @endif
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="help_page" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.help_page') }}:</label>
-                                <div class="col-sm-9">
-                                    <select
-                                        id="help_page"
-                                        name="help_page"
-                                        class="js-select form-control"
-                                        data-placeholder="{{ __('custom.select') }}"
-                                    >
-                                        <option></option>
-                                        @foreach ($helpPages as $page)
-                                            <option
-                                                value="{{ $page->name }}"
-                                                {{ $page->name == $model->help_page ? 'selected' : '' }}
-                                            >{{ $page->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <span class="error">{{ $errors->first('help_page') }}</span>
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
@@ -159,7 +220,7 @@
                                     >
                                         {{ uctrans('custom.close') }}
                                     </a>
-                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.edit') }}</button>
+                                    <button type="submit" name="edit" value="1" class="m-l-md btn btn-custom">{{ uctrans('custom.save') }}</button>
                                 </div>
                             </div>
                         </form>

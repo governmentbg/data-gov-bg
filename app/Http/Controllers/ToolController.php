@@ -710,7 +710,7 @@ class ToolController extends Controller
             $extension = pathinfo($file, PATHINFO_EXTENSION);
             $content = @file_get_contents(self::DOCKER_FILE_VOLUME . $file);
 
-            if (!file_exists()) {
+            if (!file_exists(self::DOCKER_FILE_VOLUME . $file)) {
                 return [
                     'success'   => false,
                     'error'     => [

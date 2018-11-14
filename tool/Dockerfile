@@ -41,7 +41,7 @@ RUN apk add --update mysql mysql-client
 RUN addgroup mysql mysql
 RUN rm -f /var/cache/apk/*
 
-ENV MYSQL_DATABASE=opendata MYSQL_USER=opendata MYSQL_PASSWORD=opendata GIT_REPO=https://github.com/governmentbg/data-gov-bg API_URL=http://data.egov.bg/api/ GRAYLOG_HOST=https://opendata.gov.bg GRAYLOG_PORT=24230
+ENV MYSQL_DATABASE=opendata MYSQL_USER=opendata MYSQL_PASSWORD=opendata GIT_REPO=https://github.com/governmentbg/data-gov-bg API_URL=http://data.egov.bg/api/ GRAYLOG_HOST=http://opendata.gov.bg GRAYLOG_PORT=24230
 
 # configure apache
 RUN mkdir -p /run/apache2 && chown -R apache:apache /run/apache2 \

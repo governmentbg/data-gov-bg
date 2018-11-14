@@ -24,6 +24,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Hide not active sections, subsections and pages from Help guide
 - Add missing right checks API functions
+- Admin documents editing
 
 ## [1.0.1] - 2018-11-05
 ### Added

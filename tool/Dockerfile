@@ -5,6 +5,7 @@ RUN apk add --update \
     curl \
     git \
     pwgen \
+    nano \
     mysql mysql-client \
     apache2 \
     php7-apache2 \
@@ -36,7 +37,7 @@ RUN apk add --update \
     php7-pdo_sqlite \
     php7-sqlite3
 
-RUN apk add --update mysql mysql-client pwgen
+RUN apk add --update mysql mysql-client
 RUN addgroup mysql mysql
 RUN rm -f /var/cache/apk/*
 
@@ -63,12 +64,12 @@ RUN cd /var/www/localhost \
     && chmod -R 777 storage \
     && composer install \
     && cp .env.example .env \
-    && sed -i '/GRAYLOG_HOST/d' ./.env \
-    && sed -i '/GRAYLOG_PORT/d' ./.env \
-    && printf "IS_TOOL=true\nTOOL_API_URL=$API_URL\n\nGRAYLOG_HOST=$GRAYLOG_HOST\nGRAYLOG_PORT=$GRAYLOG_PORT\n" >> .env \
+    && sed -i "/GRAYLOG_HOST=/c\\GRAYLOG_HOST=$GRAYLOG_HOST" ./.env \
+    && sed -i "/GRAYLOG_HOST=/c\\GRAYLOG_HOST=$GRAYLOG_HOST" ./.env \
+    && printf "IS_TOOL=true\n" >> .env \
+    && printf "IS_DOCKER=true\n" >> .env \
+    && printf "TOOL_API_URL=$API_URL\n" >> .env \
     && mkdir /var/files
-
-VOLUME [ "/var/lib/mysql" ]
 
 COPY entrypoint.sh entrypoint.sh
 

@@ -33,6 +33,7 @@ class ToolController extends Controller
     const FREQ_TYPE_MONTH = 4;
 
     const DOCKER_LOCALHOST = 'host.docker.internal';
+    const DOCKER_FILE_VOLUME = '/var/files/';
 
     public static function getDrivers()
     {
@@ -289,7 +290,7 @@ class ToolController extends Controller
                                 $dataQuery->query
                             );
 
-                            if ($response['success']) {
+                            if (!empty($response['success'])) {
                                 session()->flash(
                                     'alert-success',
                                     empty($response['message']) ? __('custom.query_send_success') : $response['message']
@@ -397,7 +398,7 @@ class ToolController extends Controller
 
                         Module::add($logData);
                     } else {
-                        if (file_exists('/var/files/'. $post['file'])) {
+                        if (file_exists(self::DOCKER_FILE_VOLUME . $post['file'])) {
                             session()->flash('alert-success', __('custom.conn_success'));
                         } else {
                             session()->flash('alert-danger', __('custom.conn_error'));
@@ -457,7 +458,7 @@ class ToolController extends Controller
                             $query->connection->connection_name
                         );
 
-                        if ($result['success']) {
+                        if (!empty($result['success'])) {
                             $logData['status'] = true;
 
                             session()->flash(
@@ -687,7 +688,7 @@ class ToolController extends Controller
 
     public static function getConnection($driver, $host, $dbName, $username, $password)
     {
-        if (file_exists('/etc/alpine-release')) {
+        if (config('app.IS_DOCKER')) {
             $hostParts = explode(':', $host);
 
             if (isset($hostParts[1]) && in_array($hostParts[0], ['localhost', '127.0.0.1'])) {
@@ -703,13 +704,20 @@ class ToolController extends Controller
 
     public static function updateResourceData($apiKey, $resourceUri, $data, $file = false, $email = null, $name = null, $query = null)
     {
-        $baseUrl = config('app.TOOL_API_URL');
-
         if ($file) {
             $file = $data;
             $query = $file;
             $extension = pathinfo($file, PATHINFO_EXTENSION);
-            $content = file_get_contents('/var/files/'. $file);
+            $content = @file_get_contents(self::DOCKER_FILE_VOLUME . $file);
+
+            if (!file_exists()) {
+                return [
+                    'success'   => false,
+                    'error'     => [
+                        'message'   => sprintf(__('custom.missing_file'), $file),
+                    ],
+                ];
+            }
 
             if (!empty($extension)) {
                 $metadata['data']['file_format'] = $extension;
@@ -734,7 +742,7 @@ class ToolController extends Controller
             }
         }
 
-        $requestUrl = $baseUrl .'updateResourceData';
+        $requestUrl = config('app.TOOL_API_URL') .'updateResourceData';
 
         $ch = curl_init($requestUrl);
 

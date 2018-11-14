@@ -2212,7 +2212,7 @@ class OrganisationController extends ApiController
                     $data->whereIn('data_sets.id', $criteria['dataset_ids']);
                 }
 
-                $data->groupBy(['organisations.id', 'organisations.name'])->orderBy('total', 'desc');
+                $data->groupBy(['organisations.id', 'organisations.name', 'organisations.uri'])->orderBy('total', 'desc');
 
                 if (!empty($criteria['records_limit'])) {
                     $data->take($criteria['records_limit']);
@@ -2365,7 +2365,7 @@ class OrganisationController extends ApiController
                     $data->whereIn('data_sets.id', $criteria['dataset_ids']);
                 }
 
-                $data->groupBy(['organisations.id', 'organisations.name'])->orderBy('total', 'desc');
+                $data->groupBy(['organisations.id', 'organisations.name', 'organisations.uri'])->orderBy('total', 'desc');
 
                 if (!empty($criteria['records_limit'])) {
                     $data->take($criteria['records_limit']);

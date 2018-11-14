@@ -944,32 +944,38 @@ class DataController extends Controller {
 
     public function linkedData(Request $request)
     {
-        $formats = Resource::getFormats();
-        $formats = array_only($formats, [Resource::FORMAT_JSON]);
+        $formats = Resource::getFormats(true);
+        $formats = array_only($formats, [Resource::FORMAT_JSON, Resource::FORMAT_XML]);
 
         $selFormat = $request->input('format', '');
 
         $searchResultsUrl = '';
 
         if ($request->filled('query') && !empty($selFormat)) {
+            $format = strtolower($formats[$selFormat]);
+
             if (($searchQuery = json_decode($request->input('query'))) && isset($searchQuery->query)) {
                 $params = [
                     'query'  => json_encode($searchQuery->query),
                     'format' => $selFormat
                 ];
+
                 if (isset($searchQuery->sort)) {
                     if (is_array($searchQuery->sort) && is_object(array_first($searchQuery->sort))) {
                         foreach (array_first($searchQuery->sort) as $field => $type) {
                             $params['order']['field'] = $field;
+
                             if (isset($type->order)) {
                                 $params['order']['type'] = $type->order;
                             }
+
                             break;
                         }
                     } else {
                         return back()->withInput()->withErrors(['query' => [__('custom.invalid_search_query_sort')]]);
                     }
                 }
+
                 if ($request->filled('limit_results')) {
                     $params['records_per_page'] = intval($request->limit_results);
                 }
@@ -983,15 +989,27 @@ class DataController extends Controller {
                     $result = $api->getLinkedData($rq)->getData();
 
                     if (isset($result->success) && $result->success && isset($result->data)) {
-                        if ($selFormat == Resource::FORMAT_JSON) {
-                            $content = json_encode($result->data);
-                            $filename = time() .'.'. strtolower($formats[$selFormat]);
+                        $filename = time() .'.'. $format;
 
-                            return \Response::make($content, '200', array(
-                                'Content-Type' => 'application/octet-stream',
-                                'Content-Disposition' => 'attachment; filename="'. $filename .'"'
-                            ));
+                        if (strtolower($selFormat) != Resource::FORMAT_JSON) {
+                            $method = 'json2'. strtolower($format);
+                            $convertReq = Request::create('/api/'. $method, 'POST', ['data' => $result->data]);
+                            $apiResources = new ApiConversion($convertReq);
+                            $resource = $apiResources->$method($convertReq)->getData();
+
+                            if (!$resource->success) {
+                                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.converse_unavailable')));
+                            }
+
+                            $fileData = $resource->data;
+                        } else {
+                            $fileData = json_encode($result->data, JSON_UNESCAPED_UNICODE);
                         }
+
+                        return \Response::make($fileData, '200', array(
+                            'Content-Type' => 'application/octet-stream',
+                            'Content-Disposition' => 'attachment; filename="'. $filename .'"'
+                        ));
                     } else {
                         $errors = $result->errors ?: ['common' => $result->error->message];
                         return back()->withInput()->withErrors($errors);

@@ -87,7 +87,6 @@ class SubsectionController extends AdminController
         }
 
         $sections = $this->getMainSections();
-        $helpSections = $this->getHelpSections();
 
         if ($request->has('create')) {
             $validator = \Validator::make($request->all(), [
@@ -102,7 +101,6 @@ class SubsectionController extends AdminController
                         'parent_id'     => $request->offsetGet('parent_id'),
                         'ordering'      => $request->offsetGet('ordering'),
                         'forum_link'    => $request->offsetGet('forum_link'),
-                        'help_section'  => $request->offsetGet('help_section'),
                     ]
                 ]);
                 $api = new ApiSection($rq);
@@ -131,7 +129,6 @@ class SubsectionController extends AdminController
                 'class'         => 'user',
                 'fields'        => self::getSubsectionTransFields(),
                 'sections'      => $sections,
-                'helpSections'  => $helpSections,
                 'sectionId'     => $id,
             ]
         );
@@ -192,7 +189,6 @@ class SubsectionController extends AdminController
         $fields = self::getSubsectionTransFields();
         $model = Section::find($id);
         $sections = $this->getMainSections();
-        $helpSections = $this->getHelpSections();
 
         if (!is_null($model)) {
             $model = $this->getModelUsernames($model->loadTranslations());
@@ -207,7 +203,6 @@ class SubsectionController extends AdminController
                     'parent_id'     => $request->offsetGet('parent_id'),
                     'ordering'      => $request->offsetGet('ordering'),
                     'forum_link'    => $request->offsetGet('forum_link'),
-                    'help_section'  => $request->offsetGet('help_section'),
                 ]
             ]);
 
@@ -225,7 +220,7 @@ class SubsectionController extends AdminController
             }
         }
 
-        return view('admin/subsectionEdit', compact('class', 'fields', 'model', 'sections', 'helpSections'));
+        return view('admin/subsectionEdit', compact('class', 'fields', 'model', 'sections'));
     }
 
     /**
@@ -283,14 +278,5 @@ class SubsectionController extends AdminController
         }
 
         return $sections;
-    }
-
-    public function getHelpSections()
-    {
-        $rq = Request::create('/api/listHelpSections', 'POST', ['api_key'   => Auth::user()->api_key]);
-        $help = new ApiHelp($rq);
-        $result = $help->listHelpSections($rq)->getData();
-
-        return $result->success ? $result->sections : [];
     }
 }

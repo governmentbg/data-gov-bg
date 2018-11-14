@@ -13,6 +13,27 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.2] - 2018-11-14
+### Added
+- Resource queries tool in admin edit pages section
+
+### Changed
+- Remove 'help_section' parameter from API SectionController::addSection() and editSection()
+- Remove 'help_page' parameter from API SectionController::addPage() and editPage()
+- Drop 'help_section' column from 'sections' table
+- Drop 'help_page' column from 'pages' table
+
+### Fixed
+- Hide not active sections, subsections and pages from Help guide
+- Add missing right checks API functions
+- Admin documents edit
+- Tool dockerfile api url
+- Tool database connection for localhosts
+- Tool persistent database volume
+- Tool cron resource updates
+- Tool history statuses
+- Tool file not found error
+
 ## [1.0.1] - 2018-11-05
 ### Added
 - Statistics and analytics link in admin navigation bar
@@ -196,6 +217,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.2]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.5...v1.0.0
 [0.6.5]: https://github.com/governmentbg/data-gov-bg/compare/v0.6.4...v0.6.5

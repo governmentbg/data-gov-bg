@@ -37,12 +37,6 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
-                            <label for="forum_link" class="col-sm-6 col-xs-12 col-form-label">{{ uctrans('custom.help_section') }}:</label>
-                            <div class="col-sm-6 col-xs-12">
-                                <div>{{ $section->help_section }}</div>
-                            </div>
-                        </div>
-                        <div class="form-group row m-b-lg m-t-md">
                             <label for="theme" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.theme') }}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>

@@ -94,12 +94,6 @@
                                     <div>{{ $page->forum_link }}</div>
                                 </div>
                             </div>
-                            <div class="form-group row m-b-lg m-t-md">
-                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.help_page') }}:</label>
-                                <div class="col-sm-6 col-xs-12">
-                                    <div>{{ $page->help_page }}</div>
-                                </div>
-                            </div>
 
                             <div class="text-center m-b-lg terms-hr">
                                 <hr>

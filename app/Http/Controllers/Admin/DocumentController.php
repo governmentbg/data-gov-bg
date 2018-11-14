@@ -231,6 +231,7 @@ class DocumentController extends AdminController
     {
         $class = 'user';
         $fields = self::getDocTransFields(true);
+        $model = Document::find($id)->loadTranslations();
 
         if ($request->has('edit')) {
             if (!empty($request->document)) {
@@ -255,11 +256,9 @@ class DocumentController extends AdminController
             $result = $api->editDocument($rq)->getData();
 
             if ($result->success) {
-                if ($this->appendFileData($handle, $id)) {
-                    $request->session()->flash('alert-success', __('custom.edit_success'));
+                $request->session()->flash('alert-success', __('custom.edit_success'));
 
-                    return back();
-                }
+                return back();
             } else {
                 $request->session()->flash('alert-danger', __('custom.edit_error'));
 

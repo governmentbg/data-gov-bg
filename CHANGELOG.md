@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Personal information check to work for 10 digit chunks only
 
 ## [1.0.3] - 2018-11-14
 ### Fixed

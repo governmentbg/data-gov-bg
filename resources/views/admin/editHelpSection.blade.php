@@ -39,10 +39,8 @@
                                 class="js-select"
                                 name="parent"
                                 id="parent"
-                                data-placeholder="{{ __('custom.select') }}"
                             >
-                                <option><option>
-                                <option value="0"><option>
+                                <option value="">{{ __('custom.select') }}</option>
                                 @foreach ($parents as $parent)
                                     <option
                                         value="{{ $parent->id }}"

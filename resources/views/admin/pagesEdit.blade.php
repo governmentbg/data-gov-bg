@@ -134,16 +134,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group row required">
+                            <div class="form-group row">
                                 <label for="section" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.section') }}:</label>
                                 <div class="col-sm-9">
                                     <select
                                         id="section"
                                         name="section_id"
                                         class="js-select form-control"
-                                        data-placeholder="{{ __('custom.select_section') }}"
                                     >
-                                        <option></option>
+                                        <option value="">{{ __('custom.select_section') }}</option>
                                         @foreach ($sections as $id => $name)
                                             <option
                                                 value="{{ $id }}"

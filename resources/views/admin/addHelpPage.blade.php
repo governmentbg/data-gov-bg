@@ -58,8 +58,8 @@
                                 id="section_id"
                                 data-placeholder="{{ __('custom.select') }}"
                             >
-                                <option><option>
-                                <option value="0"><option>
+                                <option></option>
+                                <option value="0"></option>
                                 @foreach ($sections as $parent)
                                     <option
                                         value="{{ $parent->id }}"

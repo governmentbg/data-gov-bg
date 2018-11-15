@@ -150,7 +150,6 @@ class SectionController extends AdminController
             $section = is_array($result->sections) && !empty($result->sections[0]) ? $result->sections[0] : null;
 
             if (!is_null($section)) {
-
                 return view(
                     'admin/sectionView',
                     [

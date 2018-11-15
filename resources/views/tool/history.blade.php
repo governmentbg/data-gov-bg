@@ -123,7 +123,7 @@
                                         type="radio"
                                         name="status"
                                         value="1"
-                                        {{ !empty($post['status']) && $post['status'] == 1 ? 'checked' : ''}}
+                                        {{ !empty($post['status']) && $post['status'] == 1 ? 'checked' : '' }}
                                     >
                                 </div>
                             </label>
@@ -137,7 +137,7 @@
                                         type="radio"
                                         name="status"
                                         value="0"
-                                        {{ isset($post['status']) && $post['status'] == 0 ? 'checked' : ''}}
+                                        {{ isset($post['status']) && $post['status'] == 0 ? 'checked' : '' }}
                                     >
                                 </div>
                             </label>
@@ -171,6 +171,7 @@
                             )
                         }}
                     </div>
+                    <div>{{ $record->action_msg }}</div>
                     <div class="{{ $record->status ? 'success' : 'error' }}">
                         {{ $record->status ? __('custom.success') : __('custom.failure') }}
                     </div>

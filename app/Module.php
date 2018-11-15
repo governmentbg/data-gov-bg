@@ -147,7 +147,7 @@ class Module extends Model
                     ActionsHistory::create($dbData);
 
                     if (
-                        !env('IS_TOOL')
+                        !config('app.IS_TOOL')
                         && in_array($dbData['action'], array_flip(ActionsHistory::getEventNewsletterTypes()))
                         && $dbData['module_name'] == self::getModules()[self::ORGANISATIONS]
                     ) {

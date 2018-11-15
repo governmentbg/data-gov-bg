@@ -16,6 +16,9 @@ Security - in case of vulnerabilities.
 - Personal information check to work for 10 digit chunks only
 - Send newsletters on post
 - Edit API information for resources type API
+- Tool history
+- Tool mail notifications and errors
+- Tool cron resource updates
 
 ### Added
 - Мodules code in API listModules() responce

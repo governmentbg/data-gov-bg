@@ -42,6 +42,7 @@ class Module extends Model
     const TOOL_DB_CONNECTION = 27;
     const TOOL_FILE = 28;
     const TOOL_DB_QUERY = 29;
+    const MODULES = 30;
 
     /**
      * Gives back the available user actions.
@@ -76,6 +77,7 @@ class Module extends Model
             self::CUSTOM_SETTINGS        => 'CustomSetting',
             self::RIGHTS                 => 'Right',
             self::THEMES                 => 'Theme',
+            self::MODULES                => 'Modules',
         ];
     }
 

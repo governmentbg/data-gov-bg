@@ -15,6 +15,11 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Personal information check to work for 10 digit chunks only
 - Send newsletters on post
+- Edit API information for resources type API
+
+### Added
+- Мodules code in API listModules() responce
+- Module "Modules" in rights list
 
 ## [1.0.3] - 2018-11-14
 ### Fixed

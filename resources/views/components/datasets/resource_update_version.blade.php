@@ -80,7 +80,7 @@
                         @foreach ($reqTypes as $id => $rqType)
                             <option
                                 value="{{ $rqType }}"
-                                {{ $rqType == $resource->http_rq_type ? 'selected' : '' }}
+                                {{ $id == $resource->http_rq_type ? 'selected' : '' }}
                             >{{ $rqType }}</option>
                         @endforeach
                     </select>

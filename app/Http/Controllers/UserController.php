@@ -6113,6 +6113,21 @@ class UserController extends Controller {
                 ->with('user')
                 ->get();
 
+            if (!empty($data['followed_org'])) {
+                $orgFollows = UserFollow::where('org_id', $data['followed_org'])
+                    ->with('user')
+                    ->get();
+                $follows = $follows->merge($orgFollows);
+            }
+
+            if (!empty($data['followed_theme'])) {
+                $themeFollows = UserFollow::where('category_id', $data['followed_theme'])
+                    ->with('user')
+                    ->get();
+
+                $follows = $follows->merge($themeFollows);
+            }
+
             if (count($follows)) {
                 foreach ($follows as $follow) {
                     $user = $follow->user;

@@ -81,14 +81,6 @@ class Module extends Model
         ];
     }
 
-    public static function getEventNewsletterModules()
-    {
-        return [
-            self::ORGANISATIONS          => 'Organisation',
-            self::DATA_SETS              => 'Dataset',
-        ];
-    }
-
     public static function getToolModules()
     {
         return [
@@ -157,7 +149,7 @@ class Module extends Model
                     if (
                         !env('IS_TOOL')
                         && in_array($dbData['action'], array_flip(ActionsHistory::getEventNewsletterTypes()))
-                        && in_array($dbData['module_name'], self::getEventNewsletterModules())
+                        && $dbData['module_name'] == self::getModules()[self::ORGANISATIONS]
                     ) {
                         app('App\Http\Controllers\UserController')->sendEventNewsletter($dbData);
                     }

@@ -12,8 +12,10 @@ class ModulesController extends ApiController
 {
     public function listModules(Request $request)
     {
-        // Accessible only to users with is_admin. No arguments passed.
-        $rightCheck = RoleRight::checkUserRight(null,null);
+        $rightCheck = RoleRight::checkUserRight(
+            Module::MODULES,
+            RoleRight::RIGHT_VIEW
+        );
 
         if (!$rightCheck) {
             return $this->errorResponse(__('custom.access_denied'));
@@ -23,7 +25,10 @@ class ModulesController extends ApiController
 
         if (!empty($modules)) {
             foreach ($modules as $module) {
-                $result[] = ['name' => __('custom.' . $module)];
+                $result[] = [
+                    'name'  => __('custom.' . $module),
+                    'code'  => $module
+                ];
             }
 
             return $this->successResponse(['modules' => $result], true);

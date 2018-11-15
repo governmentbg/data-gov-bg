@@ -118,9 +118,11 @@ class ActionsHistoryController extends ApiController
                     $history->whereIn('action', $criteria['actions']);
                 } else {
                     $matchTypes = array_intersect($criteria['actions'], $publicTypes);
+
                     if (count($matchTypes) != count($criteria['actions'])) {
                         return $this->errorResponse(__('custom.access_denied'));
                     }
+
                     $history->whereIn('action', $criteria['actions']);
                 }
             } else {
@@ -129,12 +131,16 @@ class ActionsHistoryController extends ApiController
         } else {
             if (isset($criteria['actions'])) {
                 $matchTypes = array_intersect($criteria['actions'], $publicTypes);
+
                 if (count($matchTypes) != count($criteria['actions'])) {
                     return $this->errorResponse(__('custom.access_denied'));
                 }
+
                 $history->whereIn('action', $criteria['actions']);
             } else {
-                $history->whereIn('action', $publicTypes);
+                if (!config('app.IS_TOOL')) {
+                    $history->whereIn('action', $publicTypes);
+                }
             }
         }
 

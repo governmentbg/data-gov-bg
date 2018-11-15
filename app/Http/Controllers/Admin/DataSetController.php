@@ -697,6 +697,7 @@ class DataSetController extends AdminController
         $resourceData = $res->resource;
 
         $types = Resource::getTypes();
+        $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $uri)->first()->loadTranslations();
         $custFields = CustomSetting::where('resource_id', $resource->id)->get()->loadTranslations();
 
@@ -722,6 +723,16 @@ class DataSetController extends AdminController
                 if ($resource->resource_type == Resource::TYPE_HYPERLINK) {
                     $data['type'] = $resource->resource_type;
                     $data['resource_url'] = $request->offsetGet('resource_url');
+                }
+
+                if ($resource->resource_type == Resource::TYPE_API) {
+                    $data['type'] = $resource->resource_type;
+                    $data['resource_url'] = $request->offsetGet('resource_url');
+                    $data['http_rq_type'] = $request->offsetGet('http_rq_type');
+                    $data['http_headers'] = $request->offsetGet('http_headers') ?: '';
+                    $data['post_data'] = $request->offsetGet('post_data') ?: '';
+                    $data['upl_freq_type'] = $request->offsetGet('upl_freq_type');
+                    $data['upl_freq'] = $request->offsetGet('upl_freq');
                 }
 
                 $metadata = [
@@ -751,6 +762,7 @@ class DataSetController extends AdminController
             'resource'      => $resource,
             'uri'           => $uri,
             'types'         => $types,
+            'reqTypes'      => $reqTypes,
             'custFields'    => $custFields,
             'fields'        => $this->getResourceTransFields(),
             'parent'        => isset($parent) ? $parent : false,
@@ -794,8 +806,8 @@ class DataSetController extends AdminController
                     'type'          => $resource->resource_type,
                     'resource_url'  => $request->offsetGet('resource_url'),
                     'http_rq_type'  => $request->offsetGet('http_rq_type'),
-                    'http_headers'  => $request->offsetGet('http_headers'),
-                    'post_data'     => $request->offsetGet('post_data'),
+                    'http_headers'  => $request->offsetGet('http_headers') ?: '',
+                    'post_data'     => $request->offsetGet('post_data') ?: '',
                     'upl_freq_type' => $request->offsetGet('upl_freq_type'),
                     'upl_freq'      => $request->offsetGet('upl_freq'),
                 ];

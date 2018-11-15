@@ -1553,10 +1553,10 @@ class ResourceController extends ApiController
      */
     private function checkData($data)
     {
-        array_walk_recursive($data, function(&$item, $key) {
-            $replaceWith = '**********';
-            $pattern = '/[0-9]{10}/';
+        $replaceWith = '**********';
+        $pattern = '/^\d{10}$/';
 
+        array_walk_recursive($data, function(&$item, $key) use ($pattern, $replaceWith) {
             if (!is_object($item)) {
                 if (preg_match_all($pattern, $item, $match)) {
                     foreach ($match as $k => $value) {

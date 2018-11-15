@@ -42,6 +42,7 @@ class Module extends Model
     const TOOL_DB_CONNECTION = 27;
     const TOOL_FILE = 28;
     const TOOL_DB_QUERY = 29;
+    const MODULES = 30;
 
     /**
      * Gives back the available user actions.
@@ -76,14 +77,7 @@ class Module extends Model
             self::CUSTOM_SETTINGS        => 'CustomSetting',
             self::RIGHTS                 => 'Right',
             self::THEMES                 => 'Theme',
-        ];
-    }
-
-    public static function getEventNewsletterModules()
-    {
-        return [
-            self::ORGANISATIONS          => 'Organisation',
-            self::DATA_SETS              => 'Dataset',
+            self::MODULES                => 'Modules',
         ];
     }
 
@@ -153,9 +147,9 @@ class Module extends Model
                     ActionsHistory::create($dbData);
 
                     if (
-                        !env('IS_TOOL')
+                        !config('app.IS_TOOL')
                         && in_array($dbData['action'], array_flip(ActionsHistory::getEventNewsletterTypes()))
-                        && in_array($dbData['module_name'], self::getEventNewsletterModules())
+                        && $dbData['module_name'] == self::getModules()[self::ORGANISATIONS]
                     ) {
                         app('App\Http\Controllers\UserController')->sendEventNewsletter($dbData);
                     }

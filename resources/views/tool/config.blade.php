@@ -450,7 +450,7 @@
                             <input
                                 type="submit"
                                 class="btn btn-primary save-btn pull-right"
-                                name="send_query[{{ $query->id }}]"
+                                name="send_file_query[{{ $query->id }}]"
                                 value="{{ uctrans('custom.send') }}"
                             >
                         </div>

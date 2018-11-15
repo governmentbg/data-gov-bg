@@ -20,18 +20,17 @@
                             $objOwnerId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_id'];
                             $objOwnerName = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_name'];
                             $objOwnerView = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_view'];
-                            $objOwnerLogo = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_owner_logo'];
                         } else {
                             $objOwnerId = $actionHistory->user_id;
-
-                            if ($actionHistory->user_firstname || $actionHistory->user_lastname) {
-                                $objOwnerName = trim($actionHistory->user_firstname .' '. $actionHistory->user_lastname);
-                            } else {
-                                $objOwnerName = $actionHistory->user;
-                            }
-
                             $objOwnerView = '/user/profile/'. $actionHistory->user_id;
-                            $objOwnerLogo = null;
+                        }
+
+                        if (!empty($actionHistory->user_firstname) || !empty($actionHistory->user_lastname)) {
+                            $objOwnerName = trim($actionHistory->user_firstname .' '. $actionHistory->user_lastname);
+                        } elseif (!empty($actionHistory->user)) {
+                            $objOwnerName = $actionHistory->user;
+                        } else {
+                            $objOwnerName = null;
                         }
 
                         $objId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_id'];
@@ -49,13 +48,6 @@
                             />
                         </div>
                         <div style="width: 78%; float: left;">
-                            <div>
-                                @if (isset($objOwnerLogo))
-                                    <a href="{{ url($objOwnerView) }}">
-                                        <img src="{{ $message->embed($objOwnerLogo) }}"/>
-                                    </a>
-                                @endif
-                            </div>
                             <div>
                                 <div>{{ __('custom.date') }}: {{ date('d.m.Y', strtotime($actionHistory->occurrence)) }}</div>
                                 <h3 style="font-family: inherit; font-weight: 800; line-height: 1.1;">

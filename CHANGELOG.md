@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Personal information check to work for 10 digit chunks only
+- Send newsletters on post
 
 ## [1.0.3] - 2018-11-14
 ### Fixed

@@ -734,7 +734,6 @@ class DataSetController extends AdminController
                     $data['upl_freq_type'] = $request->offsetGet('upl_freq_type');
                     $data['upl_freq']      = $request->offsetGet('upl_freq');
                 }
-                error_log(var_export($data, true));
 
                 $metadata = [
                     'api_key'       => Auth::user()->api_key,

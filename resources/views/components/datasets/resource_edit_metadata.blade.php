@@ -19,7 +19,10 @@
             @endif
         @endforeach
 
-        @if ($resource->resource_type == App\Resource::TYPE_HYPERLINK)
+        @if (
+            ($resource->resource_type == App\Resource::TYPE_HYPERLINK)
+            || ($resource->resource_type == App\Resource::TYPE_API)
+        )
             <div class="form-group row required">
                 <label for="type" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.type', 1) }}:</label>
                 <div class="col-sm-9">
@@ -54,6 +57,91 @@
             </div>
         </div>
         @endif
+
+        @if ($resource->resource_type == App\Resource::TYPE_API)
+            <div class="js-ress-api">
+                <div class="js-ress-api form-group row required">
+                    <label
+                        for="rqtype"
+                        class="col-sm-3 col-xs-12 col-form-label"
+                    >{{ uctrans('custom.request_type') }}:</label>
+                    <div class="col-sm-9">
+                        <select
+                            id="rqtype"
+                            class="js-select input-border-r-12 form-control"
+                            name="http_rq_type"
+                        >
+                            <option value=""> {{ uctrans('custom.request_type') }}</option>
+                            @foreach ($reqTypes as $id => $rqType)
+                                <option
+                                    value="{{ $rqType }}"
+                                    {{ $id == $resource->http_rq_type ? 'selected' : '' }}
+                                >{{ $rqType }}</option>
+                            @endforeach
+                        </select>
+                        <span class="error">{{ $errors->first('http_rq_type') }}</span>
+                    </div>
+                </div>
+
+                <div class="js-ress-api form-group row">
+                    <label
+                        class="col-sm-3 col-xs-12 col-form-label"
+                    >{{ __('custom.type_upl_freq') }}:</label>
+                    <div class="col-sm-9">
+                        <select
+                            class="js-select input-border-r-12 form-control"
+                            name="upl_freq_type"
+                        >
+                            <option value="">{{ __('custom.type_upl_freq') }}</option>
+                            @foreach (App\Http\Controllers\ToolController::getFreqTypes() as $id => $freqType)
+                                <option
+                                    value="{{ $id }}"
+                                    {{ $id == $resource->upl_freq_type ? 'selected' : '' }}
+                                >{{ $freqType }}</option>
+                            @endforeach
+                        </select>
+                        <span class="error">{{ $errors->first('upl_freq_type') }}</span>
+                    </div>
+                </div>
+
+                <div class="form-group row js-ress-api">
+                    <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.value_upl_freq') }}:</label>
+                    <div class="col-sm-9">
+                        <input
+                            class="input-border-r-12 form-control"
+                            name="upl_freq"
+                            type="number"
+                            value="{{ $resource->upl_freq }}"
+                        >
+                        <span class="error">{{ $errors->first('upl_freq') }}</span>
+                    </div>
+                </div>
+
+                <div class="js-ress-api form-group row">
+                    <label for="headers" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.headers') }}:</label>
+                    <div class="col-sm-9">
+                        <textarea
+                            id="headers"
+                            class="input-border-r-12 form-control"
+                            name="http_headers"
+                        >{{ $resource->http_headers }}</textarea>
+                        <span class="error">{{ $errors->first('http_headers') }}</span>
+                    </div>
+                </div>
+                <div class="js-ress-api form-group row">
+                    <label for="request" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.request') }}:</label>
+                    <div class="col-sm-9">
+                        <textarea
+                            id="request"
+                            class="input-border-r-12 form-control"
+                            name="post_data"
+                        >{{ $resource->post_data }}</textarea>
+                        <span class="error">{{ $errors->first('post_data') }}</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="form-group row">
             <label for="schema_desc" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.schema_description') }}:</label>
             <div class="col-sm-9">

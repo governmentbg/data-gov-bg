@@ -1816,12 +1816,12 @@ class UserController extends Controller {
 
                 if ($resource->resource_type == Resource::TYPE_API) {
                     $data['type'] = $resource->resource_type;
-                    $data['resource_url']  = $request->offsetGet('resource_url');
-                    $data['http_rq_type']  = $request->offsetGet('http_rq_type');
-                    $data['http_headers']  = $request->offsetGet('http_headers') ?: '';
-                    $data['post_data']     = $request->offsetGet('post_data') ?: '';
+                    $data['resource_url'] = $request->offsetGet('resource_url');
+                    $data['http_rq_type'] = $request->offsetGet('http_rq_type');
+                    $data['http_headers'] = $request->offsetGet('http_headers') ?: '';
+                    $data['post_data'] = $request->offsetGet('post_data') ?: '';
                     $data['upl_freq_type'] = $request->offsetGet('upl_freq_type');
-                    $data['upl_freq']      = $request->offsetGet('upl_freq');
+                    $data['upl_freq'] = $request->offsetGet('upl_freq');
                 }
 
                 $metadata = [
@@ -1909,8 +1909,10 @@ class UserController extends Controller {
                     'type'          => $resource->resource_type,
                     'resource_url'  => $request->offsetGet('resource_url'),
                     'http_rq_type'  => $request->offsetGet('http_rq_type'),
-                    'http_headers'  => $request->offsetGet('http_headers'),
-                    'post_data'     => $request->offsetGet('post_data'),
+                    'http_headers'  => $request->offsetGet('http_headers') ?: '',
+                    'post_data'     => $request->offsetGet('post_data') ?: '',
+                    'upl_freq_type' => $request->offsetGet('upl_freq_type'),
+                    'upl_freq'      => $request->offsetGet('upl_freq'),
                 ];
 
                 $file = $request->file('file');

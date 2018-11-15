@@ -55,13 +55,14 @@ class ToolSendPending extends Command
 
             foreach ($queries as $query) {
                 if ($this->isReady($query)) {
-                    if ($connection->source == ToolController::SOURCE_TYPE_DB) {
+                    if ($connection->source_type == ToolController::SOURCE_TYPE_DB) {
                         $logData = [
                             'module_name'   => Module::getModuleName(Module::TOOL_DB_QUERY),
                             'action'        => ActionsHistory::TYPE_SEND,
-                            'action_msg'    => 'Send data request',
                             'action_object' => $query->id,
                         ];
+
+                        $send = false;
 
                         try {
                             $username = $connection['source_db_user'];
@@ -72,7 +73,7 @@ class ToolSendPending extends Command
 
                             $data = ToolController::fetchData($query->query, $driver, $host, $dbName, $username, $password, true);
 
-                            $response = ToolController::updateResourceData(
+                            $result = ToolController::updateResourceData(
                                 $query->api_key,
                                 $query->resource_key,
                                 $data,
@@ -81,32 +82,46 @@ class ToolSendPending extends Command
                                 $connection->connection_name,
                                 $query->query
                             );
+                            $send = true;
 
-                            if (!empty($response['success'])) {
+                            if (!empty($result['success'])) {
                                 $logData['status'] = true;
                                 $successCount++;
+                                $successMessage = empty($result['message']) ? __('custom.query_send_success') : $result['message'];
+                                $logData['action_msg'] = truncate($successMessage, 191);
                             } else {
                                 $logData['status'] = false;
                                 $errorCount++;
+                                $errorDetails = empty($result['errors']) ? '' : ' ('. print_r($result['errors'], true) .')';
+                                $errorMessage = $result['error']['message'] . $errorDetails;
+                                $logData['action_msg'] = '('. truncate($errorMessage, 187) .')';
                             }
                         } catch (\Exception $e) {
                             $logData['status'] = false;
                             $errorCount++;
-                        }
+                            $logData['action_msg'] = '('. truncate($e->getMessage(), 187) .')';
 
-                        Module::add($logData);
+                            if (!$send) {
+                                ToolController::updateResourceData(
+                                    $query->api_key,
+                                    $query->resource_key,
+                                    $data,
+                                    false,
+                                    $connection->notification_email,
+                                    $connection->connection_name,
+                                    $query->query
+                                );
+                            }
+                        }
                     } else {
                         $logData = [
                             'module_name'   => Module::getModuleName(Module::TOOL_FILE),
+                            'action_object' => $query->id,
                             'action'        => ActionsHistory::TYPE_SEND,
-                            'action_msg'    => 'Send File',
-                            'status'        => true,
                         ];
 
                         try {
-                            $logData['action_object'] = $query->id;
-
-                            $response = ToolController::updateResourceData(
+                            $result = ToolController::updateResourceData(
                                 $query->api_key,
                                 $query->resource_key,
                                 $connection->source_file_path,
@@ -115,16 +130,22 @@ class ToolSendPending extends Command
                                 $connection->connection_name
                             );
 
-                            if (!empty($response['success'])) {
+                            if (!empty($result['success'])) {
                                 $logData['status'] = true;
                                 $successCount++;
+                                $successMessage = empty($result['message']) ? __('custom.query_send_success') : $result['message'];
+                                $logData['action_msg'] = truncate($successMessage, 191);
                             } else {
                                 $logData['status'] = false;
                                 $errorCount++;
+                                $errorDetails = empty($result['errors']) ? '' : ' ('. print_r($result['errors'], true) .')';
+                                $errorMessage = $result['error']['message'] . $errorDetails;
+                                $logData['action_msg'] = '('. truncate($errorMessage, 187) .')';
                             }
                         } catch (\Exception $e) {
                             $logData['status'] = false;
                             $errorCount++;
+                            $logData['action_msg'] = '('. truncate($e->getMessage(), 187) .')';
                         }
                     }
 
@@ -144,11 +165,10 @@ class ToolSendPending extends Command
     {
         $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $query->id)
-            ->where('status', true)
-            ->orderBy('occurrence')
+            ->orderBy('occurrence', 'desc')
             ->first();
 
-        $lastDate = empty($historyRecord) ? $query->created_at : $historyRecord->occurrence;
+        $lastDate = empty($historyRecord) ? $query->created_at->format('Y-m-d H:i:s') : $historyRecord->occurrence;
 
         $offsetNumber = $query->upl_freq;
         $offsetType = null;

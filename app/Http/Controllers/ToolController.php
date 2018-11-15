@@ -11,7 +11,6 @@ use App\ConnectionSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\Api\ActionsHistoryController as ApiHistory;
@@ -109,7 +108,7 @@ class ToolController extends Controller
                                 $hasDb = true;
 
                                 session()->flash('alert-success', __('custom.conn_save_success'));
-                            } catch (QueryException $e) {
+                            } catch (\Exception $e) {
                                 session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                             }
                         } else {
@@ -215,7 +214,7 @@ class ToolController extends Controller
                                 $logData['action_object'] = $query->id;
 
                                 session()->flash('alert-success', __('custom.conn_save_success'));
-                            } catch (QueryException $e) {
+                            } catch (\Exception $e) {
                                 $logData['status'] = false;
 
                                 session()->flash(
@@ -234,9 +233,9 @@ class ToolController extends Controller
 
                     if ($request->has('delete_query')) {
                         $logData = [
-                            'module_name'      => Module::getModuleName(Module::TOOL_DB_QUERY),
-                            'action'           => ActionsHistory::TYPE_DEL,
-                            'action_msg'       => 'Listed data request',
+                            'module_name'   => Module::getModuleName(Module::TOOL_DB_QUERY),
+                            'action'        => ActionsHistory::TYPE_DEL,
+                            'action_msg'    => 'Listed data request',
                         ];
 
                         try {
@@ -249,7 +248,7 @@ class ToolController extends Controller
                             $post = $dbPostData;
 
                             session()->flash('alert-success', __('custom.query_delete_success'));
-                        } catch (QueryException $e) {
+                        } catch (\Exception $e) {
                             $logData['status'] = false;
 
                             session()->flash(
@@ -263,10 +262,11 @@ class ToolController extends Controller
 
                     if ($request->has('send_query')) {
                         $logData = [
-                            'module_name'      => Module::getModuleName(Module::TOOL_DB_QUERY),
-                            'action'           => ActionsHistory::TYPE_SEND,
-                            'action_msg'       => 'Send data request',
+                            'module_name'   => Module::getModuleName(Module::TOOL_DB_QUERY),
+                            'action'        => ActionsHistory::TYPE_SEND,
                         ];
+
+                        $send = false;
 
                         try {
                             $username = $dbData['source_db_user'];
@@ -280,7 +280,7 @@ class ToolController extends Controller
 
                             $data = $this->fetchData($dataQuery->query, $driver, $host, $dbName, $username, $password, true);
 
-                            $response = $this->updateResourceData(
+                            $result = $this->updateResourceData(
                                 $dataQuery->api_key,
                                 $dataQuery->resource_key,
                                 $data,
@@ -289,24 +289,37 @@ class ToolController extends Controller
                                 $dbData['connection_name'],
                                 $dataQuery->query
                             );
+                            $send = true;
 
-                            if (!empty($response['success'])) {
-                                session()->flash(
-                                    'alert-success',
-                                    empty($response['message']) ? __('custom.query_send_success') : $response['message']
-                                );
-
+                            if (!empty($result['success'])) {
                                 $logData['status'] = true;
-                            } else {
-                                session()->flash(
-                                    'alert-danger',
-                                    __('custom.query_send_error') .' ('. $response['error']['message'] .')'
-                                );
+                                $successMessage = empty($result['message']) ? __('custom.query_send_success') : $result['message'];
+                                $logData['action_msg'] = truncate($successMessage, 191);
 
+                                session()->flash('alert-success', $successMessage);
+                            } else {
                                 $logData['status'] = false;
+                                $errorDetails = empty($result['errors']) ? '' : ' ('. print_r($result['errors'], true) .')';
+                                $errorMessage = $result['error']['message'] . $errorDetails;
+                                $logData['action_msg'] = '('. truncate($errorMessage, 187) .')';
+
+                                session()->flash('alert-danger', __('custom.query_send_error') .': '. $errorMessage);
                             }
                         } catch (\Exception $e) {
                             $logData['status'] = false;
+                            $logData['action_msg'] = '('. truncate($e->getMessage(), 187) .')';
+
+                            if (!$send) {
+                                $this->updateResourceData(
+                                    $dataQuery->api_key,
+                                    $dataQuery->resource_key,
+                                    null,
+                                    false,
+                                    $dbData['notification_email'],
+                                    $dbData['connection_name'],
+                                    $dataQuery->query
+                                );
+                            }
 
                             session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
                         }
@@ -352,7 +365,7 @@ class ToolController extends Controller
                             $actionObject = $this->saveFile($file, $post);
 
                             session()->flash('alert-success', __('custom.conn_save_success'));
-                        } catch (QueryException $e) {
+                        } catch (\Exception $e) {
                             session()->flash('alert-danger', __('custom.conn_save_error') .' ('. $e->getMessage() .')');
                         }
 
@@ -361,42 +374,7 @@ class ToolController extends Controller
                             'conn_id'   => $actionObject,
                         ]));
                     } elseif ($request->has('send_file')) {
-                        $logData = [
-                            'module_name'   => Module::getModuleName(Module::TOOL_FILE),
-                            'action'        => ActionsHistory::TYPE_SEND,
-                            'action_object' => $actionObject,
-                            'action_msg'    => 'Sent file connection',
-                        ];
-
-                        try {
-                            $result = $this->updateResourceData(
-                                $post['file_api_key'],
-                                $post['file_rs_key'],
-                                $post['file'],
-                                true,
-                                $post['file_nt_email'],
-                                $post['file_conn_name']
-                            );
-
-                            if (empty($result['success'])) {
-                                $logData['status'] = false;
-
-                                session()->flash('alert-danger', __('custom.conn_error') .': '. $result['error']['message']);
-                            } else {
-                                $logData['status'] = true;
-
-                                session()->flash(
-                                    'alert-success',
-                                    empty($result['message']) ? __('custom.conn_success') : $result['message']
-                                );
-                            }
-                        } catch (\Exception $e) {
-                            $logData['status'] = false;
-
-                            session()->flash('alert-danger', __('custom.conn_error') .' ('. $e->getMessage() .')');
-                        }
-
-                        Module::add($logData);
+                        $this->sendFile($post, $actionObject);
                     } else {
                         if (file_exists(self::DOCKER_FILE_VOLUME . $post['file'])) {
                             session()->flash('alert-success', __('custom.conn_success'));
@@ -435,48 +413,8 @@ class ToolController extends Controller
                     }
                 }
 
-                if ($request->has('send_query')) {
-                    $logData = [
-                        'module_name'   => Module::getModuleName(Module::TOOL_FILE),
-                        'action'        => ActionsHistory::TYPE_SEND,
-                        'action_msg'    => 'Send File',
-                        'status'        => true,
-                    ];
-
-                    try {
-                        $queryId = array_keys($post['send_query'])[0];
-                        $query = DataQuery::find($queryId);
-
-                        $logData['action_object'] = $queryId;
-
-                        $result = $this->updateResourceData(
-                            $query->api_key,
-                            $query->resource_key,
-                            $query->connection->source_file_path,
-                            true,
-                            $query->connection->notification_email,
-                            $query->connection->connection_name
-                        );
-
-                        if (!empty($result['success'])) {
-                            $logData['status'] = true;
-
-                            session()->flash(
-                                'alert-success',
-                                empty($result['message']) ? __('custom.query_send_success') : $result['message']
-                            );
-                        } else {
-                            $logData['status'] = false;
-
-                            session()->flash('alert-danger', __('custom.query_send_error') .': '. $result['error']['message']);
-                        }
-                    } catch (QueryException $e) {
-                        $logData['status'] = false;
-
-                        session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
-                    }
-
-                    Module::add($logData);
+                if ($request->has('send_file_query')) {
+                    $this->sendFile($post);
                 }
 
                 if ($request->has('delete_file')) {
@@ -496,7 +434,7 @@ class ToolController extends Controller
                         $logData['status'] = true;
 
                         session()->flash('alert-success', __('custom.query_delete_success'));
-                    } catch (QueryException $e) {
+                    } catch (\Exception $e) {
                         $logData['status'] = false;
 
                         session()->flash('alert-danger', __('custom.query_delete_error') .' ('. $e->getMessage() .')');
@@ -525,6 +463,65 @@ class ToolController extends Controller
         ));
     }
 
+    private function sendFile($post, $actionObject = null)
+    {
+        $logData = [
+            'module_name'   => Module::getModuleName(Module::TOOL_FILE),
+            'action'        => ActionsHistory::TYPE_SEND,
+            'action_object' => $actionObject,
+            'status'        => true,
+        ];
+
+        try {
+            if (empty($post['send_file_query'])) {
+                $result = $this->updateResourceData(
+                    $post['file_api_key'],
+                    $post['file_rs_key'],
+                    $post['file'],
+                    true,
+                    $post['file_nt_email'],
+                    $post['file_conn_name']
+                );
+            } else {
+                $queryId = array_keys($post['send_file_query'])[0];
+                $query = DataQuery::find($queryId);
+
+                $logData['action_object'] = $queryId;
+
+                $result = $this->updateResourceData(
+                    $query->api_key,
+                    $query->resource_key,
+                    $query->connection->source_file_path,
+                    true,
+                    $query->connection->notification_email,
+                    $query->connection->connection_name
+                );
+            }
+
+            if (!empty($result['success'])) {
+                $logData['status'] = true;
+                $successMessage = empty($result['message']) ? __('custom.query_send_success') : $result['message'];
+                $logData['action_msg'] = truncate($successMessage, 191);
+
+                session()->flash('alert-success', $successMessage);
+            } else {
+                $logData['status'] = false;
+                $errorDetails = empty($result['errors']) ? '' : ' ('. print_r($result['errors'], true) .')';
+                $errorMessage = $result['error']['message'] . $errorDetails;
+                $logData['action_msg'] = '('. truncate($errorMessage, 187) .')';
+
+                session()->flash('alert-danger', __('custom.query_send_error') .': '. $errorMessage);
+            }
+        } catch (\Exception $e) {
+            $logData['status'] = false;
+            $logData['action_msg'] = '('. truncate($e->getMessage(), 187) .')';
+
+            session()->flash('alert-danger', __('custom.query_send_error') .' ('. $e->getMessage() .')');
+        }
+
+        Module::add($logData);
+    }
+
     private function saveFile($file, $data)
     {
         $setting = [];
@@ -532,19 +529,19 @@ class ToolController extends Controller
         $actionObject = '';
         $action = '';
 
-        if (!empty($data['conn_id'])) {
-            $setting = ConnectionSetting::find($data['conn_id']);
-        }
-
-        $settingData = [
-            'connection_name'       => $data['file_conn_name'],
-            'source_type'           => self::SOURCE_TYPE_FILE,
-            'source_file_type'      => Resource::getFormatsCode(pathinfo($data['file'], PATHINFO_EXTENSION)),
-            'source_file_path'      => $data['file'],
-            'notification_email'    => $data['file_nt_email'],
-        ];
-
         try {
+            if (!empty($data['conn_id'])) {
+                $setting = ConnectionSetting::find($data['conn_id']);
+            }
+
+            $settingData = [
+                'connection_name'       => $data['file_conn_name'],
+                'source_type'           => self::SOURCE_TYPE_FILE,
+                'source_file_type'      => Resource::getFormatsCode(pathinfo($data['file'], PATHINFO_EXTENSION)),
+                'source_file_path'      => $data['file'],
+                'notification_email'    => $data['file_nt_email'],
+            ];
+
             if (empty($setting)) {
                 $action = ActionsHistory::TYPE_ADD;
                 $setting = ConnectionSetting::create($settingData);
@@ -576,15 +573,19 @@ class ToolController extends Controller
             }
 
             $status = true;
-        } catch (QueryException $e) {
+        } catch (\Exception $e) {
             $status = false;
+            $message = $e->getMessage();
         }
 
         $logData = [
             'module_name'   => Module::getModuleName(Module::TOOL_FILE),
             'action'        => $action,
             'action_object' => $actionObject,
-            'action_msg'    => $action == ActionsHistory::TYPE_ADD ? 'Added file connection' : 'Edited file connection',
+            'action_msg'    =>
+                ($action == ActionsHistory::TYPE_ADD ? 'Added file connection' : 'Edited file connection')
+                . (!empty($message) ? '('. $message .')' : '')
+            ,
             'status'        => $status,
         ];
 
@@ -595,7 +596,7 @@ class ToolController extends Controller
 
     private function saveConnection($driver, $data)
     {
-        $setting = ConnectionSetting::where('source_type', self::SOURCE_TYPE_DB)->first(); //TODO This needs to be changed
+        $setting = ConnectionSetting::where('source_type', self::SOURCE_TYPE_DB)->first();
         $action = '';
         $status = false;
 
@@ -624,7 +625,7 @@ class ToolController extends Controller
             }
 
             $status = true;
-        } catch (\QueryException $e) {
+        } catch (\Exception $e) {
             $status = false;
         }
 
@@ -704,28 +705,31 @@ class ToolController extends Controller
 
     public static function updateResourceData($apiKey, $resourceUri, $data, $file = false, $email = null, $name = null, $query = null)
     {
+        $elasticData = null;
+
         if ($file) {
             $file = $data;
             $query = $file;
             $extension = pathinfo($file, PATHINFO_EXTENSION);
-            $content = @file_get_contents(self::DOCKER_FILE_VOLUME . $file);
 
             if (!file_exists(self::DOCKER_FILE_VOLUME . $file)) {
-                return [
+                $errorResponse = [
                     'success'   => false,
                     'error'     => [
-                        'message'   => sprintf(__('custom.missing_file'), $file),
+                        'message'   => sprintf(__('custom.file_missing'), $file),
                     ],
                 ];
-            }
+            } else {
+                $content = file_get_contents(self::DOCKER_FILE_VOLUME . $file);
 
-            if (!empty($extension)) {
-                $metadata['data']['file_format'] = $extension;
-            }
+                if (!empty($extension)) {
+                    $metadata['data']['file_format'] = $extension;
+                }
 
-            $data = ResourceController::callConversions($apiKey, $extension, $content);
-            $elasticData = Session::get('elasticData');
-            Session::forget('elasticData');
+                ResourceController::callConversions($apiKey, $extension, $content);
+                $elasticData = Session::get('elasticData');
+                Session::forget('elasticData');
+            }
         } else {
             if (!empty($data)) {
                 $elasticData = [array_keys($data[0])];
@@ -764,7 +768,7 @@ class ToolController extends Controller
         $response = json_decode($response, true);
         curl_close($ch);
 
-        return $response;
+        return empty($errorResponse) ? $response : array_merge($errorResponse, ['errors' => $response['errors']]);
     }
 
     public function configHistory(Request $request)

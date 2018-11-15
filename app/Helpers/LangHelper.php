@@ -151,7 +151,7 @@ function locale_to_flag($locale)
 }
 
 function truncate($text, $chars = 25) {
-    if (strlen($text) <= $chars) {
+    if (mb_strlen($text) <= $chars) {
         return $text;
     }
 

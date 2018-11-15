@@ -281,6 +281,8 @@ class PageController extends ApiController
 
                 if (isset($editData['data']['section_id'])) {
                     $pageToEdit->section_id = $editData['data']['section_id'];
+                } elseif (is_null($editData['data']['section_id'])) {
+                    $pageToEdit->section_id = null;
                 }
 
                 if (isset($editData['data']['valid_from'])) {

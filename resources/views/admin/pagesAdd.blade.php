@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group row required">
+                            <div class="form-group row">
                                 <label for="section" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.section') }}:</label>
                                 <div class="col-sm-9">
                                     <select

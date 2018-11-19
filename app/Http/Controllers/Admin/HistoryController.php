@@ -95,6 +95,7 @@ class HistoryController extends AdminController
             $params['criteria']['module'] = $selectedModules;
         }
 
+        $params['api_key'] = Auth::user()->api_key;
         $params['criteria']['order'] = [
             'type'  => $request->offsetGet('order_type'),
             'field' => $request->offsetGet('order_field'),

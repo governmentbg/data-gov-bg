@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 - Resource download needs authentication
 - Main categories file preview in admin panel
 - Login history bug
+- Dataset filtering bug
 
 ### Changed
 - Base categories names in insert migration

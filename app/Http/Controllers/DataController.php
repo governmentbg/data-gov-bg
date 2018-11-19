@@ -242,9 +242,6 @@ class DataController extends Controller {
             // check for category records limit
             $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
 
-            // check for category records limit
-            $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
-
             // list data categories
             $params = [
                 'criteria' => [

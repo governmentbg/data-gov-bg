@@ -730,9 +730,9 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['user_ids'])) {
-                    $query->whereIn('created_by', $criteria['user_ids']);
+                    $query->whereIn('data_sets.created_by', $criteria['user_ids']);
                 } elseif (!empty($criteria['created_by'])) {
-                    $query->where('created_by', $criteria['created_by']);
+                    $query->where('data_sets.created_by', $criteria['created_by']);
                 }
 
                 $orderColumns = [

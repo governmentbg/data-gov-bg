@@ -13,6 +13,9 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+### Fixed
+- Resource download needs authentication
+
 ## [1.0.4] - 2018-11-15
 ### Fixed
 - Personal information check to work for 10 digit chunks only

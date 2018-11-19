@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 
 ### Fixed
 - Resource download needs authentication
+- Login history bug
 
 ## [1.0.4] - 2018-11-15
 ### Fixed

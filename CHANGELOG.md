@@ -23,7 +23,7 @@ Security - in case of vulnerabilities.
 - Tool cron resource updates
 
 ### Added
-- Мodules code in API listModules() responce
+- Мodules code in API listModules() response
 - Module "Modules" in rights list
 
 ## [1.0.3] - 2018-11-14

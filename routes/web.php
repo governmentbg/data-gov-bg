@@ -17,7 +17,6 @@ Route::middleware('auth')->group(function() {
 
     Route::post('/user/changePassword', 'UserController@changePassword');
 
-    Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
     Route::post('/admin/adminChangePassword', 'Admin\UserController@adminChangePassword');
 
     Route::middleware('check.resources')->group(function () {
@@ -334,6 +333,7 @@ Route::middleware('auth')->group(function() {
     });
 });
 
+Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
 Route::match(['get', 'post'], 'help', 'HelpController@list');
 Route::match(['get', 'post'], 'help/search', 'HelpController@search');
 Route::match(['get', 'post'], 'help/view/{id}/{activePage?}', 'HelpController@view');

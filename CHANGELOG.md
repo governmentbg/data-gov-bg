@@ -13,6 +13,9 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+### Fixed
+- Resource download needs authentication
+
 ## [1.0.4] - 2018-11-15
 ### Fixed
 - Personal information check to work for 10 digit chunks only
@@ -23,7 +26,7 @@ Security - in case of vulnerabilities.
 - Tool cron resource updates
 
 ### Added
-- Мodules code in API listModules() responce
+- Мodules code in API listModules() response
 - Module "Modules" in rights list
 
 ## [1.0.3] - 2018-11-14

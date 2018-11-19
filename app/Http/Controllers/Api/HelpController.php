@@ -146,7 +146,7 @@ class HelpController extends ApiController
 
                 if (!empty($data['parent_id'])) {
                     $section->parent_id = $data['parent_id'];
-                } elseif (is_null($data['parent_id'])) {
+                } elseif (array_key_exists('parent_id', $data) && is_null($data['parent_id'])) {
                     $section->parent_id = null;
                 }
 

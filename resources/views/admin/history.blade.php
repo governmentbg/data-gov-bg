@@ -225,13 +225,15 @@
                         @endif
                     </div>
                     @include('partials.pagination')
-                    <div class="col-lg-12 text-right">
-                        <button
-                            class="btn btn-primary add"
-                            type="submit"
-                            name="download"
-                        >{{ uctrans('custom.download') }}</button>
-                    </div>
+                    @if (!empty($history))
+                        <div class="col-lg-12 text-right">
+                            <button
+                                class="btn btn-primary add"
+                                type="submit"
+                                name="download"
+                            >{{ uctrans('custom.download') }}</button>
+                        </div>
+                    @endif
                 </form>
             </div>
         </div>

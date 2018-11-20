@@ -31,9 +31,8 @@
                                             id="parent_id"
                                             name="parent_id"
                                             class="js-select form-control"
-                                            data-placeholder="{{ __('custom.select_main_topic') }}"
                                         >
-                                            <option></option>
+                                            <option value="">{{ __('custom.select_main_topic') }}</option>
                                             @foreach ($sections as $id => $section)
                                                 <option
                                                     value="{{ $section->id }}"
@@ -131,7 +130,11 @@
                                 <div class="form-group row">
                                     <div class="col-sm-12 text-right">
                                         <a
-                                            href="{{ url('admin/subsections/list/'. $model->parent_id) }}"
+                                            @if ($model->parent_id)
+                                                href="{{ url('admin/subsections/list/'. $model->parent_id) }}"
+                                            @else
+                                                href="{{ url('admin/sections/list/') }}"
+                                            @endif
                                             class="btn btn-primary"
                                         >
                                             {{ uctrans('custom.close') }}

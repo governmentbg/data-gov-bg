@@ -146,6 +146,8 @@ class HelpController extends ApiController
 
                 if (!empty($data['parent_id'])) {
                     $section->parent_id = $data['parent_id'];
+                } elseif (array_key_exists('parent_id', $data) && is_null($data['parent_id'])) {
+                    $section->parent_id = null;
                 }
 
                 if (!empty($data['ordering'])) {
@@ -518,6 +520,8 @@ class HelpController extends ApiController
 
                 if (!empty($data['section_id'])) {
                     $helpPage->section_id = $data['section_id'];
+                } elseif (is_null($data['section_id'])) {
+                    $helpPage->section_id = null;
                 }
 
                 if (!empty($data['ordering'])) {

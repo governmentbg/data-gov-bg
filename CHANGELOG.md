@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Changed
+- Elastic search index clean command
 
 ## [1.0.5] - 2018-11-20
 ### Added

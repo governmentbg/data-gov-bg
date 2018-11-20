@@ -25,7 +25,7 @@ class HistoryController extends AdminController
         $perPage = 50;
         $params = [];
         $history = [];
-        $filename = "actionsHistory.csv";
+        $filename = 'actionsHistory.csv';
 
         $params = [
             'records_per_page'  => $perPage,
@@ -51,11 +51,17 @@ class HistoryController extends AdminController
         $ips = $this->getIpDropdown($view, $ipDropCount);
 
         if (!empty($request->offsetGet('period_from'))) {
-            $params['criteria']['period_from'] = date_format(date_create($request->offsetGet('period_from')), 'Y-m-d H:i:s');
+            $params['criteria']['period_from'] = date_format(
+                date_create($request->offsetGet('period_from')),
+                'Y-m-d H:i:s'
+            );
         }
 
         if (!empty($request->offsetGet('period_to'))) {
-            $params['criteria']['period_to'] = date_format(date_create($request->offsetGet('period_to') .' 23:59'), 'Y-m-d H:i:s');;
+            $params['criteria']['period_to'] = date_format(
+                date_create($request->offsetGet('period_to') .' 23:59'),
+                'Y-m-d H:i:s'
+            );
         }
 
         if (!empty($selectedOrgs)) {
@@ -77,7 +83,7 @@ class HistoryController extends AdminController
         }
 
         if ($view == 'login') {
-            $filename = "loginHistory.csv";
+            $filename = 'loginHistory.csv';
             $params['criteria']['actions'] = [ActionsHistory::TYPE_LOGIN];
         }
 
@@ -89,6 +95,7 @@ class HistoryController extends AdminController
             $params['criteria']['module'] = $selectedModules;
         }
 
+        $params['api_key'] = Auth::user()->api_key;
         $params['criteria']['order'] = [
             'type'  => $request->offsetGet('order_type'),
             'field' => $request->offsetGet('order_field'),
@@ -100,6 +107,13 @@ class HistoryController extends AdminController
 
         if ($res->success) {
             $history = $res->actions_history;
+
+            $paginationData = $this->getPaginationData(
+                $history,
+                $res->total_records,
+                array_except(app('request')->input(), ['page']),
+                $perPage
+            );
         }
 
         if ($request->has('download')) {
@@ -147,26 +161,17 @@ class HistoryController extends AdminController
                 }
             }
 
-            $headers = array(
-                'Content-Type' => 'text/csv',
-            );
+            $headers = ['Content-Type' => 'text/csv'];
 
             return response()->download($path, $filename, $headers)->deleteFileAfterSend(true);
         }
-
-        $paginationData = $this->getPaginationData(
-            $history,
-            $res->total_records,
-            array_except(app('request')->input(), ['page']),
-            $perPage
-        );
 
         return view('admin/history', [
             'class'             => 'user',
             'view'              => $view,
             'actionTypes'       => $actionTypes,
-            'history'           => $paginationData['items'],
-            'pagination'        => $paginationData['paginate'],
+            'history'           => isset($paginationData['items']) ? $paginationData['items'] : null,
+            'pagination'        => isset($paginationData['paginate']) ? $paginationData['paginate'] : null,
             'orgDropCount'      => count($this->getOrgDropdown()),
             'organisations'     => $organisations,
             'selectedOrgs'      => $selectedOrgs,

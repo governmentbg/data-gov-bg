@@ -38,12 +38,16 @@
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
                             <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.file_preview') }}:</label>
-                            <div class="col-sm-6 col-xs-12 fileinput-new thumbnai form-control input-border-r-12 m-l-sm">
-                                <img
-                                    class="preview js-preview {{ empty($theme->image) ? 'hidden' : '' }}"
-                                    src="{{ !empty($theme->image) ? $theme->image : '' }}"
-                                    alt="theme preview"
-                                />
+                            <div class="col-sm-6 col-xs-12">
+                                <div class="picks-box left">
+                                    <a>
+                                        <span class="svg">
+                                            @if (!empty($theme->icon_data))
+                                                {!! $theme->icon_data !!}
+                                            @endif
+                                        </span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="text-center m-b-lg terms-hr">

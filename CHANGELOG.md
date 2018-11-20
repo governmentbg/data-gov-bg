@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.6] - 2018-11-20
+### Changed
+- Elastic search index clean command
+
 ## [1.0.5] - 2018-11-20
 ### Added
 - Elastic search index clean command
@@ -250,6 +254,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.6]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.2...v1.0.3

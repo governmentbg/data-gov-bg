@@ -49,18 +49,20 @@ class CleanElastic extends Command
             }
         }
 
-        $dIds = DB::select('select d.id, count(r.id) as rescount from data_sets as d left join resources as r on d.id = r.data_set_id group by d.id having rescount = 0');
+        $dIds = DB::select('select d.id, count(r.id) as rescount from data_sets as d left join resources as r on d.id = r.data_set_id group by d.id');
 
         if (!empty($dIds)) {
             foreach ($dIds as $record) {
-                $this->info('Dataset '. $record->id .' has no resources..');
+                if ($record->rescount == 0) {
+                    $this->info('Dataset '. $record->id .' has no resources..');
 
-                if (in_array($record->id, $indices)) {
-                    \Elasticsearch::indices()->delete(['index' => $record->id]);
+                    if (in_array($record->id, $indices)) {
+                        \Elasticsearch::indices()->delete(['index' => $record->id]);
 
-                    $this->info('Dataset '. $record->id .' es index deleted');
-                } else {
-                    $this->info('Dataset '. $record->id .' had no es index');
+                        $this->info('Dataset '. $record->id .' es index deleted');
+                    } else {
+                        $this->info('Dataset '. $record->id .' had no es index');
+                    }
                 }
             }
         } else {

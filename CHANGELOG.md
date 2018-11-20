@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Elastic search index clean command
 
 ### Fixed
 - Resource download needs authentication

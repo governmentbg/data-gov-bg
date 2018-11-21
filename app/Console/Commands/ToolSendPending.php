@@ -165,6 +165,7 @@ class ToolSendPending extends Command
     {
         $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $query->id)
+            ->where('action', ActionsHistory::TYPE_SEND)
             ->orderBy('occurrence', 'desc')
             ->first();
 

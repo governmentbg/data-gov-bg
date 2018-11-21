@@ -46,5 +46,5 @@ if %ERRORLEVEL% equ 0 (
     echo Port `%port%` already in use
     goto portloop
 ) else (
-    docker run -it -d --name opendatatool -v %folder%:/var/files -v opendatatooldb:/var/lib/mysql -p %port%:80 --restart always finitesoft/data-gov-bg && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower >nul 2>&1 & echo Deployment finished
+    docker run -it -d --name opendatatool -v /var/run/docker.sock:/var/run/docker.sock -v %folder%:/var/files -v opendatatooldb:/var/lib/mysql -p %port%:80 --restart always finitesoft/data-gov-bg && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower >nul 2>&1 & echo Deployment finished
 )

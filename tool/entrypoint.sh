@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# if docker has not been started in 30 seconds restart it
+echo '[i] Docker restart check for volume consistency'
+if [ $(($(date +%s) - $(cat /var/lastrestart))) -gt 30 ]; then
+    echo '[i] Docker container manually restarted'
+    date +%s > /var/lastrestart
+    docker restart opendatatool
+fi
+
 # start apache
 httpd
 

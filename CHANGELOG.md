@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Automatic newsletters and tool resources send timing
+- Tool file folder syncronisation on automatic restart
 
 ## [1.0.6] - 2018-11-20
 ### Changed

@@ -89,7 +89,7 @@ rm -f $tmpfile
 echo '[i] CRON jobs initialized...'
 
 echo '[i] Starting all processes...'
-/usr/bin/mysqld --user=mysql --console
+/usr/bin/mysqld --user=mysql --console &
 
 until mysqladmin ping &>/dev/null; do
    echo -n '.'; sleep 0.2

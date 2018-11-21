@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Automatic newsletters and tool resources send timing
 
 ## [1.0.6] - 2018-11-20
 ### Changed

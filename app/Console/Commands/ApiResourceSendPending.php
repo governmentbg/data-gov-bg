@@ -114,7 +114,8 @@ class ApiResourceSendPending extends Command
     {
         $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $resource->uri)
-            ->orderBy('occurrence')
+            ->where('action', ActionsHistory::TYPE_SEND)
+            ->orderBy('occurrence', 'desc')
             ->first();
 
         $lastDate = empty($historyRecord) ? $resource->created_at : $historyRecord->occurrence;

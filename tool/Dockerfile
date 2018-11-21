@@ -8,6 +8,7 @@ RUN apk add --update \
     nano \
     mysql mysql-client \
     apache2 \
+    docker \
     php7-apache2 \
     php7-cli \
     php7-zlib \
@@ -69,6 +70,7 @@ RUN cd /var/www/localhost \
     && printf "IS_TOOL=true\n" >> .env \
     && printf "IS_DOCKER=true\n" >> .env \
     && printf "TOOL_API_URL=$API_URL\n" >> .env \
+    && date +%s > /var/lastrestart \
     && mkdir /var/files
 
 COPY entrypoint.sh entrypoint.sh

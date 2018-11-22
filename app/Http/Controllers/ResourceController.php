@@ -130,7 +130,7 @@ class ResourceController extends Controller {
             if ($result->success) {
                 $uri = $isUpdate ? $recordUri : $result->data->uri;
 
-                if ($metadata['data']['type'] == Resource::TYPE_HYPERLINK) {
+                if (in_array($metadata['data']['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                     $success = true;
                 } else if (!empty($extension)) {
                     $data = self::callConversions($apiKey, $extension, $content);

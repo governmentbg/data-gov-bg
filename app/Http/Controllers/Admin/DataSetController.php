@@ -557,7 +557,7 @@ class DataSetController extends AdminController
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
             if ($response['success']) {
-                if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                     return redirect('/admin/resource/view/'. $response['uri']);
                 }
 
@@ -817,7 +817,7 @@ class DataSetController extends AdminController
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
 
                 if ($response['success']) {
-                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                    if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/admin/resource/view/'. $response['uri']);
                     }
 

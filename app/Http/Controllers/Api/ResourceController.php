@@ -556,6 +556,7 @@ class ResourceController extends ApiController
         $validator = \Validator::make($post, [
             'resource_uri'      => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'data'              => 'required|array',
+            'format'            => 'sometimes|string|max:191',
             'support_email'     => 'sometimes|email',
             'connection_name'   => 'sometimes|string|max:191',
             'connection_query'  => 'sometimes|string',
@@ -603,6 +604,11 @@ class ResourceController extends ApiController
                 Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
                 $resource->is_reported = Resource::REPORTED_FALSE;
                 $resource->version = $newVersion;
+
+                if (!empty($post['format'])) {
+                    $resource->file_format = Resource::getFormatsCode($post['format']);
+                }
+
                 $resource->save();
 
                 // increase dataset version without goint to new full version

@@ -12,6 +12,10 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Automatic upload resource type
+- Api updateResourceData format parameter
+
 ### Fixed
 - Automatic newsletters and tool resources send timing
 - Tool file folder syncronisation on automatic restart

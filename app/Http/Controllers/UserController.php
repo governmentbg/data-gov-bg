@@ -1718,7 +1718,7 @@ class UserController extends Controller {
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
             if ($response['success']) {
-                if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
 
@@ -1920,7 +1920,7 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
 
                 if ($response['success']) {
-                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                    if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/user/resource/view/'. $response['uri']);
                     }
 
@@ -1995,7 +1995,7 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
                 if ($response['success']) {
-                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                    if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
 
@@ -2068,7 +2068,7 @@ class UserController extends Controller {
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
                 if ($response['success']) {
-                    if ($data['type'] == Resource::TYPE_HYPERLINK) {
+                    if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
 

@@ -894,4 +894,5 @@ return [
     'type_upl_freq' => 'Upload frequency type',
     'value_upl_freq' => 'Upload frequency value',
     'file_missing' => 'File %s is missing',
+    'auto_upload' => 'Automatic upload',
 ];

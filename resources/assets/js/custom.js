@@ -598,14 +598,15 @@ $(function() {
             var $version = typeof $('.js-resource-version').val() != 'undefined'
                 ? $('.js-resource-version').val()
                 : null;
+            var testVersion = $version ? $version : 'null';
             var $function = $(this).data('function');
 
             if (typeof $function != 'undefined') {
                 if ($function == 'test') {
-                    generateScript($uri, $format, $version);
+                    generateScript($uri, $format, testVersion);
                     testScript($uri, $format, $version);
                 } else {
-                    generateScript($uri, $format, $version);
+                    generateScript($uri, $format, testVersion);
                 }
             }
         });
@@ -614,8 +615,8 @@ $(function() {
             var $queryContent = $('.js-query-script');
 
             var script = '$.ajax({url:"/execResourceQueryScript",headers:'+
-            '{"X-CSRF-TOKEN":$(\'meta[name="csrf-token"]\').attr("content")},type:"POST",data:{uri:'+
-            $uri +',format:'+ $format +',version:'+ $version +'},success:function(e){return e},error:function(r){return!1}});';
+            '{"X-CSRF-TOKEN":$(\'meta[name="csrf-token"]\').attr("content")},type:"POST",data:{uri:"'+
+            $uri +'",format:'+ $format +',version:'+ $version +'},success:function(e){return e},error:function(r){return!1}});';
 
             $queryContent.find('textarea').html(script);
             $queryContent.removeClass('hidden');

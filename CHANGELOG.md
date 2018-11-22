@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Fix resource query script parameters format
 
 ## [1.0.7] - 2018-11-22
 ### Added

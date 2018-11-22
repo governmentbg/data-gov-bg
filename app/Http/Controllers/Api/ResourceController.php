@@ -71,7 +71,7 @@ class ResourceController extends ApiController
                 'file_format'          => 'nullable|string',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
-                'type'                 => 'required|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'type'                 => 'required|int|in:'. implode(',', array_keys(Resource::getTypes())),
                 'resource_url'         => 'nullable|url|max:191|required_if:type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'nullable|string|required_if:type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
                 'authentication'       => 'nullable|string|max:191',
@@ -133,8 +133,8 @@ class ResourceController extends ApiController
                         ? $this->trans($post['data']['locale'], $post['data']['description'])
                         : null,
                     'uri'               => Uuid::generate(4)->string,
-                    'version'           => 1,
-                    'resource_type'     => isset($post['data']['type']) ? $post['data']['type'] : null,
+                    'version'           => $post['data']['type'] == Resource::TYPE_AUTO ? 0 : 1,
+                    'resource_type'     => $post['data']['type'],
                     'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
                     'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
                     'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
@@ -373,7 +373,7 @@ class ResourceController extends ApiController
                 'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
-                'type'                 => 'sometimes|int|digits_between:1,10|in:'. implode(',', array_keys(Resource::getTypes())),
+                'type'                 => 'sometimes|int|in:'. implode(',', array_keys(Resource::getTypes())),
                 'resource_url'         => 'sometimes|nullable|url|max:191|required_if:data.type,'. Resource::TYPE_HYPERLINK .','. Resource::TYPE_API,
                 'http_rq_type'         => 'sometimes|nullable|string|required_if:data.type,'. Resource::TYPE_API .'|in:'. implode(',', $requestTypes),
                 'authentication'       => 'sometimes|nullable|string|max:191|required_if:data.type,'. Resource::TYPE_API,
@@ -556,6 +556,7 @@ class ResourceController extends ApiController
         $validator = \Validator::make($post, [
             'resource_uri'      => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'data'              => 'required|array',
+            'format'            => 'sometimes|string|max:191',
             'support_email'     => 'sometimes|email',
             'connection_name'   => 'sometimes|string|max:191',
             'connection_query'  => 'sometimes|string',
@@ -603,6 +604,11 @@ class ResourceController extends ApiController
                 Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
                 $resource->is_reported = Resource::REPORTED_FALSE;
                 $resource->version = $newVersion;
+
+                if (!empty($post['format'])) {
+                    $resource->file_format = Resource::getFormatsCode($post['format']);
+                }
+
                 $resource->save();
 
                 // increase dataset version without goint to new full version

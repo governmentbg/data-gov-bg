@@ -8,6 +8,7 @@ RUN apk add --update \
     nano \
     mysql mysql-client \
     apache2 \
+    docker \
     php7-apache2 \
     php7-cli \
     php7-zlib \
@@ -41,7 +42,7 @@ RUN apk add --update mysql mysql-client
 RUN addgroup mysql mysql
 RUN rm -f /var/cache/apk/*
 
-ENV MYSQL_DATABASE=opendata MYSQL_USER=opendata MYSQL_PASSWORD=opendata GIT_REPO=https://github.com/governmentbg/data-gov-bg API_URL=http://data.egov.bg/api/ GRAYLOG_HOST=http://opendata.gov.bg GRAYLOG_PORT=24230
+ENV MYSQL_DATABASE=opendata MYSQL_USER=opendata MYSQL_PASSWORD=opendata GIT_REPO=https://github.com/governmentbg/data-gov-bg API_URL=http://data.egov.bg/api/ GRAYLOG_HOST=data.egov.bg GRAYLOG_PORT=12202
 
 # configure apache
 RUN mkdir -p /run/apache2 && chown -R apache:apache /run/apache2 \
@@ -69,6 +70,7 @@ RUN cd /var/www/localhost \
     && printf "IS_TOOL=true\n" >> .env \
     && printf "IS_DOCKER=true\n" >> .env \
     && printf "TOOL_API_URL=$API_URL\n" >> .env \
+    && date +%s > /var/lastrestart \
     && mkdir /var/files
 
 COPY entrypoint.sh entrypoint.sh

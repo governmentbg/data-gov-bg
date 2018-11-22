@@ -723,7 +723,7 @@ class ToolController extends Controller
                 $content = file_get_contents(self::DOCKER_FILE_VOLUME . $file);
 
                 if (!empty($extension)) {
-                    $metadata['data']['file_format'] = $extension;
+                    $format = $extension;
                 }
 
                 ResourceController::callConversions($apiKey, $extension, $content);
@@ -743,6 +743,8 @@ class ToolController extends Controller
 
                     $elasticData[] = array_values($row);
                 }
+
+                $format = 'csv';
             }
         }
 
@@ -758,6 +760,10 @@ class ToolController extends Controller
             'connection_name'   => $name,
             'connection_query'  => $query,
         ];
+
+        if (!empty($format)) {
+            $params['format'] = $format;
+        }
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));

@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# if docker has not been started in 50 seconds restart it
+echo '[i] Docker restart check for volume consistency'
+if [ $(($(date +%s) - $(cat /var/lastrestart))) -gt 50 ]; then
+    echo '[i] Docker container manually restarted'
+    sleep 20
+    date +%s > /var/lastrestart
+    docker restart opendatatool
+fi
+
 # start apache
 httpd
 
@@ -89,7 +98,7 @@ rm -f $tmpfile
 echo '[i] CRON jobs initialized...'
 
 echo '[i] Starting all processes...'
-/usr/bin/mysqld --user=mysql --console
+/usr/bin/mysqld --user=mysql --console &
 
 until mysqladmin ping &>/dev/null; do
    echo -n '.'; sleep 0.2

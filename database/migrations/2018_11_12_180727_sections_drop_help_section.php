@@ -13,12 +13,15 @@ class SectionsDropHelpSection extends Migration
      */
     public function up()
     {
-        Schema::table('sections', function (Blueprint $table) {
-            $table->dropColumn('help_section');
-        });
-        Schema::table('pages', function (Blueprint $table) {
-            $table->dropColumn('help_page');
-        });
+        if (!config('app.IS_TOOL')) {
+            Schema::table('sections', function (Blueprint $table) {
+                $table->dropColumn('help_section');
+            });
+
+            Schema::table('pages', function (Blueprint $table) {
+                $table->dropColumn('help_page');
+            });
+        }
     }
 
     /**
@@ -28,11 +31,14 @@ class SectionsDropHelpSection extends Migration
      */
     public function down()
     {
-        Schema::table('sections', function (Blueprint $table) {
-            $table->string('help_section')->nullable();
-        });
-        Schema::table('pages', function (Blueprint $table) {
-            $table->string('help_page')->nullable();
-        });
+        if (!config('app.IS_TOOL')) {
+            Schema::table('sections', function (Blueprint $table) {
+                $table->string('help_section')->nullable();
+            });
+
+            Schema::table('pages', function (Blueprint $table) {
+                $table->string('help_page')->nullable();
+            });
+        }
     }
 }

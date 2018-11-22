@@ -1,9 +1,10 @@
 #!/bin/sh
 
-# if docker has not been started in 30 seconds restart it
+# if docker has not been started in 50 seconds restart it
 echo '[i] Docker restart check for volume consistency'
-if [ $(($(date +%s) - $(cat /var/lastrestart))) -gt 30 ]; then
+if [ $(($(date +%s) - $(cat /var/lastrestart))) -gt 50 ]; then
     echo '[i] Docker container manually restarted'
+    sleep 20
     date +%s > /var/lastrestart
     docker restart opendatatool
 fi

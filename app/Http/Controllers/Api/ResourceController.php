@@ -6,6 +6,7 @@ use App\Module;
 use App\Signal;
 use App\DataSet;
 use App\Resource;
+use App\DataQuery;
 use App\RoleRight;
 use App\Organisation;
 use App\CustomSetting;
@@ -80,7 +81,7 @@ class ResourceController extends ApiController
                 'custom_fields'        => 'nullable|array',
                 'custom_fields.label'  => 'nullable|string|max:191',
                 'custom_fields.value'  => 'nullable|string|max:8000',
-                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(ToolController::getFreqTypes())),
+                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(DataQuery::getFreqTypes())),
                 'upl_freq'             => 'nullable|int|max:127',
             ]);
         }
@@ -101,6 +102,7 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
             $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
+            
             if (isset($dataset->org_id)) {
                 $rightCheck = RoleRight::checkUserRight(
                     Module::RESOURCES,
@@ -381,7 +383,7 @@ class ResourceController extends ApiController
                 'post_data'            => 'sometimes|nullable|string|max:8000',
                 'is_reported'          => 'sometimes|boolean',
                 'custom_fields'        => 'sometimes|array',
-                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(ToolController::getFreqTypes())),
+                'upl_freq_type'        => 'nullable|int|in:'. implode(',', array_keys(DataQuery::getFreqTypes())),
                 'upl_freq'             => 'nullable|int|max:127',
             ]);
         }

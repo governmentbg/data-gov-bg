@@ -3,9 +3,9 @@
 @section('content')
 <div class="container tool-history p-l-r-none">
     @include('partials.alerts-bar')
+    @include('partials.pagination')
     <div class="col-lg-4 col-md-5 col-sm-12 history-filters">
-        <form method="post" class="form-horisontal">
-            {{ csrf_field() }}
+        <form method="GET" class="form-horisontal">
             <table>
                 <tr>
                     <td>{{ uctrans('custom.time') }}:</td>
@@ -61,7 +61,7 @@
                                 class="js-select form-control"
                                 name="db_type"
                             >
-                                <option value="0"></option>
+                                <option value=""></option>
                                 @foreach ($connectionTypes as $id => $dbType)
                                     <option
                                         value="{{ $id }}"

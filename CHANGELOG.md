@@ -12,8 +12,23 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Tool file data preview
+- Tool multiple databases support
+- Tool history pagination on top
+
+### Changed
+- Tool devide database and file connections
+- Refactor tool code
+
 ### Fixed
 - Fix resource query script parameters format
+- Resource preview for all formats
+- Tool database preview
+- Tool history pagination clears filters
+- Tool query filter
+- Tool driver filter
+- Tool type filter
 
 ## [1.0.7] - 2018-11-22
 ### Added

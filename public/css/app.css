@@ -1,5 +1,9 @@
 @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);@charset "UTF-8";
 
+.theme-index .data-preview {
+  border: 1px solid #c02e54;
+}
+
 .theme-index .pagination li.active span {
   background-color: #c02e54;
   border-color: #c02e54;
@@ -440,6 +444,10 @@
 
 .forum-box {
   border: 1px solid #c02e54;
+}
+
+.theme-data .data-preview {
+  border: 1px solid #4e57aa;
 }
 
 .theme-data .pagination li.active span {
@@ -884,6 +892,10 @@
   border: 1px solid #4e57aa;
 }
 
+.theme-data-attention .data-preview {
+  border: 1px solid #d32a31;
+}
+
 .theme-data-attention .pagination li.active span {
   background-color: #d32a31;
   border-color: #d32a31;
@@ -1324,6 +1336,10 @@
 
 .forum-box {
   border: 1px solid #d32a31;
+}
+
+.theme-organisation .data-preview {
+  border: 1px solid #76ad3f;
 }
 
 .theme-organisation .pagination li.active span {
@@ -1768,6 +1784,10 @@
   border: 1px solid #76ad3f;
 }
 
+.theme-request .data-preview {
+  border: 1px solid #e8d429;
+}
+
 .theme-request .pagination li.active span {
   background-color: #e8d429;
   border-color: #e8d429;
@@ -2210,6 +2230,10 @@
   border: 1px solid #e8d429;
 }
 
+.theme-visualisations .data-preview {
+  border: 1px solid #e98911;
+}
+
 .theme-visualisations .pagination li.active span {
   background-color: #e98911;
   border-color: #e98911;
@@ -2649,6 +2673,10 @@
 }
 
 .forum-box {
+  border: 1px solid #e98911;
+}
+
+.theme-visualisation .data-preview {
   border: 1px solid #e98911;
 }
 
@@ -3094,6 +3122,10 @@
   border: 1px solid #e98911;
 }
 
+.theme-news .data-preview {
+  border: 1px solid #0a7b5d;
+}
+
 .theme-news .pagination li.active span {
   background-color: #0a7b5d;
   border-color: #0a7b5d;
@@ -3536,6 +3568,10 @@
   border: 1px solid #0a7b5d;
 }
 
+.theme-documents .data-preview {
+  border: 1px solid #145c99;
+}
+
 .theme-documents .pagination li.active span {
   background-color: #145c99;
   border-color: #145c99;
@@ -3975,6 +4011,10 @@
 }
 
 .forum-box {
+  border: 1px solid #145c99;
+}
+
+.theme-document .data-preview {
   border: 1px solid #145c99;
 }
 
@@ -4420,6 +4460,10 @@
   border: 1px solid #145c99;
 }
 
+.theme-contact .data-preview {
+  border: 1px solid #791292;
+}
+
 .theme-contact .pagination li.active span {
   background-color: #791292;
   border-color: #791292;
@@ -4860,6 +4904,10 @@
 
 .forum-box {
   border: 1px solid #791292;
+}
+
+.theme-user .data-preview {
+  border: 1px solid #108f9e;
 }
 
 .theme-user .pagination li.active span {
@@ -14359,6 +14407,10 @@ body .footer .copiright {
   overflow-x: auto;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 html,
 body {
   height: 100%;
@@ -16645,6 +16697,17 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 
 .js-loader {
   height: 80px;
+}
+
+.data-preview {
+  overflow: auto;
+  white-space: pre;
+  margin: 15px 0;
+  min-height: 300px;
+  max-height: 500px;
+  width: 100%;
+  border-radius: 4px;
+  padding: 10px;
 }
 
 .container .filter-content .filter-type,

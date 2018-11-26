@@ -55,7 +55,7 @@ class ToolSendPending extends Command
 
             foreach ($queries as $query) {
                 if ($this->isReady($query)) {
-                    if ($connection->source_type == ToolController::SOURCE_TYPE_DB) {
+                    if ($connection->source_type == DataQuery::SOURCE_TYPE_DB) {
                         $logData = [
                             'module_name'   => Module::getModuleName(Module::TOOL_DB_QUERY),
                             'action'        => ActionsHistory::TYPE_SEND,
@@ -175,16 +175,16 @@ class ToolSendPending extends Command
         $offsetType = null;
 
         switch ($query->upl_freq_type) {
-            case ToolController::FREQ_TYPE_HOUR:
+            case DataQuery::FREQ_TYPE_HOUR:
                 $offsetType = 'hour';
                 break;
-            case ToolController::FREQ_TYPE_DAY:
+            case DataQuery::FREQ_TYPE_DAY:
                 $offsetType = 'day';
                 break;
-            case ToolController::FREQ_TYPE_WEEK:
+            case DataQuery::FREQ_TYPE_WEEK:
                 $offsetType = 'week';
                 break;
-            case ToolController::FREQ_TYPE_MONTH:
+            case DataQuery::FREQ_TYPE_MONTH:
                 $offsetType = 'month';
                 break;
         }

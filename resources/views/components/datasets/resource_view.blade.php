@@ -80,7 +80,7 @@
             @if (!empty($resource->upl_freq_type))
                 <p>
                     <strong>{{ __('custom.type_upl_freq') }}:</strong>
-                    &nbsp;{{ App\Http\Controllers\ToolController::getFreqTypes()[$resource->upl_freq_type] }}
+                    &nbsp;{{ App\DataQuery::getFreqTypes()[$resource->upl_freq_type] }}
                 </p>
             @endif
             @if (!empty($resource->upl_freq))

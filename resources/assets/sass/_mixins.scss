@@ -36,6 +36,10 @@
     $secondary: white;
 
     .#{$name} {
+        .data-preview {
+            border: 1px solid $primary;
+        }
+
         .pagination {
             li {
                 &.active {

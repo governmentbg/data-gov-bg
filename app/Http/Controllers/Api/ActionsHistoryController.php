@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Role;
 use \Validator;
 use App\Module;
+use App\DataQuery;
 use App\ActionsHistory;
 use App\ConnectionSetting;
 use Illuminate\Http\Request;
@@ -94,10 +95,22 @@ class ActionsHistoryController extends ApiController
             $history = ActionsHistory::select();
 
             if (isset($criteria['source_db_type'])) {
-                $connections = ConnectionSetting::where('source_db_type', $criteria['source_db_type'])
-                    ->pluck('connection_name');
+                $connections = ConnectionSetting::where('source_db_type', $criteria['source_db_type'])->pluck('id')->toArray();
 
-                $history->whereIn('action_object', $connections);
+                if (empty($connections)) {
+                    return $this->successResponse([
+                        'total_records'     => 0,
+                        'actions_history'   => [],
+                    ], true);
+                }
+
+                $queries = DataQuery::whereIn('connection_id', $connections)->pluck('id')->toArray();
+                $history->whereIn('action_object', array_merge($connections, $queries));
+                
+                $history->where(function ($query) {
+                    $query->where('module_name', Module::getModuleName(Module::TOOL_DB_QUERY))
+                        ->orWhere('module_name', Module::getModuleName(Module::TOOL_DB_CONNECTION));
+                });
             }
         } else {
             $history = ActionsHistory::select(
@@ -178,7 +191,6 @@ class ActionsHistoryController extends ApiController
             $history->where('ip_address', $criteria['ip_address']);
         }
 
-
         $actObjCriteria = [];
 
         if (isset($criteria['category_ids'])) {
@@ -225,7 +237,14 @@ class ActionsHistoryController extends ApiController
         }
 
         if (isset($criteria['query_name'])) {
-            $history->where('action_object', 'like', '%' . $criteria['query_name'] . '%');
+            $history->join('data_queries', 'actions_history.action_object', '=', 'data_queries.id');
+            $history->join('connection_settings', 'data_queries.connection_id', '=', 'connection_settings.id');
+
+            $history->where(function ($query) use ($criteria) {
+                $query->where('data_queries.name', 'like', '%' . $criteria['query_name'] . '%')
+                    ->orWhere('data_queries.query', 'like', '%' . $criteria['query_name'] . '%')
+                    ->orWhere('connection_settings.connection_name', 'like', '%' . $criteria['query_name'] . '%');
+            });
         }
 
         if (isset($criteria['status'])) {
@@ -260,7 +279,6 @@ class ActionsHistoryController extends ApiController
         );
 
         $results = [];
-
         $history = $history->get();
 
         if (!empty($history)) {

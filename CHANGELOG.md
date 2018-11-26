@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.8] - 2018-11-26
 ### Added
 - Tool file data preview
 - Tool multiple databases support
@@ -280,6 +282,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.8]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.4...v1.0.5

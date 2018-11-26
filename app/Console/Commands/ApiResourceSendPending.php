@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\User;
 use App\Module;
 use App\Resource;
+use App\DataQuery;
 use App\ActionsHistory;
 use App\ConnectionSetting;
 use Illuminate\Http\Request;
@@ -124,16 +125,16 @@ class ApiResourceSendPending extends Command
         $offsetType = null;
 
         switch ($resource->upl_freq_type) {
-            case ToolController::FREQ_TYPE_HOUR:
+            case DataQuery::FREQ_TYPE_HOUR:
                 $offsetType = 'minute';
                 break;
-            case ToolController::FREQ_TYPE_DAY:
+            case DataQuery::FREQ_TYPE_DAY:
                 $offsetType = 'day';
                 break;
-            case ToolController::FREQ_TYPE_WEEK:
+            case DataQuery::FREQ_TYPE_WEEK:
                 $offsetType = 'week';
                 break;
-            case ToolController::FREQ_TYPE_MONTH:
+            case DataQuery::FREQ_TYPE_MONTH:
                 $offsetType = 'month';
                 break;
         }

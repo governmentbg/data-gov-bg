@@ -191,8 +191,11 @@
                         </div>
                         <ul class="nav navbar-nav sections">
                             @if (config('app.IS_TOOL'))
-                                <li class="index {{ empty(Request::segment(2)) ? 'active' : '' }}">
-                                    <a href="{{ url('/tool') }}">{{ uctrans('custom.config') }}</a>
+                                <li class="index {{ empty(Request::segment(2)) || Request::segment(2) == 'configDbms' ? 'active' : '' }}">
+                                    <a href="{{ url('/tool/configDbms') }}">{{ sprintf(__('custom.config'), __('custom.dbms')) }}</a>
+                                </li>
+                                <li class="index {{ Request::segment(2) == 'configFile' ? 'active' : '' }}">
+                                    <a href="{{ url('/tool/configFile') }}">{{ sprintf(__('custom.config'), utrans('custom.file')) }}</a>
                                 </li>
                                 <li class="index {{ Request::segment(2) == 'chronology' ? 'active' : '' }}">
                                     <a href="{{ url('/tool/chronology') }}">{{ uctrans('custom.chronology') }}</a>

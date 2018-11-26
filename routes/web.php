@@ -339,7 +339,9 @@ Route::match(['get', 'post'], 'help/search', 'HelpController@search');
 Route::match(['get', 'post'], 'help/view/{id}/{activePage?}', 'HelpController@view');
 Route::match(['get', 'post'], 'help/page/view/{id}', 'HelpController@pageView');
 
-Route::match(['get', 'post'], 'tool', 'ToolController@config');
+Route::match(['get', 'post'], 'tool', 'ToolController@configDbms');
+Route::match(['get', 'post'], 'tool/configDbms', 'ToolController@configDbms');
+Route::match(['get', 'post'], 'tool/configFile', 'ToolController@configFile');
 Route::match(['get', 'post'], 'tool/chronology', 'ToolController@configHistory');
 
 Route::match(['get', 'post'], 'users/list', 'UserController@listUsers')->name('usersList');

@@ -98,7 +98,7 @@
                         name="upl_freq_type"
                     >
                         <option value="">{{ __('custom.type_upl_freq') }}</option>
-                        @foreach (App\Http\Controllers\ToolController::getFreqTypes() as $id => $freqType)
+                        @foreach (App\DataQuery::getFreqTypes() as $id => $freqType)
                             <option
                                 value="{{ $id }}"
                                 {{ $id == $resource->upl_freq_type ? 'selected' : '' }}

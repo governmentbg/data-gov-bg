@@ -7,7 +7,7 @@
 @else
     @if (empty($data))
         <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
-    @elseif (is_array($data))
+    @elseif (is_array($data) || is_object($data))
         @if ($format == App\Resource::FORMAT_CSV)
             <div class="m-b-lg overflow-x-auto js-show-on-load">
                 <table class="data-table">

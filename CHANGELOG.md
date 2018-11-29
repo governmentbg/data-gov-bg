@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Remove comment button from documents view
+- Resource preview
 
 ## [1.0.8] - 2018-11-26
 ### Added

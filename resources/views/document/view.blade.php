@@ -15,22 +15,21 @@
                                         {!! nl2br(e($document->description)) !!}
                                     </p>
                                     <div class="col-xs-12 m-t-sm p-l-none text-right">
-                                        <span class="badge badge-pill"><button class="badge badge-pill">{{ uctrans('custom.comment') }}</button></span>
                                         <span class="badge badge-pill">
-                                        <form
-                                                method="POST"
-                                                class="inline-block"
-                                                action="{{ $document->data }}"
-                                        >
-                                            {{ csrf_field() }}
-                                            <button
-                                                class="badge badge-pill js-ga-event"
-                                                type="submit"
-                                                data-ga-action="download"
-                                                data-ga-label="document download"
-                                                data-ga-category="data"
-                                            >{{ uctrans('custom.download') }}</button>
-                                        </form>
+                                            <form
+                                                    method="POST"
+                                                    class="inline-block"
+                                                    action="{{ $document->data }}"
+                                            >
+                                                {{ csrf_field() }}
+                                                <button
+                                                    class="badge badge-pill js-ga-event"
+                                                    type="submit"
+                                                    data-ga-action="download"
+                                                    data-ga-label="document download"
+                                                    data-ga-category="data"
+                                                >{{ uctrans('custom.download') }}</button>
+                                            </form>
                                         </span>
                                     </div>
                                 </div>

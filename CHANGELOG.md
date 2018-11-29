@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Remove comment button from documents view
 
 ## [1.0.8] - 2018-11-26
 ### Added

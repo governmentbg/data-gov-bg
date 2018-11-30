@@ -149,6 +149,7 @@
                     <td>
                         <input
                             type="submit"
+                            name="search"
                             class="btn btn-primary pull-right save-btn"
                             value="{{ __('custom.search_button') }}"
                         >

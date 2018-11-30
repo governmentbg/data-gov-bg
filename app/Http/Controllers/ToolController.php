@@ -48,6 +48,7 @@ class ToolController extends Controller
 
         if (!empty($post['edit_dbms'])) {
             if (is_array($post['edit_dbms'])) {
+                $this->clearConnection($request, $post);
                 $post['edit_dbms'] = array_keys($post['edit_dbms'])[0];
 
                 $this->clearQuery($request, $post);
@@ -333,6 +334,7 @@ class ToolController extends Controller
             }
 
             if ($request->has('edit_query')) {
+                $this->clearQuery($request, $post);
                 $post['query_id'] = array_keys($post['edit_query'])[0];
                 $dataQuery = DataQuery::find($post['query_id']);
                 $post = array_merge($post, $dataQuery->toArray());
@@ -367,7 +369,16 @@ class ToolController extends Controller
         $request->offsetUnset('source_db_name');
         $request->offsetUnset('notification_email');
         $request->offsetUnset('test_query');
-        $post = [];
+
+        unset(
+            $post['connection_name'],
+            $post['source_db_host'],
+            $post['source_db_user'],
+            $post['source_db_pass'],
+            $post['source_db_name'],
+            $post['notification_email'],
+            $post['test_query']
+        );
     }
 
     private function clearFile(&$request, &$post)
@@ -453,8 +464,8 @@ class ToolController extends Controller
 
                     $this->sendFile($post, $dataQueryId);
                 } else {
-                    if (file_exists("C:\\1.csv")) { //self::DOCKER_FILE_VOLUME . $post['file']
-                        $content = file_get_contents("C:\\1.csv"); //self::DOCKER_FILE_VOLUME . $post['file']
+                    if (file_exists(self::DOCKER_FILE_VOLUME . $post['file'])) {
+                        $content = file_get_contents(self::DOCKER_FILE_VOLUME . $post['file']);
                         $data = empty($content) ? ' ' : $content;
 
                         session()->flash('alert-success', __('custom.conn_success'));
@@ -885,7 +896,7 @@ class ToolController extends Controller
                 date_create($request->offsetGet('period_from') .' '. $hourFrom),
                 'Y-m-d'
             );
-        } elseif ($request->has('search')) {
+        } elseif ($request->has('search') && empty($request->offsetGet('period_to'))) {
             $range['from'] = date_format($today, 'd-m-Y');
         }
 
@@ -894,7 +905,7 @@ class ToolController extends Controller
                 date_create($request->offsetGet('period_to') .' '. $hourTo),
                 'Y-m-d'
             );
-        } elseif ($request->has('search')) {
+        } elseif ($request->has('search') && empty($request->offsetGet('period_from'))) {
             $range['to'] = date_format($today, 'd-m-Y');
         }
 

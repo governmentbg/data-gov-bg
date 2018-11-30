@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 - Resource preview
 - Tool time filter in history page
 - Escape XML resource special characters
+- Tool DBSM edit and file check
 
 ## [1.0.8] - 2018-11-26
 ### Added

@@ -16,7 +16,7 @@
 
         @foreach ($dbs as $db)
             <div class="data-query">
-                <span 
+                <span
                     class="{{ isset($post['edit_dbms']) && $db->id == $post['edit_dbms'] ? 'success' : null }}"
                 >{{ $db->connection_name }}</span>
                 <input
@@ -239,8 +239,8 @@
                             @foreach ($freqTypes as $freqTypeId => $freqType)
                                 <option
                                     value="{{ $freqTypeId }}"
-                                    {{ 
-                                        $freqTypeId == request('upl_freq_type', empty($post['upl_freq_type']) 
+                                    {{
+                                        $freqTypeId == request('upl_freq_type', empty($post['upl_freq_type'])
                                         ? ''
                                         : $post['upl_freq_type']) ? 'selected' : ''
                                     }}
@@ -272,7 +272,7 @@
 
             @foreach ($dataQueries as $dataQuery)
                 <div class="data-query">
-                    <span 
+                    <span
                         class="{{ isset($post['query_id']) && $dataQuery->id == $post['query_id'] ? 'success' : null }}"
                     >{{ $dataQuery->name }}</span>
                     <input

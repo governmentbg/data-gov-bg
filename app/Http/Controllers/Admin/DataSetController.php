@@ -665,6 +665,16 @@ class DataSetController extends AdminController
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
+        if (!empty($resource->versions_list)) {
+            usort($resource->versions_list, function($a, $b) {
+                if ($a == $b) {
+                    return 0;
+                }
+
+                return ($a < $b) ? -1 : 1;
+            });
+        }
+
         return view('admin/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,

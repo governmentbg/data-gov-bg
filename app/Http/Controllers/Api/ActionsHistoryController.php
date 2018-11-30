@@ -54,29 +54,31 @@ class ActionsHistoryController extends ApiController
         if (!$validator->fails()) {
             $criteria = isset($post['criteria']) ? $post['criteria'] : [];
             $validator = Validator::make($criteria, [
-                'period_from'     => 'nullable|date',
-                'period_to'       => 'nullable|date',
-                'username'        => 'nullable|string',
-                'user_id'         => 'nullable',
-                'module'          => 'nullable',
-                'actions'         => 'nullable|array',
-                'actions.*'       => 'int|in:'. implode(',', array_keys(ActionsHistory::getTypes())),
-                'category_ids'    => 'nullable|array',
-                'category_ids.*'  => 'int',
-                'tag_ids'         => 'nullable|array',
-                'tag_ids.*'       => 'int',
-                'org_ids'         => 'nullable|array',
-                'org_ids.*'       => 'int',
-                'group_ids'       => 'nullable|array',
-                'group_ids.*'     => 'int',
-                'user_ids'        => 'nullable|array',
-                'user_ids.*'      => 'int',
-                'dataset_ids'     => 'nullable|array',
-                'dataset_ids.*'   => 'int',
-                'resource_uris'   => 'nullable|array',
-                'resource_uris.*' => 'string',
-                'ip_address'      => 'nullable|string',
-                'order'           => 'nullable|array',
+                'period_from'       => 'nullable|date',
+                'period_to'         => 'nullable|date',
+                'period_from_time'  => 'nullable|date_format:H:i',
+                'period_to_time'    => 'nullable|date_format:H:i',
+                'username'          => 'nullable|string',
+                'user_id'           => 'nullable',
+                'module'            => 'nullable',
+                'actions'           => 'nullable|array',
+                'actions.*'         => 'int|in:'. implode(',', array_keys(ActionsHistory::getTypes())),
+                'category_ids'      => 'nullable|array',
+                'category_ids.*'    => 'int',
+                'tag_ids'           => 'nullable|array',
+                'tag_ids.*'         => 'int',
+                'org_ids'           => 'nullable|array',
+                'org_ids.*'         => 'int',
+                'group_ids'         => 'nullable|array',
+                'group_ids.*'       => 'int',
+                'user_ids'          => 'nullable|array',
+                'user_ids.*'        => 'int',
+                'dataset_ids'       => 'nullable|array',
+                'dataset_ids.*'     => 'int',
+                'resource_uris'     => 'nullable|array',
+                'resource_uris.*'   => 'string',
+                'ip_address'        => 'nullable|string',
+                'order'             => 'nullable|array',
             ]);
         }
 
@@ -106,11 +108,27 @@ class ActionsHistoryController extends ApiController
 
                 $queries = DataQuery::whereIn('connection_id', $connections)->pluck('id')->toArray();
                 $history->whereIn('action_object', array_merge($connections, $queries));
-                
+
                 $history->where(function ($query) {
                     $query->where('module_name', Module::getModuleName(Module::TOOL_DB_QUERY))
                         ->orWhere('module_name', Module::getModuleName(Module::TOOL_DB_CONNECTION));
                 });
+            }
+
+            if (isset($criteria['period_from'])) {
+                $history->whereDate('occurrence', '>=', $criteria['period_from']);
+            }
+
+            if (isset($criteria['period_to'])) {
+                $history->whereDate('occurrence', '<=', $criteria['period_to']);
+            }
+
+            if (isset($criteria['period_from_time'])) {
+                $history->whereTime('occurrence', '>=', $criteria['period_from_time']);
+            }
+
+            if (isset($criteria['period_to_time'])) {
+                $history->whereTime('occurrence', '<=', $criteria['period_to_time']);
             }
         } else {
             $history = ActionsHistory::select(
@@ -157,12 +175,14 @@ class ActionsHistoryController extends ApiController
             }
         }
 
-        if (isset($criteria['period_from'])) {
-            $history->where('occurrence', '>=', $criteria['period_from']);
-        }
+        if (!config('app.IS_TOOL')) {
+            if (isset($criteria['period_from'])) {
+                $history->where('occurrence', '>=', $criteria['period_from']);
+            }
 
-        if (isset($criteria['period_to'])) {
-            $history->where('occurrence', '<=', $criteria['period_to']);
+            if (isset($criteria['period_to'])) {
+                $history->where('occurrence', '<=', $criteria['period_to']);
+            }
         }
 
         if (isset($criteria['username'])) {

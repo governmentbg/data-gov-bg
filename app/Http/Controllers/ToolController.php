@@ -91,7 +91,7 @@ class ToolController extends Controller
         if ($request->has('test_conn') || $request->has('save_conn')) {
             $validator = \Validator::make($post, [
                 'connection_name'       => ($request->has('test_conn') ? 'nullable' : 'required') .'|string|max:191'
-                    . ($request->has('test_conn') ? 
+                    . ($request->has('test_conn') ?
                         '' :
                         '|unique:connection_settings,connection_name,'
                         . (empty($post['edit_dbms']) ? 'NULL' : $post['edit_dbms'])
@@ -421,7 +421,7 @@ class ToolController extends Controller
             $validator = \Validator::make($post, [
                 'file'              => 'required|string',
                 'file_conn_name'    => ($request->has('test_file') ? 'nullable' : 'required') .'|string|max:191'
-                . ($request->has('test_file') ? 
+                . ($request->has('test_file') ?
                     '' :
                     '|unique:connection_settings,connection_name,'
                     . (empty($post['conn_id']) ? 'NULL' : $post['conn_id'])
@@ -883,24 +883,32 @@ class ToolController extends Controller
         if (!empty($request->offsetGet('period_from'))) {
             $params['criteria']['period_from'] = date_format(
                 date_create($request->offsetGet('period_from') .' '. $hourFrom),
-                'Y-m-d H:i:s'
+                'Y-m-d'
             );
-        } else if (!empty($request->offsetGet('time_from'))) {
-            $params['criteria']['period_from'] = date_format(
-                date_create($today->toDateString() .' '. $request->offsetGet('time_from')),
-                'Y-m-d H:i:s'
-            );
+        } elseif ($request->has('search')) {
+            $range['from'] = date_format($today, 'd-m-Y');
         }
 
         if (!empty($request->offsetGet('period_to'))) {
             $params['criteria']['period_to'] = date_format(
                 date_create($request->offsetGet('period_to') .' '. $hourTo),
-                'Y-m-d H:i:s'
+                'Y-m-d'
             );
-        } else if (!empty($request->offsetGet('time_to'))) {
-            $params['criteria']['period_to'] = date_format(
-                date_create($today->toDateString() .' '. $request->offsetGet('time_to')),
-                'Y-m-d H:i:s'
+        } elseif ($request->has('search')) {
+            $range['to'] = date_format($today, 'd-m-Y');
+        }
+
+        if (!empty($request->offsetGet('time_from'))) {
+            $params['criteria']['period_from_time'] = date_format(
+                date_create($request->offsetGet('time_from')),
+                'H:i'
+            );
+        }
+
+        if (!empty($request->offsetGet('time_to'))) {
+            $params['criteria']['period_to_time'] = date_format(
+                date_create($request->offsetGet('time_to')),
+                'H:i'
             );
         }
 
@@ -913,7 +921,7 @@ class ToolController extends Controller
                 $params['criteria']['module'] = Module::getModuleName(Module::TOOL_FILE);
             } else {
                 $params['criteria']['module'] = [
-                    Module::getModuleName(Module::TOOL_DB_CONNECTION), 
+                    Module::getModuleName(Module::TOOL_DB_CONNECTION),
                     Module::getModuleName(Module::TOOL_DB_QUERY)
                 ];
             }

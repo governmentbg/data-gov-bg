@@ -16,6 +16,7 @@ Security - in case of vulnerabilities.
 - Remove comment button from documents view
 - Resource preview
 - Tool time filter in history page
+- Escape XML resource special characters
 
 ## [1.0.8] - 2018-11-26
 ### Added

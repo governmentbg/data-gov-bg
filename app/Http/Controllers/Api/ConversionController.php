@@ -44,8 +44,8 @@ class ConversionController extends ApiController
 
                 return $this->successResponse($array);
             } catch (\Exception $ex) {
-                Log::error($ex->getMessage());
-                $validator->errors()->add('data', __('custom.invalid_xml'));
+               Log::error($ex->getMessage());
+               $validator->errors()->add('data', __('custom.invalid_xml'));
             }
         }
 
@@ -872,7 +872,7 @@ class ConversionController extends ApiController
     private function fromXML($data, $parentTag = false)
     {
         if ($parentTag) {
-            $data = '<data>'. $data .'</data>';
+            $data = '<data>'. htmlspecialchars($data, ENT_XML1, 'UTF-8') .'</data>';
         }
 
         $xml = simplexml_load_string($data);

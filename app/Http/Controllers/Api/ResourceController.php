@@ -102,7 +102,7 @@ class ResourceController extends ApiController
         if (!$validator->fails()) {
             $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
             $dataset = DataSet::where('uri', $post['dataset_uri'])->first();
-            
+
             if (isset($dataset->org_id)) {
                 $rightCheck = RoleRight::checkUserRight(
                     Module::RESOURCES,

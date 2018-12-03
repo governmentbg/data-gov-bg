@@ -623,13 +623,12 @@ class MigrateData extends Command
         $totalOrgDatasets = 0;
         $totalSuccess = 0;
         $totalFailed = 0;
+        $orgDataSets = [];
         $organisationData = Cache::get('organisationData');
         $orgWithDataSets = $organisationData['org_with_dataSets'];
 
         $bar = $this->output->createProgressBar(count($orgWithDataSets));
         if (is_array($orgWithDataSets)) {
-            $orgDataSets = [];
-
             foreach ($orgWithDataSets as $k => $v) {
                 $failedPacgakes = 0;
                 $successPackages = 0;
@@ -638,6 +637,7 @@ class MigrateData extends Command
                     'include_datasets' => true
                 ];
                 $response = $this->requestUrl('organization_show', $params);
+                $total = isset($response['result']['package_count']) ? (int) $response['result']['package_count'] : 0;
 
                 foreach ($response['result']['packages'] as $res) {
                     if ($this->migrateDatasets($res)) {
@@ -648,9 +648,10 @@ class MigrateData extends Command
 
                     $totalSuccess += $successPackages;
                     $totalFailed += $failedPacgakes;
+                    $totalOrgDatasets += $total;
                 }
 
-                $this->line('Organisation total datasets : '. $response['result']['"package_count']);
+                $this->line('Organisation total datasets: '. $total);
                 $this->info('Dataset success: '. $successPackages);
                 $this->error('Dataset failed: '. $failedPacgakes);
                 $this->line('');

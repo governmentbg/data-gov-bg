@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Resource versions order
+- Resource preview for non-authenticated users
 
 ## [1.0.9] - 2018-12-03
 ### Fixed

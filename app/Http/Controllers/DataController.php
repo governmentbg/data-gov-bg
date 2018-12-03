@@ -760,6 +760,7 @@ class DataController extends Controller {
     public function resourceView(Request $request, $uri, $version = null)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $versionsPerPage = 10;
 
         $params = [
             'resource_uri' => $uri,
@@ -898,11 +899,33 @@ class DataController extends Controller {
                 $dataset = $this->getModelUsernames($dataset);
                 $resource = $this->getModelUsernames($resource);
 
+                if (!empty($resource->versions_list)) {
+                    usort($resource->versions_list, function($a, $b) {
+                        if ($a == $b) {
+                            return 0;
+                        }
+
+                        return ($a > $b) ? -1 : 1;
+                    });
+                }
+
+                $count = count($resource->versions_list);
+                $verData = collect($resource->versions_list)->paginate($versionsPerPage);
+
+                $paginationData = $this->getPaginationData(
+                    $verData,
+                    $count,
+                    array_except(app('request')->input(), ['page']),
+                    $versionsPerPage
+                );
+
                 return view(
                     'data/resourceView',
                     [
                         'class'         => 'data',
                         'organisation'  => $organisation,
+                        'versions'      => $verData,
+                        'pagination'    => $paginationData['paginate'],
                         'user'          => $user,
                         'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'       => $dataset,

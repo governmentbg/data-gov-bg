@@ -180,10 +180,11 @@
         </div>
 
         <!-- IF there are old versions of this article -->
-        @if (!empty($resource->versions_list))
+        @if (!empty($versions))
+            @include('partials.pagination')
             <div class="col-xs-12 pull-left m-t-md p-l-r-none">
                 <div class="pull-left history">
-                    @foreach ($resource->versions_list as $version)
+                    @foreach ($versions as $version)
                     <div>
                         <a
                             @if (!empty($fromOrg))
@@ -201,6 +202,7 @@
                     @endforeach
                 </div>
             </div>
+            @include('partials.pagination')
         @endif
         @include('components.signal-box', ['signals' => $resource->signals])
     </div>

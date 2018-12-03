@@ -178,10 +178,11 @@
                 </div>
 
                 <!-- IF there are old versions of this article -->
-                @if (!empty($resource->versions_list))
+                @if (!empty($versions))
+                    @include('partials.pagination')
                     <div class="col-xs-12 pull-left p-l-none m-b-md">
                         <div class="pull-left history">
-                            @foreach ($resource->versions_list as $version)
+                            @foreach ($versions as $version)
                                 @if ($version != $versionView)
                                     <div>
                                         <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => $version])) }}">
@@ -193,6 +194,7 @@
                             @endforeach
                         </div>
                     </div>
+                    @include('partials.pagination')
                 @endif
 
                 <div class="article col-xs-12 m-t-md m-b-md">

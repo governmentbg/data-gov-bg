@@ -12,12 +12,15 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.9] - 2018-12-03
 ### Fixed
 - Remove comment button from documents view
 - Resource preview
 - Tool time filter in history page
 - Escape XML resource special characters
 - Tool DBSM edit and file check
+- Undefined variable in migration
 
 ## [1.0.8] - 2018-11-26
 ### Added
@@ -288,6 +291,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.9]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.5...v1.0.6

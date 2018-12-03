@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.10] - 2018-12-03
 ### Fixed
 - Resource versions order
 - Resource preview for non-authenticated users
@@ -294,6 +296,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.9]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.6...v1.0.7

@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Fix migration undefined index
 
 ## [1.0.10] - 2018-12-03
 ### Fixed

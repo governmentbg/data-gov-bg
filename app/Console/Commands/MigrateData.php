@@ -772,27 +772,29 @@ class MigrateData extends Command
                         Log::info('Dataset "'. $dataSet['title'] .'" added successfully!');
 
                         // Add resources
-                        foreach ($dataSet['resources'] as $resource) {
-                            $savedResource = Resource::where('uri', $resource['id'])->first();
-                            $fileFormat = strtoupper(str_replace('.', '', $resource['format']));
-                            $resource['created_by'] = $resCreatedBy;
+                        if (isset($dataSet['resources'])) {
+                            foreach ($dataSet['resources'] as $resource) {
+                                $savedResource = Resource::where('uri', $resource['id'])->first();
+                                $fileFormat = strtoupper(str_replace('.', '', $resource['format']));
+                                $resource['created_by'] = $resCreatedBy;
 
-                            if ($savedResource) {
-                                continue;
-                            }
-
-                            if (in_array($fileFormat, $fileFormats)) {
-                                if ($this->migrateDatasetsResources($newDataSetId, $resource)) {
-                                    $addedResources++;
-                                } else {
-                                    $failedResources++;
+                                if ($savedResource) {
+                                    continue;
                                 }
-                            } else {
-                                $unsuporrtedFormat++;
-                                Log::error('Resource format "'. $fileFormat .'" unsupported.');
-                            }
 
-                            unset($resource);
+                                if (in_array($fileFormat, $fileFormats)) {
+                                    if ($this->migrateDatasetsResources($newDataSetId, $resource)) {
+                                        $addedResources++;
+                                    } else {
+                                        $failedResources++;
+                                    }
+                                } else {
+                                    $unsuporrtedFormat++;
+                                    Log::error('Resource format "'. $fileFormat .'" unsupported.');
+                                }
+
+                                unset($resource);
+                            }
                         }
                     }
                     $addedDatasets++;

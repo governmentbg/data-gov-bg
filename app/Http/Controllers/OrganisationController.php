@@ -1030,7 +1030,6 @@ class OrganisationController extends Controller
                         || $resource->format_code == Resource::FORMAT_RDF
                     ) {
                         $convertData = [
-                            'api_key'   => \Auth::user()->api_key,
                             'data'      => $data,
                         ];
                         $method = 'json2'. strtolower($resource->file_format);

@@ -631,6 +631,8 @@ class MigrateData extends Command
             $orgDataSets = [];
 
             foreach ($orgWithDataSets as $k => $v) {
+                $failedPacgakes = 0;
+                $successPackages = 0;
                 $params = [
                     'id' => $k,
                     'include_datasets' => true
@@ -1048,7 +1050,6 @@ class MigrateData extends Command
         $users = $userData['users'];
         $usersOldIds = isset($users['success']) ? $users['success'] : null;
 
-
         //Add user followers
         if ($usersOldIds) {
             foreach ($usersOldIds as $k => $v) {
@@ -1175,12 +1176,11 @@ class MigrateData extends Command
         $success = 0;
         $total = 0;
 
-        if (!empty($userToOrgRole) && $usersOldIds) {
+        if (!empty($userToOrgRole) && !empty($usersOldIds)) {
             foreach ($userToOrgRole as $orgId => $orgUsers) {
                 foreach ($orgUsers as $user) {
                     $total++;
                     $role = 3;
-
 
                     switch ($user['capacity']) {
                         case 'admin':

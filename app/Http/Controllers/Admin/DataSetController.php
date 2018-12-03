@@ -601,6 +601,7 @@ class DataSetController extends AdminController
         $reqMetadata = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiMetadata = new ApiResource($reqMetadata);
         $result = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
+        $versionsPerPage = 10;
 
         if (empty($result->resource)) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
@@ -671,13 +672,25 @@ class DataSetController extends AdminController
                     return 0;
                 }
 
-                return ($a < $b) ? -1 : 1;
+                return ($a > $b) ? -1 : 1;
             });
         }
+
+        $count = count($resource->versions_list);
+        $verData = collect($resource->versions_list)->paginate($versionsPerPage);
+
+        $paginationData = $this->getPaginationData(
+            $verData,
+            $count,
+            array_except(app('request')->input(), ['page']),
+            $versionsPerPage
+        );
 
         return view('admin/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
+            'versions'      => $verData,
+            'pagination'    => $paginationData['paginate'],
             'data'          => $data,
             'versionView'   => $version,
             'dataset'       => $datasetData,

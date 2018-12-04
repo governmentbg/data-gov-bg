@@ -7,375 +7,387 @@
                 data-toggle="collapse"
                 data-target="#sidebar-wrapper"
             ><span><i class="fa fa-angle-left"></i></span></button>
-            <ul class="sidebar-submenu">
-                @if (count($organisations) > 0)
-                    @foreach ($organisations as $organisation)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($organisations) > 0)
+                        @foreach ($organisations as $organisation)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array($organisation->id, $getParams['org'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['org', 'page']),
+                                                        ['org' => array_merge([$organisation->id], $getParams['org'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['org', 'page']),
+                                                        (array_diff($getParams['org'], [$organisation->id])
+                                                            ? ['org' => array_diff($getParams['org'], [$organisation->id])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['org']) && in_array($organisation->id, $getParams['org'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ $organisation->name }} ({{ $organisation->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['org']) && $display['show_all']['org'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['org']) && $display['only_popular']['org'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array($organisation->id, $getParams['org'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['org', 'page']),
-                                                    ['org' => array_merge([$organisation->id], $getParams['org'])]
-                                                )
+                                        !isset(app('request')->input()['org_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['org_limit']),
+                                                ['org_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['org', 'page']),
-                                                    (array_diff($getParams['org'], [$organisation->id])
-                                                        ? ['org' => array_diff($getParams['org'], [$organisation->id])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['org_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['org']) && in_array($organisation->id, $getParams['org'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ $organisation->name }} ({{ $organisation->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['org']) && $display['show_all']['org'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['org']) && $display['only_popular']['org'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['org_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['org_limit']),
-                                            ['org_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['org_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ untrans('custom.users', 2) }}</a>
-            <ul class="sidebar-submenu">
-                @if (count($users) > 0)
-                    @foreach ($users as $user)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($users) > 0)
+                        @foreach ($users as $user)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array($user->id, $getParams['user'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['user', 'page']),
+                                                        ['user' => array_merge([$user->id], $getParams['user'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['user', 'page']),
+                                                        (array_diff($getParams['user'], [$user->id])
+                                                            ? ['user' => array_diff($getParams['user'], [$user->id])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['user']) && in_array($user->id, $getParams['user'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ ($user->first_name || $user->last_name) ? trim($user->first_name .' '. $user->last_name) : $user->username }}
+                                ({{ $user->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['user']) && $display['show_all']['user'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['user']) && $display['only_popular']['user'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array($user->id, $getParams['user'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['user', 'page']),
-                                                    ['user' => array_merge([$user->id], $getParams['user'])]
-                                                )
+                                        !isset(app('request')->input()['user_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['user_limit']),
+                                                ['user_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['user', 'page']),
-                                                    (array_diff($getParams['user'], [$user->id])
-                                                        ? ['user' => array_diff($getParams['user'], [$user->id])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['user_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['user']) && in_array($user->id, $getParams['user'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ ($user->first_name || $user->last_name) ? trim($user->first_name .' '. $user->last_name) : $user->username }}
-                             ({{ $user->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['user']) && $display['show_all']['user'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['user']) && $display['only_popular']['user'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['user_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['user_limit']),
-                                            ['user_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['user_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ untrans('custom.groups', 2) }}</a>
-            <ul class="sidebar-submenu">
-                @if (count($groups) > 0)
-                    @foreach ($groups as $group)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($groups) > 0)
+                        @foreach ($groups as $group)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array($group->id, $getParams['group'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['group', 'page']),
+                                                        ['group' => array_merge([$group->id], $getParams['group'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['group', 'page']),
+                                                        (array_diff($getParams['group'], [$group->id])
+                                                            ? ['group' => array_diff($getParams['group'], [$group->id])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['group']) && in_array($group->id, $getParams['group'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ $group->name }} ({{ $group->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['group']) && $display['show_all']['group'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['group']) && $display['only_popular']['group'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array($group->id, $getParams['group'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['group', 'page']),
-                                                    ['group' => array_merge([$group->id], $getParams['group'])]
-                                                )
+                                        !isset(app('request')->input()['group_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['group_limit']),
+                                                ['group_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['group', 'page']),
-                                                    (array_diff($getParams['group'], [$group->id])
-                                                        ? ['group' => array_diff($getParams['group'], [$group->id])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['group_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['group']) && in_array($group->id, $getParams['group'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ $group->name }} ({{ $group->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['group']) && $display['show_all']['group'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['group']) && $display['only_popular']['group'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['group_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['group_limit']),
-                                            ['group_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['group_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.topics') }}</a>
-            <ul class="sidebar-submenu">
-                @if (count($categories) > 0)
-                    @foreach ($categories as $category)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($categories) > 0)
+                        @foreach ($categories as $category)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array($category->id, $getParams['category'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['category', 'page']),
+                                                        ['category' => array_merge([$category->id], $getParams['category'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['category', 'page']),
+                                                        (array_diff($getParams['category'], [$category->id])
+                                                            ? ['category' => array_diff($getParams['category'], [$category->id])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['category']) && in_array($category->id, $getParams['category'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ $category->name }} ({{ $category->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['category']) && $display['show_all']['category'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['category']) && $display['only_popular']['category'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array($category->id, $getParams['category'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['category', 'page']),
-                                                    ['category' => array_merge([$category->id], $getParams['category'])]
-                                                )
+                                        !isset(app('request')->input()['category_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['category_limit']),
+                                                ['category_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['category', 'page']),
-                                                    (array_diff($getParams['category'], [$category->id])
-                                                        ? ['category' => array_diff($getParams['category'], [$category->id])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['category_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['category']) && in_array($category->id, $getParams['category'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ $category->name }} ({{ $category->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['category']) && $display['show_all']['category'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['category']) && $display['only_popular']['category'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['category_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['category_limit']),
-                                            ['category_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['category_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ ultrans('custom.tags', 2) }}</a>
-            <ul class="sidebar-submenu">
-                @if (count($tags) > 0)
-                    @foreach ($tags as $tag)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($tags) > 0)
+                        @foreach ($tags as $tag)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array($tag->id, $getParams['tag'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['tag', 'page']),
+                                                        ['tag' => array_merge([$tag->id], $getParams['tag'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['tag', 'page']),
+                                                        (array_diff($getParams['tag'], [$tag->id])
+                                                            ? ['tag' => array_diff($getParams['tag'], [$tag->id])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['tag']) && in_array($tag->id, $getParams['tag'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ $tag->name }} ({{ $tag->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['tag']) && $display['show_all']['tag'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['tag']) && $display['only_popular']['tag'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array($tag->id, $getParams['tag'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['tag', 'page']),
-                                                    ['tag' => array_merge([$tag->id], $getParams['tag'])]
-                                                )
+                                        !isset(app('request')->input()['tag_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['tag_limit']),
+                                                ['tag_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['tag', 'page']),
-                                                    (array_diff($getParams['tag'], [$tag->id])
-                                                        ? ['tag' => array_diff($getParams['tag'], [$tag->id])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['tag_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['tag']) && in_array($tag->id, $getParams['tag'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ $tag->name }} ({{ $tag->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['tag']) && $display['show_all']['tag'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['tag']) && $display['only_popular']['tag'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['tag_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['tag_limit']),
-                                            ['tag_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['tag_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ __('custom.format') }}</a>
-            <ul class="sidebar-submenu">
-                @if (count($formats) > 0)
-                    @foreach ($formats as $format)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($formats) > 0)
+                        @foreach ($formats as $format)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array(strtolower($format->format), $getParams['format'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['format', 'page']),
+                                                        ['format' => array_merge([strtolower($format->format)], $getParams['format'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['format', 'page']),
+                                                        (array_diff($getParams['format'], [strtolower($format->format)])
+                                                            ? ['format' => array_diff($getParams['format'], [strtolower($format->format)])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['format']) && in_array(strtolower($format->format), $getParams['format'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ strtolower($format->format) }} ({{ $format->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['format']) && $display['show_all']['format'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['format']) && $display['only_popular']['format'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array(strtolower($format->format), $getParams['format'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['format', 'page']),
-                                                    ['format' => array_merge([strtolower($format->format)], $getParams['format'])]
-                                                )
+                                        !isset(app('request')->input()['format_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['format_limit']),
+                                                ['format_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['format', 'page']),
-                                                    (array_diff($getParams['format'], [strtolower($format->format)])
-                                                        ? ['format' => array_diff($getParams['format'], [strtolower($format->format)])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['format_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['format']) && in_array(strtolower($format->format), $getParams['format'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ strtolower($format->format) }} ({{ $format->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['format']) && $display['show_all']['format'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['format']) && $display['only_popular']['format'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['format_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['format_limit']),
-                                            ['format_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['format_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
         <li class="js-show-submenu">
@@ -384,64 +396,66 @@
                 $url = url()->current() . (!empty($params) ? '?'. http_build_query($params) : '') .'#';
             @endphp
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ ultrans('custom.license', 2) }}</a>
-            <ul class="sidebar-submenu">
-                @if (count($termsOfUse) > 0)
-                    @foreach ($termsOfUse as $termOfUse)
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (count($termsOfUse) > 0)
+                        @foreach ($termsOfUse as $termOfUse)
+                            <li>
+                                <a
+                                    href="{{
+                                            !in_array($termOfUse->id, $getParams['license'])
+                                                ? action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['license', 'page']),
+                                                        ['license' => array_merge([$termOfUse->id], $getParams['license'])]
+                                                    )
+                                                )
+                                                : action(
+                                                    'DataController@'. $action, array_merge(
+                                                        array_except(app('request')->input(), ['license', 'page']),
+                                                        (array_diff($getParams['license'], [$termOfUse->id])
+                                                            ? ['license' => array_diff($getParams['license'], [$termOfUse->id])]
+                                                            : [])
+                                                    )
+                                                )
+                                    }}"
+                                    class="{{
+                                            isset($getParams['license']) && in_array($termOfUse->id, $getParams['license'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ $termOfUse->name }} ({{ $termOfUse->datasets_count }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
+                    @endif
+                    @php
+                        $showAll = isset($display['show_all']) && isset($display['show_all']['license']) && $display['show_all']['license'];
+                        $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['license']) && $display['only_popular']['license'];
+                    @endphp
+                    @if ($showAll || $onlyPopular)
                         <li>
                             <a
                                 href="{{
-                                        !in_array($termOfUse->id, $getParams['license'])
-                                            ? action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['license', 'page']),
-                                                    ['license' => array_merge([$termOfUse->id], $getParams['license'])]
-                                                )
+                                        !isset(app('request')->input()['license_limit'])
+                                        ? action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['license_limit']),
+                                                ['license_limit' => 0]
                                             )
-                                            : action(
-                                                'DataController@'. $action, array_merge(
-                                                    array_except(app('request')->input(), ['license', 'page']),
-                                                    (array_diff($getParams['license'], [$termOfUse->id])
-                                                        ? ['license' => array_diff($getParams['license'], [$termOfUse->id])]
-                                                        : [])
-                                                )
+                                        )
+                                        : action(
+                                            'DataController@'. $action, array_merge(
+                                                array_except(app('request')->input(), ['license_limit']),
+                                                []
                                             )
+                                        )
                                 }}"
-                                class="{{
-                                        isset($getParams['license']) && in_array($termOfUse->id, $getParams['license'])
-                                            ? 'active'
-                                            : ''
-                                }}"
-                            >{{ $termOfUse->name }} ({{ $termOfUse->datasets_count }})</a>
+                            >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
-                    @endforeach
-                @else
-                    <li><span>{{ __('custom.no_matches') }}</span></li>
-                @endif
-                @php
-                    $showAll = isset($display['show_all']) && isset($display['show_all']['license']) && $display['show_all']['license'];
-                    $onlyPopular = isset($display['only_popular']) && isset($display['only_popular']['license']) && $display['only_popular']['license'];
-                @endphp
-                @if ($showAll || $onlyPopular)
-                    <li>
-                        <a
-                            href="{{
-                                    !isset(app('request')->input()['license_limit'])
-                                    ? action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['license_limit']),
-                                            ['license_limit' => 0]
-                                        )
-                                    )
-                                    : action(
-                                        'DataController@'. $action, array_merge(
-                                            array_except(app('request')->input(), ['license_limit']),
-                                            []
-                                        )
-                                    )
-                            }}"
-                        >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
-                    </li>
-                @endif
+                    @endif
+                </div>
             </ul>
         </li>
     </ul>

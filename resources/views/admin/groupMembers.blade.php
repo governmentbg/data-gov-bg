@@ -12,29 +12,31 @@
                     data-toggle="collapse"
                     data-target="#sidebar-wrapper"
                 ><span><i class="fa fa-angle-left"></i></span></button>
-                <ul class="sidebar-submenu">
-                    @foreach ($roles as $role)
+                <ul class="sidebar-submenu nano">
+                    <div class="nano-content">
+                        @foreach ($roles as $role)
+                            <li>
+                                <a
+                                    class="{{ $filter == $role->id ? 'active' : null }}"
+                                    href="{{ route('adminGroupMembersView', [
+                                        'uri'       => $group->uri,
+                                        'filter'    => $filter == $role->id ? null : $role->id,
+                                        'keywords'  => $keywords,
+                                    ]) }}"
+                                >{{ $role->name }}</a>
+                            </li>
+                        @endforeach
                         <li>
                             <a
-                                class="{{ $filter == $role->id ? 'active' : null }}"
+                                class="{{ $filter == 'for_approval' ? 'active' : null }}"
                                 href="{{ route('adminGroupMembersView', [
                                     'uri'       => $group->uri,
-                                    'filter'    => $filter == $role->id ? null : $role->id,
+                                    'filter'    => $filter == 'for_approval' ? null : 'for_approval',
                                     'keywords'  => $keywords,
                                 ]) }}"
-                            >{{ $role->name }}</a>
+                            >{{ __('custom.for_approval') }}</a>
                         </li>
-                    @endforeach
-                    <li>
-                        <a
-                            class="{{ $filter == 'for_approval' ? 'active' : null }}"
-                            href="{{ route('adminGroupMembersView', [
-                                'uri'       => $group->uri,
-                                'filter'    => $filter == 'for_approval' ? null : 'for_approval',
-                                'keywords'  => $keywords,
-                            ]) }}"
-                        >{{ __('custom.for_approval') }}</a>
-                    </li>
+                    </div>
                 </ul>
             </li>
         </ul>
@@ -50,19 +52,21 @@
                         <div class="col-sm-12 sidenav">
                             <ul class="nav">
                                 <li>
-                                    <ul class="sidebar-submenu open">
-                                        @foreach ($roles as $role)
-                                            <li>
-                                                <a
-                                                    class="{{ $filter == $role->id ? 'active' : null }}"
-                                                    href="{{ route('adminGroupMembersView', [
-                                                        'uri'       => $group->uri,
-                                                        'filter'    => $filter == $role->id ? null : $role->id,
-                                                        'keywords'  => $keywords,
-                                                    ]) }}"
-                                                >{{ $role->name }}</a>
-                                            </li>
-                                        @endforeach
+                                    <ul class="sidebar-submenu nano open">
+                                        <div class="nano-content">
+                                            @foreach ($roles as $role)
+                                                <li>
+                                                    <a
+                                                        class="{{ $filter == $role->id ? 'active' : null }}"
+                                                        href="{{ route('adminGroupMembersView', [
+                                                            'uri'       => $group->uri,
+                                                            'filter'    => $filter == $role->id ? null : $role->id,
+                                                            'keywords'  => $keywords,
+                                                        ]) }}"
+                                                    >{{ $role->name }}</a>
+                                                </li>
+                                            @endforeach
+                                        </div>
                                     </ul>
                                 </li>
                             </ul>

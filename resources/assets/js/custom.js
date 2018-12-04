@@ -90,6 +90,16 @@ $(function() {
             $childIcon.toggleClass('fa-angle-up').toggleClass('fa-angle-down');
             $this.addClass('remove-after');
             $childMenu.show();
+
+            if ($('li', $('.nano-content', $childMenu)).length){
+                $('.nano').nanoScroller();
+                var height = 0;
+
+                $.each($('li', $('.nano-content', $childMenu)), function() {
+                    height += $(this).height();
+                });
+                $childMenu.css('height', height + 'px');
+            }
         } else {
             $childIcon.toggleClass('fa-angle-up').toggleClass('fa-angle-down');
             $this.removeClass('remove-after');

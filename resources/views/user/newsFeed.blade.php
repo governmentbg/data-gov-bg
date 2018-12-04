@@ -16,13 +16,15 @@
             <div class="col-md-3 col-sm-4 col-xs-12 cust-sidenav p-l-r-none">
                 <ul class="nav">
                     <li class="js-show-submenu m-t-lg">
-                        <ul class="sidebar-submenu open">
-                            <li><a class="{{ ($filter == 'users') ? 'active' : '' }}" href="{{ url('/user/newsFeed/users') }}">{{ utrans('custom.users', 2) }}</a></li>
-                            <li><a class="{{ ($filter == 'organisations') ? 'active' : '' }}" href="{{ url('/user/newsFeed/organisations') }}">{{ utrans('custom.organisations', 2) }}</a></li>
-                            <li><a class="{{ ($filter == 'groups') ? 'active' : '' }}" href="{{ url('/user/newsFeed/groups') }}">{{ utrans('custom.groups', 2) }}</a></li>
-                            <li><a class="{{ ($filter == 'datasets') ? 'active' : '' }}" href="{{ url('/user/newsFeed/datasets') }}">{{ __('custom.data_sets') }}</a></li>
-                            <li><a class="{{ ($filter == 'categories') ? 'active' : '' }}" href="{{ url('/user/newsFeed/categories') }}">{{ __('custom.main_topic') }}</a></li>
-                            <li><a class="{{ ($filter == 'tags') ? 'active' : '' }}" href="{{ url('/user/newsFeed/tags') }}">{{ utrans('custom.tags', 2) }}</a></li>
+                        <ul class="sidebar-submenu nano open">
+                            <div class="nano-content">
+                                <li><a class="{{ ($filter == 'users') ? 'active' : '' }}" href="{{ url('/user/newsFeed/users') }}">{{ utrans('custom.users', 2) }}</a></li>
+                                <li><a class="{{ ($filter == 'organisations') ? 'active' : '' }}" href="{{ url('/user/newsFeed/organisations') }}">{{ utrans('custom.organisations', 2) }}</a></li>
+                                <li><a class="{{ ($filter == 'groups') ? 'active' : '' }}" href="{{ url('/user/newsFeed/groups') }}">{{ utrans('custom.groups', 2) }}</a></li>
+                                <li><a class="{{ ($filter == 'datasets') ? 'active' : '' }}" href="{{ url('/user/newsFeed/datasets') }}">{{ __('custom.data_sets') }}</a></li>
+                                <li><a class="{{ ($filter == 'categories') ? 'active' : '' }}" href="{{ url('/user/newsFeed/categories') }}">{{ __('custom.main_topic') }}</a></li>
+                                <li><a class="{{ ($filter == 'tags') ? 'active' : '' }}" href="{{ url('/user/newsFeed/tags') }}">{{ utrans('custom.tags', 2) }}</a></li>
+                            </div>
                         </ul>
                     </li>
                 </ul>

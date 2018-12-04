@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Scroll in dropdown filters
 
 ## [1.0.11] - 2018-12-03
 ### Fixed

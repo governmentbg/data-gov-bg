@@ -11,6 +11,7 @@ use App\DataSet;
 use App\Resource;
 use PDOException;
 use App\RoleRight;
+use App\UserFollow;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
@@ -486,11 +487,19 @@ class UserController extends ApiController
                 $userSettings->user_id = $user->id;
                 $userSettings->locale = $userLocale;
 
-                if (
-                    isset($data['user_settings']['newsletter_digest'])
+
+                $newsLetter = isset($data['user_settings']['newsletter_digest'])
                     && is_numeric($data['user_settings']['newsletter_digest'])
-                ) {
+                        ? (int) $data['user_settings']['newsletter_digest']
+                        : false;
+
+                if ($newsLetter) {
                     $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
+
+                    $userFollow = new UserFollow;
+                    $userFollow->user_id = $user->id;
+                    $userFollow->news = UserFollow::NEWS_TRUE;
+                    $userFollow->save();
                 }
 
                 $userSettings->save();
@@ -676,8 +685,24 @@ class UserController extends ApiController
             $newSettings['locale'] = $data['user_settings']['locale'];
         }
 
-        if (isset($data['user_settings']['newsletter_digest'])) {
-            $newSettings['newsletter_digest'] = (int) $data['user_settings']['newsletter_digest'];
+        $newsLetter = isset($data['user_settings']['newsletter_digest'])
+            & is_numeric($data['user_settings']['newsletter_digest'])
+                ? (int) $data['user_settings']['newsletter_digest']
+                : false;
+
+        if ($newsLetter) {
+            $newSettings['newsletter_digest'] = $newsLetter;
+
+            try {
+                UserFollow::firstOrCreate(['user_id' => $request->id, 'news' => UserFollow::NEWS_TRUE]);
+            } catch (QueryException $e) {
+                Log::error($e->getMessage());
+
+                return $this->errorResponse(__('custom.edit_user_fail'));
+            }
+        } else {
+            $newSettings['newsletter_digest'] = UserSetting::DIGEST_FREQ_NONE;
+            UserFollow::where('user_id', $request->id)->where('news', UserFollow::NEWS_TRUE)->delete();
         }
 
         if (empty($newUserData) && empty($newSettings) && empty($orgAndRoles)) {
@@ -1154,11 +1179,18 @@ class UserController extends ApiController
                 $userSettings->user_id = $user->id;
                 $userSettings->locale = $userLocale;
 
-                if (
-                    isset($data['user_settings']['newsletter_digest'])
+                $newsLetter = isset($data['user_settings']['newsletter_digest'])
                     && is_numeric($data['user_settings']['newsletter_digest'])
-                ) {
+                        ? (int) $data['user_settings']['newsletter_digest']
+                        : false;
+
+                if ($newsLetter) {
                     $userSettings->newsletter_digest = $data['user_settings']['newsletter_digest'];
+
+                    $userFollow = new UserFollow;
+                    $userFollow->user_id = $user->id;
+                    $userFollow->news = UserFollow::NEWS_TRUE;
+                    $userFollow->save();
                 }
 
                 $userSettings->save();

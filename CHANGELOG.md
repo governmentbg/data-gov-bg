@@ -15,6 +15,9 @@ Security - in case of vulnerabilities.
 ### Added
 - Scroll in dropdown filters
 
+### Fixed
+- Newsletter on post
+
 ## [1.0.11] - 2018-12-03
 ### Fixed
 - Fix migration undefined index

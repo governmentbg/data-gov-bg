@@ -897,4 +897,5 @@ return [
     'value_upl_freq' => 'Upload frequency value',
     'file_missing' => 'File %s is missing',
     'auto_upload' => 'Automatic upload',
+    'edit_news' => 'Edit news',
 ];

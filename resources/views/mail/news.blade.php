@@ -16,7 +16,7 @@
                             <a
                                 href="{{ isset($action->user_profile) ? $action->user_profile : '' }}"
                                 style="color: black; text-decoration: none;"
-                            >{{ isset($action->user_firstname) ? $action->user_firstname .' '. $action->user_lastname : '' }}</a>
+                            >{{ $action->user_firstname .' '. $action->user_lastname }}</a>
                         </h3>
                         <p>
                             @if (isset($action->url) && isset($action->object) && isset($action->text))

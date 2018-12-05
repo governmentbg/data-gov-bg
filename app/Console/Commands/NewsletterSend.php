@@ -152,7 +152,7 @@ class NewsletterSend extends Command
                     $mailData['actions'][$key]->url = url('/news/view/'. $action->action_object);
                     $mailData['actions'][$key]->time = $timeDiff;
                     $mailData['actions'][$key]->text = $action->action == ActionsHistory::TYPE_ADD
-                        ? __('custom.news_add')
+                        ? __('custom.add_news')
                         : __('custom.edit_news');
                 }
 

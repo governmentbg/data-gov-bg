@@ -17,6 +17,7 @@ Security - in case of vulnerabilities.
 
 ### Fixed
 - Newsletter on post
+- Resource type API automatic update
 
 ## [1.0.11] - 2018-12-03
 ### Fixed

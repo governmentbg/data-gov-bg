@@ -254,6 +254,90 @@ class DataRepair extends Command
                     $elasticData = $content;
 
                     break;
+                case 'tsv':
+                    $convertData['data'] = base64_encode($convertData['data']);
+                    $reqConvert = Request::create('/tsv2json', 'POST', $convertData);
+                    $api = new ApiConversion($reqConvert);
+                    $resultConvert = $api->tsv2json($reqConvert)->getData();
+
+                    if ($resultConvert->success) {
+                        $elasticData = $resultConvert->data;
+                        $data['tsvData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert->error->message, true));
+                    }
+
+                    break;
+                case 'xsd':
+                    $convertData['data'] = base64_encode($convertData['data']);
+                    $reqConvert = Request::create('/xsd2json', 'POST', $convertData);
+                    $api = new ApiConversion($reqConvert);
+                    $resultConvert = $api->xsd2json($reqConvert)->getData();
+
+                    if ($resultConvert->success) {
+                        $elasticData = $resultConvert->data;
+                        $data['xsdData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert->error->message, true));
+                    }
+
+                    break;
+                case 'ods':
+                    $convertData['data'] = base64_encode($convertData['data']);
+                    $reqConvert = Request::create('/ods2json', 'POST', $convertData);
+                    $api = new ApiConversion($reqConvert);
+                    $resultConvert = $api->ods2json($reqConvert)->getData();
+
+                    if ($resultConvert->success) {
+                        $elasticData = $resultConvert->data;
+                        $data['odsData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert->error->message, true));
+                    }
+
+                    break;
+                case 'slk':
+                    $convertData['data'] = base64_encode($convertData['data']);
+                    $reqConvert = Request::create('/slk2json', 'POST', $convertData);
+                    $api = new ApiConversion($reqConvert);
+                    $resultConvert = $api->slk2json($reqConvert)->getData();
+
+                    if ($resultConvert->success) {
+                        $elasticData = $resultConvert->data;
+                        $data['slkData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert->error->message, true));
+                    }
+
+                    break;
+                case 'rtf':
+                    $convertData['data'] = base64_encode($convertData['data']);
+                    $reqConvert = Request::create('/rtf2json', 'POST', $convertData);
+                    $api = new ApiConversion($reqConvert);
+                    $resultConvert = $api->rtf2json($reqConvert)->getData();
+
+                    if ($resultConvert->success) {
+                        $elasticData = [$resultConvert->data];
+                        $data['rtfData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert->error->message, true));
+                    }
+
+                    break;
+                case 'odt':
+                    $convertData['data'] = base64_encode($convertData['data']);
+                    $reqConvert = Request::create('/odt2json', 'POST', $convertData);
+                    $api = new ApiConversion($reqConvert);
+                    $resultConvert = $api->odt2json($reqConvert)->getData();
+
+                    if ($resultConvert->success) {
+                        $elasticData = [$resultConvert->data];
+                        $data['odtData'] = $elasticData;
+                    } else {
+                        Log::error(print_r($resultConvert->error->message, true));
+                    }
+
+                    break;
                 case 'csv':
                     $reqConvert = Request::create('/csv2json', 'POST', $convertData);
                     $api = new ApiConversion($reqConvert);
@@ -377,7 +461,7 @@ class DataRepair extends Command
 
                     break;
                 case 'txt':
-                    $elasticData['text'] = $resultConvert['data'];
+                    $elasticData['text'] = $convertData['data'];
                     $data['text'] = $convertData['data'];
 
                     break;

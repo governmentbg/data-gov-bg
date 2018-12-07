@@ -1027,7 +1027,7 @@ class MigrateData extends Command
 
                     break;
                 case 'txt':
-                    $elasticData['text'] = $resultConvert['data'];
+                    $elasticData['text'] = $convertData['data'];
                     $data['text'] = $convertData['data'];
 
                     break;

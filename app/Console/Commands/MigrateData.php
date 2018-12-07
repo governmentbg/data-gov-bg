@@ -639,16 +639,18 @@ class MigrateData extends Command
                 $response = $this->requestUrl('organization_show', $params);
                 $total = isset($response['result']['package_count']) ? (int) $response['result']['package_count'] : 0;
 
-                foreach ($response['result']['packages'] as $res) {
-                    if ($this->migrateDatasets($res)) {
-                        $successPackages++;
-                    } else {
-                        $failedPacgakes++;
-                    }
+                if (isset($response['result']['packages'])) {
+                    foreach ($response['result']['packages'] as $res) {
+                        if ($this->migrateDatasets($res)) {
+                            $successPackages++;
+                        } else {
+                            $failedPacgakes++;
+                        }
 
-                    $totalSuccess += $successPackages;
-                    $totalFailed += $failedPacgakes;
-                    $totalOrgDatasets += $total;
+                        $totalSuccess += $successPackages;
+                        $totalFailed += $failedPacgakes;
+                        $totalOrgDatasets += $total;
+                    }
                 }
 
                 $this->line('Organisation total datasets: '. $total);
@@ -985,8 +987,47 @@ class MigrateData extends Command
                     }
 
                     break;
+                case 'doc':
+                case 'docx':
+                    try {
+                        $method = 'doc2json';
+                        $convertData['data'] = base64_encode($convertData['data']);
+                        $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                        $api = new ApiConversion($reqConvert);
+                        $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                        if ($resultConvert['success']) {
+                            $elasticData['text'] = $resultConvert['data'];
+                            $data['text'] = $resultConvert['data'];
+                        } else {
+                            Log::error(print_r($resultConvert, true));
+                        }
+                    } catch (Exception $ex) {
+                        Log::error(print_r($ex->getMessage(),true));
+                    }
+
+                    break;
+                case 'pdf':
+                    try {
+                        $method = $extension .'2json';
+                        $convertData['data'] = base64_encode($convertData['data']);
+                        $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                        $api = new ApiConversion($reqConvert);
+                        $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                        if ($resultConvert['success'] ) {
+                            $elasticData['text'] = isset($resultConvert['data']) ? $resultConvert['data'] : [];
+                            $data['text'] = $resultConvert['data'];
+                        } else {
+                            Log::error(print_r($resultConvert, true));
+                        }
+                    } catch (Exception $ex) {
+                        Log::error(print_r($ex->getMessage(),true));
+                    }
+
+                    break;
                 case 'txt':
-                    $elasticData = $convertData['data'];
+                    $elasticData['text'] = $resultConvert['data'];
                     $data['text'] = $convertData['data'];
 
                     break;
@@ -999,7 +1040,7 @@ class MigrateData extends Command
                     $resultConvert = $api->$method($reqConvert)->getData(true);
 
                     if ($resultConvert['success']) {
-                        $elasticData = $resultConvert['data'];
+                        $elasticData['text'] = $resultConvert['data'];
                         $data['text'] = $resultConvert['data'];
                     }
             }

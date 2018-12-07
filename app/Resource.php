@@ -156,7 +156,7 @@ class Resource extends Model implements TranslatableInterface
     public static function getAllowedFormats()
     {
         return [
-            'CSV', 'JSON', 'KML', 'RDF', 'XML', 'XLSX', 'XLS', 'TXT', 'TSV', 'XSD', 'ODS', 'SLK', 'RTF', 'ODT'
+            'CSV', 'JSON', 'KML', 'RDF', 'XML', 'XLSX', 'XLS', 'TXT', 'TSV', 'XSD', 'ODS', 'SLK', 'RTF', 'ODT', 'PDF', 'DOC', 'DOCX'
         ];
     }
 }

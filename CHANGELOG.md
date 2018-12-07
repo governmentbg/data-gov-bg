@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Added
 - Scroll in dropdown filters
+- Command for re-download broken resources
 
 ### Fixed
 - Newsletter on post

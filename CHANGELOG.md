@@ -20,6 +20,7 @@ Security - in case of vulnerabilities.
 - Newsletter on post
 - Resource type API automatic update
 - Resource file type pdf upload
+- Resource type API update interval check
 
 ## [1.0.11] - 2018-12-03
 ### Fixed

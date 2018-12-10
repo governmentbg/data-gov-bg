@@ -127,6 +127,7 @@ class ApiResourceSendPending extends Command
         $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $resource->uri)
             ->where('action', ActionsHistory::TYPE_MOD)
+            ->where('action_msg', 'Update resource data')
             ->orderBy('occurrence', 'desc')
             ->first();
 

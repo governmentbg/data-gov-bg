@@ -313,6 +313,7 @@ class ConversionController extends ApiController
 
                 $im->setResolution(300, 300);
                 $im->readimage($path);
+                $im->setImageFormat('jpg');
                 $im->setImageDepth(8);
                 $im->stripImage();
                 $im->setBackgroundColor('white');

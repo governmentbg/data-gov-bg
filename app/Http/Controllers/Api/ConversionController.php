@@ -305,8 +305,6 @@ class ConversionController extends ApiController
             try {
                 $path = storage_path('app/pdf-resource-'. uniqid());
 
-                chmod($path, 0775);
-
                 file_put_contents($path, base64_decode($post['data']));
 
                 $im = new \Imagick();

@@ -652,6 +652,7 @@ class ResourceController extends ApiController
                     ]);
                 }
 
+                // this action message is used in another controller
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,

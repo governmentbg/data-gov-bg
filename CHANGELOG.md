@@ -21,6 +21,7 @@ Security - in case of vulnerabilities.
 - Resource type API automatic update
 - Resource file type pdf upload
 - Resource type API update interval check
+- Personal data check on resource edit
 
 ## [1.0.11] - 2018-12-03
 ### Fixed

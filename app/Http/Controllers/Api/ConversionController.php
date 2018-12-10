@@ -307,6 +307,8 @@ class ConversionController extends ApiController
 
                 file_put_contents($path, base64_decode($post['data']));
 
+                chmod($path, 0775);
+
                 $im = new \Imagick();
 
                 $im->setResolution(300, 300);

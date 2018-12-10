@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\User;
 use App\DataSet;
 use App\Resource;
+use App\Signal;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
@@ -118,9 +119,12 @@ class DataRepair extends Command
         $this->line('Datasets that do not have resource or have resources without indexes in elastic table are '. count($brokenDatasets));
         $this->line('Broken resource are '. count($brokenResources));
 
-        if ($this->confirm('You are going to delete all resources for which there are no indexes in elastic. Are you sure?')) {
-            error_log('confirmed');
+
+        if ($this->confirm('You are going to delete '. count($brokenResources) .' resources for which there are no indexes in elastic. Are you sure?')) {
             if (isset($brokenResources)) {
+                $bar = $this->output->createProgressBar(count($brokenDatasets));
+
+                Signal::whereIn('resource_id', $brokenResources)->forceDelete();
                 Resource::whereIn('id', $brokenResources)->forceDelete();
                 $fileFormats = Resource::getAllowedFormats();
 
@@ -128,6 +132,7 @@ class DataRepair extends Command
                     $addedResources = 0;
                     $failedResources = 0;
                     $unsuporrtedFormat = 0;
+                    $total = 0;
                     $dataSetInfo = DataSet::where('uri', $dataset->uri)->first();
 
                     $params = [
@@ -135,9 +140,9 @@ class DataRepair extends Command
                     ];
 
                     $response = $this->requestUrl('package_show', $params);
-                    error_log(var_export($dataset->uri,true));
 
                     if ($response['success'] && $response['result']['num_resources'] > 0) {
+                        $total = $response['result']['num_resources'];
                         $dataSetResources = isset($response['result']['resources'])
                             ? $response['result']['resources']
                             : [];
@@ -152,8 +157,8 @@ class DataRepair extends Command
                             }
 
                             if (in_array($fileFormat, $fileFormats)) {
-                                Log::info('Resource format "'. $fileFormat);
                                 if ($this->migrateDatasetsResources($dataSetInfo->id, $resource)) {
+                                    Log::info('Added resource with format: "'. $fileFormat);
                                     $addedResources++;
                                 } else {
                                     $failedResources++;
@@ -166,9 +171,17 @@ class DataRepair extends Command
                             unset($resource);
                         }
                     }
+
+                    $this->line('Datasets Total Resource: '. $total);
+                    $this->info('Resource success: '. $addedResources);
+                    $this->error('Resource failed: '. $failedResources);
+                    $this->line('');
+                    $bar->advance();
+                    $this->line('');
                 }
             }
 
+            $bar->finish();
         } else {
             $this->line('Command is aborted!');
         }

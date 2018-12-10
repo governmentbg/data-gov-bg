@@ -22,6 +22,7 @@ Security - in case of vulnerabilities.
 - Resource file type pdf upload
 - Resource type API update interval check
 - Personal data check on resource edit
+- Data set links in Data page
 
 ## [1.0.11] - 2018-12-03
 ### Fixed

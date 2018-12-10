@@ -305,8 +305,7 @@ class ConversionController extends ApiController
             try {
                 $path = storage_path('app/pdf-resource-'. uniqid());
 
-                touch($path);
-                $temp = fopen($path, 'w');
+                chmod($path, 0775);
 
                 file_put_contents($path, base64_decode($post['data']));
 
@@ -325,7 +324,6 @@ class ConversionController extends ApiController
                 $im->destroy();
 
                 unlink($path);
-                fclose($temp);
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {

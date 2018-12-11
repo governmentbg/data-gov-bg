@@ -116,12 +116,15 @@ label {
 
     .sidebar-submenu, {
         display: none;
-        padding: 10px 15px;
+        padding: 10px 0px;
         border-radius: 11px;
         width: 90%;
+        max-height: 200px;
 
-        @include mdMobile() {
-            width: 100%;
+        .nano-pane {
+            .nano-slider {
+                background: #ffff !important;
+            }
         }
 
         li {
@@ -133,7 +136,7 @@ label {
             a {
                 display: inline-block;
                 font-size: 14px;
-                padding: 9px;
+                padding: 9px 20px;
                 width: 100%;
                 text-decoration: none;
 

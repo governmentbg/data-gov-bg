@@ -641,14 +641,18 @@ class ResourceController extends ApiController
                         'resource_id'   => $id,
                     ]);
 
+                    // Filter data for containing personal info
+                    $filteredData = $this->checkData($post['data']);
+
                     $update = \Elasticsearch::index([
-                        'body'  => ['rows' => $post['data']],
+                        'body'  => ['rows' => $filteredData],
                         'index' => $index,
                         'type'  => ElasticDataSet::ELASTIC_TYPE,
                         'id'    => $id .'_'. $newVersion,
                     ]);
                 }
 
+                // this action message is used in another controller
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_MOD,

@@ -13,6 +13,19 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.12] - 2018-12-11
+### Added
+- Scroll in dropdown filters
+- Command for re-download broken resources
+
+### Fixed
+- Newsletter on post
+- Resource type API automatic update
+- Resource file type pdf upload
+- Resource type API update interval check
+- Personal data check on resource edit
+- Data set links in Data page
+
 ## [1.0.11] - 2018-12-03
 ### Fixed
 - Fix migration undefined index
@@ -300,6 +313,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.12]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.8...v1.0.9

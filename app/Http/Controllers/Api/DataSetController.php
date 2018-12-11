@@ -443,33 +443,6 @@ class DataSetController extends ApiController
 
                     Module::add($logData);
 
-                    if (
-                        !config('app.IS_TOOL')
-                        && $dataset->status == DataSet::STATUS_PUBLISHED
-                        && $dataset->visibility == DataSet::VISIBILITY_PUBLIC
-                    ) {
-
-                        $dbData = [
-                            'module_name'   => $logData['module_name'],
-                            'action'        => $logData['action'],
-                            'action_object' => isset($logData['action_object']) ? $logData['action_object'] : '',
-                            'action_msg'    => $logData['action_msg'],
-                            'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
-                            'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
-                            'occurrence'    => date('Y-m-d H:i:s'),
-                            'user_id'       => Auth::user()->id
-                        ];
-
-                        if (isset($logData['status'])) {
-                            $dbData['status'] = $logData['status'];
-                        }
-
-                        $dbData['followed_org'] = $dataset->org_id;
-                        $dbData['followed_theme'] = $dataset->category_id;
-
-                        app('App\Http\Controllers\UserController')->sendEventNewsletter($dbData);
-                    }
-
                     return $this->successResponse();
                 } else {
                     DB::rollback();

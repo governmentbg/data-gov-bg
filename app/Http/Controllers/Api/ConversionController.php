@@ -305,16 +305,15 @@ class ConversionController extends ApiController
             try {
                 $path = storage_path('app/pdf-resource-'. uniqid());
 
-                touch($path);
-                chmod($path, 0775);
-                $temp = fopen($path, 'w');
-
                 file_put_contents($path, base64_decode($post['data']));
+
+                chmod($path, 0775);
 
                 $im = new \Imagick();
 
                 $im->setResolution(300, 300);
                 $im->readimage($path);
+                $im->setImageFormat('jpeg');
                 $im->setImageDepth(8);
                 $im->stripImage();
                 $im->setBackgroundColor('white');
@@ -326,7 +325,6 @@ class ConversionController extends ApiController
                 $im->destroy();
 
                 unlink($path);
-                fclose($temp);
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {

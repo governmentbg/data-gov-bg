@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class ResourceController extends Controller {
-    public static function addMetadata($recordUri, $resourceData, $file = null, $isUpdate = false)
+    public static function addMetadata($recordUri, $resourceData, $file = null, $isUpdate = false, $changeMeta = true)
     {
         $data = [];
         $errors = [];
@@ -122,12 +122,14 @@ class ResourceController extends Controller {
                 }
             }
 
-            $apiFunction = $isUpdate ? 'editResourceMetadata' : 'addResourceMetadata';
-            $savePost = Request::create('/api/'. $apiFunction, 'POST', $metadata);
-            $api = new ApiResource($savePost);
-            $result = $api->$apiFunction($savePost)->getData();
+            if ($changeMeta) {
+                $apiFunction = $isUpdate ? 'editResourceMetadata' : 'addResourceMetadata';
+                $savePost = Request::create('/api/'. $apiFunction, 'POST', $metadata);
+                $api = new ApiResource($savePost);
+                $result = $api->$apiFunction($savePost)->getData();
+            }
 
-            if ($result->success) {
+            if ((isset($result) && $result->success) || !$changeMeta) {
                 $uri = $isUpdate ? $recordUri : $result->data->uri;
 
                 if (in_array($metadata['data']['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {

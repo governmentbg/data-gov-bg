@@ -63,6 +63,7 @@ class FeedController extends Controller
             $datasets = $history->pluck('dataset_id', 'dataset_id')->toArray();
             $moduleResource = Module::getModuleName(Module::RESOURCES);
 
+            $translateGroups = [];
             foreach ($history as $i => $row) {
                 if ($row->module_name == $moduleResource && !in_array($row->resource_dataset, $datasets )) {
                     unset($history[$i]);
@@ -145,6 +146,7 @@ class FeedController extends Controller
             ->limit(1000)
             ->get();
 
+        $translateGroups = [];
         foreach ($history as $row) {
             if (!empty($row->resource_name)) {
                 $translateGroups[$row->resource_name] = $row->resource_name;

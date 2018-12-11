@@ -15169,17 +15169,16 @@ label {
 .sidenav-open .sidebar-submenu,
 .cust-sidenav .sidebar-submenu {
   display: none;
-  padding: 10px 15px;
+  padding: 10px 0px;
   border-radius: 11px;
   width: 90%;
+  max-height: 200px;
 }
 
-@media screen and (max-width: 991px) {
-  .sidenav .sidebar-submenu,
-  .sidenav-open .sidebar-submenu,
-  .cust-sidenav .sidebar-submenu {
-    width: 100%;
-  }
+.sidenav .sidebar-submenu .nano-pane .nano-slider,
+.sidenav-open .sidebar-submenu .nano-pane .nano-slider,
+.cust-sidenav .sidebar-submenu .nano-pane .nano-slider {
+  background: #ffff !important;
 }
 
 .sidenav .sidebar-submenu li i,
@@ -15194,7 +15193,7 @@ label {
 .cust-sidenav .sidebar-submenu li a {
   display: inline-block;
   font-size: 14px;
-  padding: 9px;
+  padding: 9px 20px;
   width: 100%;
   text-decoration: none;
 }

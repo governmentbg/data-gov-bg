@@ -44,7 +44,7 @@
                 <textarea class="form-control" name="notes"></textarea>
             </div>
             <div class="form-group">
-            <h4> {{ __('custom.organisation') }} <span class="required">*</span></h4>
+            <h4>{{ utrans('custom.organisations', 1) }} <span class="required">*</span></h4>
                 <select
                     class="js-autocomplete form-control"
                     name="org_id"

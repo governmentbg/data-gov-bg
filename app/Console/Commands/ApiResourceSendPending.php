@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\User;
 use App\Module;
 use App\Resource;
+use Carbon\Carbon;
 use App\DataQuery;
 use App\ActionsHistory;
 use App\ConnectionSetting;
@@ -44,7 +45,7 @@ class ApiResourceSendPending extends Command
     {
         parent::__construct();
 
-        $this->currentTimestamp = strtotime('now');
+        $this->currentTimestamp = Carbon::now();
     }
 
     /**
@@ -56,6 +57,8 @@ class ApiResourceSendPending extends Command
     {
         $successCount = 0;
         $errorCount = 0;
+        $unchangedCount = 0;
+        $changedCount = 0;
 
         $resources = Resource::where('upl_freq_type', '!=', null)->where('upl_freq', '!=', null)->get();
         $requestTypes = Resource::getRequestTypes();
@@ -76,7 +79,7 @@ class ApiResourceSendPending extends Command
                     'schema_url'         => $resource->schema_url,
                 ];
 
-                $response = ResourceController::addMetadata($resource->uri, $data, null, true);
+                $response = ResourceController::addMetadata($resource->uri, $data, null, true, false);
 
                 if (isset($response['success'])) {
                     $reqElastic = Request::create(
@@ -93,6 +96,12 @@ class ApiResourceSendPending extends Command
 
                     if ($resultElastic->success) {
                         $successCount++;
+
+                        if (isset($resultElastic->message)) {
+                            $unchangedCount++;
+                        } else {
+                            $changedCount++;
+                        }
                     } else {
                         $errorCount++;
                     }
@@ -105,6 +114,8 @@ class ApiResourceSendPending extends Command
         Auth::logout();
 
         $this->info("$successCount successfull resource updates");
+        $this->info("$changedCount changed resource data");
+        $this->info("$unchangedCount unchanged resource data");
 
         if ($errorCount) {
             $this->error("$errorCount failed resource updates");
@@ -115,31 +126,31 @@ class ApiResourceSendPending extends Command
     {
         $historyRecord = ActionsHistory::select('occurrence')
             ->where('action_object', $resource->uri)
-            ->where('action', ActionsHistory::TYPE_SEND)
+            ->where('action', ActionsHistory::TYPE_MOD)
+            ->where('action_msg', 'Update resource data')
             ->orderBy('occurrence', 'desc')
             ->first();
 
         $lastDate = empty($historyRecord) ? $resource->created_at : $historyRecord->occurrence;
+        $lastDate = $occurrence = Carbon::createFromFormat('Y-m-d H:i:s', $lastDate);
 
         $offsetNumber = $resource->upl_freq;
-        $offsetType = null;
+        $targetTimestamp = null;
 
         switch ($resource->upl_freq_type) {
             case DataQuery::FREQ_TYPE_HOUR:
-                $offsetType = 'minute';
+                $targetTimestamp = $lastDate->addHours($offsetNumber);
                 break;
             case DataQuery::FREQ_TYPE_DAY:
-                $offsetType = 'day';
+                $targetTimestamp = $lastDate->addDays($offsetNumber);
                 break;
             case DataQuery::FREQ_TYPE_WEEK:
-                $offsetType = 'week';
+                $targetTimestamp = $lastDate->addWeeks($offsetNumber);
                 break;
             case DataQuery::FREQ_TYPE_MONTH:
-                $offsetType = 'month';
+                $targetTimestamp = $lastDate->addMonths($offsetNumber);
                 break;
         }
-
-        $targetTimestamp = strtotime($lastDate .' + '. $offsetNumber .' '. $offsetType);
 
         if ($this->currentTimestamp >= $targetTimestamp) {
             return true;

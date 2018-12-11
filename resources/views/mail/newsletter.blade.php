@@ -39,11 +39,12 @@
                         $objType = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_type'];
                         $objView = $actionObjData[$actionHistory->module][$actionHistory->action_object]['obj_view'];
                         $parentObjId = $actionObjData[$actionHistory->module][$actionHistory->action_object]['parent_obj_id'];
+                        $logo = public_path('img/'. $objType .'-icon.png');
                     @endphp
                     <div style="width: 100%;">
                         <div style="width: 20%; float: left;">
                             <img
-                                src="{{ $message->embed('img/'. $objType .'-icon.png') }}"
+                                src="{{ $message->embed($logo) }}"
                                 style="width: 55px; height: 55px; margin-top: 25px;"
                             />
                         </div>

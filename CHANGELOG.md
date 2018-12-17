@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- File input for resources with type Automatic upload
 
 ## [1.0.12] - 2018-12-11
 ### Added

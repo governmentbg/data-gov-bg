@@ -28,7 +28,11 @@
 
         <div
             class="form-group row required js-ress-file"
-            {{ $resource->resource_type == \App\Resource::TYPE_FILE ? null : 'hidden' }}
+            {{
+                ($resource->resource_type == \App\Resource::TYPE_FILE)
+                || ($resource->resource_type == \App\Resource::TYPE_AUTO)
+                ? null : 'hidden'
+            }}
         >
             <label for="file" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.file', 1) }}:</label>
             <div class="col-sm-9">
@@ -46,7 +50,8 @@
             {{
                 ($resource->resource_type == \App\Resource::TYPE_HYPERLINK)
                 || ($resource->resource_type == \App\Resource::TYPE_API)
-                ? null : 'hidden' }}
+                ? null : 'hidden'
+            }}
         >
             <label for="url" class="col-sm-3 col-xs-12 col-form-label">{{ utrans('custom.url') }}:</label>
             <div class="col-sm-9">

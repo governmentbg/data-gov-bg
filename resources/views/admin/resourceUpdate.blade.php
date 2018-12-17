@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     @include('partials.alerts-bar')
-        @if ($parent)
+    @if ($parent)
         @include('partials.admin-nav-bar', ['view' => $parent->type == App\Organisation::TYPE_GROUP ? 'group' : 'organisation'])
         @if ($parent->type == App\Organisation::TYPE_GROUP)
             @include('partials.group-nav-bar', ['view' => 'dataset', 'group' => $parent])

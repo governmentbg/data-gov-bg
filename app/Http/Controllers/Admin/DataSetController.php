@@ -840,7 +840,7 @@ class DataSetController extends AdminController
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
 
                 if ($response['success']) {
-                    if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
+                    if (in_array($data['type'], [Resource::TYPE_HYPERLINK])) {
                         return redirect('/admin/resource/view/'. $response['uri']);
                     }
 

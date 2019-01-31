@@ -20,7 +20,7 @@ class DataRepair extends Command
      *
      * @var string
      */
-    protected $signature = 'repair:migratedData {direction} {source?}';
+    protected $signature = 'repair:migratedData {direction} {source?} {datasetUri?} {missingOnly?} {closedFormats?}';
 
     /**
      * The console command description.
@@ -109,7 +109,13 @@ class DataRepair extends Command
                 ->rightJoin('elastic_data_set', 'resources.id', '=', 'elastic_data_set.resource_id')
                 ->get()
                 ->pluck('data_set_id')
-            )->get();
+            );
+
+        if ($this->argument('datasetUri')) {
+            $brokenDatasets->where('data_sets.uri', $this->argument('datasetUri'));
+        }
+
+        $brokenDatasets = $brokenDatasets->get();
 
         $brokenResources = DB::table('resources')
             ->whereNotIn('id', DB::table('elastic_data_set')->get()->pluck('resource_id'))
@@ -139,7 +145,7 @@ class DataRepair extends Command
                         'id' => $dataset->uri
                     ];
 
-                    $response = $this->requestUrl('package_show', $params);
+                    $response = request_url('package_show', $params);
 
                     if ($response['success'] && $response['result']['num_resources'] > 0) {
                         $total = $response['result']['num_resources'];
@@ -512,11 +518,11 @@ class DataRepair extends Command
                 } else {
                     // Delete resource metadata record if there are errors
                     $resource = Resource::where('uri', $resourceURI)->first();
-                    Log::error('Resource with id: "'. $resourceURI.'" failed on adding in elastic!');
+                    Log::error('Resource with id: "'. $resourceURI .'" failed on adding in elastic!');
 
                     if ($resource) {
                         $resource->forceDelete();
-                        Log::warning('Remove resource metadata with id: "'. $resourceURI.'"');
+                        Log::warning('Remove resource metadata with id: "'. $resourceURI .'"');
                     }
 
                     return false;

@@ -82,7 +82,7 @@ class CustomTNTSearch extends TNTSearch
         $dlWeight = 0.5;
         $docScores = [];
         $count = $this->totalDocumentsInCollection();
-
+        
         foreach ($keywords as $index => $term) {
             $isLastKeyword = ($keywords->count() - 1) == $index;
             $df = $this->totalMatchingDocuments($term, $isLastKeyword);
@@ -94,8 +94,7 @@ class CustomTNTSearch extends TNTSearch
                 $num = ($tfWeight + 1) * $tf;
                 $denom = $tfWeight * ((1 - $dlWeight) + $dlWeight) + $tf;
                 $score = $idf * ($num / $denom);
-                $docScores[$docID] = isset($docScores[$docID]) ?
-                $docScores[$docID] + $score : $score;
+                $docScores[$docID] = isset($docScores[$docID]) ? $docScores[$docID] + $score : $score;
             }
         }
 
@@ -206,7 +205,6 @@ class CustomTNTSearch extends TNTSearch
     private function getAllDocumentsForStrictKeyword($word, $noLimit)
     {
         $criteria = implode(', ', array_column($word, 'id'));
-
         $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'doclist') ."
             WHERE term_id IN ($criteria) ORDER BY hit_count DESC LIMIT {$this->maxDocs}";
 

@@ -45,7 +45,8 @@
             "App\\": "app/"
         },
         "files": [
-            "app/Helpers/LangHelper.php"
+            "app/Helpers/LangHelper.php",
+            "app/Helpers/UtilHelper.php"
         ]
     },
     "autoload-dev": {

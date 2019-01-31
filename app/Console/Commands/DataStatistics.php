@@ -97,6 +97,7 @@ class DataStatistics extends Command
         $correctDatasets = $allDatasets - $brokenDatasets;
         $correctResources = $allResources - $brokenResources;
 
+        $this->line('1) Successfully migrated datasets.');
         $this->line('All migrated datasets: '. $allDatasets);
         $this->line('Datasets that do not have resource or have resources without indexes in elastic table: '. $brokenDatasets);
         $this->line('Correct datasets: '. $correctDatasets);
@@ -107,9 +108,86 @@ class DataStatistics extends Command
 
     private function getOldPortalNewData()
     {
-        $newPortalDatasets = DB::table('data_sets')->count();
+        $newDatasetsCount = 0;
+        $newResourcesCount = 0;
 
-        $this->info('Statistical collection started..');
+        $lastMigratedDataset = DB::table('data_sets')
+            ->where('data_sets.updated_by', $this->migrationUserId)
+            ->orderBy('updated_at', 'desc')
+            ->limit(1)
+            ->pluck('updated_at')
+            ->first();
+
+        $lastMigratedDataset = strtotime($lastMigratedDataset);
+
+        $header[] = 'Authorization: '. config('app.MIGRATE_USER_API_KEY');
+        $params = [
+            'all_fields' => true
+        ];
+
+        $users = request_url('user_list', $params, $header);
+
+        $bar = $this->output->createProgressBar(count($users['result']));
+
+        foreach ($users['result'] as $user) {
+            $prms = [];
+            $response = [];
+
+            if ($user['number_created_packages'] > 0) {
+                $prms = [
+                    'id'                => $user['id'],
+                    'include_datasets'  => true
+                ];
+
+                $response = request_url('user_show', $prms);
+
+                if ($result = $response['result']) {
+                    $dataSets = [];
+                    $dataSets = isset($result['datasets']) ? $result['datasets'] : [];
+
+                    if ($dataSets) {
+                        foreach ($dataSets as $ds) {
+                            $dsDateCreated = strtotime($ds['metadata_created']);
+                            $dsDateModified = isset($ds['metadata_modified'])
+                                ? strtotime($ds['metadata_modified'])
+                                : null;
+
+                            if (
+                                $dsDateCreated > $lastMigratedDataset
+                                || ($dsDateModified && $dsDateModified > $lastMigratedDataset)
+                            ) {
+                                $newDatasetsCount ++;
+                            }
+
+                            if ($ds['resources']) {
+                                foreach ($ds['resources'] as $resource) {
+                                    $rsDateCreated = strtotime($resource['created']);
+                                    $rsDateModified = isset($resource['last_modified'])
+                                        ? strtotime($resource['last_modified'])
+                                        : null;
+
+                                    if (
+                                        $rsDateCreated > $lastMigratedDataset
+                                        || ($rsDateModified && $rsDateModified > $lastMigratedDataset)
+                                    ) {
+                                        $newResourcesCount ++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->line('');
+        $this->line('2) How many datasets are uploaded on the old system and are not migrated to the new one.');
+        $this->line('Last migrated dataset was on: '. date('Y-m-d H:i:s', $lastMigratedDataset));
+        $this->line('New datasets: '. $newDatasetsCount);
+        $this->line('New resources: '. $newResourcesCount);
     }
 
     private function getNewPortalNewData()
@@ -131,6 +209,7 @@ class DataStatistics extends Command
             ->where('resources.created_at', '>', $lastUpdatedResource->updated_at)
             ->count();
 
+        $this->line('3) How many datasets are uploaded directly on the new system.');
         $this->line('All new datasets: '. $newDatasets);
         $this->line('All new resources: '. $newResources);
     }

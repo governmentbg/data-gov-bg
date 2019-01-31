@@ -35,7 +35,7 @@ class MigrateData extends Command
      *
      * @var string
      */
-    protected $signature = 'migrate:data {direction} {source?}';
+    protected $signature = 'migrate:data {direction}';
 
     /**
      * The console command description.
@@ -66,13 +66,8 @@ class MigrateData extends Command
             $this->line('');
 
             if ($this->argument('direction') == 'up') {
-                if ($this->argument('source') == null) {
-                    $this->error('No source given.');
-                    $this->error('Data migration failed!');
-                } else {
-                    $this->up();
-                    $this->info('Data migration finished successfully!');
-                }
+                $this->up();
+                $this->info('Data migration finished successfully!');
             } else if ($this->argument('direction') == 'down') {
                 $this->down();
                 die();
@@ -645,6 +640,7 @@ class MigrateData extends Command
             }
         }
 
+        $this->line('');
         $this->line('Organisations Dataset Summary');
         $this->line('Total datasets: '. $totalOrgDatasets);
         $this->info('Total dataset success: '. $totalSuccess);

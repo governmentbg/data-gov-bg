@@ -2,7 +2,9 @@
 
 function request_url($uri, $params = null, $header = null)
 {
-    $requestUrl = $this->argument('source'). $uri;
+    $source = config('app.OLD_OD_API_SOURCE');
+
+    $requestUrl = $source . $uri;
     $ch = curl_init($requestUrl);
 
     if ($header) {

@@ -35,7 +35,7 @@ class MigrateData extends Command
      *
      * @var string
      */
-    protected $signature = 'migrate:data {direction} {source?}';
+    protected $signature = 'migrate:data {direction}';
 
     /**
      * The console command description.
@@ -66,13 +66,8 @@ class MigrateData extends Command
             $this->line('');
 
             if ($this->argument('direction') == 'up') {
-                if ($this->argument('source') == null) {
-                    $this->error('No source given.');
-                    $this->error('Data migration failed!');
-                } else {
-                    $this->up();
-                    $this->info('Data migration finished successfully!');
-                }
+                $this->up();
+                $this->info('Data migration finished successfully!');
             } else if ($this->argument('direction') == 'down') {
                 $this->down();
                 die();
@@ -165,26 +160,6 @@ class MigrateData extends Command
         Artisan::call('cache:clear');
     }
 
-    private function requestUrl($uri, $params = null, $header = null)
-    {
-        $requestUrl = $this->argument('source'). $uri;
-        $ch = curl_init($requestUrl);
-
-        if ($header) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        }
-
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // grab URL and pass it to the browser
-        $response = curl_exec($ch);
-        $response = json_decode($response,true);
-        curl_close($ch);
-
-        return $response;
-    }
-
     private function migrateTags()
     {
         $migrateUser = User::where('username', 'migrate_data')->value('id');
@@ -194,7 +169,7 @@ class MigrateData extends Command
         $params = [
             'all_fields' => true
         ];
-        $response = $this->requestUrl('tag_list', $params);
+        $response = request_url('tag_list', $params);
 
         if (!empty($response['result'])) {
             $tagsIds = [];
@@ -255,7 +230,7 @@ class MigrateData extends Command
             'all_fields'    => true,
             'include_users' => true,
         ];
-        $response = $this->requestUrl('organization_list', $params);
+        $response = request_url('organization_list', $params);
         $numPackageFromOrgs = 0;
 
         if (!empty($response['result'])) {
@@ -362,7 +337,7 @@ class MigrateData extends Command
         $params = [
             'all_fields' => true
         ];
-        $response = $this->requestUrl('group_list', $params);
+        $response = request_url('group_list', $params);
 
         if (!empty($response['result'])) {
             $groupIds = [];
@@ -462,7 +437,7 @@ class MigrateData extends Command
 
         $numPackage = 0;
         $oldRecords = 0;
-        $response = $this->requestUrl('user_list', $params, $header);
+        $response = request_url('user_list', $params, $header);
 
         if (!empty($response['result'])) {
 
@@ -499,14 +474,16 @@ class MigrateData extends Command
                     $lname = 'No Name';
                 }
 
-                $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                $password = substr(str_shuffle($chars),0,16);
+                $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                $password = substr(str_shuffle($chars), 0, 16);
 
                 $newData['data']['migrated_data'] = true;
                 $newData['data']['firstname'] = ucfirst($fname);
                 $newData['data']['lastname'] = ucfirst($lname);
                 $newData['data']['username'] = $res['name'];
-                $newData['data']['email'] = trim($res['email']);
+                $newData['data']['email'] = empty($res['email'])
+                    ? 'no_mail'. rand(1, 9999999) .'@mail.com'
+                    : trim($res['email']);
                 $newData['data']['password'] = $password;
                 $newData['data']['password_confirm'] = $password;
                 $newData['data']['add_info'] = $res['about'];
@@ -585,7 +562,7 @@ class MigrateData extends Command
                     'id'                => $k,
                     'include_datasets'  => true
                 ];
-                $response = $this->requestUrl('user_show', $params);
+                $response = request_url('user_show', $params);
 
                 if (isset ($response['result']['datasets'])) {
                     foreach ($response['result']['datasets'] as $res) {
@@ -628,15 +605,16 @@ class MigrateData extends Command
         $orgWithDataSets = $organisationData['org_with_dataSets'];
 
         $bar = $this->output->createProgressBar(count($orgWithDataSets));
+
         if (is_array($orgWithDataSets)) {
             foreach ($orgWithDataSets as $k => $v) {
                 $failedPacgakes = 0;
                 $successPackages = 0;
                 $params = [
-                    'id' => $k,
-                    'include_datasets' => true
+                    'id'                => $k,
+                    'include_datasets'  => true,
                 ];
-                $response = $this->requestUrl('organization_show', $params);
+                $response = request_url('organization_show', $params);
                 $total = isset($response['result']['package_count']) ? (int) $response['result']['package_count'] : 0;
 
                 if (isset($response['result']['packages'])) {
@@ -662,6 +640,7 @@ class MigrateData extends Command
             }
         }
 
+        $this->line('');
         $this->line('Organisations Dataset Summary');
         $this->line('Total datasets: '. $totalOrgDatasets);
         $this->info('Total dataset success: '. $totalSuccess);
@@ -879,9 +858,10 @@ class MigrateData extends Command
                 }
             } else {
                 $resourceIds['error'] = $result->errors;
+
                 Log::error('Resource metadata "'. $newData['data']['name']
-                        .'" with id: "'. $resourceData['id']
-                        .'" failed! Parent Dataset id: "'. $dataSetId .'".');
+                    .'" with id: "'. $resourceData['id']
+                    .'" failed! Parent Dataset id: "'. $dataSetId .'".');
             }
         }
 
@@ -892,6 +872,7 @@ class MigrateData extends Command
     {
         $content = $fileData['file_content'];
         $extension = $fileData['file_extension'];
+        $extension = null;
 
         if (!empty($extension)) {
             $convertData = [
@@ -1100,7 +1081,7 @@ class MigrateData extends Command
                 $params = [
                     'id' => $k
                 ];
-                $response = $this->requestUrl('user_follower_list', $params, $header);
+                $response = request_url('user_follower_list', $params, $header);
 
                 if (isset($response['result']) && !empty($response['result'])) {
                     foreach ($response['result'] as $res) {
@@ -1136,7 +1117,7 @@ class MigrateData extends Command
             $params = [
                 'id' => $org->uri
             ];
-            $response = $this->requestUrl('organization_follower_list', $params, $header);
+            $response = request_url('organization_follower_list', $params, $header);
 
             if (isset($response['result']) && !empty($response['result'])) {
                 foreach ($response['result'] as $res) {
@@ -1172,7 +1153,7 @@ class MigrateData extends Command
             $params = [
                 'id' => $dataSet->uri
             ];
-            $response = $this->requestUrl('dataset_follower_list', $params, $header);
+            $response = request_url('dataset_follower_list', $params, $header);
 
             if (isset($response['result']) && !empty($response['result'])) {
                 foreach ($response['result'] as $res) {

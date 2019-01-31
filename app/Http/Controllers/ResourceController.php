@@ -35,8 +35,7 @@ class ResourceController extends Controller {
             }
 
             if (
-                ($metadata['data']['type'] == Resource::TYPE_FILE
-                || $metadata['data']['type'] == Resource::TYPE_AUTO)
+                $metadata['data']['type'] == Resource::TYPE_FILE
                 && isset($file)
                 && $file->isValid()
             ) {
@@ -135,9 +134,7 @@ class ResourceController extends Controller {
 
                 if (in_array($metadata['data']['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                     $success = true;
-                }
-
-                if (!empty($extension)) {
+                } else if (!empty($extension)) {
                     $data = self::callConversions($apiKey, $extension, $content);
                 }
 

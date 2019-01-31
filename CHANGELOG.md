@@ -12,7 +12,10 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.13] - 2019-01-31
 ### Added
+- Migrated data statistics command (php artisan data:statistics)
 - File input for resources with type Automatic upload
 
 ## [1.0.12] - 2018-12-11
@@ -315,6 +318,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.9...v1.0.10

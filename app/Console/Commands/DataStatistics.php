@@ -71,7 +71,6 @@ class DataStatistics extends Command
         $this->info('Statistical collection started..');
 
         $this->migrationUserId = DB::table('users')->where('username', 'migrate_data')->get()->pluck('id');
-        error_log('migrationUser: '. print_r($this->migrationUserId, true));
     }
 
     private function getMigrated()
@@ -111,5 +110,28 @@ class DataStatistics extends Command
         $newPortalDatasets = DB::table('data_sets')->count();
 
         $this->info('Statistical collection started..');
+    }
+
+    private function getNewPortalNewData()
+    {
+        $lastUpdatedDataset = DB::table('data_sets')
+            ->where('data_sets.updated_by', $this->migrationUserId)
+            ->orderBy('data_sets.updated_at', 'desc')
+            ->limit(1)
+            ->first();
+        $newDatasets = DB::table('data_sets')
+            ->where('data_sets.created_at', '>', $lastUpdatedDataset->updated_at)
+            ->count();
+        $lastUpdatedResource = DB::table('resources')
+            ->where('resources.updated_by', $this->migrationUserId)
+            ->orderBy('resources.updated_at', 'desc')
+            ->limit(1)
+            ->first();
+        $newResources = DB::table('resources')
+            ->where('resources.created_at', '>', $lastUpdatedResource->updated_at)
+            ->count();
+
+        $this->line('All new datasets: '. $newDatasets);
+        $this->line('All new resources: '. $newResources);
     }
 }

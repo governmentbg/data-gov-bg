@@ -24,6 +24,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function selectIndex($indexName)
     {
+        error_log('selectIndex');
         $this->indexName = $indexName;
         $this->index = app('db')->connection('mysqltnt')->getPDO();
         $this->index->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -38,6 +39,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function createIndex($indexName, $disableOutput = false)
     {
+        error_log('createIndex');
         $indexer = new CustomTNTIndexer;
         $indexer->loadConfig($this->config);
         $indexer->disableOutput = $disableOutput;
@@ -54,6 +56,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function getIndex()
     {
+        error_log('getIndex');
         $indexer = new CustomTNTIndexer;
         $indexer->inMemory = false;
         $indexer->setIndex($this->index);
@@ -70,6 +73,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function search($phrase, $numOfResults = 100, $fuzzy = null)
     {
+        error_log('search');
         $startTimer = microtime(true);
         $keywords = $this->breakIntoTokens($phrase);
         $keywords = new Collection($keywords);
@@ -82,7 +86,7 @@ class CustomTNTSearch extends TNTSearch
         $dlWeight = 0.5;
         $docScores = [];
         $count = $this->totalDocumentsInCollection();
-
+        
         foreach ($keywords as $index => $term) {
             $isLastKeyword = ($keywords->count() - 1) == $index;
             $df = $this->totalMatchingDocuments($term, $isLastKeyword);
@@ -94,8 +98,7 @@ class CustomTNTSearch extends TNTSearch
                 $num = ($tfWeight + 1) * $tf;
                 $denom = $tfWeight * ((1 - $dlWeight) + $dlWeight) + $tf;
                 $score = $idf * ($num / $denom);
-                $docScores[$docID] = isset($docScores[$docID]) ?
-                $docScores[$docID] + $score : $score;
+                $docScores[$docID] = isset($docScores[$docID]) ? $docScores[$docID] + $score : $score;
             }
         }
 
@@ -129,6 +132,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function totalMatchingDocuments($keyword, $isLastWord = false, $fuzzy = null)
     {
+        error_log('totalMatchingDocuments');
         $occurance = $this->getWordlistByKeyword($keyword, $isLastWord, $fuzzy);
 
         if (isset($occurance[0])) {
@@ -147,6 +151,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function getAllDocumentsForKeyword($keyword, $noLimit = false, $isLastKeyword = false, $fuzzy = null)
     {
+        error_log('getAllDocumentsForKeyword');
         $word = $this->getWordlistByKeyword($keyword, $isLastKeyword, $fuzzy);
 
         if (!isset($word[0])) {
@@ -173,6 +178,7 @@ class CustomTNTSearch extends TNTSearch
      */
     public function getWordlistByKeyword($keyword, $isLastWord = false, $fuzzy = null)
     {
+        error_log('getWordlistByKeyword');
         $fuzzySearchResults = [];
 
         if (is_null($fuzzy) && $this->fuzziness || !empty($fuzzy)) {
@@ -205,8 +211,9 @@ class CustomTNTSearch extends TNTSearch
      */
     private function getAllDocumentsForStrictKeyword($word, $noLimit)
     {
+        error_log('getAllDocumentsForStrictKeyword');
         $criteria = implode(', ', array_column($word, 'id'));
-
+error_log('criteria: '. print_r($criteria, true));
         $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'doclist') ."
             WHERE term_id IN ($criteria) ORDER BY hit_count DESC LIMIT {$this->maxDocs}";
 
@@ -229,6 +236,7 @@ class CustomTNTSearch extends TNTSearch
      */
     private function getAllDocumentsForFuzzyKeyword($words, $noLimit)
     {
+        error_log('getAllDocumentsForFuzzyKeyword');
         $binding_params = implode(',', array_fill(0, count($words), '?'));
         $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'doclist') ."
             WHERE term_id in ($binding_params) ORDER BY CASE term_id";
@@ -259,6 +267,7 @@ class CustomTNTSearch extends TNTSearch
 
     public function setStemmer()
     {
+        error_log('setStemmer');
         $stemmer = $this->getValueFromInfoTable('stemmer');
 
         if ($stemmer) {
@@ -270,6 +279,7 @@ class CustomTNTSearch extends TNTSearch
 
     public function getValueFromInfoTable($value)
     {
+        error_log('getValueFromInfoTable');
         $query = "SELECT * FROM ". $this->getTNTName($this->indexName, 'info') ." WHERE index_key = '$value'";
         $docs = $this->index->query($query);
 
@@ -278,6 +288,7 @@ class CustomTNTSearch extends TNTSearch
 
     public static function getTNTName($name, $id = null)
     {
+        error_log('getTNTName');
         $result = $name;
 
         if (isset($id)) {

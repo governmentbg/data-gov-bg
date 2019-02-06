@@ -15,9 +15,12 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Organisations and groups search order
 - Memory usage accumulation during conversion (xls, ods, slk, csv)
+- Associate migrated users with their profiles in old system
 
 ## [1.0.13] - 2019-01-31
 ### Added
+- Add field is_migrated to dataset and resources
+- Migration for specific data (by organisation, by dataset, single resource)
 - Migrated data statistics command (php artisan data:statistics)
 - File input for resources with type Automatic upload
 

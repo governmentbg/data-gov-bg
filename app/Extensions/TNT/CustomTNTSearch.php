@@ -87,8 +87,9 @@ class CustomTNTSearch extends TNTSearch
             $isLastKeyword = ($keywords->count() - 1) == $index;
             $df = $this->totalMatchingDocuments($term, $isLastKeyword);
             $idf = log($count / max(1, $df));
+            $documents = $this->getAllDocumentsForKeyword($term, false, $isLastKeyword);
 
-            foreach ($this->getAllDocumentsForKeyword($term, false, $isLastKeyword) as $document) {
+            foreach ($documents as $document) {
                 $docID = $document['doc_id'];
                 $tf = $document['hit_count'];
                 $num = ($tfWeight + 1) * $tf;
@@ -101,7 +102,7 @@ class CustomTNTSearch extends TNTSearch
         arsort($docScores);
 
         $docs = new Collection($docScores);
-
+        
         $totalHits = $docs->count();
         $docs = $docs->map(function ($doc, $key) {
             return $key;

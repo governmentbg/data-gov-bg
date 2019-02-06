@@ -82,14 +82,14 @@ class OrganisationController extends Controller
         if ($request->has('sort')) {
             $params['criteria']['order']['field'] = $request->sort;
             $getParams['sort'] = $request->sort;
-        } else {
+        } elseif (empty(trim($request->q))) {
             $params['criteria']['order']['field'] = 'name';
         }
 
         if ($request->has('order')) {
             $params['criteria']['order']['type'] = $request->order;
             $getParams['order'] = $request->order;
-        } else {
+        } elseif (empty(trim($request->q))) {
             $params['criteria']['order']['type'] = 'asc';
         }
 
@@ -158,18 +158,19 @@ class OrganisationController extends Controller
         $res = $api->getOrganisationDetails($rq)->getData();
         $organisation = !empty($res->data) ? $res->data : [];
 
-        if (!empty($organisation) &&
-            $organisation->active == Organisation::ACTIVE_TRUE &&
-            $organisation->approved == Organisation::APPROVED_TRUE) {
-
+        if (
+            !empty($organisation) 
+            && $organisation->active == Organisation::ACTIVE_TRUE 
+            && $organisation->approved == Organisation::APPROVED_TRUE
+        ) {
             // get child organisations
             $params = [
-                'criteria'     => [
-                    'org_id'   => $organisation->id,
-                    'active'   => Organisation::ACTIVE_TRUE,
-                    'approved' => Organisation::APPROVED_TRUE,
-                    'locale'   => $locale
-                ]
+                'criteria'  => [
+                    'org_id'    => $organisation->id,
+                    'active'    => Organisation::ACTIVE_TRUE,
+                    'approved'  => Organisation::APPROVED_TRUE,
+                    'locale'    => $locale,
+                ],
             ];
             $rq = Request::create('/api/listOrganisations', 'POST', $params);
             $api = new ApiOrganisation($rq);
@@ -202,7 +203,7 @@ class OrganisationController extends Controller
                 if ($rightCheck) {
                     $userData = [
                         'api_key' => $authUser->api_key,
-                        'id'      => $authUser->id
+                        'id'      => $authUser->id,
                     ];
 
                     // get followed organisations
@@ -1129,9 +1130,11 @@ class OrganisationController extends Controller
         $result = $api->listOrganisationTypes($rq)->getData();
         $orgTypes = $result->success ? $result->types : [];
 
-        if (!empty($organisation) &&
-            $organisation->active == Organisation::ACTIVE_TRUE &&
-            $organisation->approved == Organisation::APPROVED_TRUE) {
+        if (
+            !empty($organisation) 
+            && $organisation->active == Organisation::ACTIVE_TRUE 
+            && $organisation->approved == Organisation::APPROVED_TRUE
+        ) {
 
             // set object owner
             $objOwner = [

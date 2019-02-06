@@ -206,7 +206,6 @@ class CustomTNTIndexer extends TNTIndexer
 
     public function saveHitList($stems, $docId, $termsList)
     {
-        return;
         $fieldCounter = 0;
         $fields       = [];
 

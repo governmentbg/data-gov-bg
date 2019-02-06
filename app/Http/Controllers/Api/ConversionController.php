@@ -843,6 +843,10 @@ class ConversionController extends ApiController
             }
         }
 
+        $spreadsheet->disconnectWorksheets();
+        $spreadsheet->garbageCollect();
+        unset($spreadsheet);
+
         return $rows;
     }
 

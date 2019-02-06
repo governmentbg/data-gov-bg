@@ -638,7 +638,15 @@ class OrganisationController extends ApiController
                 }
 
                 if (!empty($request->criteria['keywords'])) {
-                    $ids = Organisation::search($request->criteria['keywords'])->get()->pluck('id');
+                    $ids = Organisation::search($request->criteria['keywords'])->get()->pluck('id')->toArray();
+                    $titleIds = Organisation::select('organisations.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.label', 'like', '%'. $request->criteria['keywords'] .'%')
+                        ->get()
+                        ->pluck('id')
+                        ->toArray();
+                    $ids = $titleIds + array_diff($ids, $titleIds);
                     $query->whereIn('organisations.id', $ids);
                 }
 
@@ -677,17 +685,22 @@ class OrganisationController extends ApiController
 
                 $count = $query->count();
 
-                $transFields = ['name', 'descript'];
+                if (empty($ids) || !empty($request->criteria['order'])) {
+                    $transFields = ['name', 'descript'];
 
-                $transCols = Organisation::getTransFields();
+                    $transCols = Organisation::getTransFields();
 
-                if (in_array($field, $transFields)) {
-                    $col = $transCols[$field];
-                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
-                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)->where('translations.locale', $locale)
-                        ->orderBy('translations.' . $col, $type);
+                    if (in_array($field, $transFields)) {
+                        $col = $transCols[$field];
+                        $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
+                            ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)
+                            ->where('translations.locale', $locale)
+                            ->orderBy('translations.' . $col, $type);
+                    } else {
+                        $query->orderBy($field, $type);
+                    }
                 } else {
-                    $query->orderBy($field, $type);
+                    $query->orderBy(DB::raw('FIELD(id, '. implode(',', $ids) .')'));
                 }
 
                 $query->forPage(
@@ -729,7 +742,6 @@ class OrganisationController extends ApiController
                 }
 
                 return $this->successResponse(['organisations' => $results, 'total_records' => $count], true);
-
             } catch (QueryException $ex) {
                 Log::error($ex->getMessage());
             }
@@ -1791,7 +1803,15 @@ class OrganisationController extends ApiController
                 }
 
                 if (!empty($criteria['keywords'])) {
-                    $ids = Organisation::search($criteria['keywords'])->get()->pluck('id');
+                    $ids = Organisation::search($criteria['keywords'])->get()->pluck('id')->toArray();
+                    $titleIds = Organisation::select('organisations.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.label', 'like', '%'. $request->criteria['keywords'] .'%')
+                        ->get()
+                        ->pluck('id')
+                        ->toArray();
+                    $ids = $titleIds + array_diff($ids, $titleIds);
                     $query->whereIn('organisations.id', $ids);
                 }
 
@@ -1831,18 +1851,22 @@ class OrganisationController extends ApiController
                 $field = empty($request->criteria['order']['field']) ? 'created_at' : $request->criteria['order']['field'];
                 $type = empty($request->criteria['order']['type']) ? 'desc' : $request->criteria['order']['type'];
 
-                $transFields = ['name', 'descript'];
+                if (empty($ids) || !empty($request->criteria['order'])) {
+                    $transFields = ['name', 'descript'];
 
-                $transCols = Organisation::getTransFields();
+                    $transCols = Organisation::getTransFields();
 
-                if (in_array($field, $transFields)) {
-
-                    $col = $transCols[$field];
-                    $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
-                        ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)->where('translations.locale', $locale)
-                        ->orderBy('translations.' . $col, $type);
+                    if (in_array($field, $transFields)) {
+                        $col = $transCols[$field];
+                        $query->select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
+                            ->leftJoin('translations', 'translations.group_id', '=', 'organisations.' . $field)
+                            ->where('translations.locale', $locale)
+                            ->orderBy('translations.' . $col, $type);
+                    } else {
+                        $query->orderBy($field, $type);
+                    }
                 } else {
-                    $query->orderBy($field, $type);
+                    $query->orderBy(DB::raw('FIELD(id, '. implode(',', $ids) .')'));
                 }
 
                 $count = $query->count();
@@ -1882,8 +1906,6 @@ class OrganisationController extends ApiController
                             'updated_by'        => $group->updated_by,
                         ];
                     }
-
-                    $transFields = ['name', 'description'];
 
                     return $this->successResponse(['groups' => $result, 'total_records' => $count], true);
                 }

@@ -12,6 +12,9 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Organisations and groups search order
+- Memory usage accumulation during conversion (xls, ods, slk, csv)
 
 ## [1.0.13] - 2019-01-31
 ### Added

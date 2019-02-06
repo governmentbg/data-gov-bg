@@ -42,38 +42,24 @@ class RefreshTNTIndexes extends Command
         $start = microtime(true);
 
         try {
-            Artisan::call('scout:import', ['model' => 'App\\Category']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\DataSet']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\Document']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\HelpPage']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\HelpSection']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\Organisation']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\Page']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\Resource']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\Signal']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\TermsOfUseRequest']);
-            $this->info(Artisan::output());
-
-            Artisan::call('scout:import', ['model' => 'App\\User']);
-            $this->info(Artisan::output());
+            $models = [
+                'App\\Organisation',
+                'App\\Category',
+                'App\\DataSet',
+                'App\\Document',
+                'App\\HelpPage',
+                'App\\HelpSection',
+                'App\\Page',
+                'App\\Resource',
+                'App\\Signal',
+                'App\\TermsOfUseRequest',
+                'App\\User',
+            ];
+            
+            foreach ($models as $model) {
+                Artisan::call('scout:import', ['model' => $model]);
+                $this->info(Artisan::output());
+            }
         } catch (Exception $ex) {
             Log::error($ex->getMessage());
             $this->error($ex->getMessage());

@@ -762,7 +762,7 @@ class DataController extends Controller {
         $locale = \LaravelLocalization::getCurrentLocale();
         $versionsPerPage = 10;
 
-        ini_set('memory_limit', '1G');
+        ini_set('memory_limit', '2G');
 
         $params = [
             'resource_uri' => $uri,

@@ -329,7 +329,7 @@ return [
     'invalid_file' => 'Невалиден :type файл!',
     'invalid_xml' => 'Невалиден xml синтаксис!',
     'invalid_json' => 'Невалиден json синтаксис!',
-    'invalid_csv' => 'Невалиден csv сингаксис!',
+    'invalid_csv' => 'Невалиден csv синтаксис!',
     'invalid_format_csv' => 'Невалидно csv, моля проверете дали файлът е в utf-8 формат и дали разделителят е запетая!',
     'invalid_kml' => 'Невалиден kml синтаксис!',
     'invalid_kml_json' => 'Невалиден json kml синтаксис!',

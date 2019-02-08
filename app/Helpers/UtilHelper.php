@@ -111,8 +111,6 @@ function migrate_datasets($dataSetUri, $convert)
             : User::where('username', 'migrate_data')->value('id');
 
         if ($alreadySaved) {
-            $newData['deleted_at'] = null;
-            $newData['deleted_by'] = null;
             $newData['dataset_uri'] = $dataSet['id'];
             $request = Request::create('/api/editDataset', 'POST', $newData);
             $api = new ApiDataSet($request);
@@ -229,8 +227,20 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
 
     if (isset($newData['file'])) {
         if ($alreadySaved) {
-            $newData['deleted_at'] = null;
-            $newData['deleted_by'] = null;
+            // Change uri
+            $newResourceId = $alreadySaved->uri;
+
+            if ($alreadySaved->uri != $resourceData['id']) {
+                $changeData['resource_uri'] = $alreadySaved->uri;
+                $changeData['data']['uri'] = $resourceData['id'];
+                $changeData['data']['migrated_data'] = true;
+                $changeRequest = Request::create('/api/editResourceMetadata', 'POST', $changeData);
+                $apiEdit = new ApiResource($changeRequest);
+                $changeResult = $apiEdit->editResourceMetadata($changeRequest)->getData();
+
+                $newResourceId = $resourceData['id'];
+            }
+
             $newData['resource_uri'] = $resourceData['id'];
             $request = Request::create('/api/editResourceMetadata', 'POST', $newData);
             $api = new ApiResource($request);
@@ -245,8 +255,6 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
         if ($result->success) {
             if (isset($result->data->uri)) {
                 $newResourceId = DB::table('resources')->where('uri', $result->data->uri)->value('uri');
-            } else {
-                $newResourceId = $alreadySaved->uri;
             }
 
             if (manage_migrated_file($newData['file'], $newResourceId, $convert)) {
@@ -468,7 +476,7 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
                         Log::error(print_r($ex->getMessage(),true));
                     }
                 } else {
-                    Log::error(print_r(strtoupper($extension) .' is not an open format.'));
+                    Log::error(strtoupper($extension) .' is not an open format.');
                 }
 
                 break;
@@ -491,7 +499,7 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
                         Log::error(print_r($ex->getMessage(),true));
                     }
                 } else {
-                    Log::error(print_r(strtoupper($extension) .' is not an open format.'));
+                    Log::error(strtoupper($extension) .' is not an open format.');
                 }
 
                 break;
@@ -559,7 +567,6 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
                 $resource->forceDelete();
                 Log::warning('Remove resource metadata with id: "'. $resourceURI .'"');
             }
-
         }
 
         return false;

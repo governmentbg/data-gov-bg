@@ -28,6 +28,11 @@ Use Uuid;
 
 class UserController extends ApiController
 {
+    public function __construct()
+    {
+        ini_set('memory_limit', '1G');
+    }
+
     /**
      * List user records by given criteria
      *

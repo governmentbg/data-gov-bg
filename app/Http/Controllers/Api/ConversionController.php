@@ -21,6 +21,8 @@ use Elasticsearch\Common\Exceptions\RuntimeException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 
 include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
+include_once(base_path() . '/vendor/nuovo/spreadsheet-reader/php-excel-reader/excel_reader2.php');
+include_once(base_path() . '/vendor/nuovo/spreadsheet-reader/SpreadsheetReader.php');
 
 class ConversionController extends ApiController
 {
@@ -100,7 +102,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromCells($post['data']);
+                $data = $this->fromCells(utf8_encode($post['data']));
 
                 if ($this->emptyRecursive($data)) {
                     return $this->errorResponse(__('custom.invalid_format_csv'));
@@ -801,54 +803,26 @@ class ConversionController extends ApiController
         $path = stream_get_meta_data($temp)['uri'];
         fwrite($temp, $csv ? $data : base64_decode($data));
 
-        $spreadsheet = IOFactory::load($path);
-        $worksheet = $spreadsheet->getActiveSheet();
+        ini_set('memory_limit', '6G');
+
+        $reader = new \SpreadsheetReader($path);
+        $sheets = $reader->Sheets();
         $rows = [];
 
-        try {
-            foreach ($worksheet->getRowIterator() as $row) {
-                $cellIterator = $row->getCellIterator();
-                $cellIterator->setIterateOnlyExistingCells(false);
-                $cells = [];
+        foreach ($sheets as $index => $name) {
+            $reader->ChangeSheet($index);
 
-                foreach ($cellIterator as $cell) {
-                    $value = trim($cell->getFormattedValue());
-
-                    $cells[] = $value;
+            foreach ($reader as $row) {
+                foreach ($row as $key => $cell) {
+                    $row[$key] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $row[$key]);
                 }
 
-                if (!empty($cells)) {
-                    $rows[] = $cells;
-                }
-            }
-
-            fclose($temp);
-
-            $rowCount = count($rows);
-        } catch (Exception $ex) {
-            Log::error($ex->getMessage());
-        }
-
-        foreach ($rows[0] as $cellIndex => $cell) {
-            if ($cell == '') {
-                foreach ($rows as $row) {
-                    if ($row[$cellIndex] != '') {
-                        continue 2;
-                    }
-                }
-
-                foreach ($rows as &$row) {
-                    unset($row[$cellIndex]);
-                }
+                $rows[] = $row;
             }
         }
-
-        $spreadsheet->disconnectWorksheets();
-        $spreadsheet->garbageCollect();
-        unset($spreadsheet);
 
         return $rows;
-    }
+       }
 
     /**
      * Get text from html data

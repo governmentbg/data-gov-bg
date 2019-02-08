@@ -134,7 +134,7 @@ class ResourceController extends ApiController
                     'descript'          => isset($post['data']['description'])
                         ? $this->trans($post['data']['locale'], $post['data']['description'])
                         : null,
-                    'uri'               => isset($post['data']['uri']) ? $post['data']['uri'] : Uuid::generate(4)->string,
+                    'uri'               => Uuid::generate(4)->string,
                     'version'           => $post['data']['type'] == Resource::TYPE_AUTO ? 0 : 1,
                     'resource_type'     => $post['data']['type'],
                     'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
@@ -167,6 +167,7 @@ class ResourceController extends ApiController
                     }
 
                     $dbData['is_migrated'] = true;
+                    $dbData['uri'] = $post['data']['uri'];
                 }
 
                 $resource = Resource::create($dbData);
@@ -482,6 +483,7 @@ class ResourceController extends ApiController
                 && Auth::user()->username == 'migrate_data'
             ){
                 $resource->is_migrated = true;
+                $resource->uri = $post['data']['uri'];
             }
 
             $resource->upl_freq_type = isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null;

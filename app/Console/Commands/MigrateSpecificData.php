@@ -49,6 +49,8 @@ class MigrateSpecificData extends Command
         $delete = $this->option('delete');
         $resource = $this->option('resource');
 
+        ini_set('memory_limit', '8G');
+
         if (
             empty($org)
             && empty($dset)
@@ -62,6 +64,7 @@ class MigrateSpecificData extends Command
         //Login
         \Auth::loginUsingId($this->migrationUserId);
 
+        $start = microtime(true);
         $this->info('Data migration has started.');
 
         if (!empty($resource)) {
@@ -83,6 +86,14 @@ class MigrateSpecificData extends Command
 
             $this->getOragnisationData($org);
         }
+
+        $elaspsedTime = microtime(true) - $start;
+        $hours = floor($elaspsedTime / 3600);
+        $mins = floor($elaspsedTime / 60 % 60);
+        $secs = floor($elaspsedTime % 60);
+        $timeFormat = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+        $this->info('Data migration ended for: '. $timeFormat);
     }
 
     private function getOragnisationData($orgUri)

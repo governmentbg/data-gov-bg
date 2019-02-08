@@ -103,8 +103,9 @@ class SetMigratedUsersUri extends Command
                     }
                 } else {
                     $userNotFound++;
+                    $email = isset($result['email']) ? $result['email'] : '';
                     $this->line('');
-                    $this->line('Users with username: '. $result['name'] .' and email: '. $result['email'] .' were not found in the database.');
+                    $this->line('Users with username: '. $result['name'] .' and email: '. $email .' were not found in the database.');
                 }
 
                 $bar->advance();

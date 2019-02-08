@@ -20,10 +20,6 @@ use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
 class DataSetController extends AdminController
 {
-    public function __construct()
-    {
-        ini_set('memory_limit', '1G');
-    }
     /**
      * Loads a view for browsing datasets
      *

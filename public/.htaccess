@@ -22,3 +22,6 @@
 
 #php settings
 php_value max_input_vars 10000
+
+#apache settings
+LimitRequestBody 0

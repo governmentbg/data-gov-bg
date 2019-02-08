@@ -23,5 +23,5 @@
 #php settings
 php_value max_input_vars 10000
 
-#apache settings
-LimitRequestBody 0
+php_value post_max_size 1G
+php_value upload_max_filesize 1G

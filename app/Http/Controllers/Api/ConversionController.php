@@ -19,9 +19,9 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use Elasticsearch\Common\Exceptions\RuntimeException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
+use App\Extensions\ExcelReader\Custom_Spreadsheet_Excel_Reader;
 
 include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
-include_once(base_path() . '/vendor/nuovo/spreadsheet-reader/php-excel-reader/excel_reader2.php');
 include_once(base_path() . '/vendor/nuovo/spreadsheet-reader/SpreadsheetReader.php');
 
 class ConversionController extends ApiController

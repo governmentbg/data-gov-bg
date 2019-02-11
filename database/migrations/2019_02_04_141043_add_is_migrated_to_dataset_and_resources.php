@@ -13,24 +13,24 @@ class AddIsMigratedToDatasetAndResources extends Migration
      */
     public function up()
     {
-        $migrationUserId = DB::table('users')->where('username', 'migrate_data')->get()->pluck('id');
-
-        $lastMigratedDataset = DB::table('data_sets')
-            ->where('data_sets.updated_by', $migrationUserId)
-            ->orderBy('updated_at', 'desc')
-            ->limit(1)
-            ->pluck('updated_at')
-            ->first();
-
         if (!config('app.IS_TOOL')) {
-            Schema::table('data_sets', function (Blueprint $table) {
-                $table->tinyInteger('is_migrated')->nullable();
-            });
+            $migrationUserId = DB::table('users')->where('username', 'migrate_data')->get()->pluck('id');
 
-            DB::statement('UPDATE data_sets SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
-        }
+            $lastMigratedDataset = DB::table('data_sets')
+                ->where('data_sets.updated_by', $migrationUserId)
+                ->orderBy('updated_at', 'desc')
+                ->limit(1)
+                ->pluck('updated_at')
+                ->first();
 
-        if (!config('app.IS_TOOL')) {
+            
+                Schema::table('data_sets', function (Blueprint $table) {
+                    $table->tinyInteger('is_migrated')->nullable();
+                });
+
+                DB::statement('UPDATE data_sets SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
+            }
+
             Schema::table('resources', function (Blueprint $table) {
                 $table->tinyInteger('is_migrated')->nullable();
             });

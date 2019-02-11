@@ -2236,15 +2236,18 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+
         return view('user/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
-            'data'          => $data,
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'resPagination' => $resourcePaginationData['resPagination'],
         ]);
     }
 
@@ -2354,6 +2357,8 @@ class UserController extends Controller {
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+
         // handle delete submit
         if ($request->has('delete')) {
             $rightCheck = RoleRight::checkUserRight(
@@ -2389,7 +2394,7 @@ class UserController extends Controller {
         return view('user/orgResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
-            'data'          => $data,
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'activeMenu'    => 'organisation',
@@ -2397,6 +2402,7 @@ class UserController extends Controller {
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'resPagination' => $resourcePaginationData['resPagination'],
         ]);
     }
 
@@ -5442,16 +5448,19 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+
         return view('user/groupResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
-            'data'          => $data,
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'group'         => $group,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'resPagination' => $resourcePaginationData['resPagination'],
         ]);
     }
 

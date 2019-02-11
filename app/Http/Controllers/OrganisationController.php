@@ -159,8 +159,8 @@ class OrganisationController extends Controller
         $organisation = !empty($res->data) ? $res->data : [];
 
         if (
-            !empty($organisation) 
-            && $organisation->active == Organisation::ACTIVE_TRUE 
+            !empty($organisation)
+            && $organisation->active == Organisation::ACTIVE_TRUE
             && $organisation->approved == Organisation::APPROVED_TRUE
         ) {
             // get child organisations
@@ -1072,6 +1072,8 @@ class OrganisationController extends Controller
                     $dataset = $this->getModelUsernames($dataset);
                     $resource = $this->getModelUsernames($resource);
 
+                    $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+
                     return view(
                         'organisation/resourceView',
                         [
@@ -1080,11 +1082,12 @@ class OrganisationController extends Controller
                             'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
                             'dataset'       => $dataset,
                             'resource'      => $resource,
-                            'data'          => $data,
+                            'data'          => $resourcePaginationData['data'],
                             'versionView'   => $version,
                             'userData'      => $userData,
                             'buttons'       => $buttons,
                             'formats'       => $formats,
+                            'resPagination' => $resourcePaginationData['resPagination'],
                         ]
                     );
                 }
@@ -1131,8 +1134,8 @@ class OrganisationController extends Controller
         $orgTypes = $result->success ? $result->types : [];
 
         if (
-            !empty($organisation) 
-            && $organisation->active == Organisation::ACTIVE_TRUE 
+            !empty($organisation)
+            && $organisation->active == Organisation::ACTIVE_TRUE
             && $organisation->approved == Organisation::APPROVED_TRUE
         ) {
 

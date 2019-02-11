@@ -918,6 +918,8 @@ class DataController extends Controller {
                     $versionsPerPage
                 );
 
+                $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+
                 return view(
                     'data/resourceView',
                     [
@@ -929,11 +931,12 @@ class DataController extends Controller {
                         'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'       => $dataset,
                         'resource'      => $resource,
-                        'data'          => $data,
+                        'data'          => $resourcePaginationData['data'],
                         'versionView'   => $version,
                         'userData'      => $userData,
                         'buttons'       => $buttons,
                         'formats'       => $formats,
+                        'resPagination' => $resourcePaginationData['resPagination'],
                     ]
                 );
             }

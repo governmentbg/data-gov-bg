@@ -686,12 +686,15 @@ class DataSetController extends AdminController
             $versionsPerPage
         );
 
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+
         return view('admin/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
             'versions'      => $verData,
             'pagination'    => $paginationData['paginate'],
-            'data'          => $data,
+            'resPagination' => $resourcePaginationData['resPagination'],
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,

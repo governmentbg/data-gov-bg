@@ -23,13 +23,11 @@ class AddIsMigratedToDatasetAndResources extends Migration
                 ->pluck('updated_at')
                 ->first();
 
-            
-                Schema::table('data_sets', function (Blueprint $table) {
-                    $table->tinyInteger('is_migrated')->nullable();
-                });
+            Schema::table('data_sets', function (Blueprint $table) {
+                $table->tinyInteger('is_migrated')->nullable();
+            });
 
-                DB::statement('UPDATE data_sets SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
-            }
+            DB::statement('UPDATE data_sets SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
 
             Schema::table('resources', function (Blueprint $table) {
                 $table->tinyInteger('is_migrated')->nullable();

@@ -22,7 +22,6 @@ use Elasticsearch\Common\Exceptions\BadRequest400Exception;
 use App\Extensions\ExcelReader\Custom_Spreadsheet_Excel_Reader;
 
 include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
-include_once(base_path() . '/vendor/nuovo/spreadsheet-reader/SpreadsheetReader.php');
 
 class ConversionController extends ApiController
 {
@@ -803,26 +802,53 @@ class ConversionController extends ApiController
         $path = stream_get_meta_data($temp)['uri'];
         fwrite($temp, $csv ? $data : base64_decode($data));
 
-        ini_set('memory_limit', '6G');
-
-        $reader = new \SpreadsheetReader($path);
-        $sheets = $reader->Sheets();
+        $spreadsheet = IOFactory::load($path);
+        $worksheet = $spreadsheet->getActiveSheet();
         $rows = [];
 
-        foreach ($sheets as $index => $name) {
-            $reader->ChangeSheet($index);
+        try {
+            foreach ($worksheet->getRowIterator() as $row) {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                $cells = [];
 
-            foreach ($reader as $row) {
-                foreach ($row as $key => $cell) {
-                    $row[$key] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $row[$key]);
+                foreach ($cellIterator as $cell) {
+                    $value = trim($cell->getFormattedValue());
+                    $cells[] = $value;
                 }
 
-                $rows[] = $row;
+                if (!empty($cells)) {
+                    $rows[] = $cells;
+                }
+            }
+
+            fclose($temp);
+
+            $rowCount = count($rows);
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
+        }
+
+        foreach ($rows[0] as $cellIndex => $cell) {
+            if ($cell == '') {
+                foreach ($rows as $row) {
+                    if ($row[$cellIndex] != '') {
+                        continue 2;
+                    }
+                }
+
+                foreach ($rows as &$row) {
+                    unset($row[$cellIndex]);
+                }
             }
         }
 
+        $spreadsheet->disconnectWorksheets();
+        $spreadsheet->garbageCollect();
+        unset($spreadsheet);
+
         return $rows;
-       }
+    }
 
     /**
      * Get text from html data

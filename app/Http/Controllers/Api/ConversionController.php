@@ -107,12 +107,10 @@ class ConversionController extends ApiController
                 $file->fseek(0);
 
                 $data = [];
+
                 while (!$file->eof()) {
                     $data[] = $file->fgetcsv();
                 }
-
-                $data = json_encode($data, JSON_UNESCAPED_UNICODE);
-                $file = null;
 
                 if ($this->emptyRecursive($data)) {
                     return $this->errorResponse(__('custom.invalid_format_csv'));

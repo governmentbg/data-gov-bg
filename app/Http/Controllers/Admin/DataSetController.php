@@ -320,8 +320,13 @@ class DataSetController extends AdminController
         }
 
         // prepare request for resources
+        $resPerPage = 10;
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
+        $params['records_per_page'] = $resPerPage;
+        $params['page_number'] = $pageNumber;
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -364,12 +369,21 @@ class DataSetController extends AdminController
             return back();
         }
 
+        $paginationData = $this->getPaginationData(
+            $resources->resources,
+            $resources->total_records,
+            array_except(app('request')->input(), ['rpage']),
+            $resPerPage,
+            'rpage'
+        );
+
         return view('admin/datasetView', [
-            'class'     => 'user',
-            'dataset'   => $this->getModelUsernames($dataset),
-            'groups'    => $groups,
-            'setGroups' => $setGroups,
-            'resources' => $resources->resources,
+            'class'      => 'user',
+            'dataset'    => $this->getModelUsernames($dataset),
+            'groups'     => $groups,
+            'setGroups'  => $setGroups,
+            'resources'  => $paginationData['items'],
+            'pagination' => $paginationData['paginate'],
         ]);
     }
 
@@ -686,12 +700,16 @@ class DataSetController extends AdminController
             $versionsPerPage
         );
 
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
+
         return view('admin/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
             'versions'      => $verData,
             'pagination'    => $paginationData['paginate'],
-            'data'          => $data,
+            'resPagination' => $resourcePaginationData['resPagination'],
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,

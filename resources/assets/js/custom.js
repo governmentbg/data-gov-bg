@@ -17,10 +17,13 @@ $(function() {
 $(function() {
     $(document).ready(function() {
         var $dataTable = $('.data-table');
+        var pagingFlag = $dataTable.hasClass('paging-off') ? false : true;
 
         $dataTable.DataTable({
             pageLength: $dataTable.data('page-length') ? $dataTable.data('page-length') : 25,
             responsive: true,
+            paging: pagingFlag,
+            bInfo : pagingFlag,
             order: [],
             language: {
                 search: $('.js-translations').data('search'),

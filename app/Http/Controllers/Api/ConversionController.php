@@ -101,7 +101,16 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromCells(utf8_encode($post['data']));
+                $file = new \SplFileObject('php://memory', 'w+');
+
+                $file->fwrite($post['data']);
+                $file->fseek(0);
+
+                $data = [];
+
+                while (!$file->eof()) {
+                    $data[] = $file->fgetcsv();
+                }
 
                 if ($this->emptyRecursive($data)) {
                     return $this->errorResponse(__('custom.invalid_format_csv'));

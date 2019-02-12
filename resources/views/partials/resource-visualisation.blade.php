@@ -10,7 +10,7 @@
     @elseif (is_array($data) || is_object($data))
         @if ($format == App\Resource::FORMAT_CSV)
             <div class="m-b-lg overflow-x-auto js-show-on-load">
-                <table class="data-table">
+                <table class="data-table <?= isset($resPagination) ? 'paging-off' : '' ?>">
                     <thead>
                         @foreach ($data as $index => $row)
                             @if ($index == 0)
@@ -29,6 +29,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                @include('partials.resource-pagination')
             </div>
         @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
             <textarea

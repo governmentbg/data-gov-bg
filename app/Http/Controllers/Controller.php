@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Role;
 use App\User;
 use App\Module;
+use App\Resource;
 use App\Section;
 use App\RoleRight;
 use Illuminate\Http\Request;
@@ -55,6 +56,46 @@ class Controller extends BaseController
         return [
             'items'    => $result,
             'paginate' => $paginator,
+        ];
+    }
+
+    /**
+     * Get array with results for current page and paginator
+     *
+     * @param array params - data
+     * @param object params - resource
+     *
+     * @return array with results for the current page and paginator object
+     */
+    public function getResourcePaginationData($data, $resource, $pageNumber = 1)
+    {
+        $dataCount = count($data);
+        $maxResourceRows = 2000;
+        $resourceRowsPerPage = 100;
+
+        if (
+            $dataCount > $maxResourceRows
+            && isset($resource->format_code)
+            && $resource->format_code == Resource::FORMAT_CSV
+        ) {
+            $data = collect($data)->paginate($resourceRowsPerPage, $pageNumber);
+
+            $resourcePaginationData = $this->getPaginationData(
+                $data,
+                $dataCount,
+                array_except(app('request')->input(), ['rpage']),
+                $resourceRowsPerPage,
+                'rpage'
+            );
+        }
+
+        return [
+            'data'          => isset($resourcePaginationData['items'])
+                ? $resourcePaginationData['items']
+                : $data,
+            'resPagination' => isset($resourcePaginationData)
+                ? $resourcePaginationData['paginate']
+                : null
         ];
     }
 

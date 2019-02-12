@@ -67,7 +67,7 @@ class Controller extends BaseController
      *
      * @return array with results for the current page and paginator object
      */
-    public function getResourcePaginationData($data, $resource)
+    public function getResourcePaginationData($data, $resource, $pageNumber = 1)
     {
         $dataCount = count($data);
         $maxResourceRows = 2000;
@@ -78,7 +78,7 @@ class Controller extends BaseController
             && isset($resource->format_code)
             && $resource->format_code == Resource::FORMAT_CSV
         ) {
-            $data = collect($data)->paginate($resourceRowsPerPage);
+            $data = collect($data)->paginate($resourceRowsPerPage, $pageNumber);
 
             $resourcePaginationData = $this->getPaginationData(
                 $data,
@@ -90,7 +90,9 @@ class Controller extends BaseController
         }
 
         return [
-            'data'          => $data,
+            'data'          => isset($resourcePaginationData['items'])
+                ? $resourcePaginationData['items']
+                : $data,
             'resPagination' => isset($resourcePaginationData)
                 ? $resourcePaginationData['paginate']
                 : null

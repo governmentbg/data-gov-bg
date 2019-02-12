@@ -138,6 +138,7 @@
                         @if (count($resources) > 0)
                         <div class="col-sm-12 pull-left p-h-sm p-l-none">
                             <div class="pull-left history">
+                                @include('partials.pagination')
                                 @foreach ($resources as $resource)
                                     <div class="{{ $resource->reported ? 'signaled' : '' }}">
                                         <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => ''])) }}">
@@ -149,6 +150,7 @@
                                         </a>
                                     </div>
                                 @endforeach
+                                @include('partials.pagination')
                             </div>
                         </div>
                         @endif

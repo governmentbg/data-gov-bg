@@ -328,6 +328,14 @@ class DataSetController extends AdminController
         $params['records_per_page'] = $resPerPage;
         $params['page_number'] = $pageNumber;
 
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
+
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
@@ -384,6 +392,7 @@ class DataSetController extends AdminController
             'setGroups'  => $setGroups,
             'resources'  => $paginationData['items'],
             'pagination' => $paginationData['paginate'],
+            'uri'        => $uri
         ]);
     }
 
@@ -575,11 +584,19 @@ class DataSetController extends AdminController
                     return redirect('/admin/resource/view/'. $response['uri']);
                 }
 
+                $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
+
+                if (isset($response['data']['csvData'])) {
+                    $response['data']['csvData'] = $resourcePaginationData['data'];
+                }
+
                 return view('admin/resourceImport', array_merge([
                     'class'         => $class,
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
+                    'resPagination' => $resourcePaginationData['resPagination'],
                 ], $response['data']));
             } else {
                 // Delete resource record on fail

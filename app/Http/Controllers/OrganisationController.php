@@ -781,10 +781,16 @@ class OrganisationController extends Controller
                         'dataset_uri' => $uri
                     ]
                 ];
+                $resPerPage = 10;
+                $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                $params['records_per_page'] = $resPerPage;
+                $params['page_number'] = $pageNumber;
+
                 $rq = Request::create('/api/listResources', 'POST', $params);
                 $apiResources = new ApiResource($rq);
                 $res = $apiResources->listResources($rq)->getData();
                 $resources = !empty($res->resources) ? $res->resources : [];
+                $resCount = $res->total_records;
 
                 // get category details
                 if (!empty($dataset->category_id)) {
@@ -920,6 +926,14 @@ class OrganisationController extends Controller
 
                 $dataset = $this->getModelUsernames($dataset);
 
+                $paginationData = $this->getPaginationData(
+                    $resources,
+                    $resCount,
+                    array_except(app('request')->input(), ['rpage']),
+                    $resPerPage,
+                    'rpage'
+                );
+
                 return view(
                     'organisation/viewDataset',
                     [
@@ -927,10 +941,11 @@ class OrganisationController extends Controller
                         'organisation'  => $organisation,
                         'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'       => $dataset,
-                        'resources'     => $resources,
+                        'resources'     => $paginationData['items'],
                         'buttons'       => $buttons,
                         'groups'        => $groups,
                         'setGroups'     => isset($setGroups) ? $setGroups : [],
+                        'pagination'    => $paginationData['paginate']
                     ]
                 );
             }
@@ -1072,7 +1087,8 @@ class OrganisationController extends Controller
                     $dataset = $this->getModelUsernames($dataset);
                     $resource = $this->getModelUsernames($resource);
 
-                    $resourcePaginationData = $this->getResourcePaginationData($data, $resource);
+                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                    $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
 
                     return view(
                         'organisation/resourceView',

@@ -16,6 +16,10 @@ Security - in case of vulnerabilities.
 - Organisations and groups search order
 - Memory usage accumulation during conversion (xls, ods, slk, csv)
 - Associate migrated users with their profiles in old system
+- Large csv resources loading
+
+### Added
+- Pagination for data set resources
 
 ## [1.0.13] - 2019-01-31
 ### Added

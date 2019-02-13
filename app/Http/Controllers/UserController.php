@@ -568,6 +568,18 @@ class UserController extends Controller {
         // prepera request for resources
         unset($params['dataset_uri']);
         $params['criteria']['dataset_uri'] = $uri;
+        $resPerPage = 10;
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $params['records_per_page'] = $resPerPage;
+        $params['page_number'] = $pageNumber;
+
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -677,13 +689,24 @@ class UserController extends Controller {
             return redirect('/'. $root .'/datasets');
         }
 
+        $paginationData = $this->getPaginationData(
+            $resources->resources,
+            $resources->total_records,
+            array_except(app('request')->input(), ['rpage']),
+            $resPerPage,
+            'rpage'
+        );
+
         return view('user/datasetView', [
-            'class'     => 'user',
-            'groups'    => $groups,
-            'setGroups' => $setGroups,
-            'dataset'   => $this->getModelUsernames($dataset),
-            'resources' => $resources->resources,
-            'buttons'   => $buttons,
+            'class'      => 'user',
+            'groups'     => $groups,
+            'setGroups'  => $setGroups,
+            'dataset'    => $this->getModelUsernames($dataset),
+            'resources'  => $paginationData['items'],
+            'buttons'    => $buttons,
+            'pagination' => $paginationData['paginate'],
+            'uri'        => $uri,
+            'sorting'    => 'userDatasetView'
         ]);
     }
 
@@ -778,7 +801,19 @@ class UserController extends Controller {
 
         $buttons['addResource'] = $rightCheck;
 
+        $resPerPage = 10;
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $params['records_per_page'] = $resPerPage;
+        $params['page_number'] = $pageNumber;
         $params['criteria']['dataset_uri'] = $uri;
+
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -906,6 +941,14 @@ class UserController extends Controller {
             return redirect('/'. $root .'/organisations/datasets/'. $organisation->uri);
         }
 
+        $paginationData = $this->getPaginationData(
+            $resources->resources,
+            $resources->total_records,
+            array_except(app('request')->input(), ['rpage']),
+            $resPerPage,
+            'rpage'
+        );
+
         return view(
             'user/orgDatasetView',
             [
@@ -913,10 +956,13 @@ class UserController extends Controller {
                 'groups'        => $groups,
                 'setGroups'     => $setGroups,
                 'dataset'       => $datasetData,
-                'resources'     => $resources->resources,
+                'resources'     => $paginationData['items'],
                 'activeMenu'    => 'organisation',
                 'fromOrg'       => $organisation,
                 'buttons'       => $buttons,
+                'pagination'    => $paginationData['paginate'],
+                'uri'           => $uri,
+                'sorting'       => \Auth::user()->is_admin ? 'adminOrgDatasetView' : 'userOrgDatasetView',
             ]
         );
     }
@@ -2236,15 +2282,19 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
+
         return view('user/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
-            'data'          => $data,
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'resPagination' => $resourcePaginationData['resPagination'],
         ]);
     }
 
@@ -2354,6 +2404,9 @@ class UserController extends Controller {
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
+
         // handle delete submit
         if ($request->has('delete')) {
             $rightCheck = RoleRight::checkUserRight(
@@ -2389,7 +2442,7 @@ class UserController extends Controller {
         return view('user/orgResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
-            'data'          => $data,
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'activeMenu'    => 'organisation',
@@ -2397,6 +2450,7 @@ class UserController extends Controller {
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'resPagination' => $resourcePaginationData['resPagination'],
         ]);
     }
 
@@ -5014,7 +5068,19 @@ class UserController extends Controller {
 
         $buttons[$datasetData->uri]['delete'] = $rightCheck;
 
+        $resPerPage = 10;
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $params['records_per_page'] = $resPerPage;
+        $params['page_number'] = $pageNumber;
         $params['criteria']['dataset_uri'] = $uri;
+
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -5142,6 +5208,14 @@ class UserController extends Controller {
             return redirect('/'. $root .'/groups/datasets/'. $group->uri);
         }
 
+        $paginationData = $this->getPaginationData(
+            $resources->resources,
+            $resources->total_records,
+            array_except(app('request')->input(), ['rpage']),
+            $resPerPage,
+            'rpage'
+        );
+
         return view(
             'user/groupDatasetView',
             [
@@ -5149,10 +5223,14 @@ class UserController extends Controller {
                 'groups'        => $groups,
                 'setGroups'     => $setGroups,
                 'dataset'       => $datasetData,
-                'resources'     => $resources->resources,
+                'resources'     => $paginationData['items'],
                 'activeMenu'    => 'group',
                 'buttons'       => $buttons,
                 'group'         => $group,
+                'pagination'    => $paginationData['paginate'],
+                'grpUri'        => $grpUri,
+                'uri'           => $uri,
+                'sorting'       => \Auth::user()->is_admin ? 'adminGroupDatasetView' : 'userGroupDatasetView',
             ]
         );
     }
@@ -5442,16 +5520,20 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
+        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
+
         return view('user/groupResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
-            'data'          => $data,
+            'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'group'         => $group,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'resPagination' => $resourcePaginationData['resPagination'],
         ]);
     }
 

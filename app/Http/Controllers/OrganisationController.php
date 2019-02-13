@@ -82,14 +82,14 @@ class OrganisationController extends Controller
         if ($request->has('sort')) {
             $params['criteria']['order']['field'] = $request->sort;
             $getParams['sort'] = $request->sort;
-        } else {
+        } elseif (empty(trim($request->q))) {
             $params['criteria']['order']['field'] = 'name';
         }
 
         if ($request->has('order')) {
             $params['criteria']['order']['type'] = $request->order;
             $getParams['order'] = $request->order;
-        } else {
+        } elseif (empty(trim($request->q))) {
             $params['criteria']['order']['type'] = 'asc';
         }
 
@@ -158,18 +158,19 @@ class OrganisationController extends Controller
         $res = $api->getOrganisationDetails($rq)->getData();
         $organisation = !empty($res->data) ? $res->data : [];
 
-        if (!empty($organisation) &&
-            $organisation->active == Organisation::ACTIVE_TRUE &&
-            $organisation->approved == Organisation::APPROVED_TRUE) {
-
+        if (
+            !empty($organisation)
+            && $organisation->active == Organisation::ACTIVE_TRUE
+            && $organisation->approved == Organisation::APPROVED_TRUE
+        ) {
             // get child organisations
             $params = [
-                'criteria'     => [
-                    'org_id'   => $organisation->id,
-                    'active'   => Organisation::ACTIVE_TRUE,
-                    'approved' => Organisation::APPROVED_TRUE,
-                    'locale'   => $locale
-                ]
+                'criteria'  => [
+                    'org_id'    => $organisation->id,
+                    'active'    => Organisation::ACTIVE_TRUE,
+                    'approved'  => Organisation::APPROVED_TRUE,
+                    'locale'    => $locale,
+                ],
             ];
             $rq = Request::create('/api/listOrganisations', 'POST', $params);
             $api = new ApiOrganisation($rq);
@@ -202,7 +203,7 @@ class OrganisationController extends Controller
                 if ($rightCheck) {
                     $userData = [
                         'api_key' => $authUser->api_key,
-                        'id'      => $authUser->id
+                        'id'      => $authUser->id,
                     ];
 
                     // get followed organisations
@@ -780,10 +781,24 @@ class OrganisationController extends Controller
                         'dataset_uri' => $uri
                     ]
                 ];
+                $resPerPage = 10;
+                $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                $params['records_per_page'] = $resPerPage;
+                $params['page_number'] = $pageNumber;
+
+                if (isset($request->order)) {
+                    $params['criteria']['order']['field'] = $request->order;
+                }
+
+                if (isset($request->order_type)) {
+                    $params['criteria']['order']['type'] = $request->order_type;
+                }
+
                 $rq = Request::create('/api/listResources', 'POST', $params);
                 $apiResources = new ApiResource($rq);
                 $res = $apiResources->listResources($rq)->getData();
                 $resources = !empty($res->resources) ? $res->resources : [];
+                $resCount = $res->total_records;
 
                 // get category details
                 if (!empty($dataset->category_id)) {
@@ -919,6 +934,14 @@ class OrganisationController extends Controller
 
                 $dataset = $this->getModelUsernames($dataset);
 
+                $paginationData = $this->getPaginationData(
+                    $resources,
+                    $resCount,
+                    array_except(app('request')->input(), ['rpage']),
+                    $resPerPage,
+                    'rpage'
+                );
+
                 return view(
                     'organisation/viewDataset',
                     [
@@ -926,10 +949,13 @@ class OrganisationController extends Controller
                         'organisation'  => $organisation,
                         'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
                         'dataset'       => $dataset,
-                        'resources'     => $resources,
+                        'resources'     => $paginationData['items'],
                         'buttons'       => $buttons,
                         'groups'        => $groups,
                         'setGroups'     => isset($setGroups) ? $setGroups : [],
+                        'pagination'    => $paginationData['paginate'],
+                        'uri'           => $uri,
+                        'sorting'       => 'orgViewDataset'
                     ]
                 );
             }
@@ -1071,6 +1097,9 @@ class OrganisationController extends Controller
                     $dataset = $this->getModelUsernames($dataset);
                     $resource = $this->getModelUsernames($resource);
 
+                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                    $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
+
                     return view(
                         'organisation/resourceView',
                         [
@@ -1079,11 +1108,12 @@ class OrganisationController extends Controller
                             'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
                             'dataset'       => $dataset,
                             'resource'      => $resource,
-                            'data'          => $data,
+                            'data'          => $resourcePaginationData['data'],
                             'versionView'   => $version,
                             'userData'      => $userData,
                             'buttons'       => $buttons,
                             'formats'       => $formats,
+                            'resPagination' => $resourcePaginationData['resPagination'],
                         ]
                     );
                 }
@@ -1129,9 +1159,11 @@ class OrganisationController extends Controller
         $result = $api->listOrganisationTypes($rq)->getData();
         $orgTypes = $result->success ? $result->types : [];
 
-        if (!empty($organisation) &&
-            $organisation->active == Organisation::ACTIVE_TRUE &&
-            $organisation->approved == Organisation::APPROVED_TRUE) {
+        if (
+            !empty($organisation)
+            && $organisation->active == Organisation::ACTIVE_TRUE
+            && $organisation->approved == Organisation::APPROVED_TRUE
+        ) {
 
             // set object owner
             $objOwner = [

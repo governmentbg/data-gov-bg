@@ -158,6 +158,8 @@ class DataSetController extends ApiController
                 if (!empty($data['visibility'])) {
                     $dbData['visibility'] = $data['visibility'];
                 }
+
+                $dbData['is_migrated'] = true;
             }
 
             if (!empty($data['custom_fields'])) {
@@ -358,6 +360,13 @@ class DataSetController extends ApiController
 
                 if (!empty($post['data']['category_id'])) {
                     $dataset->category_id = $post['data']['category_id'];
+                }
+
+                if (
+                    isset($post['data']['migrated_data'])
+                    && Auth::user()->username == 'migrate_data'
+                ){
+                    $dataset->is_migrated = true;
                 }
 
                 // increase dataset version withot goint to new full version

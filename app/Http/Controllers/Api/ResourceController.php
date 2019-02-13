@@ -165,6 +165,9 @@ class ResourceController extends ApiController
                     if (!empty($post['data']['created_at'])) {
                         $dbData['created_at'] = date('Y-m-d H:i:s', strtotime($post['data']['created_at']));
                     }
+
+                    $dbData['is_migrated'] = true;
+                    $dbData['uri'] = $post['data']['uri'];
                 }
 
                 $resource = Resource::create($dbData);
@@ -473,6 +476,14 @@ class ResourceController extends ApiController
                 if ($resource->is_reported == Resource::REPORTED_FALSE) {
                     Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
                 }
+            }
+
+            if (
+                isset($post['data']['migrated_data'])
+                && Auth::user()->username == 'migrate_data'
+            ){
+                $resource->is_migrated = true;
+                $resource->uri = $post['data']['uri'];
             }
 
             $resource->upl_freq_type = isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null;

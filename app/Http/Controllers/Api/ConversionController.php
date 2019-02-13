@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use Elasticsearch\Common\Exceptions\RuntimeException;
 use Elasticsearch\Common\Exceptions\BadRequest400Exception;
+use App\Extensions\ExcelReader\Custom_Spreadsheet_Excel_Reader;
 
 include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
 
@@ -100,7 +101,16 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromCells($post['data']);
+                $file = new \SplFileObject('php://memory', 'w+');
+
+                $file->fwrite($post['data']);
+                $file->fseek(0);
+
+                $data = [];
+
+                while (!$file->eof()) {
+                    $data[] = $file->fgetcsv();
+                }
 
                 if ($this->emptyRecursive($data)) {
                     return $this->errorResponse(__('custom.invalid_format_csv'));
@@ -813,7 +823,6 @@ class ConversionController extends ApiController
 
                 foreach ($cellIterator as $cell) {
                     $value = trim($cell->getFormattedValue());
-
                     $cells[] = $value;
                 }
 
@@ -842,6 +851,10 @@ class ConversionController extends ApiController
                 }
             }
         }
+
+        $spreadsheet->disconnectWorksheets();
+        $spreadsheet->garbageCollect();
+        unset($spreadsheet);
 
         return $rows;
     }

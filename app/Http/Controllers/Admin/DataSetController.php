@@ -885,11 +885,19 @@ class DataSetController extends AdminController
                         $response['data'][$key] = $parent;
                     }
 
+                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
+
+                    if (isset($response['data']['csvData'])) {
+                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    }
+
                     return view('admin/resourceImport', array_merge([
                         'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
+                        'resPagination' => $resourcePaginationData['resPagination'],
                     ], $response['data']));
                 } else {
                     $request->session()->flash(

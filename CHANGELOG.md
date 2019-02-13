@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.14] - 2019-02-13
 ### Fixed
 - Organisations and groups search order
 - Memory usage accumulation during conversion (xls, ods, slk, csv)
@@ -328,6 +330,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.10...v1.0.11

@@ -1768,11 +1768,19 @@ class UserController extends Controller {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
 
+                $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
+
+                if (isset($response['data']['csvData'])) {
+                    $response['data']['csvData'] = $resourcePaginationData['data'];
+                }
+
                 return view('user/resourceImport', array_merge([
                     'class'         => $class,
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
+                    'resPagination' => $resourcePaginationData['resPagination'],
                 ], $response['data']));
             } else {
                 // delete resource record on fail
@@ -1975,11 +1983,19 @@ class UserController extends Controller {
                         $response['data'][$key] = $parent;
                     }
 
+                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
+
+                    if (isset($response['data']['csvData'])) {
+                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    }
+
                     return view('user/resourceImport', array_merge([
                         'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
+                        'resPagination' => $resourcePaginationData['resPagination'],
                     ], $response['data']));
                 } else {
                     $request->session()->flash(
@@ -2045,12 +2061,20 @@ class UserController extends Controller {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
 
+                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
+
+                    if (isset($response['data']['csvData'])) {
+                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    }
+
                     return view('user/resourceImport', array_merge([
                         'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'group'         => $group,
+                        'resPagination' => $resourcePaginationData['resPagination'],
                     ], $response['data']));
                 } else {
                     // delete resource record on fail
@@ -2118,12 +2142,20 @@ class UserController extends Controller {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
 
+                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
+                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
+
+                    if (isset($response['data']['csvData'])) {
+                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    }
+
                     return view('user/resourceImport', array_merge([
                         'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'fromOrg'       => $fromOrg,
+                        'resPagination' => $resourcePaginationData['resPagination'],
                     ], $response['data']));
                 } else {
                     // Delete resource record on fail

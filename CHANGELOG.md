@@ -13,8 +13,20 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.14] - 2019-02-13
+### Fixed
+- Organisations and groups search order
+- Memory usage accumulation during conversion (xls, ods, slk, csv)
+- Associate migrated users with their profiles in old system
+- Large csv resources loading
+
+### Added
+- Pagination for data set resources
+
 ## [1.0.13] - 2019-01-31
 ### Added
+- Add field is_migrated to dataset and resources
+- Migration for specific data (by organisation, by dataset, single resource)
 - Migrated data statistics command (php artisan data:statistics)
 - File input for resources with type Automatic upload
 
@@ -318,6 +330,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.10...v1.0.11

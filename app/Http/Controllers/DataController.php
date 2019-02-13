@@ -602,6 +602,14 @@ class DataController extends Controller {
             $params['records_per_page'] = $resPerPage;
             $params['page_number'] = $pageNumber;
 
+            if (isset($request->order)) {
+                $params['criteria']['order']['field'] = $request->order;
+            }
+
+            if (isset($request->order_type)) {
+                $params['criteria']['order']['type'] = $request->order_type;
+            }
+
             $rq = Request::create('/api/listResources', 'POST', $params);
             $apiResources = new ApiResource($rq);
             $res = $apiResources->listResources($rq)->getData();
@@ -758,7 +766,9 @@ class DataController extends Controller {
                 'buttons'       => $buttons,
                 'groups'        => $groups,
                 'setGroups'     => isset($setGroups) ? $setGroups : [],
-                'pagination'    => $paginationData['paginate']
+                'pagination'    => $paginationData['paginate'],
+                'uri'           => $uri,
+                'sorting'       => 'dataView',
             ];
 
             return view(

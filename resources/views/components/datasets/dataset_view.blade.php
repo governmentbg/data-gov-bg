@@ -167,6 +167,9 @@
             @endif
             <div class="col-xs-12 pull-left m-t-md p-l-none">
                 <div class="pull-left history">
+                    @if (!empty($resources) && count($resources) > 1)
+                        @include('partials.sorting.data-sets')
+                    @endif
                     @include('partials.pagination')
                     @foreach ($resources as $resource)
                         @if (!empty($admin) || !empty($buttons[$resource->uri]['view']))

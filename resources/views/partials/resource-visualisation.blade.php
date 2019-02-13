@@ -101,6 +101,6 @@
             </form>
         @endif
     @else
-        <div class="data-preview">{{ $data }}</div>
+        <div class="data-preview">{!! nl2br($data) !!}</div>
     @endif
 @endif

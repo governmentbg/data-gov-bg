@@ -69,8 +69,10 @@ class Controller extends BaseController
      */
     public function getResourcePaginationData($data, $resource, $pageNumber = 1, $import = false)
     {
-        $csv = isset($data['csvData']);
-        $data = $csv ? $data['csvData'] : $data;
+        if (is_array($data)) {
+            $data = isset($data['csvData']) ? $data['csvData'] : $data;
+        }
+
         $dataCount = count($data);
         $maxResourceRows = 2000;
         $resourceRowsPerPage = 100;

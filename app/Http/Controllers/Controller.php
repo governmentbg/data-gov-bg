@@ -69,6 +69,8 @@ class Controller extends BaseController
      */
     public function getResourcePaginationData($data, $resource, $pageNumber = 1, $import = false)
     {
+        $csv = isset($data['csvData']);
+
         if (is_array($data)) {
             $data = isset($data['csvData']) ? $data['csvData'] : $data;
         }

@@ -392,7 +392,8 @@ class DataSetController extends AdminController
             'setGroups'  => $setGroups,
             'resources'  => $paginationData['items'],
             'pagination' => $paginationData['paginate'],
-            'uri'        => $uri
+            'uri'        => $uri,
+            'sorting'    => 'adminMyData'
         ]);
     }
 

@@ -573,6 +573,14 @@ class UserController extends Controller {
         $params['records_per_page'] = $resPerPage;
         $params['page_number'] = $pageNumber;
 
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
+
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
@@ -696,7 +704,9 @@ class UserController extends Controller {
             'dataset'    => $this->getModelUsernames($dataset),
             'resources'  => $paginationData['items'],
             'buttons'    => $buttons,
-            'pagination' => $paginationData['paginate']
+            'pagination' => $paginationData['paginate'],
+            'uri'        => $uri,
+            'sorting'    => 'userDatasetView'
         ]);
     }
 
@@ -796,6 +806,14 @@ class UserController extends Controller {
         $params['records_per_page'] = $resPerPage;
         $params['page_number'] = $pageNumber;
         $params['criteria']['dataset_uri'] = $uri;
+
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
 
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
@@ -942,7 +960,9 @@ class UserController extends Controller {
                 'activeMenu'    => 'organisation',
                 'fromOrg'       => $organisation,
                 'buttons'       => $buttons,
-                'pagination'    => $paginationData['paginate']
+                'pagination'    => $paginationData['paginate'],
+                'uri'           => $uri,
+                'sorting'       => \Auth::user()->is_admin ? 'adminOrgDatasetView' : 'userOrgDatasetView',
             ]
         );
     }
@@ -5054,6 +5074,14 @@ class UserController extends Controller {
         $params['page_number'] = $pageNumber;
         $params['criteria']['dataset_uri'] = $uri;
 
+        if (isset($request->order)) {
+            $params['criteria']['order']['field'] = $request->order;
+        }
+
+        if (isset($request->order_type)) {
+            $params['criteria']['order']['type'] = $request->order_type;
+        }
+
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
@@ -5199,7 +5227,10 @@ class UserController extends Controller {
                 'activeMenu'    => 'group',
                 'buttons'       => $buttons,
                 'group'         => $group,
-                'pagination'    => $paginationData['paginate']
+                'pagination'    => $paginationData['paginate'],
+                'grpUri'        => $grpUri,
+                'uri'           => $uri,
+                'sorting'       => \Auth::user()->is_admin ? 'adminGroupDatasetView' : 'userGroupDatasetView',
             ]
         );
     }

@@ -12,6 +12,9 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- On migrating specific data with delete - remove only previous migrated datasets
+- Store elastic data in session by key (uri of the resource)
 
 ## [1.0.14] - 2019-02-13
 ### Fixed

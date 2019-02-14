@@ -224,12 +224,12 @@ class MigrateSpecificData extends Command
             case 'org':
 
                 $orgId = DB::table('organisations')->where('uri', $data)->value('id');
-                $dataSets = DataSet::where('org_id', $orgId)->get()->pluck('id');
+                $dataSets = DataSet::where('org_id', $orgId)->where('is_migrated', true)->get()->pluck('id');
                 $this->deleteData($dataSets);
                 break;
             case 'dset':
 
-                $dataSets = DataSet::where('uri', $data)->get()->pluck('id');
+                $dataSets = DataSet::where('uri', $data)->where('is_migrated', true)->get()->pluck('id');
                 $this->deleteData($dataSets);
                 break;
         }

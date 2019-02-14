@@ -640,7 +640,7 @@ class HelpController extends ApiController
 
         if (!empty($criteria['keywords'])) {
             $ids = HelpPage::search($criteria['keywords'])->get()->pluck('id');
-            $pages = HelpPage::whereIn('id', $ids)->with('section');
+            $pages = HelpPage::whereIn('help_pages.id', $ids)->with('section');
         } else {
             $pages = HelpPage::select()->with('section');
         }

@@ -127,7 +127,7 @@ class UserController extends ApiController
 
             if (isset($criteria['keywords'])) {
                 $ids = User::search($criteria['keywords'])->get()->pluck('id');
-                $query->whereIn('id', $ids);
+                $query->whereIn('users.id', $ids);
             }
 
             if (isset($criteria['approved'])) {
@@ -159,9 +159,9 @@ class UserController extends ApiController
             }
 
             if (!empty($criteria['id'])) {
-                $query->where('id', $criteria['id']);
+                $query->where('users.id', $criteria['id']);
             } elseif (isset($criteria['user_ids'])) {
-                $query->whereIn('id', $criteria['user_ids']);
+                $query->whereIn('users.id', $criteria['user_ids']);
             }
 
             $query->whereNotIn('username', User::SYSTEM_USERS);

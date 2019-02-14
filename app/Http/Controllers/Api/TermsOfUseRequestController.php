@@ -280,11 +280,11 @@ class TermsOfUseRequestController extends ApiController
                 $query = TermsOfUseRequest::select();
             } else {
                 $ids = TermsOfUseRequest::search($criteria['search'])->get()->pluck('id');
-                $query = TermsOfUseRequest::whereIn('id', $ids);
+                $query = TermsOfUseRequest::whereIn('terms_of_use_requests.id', $ids);
             }
 
             if (!empty($criteria['request_id'])) {
-                $query->where('id', '=', $criteria['request_id']);
+                $query->where('terms_of_use_requests.id', '=', $criteria['request_id']);
             }
 
             if (!empty($criteria['status'])) {

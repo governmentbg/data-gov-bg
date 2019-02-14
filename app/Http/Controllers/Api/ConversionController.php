@@ -772,7 +772,7 @@ class ConversionController extends ApiController
         file_put_contents($path, base64_decode($data));
 
         if (mime_content_type($path) == 'application/msword') {
-            shell_exec('/usr/bin/wvText '. $path .' '. $pathOut);
+            shell_exec('/usr/bin/wvText '. escapeshellarg($path) .' '. escapeshellarg($pathOut));
             $result = file_get_contents($pathOut);
 
             if (!mb_detect_encoding($result, 'UTF-8', true)) {

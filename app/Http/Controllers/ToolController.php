@@ -817,9 +817,9 @@ class ToolController extends Controller
                     $format = $extension;
                 }
 
-                ResourceController::callConversions($apiKey, $extension, $content);
-                $elasticData = Session::get('elasticData');
-                Session::forget('elasticData');
+                ResourceController::callConversions($apiKey, $extension, $content, $resourceUri);
+                $elasticData = Session::get('elasticData.'. $resourceUri);
+                Session::forget('elasticData.'. $resourceUri);
             }
         } else {
             if (!empty($data)) {

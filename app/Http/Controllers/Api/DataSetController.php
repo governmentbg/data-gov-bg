@@ -657,12 +657,12 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['dataset_ids'])) {
-                    $query->whereIn('id', $criteria['dataset_ids']);
+                    $query->whereIn('data_sets.id', $criteria['dataset_ids']);
                 }
 
                 if (!empty($criteria['keywords'])) {
                     $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
-                    $query->whereIn('id', $ids);
+                    $query->whereIn('data_sets.id', $ids);
                 }
 
                 if (isset($criteria['user_datasets_only']) && $criteria['user_datasets_only']) {

@@ -24,9 +24,7 @@ return [
      * how many proxies that client's request has
      * subsequently passed through.
      */
-    'proxies' => [
-        '192.168.1.10',
-    ],
+    'proxies' => array_map('trim', explode(',', env('TRUSTED_PROXIES'))),
 
     /*
      * Or, to trust all proxies that connect
@@ -56,9 +54,9 @@ return [
      * for them to be considered untrusted instead. Ex:
      *
      * Illuminate\Http\Request::HEADER_CLIENT_HOST  => null,
-     * 
+     *
      * WARNING: If you're using AWS Elastic Load Balancing or Heroku,
-     * the FORWARDED and X_FORWARDED_HOST headers should be set to null 
+     * the FORWARDED and X_FORWARDED_HOST headers should be set to null
      * as they are currently unsupported there.
      */
     'headers' => [

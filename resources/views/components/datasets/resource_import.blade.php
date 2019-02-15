@@ -52,7 +52,11 @@
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ uctrans('custom.cancel') }}
                     </a>
-                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
+                    <button
+                        name="ready_data"
+                        type="submit"
+                        class="m-l-md btn btn-primary"
+                    >{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>
@@ -83,7 +87,11 @@
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ uctrans('custom.cancel') }}
                     </a>
-                    <button name="ready_data" type="submit" class="m-l-md btn btn-primary">{{ uctrans('custom.save') }}</button>
+                    <button
+                        name="ready_data"
+                        type="submit"
+                        class="m-l-md btn btn-primary"
+                    >{{ uctrans('custom.save') }}</button>
                 </div>
             </div>
         </form>

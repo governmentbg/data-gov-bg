@@ -149,7 +149,7 @@ class DataSetController extends AdminController
             $perPage
         );
 
-        // handle dataset delete
+        // Handle dataset delete
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
@@ -219,7 +219,7 @@ class DataSetController extends AdminController
         if ($request->isMethod('post') && ($request->has('create') || $request->has('add_resource'))){
             $data = $request->all();
 
-            // prepare post data for API request
+            // Prepare post data for API request
             $data = $this->prepareTags($data);
 
             if (!empty($data['group_id'])) {
@@ -228,7 +228,7 @@ class DataSetController extends AdminController
 
             unset($data['group_id'], $data['add_resource'], $data['create']);
 
-            // make request to API
+            // Make request to API
             $params['api_key'] = \Auth::user()->api_key;
             $params['data'] = $data;
 
@@ -319,7 +319,7 @@ class DataSetController extends AdminController
             }
         }
 
-        // prepare request for resources
+        // Prepare request for resources
         $resPerPage = 10;
         $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
 
@@ -340,7 +340,7 @@ class DataSetController extends AdminController
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
-        // get category details
+        // Get category details
         if (!empty($dataset->category_id)) {
             $params = [
                 'category_id' => $dataset->category_id,
@@ -352,7 +352,7 @@ class DataSetController extends AdminController
             $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
         }
 
-        // get terms of use details
+        // Get terms of use details
         if (!empty($dataset->terms_of_use_id)) {
             $params = [
                 'terms_id' => $dataset->terms_of_use_id,
@@ -364,7 +364,7 @@ class DataSetController extends AdminController
             $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        // handle dataset delete
+        // Handle dataset delete
         if ($request->has('delete')) {
             $uri = $request->offsetGet('dataset_uri');
 
@@ -458,7 +458,7 @@ class DataSetController extends AdminController
                 'group_id'      => $groupId,
             ];
 
-            // if all groups are deselected
+            // If all groups are deselected
             if (count($setGroups) && is_null($groupId)) {
                 $post['group_id'] = $setGroups;
                 $removeGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $post);
@@ -566,7 +566,7 @@ class DataSetController extends AdminController
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $dataset = DataSet::where('uri', $datasetUri)->first();
-
+error_log('here');
         if (empty($dataset)) {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
 
@@ -579,7 +579,7 @@ class DataSetController extends AdminController
             $data['description'] = $data['descript'];
 
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
-
+error_log('response: '. print_r($response, true));
             if ($response['success']) {
                 if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                     return redirect('/admin/resource/view/'. $response['uri']);
@@ -661,7 +661,7 @@ class DataSetController extends AdminController
             $datasetData = null;
         }
 
-        // get elastic search data for the resource
+        // Get elastic search data for the resource
         $reqEsData = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $uri, 'version' => $version]);
         $apiEsData = new ApiResource($reqEsData);
         $response = $apiEsData->getResourceData($reqEsData)->getData();
@@ -683,7 +683,7 @@ class DataSetController extends AdminController
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
-        // handle delete request
+        // Handle delete request
         if ($request->has('delete')) {
             $reqDelete = Request::create('/api/deleteResource', 'POST', ['resource_uri' => $uri]);
             $apiDelete = new ApiResource($reqDelete);

@@ -61,7 +61,7 @@ class MigrateSpecificData extends Command
 
         $this->migrationUserId = DB::table('users')->where('username', 'migrate_data')->get()->pluck('id');
 
-        //Login
+        // Login
         \Auth::loginUsingId($this->migrationUserId);
 
         $start = microtime(true);
@@ -191,7 +191,6 @@ class MigrateSpecificData extends Command
         $params = [
             'id' => $resourceUri
         ];
-
         $response = request_url('resource_show', $params);
 
         if (isset($response['result'])) {
@@ -225,12 +224,12 @@ class MigrateSpecificData extends Command
             case 'org':
 
                 $orgId = DB::table('organisations')->where('uri', $data)->value('id');
-                $dataSets = DataSet::where('org_id', $orgId)->get()->pluck('id');
+                $dataSets = DataSet::where('org_id', $orgId)->where('is_migrated', true)->get()->pluck('id');
                 $this->deleteData($dataSets);
                 break;
             case 'dset':
 
-                $dataSets = DataSet::where('uri', $data)->get()->pluck('id');
+                $dataSets = DataSet::where('uri', $data)->where('is_migrated', true)->get()->pluck('id');
                 $this->deleteData($dataSets);
                 break;
         }

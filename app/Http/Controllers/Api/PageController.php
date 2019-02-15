@@ -516,7 +516,7 @@ class PageController extends ApiController
             }
 
             if (isset($criteria['page_id'])) {
-                $pageList->where('id', $criteria['page_id']);
+                $pageList->where('pages.id', $criteria['page_id']);
             }
 
             if (isset($criteria['active'])) {

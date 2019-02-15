@@ -13,6 +13,17 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.15] - 2019-02-15
+### Fixed
+- On migrating specific data with delete - remove only previous migrated datasets
+- Store elastic data in session by key (uri of the resource)
+
+### Added
+- Trusted proxies config
+
+### Changed
+- Improved dataset and resources transactions
+
 ## [1.0.14] - 2019-02-13
 ### Fixed
 - Organisations and groups search order
@@ -330,6 +341,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.15]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.14...v1.0.15
 [1.0.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.11...v1.0.12

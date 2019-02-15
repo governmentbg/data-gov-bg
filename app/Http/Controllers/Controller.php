@@ -74,6 +74,7 @@ class Controller extends BaseController
         if (is_array($data)) {
             $csv = isset($data['csvData']);
             $data = $csv ? $data['csvData'] : $data;
+            $header = isset($data[0]) ? $data[0] : null;
         }
 
         $dataCount = count($data);
@@ -87,6 +88,10 @@ class Controller extends BaseController
                 && $resource->format_code == Resource::FORMAT_CSV)
             ) {
                 $data = collect($data)->paginate($resourceRowsPerPage, $pageNumber);
+
+                if (isset($header) && $pageNumber > 1) {
+                    $data->prepend($header);
+                }
 
                 $resourcePaginationData = $this->getPaginationData(
                     $data,

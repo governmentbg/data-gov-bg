@@ -375,7 +375,7 @@ class CategoryController extends ApiController
 
             if (!empty($criteria['keywords'])) {
                 $ids = Category::search($criteria['keywords'])->get()->pluck('id');
-                $query->whereIn('id', $ids);
+                $query->whereIn('categories.id', $ids);
             }
 
             $orderColumns = [

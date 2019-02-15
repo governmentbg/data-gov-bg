@@ -189,7 +189,7 @@
                             <form method="post">
                                 {{ csrf_field() }}
                                 @foreach ($getParams['tag'] as $selTag)
-                                    <span class="badge badge-pill">
+                                    <span class="badge badge-pill m-b-sm">
                                         {{ array_pluck($tags, 'name', 'id')[$selTag] }}&nbsp;
                                         @if (isset($buttons[$selTag]['followTag']) && $buttons[$selTag]['followTag'])
                                             <button class="badge badge-follow" type="submit" name="followTag" value="{{ $selTag }}"

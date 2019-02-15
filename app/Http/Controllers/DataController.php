@@ -411,9 +411,13 @@ class DataController extends Controller {
                     }
                 }
             }
+        } else {
+            $request['page'] = $paginationData['paginate']->lastPage();
+
+            return redirect()->route('data', $request->query());
         }
 
-        if  (\Auth::check()) {
+        if (\Auth::check()) {
             // check rights for add button
             $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
             $buttons['add'] = $rightCheck;
@@ -1800,6 +1804,7 @@ class DataController extends Controller {
 
                 // set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
+                $formats = Resource::getFormats(true);
 
                 if (empty($version)) {
                     $version = $resource->version;
@@ -1891,7 +1896,8 @@ class DataController extends Controller {
                         'data'           => $data,
                         'versionView'    => $version,
                         'userData'       => $userData,
-                        'buttons'        => $buttons
+                        'buttons'        => $buttons,
+                        'formats'        => $formats
                     ]
                 );
             }

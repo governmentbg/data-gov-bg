@@ -5,6 +5,8 @@ namespace App\Extensions\TNT;
 use Laravel\Scout\Builder;
 use TeamTNT\TNTSearch\TNTSearch;
 use Laravel\Scout\Engines\Engine;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Extensions\TNT\CustomTNTSearch;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,23 +29,21 @@ class CustomTNTSearchEngine extends TNTSearchEngine
         $index = $this->tnt->getIndex();
         $index->setPrimaryKey($models->first()->getKeyName());
 
-        $index->indexBeginTransaction();
+        DB::transaction(function () use ($models, $index, $indexName) {
+            $models->each(function ($model) use ($index, $indexName) {
+                $array = $model->toSearchableArray();
 
-        $models->each(function ($model) use ($index, $indexName) {
-            $array = $model->toSearchableArray();
+                if (empty($array)) {
+                    return;
+                }
 
-            if (empty($array)) {
-                return;
-            }
-
-            if ($model->getKey()) {
-                $index->update($model->getKey(), $array, $indexName);
-            } else {
-                $index->insert($array, $indexName);
-            }
-        });
-
-        $index->indexEndTransaction();
+                if ($model->getKey()) {
+                    $index->update($model->getKey(), $array, $indexName);
+                } else {
+                    $index->insert($array, $indexName);
+                }
+            });
+        }, config('app.TRANSACTION_ATTEMPTS'));
     }
 
     /**

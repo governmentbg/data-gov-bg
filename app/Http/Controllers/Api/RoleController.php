@@ -273,7 +273,7 @@ class RoleController extends ApiController
             $query = Role::select();
 
             if (isset($post['role_id'])) {
-                $query->where('id', $post['role_id']);
+                $query->where('roles.id', $post['role_id']);
             }
 
             if (isset($post['active'])) {

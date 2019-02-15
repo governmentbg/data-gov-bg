@@ -356,11 +356,11 @@ class SignalController extends ApiController
 
         if (isset($criteria['search'])) {
             $ids = Signal::search($criteria['search'])->get()->pluck('id');
-            $query->whereIn('id', $ids);
+            $query->whereIn('signals.id', $ids);
         }
 
         if (isset($criteria['signal_id'])) {
-            $query->where('id', $criteria['signal_id']);
+            $query->where('signals.id', $criteria['signal_id']);
         }
 
         if (isset($criteria['status'])) {

@@ -1051,7 +1051,7 @@ class OrganisationController extends ApiController
 
                 if (isset($post['keywords'])) {
                     $ids = User::search($post['keywords'])->get()->pluck('id');
-                    $query = $query->whereIn('id', $ids);
+                    $query = $query->whereIn('users.id', $ids);
                 }
 
                 $query->whereHas('UserToOrgRole', function($q) use ($post) {

@@ -1760,6 +1760,8 @@ class UserController extends Controller {
             $data = $request->except('file');
             $file = $request->file('file');
             $data['description'] = $data['descript'];
+            $maxResourceRows = 2000;
+            $bPaging = true;
 
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
@@ -1768,11 +1770,21 @@ class UserController extends Controller {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
 
+                if (
+                    is_array($data)
+                    && isset($response['data']['csvData'])
+                    && count($response['data']['csvData']) > $maxResourceRows
+                ) {
+                    $bPaging = false;
+                    $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
+                }
+
                 return view('user/resourceImport', array_merge([
                     'class'         => $class,
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
+                    'bPaging'       => $bPaging
                 ], $response['data']));
             } else {
                 // delete resource record on fail
@@ -1964,6 +1976,8 @@ class UserController extends Controller {
                 $file = $request->file('file');
 
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
+                $maxResourceRows = 2000;
+                $bPaging = true;
 
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
@@ -1975,11 +1989,21 @@ class UserController extends Controller {
                         $response['data'][$key] = $parent;
                     }
 
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
+                    }
+
                     return view('user/resourceImport', array_merge([
                         'class'         => $class,
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     $request->session()->flash(
@@ -2039,10 +2063,21 @@ class UserController extends Controller {
                 $data['description'] = $data['descript'];
 
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
+                $maxResourceRows = 2000;
+                $bPaging = true;
 
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
+                    }
+
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -2051,6 +2086,7 @@ class UserController extends Controller {
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'group'         => $group,
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     // delete resource record on fail
@@ -2112,10 +2148,21 @@ class UserController extends Controller {
                 $data['description'] = $data['descript'];
 
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
+                $maxResourceRows = 2000;
+                $bPaging = true;
 
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
+                    }
+
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -2124,6 +2171,7 @@ class UserController extends Controller {
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'fromOrg'       => $fromOrg,
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     // Delete resource record on fail
@@ -4356,7 +4404,7 @@ class UserController extends Controller {
             }
 
             $rq = Request::create('/api/listOrganisations', 'POST', [
-                'api_key'   => $result->users[0]->api_key,
+                'api_key'   => User::where('id', $result->users[0]->id)->value('api_key'),
                 'criteria'  => [
                     'user_id'   => $id,
                 ],

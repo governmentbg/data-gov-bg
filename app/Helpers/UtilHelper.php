@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\User;
 use App\DataSet;
 use App\Resource;
 use App\ElasticDataSet;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
@@ -105,9 +106,9 @@ function migrate_datasets($dataSetUri, $convert)
         $newData['data']['created_at'] = $dataSet['metadata_created'];
         $newData['data']['updated_by'] = DB::table('users')->where('username', 'migrate_data')->value('id');
 
-        $cretaedBy = DB::table('users')->where('uri', $dataSet['creator_user_id'])->value('id');
-        $newData['data']['created_by'] = isset($cretaedBy)
-            ? $cretaedBy
+        $createdBy = DB::table('users')->where('uri', $dataSet['creator_user_id'])->value('id');
+        $newData['data']['created_by'] = isset($createdBy)
+            ? $createdBy
             : User::where('username', 'migrate_data')->value('id');
 
         if ($alreadySaved) {

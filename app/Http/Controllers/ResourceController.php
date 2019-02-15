@@ -59,7 +59,7 @@ class ResourceController extends Controller {
                     $reqHeaders = preg_split('/\r\n|\r|\n/', $resourceData['http_headers']);
                 }
 
-                // by default curl uses GET
+                // By default curl uses GET
                 if ($resourceData['http_rq_type'] == 'POST') {
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 
@@ -78,12 +78,12 @@ class ResourceController extends Controller {
                 ]);
 
                 $responseHeaders = [];
-                // this function is called by curl for each header received
+                // This function is called by curl for each header received
                 curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders) {
                     $length = strlen($header);
                     $header = explode(':', $header, 2);
 
-                    // ignore invalid headers
+                    // Ignore invalid headers
                     if (count($header) < 2) {
                         return $length;
                     }
@@ -454,7 +454,7 @@ class ResourceController extends Controller {
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
 
                 if ($action == 'create') {
-                    // delete resource metadata record
+                    // Delete resource metadata record
                     $resource = Resource::where('uri', $uri)->first();
 
                     if ($resource) {
@@ -522,7 +522,7 @@ class ResourceController extends Controller {
                 $request->session()->flash('alert-danger', $resultElastic->error->message);
 
                 if ($action == 'create') {
-                    // delete resource metadata record
+                    // Delete resource metadata record
                     $resource = Resource::where('uri', $uri)->first();
 
                     if ($resource) {
@@ -590,7 +590,7 @@ class ResourceController extends Controller {
     public function resourceCancelImport(Request $request, $uri, $action)
     {
         if ($action == 'create') {
-            // delete resource metadata record
+            // Delete resource metadata record
             $resource = Resource::where('uri', $uri)->first();
 
             if ($resource) {

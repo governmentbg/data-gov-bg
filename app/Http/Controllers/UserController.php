@@ -1760,6 +1760,8 @@ class UserController extends Controller {
             $data = $request->except('file');
             $file = $request->file('file');
             $data['description'] = $data['descript'];
+            $maxResourceRows = 2000;
+            $bPaging = true;
 
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
@@ -1768,11 +1770,13 @@ class UserController extends Controller {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
 
-                $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
-
-                if (isset($response['data']['csvData'])) {
-                    $response['data']['csvData'] = $resourcePaginationData['data'];
+                if (
+                    is_array($data)
+                    && isset($response['data']['csvData'])
+                    && count($response['data']['csvData']) > $maxResourceRows
+                ) {
+                    $bPaging = false;
+                    $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                 }
 
                 return view('user/resourceImport', array_merge([
@@ -1780,7 +1784,7 @@ class UserController extends Controller {
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
-                    'resPagination' => $resourcePaginationData['resPagination'],
+                    'bPaging'       => $bPaging
                 ], $response['data']));
             } else {
                 // delete resource record on fail
@@ -1972,6 +1976,8 @@ class UserController extends Controller {
                 $file = $request->file('file');
 
                 $response = ResourceController::addMetadata($resourceUri, $data, $file, true);
+                $maxResourceRows = 2000;
+                $bPaging = true;
 
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
@@ -1983,11 +1989,13 @@ class UserController extends Controller {
                         $response['data'][$key] = $parent;
                     }
 
-                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
-
-                    if (isset($response['data']['csvData'])) {
-                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -1995,7 +2003,7 @@ class UserController extends Controller {
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
-                        'resPagination' => $resourcePaginationData['resPagination'],
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     $request->session()->flash(
@@ -2055,17 +2063,21 @@ class UserController extends Controller {
                 $data['description'] = $data['descript'];
 
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
+                $maxResourceRows = 2000;
+                $bPaging = true;
 
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
                     }
 
-                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
-
-                    if (isset($response['data']['csvData'])) {
-                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -2074,7 +2086,7 @@ class UserController extends Controller {
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'group'         => $group,
-                        'resPagination' => $resourcePaginationData['resPagination'],
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     // delete resource record on fail
@@ -2136,17 +2148,21 @@ class UserController extends Controller {
                 $data['description'] = $data['descript'];
 
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
+                $maxResourceRows = 2000;
+                $bPaging = true;
 
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
                     }
 
-                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
-
-                    if (isset($response['data']['csvData'])) {
-                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                     }
 
                     return view('user/resourceImport', array_merge([
@@ -2155,7 +2171,7 @@ class UserController extends Controller {
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'fromOrg'       => $fromOrg,
-                        'resPagination' => $resourcePaginationData['resPagination'],
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     // Delete resource record on fail

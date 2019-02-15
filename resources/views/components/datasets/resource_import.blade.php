@@ -9,7 +9,7 @@
             {{ csrf_field() }}
 
             <div class="m-b-lg overflow-x-auto js-show-on-load">
-                <table class="data-table <?= isset($resPagination) ? 'paging-off' : '' ?>">
+                <table class="data-table <?= $bPaging ? '' : 'paging-off' ?>">
                     @foreach ($csvData as $index => $row)
                         @if ($index == 0)
                             <thead>
@@ -35,7 +35,6 @@
                     @endforeach
                     <tbody>
                 </table>
-                @include('partials.resource-pagination')
             </div>
 
             <div class="form-group row">

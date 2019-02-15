@@ -566,6 +566,8 @@ class DataSetController extends AdminController
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $dataset = DataSet::where('uri', $datasetUri)->first();
+        $maxResourceRows = 2000;
+        $bPaging = true;
 
         if (empty($dataset)) {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
@@ -585,11 +587,13 @@ class DataSetController extends AdminController
                     return redirect('/admin/resource/view/'. $response['uri']);
                 }
 
-                $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
-
-                if (isset($response['data']['csvData'])) {
-                    $response['data']['csvData'] = $resourcePaginationData['data'];
+                if (
+                    is_array($data)
+                    && isset($response['data']['csvData'])
+                    && count($response['data']['csvData']) > $maxResourceRows
+                ) {
+                    $bPaging = false;
+                    $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                 }
 
                 return view('admin/resourceImport', array_merge([
@@ -597,7 +601,7 @@ class DataSetController extends AdminController
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
-                    'resPagination' => $resourcePaginationData['resPagination'],
+                    'bPaging'       => $bPaging
                 ], $response['data']));
             } else {
                 // Delete resource record on fail
@@ -853,6 +857,8 @@ class DataSetController extends AdminController
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $resource = Resource::where('uri', $resourceUri)->first()->loadTranslations();
+        $maxResourceRows = 2000;
+        $bPaging = true;
 
         if ($parentUri) {
             $parent = Organisation::where('uri', $parentUri)->first();
@@ -885,11 +891,13 @@ class DataSetController extends AdminController
                         $response['data'][$key] = $parent;
                     }
 
-                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                    $resourcePaginationData = $this->getResourcePaginationData($response['data'], null, $pageNumber, true);
-
-                    if (isset($response['data']['csvData'])) {
-                        $response['data']['csvData'] = $resourcePaginationData['data'];
+                    if (
+                        is_array($data)
+                        && isset($response['data']['csvData'])
+                        && count($response['data']['csvData']) > $maxResourceRows
+                    ) {
+                        $bPaging = false;
+                        $response['data']['csvData'] = collect($response['data']['csvData'])->paginate(100, 1);
                     }
 
                     return view('admin/resourceImport', array_merge([
@@ -897,7 +905,7 @@ class DataSetController extends AdminController
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
-                        'resPagination' => $resourcePaginationData['resPagination'],
+                        'bPaging'       => $bPaging
                     ], $response['data']));
                 } else {
                     $request->session()->flash(

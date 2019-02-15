@@ -192,7 +192,7 @@
                             <form method="post">
                                 {{ csrf_field() }}
                                 @foreach ($getParams['tag'] as $selTag)
-                                    <span class="badge badge-pill">
+                                    <span class="badge badge-pill m-b-sm">
                                         {{ array_pluck($tags, 'name', 'id')[$selTag] }}&nbsp;
                                         @if (isset($buttons[$selTag]['followTag']) && $buttons[$selTag]['followTag'])
                                             <button class="badge badge-follow" type="submit" name="followTag" value="{{ $selTag }}"
@@ -269,7 +269,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12 p-l-r-none">
-                            <a href="{{ route('reportedView', array_merge(app('request')->input(), ['uri' => $dataset->uri])) }}">
+                            <a href="{{ route('reportedView', ['uri' => $dataset->uri]) }}">
                                 <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                             </a>
                             <p>{!! nl2br(e($dataset->descript)) !!}</p>

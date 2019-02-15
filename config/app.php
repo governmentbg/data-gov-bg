@@ -140,6 +140,7 @@ return [
     'TNT_DATABASE' => env('TNT_DATABASE'),
     'NEWSLETTER_SEND_TIME' => '10:00',
     'OLD_OD_API_SOURCE' => env('OLD_OD_API_SOURCE', 'https://opendata.government.bg/api/3/action/'),
+    'TRANSACTION_ATTEMPTS' => env('TRANSACTION_ATTEMPTS', 10),
 
     /*
     |--------------------------------------------------------------------------

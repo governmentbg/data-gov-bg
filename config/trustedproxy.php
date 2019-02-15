@@ -24,9 +24,7 @@ return [
      * how many proxies that client's request has
      * subsequently passed through.
      */
-    'proxies' => [
-        array_map('trim', explode(',', env('TRUSTED_PROXIES'))),
-    ],
+    'proxies' => array_map('trim', explode(',', env('TRUSTED_PROXIES'))),
 
     /*
      * Or, to trust all proxies that connect

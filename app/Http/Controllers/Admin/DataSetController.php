@@ -566,7 +566,7 @@ class DataSetController extends AdminController
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
         $dataset = DataSet::where('uri', $datasetUri)->first();
-error_log('here');
+
         if (empty($dataset)) {
             session()->flash('alert-danger', __('custom.no_dataset_found'));
 
@@ -579,7 +579,7 @@ error_log('here');
             $data['description'] = $data['descript'];
 
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
-error_log('response: '. print_r($response, true));
+
             if ($response['success']) {
                 if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                     return redirect('/admin/resource/view/'. $response['uri']);

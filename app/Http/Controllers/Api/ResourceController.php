@@ -2,6 +2,9 @@
 namespace App\Http\Controllers\Api;
 
 use Uuid;
+use Error;
+use Exception;
+use Throwable;
 use App\Module;
 use App\Signal;
 use App\DataSet;
@@ -125,100 +128,115 @@ class ResourceController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
-            DB::beginTransaction();
-
             try {
-                $dbData = [
-                    'data_set_id'       => $dataset->id,
-                    'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
-                    'descript'          => isset($post['data']['description'])
-                        ? $this->trans($post['data']['locale'], $post['data']['description'])
-                        : null,
-                    'uri'               => Uuid::generate(4)->string,
-                    'version'           => $post['data']['type'] == Resource::TYPE_AUTO ? 0 : 1,
-                    'resource_type'     => $post['data']['type'],
-                    'resource_url'      => isset($post['data']['resource_url']) ? $post['data']['resource_url'] : null,
-                    'http_rq_type'      => isset($post['data']['http_rq_type']) ? array_flip($requestTypes)[$post['data']['http_rq_type']] : null,
-                    'authentication'    => isset($post['data']['authentication']) ? $post['data']['authentication'] : null,
-                    'post_data'         => isset($post['data']['post_data']) ? $post['data']['post_data'] : null,
-                    'http_headers'      => isset($post['data']['http_headers']) ? $post['data']['http_headers'] : null,
-                    'file_format'       => isset($post['data']['file_format']) ? Resource::getFormatsCode($post['data']['file_format']) : null,
-                    'schema_descript'   => isset($post['data']['schema_description']) ? $post['data']['schema_description'] : null,
-                    'schema_url'        => isset($post['data']['schema_url']) ? $post['data']['schema_url'] : null,
-                    'is_reported'       => 0,
-                    'upl_freq_type'     => isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null,
-                    'upl_freq'          => isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null,
-                ];
+                $result = DB::transaction(function () use ($post, $dataset, $requestTypes) {
+                    $dbData = [
+                        'data_set_id'       => $dataset->id,
+                        'name'              => $this->trans($post['data']['locale'], $post['data']['name']),
+                        'descript'          => isset($post['data']['description'])
+                            ? $this->trans($post['data']['locale'], $post['data']['description'])
+                            : null,
+                        'uri'               => Uuid::generate(4)->string,
+                        'version'           => $post['data']['type'] == Resource::TYPE_AUTO ? 0 : 1,
+                        'resource_type'     => $post['data']['type'],
+                        'resource_url'      => isset($post['data']['resource_url'])
+                            ? $post['data']['resource_url']
+                            : null,
+                        'http_rq_type'      => isset($post['data']['http_rq_type'])
+                            ? array_flip($requestTypes)[$post['data']['http_rq_type']]
+                            : null,
+                        'authentication'    => isset($post['data']['authentication'])
+                            ? $post['data']['authentication']
+                            : null,
+                        'post_data'         => isset($post['data']['post_data'])
+                            ? $post['data']['post_data']
+                            : null,
+                        'http_headers'      => isset($post['data']['http_headers'])
+                            ? $post['data']['http_headers']
+                            : null,
+                        'file_format'       => isset($post['data']['file_format'])
+                            ? Resource::getFormatsCode($post['data']['file_format'])
+                            : null,
+                        'schema_descript'   => isset($post['data']['schema_description'])
+                            ? $post['data']['schema_description']
+                            : null,
+                        'schema_url'        => isset($post['data']['schema_url'])
+                            ? $post['data']['schema_url']
+                            : null,
+                        'is_reported'       => 0,
+                        'upl_freq_type'     => isset($post['data']['upl_freq_type'])
+                            ? $post['data']['upl_freq_type']
+                            : null,
+                        'upl_freq'          => isset($post['data']['upl_freq'])
+                            ? $post['data']['upl_freq']
+                            : null,
+                    ];
 
-                 if (
-                    isset($post['data']['migrated_data'])
-                    && Auth::user()->username == 'migrate_data'
-                ){
-                    if (!empty($post['data']['created_by'])) {
-                        $dbData['created_by'] = $post['data']['created_by'];
+                    if (
+                        isset($post['data']['migrated_data'])
+                        && Auth::user()->username == 'migrate_data'
+                    ){
+                        if (!empty($post['data']['created_by'])) {
+                            $dbData['created_by'] = $post['data']['created_by'];
+                        }
+
+                        if (!empty($post['data']['updated_by'])) {
+                            $dbData['updated_by'] = $post['data']['updated_by'];
+                        }
+
+                        if (!empty($post['data']['created_at'])) {
+                            $dbData['created_at'] = date('Y-m-d H:i:s', strtotime($post['data']['created_at']));
+                        }
+
+                        $dbData['is_migrated'] = true;
+                        $dbData['uri'] = $post['data']['uri'];
                     }
 
-                    if (!empty($post['data']['updated_by'])) {
-                        $dbData['updated_by'] = $post['data']['updated_by'];
-                    }
+                    $resource = Resource::create($dbData);
+                    $resource->searchable();
 
-                    if (!empty($post['data']['created_at'])) {
-                        $dbData['created_at'] = date('Y-m-d H:i:s', strtotime($post['data']['created_at']));
-                    }
-
-                    $dbData['is_migrated'] = true;
-                    $dbData['uri'] = $post['data']['uri'];
-                }
-
-                $resource = Resource::create($dbData);
-                $resource->searchable();
-
-                if (!empty($post['data']['custom_fields'])) {
-                    foreach ($post['data']['custom_fields'] as $fieldSet) {
-                        if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
-                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                    if (!empty($post['data']['custom_fields'])) {
+                        foreach ($post['data']['custom_fields'] as $fieldSet) {
+                            if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                                if (
+                                    !empty(array_filter($fieldSet['value'])
+                                    || !empty(array_filter($fieldSet['label'])))
+                                ) {
+                                    $customFields[] = [
+                                        'value' => $fieldSet['value'],
+                                        'label' => $fieldSet['label'],
+                                    ];
+                                }
+                            } elseif (!empty($fieldSet['label'])) {
                                 $customFields[] = [
-                                    'value' => $fieldSet['value'],
-                                    'label' => $fieldSet['label'],
+                                    'value' => [$locale => $fieldSet['value']],
+                                    'label' => [$locale => $fieldSet['label']]
                                 ];
                             }
-                        } elseif (!empty($fieldSet['label'])) {
-                            $customFields[] = [
-                                'value' => [
-                                    $locale => $fieldSet['value']
-                                ],
-                                'label' =>[
-                                    $locale => $fieldSet['label']
-                                ]
-                            ];
+                        }
+
+                        if (!empty($customFields)) {
+                            if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                                throw new Error;
+                            }
                         }
                     }
 
-                    if (!empty($customFields)) {
-                        if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
-                            DB::rollback();
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::RESOURCES),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $resource->uri,
+                        'action_msg'       => 'Added resource metadata',
+                    ];
 
-                            return $this->errorResponse(__('custom.add_resource_meta_fail'));
-                        }
-                    }
-                }
+                    Module::add($logData);
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::RESOURCES),
-                    'action'           => ActionsHistory::TYPE_ADD,
-                    'action_object'    => $resource->uri,
-                    'action_msg'       => 'Added resource metadata',
-                ];
+                    return $this->successResponse(['uri' => $resource->uri]);
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                Module::add($logData);
-
-                DB::commit();
-
-                return $this->successResponse(['uri' => $resource->uri]);
-            } catch (QueryException $ex) {
-                DB::rollback();
-
-                Log::error($ex->getMessage());
+                return $result;
+            } catch (Throwable $e) {
+                return $this->errorResponse(__('custom.add_resource_meta_fail'));
             }
         } else {
             $errors = $validator->errors()->messages();
@@ -271,60 +289,54 @@ class ResourceController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
-            DB::beginTransaction();
-
             try {
-                $id = $resource->id;
-                $index = $resource->data_set_id;
-                $dataset->version = intval($dataset->version) + 1;
-                $dataset->save();
+                $result = DB::transaction(function () use ($resource, $dataset, $post) {
+                    $id = $resource->id;
+                    $index = $resource->data_set_id;
+                    $dataset->version = intval($dataset->version) + 1;
+                    $dataset->save();
 
-                $elasticDataSet = ElasticDataSet::create([
-                    'index'         => $index,
-                    'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                    'doc'           => $id .'_1',
-                    'version'       => 1,
-                    'resource_id'   => $id
-                ]);
+                    $elasticDataSet = ElasticDataSet::create([
+                        'index'         => $index,
+                        'index_type'    => ElasticDataSet::ELASTIC_TYPE,
+                        'doc'           => $id .'_1',
+                        'version'       => 1,
+                        'resource_id'   => $id
+                    ]);
 
-                // Filter data for containing personal info
-                $filteredData = $this->checkData($post['data']);
+                    // Filter data for containing personal info
+                    $filteredData = $this->checkData($post['data']);
 
-                \Elasticsearch::index([
-                    'body'  => ['rows' => $filteredData],
-                    'index' => $index,
-                    'type'  => ElasticDataSet::ELASTIC_TYPE,
-                    'id'    => $id .'_1',
-                ]);
+                    \Elasticsearch::index([
+                        'body'  => ['rows' => $filteredData],
+                        'index' => $index,
+                        'type'  => ElasticDataSet::ELASTIC_TYPE,
+                        'id'    => $id .'_1',
+                    ]);
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::RESOURCES),
-                    'action'           => ActionsHistory::TYPE_ADD,
-                    'action_object'    => $resource->uri,
-                    'action_msg'       => 'Added resource data',
-                ];
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::RESOURCES),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $resource->uri,
+                        'action_msg'       => 'Added resource data',
+                    ];
 
-                Module::add($logData);
+                    Module::add($logData);
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
-                    'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $dataset->id,
-                    'action_msg'       => 'Added resource data',
-                ];
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $dataset->id,
+                        'action_msg'       => 'Added resource data',
+                    ];
 
-                Module::add($logData);
+                    Module::add($logData);
 
-                DB::commit();
+                    return $this->successResponse();
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                return $this->successResponse();
-            } catch (\Exception $ex) {
-                DB::rollback();
-
-                Log::error($ex->getMessage());
-            } catch (QueryException $ex) {
-                DB::rollback();
-
+                return $result;
+            } catch (Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -432,121 +444,117 @@ class ResourceController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
-            DB::beginTransaction();
-
-            if (isset($post['data']['type'])) {
-                $resource->resource_type = $post['data']['type'];
-            }
-
-            if (isset($post['data']['resource_url'])) {
-                $resource->resource_url = $post['data']['resource_url'];
-            }
-
-            if (isset($post['data']['http_rq_type'])) {
-                $resource->http_rq_type = array_flip($requestTypes)[$post['data']['http_rq_type']];
-            }
-
-            if (isset($post['data']['authentication'])) {
-                $resource->authentication = $post['data']['authentication'];
-            }
-
-            if (isset($post['data']['post_data'])) {
-                $resource->post_data = $post['data']['post_data'];
-            }
-
-            if (isset($post['data']['http_headers'])) {
-                $resource->http_headers = $post['data']['http_headers'];
-            }
-
-            if (isset($post['data']['file_format'])) {
-                $resource->file_format = Resource::getFormatsCode($post['data']['file_format']);
-            }
-
-            if (isset($post['data']['schema_description'])) {
-                $resource->schema_descript = $post['data']['schema_description'];
-            }
-
-            if (isset($post['data']['schema_url'])) {
-                $resource->schema_url = $post['data']['schema_url'];
-            }
-
-            if (isset($post['data']['is_reported'])) {
-                $resource->is_reported = $post['data']['is_reported'];
-
-                if ($resource->is_reported == Resource::REPORTED_FALSE) {
-                    Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
-                }
-            }
-
-            if (
-                isset($post['data']['migrated_data'])
-                && Auth::user()->username == 'migrate_data'
-            ){
-                $resource->is_migrated = true;
-                $resource->uri = $post['data']['uri'];
-            }
-
-            $resource->upl_freq_type = isset($post['data']['upl_freq_type']) ? $post['data']['upl_freq_type'] : null;
-
-            $resource->upl_freq = isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null;
-
             try {
-                if (isset($post['data']['name'])) {
-                    $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
-                }
+                $result = DB::transaction(function () use ($resource, $requestTypes, $post) {
+                    if (isset($post['data']['type'])) {
+                        $resource->resource_type = $post['data']['type'];
+                    }
 
-                if (isset($post['data']['description'])) {
-                    $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
-                }
+                    if (isset($post['data']['resource_url'])) {
+                        $resource->resource_url = $post['data']['resource_url'];
+                    }
 
-                $resource->save();
+                    if (isset($post['data']['http_rq_type'])) {
+                        $resource->http_rq_type = array_flip($requestTypes)[$post['data']['http_rq_type']];
+                    }
 
-                if (!empty($post['data']['custom_fields'])) {
-                    foreach ($post['data']['custom_fields'] as $fieldSet) {
-                        if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
-                            if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                    if (isset($post['data']['authentication'])) {
+                        $resource->authentication = $post['data']['authentication'];
+                    }
+
+                    if (isset($post['data']['post_data'])) {
+                        $resource->post_data = $post['data']['post_data'];
+                    }
+
+                    if (isset($post['data']['http_headers'])) {
+                        $resource->http_headers = $post['data']['http_headers'];
+                    }
+
+                    if (isset($post['data']['file_format'])) {
+                        $resource->file_format = Resource::getFormatsCode($post['data']['file_format']);
+                    }
+
+                    if (isset($post['data']['schema_description'])) {
+                        $resource->schema_descript = $post['data']['schema_description'];
+                    }
+
+                    if (isset($post['data']['schema_url'])) {
+                        $resource->schema_url = $post['data']['schema_url'];
+                    }
+
+                    if (isset($post['data']['is_reported'])) {
+                        $resource->is_reported = $post['data']['is_reported'];
+
+                        if ($resource->is_reported == Resource::REPORTED_FALSE) {
+                            Signal::where('resource_id', '=', $resource->id)
+                                ->update(['status' => Signal::STATUS_PROCESSED]);
+                        }
+                    }
+
+                    if (
+                        isset($post['data']['migrated_data'])
+                        && Auth::user()->username == 'migrate_data'
+                    ){
+                        $resource->is_migrated = true;
+                        $resource->uri = $post['data']['uri'];
+                    }
+
+                    $resource->upl_freq = isset($post['data']['upl_freq']) ? $post['data']['upl_freq'] : null;
+                    $resource->upl_freq_type = isset($post['data']['upl_freq_type'])
+                        ? $post['data']['upl_freq_type']
+                        : null;
+
+                    if (isset($post['data']['name'])) {
+                        $resource->name = $this->trans($post['data']['locale'], $post['data']['name']);
+                    }
+
+                    if (isset($post['data']['description'])) {
+                        $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
+                    }
+
+                    $resource->save();
+
+                    if (!empty($post['data']['custom_fields'])) {
+                        foreach ($post['data']['custom_fields'] as $fieldSet) {
+                            if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
+                                if (!empty(array_filter($fieldSet['value']) || !empty(array_filter($fieldSet['label'])))) {
+                                    $customFields[] = [
+                                        'value' => $fieldSet['value'],
+                                        'label' => $fieldSet['label'],
+                                    ];
+                                }
+                            } elseif (!empty($fieldSet['label'])) {
                                 $customFields[] = [
-                                    'value' => $fieldSet['value'],
-                                    'label' => $fieldSet['label'],
+                                    'value' => [$locale => $fieldSet['value']],
+                                    'label' => [$locale => $fieldSet['label']],
                                 ];
                             }
-                        } elseif (!empty($fieldSet['label'])) {
-                            $customFields[] = [
-                                'value' => [
-                                    $locale => $fieldSet['value']
-                                ],
-                                'label' =>[
-                                    $locale => $fieldSet['label']
-                                ]
-                            ];
+                        }
+
+                        if (!empty($customFields)) {
+                            if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
+                                throw new Error;
+                            }
                         }
                     }
 
-                    if (!empty($customFields)) {
-                        if (!$this->checkAndCreateCustomSettings($customFields, $resource->id)) {
-                            DB::rollback();
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::RESOURCES),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $resource->uri,
+                        'action_msg'       => 'Edit resource metadata',
+                    ];
 
-                            return $this->errorResponse(__('custom.add_resource_meta_fail'));
-                        }
-                    }
-                }
+                    Module::add($logData);
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::RESOURCES),
-                    'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $resource->uri,
-                    'action_msg'       => 'Edit resource metadata',
-                ];
+                    return $this->successResponse();
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                Module::add($logData);
-
-                DB::commit();
-
-                return $this->successResponse();
-            } catch (QueryException $ex) {
-                DB::rollback();
-
+                return $result;
+            } catch (Exception $ex) {
                 Log::error($ex->getMessage());
+            } catch (Throwable $th) {
+                return $this->errorResponse(__('custom.add_resource_meta_fail'));
             }
         }
 
@@ -576,120 +584,117 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $newVersion = strval(intval($resource->version) + 1);
+            $dataset = DataSet::where('id', $resource->data_set_id)->first();
+
+            if (isset($dataset->org_id)) {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [
+                        'org_id'    => $dataset->org_id
+                    ],
+                    [
+                        'created_by'    => $dataset->created_by,
+                        'org_id'        => $dataset->org_id
+                    ]
+                );
+            } else {
+                $rightCheck = RoleRight::checkUserRight(
+                    Module::RESOURCES,
+                    RoleRight::RIGHT_EDIT,
+                    [],
+                    [
+                        'created_by'    => $resource->created_by
+                    ]
+                );
+            }
+
+            if (!$rightCheck) {
+                return $this->errorResponse(__('custom.access_denied'));
+            }
+
             try {
-                DB::beginTransaction();
+                $result = DB::transaction(function () use ($resource, $dataset, $post, $newVersion) {
+                    $id = $resource->id;
+                    $index = $resource->dataSet->id;
+                    // Update signals status after resource version update and mark resource as not reported
+                    Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                    $resource->is_reported = Resource::REPORTED_FALSE;
+                    $resource->version = $newVersion;
 
-                $resource = Resource::where('uri', $post['resource_uri'])->first();
-                $newVersion = strval(intval($resource->version) + 1);
-                $dataset = DataSet::where('id', $resource->data_set_id)->first();
+                    if (!empty($post['format'])) {
+                        $resource->file_format = Resource::getFormatsCode($post['format']);
+                    }
 
-                if (isset($dataset->org_id)) {
-                    $rightCheck = RoleRight::checkUserRight(
-                        Module::RESOURCES,
-                        RoleRight::RIGHT_EDIT,
-                        [
-                            'org_id'    => $dataset->org_id
-                        ],
-                        [
-                            'created_by'    => $dataset->created_by,
-                            'org_id'        => $dataset->org_id
-                        ]
-                    );
-                } else {
-                    $rightCheck = RoleRight::checkUserRight(
-                        Module::RESOURCES,
-                        RoleRight::RIGHT_EDIT,
-                        [],
-                        [
-                            'created_by'    => $resource->created_by
-                        ]
-                    );
-                }
+                    $resource->save();
 
-                if (!$rightCheck) {
-                    return $this->errorResponse(__('custom.access_denied'));
-                }
+                    // Increase dataset version without goint to new full version
+                    $versionParts = explode('.', $dataset->version);
 
-                $id = $resource->id;
-                $index = $resource->dataSet->id;
+                    if (isset($versionParts[1])) {
+                        $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
+                    } else {
+                        $dataset->version = $versionParts[0] .'.1';
+                    }
 
-                // update signals status after resource version update and mark resource as not reported
-                Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
-                $resource->is_reported = Resource::REPORTED_FALSE;
-                $resource->version = $newVersion;
+                    $dataset->save();
 
-                if (!empty($post['format'])) {
-                    $resource->file_format = Resource::getFormatsCode($post['format']);
-                }
+                    $prevVersionData = ElasticDataSet::getElasticData($resource->id, $newVersion - 1);
 
-                $resource->save();
+                    if ($prevVersionData === $post['data']) {
+                        $message = __('custom.resource_updated');
 
-                // increase dataset version without goint to new full version
-                $versionParts = explode('.', $dataset->version);
+                        $this->sendSupportMail(true, $post, $message);
 
-                if (isset($versionParts[1])) {
-                    $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
-                } else {
-                    $dataset->version = $versionParts[0] .'.1';
-                }
+                        return $this->successResponse(['message' => $message], true);
+                    } else {
+                        $elasticDataSet = ElasticDataSet::create([
+                            'index'         => $index,
+                            'index_type'    => ElasticDataSet::ELASTIC_TYPE,
+                            'doc'           => $id .'_'. $newVersion,
+                            'version'       => $newVersion,
+                            'resource_id'   => $id,
+                        ]);
 
-                $dataset->save();
+                        // Filter data for containing personal info
+                        $filteredData = $this->checkData($post['data']);
 
-                $prevVersionData = ElasticDataSet::getElasticData($resource->id, $newVersion - 1);
+                        $update = \Elasticsearch::index([
+                            'body'  => ['rows' => $filteredData],
+                            'index' => $index,
+                            'type'  => ElasticDataSet::ELASTIC_TYPE,
+                            'id'    => $id .'_'. $newVersion,
+                        ]);
+                    }
 
-                if ($prevVersionData === $post['data']) {
-                    $message = __('custom.resource_updated');
+                    // This action message is used in another controller
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::RESOURCES),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $resource->uri,
+                        'action_msg'       => 'Update resource data',
+                    ];
 
-                    $this->sendSupportMail(true, $post, $message);
+                    Module::add($logData);
 
-                    return $this->successResponse(['message' => $message], true);
-                } else {
-                    $elasticDataSet = ElasticDataSet::create([
-                        'index'         => $index,
-                        'index_type'    => ElasticDataSet::ELASTIC_TYPE,
-                        'doc'           => $id .'_'. $newVersion,
-                        'version'       => $newVersion,
-                        'resource_id'   => $id,
-                    ]);
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $dataset->id,
+                        'action_msg'       => 'Update resource data',
+                    ];
 
-                    // Filter data for containing personal info
-                    $filteredData = $this->checkData($post['data']);
+                    Module::add($logData);
 
-                    $update = \Elasticsearch::index([
-                        'body'  => ['rows' => $filteredData],
-                        'index' => $index,
-                        'type'  => ElasticDataSet::ELASTIC_TYPE,
-                        'id'    => $id .'_'. $newVersion,
-                    ]);
-                }
+                    $this->sendSupportMail(true, $post);
 
-                // this action message is used in another controller
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::RESOURCES),
-                    'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $resource->uri,
-                    'action_msg'       => 'Update resource data',
-                ];
+                    return $this->successResponse();
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                Module::add($logData);
-
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
-                    'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $dataset->id,
-                    'action_msg'       => 'Update resource data',
-                ];
-
-                Module::add($logData);
-
-                DB::commit();
-
-                $this->sendSupportMail(true, $post);
-
-                return $this->successResponse();
-            } catch (\Exception $ex) {
-                DB::rollback();
-
+                return $result;
+            } catch (Exception $ex) {
                 Log::error($ex->getMessage());
             }
         }
@@ -1043,7 +1048,7 @@ class ResourceController extends ApiController
 
                 $data['signals'] = $allSignals;
 
-                // get resource versions
+                // Get resource versions
                 $versionsList = [];
                 $versions = $resource->elasticDataSet()->get();
 
@@ -1522,47 +1527,33 @@ class ResourceController extends ApiController
     public function checkAndCreateCustomSettings($customFields, $resourceId)
     {
         if (!empty($resourceId)) {
-            try {
-                DB::beginTransaction();
+            CustomSetting::where('resource_id', $resourceId)->delete();
 
-                CustomSetting::where('resource_id', $resourceId)->delete();
+            foreach ($customFields as $field) {
+                if (!empty($field['label']) && !empty($field['value'])) {
+                    foreach ($field['label'] as $locale => $label) {
+                        if (
+                            (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                            || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
 
-                foreach ($customFields as $field) {
-                    if (!empty($field['label']) && !empty($field['value'])) {
-                        foreach ($field['label'] as $locale => $label) {
-                            if (
-                                (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
-                                || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
-
-                            ) {
-                                DB::rollback();
-
-                                return false;
-                            }
+                        ) {
+                            return false;
                         }
-
-                        $saveField = new CustomSetting;
-                        $saveField->resource_id = $resourceId;
-                        $saveField->created_by = \Auth::user()->id;
-                        $saveField->key = $this->trans($empty, $field['label']);
-                        $saveField->value = $this->trans($empty, $field['value']);
-
-                        $saveField->save();
-                    } else {
-                        DB::rollback();
-
-                        return false;
                     }
+
+                    $saveField = new CustomSetting;
+                    $saveField->resource_id = $resourceId;
+                    $saveField->created_by = \Auth::user()->id;
+                    $saveField->key = $this->trans($empty, $field['label']);
+                    $saveField->value = $this->trans($empty, $field['value']);
+
+                    $saveField->save();
+                } else {
+                    return false;
                 }
-
-                DB::commit();
-
-                return true;
-            } catch (QueryException $ex) {
-                DB::rollback();
-
-                Log::error($ex->getMessage());
             }
+
+            return true;
         }
 
         return false;

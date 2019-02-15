@@ -2,8 +2,10 @@
 namespace App\Http\Controllers\Api;
 
 use Uuid;
-use App\User;
+use Error;
 use App\Tags;
+use App\User;
+use Throwable;
 use App\Module;
 use App\Signal;
 use App\DataSet;
@@ -162,6 +164,8 @@ class DataSetController extends ApiController
                 $dbData['is_migrated'] = true;
             }
 
+            $customFields = null;
+
             if (!empty($data['custom_fields'])) {
                 foreach ($data['custom_fields'] as $fieldSet) {
                     if (is_array($fieldSet['value']) && is_array($fieldSet['label'])) {
@@ -185,43 +189,37 @@ class DataSetController extends ApiController
             }
 
             try {
-                DB::beginTransaction();
+                $result = DB::transaction(function () use ($dbData, $data, $customFields) {
+                    $newDataSet = DataSet::create($dbData);
+                    $newDataSet->searchable();
 
-                $newDataSet = DataSet::create($dbData);
-                $newDataSet->searchable();
-
-                if (!empty($data['tags'])) {
-                    if (!$this->checkAndCreateTags($newDataSet, $data['tags'])) {
-                        DB::rollback();
-
-                        return $this->errorResponse(__('custom.add_dataset_fail'));
+                    if (!empty($data['tags'])) {
+                        if (!$this->checkAndCreateTags($newDataSet, $data['tags'])) {
+                            throw new Error;
+                        }
                     }
-                }
 
-                if (!empty($customFields)) {
-                    if (!$this->checkAndCreateCustomSettings($customFields, $newDataSet->id)) {
-                        DB::rollback();
-
-                        return $this->errorResponse(__('custom.add_dataset_fail'));
+                    if (!empty($customFields)) {
+                        if (!$this->checkAndCreateCustomSettings($customFields, $newDataSet->id)) {
+                            throw new Error;
+                        }
                     }
-                }
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
-                    'action'           => ActionsHistory::TYPE_ADD,
-                    'action_object'    => $newDataSet->id,
-                    'action_msg'       => 'Added dataset',
-                ];
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_ADD,
+                        'action_object'    => $newDataSet->id,
+                        'action_msg'       => 'Added dataset',
+                    ];
 
-                Module::add($logData);
+                    Module::add($logData);
 
-                DB::commit();
+                    return $this->successResponse(['uri' => $newDataSet->uri], true);
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                return $this->successResponse(['uri' => $newDataSet->uri], true);
-            } catch (Exception $ex) {
-                DB::rollback();
-
-                Log::error($ex->getMessage());
+                return $result;
+            } catch (Throwable $e) {
+                return $this->errorResponse(__('custom.add_dataset_fail'));
             }
         }
 
@@ -326,6 +324,8 @@ class DataSetController extends ApiController
                 return $this->errorResponse(__('custom.access_denied'));
             }
 
+            $customFields = null;
+
             if (!empty($post['data']['custom_fields'])) {
                 foreach ($post['data']['custom_fields'] as $i => $fieldSet) {
                     if (!empty(array_filter($fieldSet['value']) && isset($post['data']['sett_id'][$i]))) {
@@ -344,104 +344,95 @@ class DataSetController extends ApiController
             }
 
             try {
-                DB::beginTransaction();
+                $result = DB::transaction(function () use ($post, $dataset, $locale, $customFields) {
+                    if (!empty($post['data']['name'])) {
+                        $dataset->name = $this->trans($locale, $post['data']['name']);
+                    }
 
-                if (!empty($post['data']['name'])) {
-                    $dataset->name = $this->trans($locale, $post['data']['name']);
-                }
+                    if (!empty($post['data']['sla'])) {
+                        $dataset->sla = $this->trans($locale, $post['data']['sla']);
+                    }
 
-                if (!empty($post['data']['sla'])) {
-                    $dataset->sla = $this->trans($locale, $post['data']['sla']);
-                }
+                    if (!empty($post['data']['description'])) {
+                        $dataset->descript = $this->trans($locale, $post['data']['description']);
+                    }
 
-                if (!empty($post['data']['description'])) {
-                    $dataset->descript = $this->trans($locale, $post['data']['description']);
-                }
+                    if (!empty($post['data']['category_id'])) {
+                        $dataset->category_id = $post['data']['category_id'];
+                    }
 
-                if (!empty($post['data']['category_id'])) {
-                    $dataset->category_id = $post['data']['category_id'];
-                }
+                    if (
+                        isset($post['data']['migrated_data'])
+                        && Auth::user()->username == 'migrate_data'
+                    ){
+                        $dataset->is_migrated = true;
+                    }
 
-                if (
-                    isset($post['data']['migrated_data'])
-                    && Auth::user()->username == 'migrate_data'
-                ){
-                    $dataset->is_migrated = true;
-                }
+                    // Increase dataset version withot goint to new full version
+                    $versionParts = explode('.', $dataset->version);
 
-                // increase dataset version withot goint to new full version
-                $versionParts = explode('.', $dataset->version);
+                    if (isset($versionParts[1])) {
+                        $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
+                    } else {
+                        $dataset->version = $versionParts[0] .'.1';
+                    }
 
-                if (isset($versionParts[1])) {
-                    $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
-                } else {
-                    $dataset->version = $versionParts[0] .'.1';
-                }
+                    // If NULL passed - dataset not connected to organisation
+                    $dataset->org_id = $post['data']['org_id'];
 
-                // if NULL passed - dataset not connected to organisation
-                $dataset->org_id = $post['data']['org_id'];
+                    if (!empty($post['data']['uri'])) {
+                        $dataset->uri = $post['data']['uri'];
+                    }
 
-                if (!empty($post['data']['uri'])) {
-                    $dataset->uri = $post['data']['uri'];
-                }
+                    if (!empty($post['data']['terms_of_use_id'])) {
+                        $dataset->terms_of_use_id = $post['data']['terms_of_use_id'];
+                    }
 
-                if (!empty($post['data']['terms_of_use_id'])) {
-                    $dataset->terms_of_use_id = $post['data']['terms_of_use_id'];
-                }
+                    if (!empty($post['data']['visibility'])) {
+                        $dataset->visibility = $post['data']['visibility'];
+                    }
 
-                if (!empty($post['data']['visibility'])) {
-                    $dataset->visibility = $post['data']['visibility'];
-                }
+                    if (!empty($post['data']['source'])) {
+                        $dataset->source = $post['data']['source'];
+                    }
 
-                if (!empty($post['data']['source'])) {
-                    $dataset->source = $post['data']['source'];
-                }
+                    if (!empty($post['data']['author_name'])) {
+                        $dataset->author_name = $post['data']['author_name'];
+                    }
 
-                if (!empty($post['data']['author_name'])) {
-                    $dataset->author_name = $post['data']['author_name'];
-                }
+                    if (!empty($post['data']['author_email'])) {
+                        $dataset->author_email = $post['data']['author_email'];
+                    }
 
-                if (!empty($post['data']['author_email'])) {
-                    $dataset->author_email = $post['data']['author_email'];
-                }
+                    if (!empty($post['data']['support_name'])) {
+                        $dataset->support_name = $post['data']['support_name'];
+                    }
 
-                if (!empty($post['data']['support_name'])) {
-                    $dataset->support_name = $post['data']['support_name'];
-                }
+                    if (!empty($post['data']['support_email'])) {
+                        $dataset->support_email = $post['data']['support_email'];
+                    }
 
-                if (!empty($post['data']['support_email'])) {
-                    $dataset->support_email = $post['data']['support_email'];
-                }
+                    $dataset->forum_link = !empty($post['data']['forum_link'])
+                        ? $post['data']['forum_link']
+                        : null;
 
+                    if (!empty($post['data']['status'])) {
+                        $dataset->status = $post['data']['status'];
+                    }
 
-                $dataset->forum_link = !empty($post['data']['forum_link'])
-                    ? $post['data']['forum_link']
-                    : null;
+                    $dataset->save();
 
-                if (!empty($post['data']['status'])) {
-                    $dataset->status = $post['data']['status'];
-                }
-
-                $flag = $dataset->save();
-
-                if ($flag) {
                     if (!empty($customFields)) {
                         if (!$this->checkAndCreateCustomSettings($customFields, $dataset->id)) {
-                            DB::rollback();
-
-                            return $this->errorResponse(__('custom.edit_dataset_fail'));
+                            throw new Error;
                         }
                     }
 
                     if (!empty($post['data']['tags'])) {
                         if (!$this->checkAndCreateTags($dataset, $post['data']['tags'])) {
-                            DB::rollback();
-
-                            return $this->errorResponse(__('custom.edit_dataset_fail'));
+                            throw new Error;
                         }
                     }
-
-                    DB::commit();
 
                     $logData = [
                         'module_name'      => Module::getModuleName(Module::DATA_SETS),
@@ -453,13 +444,11 @@ class DataSetController extends ApiController
                     Module::add($logData);
 
                     return $this->successResponse();
-                } else {
-                    DB::rollback();
-                }
-            } catch (Exception $ex) {
-                Log::error($ex->getMessage());
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                DB::rollback();
+                return $result;
+            } catch (Throwable $e) {
+                return $this->errorResponse(__('custom.edit_dataset_fail'));
             }
         }
 
@@ -989,50 +978,46 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                DB::beginTransaction();
+                $result = DB::transaction(function () use ($post) {
+                    $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
+                    DataSetGroup::destroy($dataSetId);
 
-                $dataSetId = DataSet::where('uri', $post['data_set_uri'])->first()->id;
-                DataSetGroup::destroy($dataSetId);
+                    foreach ($post['group_id'] as $id) {
+                        $rightCheck = RoleRight::checkUserRight(
+                            Module::GROUPS,
+                            RoleRight::RIGHT_EDIT,
+                            [
+                                'group_id' => $id
+                            ],
+                            [
+                                'group_ids' => $post['group_id']
+                            ]
+                        );
 
-                foreach ($post['group_id'] as $id) {
-                    $rightCheck = RoleRight::checkUserRight(
-                        Module::GROUPS,
-                        RoleRight::RIGHT_EDIT,
-                        [
-                            'group_id' => $id
-                        ],
-                        [
-                            'group_ids' => $post['group_id']
-                        ]
-                    );
+                        if (!$rightCheck) {
+                            return $this->errorResponse(__('custom.access_denied'));
+                        }
 
-                    if (!$rightCheck) {
-                        return $this->errorResponse(__('custom.access_denied'));
+                        $setGroup = new DataSetGroup;
+                        $setGroup->data_set_id = $dataSetId;
+                        $setGroup->group_id = $id;
+
+                        $setGroup->save();
                     }
 
-                    $setGroup = new DataSetGroup;
-                    $setGroup->data_set_id = $dataSetId;
-                    $setGroup->group_id = $id;
+                    $logData = [
+                        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+                        'action'           => ActionsHistory::TYPE_MOD,
+                        'action_object'    => $dataSetId,
+                        'action_msg'       => 'Added dataset to group',
+                    ];
 
-                    $setGroup->save();
-                }
+                    Module::add($logData);
+                }, config('app.TRANSACTION_ATTEMPTS'));
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::DATA_SETS),
-                    'action'           => ActionsHistory::TYPE_MOD,
-                    'action_object'    => $dataSetId,
-                    'action_msg'       => 'Added dataset to group',
-                ];
-
-                Module::add($logData);
-
-                DB::commit();
-
-                return $this->successResponse();
-            } catch (Exception $ex) {
-                DB::rollback();
-
-                Log::error($ex->getMessage());
+                return $result;
+            } catch (Throwable $e) {
+                return $this->errorResponse(__('custom.add_datasetgroup_fail'));
             }
         }
 
@@ -1169,49 +1154,37 @@ class DataSetController extends ApiController
      */
     public function checkAndCreateCustomSettings($customFields, $datasetId)
     {
-        try {
-            if ($datasetId) {
-                DB::beginTransaction();
+        if ($datasetId) {
+            CustomSetting::where('data_set_id', $datasetId)->delete();
 
-                CustomSetting::where('data_set_id', $datasetId)->delete();
+            foreach ($customFields as $field) {
+                if (!empty($field['label']) && !empty($field['value'])) {
+                    foreach ($field['label'] as $locale => $label) {
+                        if (
+                            (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
+                            || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
 
-                foreach ($customFields as $field) {
-                    if (!empty($field['label']) && !empty($field['value'])) {
-                        foreach ($field['label'] as $locale => $label) {
-                            if (
-                                (empty($field['label'][$locale]) && !empty($field['value'][$locale]))
-                                || (!empty($field['label'][$locale]) && empty($field['value'][$locale]))
-
-                            ) {
-                                DB::rollback();
-
-                                return false;
-                            }
+                        ) {
+                            return false;
                         }
-
-                        $saveField = new CustomSetting;
-                        $saveField->data_set_id = $datasetId;
-                        $saveField->created_by = \Auth::user()->id;
-                        $saveField->key = $this->trans($empty, $field['label']);
-                        $saveField->value = $this->trans($empty, $field['value']);
-
-                        $saveField->save();
-                    } else {
-                        DB::rollback();
-
-                        return false;
                     }
+
+                    $saveField = new CustomSetting;
+                    $saveField->data_set_id = $datasetId;
+                    $saveField->created_by = \Auth::user()->id;
+                    $saveField->key = $this->trans($empty, $field['label']);
+                    $saveField->value = $this->trans($empty, $field['value']);
+
+                    $saveField->save();
+                } else {
+                    return false;
                 }
-
-                DB::commit();
-
-                return true;
             }
-        } catch (Exception $ex) {
-            Log::error($ex->getMessage());
 
-            return false;
+            return true;
         }
+
+        return false;
     }
 
     /**

@@ -260,7 +260,7 @@
                                 </div>
                             </div>
                             <div class="col-xs-12">
-                                <a href="{{ route('orgViewDataset', array_merge(app('request')->input(), ['uri' => $dataset->uri])) }}">
+                                <a href="{{ route('orgViewDataset', ['uri' => $dataset->uri]) }}">
                                     <h2 class="{{ $dataset->reported ? 'error' : '' }}">{{ $dataset->name }}</h2>
                                 </a>
                                 <p>{!! nl2br(e($dataset->descript)) !!}</p>

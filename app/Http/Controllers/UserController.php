@@ -4404,7 +4404,7 @@ class UserController extends Controller {
             }
 
             $rq = Request::create('/api/listOrganisations', 'POST', [
-                'api_key'   => $result->users[0]->api_key,
+                'api_key'   => User::where('id', $result->users[0]->id)->value('api_key'),
                 'criteria'  => [
                     'user_id'   => $id,
                 ],

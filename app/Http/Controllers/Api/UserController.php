@@ -472,6 +472,11 @@ class UserController extends ApiController
                     if (!empty($request->data['created_by'])) {
                         $user->created_by = $request->data['created_by'];
                     }
+
+                    if (!empty($request->data['uri'])) {
+                        $user->uri = $request->data['uri'];
+                    }
+
                 }
 
                 $registered = $user->save();

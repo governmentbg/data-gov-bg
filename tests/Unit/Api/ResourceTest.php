@@ -238,21 +238,32 @@ class ResourceTest extends TestCase
             url('api/getResourceData'),
             ['resource_uri' => $resource->uri]
         )->assertStatus(200)->assertJson(['success' => true]);
+    }
 
-        // Test successfull data update
+    /**
+     * Test resource upload
+     *
+     * @return void
+     */
+    public function testCsvUpload()
+    {
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
+
+        $result = $this->post(url('api/csv2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => file_get_contents(storage_path('tests/sample.csv')),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $data = $result->original['data'];
+
         $this->post(
-            url('api/updateResourceData'),
+            url('api/addResourceData'),
             [
                 'api_key'       => $this->getApiKey(),
                 'resource_uri'  => $resource->uri,
-                'data'          => $data2,
+                'data'          => $data,
             ]
-        )->assertStatus(200)->assertJson(['success' => true]);
-
-        // Test successful request
-        $this->post(
-            url('api/getResourceData'),
-            ['resource_uri' => $resource->uri]
         )->assertStatus(200)->assertJson(['success' => true]);
     }
 

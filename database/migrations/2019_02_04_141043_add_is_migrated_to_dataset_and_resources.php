@@ -27,13 +27,14 @@ class AddIsMigratedToDatasetAndResources extends Migration
                 $table->tinyInteger('is_migrated')->nullable();
             });
 
-            DB::statement('UPDATE data_sets SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
-
             Schema::table('resources', function (Blueprint $table) {
                 $table->tinyInteger('is_migrated')->nullable();
             });
 
-            DB::statement('UPDATE resources SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
+            if ($lastMigratedDataset) {
+                DB::statement('UPDATE data_sets SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
+                DB::statement('UPDATE resources SET is_migrated = 1 where updated_at <= "'. $lastMigratedDataset . '";');
+            }
         }
     }
 

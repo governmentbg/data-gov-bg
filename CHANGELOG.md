@@ -16,6 +16,10 @@ Security - in case of vulnerabilities.
 - Elastic mapper settings command
 - CSV resource upload test and test file
 
+### Changed
+- Refactoring of initial migration
+- Change old portal source for retrieving data from API
+
 ## [1.0.16] - 2019-02-15
 ### Fixed
 - Trusted proxies config

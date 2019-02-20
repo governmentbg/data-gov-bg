@@ -149,11 +149,28 @@ class MigrateData extends Command
 
         if (!empty($optAll)) {
             $this->migrateTags();
+
+            $this->line('Migrating users: ');
             $this->migrateUsers();
+
+            $this->line('');
+            $this->line('Migrating organisations: ');
             $this->migrateOrganisations();
+
+            $this->line('');
+            $this->line('Migrating groups: ');
             $this->migrateGroups();
+
+            $this->line('');
+            $this->line('Migrating users` datasets: ');
             $this->getUsersDatasets();
+
+            $this->line('');
+            $this->line('Migrating organisations` datasets: ');
             $this->getOrgsDatasets();
+
+            $this->line('');
+            $this->line('Migrating followers: ');
             $this->migrateFollowers();
         }
     }
@@ -332,14 +349,13 @@ class MigrateData extends Command
         if ($oldRecords > 336) {
             $countSaved = Tags::where('created_by', $this->migrationUserId)->count();
             $this->line('Already saved tags: '. $countSaved);
-        } else {
-            $this->line('Tags total: '. (isset($response['result']) ? count($response['result']) : '0'));
-            $this->info('Tags successful: '. (isset($tags['success']) ? count($tags['success']) : '0'));
-            $this->error('Tags failed: '.(isset($tags['error']) ? count($tags['error']) : '0'));
         }
-        $this->line('');
 
-        return $tags;
+        $this->line('Tags total: '. (isset($response['result']) ? count($response['result']) : '0'));
+        $this->info('Tags successful: '. (isset($tags['success']) ? count($tags['success']) : '0'));
+        $this->error('Tags failed: '.(isset($tags['error']) ? count($tags['error']) : '0'));
+
+        $this->line('');
     }
 
     private function migrateOrganisations()
@@ -447,9 +463,10 @@ class MigrateData extends Command
                         }
 
                         $this->line('');
-                        $this->line('User to organisation role total: '. (isset($res['users']) ? count($res['users']) : '0'));
-                        $this->info('Successful: '. $added);
-                        $this->error('Failed: '. $error);
+                        $this->line('User to organisation role total: '. (isset($res['users']) ? count($res['users']) : '0')
+                            .'; Successful: '. $added
+                            .'; Failed: '. $error .';'
+                        );
                     }
 
                     $success ++;
@@ -977,6 +994,7 @@ class MigrateData extends Command
         $dataSets = DataSet::where('is_migrated', true)->pluck('uri','id');
 
         if ($dataSets) {
+            $this->line('');
             $this->line('Migrate datasets followers');
             $this->line('');
             $dsBar = $this->output->createProgressBar(count($dataSets));

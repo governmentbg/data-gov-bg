@@ -52,12 +52,10 @@ class ElasticMapperFix extends Command
             }
 
             $dIds = DB::select('select id from data_sets');
-            error_log('indices: '. print_r($indices, true));
+
             if (!empty($dIds)) {
                 foreach ($dIds as $record) {
-                    error_log('label: '. print_r($record->id, true));
                     if (in_array($record->id, $indices)) {
-                        error_log('in');
                         \Elasticsearch::indices()->putMapping([
                             'index' => $record->id,
                             'type'  => ElasticDataSet::ELASTIC_TYPE,

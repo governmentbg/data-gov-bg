@@ -12,6 +12,13 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Elastic mapper settings command
+- CSV resource upload test and test file
+
+## [1.0.16] - 2019-02-15
+### Fixed
+- Trusted proxies config
 
 ## [1.0.15] - 2019-02-15
 ### Fixed
@@ -341,6 +348,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.15...v1.0.16
 [1.0.15]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.14...v1.0.15
 [1.0.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.12...v1.0.13

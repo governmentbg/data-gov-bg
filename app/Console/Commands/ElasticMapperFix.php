@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\ElasticDataSet;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ElasticMapperFix extends Command
 {
@@ -41,11 +42,28 @@ class ElasticMapperFix extends Command
         $this->info($this->description .' started..');
 
         try {
-            \Elasticsearch::indices()->putMapping([
-                'index' => '_all',
-                'type'  => ElasticDataSet::ELASTIC_TYPE,
-                'body'  => ['date_detection' => false],
-            ]);
+            $stats = \Elasticsearch::indices()->stats();
+            $indices = [];
+
+            if (!empty($stats['indices'])) {
+                foreach ($stats['indices'] as $index => $stat) {
+                    $indices[] = $index;
+                }
+            }
+
+            $dIds = DB::select('select id from data_sets');
+
+            if (!empty($dIds)) {
+                foreach ($dIds as $record) {
+                    if (in_array($record->id, $indices)) {
+                        \Elasticsearch::indices()->putMapping([
+                            'index' => $record->id,
+                            'type'  => ElasticDataSet::ELASTIC_TYPE,
+                            'body'  => ['date_detection' => false],
+                        ]);
+                    }
+                }
+            }
 
             $this->info('Date detection set to false for old indices');
 

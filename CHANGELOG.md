@@ -11,9 +11,9 @@ Removed - for now removed features.
 Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
-## [Unreleased] - XXXX-XX-XX
+## [1.0.17] - 2019-02-20
 ### Added
-- Elastic mapper settings command
+- Elastic mapper settings command (php artisan elastic:mapper)
 - CSV resource upload test and test file
 
 ### Changed
@@ -352,6 +352,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.16...v1.0.17
 [1.0.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.15...v1.0.16
 [1.0.15]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.14...v1.0.15
 [1.0.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.13...v1.0.14

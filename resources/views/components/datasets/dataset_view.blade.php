@@ -90,7 +90,7 @@
                 </div>
             @endif
             @if (!empty($dataset->org))
-                <p><strong>{{ utrans('custom.organisation') }}:</strong></p>
+                <p><strong>{{ utrans('custom.organisations') }}:</strong></p>
                 <div class="m-b-sm">
                     <p><a href="{{ url('/'. $root .'/organisations/view/'. $dataset->org->uri) }}">{{ $dataset->org->name }}</a></p>
                 </div>

@@ -211,7 +211,7 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
     // get file
     $url = $resourceData['url'];
     $url = explode ('/', $url);
-    $url[2] = config('app.OLD_PORATL_DOMAIN');
+    $url[2] = config('app.OLD_PORTAL_DOMAIN');
     $url = implode('/', $url);
 
     $path = pathinfo($url);

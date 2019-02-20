@@ -209,8 +209,12 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
     $newData['data']['updated_by'] = DB::table('users')->where('username', 'migrate_data')->value('id');
 
     // get file
-    $path = pathinfo($resourceData['url']);
     $url = $resourceData['url'];
+    $url = explode ('/', $url);
+    $url[2] = config('app.OLD_PORTAL_DOMAIN');
+    $url = implode('/', $url);
+
+    $path = pathinfo($url);
 
     if ($path['filename'] == '') {
         $filename = rand() . $path['basename'];

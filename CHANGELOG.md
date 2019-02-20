@@ -11,6 +11,11 @@ Removed - for now removed features.
 Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
+## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Url for downloading resources
+- Refactoring of migration for repairing migrated data
+
 ## [1.0.17] - 2019-02-20
 ### Added
 - Elastic mapper settings command (php artisan elastic:mapper)

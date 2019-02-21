@@ -12,6 +12,9 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Missing label
+- Fix showing user`s datasets
 
 ## [1.0.18] - 2019-02-20
 ### Fixed

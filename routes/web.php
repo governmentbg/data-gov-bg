@@ -55,20 +55,11 @@ Route::middleware('auth')->group(function() {
             '/admin/organisations/members/{uri}',
             'Admin\OrganisationController@viewMembers'
         )->name('adminOrgMembersView');
-
-        Route::get(
-            '/admin/organisations/members/addByMail',
-            'Admin\OrganisationController@addMembersByMail'
-        )->name('adminAddOrgMembersByMail');
         Route::match(
             ['get', 'post'],
             '/admin/organisations/members/addNew/{uri}',
             'Admin\OrganisationController@addMembersNew'
         )->name('adminAddOrgMembersNew');
-        Route::get(
-            '/admin/organisations/members/addExisting',
-            'Admin\OrganisationController@addMembersExisting'
-        )->name('adminAddOrgMembersExisting');
         Route::get(
             '/admin/organisations/members/delete',
             'Admin\OrganisationController@delMember'

@@ -218,7 +218,7 @@
     </div>
 </div>
 
-<div class="modal inmodal fade" id="invite-existing" tabindex="-1" role="dialog"  aria-hidden="true">
+<div class="modal inmodal fade" id="invite-existing" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">
@@ -277,7 +277,7 @@
     </div>
 </div>
 
-<div class="modal inmodal fade" id="invite" tabindex="-1" role="dialog"  aria-hidden="true">
+<div class="modal inmodal fade" id="invite" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="frame">

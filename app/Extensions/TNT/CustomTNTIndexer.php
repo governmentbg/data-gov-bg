@@ -22,6 +22,22 @@ use TeamTNT\TNTSearch\Connectors\FileSystemConnector;
 
 class CustomTNTIndexer extends TNTIndexer
 {
+    public $tokenizer = null;
+    public $stemmer = null;
+    public $filereader = null;
+
+    public function __construct()
+    {
+        $this->stemmer = new PorterStemmer;
+        $this->tokenizer = new CustomTNTTokenizer;
+        $this->filereader = new TextFileReader;
+    }
+
+    public function breakIntoTokens($text)
+    {
+        return $this->tokenizer->tokenize($text);
+    }
+
     /**
      * @param string $indexName
      *
@@ -264,6 +280,7 @@ class CustomTNTIndexer extends TNTIndexer
             }
 
             $counter++;
+
             if ($counter >= $count && $count > 0) {
                 break;
             }

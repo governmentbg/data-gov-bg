@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">
-                                    <label for="org_id" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisation') }}:</label>
+                                    <label for="org_id" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisations') }}:</label>
                                     <div class="col-sm-9">
                                         <select
                                             class="js-autocomplete form-control"

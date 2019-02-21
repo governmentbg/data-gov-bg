@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Missing label
 - Fix showing user`s datasets
+- More specific searching by keyword
 
 ## [1.0.18] - 2019-02-20
 ### Fixed

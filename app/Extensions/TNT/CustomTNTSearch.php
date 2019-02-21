@@ -16,6 +16,12 @@ use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 class CustomTNTSearch extends TNTSearch
 {
     public $indexName = null;
+    public $tokenizer = null;
+
+    public function __construct()
+    {
+        $this->tokenizer = new CustomTNTTokenizer;
+    }
 
     /**
      * @param string $indexName
@@ -28,6 +34,11 @@ class CustomTNTSearch extends TNTSearch
         $this->index = app('db')->connection('mysqltnt')->getPDO();
         $this->index->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->setStemmer();
+    }
+
+    public function breakIntoTokens($text)
+    {
+        return $this->tokenizer->tokenize($text);
     }
 
     /**
@@ -82,7 +93,7 @@ class CustomTNTSearch extends TNTSearch
         $dlWeight = 0.5;
         $docScores = [];
         $count = $this->totalDocumentsInCollection();
-        
+
         foreach ($keywords as $index => $term) {
             $isLastKeyword = ($keywords->count() - 1) == $index;
             $df = $this->totalMatchingDocuments($term, $isLastKeyword);
@@ -102,7 +113,7 @@ class CustomTNTSearch extends TNTSearch
         arsort($docScores);
 
         $docs = new Collection($docScores);
-        
+
         $totalHits = $docs->count();
         $docs = $docs->map(function ($doc, $key) {
             return $key;
@@ -180,15 +191,15 @@ class CustomTNTSearch extends TNTSearch
         }
 
         $searchWordlist = "SELECT * FROM ". $this->getTNTName($this->indexName, 'wordlist') ." WHERE term like :keyword";
-        $stmtWord       = $this->index->prepare($searchWordlist);
+        $stmtWord = $this->index->prepare($searchWordlist);
 
         if ($this->asYouType && $isLastWord) {
             $searchWordlist = "SELECT * FROM ". $this->getTNTName($this->indexName, 'wordlist') ." WHERE term
                 like :keyword ORDER BY length(term) ASC, num_hits DESC LIMIT 1";
             $stmtWord = $this->index->prepare($searchWordlist);
-            $stmtWord->bindValue(':keyword', mb_strtolower($keyword) ."%");
+            $stmtWord->bindValue(':keyword', mb_strtolower($keyword) .'%');
         } else {
-            $stmtWord->bindValue(':keyword', "%". mb_strtolower($keyword) ."%");
+            $stmtWord->bindValue(':keyword', '%'. mb_strtolower($keyword) .'%');
         }
 
         $stmtWord->execute();

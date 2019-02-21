@@ -55,7 +55,7 @@ class RefreshTNTIndexes extends Command
                 'App\\TermsOfUseRequest',
                 'App\\User',
             ];
-            
+
             foreach ($models as $model) {
                 Artisan::call('scout:import', ['model' => $model]);
                 $this->info(Artisan::output());

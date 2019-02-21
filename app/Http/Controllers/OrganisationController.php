@@ -1206,6 +1206,7 @@ class OrganisationController extends Controller
                 $objType = Module::getModuleName(Module::DATA_SETS);
                 $objTypeRes = Module::getModuleName(Module::RESOURCES);
                 $actObjData[$objType] = [];
+                $criteria['resource_uris'] = [];
 
                 foreach ($res->datasets as $dataset) {
                     $criteria['dataset_ids'][] = $dataset->id;
@@ -1224,7 +1225,12 @@ class OrganisationController extends Controller
 
                     if (!empty($dataset->resource)) {
                         foreach ($dataset->resource as $resource) {
+                            if (array_search($resource->uri, $criteria['resource_uris'])) {
+                                continue;
+                            }
+
                             $criteria['resource_uris'][] = $resource->uri;
+
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,

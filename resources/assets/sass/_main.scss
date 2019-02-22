@@ -1,3 +1,7 @@
+html {
+    overflow: hidden;
+}
+
 a,
 a:hover,
 a:focus,
@@ -114,7 +118,7 @@ label {
         display: none !important;
     }
 
-    .sidebar-submenu, {
+    .sidebar-submenu {
         display: none;
         padding: 10px 0px;
         border-radius: 11px;

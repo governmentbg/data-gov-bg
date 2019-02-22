@@ -13,6 +13,8 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
+- Multi page pdf conversion
+- Optimise chronology loading
 - Missing label
 - Fix showing user`s datasets
 - More specific searching by keyword

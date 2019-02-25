@@ -19,6 +19,7 @@ Security - in case of vulnerabilities.
 - Fix showing user`s datasets
 - More specific searching by keyword
 - Pagination URLs in admin panel, my data section
+- Convert Windows-1251 encoding to UTF-8
 
 ## [1.0.18] - 2019-02-20
 ### Fixed

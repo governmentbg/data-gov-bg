@@ -108,10 +108,12 @@ class ConversionController extends ApiController
             try {
                 $file = new \SplFileObject('php://memory', 'w+');
 
+                if (!mb_check_encoding($post['data'], 'UTF-8')) {
+                    $post['data'] = mb_convert_encoding($post['data'], 'UTF-8', 'Windows-1251');
+                }
+
                 $file->fwrite($post['data']);
                 $file->fseek(0);
-
-                $data = [];
 
                 while (!$file->eof()) {
                     $data[] = $file->fgetcsv();

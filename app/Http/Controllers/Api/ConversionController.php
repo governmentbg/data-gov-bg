@@ -25,6 +25,11 @@ include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
 
 class ConversionController extends ApiController
 {
+    public function __construct()
+    {
+        ini_set('max_execution_time', 300);
+    }
+
     /**
      * Convert from xml data and return json
      *

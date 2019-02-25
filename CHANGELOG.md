@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.19] - XXXX-XX-XX
 ### Fixed
 - Multi page pdf conversion
 - Optimise chronology loading
@@ -368,6 +370,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.18...v1.0.19
 [1.0.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.17...v1.0.18
 [1.0.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.16...v1.0.17
 [1.0.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.15...v1.0.16

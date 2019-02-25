@@ -20,6 +20,7 @@ Security - in case of vulnerabilities.
 - More specific searching by keyword
 - Pagination URLs in admin panel, my data section
 - Missing versions list in resource views
+- Convert Windows-1251 encoding to UTF-8
 
 ## [1.0.18] - 2019-02-20
 ### Fixed

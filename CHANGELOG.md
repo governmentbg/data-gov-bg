@@ -13,7 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
-## [1.0.19] - XXXX-XX-XX
+## [1.0.19] - 2019-02-25
 ### Fixed
 - Multi page pdf conversion
 - Optimise chronology loading

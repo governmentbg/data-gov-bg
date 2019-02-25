@@ -109,7 +109,7 @@
                 @foreach ($orgRoles as $org => $orgRole)
                     @if ($org != 0 && isset($organisations[$org]))
                         <div class="form-group row">
-                            <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.organisation') }}: </label>
+                            <label class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisations') }}: </label>
                             <span class="col-sm-3 col-xs-12">{{ $organisations[$org]->name }} </span>
                             <label for="role[{{ $org }}]" class="col-sm-1 col-xs-12 col-form-label">{{ __('custom.roles') }}: </label>
                             <div class="col-sm-3">

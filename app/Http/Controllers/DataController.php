@@ -411,7 +411,9 @@ class DataController extends Controller {
                     }
                 }
             }
-        } else {
+        }
+
+        if ($request['page'] > $paginationData['paginate']->lastPage()) {
             $request['page'] = $paginationData['paginate']->lastPage();
 
             return redirect()->route('data', $request->query());

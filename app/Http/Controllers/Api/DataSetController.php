@@ -1015,7 +1015,7 @@ class DataSetController extends ApiController
                     Module::add($logData);
                 }, config('app.TRANSACTION_ATTEMPTS'));
 
-                return $result;
+                return $this->successResponse();
             } catch (Throwable $e) {
                 return $this->errorResponse(__('custom.add_datasetgroup_fail'));
             }

@@ -115,6 +115,8 @@ class ConversionController extends ApiController
                 $file->fwrite($post['data']);
                 $file->fseek(0);
 
+                $data = [];
+
                 while (!$file->eof()) {
                     $data[] = $file->fgetcsv();
                 }

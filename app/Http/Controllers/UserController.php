@@ -2231,6 +2231,7 @@ class UserController extends Controller {
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
         $formats = Resource::getFormats(true);
+        $versionsPerPage = 10;
 
         if (empty($version)) {
             $version = $resource->version;
@@ -2333,11 +2334,33 @@ class UserController extends Controller {
         $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
         $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
 
+        if (!empty($resource->versions_list)) {
+            usort($resource->versions_list, function($a, $b) {
+                if ($a == $b) {
+                    return 0;
+                }
+
+                return ($a > $b) ? -1 : 1;
+            });
+        }
+
+        $vCount = count($resource->versions_list);
+        $verData = collect($resource->versions_list)->paginate($versionsPerPage);
+
+        $paginationData = $this->getPaginationData(
+            $verData,
+            $vCount,
+            array_except(app('request')->input(), ['page']),
+            $versionsPerPage
+        );
+
         return view('user/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
             'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
+            'versions'      => $verData,
+            'pagination'    => $paginationData['paginate'],
             'buttons'       => $buttons,
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
@@ -2372,6 +2395,7 @@ class UserController extends Controller {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
         }
 
+        $versionsPerPage = 10;
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
         $formats = Resource::getFormats(true);
@@ -2487,10 +2511,32 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
+        if (!empty($resource->versions_list)) {
+            usort($resource->versions_list, function($a, $b) {
+                if ($a == $b) {
+                    return 0;
+                }
+
+                return ($a > $b) ? -1 : 1;
+            });
+        }
+
+        $vCount = count($resource->versions_list);
+        $verData = collect($resource->versions_list)->paginate($versionsPerPage);
+
+        $paginationData = $this->getPaginationData(
+            $verData,
+            $vCount,
+            array_except(app('request')->input(), ['page']),
+            $versionsPerPage
+        );
+
         return view('user/orgResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
             'data'          => $resourcePaginationData['data'],
+            'versions'      => $verData,
+            'pagination'    => $paginationData['paginate'],
             'versionView'   => $version,
             'buttons'       => $buttons,
             'activeMenu'    => 'organisation',
@@ -5487,6 +5533,7 @@ class UserController extends Controller {
         $apiDatasets = new ApiDataset($datasetReq);
         $dataset = $apiDatasets->getDatasetDetails($datasetReq)->getData();
         $dataset = !empty($dataset->data) ? $dataset->data : null;
+        $versionsPerPage = 10;
 
         if (!is_null($dataset)) {
             $datasetData = [
@@ -5571,11 +5618,33 @@ class UserController extends Controller {
         $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
         $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
 
+        if (!empty($resource->versions_list)) {
+            usort($resource->versions_list, function($a, $b) {
+                if ($a == $b) {
+                    return 0;
+                }
+
+                return ($a > $b) ? -1 : 1;
+            });
+        }
+
+        $vCount = count($resource->versions_list);
+        $verData = collect($resource->versions_list)->paginate($versionsPerPage);
+
+        $paginationData = $this->getPaginationData(
+            $verData,
+            $vCount,
+            array_except(app('request')->input(), ['page']),
+            $versionsPerPage
+        );
+
         return view('user/groupResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
             'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
+            'versions'      => $verData,
+            'pagination'    => $paginationData['paginate'],
             'buttons'       => $buttons,
             'group'         => $group,
             'dataset'       => $datasetData,

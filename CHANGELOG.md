@@ -13,6 +13,17 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.19] - XXXX-XX-XX
+### Fixed
+- Multi page pdf conversion
+- Optimise chronology loading
+- Missing label
+- Fix showing user`s datasets
+- More specific searching by keyword
+- Pagination URLs in admin panel, my data section
+- Missing versions list in resource views
+- Convert Windows-1251 encoding to UTF-8
+
 ## [1.0.18] - 2019-02-20
 ### Fixed
 - Url for downloading resources
@@ -359,6 +370,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.18...v1.0.19
 [1.0.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.17...v1.0.18
 [1.0.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.16...v1.0.17
 [1.0.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.15...v1.0.16

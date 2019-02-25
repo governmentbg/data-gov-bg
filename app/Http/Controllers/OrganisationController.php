@@ -967,6 +967,7 @@ class OrganisationController extends Controller
     public function resourceView(Request $request, $uri, $version = null)
     {
         $locale = \LaravelLocalization::getCurrentLocale();
+        $versionsPerPage = 10;
 
         $params = [
             'resource_uri' => $uri,
@@ -1097,6 +1098,26 @@ class OrganisationController extends Controller
                     $dataset = $this->getModelUsernames($dataset);
                     $resource = $this->getModelUsernames($resource);
 
+                    if (!empty($resource->versions_list)) {
+                        usort($resource->versions_list, function($a, $b) {
+                            if ($a == $b) {
+                                return 0;
+                            }
+
+                            return ($a > $b) ? -1 : 1;
+                        });
+                    }
+
+                    $vCount = count($resource->versions_list);
+                    $verData = collect($resource->versions_list)->paginate($versionsPerPage);
+
+                    $paginationData = $this->getPaginationData(
+                        $verData,
+                        $vCount,
+                        array_except(app('request')->input(), ['page']),
+                        $versionsPerPage
+                    );
+
                     $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
                     $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
 
@@ -1105,6 +1126,8 @@ class OrganisationController extends Controller
                         [
                             'class'         => 'organisation',
                             'organisation'  => $organisation,
+                            'versions'      => $verData,
+                            'pagination'    => $paginationData['paginate'],
                             'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
                             'dataset'       => $dataset,
                             'resource'      => $resource,
@@ -1206,6 +1229,7 @@ class OrganisationController extends Controller
                 $objType = Module::getModuleName(Module::DATA_SETS);
                 $objTypeRes = Module::getModuleName(Module::RESOURCES);
                 $actObjData[$objType] = [];
+                $criteria['resource_uris'] = [];
 
                 foreach ($res->datasets as $dataset) {
                     $criteria['dataset_ids'][] = $dataset->id;
@@ -1224,7 +1248,12 @@ class OrganisationController extends Controller
 
                     if (!empty($dataset->resource)) {
                         foreach ($dataset->resource as $resource) {
+                            if (array_search($resource->uri, $criteria['resource_uris'])) {
+                                continue;
+                            }
+
                             $criteria['resource_uris'][] = $resource->uri;
+
                             $actObjData[$objTypeRes][$resource->uri] = [
                                 'obj_id'            => $resource->uri,
                                 'obj_name'          => $resource->name,

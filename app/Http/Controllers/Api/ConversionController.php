@@ -25,6 +25,11 @@ include_once(base_path() . '/vendor/phayes/geophp/geoPHP.inc');
 
 class ConversionController extends ApiController
 {
+    public function __construct()
+    {
+        ini_set('max_execution_time', 300);
+    }
+
     /**
      * Convert from xml data and return json
      *
@@ -102,6 +107,10 @@ class ConversionController extends ApiController
         if (!$validator->fails()) {
             try {
                 $file = new \SplFileObject('php://memory', 'w+');
+
+                if (!mb_check_encoding($post['data'], 'UTF-8')) {
+                    $post['data'] = mb_convert_encoding($post['data'], 'UTF-8', 'Windows-1251');
+                }
 
                 $file->fwrite($post['data']);
                 $file->fseek(0);
@@ -313,9 +322,10 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                $pages = 1;
                 $path = storage_path('app/pdf-resource-'. uniqid());
-
                 file_put_contents($path, base64_decode($post['data']));
+                $paths = [$path];
 
                 chmod($path, 0775);
 
@@ -327,24 +337,41 @@ class ConversionController extends ApiController
                 $im->setImageDepth(8);
                 $im->stripImage();
                 $im->setBackgroundColor('white');
-                $im->writeImage($path);
 
-                $result = (new TesseractOCR($path))->lang('bul', 'eng')->run();
+                $pages = $im->getNumberImages();
 
-                $im->clear();
-                $im->destroy();
+                if ($pages > 1) {
+                    for ($i = 0; $i < $pages; $i++) {
+                        $paths[] = $path .'-'. $i;
+                    }
+                }
 
-                unlink($path);
+                $im->writeImages($path, false);
+
+                $result = '';
+
+                foreach ($paths as $index => $singlePath) {
+                    if ($pages == 1 || $index > 0) {
+                        $result .= (new TesseractOCR($singlePath))->lang('bul', 'eng')->run() . PHP_EOL;
+                    }
+                }
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.no_text_found'));
-            } catch (\Exception $ex) {
+            } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
+            } finally {
+                $im->clear();
+                $im->destroy();
+
+                foreach ($paths as $index => $singlePath) {
+                    @unlink($singlePath);
+                }
             }
         }
 
@@ -381,7 +408,7 @@ class ConversionController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.no_text_found'));
-            } catch (\Exception $ex) {
+            } catch (\ErrorException $ex) {
                 Log::error($ex->getMessage());
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'img']));
             }

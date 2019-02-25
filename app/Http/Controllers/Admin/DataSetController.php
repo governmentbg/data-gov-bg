@@ -145,7 +145,7 @@ class DataSetController extends AdminController
         $paginationData = $this->getPaginationData(
             $datasets,
             $count,
-            array_except(app('request')->input(), ['q', 'page',]),
+            array_except(app('request')->input(), ['page']),
             $perPage
         );
 

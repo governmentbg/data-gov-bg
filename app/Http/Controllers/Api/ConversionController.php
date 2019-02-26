@@ -322,20 +322,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $result = '';
-
-                $temp = tmpfile();
-                $path = stream_get_meta_data($temp)['uri'];
-                file_put_contents($path, base64_decode($post['data']));
-
                 $parser = new \Smalot\PdfParser\Parser();
-                $pdf = $parser->parseFile($path);
-
-                $pages = $pdf->getPages();
-
-                foreach ($pages as $page) {
-                    $result .= $page->getText() . PHP_EOL;
-                }
+                $pdf = $parser->parseContent(base64_decode($post['data']));
+                $result = $pdf->getText();
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {
@@ -346,8 +335,6 @@ class ConversionController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
-            } finally {
-                fclose($temp);
             }
         }
 

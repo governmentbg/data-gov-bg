@@ -322,38 +322,19 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $pages = 1;
-                $path = storage_path('app/pdf-resource-'. uniqid());
-                file_put_contents($path, base64_decode($post['data']));
-                $paths = [$path];
-
-                $im = new \Imagick();
-
-                $im->setResolution(300, 300);
-                $im->readimage($path);
-                $im->setImageFormat('jpeg');
-                $im->setImageDepth(8);
-                $im->stripImage();
-                $im->setBackgroundColor('white');
-
-                $pages = $im->getNumberImages();
-
-                if ($pages > 1) {
-                    for ($i = 0; $i < $pages; $i++) {
-                        $paths[] = $path .'-'. $i;
-                    }
-                }
-
-                $im->writeImages($path, false);
-
                 $result = '';
 
-                foreach ($paths as $index => $singlePath) {
-                    if ($pages == 1 || $index > 0) {
-                        @chmod($singlePath, 0775);
+                $temp = tmpfile();
+                $path = stream_get_meta_data($temp)['uri'];
+                file_put_contents($path, base64_decode($post['data']));
 
-                        $result .= (new TesseractOCR($singlePath))->lang('bul', 'eng')->run() . PHP_EOL;
-                    }
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseFile($path);
+
+                $pages = $pdf->getPages();
+
+                foreach ($pages as $page) {
+                    $result .= $page->getText() . PHP_EOL;
                 }
 
                 return $this->successResponse($result);
@@ -366,12 +347,7 @@ class ConversionController extends ApiController
 
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
             } finally {
-                $im->clear();
-                $im->destroy();
-
-                foreach ($paths as $index => $singlePath) {
-                    @unlink($singlePath);
-                }
+                fclose($temp);
             }
         }
 

@@ -322,39 +322,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $pages = 1;
-                $path = storage_path('app/pdf-resource-'. uniqid());
-                file_put_contents($path, base64_decode($post['data']));
-                $paths = [$path];
-
-                $im = new \Imagick();
-
-                $im->setResolution(300, 300);
-                $im->readimage($path);
-                $im->setImageFormat('jpeg');
-                $im->setImageDepth(8);
-                $im->stripImage();
-                $im->setBackgroundColor('white');
-
-                $pages = $im->getNumberImages();
-
-                if ($pages > 1) {
-                    for ($i = 0; $i < $pages; $i++) {
-                        $paths[] = $path .'-'. $i;
-                    }
-                }
-
-                $im->writeImages($path, false);
-
-                $result = '';
-
-                foreach ($paths as $index => $singlePath) {
-                    if ($pages == 1 || $index > 0) {
-                        @chmod($singlePath, 0775);
-
-                        $result .= (new TesseractOCR($singlePath))->lang('bul', 'eng')->run() . PHP_EOL;
-                    }
-                }
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseContent(base64_decode($post['data']));
+                $result = $pdf->getText();
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {
@@ -365,13 +335,6 @@ class ConversionController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
-            } finally {
-                $im->clear();
-                $im->destroy();
-
-                foreach ($paths as $index => $singlePath) {
-                    @unlink($singlePath);
-                }
             }
         }
 

@@ -327,8 +327,6 @@ class ConversionController extends ApiController
                 file_put_contents($path, base64_decode($post['data']));
                 $paths = [$path];
 
-                chmod($path, 0775);
-
                 $im = new \Imagick();
 
                 $im->setResolution(300, 300);
@@ -352,6 +350,8 @@ class ConversionController extends ApiController
 
                 foreach ($paths as $index => $singlePath) {
                     if ($pages == 1 || $index > 0) {
+                        chmod($singlePath, 0775);
+
                         $result .= (new TesseractOCR($singlePath))->lang('bul', 'eng')->run() . PHP_EOL;
                     }
                 }

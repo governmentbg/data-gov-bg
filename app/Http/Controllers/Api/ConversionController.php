@@ -350,7 +350,7 @@ class ConversionController extends ApiController
 
                 foreach ($paths as $index => $singlePath) {
                     if ($pages == 1 || $index > 0) {
-                        chmod($singlePath, 0775);
+                        @chmod($singlePath, 0775);
 
                         $result .= (new TesseractOCR($singlePath))->lang('bul', 'eng')->run() . PHP_EOL;
                     }

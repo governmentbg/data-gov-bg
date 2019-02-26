@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Search results ordering in my data section
 
 ## [1.0.19] - 2019-02-25
 ### Fixed

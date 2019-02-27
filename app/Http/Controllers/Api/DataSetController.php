@@ -759,10 +759,12 @@ class DataSetController extends ApiController
                     $query->orderBy($order['field'], $order['type']);
                 }
 
-                $query->forPage(
-                    $request->offsetGet('page_number'),
-                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                );
+                if (isset($post['records_per_page'])) {
+                    $query->forPage(
+                        $request->offsetGet('page_number'),
+                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                    );
+                }
 
                 $results = [];
 

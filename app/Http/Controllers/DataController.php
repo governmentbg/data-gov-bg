@@ -106,10 +106,9 @@ class DataController extends Controller {
 
         // prepare datasets parameters
         $perPage = 6;
+        $pageNumber = !empty($request->page) ? $request->page : 1;
         $params = [
-            'records_per_page' => $perPage,
-            'page_number'      => !empty($request->page) ? $request->page : 1,
-            'criteria'         => $criteria,
+            'criteria' => $criteria,
         ];
         $params['criteria']['locale'] = $locale;
         $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
@@ -142,14 +141,12 @@ class DataController extends Controller {
         $datasets = !empty($res->datasets) ? $res->datasets : [];
         $count = !empty($res->total_records) ? $res->total_records : 0;
 
-        $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
-
         $datasetOrgs = [];
         $buttons = [];
 
-        if (!empty($paginationData['items'])) {
+        if (!empty($datasets)) {
             // get organisation ids
-            $orgIds = array_where(array_pluck($paginationData['items'], 'org_id'), function ($value, $key) {
+            $orgIds = array_where(array_pluck($datasets, 'org_id'), function ($value, $key) {
                 return !is_null($value);
             });
 
@@ -165,6 +162,19 @@ class DataController extends Controller {
             $res = $api->listOrganisations($rq)->getData();
             $datasetOrgs = !empty($res->organisations) ? $res->organisations : [];
 
+            $notApprovedCount = 0;
+            $approvedOrgs = array_column($datasetOrgs, 'approved', 'id');
+
+            foreach ($datasets as $key => $dset) {
+                if (!is_null($dset->org_id) && empty($approvedOrgs[$dset->org_id])) {
+                    $notApprovedCount++;
+                    unset($datasets[$key]);
+                }
+            }
+
+            $datasets = collect($datasets)->paginate($perPage, $pageNumber);
+            $count = (int) $count - $notApprovedCount;
+            $paginationData = $this->getPaginationData($datasets, $count, $getParams, $perPage);
             $recordsLimit = 10;
 
             if (empty($getParams['user'])) {

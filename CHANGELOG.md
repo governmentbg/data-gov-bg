@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Search results ordering in my data section
+- Remove data sets from inactive and not approved organisations
 
 ### Added
 - Different csv delimiters

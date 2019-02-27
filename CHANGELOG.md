@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Get resource format from file extension
 
 ## [1.0.20] - 2019-02-27
 ### Added

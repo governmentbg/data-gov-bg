@@ -423,7 +423,7 @@ class DataController extends Controller {
             }
         }
 
-        if ($request['page'] > $paginationData['paginate']->lastPage()) {
+        if (isset($paginationData) && $request['page'] > $paginationData['paginate']->lastPage()) {
             $request['page'] = $paginationData['paginate']->lastPage();
 
             return redirect()->route('data', $request->query());
@@ -442,9 +442,9 @@ class DataController extends Controller {
             [
                 'class'              => 'data',
                 'datasetOrgs'        => $datasetOrgs,
-                'datasets'           => $paginationData['items'],
+                'datasets'           => isset($paginationData) ? $paginationData['items'] : [],
                 'resultsCount'       => $count,
-                'pagination'         => $paginationData['paginate'],
+                'pagination'         => isset($paginationData) ? $paginationData['paginate'] : null,
                 'organisations'      => $organisations,
                 'users'              => $users,
                 'groups'             => $groups,

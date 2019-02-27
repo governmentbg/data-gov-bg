@@ -650,8 +650,22 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['keywords'])) {
-                    $ids = DataSet::search($criteria['keywords'])->get()->pluck('id');
+                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
                     $query->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $query->orderByRaw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
                 }
 
                 if (isset($criteria['user_datasets_only']) && $criteria['user_datasets_only']) {
@@ -745,10 +759,12 @@ class DataSetController extends ApiController
                     $query->orderBy($order['field'], $order['type']);
                 }
 
-                $query->forPage(
-                    $request->offsetGet('page_number'),
-                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                );
+                if (isset($post['records_per_page'])) {
+                    $query->forPage(
+                        $request->offsetGet('page_number'),
+                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                    );
+                }
 
                 $results = [];
 

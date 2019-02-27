@@ -11,6 +11,7 @@
 {{ __('custom.greeting_invite') }}
 <br>{{__('custom.you_have_received')}} {{ $user }}.
 <br>{{ __('custom.please_follow_link_update') }}.
+<br>{{ __('custom.username') }}: {{ $username }}
 <br>{{ __('custom.password') }}: {{ $pass }}
 <br><a href="{{ route('preGenerated', ['username' => $username, 'pass' => $pass]) }}"> {{ __('custom.confirm') }}</a>
 

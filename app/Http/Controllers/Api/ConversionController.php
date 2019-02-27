@@ -115,10 +115,11 @@ class ConversionController extends ApiController
                 $file->fwrite($post['data']);
                 $file->fseek(0);
 
+                $delimiter = $this->getCSVDelimiter($file);
                 $data = [];
 
                 while (!$file->eof()) {
-                    $data[] = $file->fgetcsv();
+                    $data[] = $file->fgetcsv($delimiter);
                 }
 
                 if ($this->emptyRecursive($data)) {
@@ -322,39 +323,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $pages = 1;
-                $path = storage_path('app/pdf-resource-'. uniqid());
-                file_put_contents($path, base64_decode($post['data']));
-                $paths = [$path];
-
-                chmod($path, 0775);
-
-                $im = new \Imagick();
-
-                $im->setResolution(300, 300);
-                $im->readimage($path);
-                $im->setImageFormat('jpeg');
-                $im->setImageDepth(8);
-                $im->stripImage();
-                $im->setBackgroundColor('white');
-
-                $pages = $im->getNumberImages();
-
-                if ($pages > 1) {
-                    for ($i = 0; $i < $pages; $i++) {
-                        $paths[] = $path .'-'. $i;
-                    }
-                }
-
-                $im->writeImages($path, false);
-
-                $result = '';
-
-                foreach ($paths as $index => $singlePath) {
-                    if ($pages == 1 || $index > 0) {
-                        $result .= (new TesseractOCR($singlePath))->lang('bul', 'eng')->run() . PHP_EOL;
-                    }
-                }
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseContent(base64_decode($post['data']));
+                $result = $pdf->getText();
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {
@@ -365,13 +336,6 @@ class ConversionController extends ApiController
                 Log::error($ex->getMessage());
 
                 $validator->errors()->add('data', __('custom.invalid_file', ['type' => 'pdf']));
-            } finally {
-                $im->clear();
-                $im->destroy();
-
-                foreach ($paths as $index => $singlePath) {
-                    @unlink($singlePath);
-                }
             }
         }
 
@@ -1054,5 +1018,34 @@ class ConversionController extends ApiController
         $easyRdf->parse(json_encode($data), 'json');
 
         return $easyRdf->serialise('rdfxml');
+    }
+
+    private function getCSVDelimiter(\SplFileObject $file, $checkLines = 3)
+    {
+        $delimiters = [',', ';'];
+        $counts = [];
+
+        foreach ($delimiters as $delimiter) {
+            $index = 0;
+
+            while (!$file->eof() && $index < $checkLines) {
+                $counts[$delimiter][$index] = count($file->fgetcsv($delimiter));
+                $index++;
+            }
+
+            $file->fseek(0);
+        }
+
+        foreach ($counts as $delimiter => $lines) {
+            foreach ($lines as $index => $count) {
+                if ($index > 0 && $count !== $lines[$index - 1]) {
+                    continue 2;
+                }
+            }
+
+            return $delimiter;
+        }
+
+        return $delimiters[0];
     }
 }

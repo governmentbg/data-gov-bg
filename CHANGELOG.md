@@ -13,7 +13,18 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
-## [1.0.19] - XXXX-XX-XX
+## [1.0.20] - 2019-02-27
+### Added
+- Different csv delimiters
+
+### Changed
+- New pdf library (smalot/pdfparser)
+
+### Fixed
+- Search results ordering in my data section
+- Remove data sets from inactive and not approved organisations
+
+## [1.0.19] - 2019-02-25
 ### Fixed
 - Multi page pdf conversion
 - Optimise chronology loading
@@ -370,6 +381,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.20]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.19...v1.0.20
 [1.0.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.18...v1.0.19
 [1.0.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.17...v1.0.18
 [1.0.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.16...v1.0.17

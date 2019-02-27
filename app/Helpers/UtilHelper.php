@@ -233,7 +233,7 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
     if (isset($newData['file'])) {
         if ($alreadySaved) {
             // Change uri
-            $newResourceId = $alreadySaved->uri;
+            $newResourceURI = $alreadySaved->uri;
 
             if ($alreadySaved->uri != $resourceData['id']) {
                 $changeData['resource_uri'] = $alreadySaved->uri;
@@ -243,7 +243,7 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
                 $apiEdit = new ApiResource($changeRequest);
                 $changeResult = $apiEdit->editResourceMetadata($changeRequest)->getData();
 
-                $newResourceId = $resourceData['id'];
+                $newResourceURI = $resourceData['id'];
             }
 
             $newData['resource_uri'] = $resourceData['id'];
@@ -255,14 +255,11 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
             $request = Request::create('/api/addResourceMetadata', 'POST', $newData);
             $api = new ApiResource($request);
             $result = $api->addResourceMetadata($request)->getData();
+            $newResourceURI = $resourceData['id'];
         }
 
         if ($result->success) {
-            if (isset($result->data->uri)) {
-                $newResourceId = DB::table('resources')->where('uri', $result->data->uri)->value('uri');
-            }
-
-            if (manage_migrated_file($newData['file'], $newResourceId, $convert)) {
+            if (manage_migrated_file($newData['file'], $newResourceURI, $convert)) {
                 Log::info('Resource metadata "'. $newData['data']['name'] .'" added successfully!');
                 return true;
             } else {
@@ -528,7 +525,9 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
         }
 
         $resource = Resource::where('uri',$resourceURI)->first();
-        $alreadyExists = ElasticDataSet::getElasticData($resource->id, $resource->version);
+        $lastVersionElds = ElasticDataSet::where('resource_id', $resource->id)->max('version');
+
+        $alreadyExists = ElasticDataSet::getElasticData($resource->id, $lastVersionElds);
 
         if (!empty($elasticData)) {
             $saveData = [

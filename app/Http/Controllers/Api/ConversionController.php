@@ -115,10 +115,11 @@ class ConversionController extends ApiController
                 $file->fwrite($post['data']);
                 $file->fseek(0);
 
+                $delimiter = $this->getCSVDelimiter($file);
                 $data = [];
 
                 while (!$file->eof()) {
-                    $data[] = $file->fgetcsv();
+                    $data[] = $file->fgetcsv($delimiter);
                 }
 
                 if ($this->emptyRecursive($data)) {
@@ -1017,5 +1018,34 @@ class ConversionController extends ApiController
         $easyRdf->parse(json_encode($data), 'json');
 
         return $easyRdf->serialise('rdfxml');
+    }
+
+    private function getCSVDelimiter(\SplFileObject $file, $checkLines = 3)
+    {
+        $delimiters = [',', ';'];
+        $counts = [];
+
+        foreach ($delimiters as $delimiter) {
+            $index = 0;
+
+            while (!$file->eof() && $index < $checkLines) {
+                $counts[$delimiter][$index] = count($file->fgetcsv($delimiter));
+                $index++;
+            }
+
+            $file->fseek(0);
+        }
+
+        foreach ($counts as $delimiter => $lines) {
+            foreach ($lines as $index => $count) {
+                if ($index > 0 && $count !== $lines[$index - 1]) {
+                    continue 2;
+                }
+            }
+
+            return $delimiter;
+        }
+
+        return $delimiters[0];
     }
 }

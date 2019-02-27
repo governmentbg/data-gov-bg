@@ -15,6 +15,9 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Search results ordering in my data section
 
+### Added
+- Different csv delimiters
+
 ## [1.0.19] - 2019-02-25
 ### Fixed
 - Multi page pdf conversion

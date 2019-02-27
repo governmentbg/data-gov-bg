@@ -140,6 +140,14 @@ function migrate_datasets($dataSetUri, $convert)
                 // Add resources
                 if (isset($dataSet['resources'])) {
                     foreach ($dataSet['resources'] as $resource) {
+                        $alternativeFileFormat = '';
+                        $alternativeFileFormat = explode('/', $resource['url']);
+                        $alternativeFileFormat = substr(strrchr(array_pop($alternativeFileFormat), '.'), 1);
+
+                        $resource['format'] = !empty($resource['format'])
+                            ? $resource['format']
+                            : $alternativeFileFormat;
+
                         $fileFormat = strtoupper(str_replace('.', '', $resource['format']));
                         $resource['created_by'] = $resCreatedBy;
 

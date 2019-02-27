@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Search results ordering in my data section
 - Remove data sets from inactive and not approved organisations
+- Get resource format from file extension
 
 ### Added
 - Different csv delimiters

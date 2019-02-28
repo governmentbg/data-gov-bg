@@ -13,6 +13,13 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.23] - 2019-02-28
+### Fixed
+- List datasets api function pagination
+
+### Removed
+- Remove data sets from inactive and not approved organisations
+
 ## [1.0.22] - 2019-02-28
 ### Changed
 - Homepage statistics with cron and cache
@@ -394,6 +401,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.23]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.22...v1.0.23
 [1.0.22]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.21...v1.0.22
 [1.0.21]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.20...v1.0.21
 [1.0.20]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.19...v1.0.20

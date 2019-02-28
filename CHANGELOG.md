@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- List datasets api function pagination
 
 ## [1.0.22] - 2019-02-28
 ### Changed

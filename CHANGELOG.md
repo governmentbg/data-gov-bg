@@ -15,6 +15,9 @@ Security - in case of vulnerabilities.
 ### Fixed
 - List datasets api function pagination
 
+### Removed
+- Remove data sets from inactive and not approved organisations
+
 ## [1.0.22] - 2019-02-28
 ### Changed
 - Homepage statistics with cron and cache

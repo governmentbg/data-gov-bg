@@ -570,7 +570,8 @@ class ResourceController extends Controller {
         }
 
         if (!empty($fileData)) {
-            $handle = fopen('../storage/app/'. $fileName, 'w+');
+            $tmpFileName = str_random(32);
+            $handle = fopen('../storage/app/'. $tmpFileName, 'w+');
             $path = stream_get_meta_data($handle)['uri'];
 
             fwrite($handle, $fileData);

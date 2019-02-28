@@ -693,6 +693,7 @@ class DataSetController extends ApiController
                 if (!empty($criteria['formats'])) {
                     $formatCodes = array_flip(Resource::getFormats());
                     $formats = [];
+
                     foreach ($criteria['formats'] as $format) {
                         if (isset($formatCodes[$format])) {
                             array_push($formats, $formatCodes[$format]);
@@ -759,12 +760,10 @@ class DataSetController extends ApiController
                     $query->orderBy($order['field'], $order['type']);
                 }
 
-                if (isset($post['records_per_page'])) {
-                    $query->forPage(
-                        $request->offsetGet('page_number'),
-                        $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-                    );
-                }
+                $query->forPage(
+                    $request->offsetGet('page_number'),
+                    $this->getRecordsPerPage($request->offsetGet('records_per_page'))
+                );
 
                 $results = [];
 
@@ -814,12 +813,14 @@ class DataSetController extends ApiController
 
                     $result['formats'] = array_keys($formats);
                     $tags = [];
+
                     foreach ($set->tags as $tag) {
                         $tags[] = [
                             'id'    => $tag->id,
                             'name'  => $tag->name,
                         ];
                     }
+
                     $result['tags'] = $tags;
 
                     $results[] = $result;

@@ -13,6 +13,13 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.22] - 2019-02-28
+### Changed
+- Homepage statistics with cron and cache
+
+### Fixed
+- Download resources with long names
+
 ## [1.0.21] - 2019-02-28
 ### Fixed
 - Get resource format from file extension
@@ -387,6 +394,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.22]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.21...v1.0.22
 [1.0.21]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.20...v1.0.21
 [1.0.20]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.19...v1.0.20
 [1.0.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.18...v1.0.19

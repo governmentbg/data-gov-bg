@@ -617,31 +617,8 @@ class ResourceController extends ApiController
 
             try {
                 $result = DB::transaction(function () use ($resource, $dataset, $post, $newVersion) {
-                    $id = $resource->id;
-                    $index = $resource->dataSet->id;
-                    // Update signals status after resource version update and mark resource as not reported
-                    Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
-                    $resource->is_reported = Resource::REPORTED_FALSE;
-                    $resource->version = $newVersion;
 
-                    if (!empty($post['format'])) {
-                        $resource->file_format = Resource::getFormatsCode($post['format']);
-                    }
-
-                    $resource->save();
-
-                    // Increase dataset version without goint to new full version
-                    $versionParts = explode('.', $dataset->version);
-
-                    if (isset($versionParts[1])) {
-                        $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
-                    } else {
-                        $dataset->version = $versionParts[0] .'.1';
-                    }
-
-                    $dataset->save();
-
-                    $prevVersionData = ElasticDataSet::getElasticData($resource->id, $newVersion - 1);
+                    $prevVersionData = ElasticDataSet::getElasticData($resource->id, $resource->version);
 
                     if ($prevVersionData === $post['data']) {
                         $message = __('custom.resource_updated');
@@ -650,6 +627,30 @@ class ResourceController extends ApiController
 
                         return $this->successResponse(['message' => $message], true);
                     } else {
+                        $id = $resource->id;
+                        $index = $resource->dataSet->id;
+                        // Update signals status after resource version update and mark resource as not reported
+                        Signal::where('resource_id', '=', $resource->id)->update(['status' => Signal::STATUS_PROCESSED]);
+                        $resource->is_reported = Resource::REPORTED_FALSE;
+                        $resource->version = $newVersion;
+
+                        if (!empty($post['format'])) {
+                            $resource->file_format = Resource::getFormatsCode($post['format']);
+                        }
+
+                        $resource->save();
+
+                        // Increase dataset version without goint to new full version
+                        $versionParts = explode('.', $dataset->version);
+
+                        if (isset($versionParts[1])) {
+                            $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
+                        } else {
+                            $dataset->version = $versionParts[0] .'.1';
+                        }
+
+                        $dataset->save();
+
                         $elasticDataSet = ElasticDataSet::create([
                             'index'         => $index,
                             'index_type'    => ElasticDataSet::ELASTIC_TYPE,

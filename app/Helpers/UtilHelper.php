@@ -180,7 +180,7 @@ function migrate_datasets($dataSetUri, $convert)
             return $datasetInfo;
         } else {
             $failedDatasets++;
-            Log::error('Dataset "'. $dataSet['title'] .'" with id: "'. $dataSet['id'] .'" failed!');
+            Log::error('Dataset "'. $dataSet['title'] .'" with uri(id): "'. $dataSet['id'] .'" failed!');
 
             return false;
         }
@@ -275,7 +275,7 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
             }
         } else {
             Log::error('Resource metadata "'. $newData['data']['name']
-                .'" with id: "'. $resourceData['id']
+                .'" with uri(id): "'. $resourceData['id']
                 .'" failed! Parent Dataset id: "'. $dataSetId .'".');
         }
     }
@@ -557,27 +557,27 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
             gc_collect_cycles();
 
             if ($resultElastic->success) {
-                Log::info('Resource with id: "'. $resourceURI .'" added successfully to elastic!');
+                Log::info('Resource with uri(id): "'. $resourceURI .'" added successfully to elastic!');
 
                 return true;
             } else {
                 // Delete resource metadata record if there are errors
-                Log::error('Resource with id: "'. $resourceURI .'" failed on adding in elastic!');
+                Log::error('Resource with uri(id): "'. $resourceURI .'" failed on adding in elastic!');
 
                 if ($resource && !$alreadyExists) {
                     $resource->forceDelete();
-                    Log::warning('Remove resource metadata with id: "'. $resourceURI .'"');
+                    Log::warning('Remove resource metadata with uri(id): "'. $resourceURI .'"');
                 }
 
                 return false;
             }
         } else {
             // Delete resource metadata record if there are errors
-            Log::error('Resource with id: "'. $resourceURI .'" failed on adding in elastic!');
+            Log::error('Resource with uri(id): "'. $resourceURI .'" failed on adding in elastic!');
 
             if ($resource && !$alreadyExists) {
                 $resource->forceDelete();
-                Log::warning('Remove resource metadata with id: "'. $resourceURI .'"');
+                Log::warning('Remove resource metadata with uri(id): "'. $resourceURI .'"');
             }
         }
 

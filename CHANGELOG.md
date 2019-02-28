@@ -12,6 +12,11 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.22] - 2019-02-28
+### Changed
+- Homepage statistics with cron and cache
+
 ### Fixed
 - Download resources with long names
 

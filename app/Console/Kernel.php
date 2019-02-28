@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('newsletter:send weekly')->weeklyOn(1, config('app.NEWSLETTER_SEND_TIME'));
             $schedule->command('newsletter:send monthly')->monthlyOn(1, config('app.NEWSLETTER_SEND_TIME'));
             $schedule->command('resource:sendpending')->everyMinute();
+            $schedule->command('update:counters')->everyTenMinutes();
         }
     }
 

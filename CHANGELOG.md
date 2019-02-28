@@ -13,9 +13,15 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.0.21] - 2019-02-28
+### Fixed
+- Get resource format from file extension
+- Update resource/dataset version only if resource`s data will be uploaded to elastic
+
 ## [1.0.20] - 2019-02-27
 ### Added
 - Different csv delimiters
+- Username to member invitation mail
 
 ### Changed
 - New pdf library (smalot/pdfparser)
@@ -381,6 +387,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.21]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.20...v1.0.21
 [1.0.20]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.19...v1.0.20
 [1.0.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.18...v1.0.19
 [1.0.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.17...v1.0.18

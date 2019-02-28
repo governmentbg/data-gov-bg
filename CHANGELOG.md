@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Download resources with long names
 
 ## [1.0.21] - 2019-02-28
 ### Fixed

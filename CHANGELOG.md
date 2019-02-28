@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Get resource format from file extension
+- Update resource/dataset version only if resource`s data will be uploaded to elastic
 
 ## [1.0.20] - 2019-02-27
 ### Added

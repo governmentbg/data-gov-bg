@@ -119,7 +119,14 @@ class ConversionController extends ApiController
                 $data = [];
 
                 while (!$file->eof()) {
-                    $data[] = $file->fgetcsv($delimiter);
+                    $rows = array_map('trim', $file->fgetcsv($delimiter));
+                    $length = array_reduce($rows, function($carry, $item) { return $carry + strlen($item); }, 0);
+
+                    if ($length === 0) {
+                        continue;
+                    }
+
+                    $data[] = $rows;
                 }
 
                 if ($this->emptyRecursive($data)) {
@@ -326,6 +333,49 @@ class ConversionController extends ApiController
                 $parser = new \Smalot\PdfParser\Parser();
                 $pdf = $parser->parseContent(base64_decode($post['data']));
                 $result = $pdf->getText();
+
+                if (empty($result)) {
+                    try {
+                        $pages = 1;
+                        $temp = tmpfile();
+                        $path = stream_get_meta_data($temp)['uri'];
+
+                        file_put_contents($path, base64_decode($post['data']));
+                        $paths = [$path];
+
+                        $im = new \Imagick();
+                        $im->setResolution(300, 300);
+                        $im->readimage($path);
+                        $im->setImageFormat('jpeg');
+                        $im->setImageDepth(8);
+                        $im->stripImage();
+                        $im->setBackgroundColor('white');
+                        $pages = $im->getNumberImages();
+
+                        if ($pages > 1) {
+                            for ($i = 0; $i < $pages; $i++) {
+                                $paths[] = $path .'-'. $i;
+                            }
+                        }
+
+                        $im->writeImages($path, false);
+
+                        shell_exec('convert -append '. escapeshellarg($path) .'-* '. escapeshellarg($path));
+
+                        $result = (new TesseractOCR($path))->lang('bul', 'eng')->run() . PHP_EOL;
+                    } finally {
+                        if ($temp) {
+                            fclose($temp);
+                        }
+
+                        $im->clear();
+                        $im->destroy();
+
+                        foreach ($paths as $index => $singlePath) {
+                            @unlink($singlePath);
+                        }
+                    }
+                }
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {
@@ -1029,23 +1079,25 @@ class ConversionController extends ApiController
             $index = 0;
 
             while (!$file->eof() && $index < $checkLines) {
-                $counts[$delimiter][$index] = count($file->fgetcsv($delimiter));
+                $rows = $file->fgetcsv($delimiter);
+                $count = count($rows);
+
+                if ($count === 1 && is_null($rows[0])) {
+                    continue;
+                }
+
+                if (!isset($counts[$delimiter])) {
+                    $counts[$delimiter] = $count;
+                } elseif ($counts[$delimiter] !== $count) {
+                    $counts[$delimiter] = 0;
+                }
+
                 $index++;
             }
 
             $file->fseek(0);
         }
 
-        foreach ($counts as $delimiter => $lines) {
-            foreach ($lines as $index => $count) {
-                if ($index > 0 && $count !== $lines[$index - 1]) {
-                    continue 2;
-                }
-            }
-
-            return $delimiter;
-        }
-
-        return $delimiters[0];
+        return array_search(max($counts), $counts);
     }
 }

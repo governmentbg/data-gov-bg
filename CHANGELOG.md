@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Improved resource type CSV visualization
 
 ## [1.0.23] - 2019-02-28
 ### Fixed

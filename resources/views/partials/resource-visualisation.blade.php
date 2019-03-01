@@ -24,6 +24,11 @@
                                     @foreach ($row as $key => $value)
                                         <td>{{ $value }}</td>
                                     @endforeach
+                                    @if (count($data[0]) > count($row))
+                                        @for ($x = count($data[0]) - count($row); $x >= 0; $x--)
+                                            <td></td>
+                                        @endfor
+                                    @endif
                                 </tr>
                             @endif
                         @endforeach

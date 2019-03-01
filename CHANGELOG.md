@@ -14,6 +14,8 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Improved resource type CSV visualization
+- Improved csv delimiters
+- Improved pdf conversion and file format
 
 ## [1.0.23] - 2019-02-28
 ### Fixed

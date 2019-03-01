@@ -30,6 +30,11 @@
                                 @foreach ($row as $key => $value)
                                     <td>{{ $value }}</td>
                                 @endforeach
+                                @if (count($csvData[0]) > count($row))
+                                    @for ($x = count($csvData[0]) - count($row); $x >= 0; $x--)
+                                        <td></td>
+                                    @endfor
+                                @endif
                             </tr>
                         @endif
                     @endforeach

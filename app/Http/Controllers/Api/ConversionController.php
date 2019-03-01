@@ -334,46 +334,48 @@ class ConversionController extends ApiController
                 $pdf = $parser->parseContent(base64_decode($post['data']));
                 $result = $pdf->getText();
 
-            if (empty($result)) {
-                try {
-                    $pages = 1;
-                    $temp = tmpfile();
-                    $path = stream_get_meta_data($temp)['uri'];
+                if (empty($result)) {
+                    try {
+                        $pages = 1;
+                        $temp = tmpfile();
+                        $path = stream_get_meta_data($temp)['uri'];
 
-                    file_put_contents($path, base64_decode($post['data']));
-                    $paths = [$path];
+                        file_put_contents($path, base64_decode($post['data']));
+                        $paths = [$path];
 
-                    $im = new \Imagick();
-                    $im->setResolution(300, 300);
-                    $im->readimage($path);
-                    $im->setImageFormat('jpeg');
-                    $im->setImageDepth(8);
-                    $im->stripImage();
-                    $im->setBackgroundColor('white');
-                    $pages = $im->getNumberImages();
+                        $im = new \Imagick();
+                        $im->setResolution(300, 300);
+                        $im->readimage($path);
+                        $im->setImageFormat('jpeg');
+                        $im->setImageDepth(8);
+                        $im->stripImage();
+                        $im->setBackgroundColor('white');
+                        $pages = $im->getNumberImages();
 
-                    if ($pages > 1) {
-                        for ($i = 0; $i < $pages; $i++) {
-                            $paths[] = $path .'-'. $i;
+                        if ($pages > 1) {
+                            for ($i = 0; $i < $pages; $i++) {
+                                $paths[] = $path .'-'. $i;
+                            }
+                        }
+
+                        $im->writeImages($path, false);
+
+                        shell_exec('convert -append '. escapeshellarg($path) .'-* '. escapeshellarg($path));
+
+                        $result = (new TesseractOCR($path))->lang('bul', 'eng')->run() . PHP_EOL;
+                    } finally {
+                        if ($temp) {
+                            fclose($temp);
+                        }
+
+                        $im->clear();
+                        $im->destroy();
+
+                        foreach ($paths as $index => $singlePath) {
+                            @unlink($singlePath);
                         }
                     }
-
-                    $im->writeImages($path, false);
-
-                    shell_exec('convert -append '. escapeshellarg($path) .'-* '. escapeshellarg($path));
-
-                    $result = (new TesseractOCR($path))->lang('bul', 'eng')->run() . PHP_EOL;
-
-                    fclose($temp);
-                } finally {
-                    $im->clear();
-                    $im->destroy();
-
-                    foreach ($paths as $index => $singlePath) {
-                        @unlink($singlePath);
-                    }
                 }
-            }
 
                 return $this->successResponse($result);
             } catch (\Exception $ex) {

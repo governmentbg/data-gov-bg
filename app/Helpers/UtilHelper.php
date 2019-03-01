@@ -131,7 +131,7 @@ function migrate_datasets($dataSetUri, $convert)
             $newDataSetId = DB::table('data_sets')->where('uri', $dataSet['id'])->value('id');
 
             //Migrate dataset followers
-            $followersInfo = dataset_followers($newDataSetId);
+            $followersInfo = dataset_followers($dataSet['id']);
 
             if ($dataSet['num_resources'] > 0) {
                 $fileFormats = Resource::getAllowedFormats();
@@ -144,11 +144,12 @@ function migrate_datasets($dataSetUri, $convert)
                         $alternativeFileFormat = explode('/', $resource['url']);
                         $alternativeFileFormat = substr(strrchr(array_pop($alternativeFileFormat), '.'), 1);
 
-                        $resource['format'] = !empty($resource['format'])
+                        $fileFormat = !empty($resource['format'])
                             ? $resource['format']
                             : $alternativeFileFormat;
 
-                        $fileFormat = strtoupper(str_replace('.', '', $resource['format']));
+                        $fileFormat = strtoupper(str_replace('.', '', $fileFormat));
+                        $resource['format'] = $fileFormat;
                         $resource['created_by'] = $resCreatedBy;
 
                         if (in_array($fileFormat, $fileFormats)) {
@@ -883,19 +884,20 @@ function map_terms_of_use($oldLicense)
     return $newTerm;
 }
 
-function dataset_followers($datasetId)
+function dataset_followers($datasetURI)
 {
     $apiKey = config('app.MIGRATE_USER_API_KEY');
     $followers = [];
 
     $params = [
-        'id' => $datasetId
+        'id' => $datasetURI
     ];
     $response = request_url('dataset_follower_list', $params);
+    $datasetId = DB::table('data_sets')->where('uri', $datasetURI)->value('id');
 
     if (isset($response['result']) && !empty($response['result'])) {
         foreach ($response['result'] as $res) {
-            $user = DB::table('organisations')->where('uri', $res['id'])->value('id');
+            $user = DB::table('users')->where('uri', $res['id'])->value('id');
 
             if ($user) {
                 $dsFollowExists = DB::table('user_follows')->where('user_id', $user)
@@ -917,8 +919,7 @@ function dataset_followers($datasetId)
 
             continue;
         }
-
-        $addedFollowers = DB::table('user_follows')->whereIn('data_set_id', $datasetId)->count();
+        $addedFollowers = DB::table('user_follows')->where('data_set_id', $datasetId)->count();
 
         $followers = [
             'totalFollowers' => count($response['result']),

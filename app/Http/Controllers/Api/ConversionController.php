@@ -336,30 +336,24 @@ class ConversionController extends ApiController
 
                 if (empty($result)) {
                     try {
-                        $pages = 1;
                         $temp = tmpfile();
                         $path = stream_get_meta_data($temp)['uri'];
-
-                        file_put_contents($path, base64_decode($post['data']));
-                        $paths = [$path];
+                        fwrite($temp, base64_decode($post['data']));
+                        fseek($temp, 0);
 
                         $im = new \Imagick();
                         $im->setResolution(300, 300);
-                        $im->readimage($path);
+                        $im->readImageFile($temp);
                         $im->setImageDepth(8);
                         $im->stripImage();
                         $im->setBackgroundColor('white');
-                        $pages = $im->getNumberImages();
 
-                        if ($pages > 1) {
-                            for ($i = 0; $i < $pages; $i++) {
-                                $paths[] = $path .'-'. $i;
-                            }
+                        if ($im->getNumberImages() > 1) {
+                            $im->resetIterator();
+                            $im = $im->appendImages(true);
                         }
 
-                        $im->writeImages('jpg:'. $path, false);
-
-                        shell_exec('convert -append '. escapeshellarg($path) .'-* '. escapeshellarg($path));
+                        $im->writeImageFile($temp, 'jpg');
 
                         $result = (new TesseractOCR($path))->lang('bul', 'eng')->run() . PHP_EOL;
                     } finally {
@@ -369,10 +363,6 @@ class ConversionController extends ApiController
 
                         $im->clear();
                         $im->destroy();
-
-                        foreach ($paths as $index => $singlePath) {
-                            @unlink($singlePath);
-                        }
                     }
                 }
 

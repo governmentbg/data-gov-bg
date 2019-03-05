@@ -101,7 +101,7 @@
                     <div class="filter-content tex">
                         <div class="p-l-r-none m-b-lg m-t-md col-md-6">
                             <form class="js-keywords-form">
-                                @foreach (app('request')->except(['keywords']) as $key => $value)
+                                @foreach (app('request')->except(['keywords', 'page']) as $key => $value)
                                     <input name="{{ $key }}" type="hidden" value="{{ $value }}">
                                 @endforeach
                                 <input name="keywords" class="input-border-r-12 form-control" type="text" value="{{ $keywords }}" placeholder="{{ __('custom.search') }}">
@@ -145,8 +145,8 @@
                                 <div class="col-xs-12 p-l-none">
                                     <h3 class="m-b-md"><a href="{{ url('/admin/users/edit/'. $member->id) }}">{{
                                         empty($member->firstname)
-                                        ? $member->username
-                                        : $member->firstname .' '. $member->lastname
+                                            ? $member->username
+                                            : $member->firstname .' '. $member->lastname
                                     }}</a></h3>
                                     @if ($isAdmin)
                                         <div class="js-member-admin-controls">

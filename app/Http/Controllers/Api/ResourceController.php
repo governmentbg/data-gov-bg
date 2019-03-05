@@ -70,8 +70,8 @@ class ResourceController extends ApiController
             $validator = \Validator::make($post['data'], [
                 'description'          => 'nullable|max:8000',
                 'locale'               => 'nullable|max:5',
-                'name'                 => 'required_with:locale|max:191',
-                'name.bg'              => 'required_without:locale|string|max:191',
+                'name'                 => 'required_with:locale|max:8000',
+                'name.bg'              => 'required_without:locale|string|max:8000',
                 'file_format'          => 'nullable|string',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
@@ -294,6 +294,7 @@ class ResourceController extends ApiController
                     $id = $resource->id;
                     $index = $resource->data_set_id;
                     $dataset->version = intval($dataset->version) + 1;
+                    $dataset->updated_by = Auth::id();
                     $dataset->save();
 
                     $elasticDataSet = ElasticDataSet::create([
@@ -383,8 +384,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'                 => 'sometimes|required_with:locale|max:191',
-                'name.bg'              => 'sometimes|required_without:locale|string|max:191',
+                'name'                 => 'sometimes|required_with:locale|max:8000',
+                'name.bg'              => 'sometimes|required_without:locale|string|max:8000',
                 'description'          => 'nullable|max:8000',
                 'file_format'          => 'sometimes|string|max:191',
                 'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',
@@ -512,6 +513,7 @@ class ResourceController extends ApiController
                         $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
                     }
 
+                    $resource->updated_by = Auth::id();
                     $resource->save();
 
                     if (!empty($post['data']['custom_fields'])) {
@@ -638,6 +640,7 @@ class ResourceController extends ApiController
                             $resource->file_format = Resource::getFormatsCode($post['format']);
                         }
 
+                        $resource->updated_by = Auth::id();
                         $resource->save();
 
                         // Increase dataset version without goint to new full version
@@ -649,6 +652,7 @@ class ResourceController extends ApiController
                             $dataset->version = $versionParts[0] .'.1';
                         }
 
+                        $dataset->updated_by = Auth::id();
                         $dataset->save();
 
                         $elasticDataSet = ElasticDataSet::create([

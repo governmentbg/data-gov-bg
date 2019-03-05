@@ -1285,15 +1285,16 @@ class OrganisationController extends ApiController
             try {
                 if (isset($post['role_id']) || isset($post['org_id'])) {
                     UserToOrgRole::where('org_id', $post['org_id'])->where('user_id', $post['user_id'])->delete();
+
                     foreach ($post['role_id'] as $role) {
                         $user = UserToOrgRole::updateOrCreate(
-                            [
-                                'user_id' => $post['user_id'],
-                                'org_id'  => $post['org_id'],
-                                'role_id' => isset($post['role_id']) ? $role : null
-                            ])
-                              ->where('org_id', $post['org_id'])
-                              ->where('user_id', $post['user_id']);
+                        [
+                            'user_id' => $post['user_id'],
+                            'org_id'  => $post['org_id'],
+                            'role_id' => isset($post['role_id']) ? $role : null
+                        ])
+                            ->where('org_id', $post['org_id'])
+                            ->where('user_id', $post['user_id']);
                     }
                 }
 

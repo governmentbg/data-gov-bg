@@ -346,7 +346,6 @@ class ConversionController extends ApiController
                         $im = new \Imagick();
                         $im->setResolution(300, 300);
                         $im->readimage($path);
-                        $im->setImageFormat('jpeg');
                         $im->setImageDepth(8);
                         $im->stripImage();
                         $im->setBackgroundColor('white');
@@ -358,7 +357,7 @@ class ConversionController extends ApiController
                             }
                         }
 
-                        $im->writeImages($path, false);
+                        $im->writeImages('jpg:'. $path, false);
 
                         shell_exec('convert -append '. escapeshellarg($path) .'-* '. escapeshellarg($path));
 

@@ -70,8 +70,8 @@ class ResourceController extends ApiController
             $validator = \Validator::make($post['data'], [
                 'description'          => 'nullable|max:8000',
                 'locale'               => 'nullable|max:5',
-                'name'                 => 'required_with:locale|max:191',
-                'name.bg'              => 'required_without:locale|string|max:191',
+                'name'                 => 'required_with:locale|max:8000',
+                'name.bg'              => 'required_without:locale|string|max:8000',
                 'file_format'          => 'nullable|string',
                 'schema_description'   => 'nullable|string|max:8000',
                 'schema_url'           => 'nullable|url|max:191',
@@ -383,8 +383,8 @@ class ResourceController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
-                'name'                 => 'sometimes|required_with:locale|max:191',
-                'name.bg'              => 'sometimes|required_without:locale|string|max:191',
+                'name'                 => 'sometimes|required_with:locale|max:8000',
+                'name.bg'              => 'sometimes|required_without:locale|string|max:8000',
                 'description'          => 'nullable|max:8000',
                 'file_format'          => 'sometimes|string|max:191',
                 'locale'               => 'sometimes|string|required_with:data.name,data.description|max:5',

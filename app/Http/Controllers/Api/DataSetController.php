@@ -421,7 +421,6 @@ class DataSetController extends ApiController
                     }
 
                     $dataset->updated_by = Auth::id();
-                    
                     $dataset->save();
 
                     if (!empty($customFields)) {

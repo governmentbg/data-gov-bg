@@ -16,6 +16,7 @@ Security - in case of vulnerabilities.
 - Improved resource type CSV visualization
 - Improved csv delimiters
 - Improved pdf conversion and file format
+- Fix updated_by for datasets and resources
 
 ## [1.0.23] - 2019-02-28
 ### Fixed

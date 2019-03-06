@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Keep approved value on edit organisation
 
 ## [1.0.24] - 2019-03-05
 ### Fixed

@@ -3485,10 +3485,6 @@ class UserController extends Controller {
             }
 
             if ($request->has('save')) {
-                if (!Auth::user()->is_admin) {
-                    unset($post['data']['approved']);
-                }
-
                 $request = Request::create('/api/editOrganisation', 'POST', $post);
                 $api = new ApiOrganisation($request);
                 $result = $api->editOrganisation($request)->getData();

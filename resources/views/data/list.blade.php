@@ -222,17 +222,17 @@
                 @endif
                 @foreach ($datasets as $dataset)
                     @php
-                        $datasetOrg = !is_null($dataset->org_id) ? collect($datasetOrgs)->firstWhere('id', $dataset->org_id) : null;
+                        $datasetOrg = !empty($dataset->org_id) ? collect($datasetOrgs)->firstWhere('id', $dataset->org_id) : null;
                     @endphp
                     <div class="col-sm-12 article m-t-md m-b-md p-l-r-none">
                         <div class="art-heading-bar row">
                             <div class="col-sm-7 col-xs-12 p-l-r-none">
                                 @if (!empty($datasetOrg))
-                                <div class="col-sm-2 col-xs-4 logo">
-                                    <a href="{{ url('/organisation/profile/'. $datasetOrg->uri) }}" title="{{ $datasetOrg->name }}">
-                                        <img class="img-responsive" src="{{ $datasetOrg->logo }}" alt="{{ $datasetOrg->name }}">
-                                    </a>
-                                </div>
+                                    <div class="col-sm-2 col-xs-4 logo">
+                                        <a href="{{ url('/organisation/profile/'. $datasetOrg->uri) }}" title="{{ $datasetOrg->name }}">
+                                            <img class="img-responsive" src="{{ $datasetOrg->logo }}" alt="{{ $datasetOrg->name }}">
+                                        </a>
+                                    </div>
                                 @endif
                                 <div class="p-w-sm">
                                     @include(

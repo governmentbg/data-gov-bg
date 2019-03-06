@@ -14,6 +14,10 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Keep approved value on edit organisation
+- Hide public area datasets if organisation is not active or not approved
+
+### Changed
+- Api listDatasets additional array parameter criteria[public] (optional)
 
 ## [1.0.24] - 2019-03-05
 ### Fixed

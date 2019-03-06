@@ -36,7 +36,7 @@ class DataController extends Controller {
 
         $criteria = [];
 
-        // filters
+        // Filters
         $organisations = [];
         $users = [];
         $groups = [];
@@ -47,14 +47,16 @@ class DataController extends Controller {
         $getParams = [];
         $display = [];
 
-        // organisations / users filter
+        // Organisations / users filter
         $userDatasetsOnly = false;
+
         if ($request->filled('org') && is_array($request->org)) {
             $criteria['org_ids'] = $request->org;
             $getParams['org'] = $request->org;
             $getParams['user'] = [];
         } else {
             $getParams['org'] = [];
+
             if ($request->filled('user') && is_array($request->user)) {
                 $criteria['user_ids'] = $request->user;
                 $userDatasetsOnly = true;
@@ -64,7 +66,7 @@ class DataController extends Controller {
             }
         }
 
-        // groups filter
+        // Groups filter
         if ($request->filled('group') && is_array($request->group)) {
             $criteria['group_ids'] = $request->group;
             $getParams['group'] = $request->group;
@@ -72,7 +74,7 @@ class DataController extends Controller {
             $getParams['group'] = [];
         }
 
-        // main categories filter
+        // Main categories filter
         if ($request->filled('category') && is_array($request->category)) {
             $criteria['category_ids'] = $request->category;
             $getParams['category'] = $request->category;
@@ -80,7 +82,7 @@ class DataController extends Controller {
             $getParams['category'] = [];
         }
 
-        // tags filter
+        // Tags filter
         if ($request->filled('tag') && is_array($request->tag)) {
             $criteria['tag_ids'] = $request->tag;
             $getParams['tag'] = $request->tag;
@@ -88,7 +90,7 @@ class DataController extends Controller {
             $getParams['tag'] = [];
         }
 
-        // data formats filter
+        // Data formats filter
         if ($request->filled('format') && is_array($request->format)) {
             $criteria['formats'] = array_map('strtoupper', $request->format);
             $getParams['format'] = $request->format;
@@ -96,7 +98,7 @@ class DataController extends Controller {
             $getParams['format'] = [];
         }
 
-        // terms of use filter
+        // Terms of use filter
         if ($request->filled('license') && is_array($request->license)) {
             $criteria['terms_of_use_ids'] = $request->license;
             $getParams['license'] = $request->license;
@@ -104,37 +106,41 @@ class DataController extends Controller {
             $getParams['license'] = [];
         }
 
-        // prepare datasets parameters
+        // Prepare datasets parameters
         $perPage = 6;
         $params = [
             'records_per_page' => $perPage,
             'page_number'      => !empty($request->page) ? $request->page : 1,
             'criteria'         => $criteria,
         ];
+        $params['criteria']['public'] = true;
         $params['criteria']['locale'] = $locale;
         $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
         $params['criteria']['visibility'] = DataSet::VISIBILITY_PUBLIC;
         $params['criteria']['user_datasets_only'] = $userDatasetsOnly;
 
-        // apply search
+        // Apply search
         if ($request->filled('q') && !empty(trim($request->q))) {
             $getParams['q'] = trim($request->q);
             $params['criteria']['keywords'] = $getParams['q'];
         }
 
-        // apply sort parameters
+        // Apply sort parameters
         if ($request->has('sort')) {
             $getParams['sort'] = $request->sort;
+
             if ($request->sort != 'relevance') {
                 $params['criteria']['order']['field'] = $request->sort;
+
                 if ($request->has('order')) {
                     $params['criteria']['order']['type'] = $request->order;
                 }
+
                 $getParams['order'] = $request->order;
             }
         }
 
-        // list datasets
+        // List datasets
         $rq = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($rq);
         $res = $api->listDatasets($rq)->getData();
@@ -148,36 +154,36 @@ class DataController extends Controller {
         $buttons = [];
 
         if (!empty($paginationData['items'])) {
-            // get organisation ids
+            // Get organisation ids
             $orgIds = array_where(array_pluck($paginationData['items'], 'org_id'), function ($value, $key) {
                 return !is_null($value);
             });
 
-            // list organisations
+            // List organisations
             $params = [
                 'criteria'  => [
-                    'org_ids'  => array_unique($orgIds),
-                    'locale'   => $locale
-                ]
+                    'org_ids'   => array_unique($orgIds),
+                    'locale'    => $locale,
+                ],
             ];
             $rq = Request::create('/api/listOrganisations', 'POST', $params);
             $api = new ApiOrganisation($rq);
             $res = $api->listOrganisations($rq)->getData();
             $datasetOrgs = !empty($res->organisations) ? $res->organisations : [];
-
             $recordsLimit = 10;
 
             if (empty($getParams['user'])) {
-                // check for organisation records limit
+                // Check for organisation records limit
                 $hasLimit = !($request->filled('org_limit') && $request->org_limit == 0);
 
-                // list data organisations
+                // List data organisations
                 $params = [
                     'criteria' => [
-                        'dataset_criteria' => $criteria,
-                        'locale' => $locale
+                        'dataset_criteria'  => $criteria,
+                        'locale'            => $locale,
                     ],
                 ];
+
                 if ($hasLimit) {
                     $params['criteria']['records_limit'] = $recordsLimit;
                 }
@@ -193,15 +199,16 @@ class DataController extends Controller {
             }
 
             if (empty($getParams['org'])) {
-                // check for user records limit
+                // Check for user records limit
                 $hasLimit = !($request->filled('user_limit') && $request->user_limit == 0);
 
-                // list data users
+                // List data users
                 $params = [
-                    'criteria' => [
-                        'dataset_criteria' => $criteria
+                    'criteria'          => [
+                        'dataset_criteria'  => $criteria,
                     ],
                 ];
+
                 if ($hasLimit) {
                     $params['criteria']['records_limit'] = $recordsLimit;
                 }
@@ -216,16 +223,17 @@ class DataController extends Controller {
                 $this->prepareDisplayParams(count($users), $hasLimit, $recordsLimit, 'user', $display);
             }
 
-            // check for group records limit
+            // Check for group records limit
             $hasLimit = !($request->filled('group_limit') && $request->group_limit == 0);
 
-            // list data groups
+            // List data groups
             $params = [
-                'criteria' => [
-                    'dataset_criteria' => $criteria,
-                    'locale' => $locale
+                'criteria'          => [
+                    'dataset_criteria'  => $criteria,
+                    'locale'            => $locale,
                 ],
             ];
+
             if ($hasLimit) {
                 $params['criteria']['records_limit'] = $recordsLimit;
             }
@@ -239,16 +247,17 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($groups), $hasLimit, $recordsLimit, 'group', $display);
 
-            // check for category records limit
+            // Check for category records limit
             $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
 
-            // list data categories
+            // List data categories
             $params = [
                 'criteria' => [
-                    'dataset_criteria' => $criteria,
-                    'locale' => $locale
+                    'dataset_criteria'  => $criteria,
+                    'locale'            => $locale,
                 ],
             ];
+
             if ($hasLimit) {
                 $params['criteria']['records_limit'] = $recordsLimit;
             }
@@ -262,13 +271,13 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($categories), $hasLimit, $recordsLimit, 'category', $display);
 
-            // check for tag records limit
+            // Check for tag records limit
             $hasLimit = !($request->filled('tag_limit') && $request->tag_limit == 0);
 
-            // list data tags
+            // List data tags
             $params = [
                 'criteria' => [
-                    'dataset_criteria' => $criteria
+                    'dataset_criteria' => $criteria,
                 ],
             ];
             if ($hasLimit) {
@@ -284,15 +293,16 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($tags), $hasLimit, $recordsLimit, 'tag', $display);
 
-            // check for format records limit
+            // Check for format records limit
             $hasLimit = !($request->filled('format_limit') && $request->format_limit == 0);
 
-            // list data formats
+            // List data formats
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
                 ],
             ];
+
             if ($hasLimit) {
                 $params['criteria']['records_limit'] = $recordsLimit;
             }
@@ -306,16 +316,17 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
 
-            // check for terms of use records limit
+            // Check for terms of use records limit
             $hasLimit = !($request->filled('license_limit') && $request->license_limit == 0);
 
-            // list data terms of use
+            // List data terms of use
             $params = [
                 'criteria' => [
-                    'dataset_criteria' => $criteria,
-                    'locale' => $locale
+                    'dataset_criteria'  => $criteria,
+                    'locale'            => $locale,
                 ],
             ];
+
             if ($hasLimit) {
                 $params['criteria']['records_limit'] = $recordsLimit;
             }
@@ -332,14 +343,16 @@ class DataController extends Controller {
             if ($authUser = \Auth::user()) {
                 $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+
                 if ($rightCheck) {
                     $userData = [
                         'api_key' => $authUser->api_key,
                         'id'      => $authUser->id
                     ];
 
-                    // get followed categories
+                    // Get followed categories
                     $followed = [];
+
                     if ($this->getFollowed($userData, 'category_id', $followed)) {
                         foreach ($getParams['category'] as $selCategory) {
                             if (!in_array($selCategory, $followed)) {
@@ -349,21 +362,31 @@ class DataController extends Controller {
                             }
                         }
 
-                        // follow / unfollow category
+                        // Follow / unfollow category
                         $followReq = [];
+
                         if ($request->has('followCategory')) {
                             $followReq['follow'] = $request->followCategory;
                         } elseif ($request->has('unfollowCategory')) {
                             $followReq['unfollow'] = $request->unfollowCategory;
                         }
-                        $followResult = $this->followObject($followReq, $userData, $followed, 'category_id', $getParams['category']);
+
+                        $followResult = $this->followObject(
+                            $followReq,
+                            $userData,
+                            $followed,
+                            'category_id',
+                            $getParams['category']
+                        );
+
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
                     }
 
-                    // get followed tags
+                    // Get followed tags
                     $followed = [];
+
                     if ($this->getFollowed($userData, 'tag_id', $followed)) {
                         foreach ($getParams['tag'] as $selTag) {
                             if (!in_array($selTag, $followed)) {
@@ -373,28 +396,34 @@ class DataController extends Controller {
                             }
                         }
 
-                        // follow / unfollow tag
+                        // Follow / unfollow tag
                         $followReq = [];
+
                         if ($request->has('followTag')) {
                             $followReq['follow'] = $request->followTag;
                         } elseif ($request->has('unfollowTag')) {
                             $followReq['unfollow'] = $request->unfollowTag;
                         }
+
                         $followResult = $this->followObject($followReq, $userData, $followed, 'tag_id', $getParams['tag']);
+
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
                     }
 
-                    // get followed datasets
+                    // Get followed datasets
                     $followed = [];
+
                     if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         $datasetIds = array_pluck($paginationData['items'], 'id');
+
                         foreach ($datasetIds as $datasetId) {
                             $buttons[$datasetId] = [
                                 'follow'   => false,
                                 'unfollow' => false,
                             ];
+
                             if (!in_array($datasetId, $followed)) {
                                 $buttons[$datasetId]['follow'] = true;
                             } else {
@@ -402,7 +431,7 @@ class DataController extends Controller {
                             }
                         }
 
-                        // follow / unfollow dataset
+                        // Follow / unfollow dataset
                         $followReq = $request->only(['follow', 'unfollow']);
                         $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
                         if (!empty($followResult) && $followResult->success) {
@@ -420,7 +449,7 @@ class DataController extends Controller {
         }
 
         if (\Auth::check()) {
-            // check rights for add button
+            // Check rights for add button
             $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
             $buttons['add'] = $rightCheck;
 
@@ -489,7 +518,7 @@ class DataController extends Controller {
         $followResult = null;
 
         if (isset($followReq['follow'])) {
-            // follow object
+            // Follow object
             if (in_array($followReq['follow'], $objIds) && !in_array($followReq['follow'], $followed)) {
                 $followRq = Request::create('api/addFollow', 'POST', [
                     'api_key'    => $userData['api_key'],
@@ -500,7 +529,7 @@ class DataController extends Controller {
                 $followResult = $apiFollow->addFollow($followRq)->getData();
             }
         } elseif (isset($followReq['unfollow'])) {
-            // unfollow object
+            // Unfollow object
             if (in_array($followReq['unfollow'], $objIds) && in_array($followReq['unfollow'], $followed)) {
                 $followRq = Request::create('api/unFollow', 'POST', [
                     'api_key'    => $userData['api_key'],
@@ -520,10 +549,10 @@ class DataController extends Controller {
         $locale = \LaravelLocalization::getCurrentLocale();
         $groups = [];
 
-        // get dataset details
+        // Get dataset details
         $params = [
-            'dataset_uri' => $uri,
-            'locale'  => $locale
+            'dataset_uri'   => $uri,
+            'locale'        => $locale,
         ];
         $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($rq);
@@ -531,9 +560,9 @@ class DataController extends Controller {
         $dataset = !empty($res->data) ? $res->data : [];
 
         if (
-            !empty($dataset) &&
-            $dataset->status == DataSet::STATUS_PUBLISHED &&
-            $dataset->visibility == DataSet::VISIBILITY_PUBLIC
+            !empty($dataset)
+            && $dataset->status == DataSet::STATUS_PUBLISHED
+            && $dataset->visibility == DataSet::VISIBILITY_PUBLIC
         ) {
             $setGroups = [];
 
@@ -545,20 +574,21 @@ class DataController extends Controller {
 
             $organisation = [];
             $user = [];
+
             if (!is_null($dataset->org_id)) {
-                // get organisation details
+                // Get organisation details
                 $params = [
                     'org_id'  => $dataset->org_id,
-                    'locale'  => $locale
+                    'locale'  => $locale,
                 ];
                 $rq = Request::create('/api/getOrganisationDetails', 'POST', $params);
                 $api = new ApiOrganisation($rq);
                 $res = $api->getOrganisationDetails($rq)->getData();
                 $organisation = !empty($res->data) ? $res->data : [];
             } else {
-                // get user details
+                // Get user details
                 $params = [
-                    'criteria' => ['id' => $dataset->created_by]
+                    'criteria' => ['id' => $dataset->created_by],
                 ];
                 $rq = Request::create('/api/listUsers', 'POST', $params);
                 $api = new ApiUser($rq);
@@ -567,13 +597,13 @@ class DataController extends Controller {
             }
 
             if (\Auth::check() && $request->has('delete')) {
-                // check delete rights
+                // Check delete rights
                 $checkData = [
-                    'org_id' => $dataset->org_id
+                    'org_id'    => $dataset->org_id,
                 ];
                 $objData = [
-                    'org_id'      => $dataset->org_id,
-                    'created_by'  => $dataset->created_by
+                    'org_id'        => $dataset->org_id,
+                    'created_by'    => $dataset->created_by,
                 ];
                 $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
 
@@ -593,15 +623,18 @@ class DataController extends Controller {
                         return redirect()->route('data', array_except($request->query(), ['page']));
                     }
 
-                    $request->session()->flash('alert-danger', isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete'));
+                    $request->session()->flash(
+                        'alert-danger',
+                        isset($result->error) ? $result->error->message : __('custom.fail_dataset_delete')
+                    );
                 }
             }
 
-            // list resources
+            // List resources
             $params = [
-                'criteria' => [
-                    'dataset_uri' => $uri
-                ]
+                'criteria'      => [
+                    'dataset_uri'   => $uri,
+                ],
             ];
             $resPerPage = 10;
             $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
@@ -622,11 +655,11 @@ class DataController extends Controller {
             $resources = !empty($res->resources) ? $res->resources : [];
             $resCount = $res->total_records;
 
-            // get category details
+            // Get category details
             if (!empty($dataset->category_id)) {
                 $params = [
-                    'category_id' => $dataset->category_id,
-                    'locale'  => $locale
+                    'category_id'   => $dataset->category_id,
+                    'locale'        => $locale,
                 ];
                 $rq = Request::create('/api/getMainCategoryDetails', 'POST', $params);
                 $api = new ApiCategory($rq);
@@ -635,11 +668,11 @@ class DataController extends Controller {
                 $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
             }
 
-            // get terms of use details
+            // Get terms of use details
             if (!empty($dataset->terms_of_use_id)) {
                 $params = [
-                    'terms_id' => $dataset->terms_of_use_id,
-                    'locale'  => $locale
+                    'terms_id'  => $dataset->terms_of_use_id,
+                    'locale'    => $locale,
                 ];
                 $rq = Request::create('/api/getTermsOfUseDetails', 'POST', $params);
                 $api = new ApiTermsOfUse($rq);
@@ -649,17 +682,20 @@ class DataController extends Controller {
             }
 
             $buttons = [];
+
             if ($authUser = \Auth::user()) {
                 $objData = ['object_id' => $authUser->id];
                 $rightCheck = RoleRight::checkUserRight(Module::USERS, RoleRight::RIGHT_EDIT, [], $objData);
+
                 if ($rightCheck) {
                     $userData = [
-                        'api_key' => $authUser->api_key,
-                        'id'      => $authUser->id
+                        'api_key'   => $authUser->api_key,
+                        'id'        => $authUser->id,
                     ];
 
-                    // get followed datasets
+                    // Get followed datasets
                     $followed = [];
+
                     if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         if (!in_array($dataset->id, $followed)) {
                             $buttons['follow'] = true;
@@ -667,9 +703,16 @@ class DataController extends Controller {
                             $buttons['unfollow'] = true;
                         }
 
-                        // follow / unfollow dataset
+                        // Follow / unfollow dataset
                         $followReq = $request->only(['follow', 'unfollow']);
-                        $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
+                        $followResult = $this->followObject(
+                            $followReq,
+                            $userData,
+                            $followed,
+                            'data_set_id',
+                            [$dataset->id]
+                        );
+
                         if (!empty($followResult) && $followResult->success) {
                             return back();
                         }
@@ -677,22 +720,22 @@ class DataController extends Controller {
                 }
 
                 $checkData = [
-                    'org_id' => $dataset->org_id
+                    'org_id'    => $dataset->org_id,
                 ];
                 $objData = [
-                    'org_id'      => $dataset->org_id,
-                    'created_by'  => $dataset->created_by
+                    'org_id'        => $dataset->org_id,
+                    'created_by'    => $dataset->created_by,
                 ];
 
-                // check rights for add resource button
+                // Check rights for add resource button
                 $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['addResource'] = $rightCheck;
 
-                // check rights for edit button
+                // Check rights for edit button
                 $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['edit'] = $rightCheck;
 
-                // check rights for delete button
+                // Check rights for delete button
                 $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
                 $buttons['delete'] = $rightCheck;
 
@@ -779,9 +822,7 @@ class DataController extends Controller {
 
             return view(
                 'data/view',
-                !empty($discussion)
-                    ? array_merge($viewParams, $discussion)
-                    : $viewParams
+                !empty($discussion) ? array_merge($viewParams, $discussion) : $viewParams
             );
         }
 
@@ -803,7 +844,7 @@ class DataController extends Controller {
         $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
-            // get dataset details
+            // Get dataset details
             $params = [
                 'dataset_uri' => $resource->dataset_uri,
                 'locale'  => $locale
@@ -820,7 +861,7 @@ class DataController extends Controller {
                 $organisation = [];
                 $user = [];
                 if (!is_null($dataset->org_id)) {
-                    // get organisation details
+                    // Get organisation details
                     $params = [
                         'org_id'  => $dataset->org_id,
                         'locale'  => $locale
@@ -830,7 +871,7 @@ class DataController extends Controller {
                     $res = $api->getOrganisationDetails($rq)->getData();
                     $organisation = !empty($res->data) ? $res->data : [];
                 } else {
-                    // get user details
+                    // Get user details
                     $params = [
                         'criteria' => ['id' => $dataset->created_by]
                     ];
@@ -840,7 +881,7 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
-                // set resource format code
+                // Set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
                 $formats = Resource::getFormats(true);
 
@@ -849,7 +890,7 @@ class DataController extends Controller {
                 }
 
                 if (\Auth::check() && $request->has('delete')) {
-                    // check delete rights
+                    // Check delete rights
                     $checkData = [
                         'org_id' => $dataset->org_id
                     ];
@@ -879,7 +920,7 @@ class DataController extends Controller {
                     }
                 }
 
-                // get resource data
+                // Get resource data
                 $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri, 'version' => $version]);
                 $api = new ApiResource($rq);
                 $res = $api->getResourceData($rq)->getData();
@@ -914,12 +955,12 @@ class DataController extends Controller {
                         'created_by'  => $resource->created_by
                     ];
 
-                    // check rights for update / edit buttons
+                    // Check rights for update / edit buttons
                     $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
                     $buttons['update'] = $rightCheck;
                     $buttons['edit'] = $rightCheck;
 
-                    // check rights for delete button
+                    // Check rights for delete button
                     $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
                     $buttons['delete'] = $rightCheck;
 
@@ -1100,7 +1141,7 @@ class DataController extends Controller {
             'reported' => Resource::REPORTED_TRUE
         ];
 
-        // filters
+        // Filters
         $organisations = [];
         $users = [];
         $groups = [];
@@ -1111,7 +1152,7 @@ class DataController extends Controller {
         $getParams = [];
         $display = [];
 
-        // organisations / users filter
+        // Organisations / users filter
         $userDatasetsOnly = false;
         if ($request->filled('org') && is_array($request->org)) {
             $criteria['org_ids'] = $request->org;
@@ -1128,7 +1169,7 @@ class DataController extends Controller {
             }
         }
 
-        // groups filter
+        // Groups filter
         if ($request->filled('group') && is_array($request->group)) {
             $criteria['group_ids'] = $request->group;
             $getParams['group'] = $request->group;
@@ -1136,7 +1177,7 @@ class DataController extends Controller {
             $getParams['group'] = [];
         }
 
-        // main categories filter
+        // Main categories filter
         if ($request->filled('category') && is_array($request->category)) {
             $criteria['category_ids'] = $request->category;
             $getParams['category'] = $request->category;
@@ -1144,7 +1185,7 @@ class DataController extends Controller {
             $getParams['category'] = [];
         }
 
-        // tags filter
+        // Tags filter
         if ($request->filled('tag') && is_array($request->tag)) {
             $criteria['tag_ids'] = $request->tag;
             $getParams['tag'] = $request->tag;
@@ -1152,7 +1193,7 @@ class DataController extends Controller {
             $getParams['tag'] = [];
         }
 
-        // data formats filter
+        // Data formats filter
         if ($request->filled('format') && is_array($request->format)) {
             $criteria['formats'] = array_map('strtoupper', $request->format);
             $getParams['format'] = $request->format;
@@ -1160,7 +1201,7 @@ class DataController extends Controller {
             $getParams['format'] = [];
         }
 
-        // terms of use filter
+        // Terms of use filter
         if ($request->filled('license') && is_array($request->license)) {
             $criteria['terms_of_use_ids'] = $request->license;
             $getParams['license'] = $request->license;
@@ -1168,7 +1209,7 @@ class DataController extends Controller {
             $getParams['license'] = [];
         }
 
-        // prepare datasets parameters
+        // Prepare datasets parameters
         $perPage = 6;
         $params = [
             'records_per_page' => $perPage,
@@ -1180,13 +1221,13 @@ class DataController extends Controller {
         $params['criteria']['visibility'] = DataSet::VISIBILITY_PUBLIC;
         $params['criteria']['user_datasets_only'] = $userDatasetsOnly;
 
-        // apply search
+        // Apply search
         if ($request->filled('q') && !empty(trim($request->q))) {
             $getParams['q'] = trim($request->q);
             $params['criteria']['keywords'] = $getParams['q'];
         }
 
-        // apply sort parameters
+        // Apply sort parameters
         if ($request->has('sort')) {
             $getParams['sort'] = $request->sort;
             if ($request->sort != 'relevance') {
@@ -1198,7 +1239,7 @@ class DataController extends Controller {
             }
         }
 
-        // list datasets
+        // List datasets
         $rq = Request::create('/api/listDatasets', 'POST', $params);
         $api = new ApiDataSet($rq);
         $res = $api->listDatasets($rq)->getData();
@@ -1212,12 +1253,12 @@ class DataController extends Controller {
         $buttons = [];
 
         if (!empty($paginationData['items'])) {
-            // get organisation ids
+            // Get organisation ids
             $orgIds = array_where(array_pluck($paginationData['items'], 'org_id'), function ($value, $key) {
                 return !is_null($value);
             });
 
-            // list organisations
+            // List organisations
             $params = [
                 'criteria'  => [
                     'org_ids'  => array_unique($orgIds),
@@ -1232,10 +1273,10 @@ class DataController extends Controller {
             $recordsLimit = 10;
 
             if (empty($getParams['user'])) {
-                // check for organisation records limit
+                // Check for organisation records limit
                 $hasLimit = !($request->filled('org_limit') && $request->org_limit == 0);
 
-                // list data organisations
+                // List data organisations
                 $params = [
                     'criteria' => [
                         'dataset_criteria' => $criteria,
@@ -1257,10 +1298,10 @@ class DataController extends Controller {
             }
 
             if (empty($getParams['org'])) {
-                // check for user records limit
+                // Check for user records limit
                 $hasLimit = !($request->filled('user_limit') && $request->user_limit == 0);
 
-                // list data users
+                // List data users
                 $params = [
                     'criteria' => [
                         'dataset_criteria' => $criteria
@@ -1280,10 +1321,10 @@ class DataController extends Controller {
                 $this->prepareDisplayParams(count($users), $hasLimit, $recordsLimit, 'user', $display);
             }
 
-            // check for group records limit
+            // Check for group records limit
             $hasLimit = !($request->filled('group_limit') && $request->group_limit == 0);
 
-            // list data groups
+            // List data groups
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
@@ -1303,13 +1344,13 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($groups), $hasLimit, $recordsLimit, 'group', $display);
 
-            // check for category records limit
+            // Check for category records limit
             $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
 
-            // check for category records limit
+            // Check for category records limit
             $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
 
-            // list data categories
+            // List data categories
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
@@ -1329,10 +1370,10 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($categories), $hasLimit, $recordsLimit, 'category', $display);
 
-            // check for tag records limit
+            // Check for tag records limit
             $hasLimit = !($request->filled('tag_limit') && $request->tag_limit == 0);
 
-            // list data tags
+            // List data tags
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria
@@ -1351,10 +1392,10 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($tags), $hasLimit, $recordsLimit, 'tag', $display);
 
-            // check for format records limit
+            // Check for format records limit
             $hasLimit = !($request->filled('format_limit') && $request->format_limit == 0);
 
-            // list data formats
+            // List data formats
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
@@ -1373,10 +1414,10 @@ class DataController extends Controller {
 
             $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
 
-            // check for terms of use records limit
+            // Check for terms of use records limit
             $hasLimit = !($request->filled('license_limit') && $request->license_limit == 0);
 
-            // list data terms of use
+            // List data terms of use
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
@@ -1405,7 +1446,7 @@ class DataController extends Controller {
                         'id'      => $authUser->id
                     ];
 
-                    // get followed categories
+                    // Get followed categories
                     $followed = [];
                     if ($this->getFollowed($userData, 'category_id', $followed)) {
                         foreach ($getParams['category'] as $selCategory) {
@@ -1416,7 +1457,7 @@ class DataController extends Controller {
                             }
                         }
 
-                        // follow / unfollow category
+                        // Follow / unfollow category
                         $followReq = [];
                         if ($request->has('followCategory')) {
                             $followReq['follow'] = $request->followCategory;
@@ -1429,7 +1470,7 @@ class DataController extends Controller {
                         }
                     }
 
-                    // get followed tags
+                    // Get followed tags
                     $followed = [];
                     if ($this->getFollowed($userData, 'tag_id', $followed)) {
                         foreach ($getParams['tag'] as $selTag) {
@@ -1440,7 +1481,7 @@ class DataController extends Controller {
                             }
                         }
 
-                        // follow / unfollow tag
+                        // Follow / unfollow tag
                         $followReq = [];
                         if ($request->has('followTag')) {
                             $followReq['follow'] = $request->followTag;
@@ -1453,7 +1494,7 @@ class DataController extends Controller {
                         }
                     }
 
-                    // get followed datasets
+                    // Get followed datasets
                     $followed = [];
                     if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         $datasetIds = array_pluck($paginationData['items'], 'id');
@@ -1469,7 +1510,7 @@ class DataController extends Controller {
                             }
                         }
 
-                        // follow / unfollow dataset
+                        // Follow / unfollow dataset
                         $followReq = $request->only(['follow', 'unfollow']);
                         $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', $datasetIds);
                         if (!empty($followResult) && $followResult->success) {
@@ -1481,7 +1522,7 @@ class DataController extends Controller {
         }
 
         if  (\Auth::check()) {
-            // check rights for add button
+            // Check rights for add button
             $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT);
             $buttons['add'] = $rightCheck;
 
@@ -1515,10 +1556,10 @@ class DataController extends Controller {
         $locale = \LaravelLocalization::getCurrentLocale();
         $groups = [];
 
-        // get dataset details
+        // Get dataset details
         $params = [
-            'dataset_uri' => $uri,
-            'locale'  => $locale
+            'dataset_uri'   => $uri,
+            'locale'        => $locale,
         ];
         $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
         $api = new ApiDataSet($rq);
@@ -1526,9 +1567,10 @@ class DataController extends Controller {
         $dataset = !empty($res->data) ? $res->data : [];
 
         if (
-            !empty($dataset) && $dataset->reported &&
-            $dataset->status == DataSet::STATUS_PUBLISHED &&
-            $dataset->visibility == DataSet::VISIBILITY_PUBLIC
+            !empty($dataset)
+            && $dataset->reported
+            && $dataset->status == DataSet::STATUS_PUBLISHED
+            && $dataset->visibility == DataSet::VISIBILITY_PUBLIC
         ) {
             $setGroups = [];
 
@@ -1541,7 +1583,7 @@ class DataController extends Controller {
             $organisation = [];
             $user = [];
             if (!is_null($dataset->org_id)) {
-                // get organisation details
+                // Get organisation details
                 $params = [
                     'org_id'  => $dataset->org_id,
                     'locale'  => $locale
@@ -1551,9 +1593,9 @@ class DataController extends Controller {
                 $res = $api->getOrganisationDetails($rq)->getData();
                 $organisation = !empty($res->data) ? $res->data : [];
             } else {
-                // get user details
+                // Get user details
                 $params = [
-                    'criteria' => ['id' => $dataset->created_by]
+                    'criteria' => ['id' => $dataset->created_by],
                 ];
                 $rq = Request::create('/api/listUsers', 'POST', $params);
                 $api = new ApiUser($rq);
@@ -1562,7 +1604,7 @@ class DataController extends Controller {
             }
 
             if (\Auth::check() && $request->has('delete')) {
-                // check delete rights
+                // Check delete rights
                 $checkData = [
                     'org_id' => $dataset->org_id
                 ];
@@ -1592,7 +1634,7 @@ class DataController extends Controller {
                 }
             }
 
-            // list resources
+            // List resources
             $params = [
                 'criteria' => [
                     'dataset_uri' => $uri
@@ -1603,7 +1645,7 @@ class DataController extends Controller {
             $res = $apiResources->listResources($rq)->getData();
             $resources = !empty($res->resources) ? $res->resources : [];
 
-            // get category details
+            // Get category details
             if (!empty($dataset->category_id)) {
                 $params = [
                     'category_id' => $dataset->category_id,
@@ -1616,7 +1658,7 @@ class DataController extends Controller {
                 $dataset->category_name = isset($res->category) && !empty($res->category) ? $res->category->name : '';
             }
 
-            // get terms of use details
+            // Get terms of use details
             if (!empty($dataset->terms_of_use_id)) {
                 $params = [
                     'terms_id' => $dataset->terms_of_use_id,
@@ -1639,7 +1681,7 @@ class DataController extends Controller {
                         'id'      => $authUser->id
                     ];
 
-                    // get followed datasets
+                    // Get followed datasets
                     $followed = [];
                     if ($this->getFollowed($userData, 'dataset_id', $followed)) {
                         if (!in_array($dataset->id, $followed)) {
@@ -1648,7 +1690,7 @@ class DataController extends Controller {
                             $buttons['unfollow'] = true;
                         }
 
-                        // follow / unfollow dataset
+                        // Follow / unfollow dataset
                         $followReq = $request->only(['follow', 'unfollow']);
                         $followResult = $this->followObject($followReq, $userData, $followed, 'data_set_id', [$dataset->id]);
                         if (!empty($followResult) && $followResult->success) {
@@ -1665,15 +1707,15 @@ class DataController extends Controller {
                     'created_by'  => $dataset->created_by
                 ];
 
-                // check rights for add resource button
+                // Check rights for add resource button
                 $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['addResource'] = $rightCheck;
 
-                // check rights for edit button
+                // Check rights for edit button
                 $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_EDIT, $checkData, $objData);
                 $buttons['edit'] = $rightCheck;
 
-                // check rights for delete button
+                // Check rights for delete button
                 $rightCheck = RoleRight::checkUserRight(Module::DATA_SETS, RoleRight::RIGHT_ALL, $checkData, $objData);
                 $buttons['delete'] = $rightCheck;
 
@@ -1758,8 +1800,8 @@ class DataController extends Controller {
         $locale = \LaravelLocalization::getCurrentLocale();
 
         $params = [
-            'resource_uri' => $uri,
-            'locale'  => $locale
+            'resource_uri'  => $uri,
+            'locale'        => $locale,
         ];
         $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
         $api = new ApiResource($rq);
@@ -1767,24 +1809,27 @@ class DataController extends Controller {
         $resource = !empty($res->resource) ? $res->resource : [];
 
         if (!empty($resource) && isset($resource->dataset_uri)) {
-            // get dataset details
+            // Get dataset details
             $params = [
-                'dataset_uri' => $resource->dataset_uri,
-                'locale'  => $locale
+                'dataset_uri'   => $resource->dataset_uri,
+                'locale'        => $locale,
             ];
             $rq = Request::create('/api/getDataSetDetails', 'POST', $params);
             $api = new ApiDataSet($rq);
             $res = $api->getDataSetDetails($rq)->getData();
             $dataset = !empty($res->data) ? $res->data : [];
 
-            if (!empty($dataset) && $dataset->reported &&
-                $dataset->status == DataSet::STATUS_PUBLISHED &&
-                $dataset->visibility == DataSet::VISIBILITY_PUBLIC) {
+            if (
+                !empty($dataset)
+                && $dataset->reported
+                && $dataset->status == DataSet::STATUS_PUBLISHED
+                && $dataset->visibility == DataSet::VISIBILITY_PUBLIC
+            ) {
 
                 $organisation = [];
                 $user = [];
                 if (!is_null($dataset->org_id)) {
-                    // get organisation details
+                    // Get organisation details
                     $params = [
                         'org_id'  => $dataset->org_id,
                         'locale'  => $locale
@@ -1794,7 +1839,7 @@ class DataController extends Controller {
                     $res = $api->getOrganisationDetails($rq)->getData();
                     $organisation = !empty($res->data) ? $res->data : [];
                 } else {
-                    // get user details
+                    // Get user details
                     $params = [
                         'criteria' => ['id' => $dataset->created_by]
                     ];
@@ -1804,7 +1849,7 @@ class DataController extends Controller {
                     $user = !empty($res->users) ? $res->users[0] : [];
                 }
 
-                // set resource format code
+                // Set resource format code
                 $resource->format_code = Resource::getFormatsCode($resource->file_format);
                 $formats = Resource::getFormats(true);
 
@@ -1813,7 +1858,7 @@ class DataController extends Controller {
                 }
 
                 if (\Auth::check() && $request->has('delete')) {
-                    // check delete rights
+                    // Check delete rights
                     $checkData = [
                         'org_id' => $dataset->org_id
                     ];
@@ -1843,7 +1888,7 @@ class DataController extends Controller {
                     }
                 }
 
-                // get resource data
+                // Get resource data
                 $rq = Request::create('/api/getResourceData', 'POST', ['resource_uri' => $resource->uri, 'version' => $version]);
                 $api = new ApiResource($rq);
                 $res = $api->getResourceData($rq)->getData();
@@ -1871,12 +1916,12 @@ class DataController extends Controller {
                         'created_by'  => $resource->created_by
                     ];
 
-                    // check rights for update / edit buttons
+                    // Check rights for update / edit buttons
                     $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_EDIT, $checkData, $objData);
                     $buttons['update'] = $rightCheck;
                     $buttons['edit'] = $rightCheck;
 
-                    // check rights for delete button
+                    // Check rights for delete button
                     $rightCheck = RoleRight::checkUserRight(Module::RESOURCES, RoleRight::RIGHT_ALL, $checkData, $objData);
                     $buttons['delete'] = $rightCheck;
 
@@ -1912,7 +1957,7 @@ class DataController extends Controller {
     {
         $locale = \LaravelLocalization::getCurrentLocale();
 
-        // get dataset details
+        // Get dataset details
         $params = [
             'dataset_uri' => $uri,
             'locale'      => $locale
@@ -1935,7 +1980,7 @@ class DataController extends Controller {
 
             $objOwner = [];
             if (!is_null($dataset->org_id)) {
-                // get organisation details
+                // Get organisation details
                 $params = [
                     'org_id'  => $dataset->org_id,
                     'locale'  => $locale
@@ -1945,7 +1990,7 @@ class DataController extends Controller {
                 $res = $api->getOrganisationDetails($rq)->getData();
                 $organisation = !empty($res->data) ? $res->data : [];
 
-                // set object owner
+                // Set object owner
                 if (!empty($organisation)) {
                     $objOwner = [
                         'id' => $organisation->id,

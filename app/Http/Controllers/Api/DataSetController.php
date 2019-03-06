@@ -554,6 +554,7 @@ class DataSetController extends ApiController
      * @param array criteria[user_ids] - optional
      * @param boolean criteria[user_datasets_only] - optional
      * @param boolean criteria[keywords] - optional
+     * @param array criteria[public] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional
@@ -582,37 +583,38 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($criteria, [
-                'dataset_ids'         => 'nullable|array',
-                'dataset_ids.*'       => 'int|digits_between:1,10',
-                'locale'              => 'nullable|string|max:5',
-                'org_ids'             => 'nullable|array',
-                'org_ids.*'           => 'int|digits_between:1,10',
-                'group_ids'           => 'nullable|array',
-                'group_ids.*'         => 'int|digits_between:1,10',
-                'category_ids'        => 'nullable|array',
-                'category_ids.*'      => 'int|digits_between:1,10',
-                'tag_ids'             => 'nullable|array',
-                'tag_ids.*'           => 'int|digits_between:1,10',
-                'formats'             => 'nullable|array|min:1',
-                'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
-                'terms_of_use_ids'    => 'nullable|array',
-                'terms_of_use_ids.*'  => 'int|digits_between:1,10',
-                'keywords'            => 'nullable|string|max:191',
-                'status'              => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
-                'visibility'          => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
-                'reported'            => 'nullable|int|digits_between:1,10',
-                'created_by'          => 'nullable|int|digits_between:1,10',
-                'user_ids'            => 'nullable|array',
-                'user_ids.*'          => 'int|digits_between:1,10',
-                'user_datasets_only'  => 'nullable|bool',
-                'order'               => 'nullable|array',
+                'dataset_ids'           => 'nullable|array',
+                'dataset_ids.*'         => 'int|digits_between:1,10',
+                'locale'                => 'nullable|string|max:5',
+                'org_ids'               => 'nullable|array',
+                'org_ids.*'             => 'int|digits_between:1,10',
+                'group_ids'             => 'nullable|array',
+                'group_ids.*'           => 'int|digits_between:1,10',
+                'category_ids'          => 'nullable|array',
+                'category_ids.*'        => 'int|digits_between:1,10',
+                'tag_ids'               => 'nullable|array',
+                'tag_ids.*'             => 'int|digits_between:1,10',
+                'formats'               => 'nullable|array|min:1',
+                'formats.*'             => 'string|in:'. implode(',', Resource::getFormats()),
+                'terms_of_use_ids'      => 'nullable|array',
+                'terms_of_use_ids.*'    => 'int|digits_between:1,10',
+                'keywords'              => 'nullable|string|max:191',
+                'status'                => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
+                'visibility'            => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
+                'reported'              => 'nullable|int|digits_between:1,10',
+                'created_by'            => 'nullable|int|digits_between:1,10',
+                'user_ids'              => 'nullable|array',
+                'user_ids.*'            => 'int|digits_between:1,10',
+                'user_datasets_only'    => 'nullable|bool',
+                'public'                => 'nullable|bool',
+                'order'                 => 'nullable|array',
             ]);
         }
 
         if (!$validator->fails()) {
             $validator = \Validator::make($order, [
-                'type'        => 'nullable|string|max:191',
-                'field'       => 'nullable|string|max:191',
+                'type'  => 'nullable|string|max:191',
+                'field' => 'nullable|string|max:191',
             ]);
         }
 
@@ -646,6 +648,19 @@ class DataSetController extends ApiController
                     $query->where('visibility', DataSet::VISIBILITY_PUBLIC);
                 }
 
+                if (!empty($criteria['public'])) {
+                    $query->where(function($q) {
+                        $q->whereIn(
+                            'data_sets.org_id',
+                            Organisation::select('id')
+                                ->where('organisations.active', 1)
+                                ->where('organisations.approved', 1)
+                                ->get()
+                                ->pluck('id')
+                        )
+                            ->orWhereNull('data_sets.org_id');
+                    });
+                }
                 if (!empty($criteria['dataset_ids'])) {
                     $query->whereIn('data_sets.id', $criteria['dataset_ids']);
                 }
@@ -919,12 +934,14 @@ class DataSetController extends ApiController
                     $hasRes = $data->resource()->count();
 
                     $allSignals = [];
+
                     if ($hasRes) {
                         foreach ($data->resource as $resource) {
                             if ($resource->is_reported) {
                                 $data['reported'] = 1;
                                 $signals = Signal::where('resource_id', $resource->id)
-                                        ->where('status', Signal::STATUS_NEW)->get();
+                                    ->where('status', Signal::STATUS_NEW)->get();
+
                                 if ($signals) {
                                     foreach ($signals as $signal) {
                                         $allSignals[] = [
@@ -1090,7 +1107,8 @@ class DataSetController extends ApiController
                         }
                     }
 
-                    if (DataSetGroup::where('data_set_id', $dataSet->id)
+                    if (
+                        DataSetGroup::where('data_set_id', $dataSet->id)
                             ->whereIn('group_id', $post['group_id'])
                             ->delete()
                     ) {

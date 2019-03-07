@@ -40,6 +40,7 @@ class UpdateElasticTextKeys extends Command
     {
         $this->info($this->description .' started..');
         $start = microtime(true);
+        $count = 0;
 
         try {
             $mappings = \Elasticsearch::indices()->getMapping(['index' => '_all']);
@@ -91,6 +92,7 @@ class UpdateElasticTextKeys extends Command
                             ]);
                         }
 
+                        $count++;
                         $this->info('Index '. $index .' migrated successfully');
                     }
                 }
@@ -104,6 +106,12 @@ class UpdateElasticTextKeys extends Command
         $mins = floor($elaspsedTime / 60 % 60);
         $secs = floor($elaspsedTime % 60);
         $time = sprintf('%02d:%02d:%02d', $hours, $mins, $secs);
+
+        if ($count) {
+            $this->info($count .' indexes migrated successfully');
+        } else {
+            $this->info('No wrong indexes found');
+        }
 
         $this->info($this->description .' finished in '. $time);
     }

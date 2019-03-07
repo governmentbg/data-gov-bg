@@ -295,6 +295,8 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
             'data'      => $content,
         ];
 
+        $extension = strtolower($extension);
+
         switch ($extension) {
             case 'json':
                 $elasticData = $content;

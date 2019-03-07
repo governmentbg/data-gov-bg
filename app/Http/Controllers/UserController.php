@@ -2331,9 +2331,6 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
-        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
-
         if (!empty($resource->versions_list)) {
             usort($resource->versions_list, function($a, $b) {
                 if ($a == $b) {
@@ -2354,9 +2351,37 @@ class UserController extends Controller {
             $versionsPerPage
         );
 
+        $dataPerPage = 25;
+        $maxDataRows = 2000;
+        $backPaging = count($data) > $maxDataRows;
+        $search = $request->has('q') ? $request->offsetGet('q') : '';
+        $pageNumber = $request->has('rpage') ? $request->offsetGet('rpage') : 1;
+        $perPage = $request->has('per_page') ? $request->offsetGet('per_page') : $dataPerPage;
+
+        if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
+            $data = $this->searchResourceRows($search, $data);
+        }
+
+        $resourcePaginationData = $this->getResourcePaginationData(
+            $data,
+            $resource,
+            $pageNumber,
+            $perPage,
+            $backPaging
+        );
+
+        if (
+            $resourcePaginationData['resPagination'] instanceof \Illuminate\Pagination\LengthAwarePaginator
+            && $pageNumber > $resourcePaginationData['resPagination']->lastPage()
+        ) {
+            return redirect($request->fullUrlWithQuery(['rpage' => '1']));
+        }
+
         return view('user/resourceView', [
             'class'         => 'user',
             'resource'      => $resource,
+            'search'        => $search,
+            'dataPerPage'   => $dataPerPage,
             'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'versions'      => $verData,
@@ -2476,9 +2501,6 @@ class UserController extends Controller {
             $data = isset($resultConvert->data) ? $resultConvert->data : [];
         }
 
-        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
-
         // handle delete submit
         if ($request->has('delete')) {
             $rightCheck = RoleRight::checkUserRight(
@@ -2531,9 +2553,37 @@ class UserController extends Controller {
             $versionsPerPage
         );
 
+        $dataPerPage = 25;
+        $maxDataRows = 2000;
+        $backPaging = count($data) > $maxDataRows;
+        $search = $request->has('q') ? $request->offsetGet('q') : '';
+        $pageNumber = $request->has('rpage') ? $request->offsetGet('rpage') : 1;
+        $perPage = $request->has('per_page') ? $request->offsetGet('per_page') : $dataPerPage;
+
+        if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
+            $data = $this->searchResourceRows($search, $data);
+        }
+
+        $resourcePaginationData = $this->getResourcePaginationData(
+            $data,
+            $resource,
+            $pageNumber,
+            $perPage,
+            $backPaging
+        );
+
+        if (
+            $resourcePaginationData['resPagination'] instanceof \Illuminate\Pagination\LengthAwarePaginator
+            && $pageNumber > $resourcePaginationData['resPagination']->lastPage()
+        ) {
+            return redirect($request->fullUrlWithQuery(['rpage' => '1']));
+        }
+
         return view('user/orgResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
+            'search'        => $search,
+            'dataPerPage'   => $dataPerPage,
             'data'          => $resourcePaginationData['data'],
             'versions'      => $verData,
             'pagination'    => $paginationData['paginate'],
@@ -3485,10 +3535,6 @@ class UserController extends Controller {
             }
 
             if ($request->has('save')) {
-                if (!Auth::user()->is_admin) {
-                    unset($post['data']['approved']);
-                }
-
                 $request = Request::create('/api/editOrganisation', 'POST', $post);
                 $api = new ApiOrganisation($request);
                 $result = $api->editOrganisation($request)->getData();
@@ -5615,9 +5661,6 @@ class UserController extends Controller {
             $request->session()->flash('alert-success', __('custom.delete_error'));
         }
 
-        $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-        $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
-
         if (!empty($resource->versions_list)) {
             usort($resource->versions_list, function($a, $b) {
                 if ($a == $b) {
@@ -5638,9 +5681,37 @@ class UserController extends Controller {
             $versionsPerPage
         );
 
+        $dataPerPage = 25;
+        $maxDataRows = 2000;
+        $backPaging = count($data) > $maxDataRows;
+        $search = $request->has('q') ? $request->offsetGet('q') : '';
+        $pageNumber = $request->has('rpage') ? $request->offsetGet('rpage') : 1;
+        $perPage = $request->has('per_page') ? $request->offsetGet('per_page') : $dataPerPage;
+
+        if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
+            $data = $this->searchResourceRows($search, $data);
+        }
+
+        $resourcePaginationData = $this->getResourcePaginationData(
+            $data,
+            $resource,
+            $pageNumber,
+            $perPage,
+            $backPaging
+        );
+
+        if (
+            $resourcePaginationData['resPagination'] instanceof \Illuminate\Pagination\LengthAwarePaginator
+            && $pageNumber > $resourcePaginationData['resPagination']->lastPage()
+        ) {
+            return redirect($request->fullUrlWithQuery(['rpage' => '1']));
+        }
+
         return view('user/groupResourceView', [
             'class'         => 'user',
             'resource'      => $resource,
+            'search'        => $search,
+            'dataPerPage'   => $dataPerPage,
             'data'          => $resourcePaginationData['data'],
             'versionView'   => $version,
             'versions'      => $verData,

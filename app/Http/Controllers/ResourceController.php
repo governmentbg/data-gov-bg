@@ -158,6 +158,8 @@ class ResourceController extends Controller {
             'data'      => $content,
         ];
 
+        $extension = strtolower($extension);
+
         switch ($extension) {
             case 'json':
                 Session::put('elasticData.'. $resourceUri, json_decode($content, true));
@@ -578,9 +580,7 @@ class ResourceController extends Controller {
 
             fclose($handle);
 
-            $headers = array(
-                'Content-Type' => 'text/'. strtolower($format),
-            );
+            $headers = ['Content-Type' => 'text/'. strtolower($format)];
 
             return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
         }

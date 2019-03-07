@@ -394,10 +394,12 @@ class OrganisationController extends ApiController
                     $orgData['active'] = Organisation::ACTIVE_FALSE;
                 }
 
-                if (!empty($data['approved']) && Role::isAdmin()) {
-                    $orgData['approved'] = $data['approved'];
+                if (Role::isAdmin()) {
+                    $orgData['approved'] = empty($data['approved'])
+                       ? Organisation::APPROVED_FALSE
+                       : Organisation::APPROVED_TRUE;
                 } else {
-                    $orgData['approved'] = Organisation::APPROVED_FALSE;
+                    $orgData['approved'] = $organisation->approved;
                 }
 
                 if (!empty($data['custom_fields'])) {

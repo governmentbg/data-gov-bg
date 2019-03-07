@@ -131,7 +131,9 @@ class MigrateSpecificData extends Command
                             $this->line('Followers total: '. $result['followersInfo']['totalFollowers']);
                             $this->info('Followers success: '. $result['followersInfo']['successFollowers']);
                         } else {
-                            $this->info($result['followersInfo']['error_msg']);
+                            if (isset($result['followersInfo']['error_msg'])) {
+                                $this->info($result['followersInfo']['error_msg']);
+                            }
                         }
                         $this->line('');
                     } else {
@@ -174,7 +176,9 @@ class MigrateSpecificData extends Command
                     $this->line('Followers total: '. $result['followersInfo']['totalFollowers']);
                     $this->info('Followers success: '. $result['followersInfo']['successFollowers']);
                 } else {
-                    $this->info($result['followersInfo']['error_msg']);
+                    if (isset($result['followersInfo']['error_msg'])) {
+                        $this->info($result['followersInfo']['error_msg']);
+                    }
                 }
                 $this->line('');
             } elseif (isset($result['error'])) {

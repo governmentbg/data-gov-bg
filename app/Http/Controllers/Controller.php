@@ -67,9 +67,11 @@ class Controller extends BaseController
      *
      * @return array with results for the current page and paginator object
      */
-    public function getResourcePaginationData($data, $resource, $pageNumber = 1, $import = false)
+    public function getResourcePaginationData($data, $resource, $pageNumber = 1, $perPage = 25, $backPaging = false, $import = false)
     {
         $csv = false;
+        $maxResourceRows = 2000;
+        $dataCount = count($data);
 
         if (is_array($data)) {
             $csv = isset($data['csvData']);
@@ -77,17 +79,13 @@ class Controller extends BaseController
             $header = isset($data[0]) ? $data[0] : null;
         }
 
-        $dataCount = count($data);
-        $maxResourceRows = 2000;
-        $resourceRowsPerPage = 100;
-
-        if ($dataCount > $maxResourceRows) {
+        if ($dataCount > $maxResourceRows || $backPaging) {
             if (
                 ($import && $csv)
                 || (isset($resource->format_code)
                 && $resource->format_code == Resource::FORMAT_CSV)
             ) {
-                $data = collect($data)->paginate($resourceRowsPerPage, $pageNumber);
+                $data = collect($data)->paginate($perPage, $pageNumber);
 
                 if (isset($header) && $pageNumber > 1) {
                     $data->prepend($header);
@@ -97,7 +95,7 @@ class Controller extends BaseController
                     $data,
                     $dataCount,
                     array_except(app('request')->input(), ['rpage']),
-                    $resourceRowsPerPage,
+                    $perPage,
                     'rpage'
                 );
             }
@@ -560,5 +558,28 @@ class Controller extends BaseController
         }
 
         return [];
+    }
+
+    public function searchResourceRows($keywords, $data)
+    {
+        $result = [];
+
+        if (!empty($data)) {
+            $result = array_filter($data, function($row) use ($keywords) {
+                foreach ($row as $value) {
+
+                    if (mb_stripos($value, $keywords, '0', 'UTF-8') !== false) {
+                        return true;
+                    }
+                }
+            });
+
+            // add table header to result array
+            $result = isset($data[0])
+                ? array_merge([0 => $data[0]], $result)
+                : array_merge([0 => []], $result);
+        }
+
+        return $result;
     }
 }

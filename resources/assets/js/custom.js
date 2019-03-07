@@ -13,6 +13,10 @@ $(function() {
     });
 });
 
+$('.js-records-per-page').change(function() {
+    $(this).closest('form').submit();
+});
+
 // data tables functionality
 $(function() {
     $(document).ready(function() {
@@ -22,6 +26,7 @@ $(function() {
         $dataTable.DataTable({
             pageLength: $dataTable.data('page-length') ? $dataTable.data('page-length') : 25,
             responsive: true,
+            searching: pagingFlag,
             paging: pagingFlag,
             bInfo : pagingFlag,
             order: [],

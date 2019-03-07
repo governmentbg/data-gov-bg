@@ -1,6 +1,7 @@
 @php
     $format = empty($resource) ? false : $resource->format_code;
     $type = empty($resource) ? App\Resource::TYPE_FILE : $resource->type;
+    $perPageArr = [10, 25, 50, 100];
 @endphp
 @if ($type == App\Resource::getTypes()[App\Resource::TYPE_HYPERLINK])
     <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
@@ -10,6 +11,58 @@
     @elseif (is_array($data) || is_object($data))
         @if ($format == App\Resource::FORMAT_CSV)
             <div class="m-b-lg overflow-x-auto js-show-on-load">
+                @if (isset($resPagination))
+                    <div class="row m-b-lg">
+                        <form method="GET">
+                            <div class="col-xs-6">
+                                @if (isset(app('request')['q']))
+                                    <input name="q" type="hidden" value="{{ app('request')['q'] }}">
+                                @endif
+                                @if (isset(app('request')['rpage']))
+                                    <input name="rpage" type="hidden" value="{{ app('request')['rpage'] }}">
+                                @endif
+                                <select class="js-records-per-page" name="per_page">
+                                    @foreach ($perPageArr as $opt)
+                                        <option
+                                            value="{{ $opt }}"
+                                            {{
+                                                !isset(app('request')['per_page'])
+                                                && isset($dataPerPage)
+                                                && $opt == $dataPerPage
+                                                    ? 'selected'
+                                                    : ''
+                                            }}
+                                            {{
+                                                isset(app('request')['per_page'])
+                                                && app('request')['per_page'] == $opt
+                                                    ? 'selected'
+                                                    : ''
+                                            }}
+                                        >{{ $opt }}</option>
+                                    @endforeach
+                                </select>
+                                {{ __('custom.rec_per_page') }}
+                            </div>
+                        </form>
+                        <form method="GET">
+                            <div class="col-xs-6">
+                                <input
+                                    type="text"
+                                    class="input-border-r-12 form-control"
+                                    placeholder="{{ __('custom.search') }}.."
+                                    value="{{ isset($search) ? $search : '' }}"
+                                    name="q"
+                                >
+                            </div>
+                            @if (isset(app('request')['rpage']))
+                                <input name="rpage" type="hidden" value="{{ app('request')['rpage'] }}">
+                            @endif
+                            @if (isset(app('request')['per_page']))
+                                <input name="per_page" type="hidden" value="{{ app('request')['per_page'] }}">
+                            @endif
+                        </form>
+                    </div>
+                @endif
                 <table class="data-table <?= isset($resPagination) ? 'paging-off' : '' ?>">
                     <thead>
                         @foreach ($data as $index => $row)

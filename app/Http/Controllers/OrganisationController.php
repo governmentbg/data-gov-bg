@@ -1118,8 +1118,31 @@ class OrganisationController extends Controller
                         $versionsPerPage
                     );
 
-                    $pageNumber = !empty($request->rpage) ? $request->rpage : 1;
-                    $resourcePaginationData = $this->getResourcePaginationData($data, $resource, $pageNumber);
+                    $dataPerPage = 25;
+                    $maxDataRows = 2000;
+                    $backPaging = count($data) > $maxDataRows;
+                    $search = $request->has('q') ? $request->offsetGet('q') : '';
+                    $pageNumber = $request->has('rpage') ? $request->offsetGet('rpage') : 1;
+                    $perPage = $request->has('per_page') ? $request->offsetGet('per_page') : $dataPerPage;
+
+                    if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
+                        $data = $this->searchResourceRows($search, $data);
+                    }
+
+                    $resourcePaginationData = $this->getResourcePaginationData(
+                        $data,
+                        $resource,
+                        $pageNumber,
+                        $perPage,
+                        $backPaging
+                    );
+
+                    if (
+                        $resourcePaginationData['resPagination'] instanceof \Illuminate\Pagination\LengthAwarePaginator
+                        && $pageNumber > $resourcePaginationData['resPagination']->lastPage()
+                    ) {
+                        return redirect($request->fullUrlWithQuery(['rpage' => '1']));
+                    }
 
                     return view(
                         'organisation/resourceView',
@@ -1131,6 +1154,8 @@ class OrganisationController extends Controller
                             'approved'      => ($organisation->type == Organisation::TYPE_COUNTRY),
                             'dataset'       => $dataset,
                             'resource'      => $resource,
+                            'search'        => $search,
+                            'dataPerPage'   => $dataPerPage,
                             'data'          => $resourcePaginationData['data'],
                             'versionView'   => $version,
                             'userData'      => $userData,

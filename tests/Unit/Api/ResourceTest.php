@@ -5,6 +5,7 @@ namespace Tests\Unit\Api;
 use App\DataSet;
 use App\Resource;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -258,6 +259,78 @@ class ResourceTest extends TestCase
         $data = $result->original['data'];
 
         $this->post(
+            url('api/addResourceData'),
+            [
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => $data,
+            ]
+        )->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    /**
+     * Test resource upload
+     *
+     * @return void
+     */
+    public function testPdfAndCsvUpload()
+    {
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id, [
+            'file_format'   => Resource::FORMAT_CSV,
+            'resource_type' => Resource::TYPE_FILE,
+        ]);
+
+        $result = $this->post(url('api/csv2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => file_get_contents(storage_path('tests/sample.csv')),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $data = $result->original['data'];
+
+        $result = $this->post(
+            url('api/addResourceData'),
+            [
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => $data,
+            ]
+        )->assertStatus(200)->assertJson(['success' => true]);
+
+        $resource = $this->getNewResource($dataSet->id, [
+            'file_format'   => Resource::FORMAT_JSON,
+            'resource_type' => Resource::TYPE_FILE,
+        ]);
+
+        $result = $this->post(url('api/pdf2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => base64_encode(file_get_contents(storage_path('tests/sample.pdf'))),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $data = $result->original['data'];
+
+        $result = $this->post(
+            url('api/addResourceData'),
+            [
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => ['text' => $data],
+            ]
+        )->assertStatus(200)->assertJson(['success' => true]);
+
+        $resource = $this->getNewResource($dataSet->id, [
+            'file_format'   => Resource::FORMAT_CSV,
+            'resource_type' => Resource::TYPE_FILE,
+        ]);
+
+        $result = $this->post(url('api/csv2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => file_get_contents(storage_path('tests/sample.csv')),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $data = $result->original['data'];
+
+        $result = $this->post(
             url('api/addResourceData'),
             [
                 'api_key'       => $this->getApiKey(),

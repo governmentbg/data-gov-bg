@@ -20,7 +20,8 @@ class ElasticDataSet extends Model
     public static function getElasticData($id, $version)
     {
         $elasticData = ElasticDataSet::where('resource_id', $id)
-            ->where('version', $version)->first();
+            ->where('version', $version)
+            ->first();
 
         if (!empty($elasticData)) {
             $data = \Elasticsearch::get([
@@ -30,6 +31,14 @@ class ElasticDataSet extends Model
             ]);
         }
 
-        return !empty($data['_source']['rows']) ? $data['_source']['rows'] : [];
+        $result = [];
+
+        if (!empty($data['_source']['rows'])) {
+            $result = $data['_source']['rows'];
+        } elseif (!empty($data['_source'])) {
+            $result = $data['_source'];
+        }
+
+        return $result;
     }
 }

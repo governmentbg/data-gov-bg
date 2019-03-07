@@ -309,7 +309,7 @@ class ResourceController extends ApiController
                     $filteredData = $this->checkData($post['data']);
 
                     \Elasticsearch::index([
-                        'body'  => ['rows' => $filteredData],
+                        'body'  => $this->setElasticKey($filteredData),
                         'index' => $index,
                         'type'  => ElasticDataSet::ELASTIC_TYPE,
                         'id'    => $id .'_1',
@@ -667,7 +667,7 @@ class ResourceController extends ApiController
                         $filteredData = $this->checkData($post['data']);
 
                         $update = \Elasticsearch::index([
-                            'body'  => ['rows' => $filteredData],
+                            'body'  => $this->setElasticKey($filteredData),
                             'index' => $index,
                             'type'  => ElasticDataSet::ELASTIC_TYPE,
                             'id'    => $id .'_'. $newVersion,
@@ -711,6 +711,15 @@ class ResourceController extends ApiController
         );
 
         return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
+    }
+
+    private function setElasticKey($data)
+    {
+        if (is_array($data) && count($data) == 1 && array_keys($data)[0] == 'text') {
+            return $data;
+        }
+
+        return ['rows' => $data];
     }
 
     private function sendSupportMail($success, $post, $message = null)
@@ -1171,8 +1180,8 @@ class ResourceController extends ApiController
 
                 return $this->successResponse(
                     ($resource->resource_type == Resource::TYPE_HYPERLINK)
-                    ? []
-                    : ElasticDataSet::getElasticData($resource->id, $version)
+                        ? []
+                        : ElasticDataSet::getElasticData($resource->id, $version)
                 );
             } catch (\Exception $ex) {
                 Log::error($ex->getMessage());

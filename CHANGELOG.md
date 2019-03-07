@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Keep approved value on edit organisation
 - Hide public area datasets if organisation is not active or not approved
+- Search and paging on resource type CSV visualization
 
 ### Changed
 - Api listDatasets additional array parameter criteria[public] (optional)

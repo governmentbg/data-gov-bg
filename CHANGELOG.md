@@ -16,9 +16,13 @@ Security - in case of vulnerabilities.
 - Keep approved value on edit organisation
 - Hide public area datasets if organisation is not active or not approved
 - Search and paging on resource type CSV visualization
+- Compare lowercase types before conversion
 
 ### Changed
 - Api listDatasets additional array parameter criteria[public] (optional)
+
+### Added
+- Update elastic text keys command
 
 ## [1.0.24] - 2019-03-05
 ### Fixed

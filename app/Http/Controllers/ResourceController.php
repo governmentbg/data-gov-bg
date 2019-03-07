@@ -158,6 +158,8 @@ class ResourceController extends Controller {
             'data'      => $content,
         ];
 
+        $extension = strtolower($extension);
+
         switch ($extension) {
             case 'json':
                 Session::put('elasticData.'. $resourceUri, json_decode($content, true));

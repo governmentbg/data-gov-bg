@@ -107,13 +107,13 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    protected function getNewResource($dataSetId = null)
+    protected function getNewResource($dataSetId = null, $data = [])
     {
         if (empty($dataSetId)) {
             $dataSetId = $this->getNewDataSet()->id;
         }
 
-        return Resource::create([
+        return Resource::create(array_merge([
             'data_set_id'       => $dataSetId,
             'uri'               => $this->faker->uuid(),
             'name'              => $this->faker->word(),
@@ -129,7 +129,7 @@ abstract class TestCase extends BaseTestCase
             'authentication'    => $this->faker->word(),
             'http_headers'      => $this->faker->text(),
             'is_reported'       => false,
-        ]);
+        ], $data));
     }
 
     protected function getNewPage($data = [])

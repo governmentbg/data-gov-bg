@@ -578,9 +578,7 @@ class ResourceController extends Controller {
 
             fclose($handle);
 
-            $headers = array(
-                'Content-Type' => 'text/'. strtolower($format),
-            );
+            $headers = ['Content-Type' => 'text/'. strtolower($format)];
 
             return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
         }

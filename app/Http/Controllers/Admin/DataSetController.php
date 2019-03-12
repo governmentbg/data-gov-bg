@@ -740,7 +740,11 @@ class DataSetController extends AdminController
             if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
                 unset($data[0]);
                 $orderArr = array_column($data, $request->order);
-                array_multisort($orderArr, $oType, $data);
+
+                if (count($orderArr) == count($data)) {
+                    array_multisort($orderArr, $oType, $data);
+                }
+
                 $data = array_merge([0 => $tHeader], $data);
             }
         }

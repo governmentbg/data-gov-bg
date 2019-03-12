@@ -308,11 +308,13 @@ class ResourceController extends ApiController
                     // Filter data for containing personal info
                     $filteredData = $this->checkData($post['data']);
 
+                    $elasticKey = $id .'_1';
+
                     \Elasticsearch::index([
-                        'body'  => $this->setElasticKey($filteredData),
+                        'body'  => $this->setElasticKey($filteredData, $elasticKey),
                         'index' => $index,
                         'type'  => ElasticDataSet::ELASTIC_TYPE,
-                        'id'    => $id .'_1',
+                        'id'    => $elasticKey,
                     ]);
 
                     $logData = [
@@ -666,11 +668,13 @@ class ResourceController extends ApiController
                         // Filter data for containing personal info
                         $filteredData = $this->checkData($post['data']);
 
+                        $elasticKey = $id .'_'. $newVersion;
+
                         $update = \Elasticsearch::index([
-                            'body'  => $this->setElasticKey($filteredData),
+                            'body'  => $this->setElasticKey($filteredData, $elasticKey),
                             'index' => $index,
                             'type'  => ElasticDataSet::ELASTIC_TYPE,
-                            'id'    => $id .'_'. $newVersion,
+                            'id'    => $elasticKey,
                         ]);
                     }
 
@@ -713,13 +717,16 @@ class ResourceController extends ApiController
         return $this->errorResponse(__('custom.update_resource_fail'), $validator->errors()->messages());
     }
 
-    private function setElasticKey($data)
+    private function setElasticKey($data, $elasticKey)
     {
         if (is_array($data) && count($data) == 1 && array_keys($data)[0] == 'text') {
+            $data[$elasticKey] = $data['text'];
+            unset($data['text']);
+
             return $data;
         }
 
-        return ['rows' => $data];
+        return [$elasticKey => $data];
     }
 
     private function sendSupportMail($success, $post, $message = null)

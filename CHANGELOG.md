@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Order by column on resource type CSV visualization
 
 ## [1.0.25] - XXXX-XX-XX
 ### Fixed

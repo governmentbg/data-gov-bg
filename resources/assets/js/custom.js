@@ -28,6 +28,7 @@ $(function() {
             responsive: true,
             searching: pagingFlag,
             paging: pagingFlag,
+            ordering: pagingFlag,
             bInfo : pagingFlag,
             order: [],
             language: {

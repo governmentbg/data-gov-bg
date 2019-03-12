@@ -2362,6 +2362,18 @@ class UserController extends Controller {
             $data = $this->searchResourceRows($search, $data);
         }
 
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+                array_multisort($orderArr, $oType, $data);
+                $data = array_merge([0 => $tHeader], $data);
+            }
+        }
+
         $resourcePaginationData = $this->getResourcePaginationData(
             $data,
             $resource,
@@ -2562,6 +2574,18 @@ class UserController extends Controller {
 
         if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
             $data = $this->searchResourceRows($search, $data);
+        }
+
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+                array_multisort($orderArr, $oType, $data);
+                $data = array_merge([0 => $tHeader], $data);
+            }
         }
 
         $resourcePaginationData = $this->getResourcePaginationData(
@@ -5690,6 +5714,18 @@ class UserController extends Controller {
 
         if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
             $data = $this->searchResourceRows($search, $data);
+        }
+
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+                array_multisort($orderArr, $oType, $data);
+                $data = array_merge([0 => $tHeader], $data);
+            }
         }
 
         $resourcePaginationData = $this->getResourcePaginationData(

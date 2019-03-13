@@ -205,14 +205,14 @@
                                         @foreach ($history as $record)
                                             <tr>
                                                 <td>{{ $record->occurrence }}</td>
-                                                <td>{{ $record->user }}</td>
+                                                <td>{{ isset($record->user) ? $record->user : 'N/A' }}</td>
                                                 @if ($view == 'action')
                                                     <td>{{ $record->module }}</th>
                                                     <td>{{ $actionTypes[$record->action] }}</th>
                                                     <td>{{ $record->action_object }}</th>
                                                 @endif
                                                 <td>{{ $record->action_msg }}</td>
-                                                <td>{{ $record->ip_address }}</td>
+                                                <td>{{ isset($record->ip_address) ? $record->ip_address : 'N/A' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

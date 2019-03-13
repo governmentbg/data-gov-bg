@@ -719,7 +719,7 @@ class ResourceController extends ApiController
 
     private function setElasticKey($data, $elasticKey)
     {
-        if (is_array($data) && count($data) == 1 && array_keys($data)[0] == 'text') {
+        if (is_array($data) && count($data) == 1 && array_keys($data)[0] === 'text') {
             $data[$elasticKey] = $data['text'];
             unset($data['text']);
 

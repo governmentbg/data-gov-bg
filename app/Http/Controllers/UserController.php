@@ -4228,12 +4228,13 @@ class UserController extends Controller {
                     try {
                         $user->save();
                         $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
+                        $ip = request()->ip();
 
                         $dbData = [
                             'module_name'   => Module::getModuleName(Module::USERS),
                             'action'        => ActionsHistory::TYPE_CONFIRM_ACCOUNT,
                             'action_msg'    => 'Confirmed account',
-                            'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
+                            'ip_address'    => !empty($ip) ? $ip : 'N/A',
                             'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
                             'occurrence'    => date('Y-m-d H:i:s'),
                             'user_id'       => $user->id,

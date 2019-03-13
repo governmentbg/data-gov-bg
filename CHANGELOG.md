@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Order by column on resource type CSV visualization
+- User IP address in actions history
 
 ## [1.0.25] - XXXX-XX-XX
 ### Fixed

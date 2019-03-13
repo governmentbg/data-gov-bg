@@ -17,6 +17,9 @@ Security - in case of vulnerabilities.
 - User IP address in actions history
 - Sort error on actions history view
 
+### Changed
+- Change Elasticsearch data structure
+
 ## [1.0.25] - XXXX-XX-XX
 ### Fixed
 - Keep approved value on edit organisation

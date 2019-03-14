@@ -209,7 +209,7 @@ class DataSetController extends AdminController
         $visibilityOptions = DataSet::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
-        $organisations = $this->getOrgDropdown();
+        $organisations = $this->getAllOrganisations();
         $groups = $this->getGroupDropdown();
 
         if ($request->has('back')) {
@@ -409,7 +409,7 @@ class DataSetController extends AdminController
         $visibilityOptions = Dataset::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
-        $organisations = $this->getOrgDropdown();
+        $organisations = $this->getAllOrganisations();
         $groups = $this->getGroupDropdown();
         $params = ['dataset_uri' => $uri];
         $setGroups = [];

@@ -900,4 +900,5 @@ return [
     'edit_news' => 'edit news',
     'add_news' => 'add news',
     'rec_per_page' => 'records per page',
+    'organisation' => 'organisation',
 ];

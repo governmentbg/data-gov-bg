@@ -16,6 +16,7 @@ Security - in case of vulnerabilities.
 - Order by column on resource type CSV visualization
 - User IP address in actions history
 - Sort error on actions history view
+- Improved sorting and filtering in actions history view
 
 ### Changed
 - Change Elasticsearch data structure

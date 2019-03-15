@@ -584,6 +584,8 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
 
         // get category details
         if (!empty($dataset->category_id)) {
@@ -609,7 +611,7 @@ class UserController extends Controller {
             $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        foreach ($resources->resources as $resource) {
+        foreach ($resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
                 RoleRight::RIGHT_VIEW,
@@ -690,8 +692,8 @@ class UserController extends Controller {
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'
@@ -818,6 +820,8 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
 
         // get category details
         if (!empty($datasetData->category_id)) {
@@ -843,7 +847,7 @@ class UserController extends Controller {
             $datasetData->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        foreach ($resources->resources as $resource) {
+        foreach ($resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
                 RoleRight::RIGHT_VIEW,
@@ -942,8 +946,8 @@ class UserController extends Controller {
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'
@@ -5258,6 +5262,8 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
 
         // get category details
         if (!empty($datasetData->category_id)) {
@@ -5283,7 +5289,7 @@ class UserController extends Controller {
             $datasetData->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        foreach ($resources->resources as $resource) {
+        foreach ($resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
                 RoleRight::RIGHT_VIEW,
@@ -5382,8 +5388,8 @@ class UserController extends Controller {
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'

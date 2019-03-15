@@ -59855,7 +59855,7 @@ $(function () {
             $('.nano').nanoScroller({});
         }
 
-        $('.js-parent-org-filter').change(function () {
+        $('.js-parent-org-filter, .js-ajax-user').change(function () {
             this.form.submit();
         });
     });
@@ -60675,7 +60675,7 @@ function initSelect2() {
             var options = {
                 placeholder: $(this).data('placeholder'),
                 minimumInputLength: select2MinLength,
-                dropdownParent: $($(this).data('parent')),
+                dropdownParent: typeof $(this).data('parent') != 'undefined' ? $($(this).data('parent')) : false,
                 ajax: {
                     url: $(this).data('url'),
                     type: 'POST',
@@ -60722,14 +60722,16 @@ function initSelect2() {
 
     if ($('.js-ajax-autocomplete-org').length) {
         $('.js-ajax-autocomplete-org').each(function () {
+            var $this = $(this);
+
             var options = {
-                placeholder: $(this).data('placeholder'),
+                placeholder: $this.data('placeholder'),
                 minimumInputLength: select2MinLength,
                 ajax: {
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    url: $(this).data('url'),
+                    url: $this.data('url'),
                     type: 'POST',
                     delay: select2Delay,
                     data: function data(params) {
@@ -60738,7 +60740,7 @@ function initSelect2() {
                                 keywords: params.term
                             }
                         };
-                        var finalParams = $.extend({}, queryParams, $(this).data('post'));
+                        var finalParams = $.extend({}, queryParams, $this.data('post'));
 
                         return finalParams;
                     },
@@ -60746,9 +60748,10 @@ function initSelect2() {
 
                         return {
                             results: $.map(data.organisations, function (item) {
+
                                 return {
                                     text: item.name,
-                                    id: item.uri
+                                    id: typeof $this.data('id') != 'undefined' ? item.id : item.uri
                                 };
                             })
                         };
@@ -60772,12 +60775,13 @@ function initSelect2() {
         });
     }
 
-    $('.js-ajax-autocomplete-org').on('select2:open', function (e) {
-        var selectedVal = $('.js-ajax-autocomplete-org').find(':selected').val();
+    $('.js-ajax-autocomplete-org, .js-ajax-user').on('select2:open', function (e) {
+        var $this = $(this);
+        var selectedVal = $this.find(':selected').val();
 
         if (typeof selectedVal != 'undefined') {
             var newOption = new Option($('.js-translations').data('clear-org-filter'), 0, true, true);
-            $('.js-ajax-autocomplete-org').append(newOption).trigger('change');
+            $this.append(newOption).trigger('change');
         }
     });
 };

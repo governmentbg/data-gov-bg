@@ -798,7 +798,7 @@ class OrganisationController extends Controller
                 $apiResources = new ApiResource($rq);
                 $res = $apiResources->listResources($rq)->getData();
                 $resources = !empty($res->resources) ? $res->resources : [];
-                $resCount = $res->total_records;
+                $resCount = isset($res->total_records) ? $res->total_records : 0;
 
                 // get category details
                 if (!empty($dataset->category_id)) {

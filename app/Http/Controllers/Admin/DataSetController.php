@@ -340,6 +340,9 @@ class DataSetController extends AdminController
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
+
         // Get category details
         if (!empty($dataset->category_id)) {
             $params = [
@@ -378,8 +381,8 @@ class DataSetController extends AdminController
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'

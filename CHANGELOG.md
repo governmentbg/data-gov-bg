@@ -13,7 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
-## [1.0.25] - XXXX-XX-XX
+## [1.0.25] - 2019-03-07
 ### Fixed
 - Keep approved value on edit organisation
 - Hide public area datasets if organisation is not active or not approved

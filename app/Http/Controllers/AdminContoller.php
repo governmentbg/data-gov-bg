@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Organisation;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\TagController as ApiTags;
@@ -17,6 +18,25 @@ class AdminController extends Controller
     {
         $this->middleware('admin');
         $this->middleware('help');
+    }
+
+    public function getAllOrganisations()
+    {
+        $locale = \LaravelLocalization::getCurrentLocale();
+        $orgs = Organisation::select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*', 'organisations.name')
+                ->leftJoin('translations', 'translations.group_id', '=', 'organisations.name')
+                ->where('translations.locale', $locale)
+                ->where('organisations.type', '!=', Organisation::TYPE_GROUP)
+                ->orderBy('translations.label', 'ASC')
+                ->get();
+
+        $organisations = [];
+
+        foreach ($orgs as $row) {
+            $organisations[$row->id] = $row->name;
+        }
+
+        return $organisations;
     }
 
     public function getOrgDropdown($userId = null, $count = null, $fullData = false)

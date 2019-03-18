@@ -12,6 +12,14 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Order by column on resource type CSV visualization
+- User IP address in actions history
+- Sort error on actions history view
+- Improved sorting and filtering in actions history view
+
+### Changed
+- Change Elasticsearch data structure
 
 ## [1.0.25] - 2019-03-07
 ### Fixed

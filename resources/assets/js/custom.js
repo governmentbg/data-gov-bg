@@ -7,7 +7,7 @@ $(function() {
             $('.nano').nanoScroller({});
         }
 
-        $('.js-parent-org-filter').change(function() {
+        $('.js-parent-org-filter, .js-ajax-user').change(function() {
             this.form.submit();
         });
     });
@@ -28,6 +28,7 @@ $(function() {
             responsive: true,
             searching: pagingFlag,
             paging: pagingFlag,
+            ordering: pagingFlag,
             bInfo : pagingFlag,
             order: [],
             language: {

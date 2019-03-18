@@ -209,7 +209,7 @@ class DataSetController extends AdminController
         $visibilityOptions = DataSet::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
-        $organisations = $this->getOrgDropdown();
+        $organisations = $this->getAllOrganisations();
         $groups = $this->getGroupDropdown();
 
         if ($request->has('back')) {
@@ -340,6 +340,9 @@ class DataSetController extends AdminController
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
 
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
+
         // Get category details
         if (!empty($dataset->category_id)) {
             $params = [
@@ -378,8 +381,8 @@ class DataSetController extends AdminController
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'
@@ -409,7 +412,7 @@ class DataSetController extends AdminController
         $visibilityOptions = Dataset::getVisibility();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
-        $organisations = $this->getOrgDropdown();
+        $organisations = $this->getAllOrganisations();
         $groups = $this->getGroupDropdown();
         $params = ['dataset_uri' => $uri];
         $setGroups = [];
@@ -731,6 +734,22 @@ class DataSetController extends AdminController
 
         if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
             $data = $this->searchResourceRows($search, $data);
+        }
+
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+
+                if (count($orderArr) == count($data)) {
+                    array_multisort($orderArr, $oType, $data);
+                }
+
+                $data = array_merge([0 => $tHeader], $data);
+            }
         }
 
         $resourcePaginationData = $this->getResourcePaginationData(

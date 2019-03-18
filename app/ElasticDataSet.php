@@ -33,7 +33,9 @@ class ElasticDataSet extends Model
 
         $result = [];
 
-        if (!empty($data['_source']['rows'])) {
+        if (!empty($data['_source'][$id .'_'. $version])) {
+            $result = $data['_source'][$id .'_'. $version];
+        } elseif (!empty($data['_source']['rows'])) {
             $result = $data['_source']['rows'];
         } elseif (!empty($data['_source'])) {
             $result = $data['_source'];

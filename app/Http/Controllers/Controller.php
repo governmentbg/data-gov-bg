@@ -8,6 +8,7 @@ use App\Module;
 use App\Resource;
 use App\Section;
 use App\RoleRight;
+use App\Organisation;
 use Illuminate\Http\Request;
 use DevDojo\Chatter\Models\Models;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -266,19 +267,28 @@ class Controller extends BaseController
     protected function prepareOrganisations()
     {
         $params = [];
-
-        $params['api_key'] = \Auth::user()->api_key;
+        $organisations = [];
+        $locale = \LaravelLocalization::getCurrentLocale();
 
         if (!Role::isAdmin()) {
-            $params['criteria']['user_id'] = \Auth::user()->id;
+            $params['user_id'] = \Auth::user()->id;
         }
 
-        $request = Request::create('/api/listOrganisations', 'POST', $params);
-        $api = new ApiOrganisation($request);
-        $result = $api->listOrganisations($request)->getData();
-        $organisations = [];
+        $query = Organisation::select('translations.label', 'translations.group_id', 'translations.text', 'organisations.*')
+                ->leftJoin('translations', 'translations.group_id', '=', 'organisations.name')
+                ->where('translations.locale', $locale)
+                ->where('organisations.type', '!=', Organisation::TYPE_GROUP);
 
-        foreach ($result->organisations as $row) {
+        if (!empty($params['user_id'])) {
+            $query->whereHas('userToOrgRole', function($q) use ($params) {
+                $q->where('user_id', $params['user_id']);
+            });
+        }
+
+        $orgs = $query->orderBy('translations.label', 'ASC')
+                ->get();
+
+        foreach ($orgs as $row) {
             $organisations[$row->id] = $row->name;
         }
 

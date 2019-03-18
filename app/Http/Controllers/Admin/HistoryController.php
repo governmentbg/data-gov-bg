@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Role;
 use App\User;
 use App\Module;
+use App\DataSet;
+use App\Resource;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
@@ -66,6 +68,14 @@ class HistoryController extends AdminController
                 $userIds = UserToOrgRole::where('org_id', $selectedOrg)->pluck('user_id')->toArray();
                 $params['criteria']['user_id'] = $userIds;
                 $params['criteria']['org_ids'] = null;
+            } else {
+                $dataSetIds = DataSet::where('org_id', $selectedOrg)->pluck('id')->toArray();
+                $resourceIds = empty($dataSetIds)
+                    ? null
+                    : Resource::whereIn('data_set_id', $dataSetIds)->pluck('uri')->toArray();
+
+                $params['criteria']['dataset_ids'] = empty($dataSetIds) ? null : $dataSetIds;
+                $params['criteria']['resource_uris'] = empty($resourceIds) ? null : $resourceIds;
             }
         }
 

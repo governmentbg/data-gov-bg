@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.0] - 2019-03-19
+### Added
+- Remove uncessary and incorrect copyright statement from the footer (Pull request)
+
 ## [1.0.26] - 2019-03-19
 ### Fixed
 - Order by column on resource type CSV visualization
@@ -432,6 +436,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.0]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.26...v1.1.0
 [1.0.26]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.25...v1.0.26
 [1.0.25]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.24...v1.0.25
 [1.0.24]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.23...v1.0.24

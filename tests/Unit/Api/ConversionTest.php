@@ -11,7 +11,12 @@ class ConversionTest extends TestCase
     {
         $this->post(url('api/xml2json'), [
             'api_key'   => $this->getApiKey(),
-            'data'      => '<note><to>Tove</to><from>Jani</from><body>Don\'t forget me this weekend!</body></note>',
+            'data'      => file_get_contents(storage_path('tests/sample.xml')),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $this->post(url('api/xml2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => file_get_contents(storage_path('tests/sample-excel.xml')),
         ])->assertStatus(200)->assertJson(['success' => true]);
     }
 

@@ -916,6 +916,25 @@
                 <input class="js-to-filter datepicker input-border-r-12 form-control" name="period_to" value="{{ $range['to'] }}">
             </div>
         </div>
+        @if (isset(app('request')->input()['org']))
+            <input type="hidden" name="org" value="{{ app('request')->input()['org'] }}">
+        @endif
+        @if (isset(app('request')->input()['user']))
+            <input type="hidden" name="user" value="{{ app('request')->input()['user'] }}">
+        @endif
+        @if (isset(app('request')->input()['ip']))
+            <input type="hidden" name="ip" value="{{ app('request')->input()['ip'] }}">
+        @endif
+        @if (isset(app('request')->input()['module']) && is_array(app('request')->input()['module']))
+            @foreach (app('request')->input()['module'] as $mod)
+                <input type="hidden" name="module[]" value="{{ $mod }}">
+            @endforeach
+        @endif
+        @if (isset(app('request')->input()['action']) && is_array(app('request')->input()['action']))
+            @foreach (app('request')->input()['action'] as $act)
+                <input type="hidden" name="action[]" value="{{ $act }}">
+            @endforeach
+        @endif
         @if (isset(app('request')->input()['order_field']))
             <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
         @endif
@@ -928,80 +947,175 @@
     </form>
 
     <ul class="nav">
-        <li class="js-show-submenu">
-            <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ utrans('custom.organisations') }}</a>
-            <ul class="sidebar-submenu nano">
-                <div class="nano-content">
-                    <li>
-                        <a
-                            href="{{
-                                !isset(app('request')->input()['orgs_count'])
-                                ? action(
-                                    $action, array_merge(
-                                        [
-                                            'orgs_count'    => $orgDropCount,
-                                            'type'          => $view,
-                                            'page'          => 1,
-                                        ],
-                                        array_except(app('request')->input(), ['orgs_count', 'page'])
-                                    )
-                                )
-                                : action(
-                                    $action, array_merge(
-                                        [
-                                            'orgs_count'    => null,
-                                            'org'           => [],
-                                            'type'          => $view,
-                                            'page'          => 1,
-                                        ],
-                                        array_except(app('request')->input(), ['org', 'orgs_count', 'page'])
-                                    )
-                                )
-                            }}"
-                            class="{{
-                                isset(app('request')->input()['orgs_count']) && app('request')->input()['orgs_count'] == $orgDropCount
-                                    ? 'active'
-                                    : ''
-                            }}"
-                        >{{ !isset(app('request')->input()['orgs_count']) ? __('custom.show_all') : __('custom.clear_filter') }}</a>
-                    </li>
-                    @foreach ($organisations as $id => $org)
-                        <li>
-                            <a
-                                href="{{
-                                    !in_array($id, $selectedOrgs)
-                                        ? action(
-                                            $action, array_merge(
-                                                [
-                                                    'org'   => array_merge([$id], $selectedOrgs),
-                                                    'type'  => $view,
-                                                    'page'  => 1,
-                                                ],
-                                                array_except(app('request')->input(), ['org', 'page'])
-                                            )
-                                        )
-                                        : action(
-                                            $action, array_merge(
-                                                [
-                                                    'org'   => array_diff($selectedOrgs, [$id]),
-                                                    'type'  => $view,
-                                                    'page'  => 1,
-                                                ],
-                                                array_except(app('request')->input(), ['org', 'page'])
-                                            )
-                                        )
-                                }}"
-                                class="{{
-                                    isset($selectedOrgs) && in_array($id, $selectedOrgs)
-                                        ? 'active'
-                                        : ''
-                                }}"
-                            >{{ $org }}</a>
-                        </li>
-                    @endforeach
-                </div>
-            </ul>
-        </li>
+        <div class="form-group">
+            <div class="col-xs-12 search-field admin">
+                <form
+                    method="GET"
+                    class="form-horisontal"
+                >
+                    @if (isset(app('request')->input()['period_from']))
+                        <input type="hidden" name="period_from" value="{{ app('request')->input()['period_from'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['period_to']))
+                        <input type="hidden" name="period_to" value="{{ app('request')->input()['period_to'] }}">
+                    @endif
+                    <div class="form-group row m-t-sm">
+                        <div class="col-lg-10 col-xs-12">
+                            <select
+                                class="js-ajax-autocomplete-org form-control js-parent-org-filter"
+                                data-url="{{ url('/api/listOrganisations') }}"
+                                data-post="{{ json_encode(['api_key' => \Auth::user()->api_key]) }}"
+                                data-placeholder="{{ utrans('custom.organisation') }}"
+                                data-id="true"
+                                name="org"
+                            >
+                                @if (isset($filterOrg))
+                                    <option value="{{ $filterOrg->id }}" selected>{{ $filterOrg->name }}</option>
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    @if (isset(app('request')->input()['user']))
+                        <input type="hidden" name="user" value="{{ app('request')->input()['user'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['ip']))
+                        <input type="hidden" name="ip" value="{{ app('request')->input()['ip'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['module']) && is_array(app('request')->input()['module']))
+                        @foreach (app('request')->input()['module'] as $mod)
+                            <input type="hidden" name="module[]" value="{{ $mod }}">
+                        @endforeach
+                    @endif
+                    @if (isset(app('request')->input()['action']) && is_array(app('request')->input()['action']))
+                        @foreach (app('request')->input()['action'] as $act)
+                            <input type="hidden" name="action[]" value="{{ $act }}">
+                        @endforeach
+                    @endif
+                    @if (isset(app('request')->input()['order_field']))
+                        <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['order_type']))
+                        <input type="hidden" name="order_type" value="{{ app('request')->input()['order_type'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['q']))
+                        <input type="hidden" name="q" value="{{ app('request')->input()['q'] }}">
+                    @endif
+                </form>
+            </div>
+        </div>
+    </ul>
+    <ul class="nav">
+        <div class="form-group">
+            <div class="col-xs-12 search-field admin">
+                <form
+                    method="GET"
+                    class="form-horisontal"
+                >
+                    @if (isset(app('request')->input()['period_from']))
+                        <input type="hidden" name="period_from" value="{{ app('request')->input()['period_from'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['period_to']))
+                        <input type="hidden" name="period_to" value="{{ app('request')->input()['period_to'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['org']))
+                        <input type="hidden" name="org" value="{{ app('request')->input()['org'] }}">
+                    @endif
+                    <div class="form-group row m-t-sm">
+                        <div class="col-lg-10 col-xs-12">
+                            <select
+                                class="js-ajax-autocomplete form-control js-ajax-user"
+                                data-url="{{ url('/api/listUsers') }}"
+                                data-post="{{ json_encode(['api_key' => \Auth::user()->api_key]) }}"
+                                name="user"
+                                data-placeholder="{{ utrans('custom.user') }}"
+                            >
+                                @if (isset($filterUser))
+                                    <option
+                                        value="{{ $filterUser->id }}"
+                                        selected
+                                    >{{ $filterUser->username .' | '. $filterUser->firstname .' '. $filterUser->lastname}}</option>
+                                @endif
+                            </select>
+                        </div>
+                    </div>
+                    @if (isset(app('request')->input()['ip']))
+                        <input type="hidden" name="ip" value="{{ app('request')->input()['ip'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['module']) && is_array(app('request')->input()['module']))
+                        @foreach (app('request')->input()['module'] as $mod)
+                            <input type="hidden" name="module[]" value="{{ $mod }}">
+                        @endforeach
+                    @endif
+                    @if (isset(app('request')->input()['action']) && is_array(app('request')->input()['action']))
+                        @foreach (app('request')->input()['action'] as $act)
+                            <input type="hidden" name="action[]" value="{{ $act }}">
+                        @endforeach
+                    @endif
+                    @if (isset(app('request')->input()['order_field']))
+                        <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['order_type']))
+                        <input type="hidden" name="order_type" value="{{ app('request')->input()['order_type'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['q']))
+                        <input type="hidden" name="q" value="{{ app('request')->input()['q'] }}">
+                    @endif
+                </form>
+            </div>
+        </div>
+    </ul>
+
+    <ul class="nav">
+        <div class="form-group">
+            <div class="col-xs-12 search-field admin">
+                <form
+                    method="GET"
+                    class="form-horisontal"
+                >
+                    @if (isset(app('request')->input()['period_from']))
+                        <input type="hidden" name="period_from" value="{{ app('request')->input()['period_from'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['period_to']))
+                        <input type="hidden" name="period_to" value="{{ app('request')->input()['period_to'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['org']))
+                        <input type="hidden" name="org" value="{{ app('request')->input()['org'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['user']))
+                        <input type="hidden" name="user" value="{{ app('request')->input()['user'] }}">
+                    @endif
+                    <div class="form-group row m-t-sm">
+                        <div class="col-lg-10 col-xs-12">
+                            <input
+                                class="input-border-r-12 form-control"
+                                name="ip"
+                                placeholder="&nbsp;&nbsp;{{ utrans('custom.ip_address') }}"
+                                value="{{ isset($selectedIp) ? $selectedIp : null }}"
+                            >
+                        </div>
+                    </div>
+                    @if (isset(app('request')->input()['module']) && is_array(app('request')->input()['module']))
+                        @foreach (app('request')->input()['module'] as $mod)
+                            <input type="hidden" name="module[]" value="{{ $mod }}">
+                        @endforeach
+                    @endif
+                    @if (isset(app('request')->input()['action']) && is_array(app('request')->input()['action']))
+                        @foreach (app('request')->input()['action'] as $act)
+                            <input type="hidden" name="action[]" value="{{ $act }}">
+                        @endforeach
+                    @endif
+                    @if (isset(app('request')->input()['order_field']))
+                        <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['order_type']))
+                        <input type="hidden" name="order_type" value="{{ app('request')->input()['order_type'] }}">
+                    @endif
+                    @if (isset(app('request')->input()['q']))
+                        <input type="hidden" name="q" value="{{ app('request')->input()['q'] }}">
+                    @endif
+                </form>
+            </div>
+        </div>
     </ul>
 
     @if ($view == 'action')
@@ -1092,148 +1206,5 @@
             </li>
         </ul>
     @endif
-
-    <ul class="nav">
-        <li class="js-show-submenu">
-            <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ utrans('custom.users') }}</a>
-            <ul class="sidebar-submenu nano">
-                <div class="nano-content">
-                    <li>
-                        <a
-                            href="{{
-                                !isset(app('request')->input()['users_count'])
-                                ? action(
-                                    $action, array_merge(
-                                        [
-                                            'users_count'   => $userDropCount,
-                                            'type'          => $view,
-                                            'page'          => 1,
-                                        ],
-                                        array_except(app('request')->input(), ['users_count', 'page'])
-                                    )
-                                )
-                                : action(
-                                    $action, array_merge(
-                                        [
-                                            'users_count'  => null,
-                                            'user'         => [],
-                                            'type'         => $view,
-                                            'page'         => 1,
-                                        ],
-                                        array_except(app('request')->input(), ['user', 'users_count', 'page'])
-                                    )
-                                )
-                            }}"
-                            class="{{
-                                isset(app('request')->input()['users_count']) && app('request')->input()['users_count'] == $userDropCount
-                                    ? 'active'
-                                    : ''
-                            }}"
-                        >{{ !isset(app('request')->input()['users_count']) ? __('custom.show_all') : __('custom.clear_filter') }}</a>
-                    </li>
-                    @foreach ($users as $id => $user)
-                        <li>
-                            <a
-                                href="{{
-                                    empty($selectedUser)
-                                    ? action(
-                                        $action, array_merge(
-                                            [
-                                                'user'  => $id,
-                                                'type'  => $view,
-                                                'page'  => 1,
-                                            ],
-                                            array_except(app('request')->input(), ['user', 'page'])
-                                        )
-                                    )
-                                    : action(
-                                        $action, array_merge(
-                                            [
-                                                'user'  => [],
-                                                'type'  => $view,
-                                                'page'  => 1,
-                                            ],
-                                            array_except(app('request')->input(), ['user', 'page'])
-                                        )
-                                    )
-                                }}"
-                                class="{{
-                                    isset(app('request')->input()['user']) && $id == $selectedUser
-                                        ? 'active'
-                                        : ''
-                                }}"
-                            >{{ $user }}</a>
-                        </li>
-                    @endforeach
-                </div>
-            </ul>
-        </li>
-    </ul>
-
-    <ul class="nav">
-        <li class="js-show-submenu">
-            <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ utrans('custom.ip_address') }}</a>
-            <ul class="sidebar-submenu nano">
-                <div class="nano-content">
-                    <li>
-                        <a
-                            href="{{
-                                !isset(app('request')->input()['ips_count'])
-                                ? action(
-                                    $action, array_merge(
-                                        [
-                                            'ips_count' => $ipDropCount,
-                                            'type'      => $view,
-                                            'page'      => 1,
-                                        ],
-                                        array_except(app('request')->input(), ['ips_count', 'page'])
-                                    )
-                                )
-                                : action(
-                                    $action, array_merge(
-                                        [
-                                            'ips_count'  => null,
-                                            'ip'         => [],
-                                            'type'       => $view,
-                                            'page'       => 1,
-                                        ],
-                                        array_except(app('request')->input(), ['ip', 'ips_count', 'page'])
-                                    )
-                                )
-                            }}"
-                            class="{{
-                                isset(app('request')->input()['ips_count']) && app('request')->input()['ips_count'] == $userDropCount
-                                    ? 'active'
-                                    : ''
-                            }}"
-                        >{{ !isset(app('request')->input()['ips_count']) ? __('custom.show_all') : __('custom.clear_filter') }}</a>
-                    </li>
-                    @foreach ($ips as $ip)
-                        <li>
-                            <a
-                                href="{{
-                                    action(
-                                        $action, array_merge(
-                                            [
-                                                'ip'    => $ip,
-                                                'type'  => $view,
-                                                'page'  => 1,
-                                            ],
-                                            array_except(app('request')->input(), ['ip', 'page'])
-                                        )
-                                    )
-                                }}"
-                                class="{{
-                                    isset(app('request')->input()['ip']) && $ip == $selectedIp
-                                        ? 'active'
-                                        : ''
-                                }}"
-                            >{{ $ip }}</a>
-                        </li>
-                    @endforeach
-                </div>
-            </ul>
-        </li>
-    </ul>
 @endif
 

@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.0.26] - 2019-03-19
 ### Fixed
 - Order by column on resource type CSV visualization
 - User IP address in actions history
@@ -430,6 +432,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.0.26]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.25...v1.0.26
 [1.0.25]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.24...v1.0.25
 [1.0.24]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.23...v1.0.24
 [1.0.23]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.22...v1.0.23

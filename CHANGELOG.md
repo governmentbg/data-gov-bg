@@ -12,6 +12,11 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Changed
+- Library to gnumeic for ods/xls/xlsx conversions
+
+### Fixed
+- Use gnumeic for xml conversion if exported for excel
 
 ## [1.1.0] - 2019-03-19
 ### Added

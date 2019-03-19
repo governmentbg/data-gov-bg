@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\User;
 use App\Module;
+use App\DataSet;
+use App\Resource;
 use App\UserSetting;
 use App\Organisation;
 use App\UserToOrgRole;
@@ -32,13 +35,8 @@ class HistoryController extends AdminController
             'page_number'       => !empty($request->page) ? $request->page : 1,
         ];
 
-        $orgDropCount = $request->offsetGet('orgs_count') ?: Organisation::INIT_FILTER;
-        $selectedOrgs = $request->offsetGet('org') ?: [];
-        $organisations = $this->getOrgDropdown(null, $orgDropCount);
-
-        $userDropCount = $request->offsetGet('users_count') ?: Organisation::INIT_FILTER;
-        $selectedUser = $request->offsetGet('user') ?: '';
-        $users = $this->getUserDropdown($userDropCount);
+        $selectedOrg = $request->offsetGet('org') ?: null;
+        $selectedUser = $request->offsetGet('user') ?: null;
 
         $selectedActions = $request->offsetGet('action') ?: [];
         $actionTypes = ActionsHistory::getTypes();
@@ -46,9 +44,7 @@ class HistoryController extends AdminController
         $selectedModules = $request->offsetGet('module') ?: [];
         $modules = Module::getModules();
 
-        $ipDropCount = $request->offsetGet('ips_count') ?: Organisation::INIT_FILTER;
-        $selectedIp = $request->offsetGet('ip') ?: '';
-        $ips = $this->getIpDropdown($view, $ipDropCount);
+        $selectedIp = $request->offsetGet('ip') ?: null;
 
         if (!empty($request->offsetGet('period_from'))) {
             $params['criteria']['period_from'] = date_format(
@@ -64,18 +60,28 @@ class HistoryController extends AdminController
             );
         }
 
-        if (!empty($selectedOrgs)) {
+        if (!is_null($selectedOrg)) {
+            $params['criteria']['org_ids'] = [$selectedOrg];
+            $filterOrg = Organisation::where('id', $selectedOrg)->first();
+
             if ($view == 'login') {
-                $userIds = UserToOrgRole::whereIn('org_id', $selectedOrgs)->pluck('user_id')->toArray();
-                $selectedUser = $userIds;
+                $userIds = UserToOrgRole::where('org_id', $selectedOrg)->pluck('user_id')->toArray();
+                $params['criteria']['user_id'] = $userIds;
+                $params['criteria']['org_ids'] = null;
             } else {
-                $selectedOrgs = array_unique($selectedOrgs);
-                $params['criteria']['org_ids'] = $selectedOrgs;
+                $dataSetIds = DataSet::where('org_id', $selectedOrg)->pluck('id')->toArray();
+                $resourceIds = empty($dataSetIds)
+                    ? null
+                    : Resource::whereIn('data_set_id', $dataSetIds)->pluck('uri')->toArray();
+
+                $params['criteria']['dataset_ids'] = empty($dataSetIds) ? null : $dataSetIds;
+                $params['criteria']['resource_uris'] = empty($resourceIds) ? null : $resourceIds;
             }
         }
 
         if (!empty($selectedUser)) {
             $params['criteria']['user_id'] = $selectedUser;
+            $filterUser = User::where('id', $selectedUser)->first();
         }
 
         if (!empty($selectedIp)) {
@@ -172,14 +178,8 @@ class HistoryController extends AdminController
             'actionTypes'       => $actionTypes,
             'history'           => isset($paginationData['items']) ? $paginationData['items'] : null,
             'pagination'        => isset($paginationData['paginate']) ? $paginationData['paginate'] : null,
-            'orgDropCount'      => count($this->getOrgDropdown()),
-            'organisations'     => $organisations,
-            'selectedOrgs'      => $selectedOrgs,
-            'userDropCount'     => count($this->getUserDropdown()),
-            'users'             => $users,
-            'selectedUser'      => $selectedUser,
-            'ipDropCount'       => count($this->getIpDropdown()),
-            'ips'               => $ips,
+            'filterOrg'         => isset($filterOrg) && !empty($filterOrg->id) ? $filterOrg : null,
+            'filterUser'        => isset($filterUser) && !empty($filterUser->id) ? $filterUser : null,
             'selectedIp'        => $selectedIp,
             'selectedActions'   => $selectedActions,
             'modules'           => $modules,

@@ -14,13 +14,13 @@
                 @if (isset($resPagination))
                     <div class="row m-b-lg">
                         <form method="GET">
+                            @if (isset(app('request')['q']))
+                                <input name="q" type="hidden" value="{{ app('request')['q'] }}">
+                            @endif
+                            @if (isset(app('request')['rpage']))
+                                <input name="rpage" type="hidden" value="{{ app('request')['rpage'] }}">
+                            @endif
                             <div class="col-xs-6">
-                                @if (isset(app('request')['q']))
-                                    <input name="q" type="hidden" value="{{ app('request')['q'] }}">
-                                @endif
-                                @if (isset(app('request')['rpage']))
-                                    <input name="rpage" type="hidden" value="{{ app('request')['rpage'] }}">
-                                @endif
                                 <select class="js-records-per-page" name="per_page">
                                     @foreach ($perPageArr as $opt)
                                         <option
@@ -43,6 +43,12 @@
                                 </select>
                                 {{ __('custom.rec_per_page') }}
                             </div>
+                            @if (isset(app('request')['order_type']))
+                                <input name="order_type" type="hidden" value="{{ app('request')['order_type'] }}">
+                            @endif
+                            @if (isset(app('request')['order']))
+                                <input name="order" type="hidden" value="{{ app('request')['order'] }}">
+                            @endif
                         </form>
                         <form method="GET">
                             <div class="col-xs-6">
@@ -60,7 +66,48 @@
                             @if (isset(app('request')['per_page']))
                                 <input name="per_page" type="hidden" value="{{ app('request')['per_page'] }}">
                             @endif
+                            @if (isset(app('request')['order_type']))
+                                <input name="order_type" type="hidden" value="{{ app('request')['order_type'] }}">
+                            @endif
+                            @if (isset(app('request')['order']))
+                                <input name="order" type="hidden" value="{{ app('request')['order'] }}">
+                            @endif
                         </form>
+                    </div>
+                    <div class="row m-b-lg">
+                        <div class="col-xs-12 m-b-sm">{{ __('custom.order_by_c') }}:</div>
+                        <div class="col-xs-12 order-documents">
+                            @php
+                                $params = array_merge(
+                                    ['order_type' => 'asc'],
+                                    array_except(app('request')->input(), ['order_type'])
+                                )
+                            @endphp
+                            <a
+                                href="{{ url()->current() .'?'. http_build_query($params) }}"
+                                class="{{
+                                    isset(app('request')->input()['order_type'])
+                                    && app('request')->input()['order_type'] == 'asc'
+                                        ? 'active'
+                                        : ''
+                                }}"
+                            >{{ uctrans('custom.order_asc') }}</a>
+                            @php
+                                $params = array_merge(
+                                    ['order_type' => 'desc'],
+                                    array_except(app('request')->input(), ['order_type'])
+                                )
+                            @endphp
+                            <a
+                                href="{{ url()->current() .'?'. http_build_query($params) }}"
+                                class="{{
+                                    isset(app('request')->input()['order_type'])
+                                    && app('request')->input()['order_type'] == 'desc'
+                                        ? 'active'
+                                        : ''
+                                }}"
+                            >{{ uctrans('custom.order_desc') }}</a>
+                        </div>
                     </div>
                 @endif
                 <table class="data-table <?= isset($resPagination) ? 'paging-off' : '' ?>">
@@ -68,7 +115,26 @@
                         @foreach ($data as $index => $row)
                             @if ($index == 0)
                                 @foreach ($row as $key => $value)
-                                    <th><p>{{ $value }}</p></th>
+                                    @php
+                                        $params = array_merge(
+                                            ['order' => $key],
+                                            array_except(app('request')->input(), ['order'])
+                                        )
+                                    @endphp
+                                    <th>
+                                        <p>{{ $value }}</p>
+                                        @if (isset($resPagination))
+                                            <a
+                                                href="{{ url()->current() .'?'. http_build_query($params) }}"
+                                                class="{{
+                                                    isset(app('request')->input()['order'])
+                                                    && app('request')->input()['order'] == $key
+                                                        ? 'active'
+                                                        : ''
+                                                }}"
+                                            ><i class="fa fa-sort"></i></a>
+                                        @endif
+                                    </th>
                                 @endforeach
                                 </thead>
                                 <tbody>

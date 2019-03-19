@@ -41,9 +41,12 @@ class ActionsHistoryController extends ApiController
         $post = $request->all();
         $order = [];
         $publicTypes = array_keys(ActionsHistory::getPublicTypes());
+        $allActTypes = array_keys(ActionsHistory::getTypes());
+        $defaultOrderType = 'desc';
+        $defaultOrderField = 'occurrence';
 
-        $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : 'desc';
-        $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : 'occurrence';
+        $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : $defaultOrderType;
+        $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : $defaultOrderField;
 
         $validator = Validator::make($post, [
             'criteria'               => 'nullable|array',
@@ -157,7 +160,8 @@ class ActionsHistoryController extends ApiController
                     $history->whereIn('action', $criteria['actions']);
                 }
             } else {
-                $history->whereIn('action', $publicTypes);
+                $actTypes = Auth::user()->is_admin ? $allActTypes : $publicTypes;
+                $history->whereIn('action', $actTypes);
             }
         } else {
             if (isset($criteria['actions'])) {
@@ -291,6 +295,10 @@ class ActionsHistoryController extends ApiController
 
         if (!empty($order)) {
             $history->orderBy($order['field'], $order['type']);
+
+            if ($order['field'] != $defaultOrderField) {
+                $history->orderBy($defaultOrderField, $defaultOrderType);
+            }
         }
 
         $history->forPage(

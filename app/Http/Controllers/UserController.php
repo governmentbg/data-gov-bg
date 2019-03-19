@@ -584,6 +584,8 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
 
         // get category details
         if (!empty($dataset->category_id)) {
@@ -609,7 +611,7 @@ class UserController extends Controller {
             $dataset->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        foreach ($resources->resources as $resource) {
+        foreach ($resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
                 RoleRight::RIGHT_VIEW,
@@ -690,8 +692,8 @@ class UserController extends Controller {
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'
@@ -818,6 +820,8 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
 
         // get category details
         if (!empty($datasetData->category_id)) {
@@ -843,7 +847,7 @@ class UserController extends Controller {
             $datasetData->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        foreach ($resources->resources as $resource) {
+        foreach ($resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
                 RoleRight::RIGHT_VIEW,
@@ -942,8 +946,8 @@ class UserController extends Controller {
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'
@@ -2362,6 +2366,22 @@ class UserController extends Controller {
             $data = $this->searchResourceRows($search, $data);
         }
 
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+
+                if (count($orderArr) == count($data)) {
+                    array_multisort($orderArr, $oType, $data);
+                }
+
+                $data = array_merge([0 => $tHeader], $data);
+            }
+        }
+
         $resourcePaginationData = $this->getResourcePaginationData(
             $data,
             $resource,
@@ -2562,6 +2582,22 @@ class UserController extends Controller {
 
         if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
             $data = $this->searchResourceRows($search, $data);
+        }
+
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+
+                if (count($orderArr) == count($data)) {
+                    array_multisort($orderArr, $oType, $data);
+                }
+
+                $data = array_merge([0 => $tHeader], $data);
+            }
         }
 
         $resourcePaginationData = $this->getResourcePaginationData(
@@ -4196,12 +4232,13 @@ class UserController extends Controller {
                     try {
                         $user->save();
                         $request->session()->flash('alert-success', __('custom.successful_acc_activation'));
+                        $ip = request()->ip();
 
                         $dbData = [
                             'module_name'   => Module::getModuleName(Module::USERS),
                             'action'        => ActionsHistory::TYPE_CONFIRM_ACCOUNT,
                             'action_msg'    => 'Confirmed account',
-                            'ip_address'    => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'N/A',
+                            'ip_address'    => !empty($ip) ? $ip : 'N/A',
                             'user_agent'    => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A',
                             'occurrence'    => date('Y-m-d H:i:s'),
                             'user_id'       => $user->id,
@@ -5225,6 +5262,8 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($resourcesReq);
         $resources = $apiResources->listResources($resourcesReq)->getData();
+        $resCount = isset($resources->total_records) ? $resources->total_records : 0;
+        $resources = !empty($resources->resources) ? $resources->resources : [];
 
         // get category details
         if (!empty($datasetData->category_id)) {
@@ -5250,7 +5289,7 @@ class UserController extends Controller {
             $datasetData->terms_of_use_name = isset($res->data) && !empty($res->data) ? $res->data->name : '';
         }
 
-        foreach ($resources->resources as $resource) {
+        foreach ($resources as $resource) {
             $rightCheck = RoleRight::checkUserRight(
                 Module::RESOURCES,
                 RoleRight::RIGHT_VIEW,
@@ -5349,8 +5388,8 @@ class UserController extends Controller {
         }
 
         $paginationData = $this->getPaginationData(
-            $resources->resources,
-            $resources->total_records,
+            $resources,
+            $resCount,
             array_except(app('request')->input(), ['rpage']),
             $resPerPage,
             'rpage'
@@ -5690,6 +5729,22 @@ class UserController extends Controller {
 
         if (!empty($search) && $resource->format_code == Resource::FORMAT_CSV) {
             $data = $this->searchResourceRows($search, $data);
+        }
+
+        if ($request->has('order') && $request->has('order_type')) {
+            $oType = $request->order_type == 'asc' ? SORT_ASC : SORT_DESC;
+            $tHeader = isset($data[0]) ? $data[0] : [];
+
+            if (!empty($tHeader) && is_numeric($request->order) && count($tHeader) > $request->order) {
+                unset($data[0]);
+                $orderArr = array_column($data, $request->order);
+
+                if (count($orderArr) == count($data)) {
+                    array_multisort($orderArr, $oType, $data);
+                }
+
+                $data = array_merge([0 => $tHeader], $data);
+            }
         }
 
         $resourcePaginationData = $this->getResourcePaginationData(

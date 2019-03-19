@@ -142,6 +142,7 @@ return [
     'OLD_OD_API_SOURCE' => env('OLD_OD_API_SOURCE', 'http://old.opendata.government.bg/api/3/action/'),
     'OLD_PORTAL_DOMAIN' => env('OLD_PORTAL_DOMAIN', 'old.opendata.government.bg'),
     'TRANSACTION_ATTEMPTS' => env('TRANSACTION_ATTEMPTS', 10),
+    'TRUSTED_PROXIES' => array_map('trim', explode(',', env('TRUSTED_PROXIES'))),
 
     /*
     |--------------------------------------------------------------------------

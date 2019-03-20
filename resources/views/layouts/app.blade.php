@@ -348,9 +348,7 @@
                 </div>
                 <div class="copiright text-center col-xs-12">
                     <div class="row">
-                        <strong>Copyright &copy; 2018 </strong>
-                        {{ __('custom.by') }}
-                        <a target="_blank" href="http://data.egov.bg/"> {{ __('custom.copyright') }}</a>
+                        {{ __('custom.copyright') }}
                     </div>
                 </div>
             </footer>

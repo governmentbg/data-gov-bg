@@ -6,6 +6,7 @@ use Uuid;
 use App\DataSet;
 use App\Category;
 use App\Resource;
+use SplFileObject;
 use SimpleXMLElement;
 use App\ElasticDataSet;
 use Illuminate\Http\Request;
@@ -46,9 +47,9 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $array = $this->fromXML($post['data'], true);
+                $data = $this->fromXml($post['data'], true);
 
-                return $this->successResponse($array);
+                return $this->successResponse($data);
             } catch (\Exception $ex) {
                Log::error($ex->getMessage());
                $validator->errors()->add('data', __('custom.invalid_xml'));
@@ -106,28 +107,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $file = new \SplFileObject('php://memory', 'w+');
-
-                if (!mb_check_encoding($post['data'], 'UTF-8')) {
-                    $post['data'] = mb_convert_encoding($post['data'], 'UTF-8', 'Windows-1251');
-                }
-
-                $file->fwrite($post['data']);
-                $file->fseek(0);
-
-                $delimiter = $this->getCSVDelimiter($file);
-                $data = [];
-
-                while (!$file->eof()) {
-                    $rows = array_map('trim', $file->fgetcsv($delimiter));
-                    $length = array_reduce($rows, function($carry, $item) { return $carry + strlen($item); }, 0);
-
-                    if ($length === 0) {
-                        continue;
-                    }
-
-                    $data[] = $rows;
-                }
+                $data = $this->fromCsv($post['data']);
 
                 if ($this->emptyRecursive($data)) {
                     return $this->errorResponse(__('custom.invalid_format_csv'));
@@ -464,7 +444,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromCells($post['data'], false);
+                $data = $this->fromCells($post['data']);
 
                 return $this->successResponse($data);
             } catch (\Exception $ex) {
@@ -492,7 +472,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromCells($post['data'], false);
+                $data = $this->fromCells($post['data']);
 
                 return $this->successResponse($data);
             } catch (\Exception $ex) {
@@ -520,7 +500,7 @@ class ConversionController extends ApiController
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromCells($post['data'], false);
+                $data = $this->fromSlk($post['data']);
 
                 return $this->successResponse($data);
             } catch (\Exception $ex) {
@@ -828,18 +808,40 @@ class ConversionController extends ApiController
     }
 
     /**
-     * Get text from csv/xls/xlsx document data
+     * Get text from ods/xls/xlsx document data
      *
-     * @param csv/xls/xlsx document data - required
+     * @param ods/xls/xlsx document data - required
      * @param bool document data - optional
      *
      * @return text data
      */
-    private function fromCells($data, $csv = true)
+    private function fromCells($data, $decode = true)
+    {
+        $tempInit = tmpfile();
+        $pathInit = stream_get_meta_data($tempInit)['uri'];
+        fwrite($tempInit, $decode ? base64_decode($data) : $data);
+        $temp = tmpfile();
+        $path = stream_get_meta_data($temp)['uri'];
+
+        shell_exec('ssconvert -T Gnumeric_stf:stf_csv '. escapeshellarg($pathInit) .' '. escapeshellarg($path));
+        $contents = file_get_contents($path);
+
+        return $this->fromCsv($contents);
+    }
+
+    /**
+     * Get text from slk document data
+     *
+     * @param slk document data - required
+     * @param bool document data - optional
+     *
+     * @return text data
+     */
+    private function fromSlk($data)
     {
         $temp = tmpfile();
         $path = stream_get_meta_data($temp)['uri'];
-        fwrite($temp, $csv ? $data : base64_decode($data));
+        fwrite($temp, base64_decode($data));
 
         $spreadsheet = IOFactory::load($path);
         $worksheet = $spreadsheet->getActiveSheet();
@@ -890,6 +892,42 @@ class ConversionController extends ApiController
     }
 
     /**
+     * Get text from csv document data
+     *
+     * @param csv document data - required
+     * @param bool document data - optional
+     *
+     * @return text data
+     */
+    private function fromCsv($postData)
+    {
+        $file = new \SplFileObject('php://memory', 'w+');
+
+        if (!mb_check_encoding($postData, 'UTF-8')) {
+            $postData = mb_convert_encoding($postData, 'UTF-8', 'Windows-1251');
+        }
+
+        $file->fwrite($postData);
+        $file->fseek(0);
+
+        $delimiter = $this->getCSVDelimiter($file);
+        $data = [];
+
+        while (!$file->eof()) {
+            $rows = array_map('trim', $file->fgetcsv($delimiter));
+            $length = array_reduce($rows, function($carry, $item) { return $carry + strlen($item); }, 0);
+
+            if ($length === 0) {
+                continue;
+            }
+
+            $data[] = $rows;
+        }
+
+        return $data;
+    }
+
+    /**
      * Get text from html data
      *
      * @param html data - required
@@ -912,8 +950,12 @@ class ConversionController extends ApiController
      */
     private function fromXML($data, $parentTag = false)
     {
+        if (strpos($data, '<?mso-application progid="Excel.Sheet"?>') !== false) {
+            return $this->fromCells($data, false);
+        }
+
         if ($parentTag) {
-            $data = '<data>'. htmlspecialchars($data, ENT_XML1, 'UTF-8') .'</data>';
+            $data = '<data>'. str_replace('&', '&amp;', $data) .'</data>';
         }
 
         $xml = simplexml_load_string($data);
@@ -1059,7 +1101,7 @@ class ConversionController extends ApiController
         return $easyRdf->serialise('rdfxml');
     }
 
-    private function getCSVDelimiter(\SplFileObject $file, $checkLines = 3)
+    private function getCSVDelimiter(SplFileObject $file, $checkLines = 3)
     {
         $delimiters = [',', ';'];
         $counts = [];

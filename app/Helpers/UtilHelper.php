@@ -149,11 +149,15 @@ function migrate_datasets($dataSetUri, $convert)
                             : $alternativeFileFormat;
 
                         $fileFormat = strtoupper(str_replace('.', '', $fileFormat));
+
+                        if ($fileFormat == 'WORD') {
+                            $fileFormat = 'DOC';
+                        }
+
                         $resource['format'] = $fileFormat;
                         $resource['created_by'] = $resCreatedBy;
 
                         if (in_array($fileFormat, $fileFormats)) {
-
                             if (migrate_datasets_resources($newDataSetId, $resource, $convert)) {
                                 $addedResources++;
                             } else {
@@ -161,6 +165,7 @@ function migrate_datasets($dataSetUri, $convert)
                             }
                         } else {
                             $unsuporrtedFormat++;
+
                             Log::error('Resource format "'. $fileFormat .'" unsupported.');
                         }
 
@@ -204,7 +209,7 @@ function migrate_datasets_resources($dataSetId, $resourceData, $convert)
     $newData['api_key'] = config('app.MIGRATE_USER_API_KEY');
 
     $newData['data']['migrated_data'] = true;
-    $newData['data']['locale'] = "bg";
+    $newData['data']['locale'] = 'bg';
     $newData['data']['data_set_id'] = $dataSetId;
     $newData['data']['name'] = !empty($resourceData['name']) ? $resourceData['name'] : 'Без име';
     $newData['data']['uri'] = $resourceData['id'];

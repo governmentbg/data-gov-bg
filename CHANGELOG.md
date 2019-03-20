@@ -13,6 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 ### Changed
+- Format WORD to DOC in data migration command
 - Library to gnumeic for ods/xls/xlsx conversions
 
 ### Fixed

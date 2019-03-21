@@ -825,8 +825,23 @@ class ConversionController extends ApiController
 
         shell_exec('ssconvert -T Gnumeric_stf:stf_csv '. escapeshellarg($pathInit) .' '. escapeshellarg($path));
         $contents = file_get_contents($path);
+        $rows = $this->fromCsv($contents);
 
-        return $this->fromCsv($contents);
+        foreach ($rows[0] as $cellIndex => $cell) {
+            if ($cell == '') {
+                foreach ($rows as $row) {
+                    if ($row[$cellIndex] != '') {
+                        continue 2;
+                    }
+                }
+
+                foreach ($rows as &$row) {
+                    unset($row[$cellIndex]);
+                }
+            }
+        }
+
+        return $rows;
     }
 
     /**

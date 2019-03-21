@@ -15,6 +15,7 @@ Security - in case of vulnerabilities.
 ### Changed
 - Format WORD to DOC in data migration command
 - Library to gnumeic for ods/xls/xlsx conversions
+- Forgotten password mail text
 
 ### Fixed
 - Use gnumeic for xml conversion if exported for excel

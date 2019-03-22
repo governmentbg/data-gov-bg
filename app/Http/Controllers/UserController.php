@@ -3434,10 +3434,11 @@ class UserController extends Controller {
 
             if ($request->has('generate')) {
                 $mailData = [
-                    'user'  => $user->firstname,
-                    'hash'  => $user->hash_id,
-                    'mail'  => $mail,
-                    'id'    => $id,
+                    'user'      => $user->firstname,
+                    'username'  => $user->username,
+                    'hash'      => $user->hash_id,
+                    'mail'      => $mail,
+                    'id'        => $id,
                 ];
 
                 Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($mailData) {

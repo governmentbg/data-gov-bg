@@ -636,10 +636,11 @@ class UserController extends ApiController
             $newUserData['hash_id'] = str_replace('-', '', Uuid::generate(4)->string);
 
             $mailData = [
-                'user'  => $user->firstname,
-                'hash'  => $newUserData['hash_id'],
-                'mail'  => $data['email'],
-                'id'    => $id,
+                'user'      => $user->firstname,
+                'username'  => $user->username,
+                'hash'      => $newUserData['hash_id'],
+                'mail'      => $data['email'],
+                'id'        => $id,
             ];
 
             Mail::send('mail/emailChangeMail', $mailData, function ($m) use ($data) {

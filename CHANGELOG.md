@@ -11,6 +11,12 @@ Removed - for now removed features.
 Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
+## [Unreleased] - XXXX-XX-XX
+
+## [1.1.2] - 2019-03-22
+### Fixed
+- Confirmation email heading on user email change
+
 ## [1.1.1] - 2019-03-22
 ### Changed
 - Format WORD to DOC in data migration command
@@ -444,6 +450,8 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.2]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.0...v1.1.1
 [1.1.0]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.26...v1.1.0
 [1.0.26]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.25...v1.0.26
 [1.0.25]: https://github.com/governmentbg/data-gov-bg/compare/v1.0.24...v1.0.25

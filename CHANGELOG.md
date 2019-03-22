@@ -11,7 +11,7 @@ Removed - for now removed features.
 Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
-## [Unreleased] - XXXX-XX-XX
+## [1.1.1] - 2019-03-22
 ### Changed
 - Format WORD to DOC in data migration command
 - Library to gnumeic for ods/xls/xlsx conversions

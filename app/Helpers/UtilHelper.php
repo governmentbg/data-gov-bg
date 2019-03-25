@@ -11,6 +11,11 @@ use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
+function is_xml_excel_exported($xml)
+{
+    return strpos($xml, '<?mso-application progid="Excel.Sheet"?>') !== false;
+}
+
 function request_url($uri, $params = null, $header = null)
 {
     $source = config('app.OLD_OD_API_SOURCE');

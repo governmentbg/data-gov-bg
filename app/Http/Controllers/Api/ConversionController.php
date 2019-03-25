@@ -965,7 +965,7 @@ class ConversionController extends ApiController
      */
     private function fromXML($data, $parentTag = false)
     {
-        if (strpos($data, '<?mso-application progid="Excel.Sheet"?>') !== false) {
+        if (is_xml_excel_exported($data)) {
             return $this->fromCells($data, false);
         }
 

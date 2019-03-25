@@ -155,12 +155,6 @@
                 </table>
                 @include('partials.resource-pagination')
             </div>
-        @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
-            <textarea
-                class="js-xml-prev col-xs-12 m-b-md"
-                data-xml-data="{{ $data }}"
-                rows="20"
-            ></textarea>
         @elseif ($format == App\Resource::FORMAT_JSON && isset($data->text))
             <p>@php echo nl2br(e($data->text)) @endphp</p>
         @elseif ($format == App\Resource::FORMAT_XSD)
@@ -224,6 +218,12 @@
                 </div>
             </form>
         @endif
+    @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
+        <textarea
+            class="js-xml-prev col-xs-12 m-b-md"
+            data-xml-data="{{ $data }}"
+            rows="20"
+        ></textarea>
     @else
         <div class="data-preview">{!! nl2br($data) !!}</div>
     @endif

@@ -12,6 +12,10 @@ table.dataTable {
     p {
         margin-bottom: 0 !important;
     }
+
+    td {
+        vertical-align: top;
+    }
 }
 
 table.dataTable thead th,

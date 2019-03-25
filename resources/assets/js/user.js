@@ -288,8 +288,15 @@ $(function() {
 
 $(function() {
     if ($('.js-ress-type').length) {
+        checkRessType();
+
         $('.js-ress-type').on('change', function() {
-            var type = $(".js-ress-type option:selected").val();
+            checkRessType();
+        });
+
+        function checkRessType() {
+            var type = $('.js-ress-type option:selected').val();
+
             switch (parseInt(type)) {
                 case 1:
                     $('.js-ress-url').hide();
@@ -311,7 +318,7 @@ $(function() {
                     $('.js-ress-url').hide();
                     $('.js-ress-api').hide();
             }
-        })
+        }
     }
 });
 

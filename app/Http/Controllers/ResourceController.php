@@ -286,7 +286,27 @@ class ResourceController extends Controller {
                 if ($resultConvert['success']) {
                     $elasticData = $resultConvert['data'];
                     Session::put('elasticData.'. $resourceUri, $elasticData);
-                    $data['xmlData'] = $content;
+
+                    if (is_xml_excel_exported($content)) {
+                        $metadata = [
+                            'api_key'       => $apiKey,
+                            'resource_uri'  => $resourceUri,
+                            'data'          => [
+                                'file_format'   => 'CSV',
+                            ],
+                        ];
+                        $editRequest = Request::create('/api/editResourceMetadata', 'POST', $metadata);
+                        $api = new ApiResource($editRequest);
+                        $resultEdit = $api->editResourceMetadata($editRequest)->getData();
+
+                        if ($resultEdit->success) {
+                            $data['csvData'] = $elasticData;
+                        } else {
+                            $data['error'] = $resultEdit->error->message;
+                        }
+                    } else {
+                        $data['xmlData'] = $content;
+                    }
                 } else {
                     $data['error'] = $resultConvert['error']['message'];
                 }

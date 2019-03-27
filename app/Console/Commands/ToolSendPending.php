@@ -55,7 +55,7 @@ class ToolSendPending extends Command
 
             foreach ($queries as $query) {
                 if ($this->isReady($query)) {
-                    if ($connection->source_type == DataQuery::SOURCE_TYPE_DB) {
+                    if ($connection->source_type == ConnectionSetting::SOURCE_TYPE_DB) {
                         $logData = [
                             'module_name'   => Module::getModuleName(Module::TOOL_DB_QUERY),
                             'action'        => ActionsHistory::TYPE_SEND,

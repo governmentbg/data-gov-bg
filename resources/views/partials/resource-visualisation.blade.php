@@ -158,8 +158,12 @@
         @elseif ($format == App\Resource::FORMAT_JSON && isset($data->text))
             <p>@php echo nl2br(e($data->text)) @endphp</p>
         @elseif ($format == App\Resource::FORMAT_XSD)
-            @foreach ($data as $row)
-                <p>{{ $row }}</p>
+            @foreach ($data as $el)
+                <textarea
+                    class="js-xml-prev col-xs-12 m-b-md"
+                    data-xml-data="{{ $el }}"
+                    rows="20"
+                ></textarea>
             @endforeach
         @else
             <div class="data-preview">{{ json_encode($data, JSON_PRETTY_PRINT) }}</div>

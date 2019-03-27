@@ -14,6 +14,7 @@ Security - in case of vulnerabilities.
 ## [Unreleased] - XXXX-XX-XX
 ### Fixed
 - Xml resource visualisations
+- Xsd resource visualisations
 
 ## [1.1.2] - 2019-03-22
 ### Fixed

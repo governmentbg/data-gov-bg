@@ -106,7 +106,18 @@
             action="{{ url('importElastic') }}"
         >
             {{ csrf_field() }}
-            <p>@php echo isset($text) ? nl2br(e($text)) : uctrans('custom.resource_no_visualization') @endphp</p>
+            @if (!empty($xsdData))
+                @foreach ($xsdData as $xsd)
+                    <textarea
+                        class="js-xml-prev col-xs-12 m-b-md"
+                        data-xml-data="{{ $xsd }}"
+                        rows="20"
+                        readonly
+                    ></textarea>
+                @endforeach
+            @else
+                <p>@php echo isset($text) ? nl2br(e($text)) : uctrans('custom.resource_no_visualization') @endphp</p>
+            @endif
             <div class="form-group row">
                 <div class="col-sm-12 text-right m-b-sm">
                     <input type="hidden" name="resource_uri" value="{{ $resourceUri }}">

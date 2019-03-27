@@ -563,7 +563,6 @@ class ConversionController extends ApiController
         if (!$validator->fails()) {
             try {
                 $data = base64_decode($post['data']);
-
                 $data = explode("\r\n", $data);
 
                 return $this->successResponse($data);

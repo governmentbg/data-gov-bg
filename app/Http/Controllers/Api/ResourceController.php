@@ -621,10 +621,16 @@ class ResourceController extends ApiController
 
             try {
                 $result = DB::transaction(function () use ($resource, $dataset, $post, $newVersion) {
-
                     $prevVersionData = ElasticDataSet::getElasticData($resource->id, $resource->version);
 
-                    if ($prevVersionData === $post['data']) {
+                    if (
+                        $prevVersionData === $post['data']
+                        || (
+                            isset($post['data']['text'])
+                            && count($post['data']) == 1
+                            && $post['data']['text'] === $prevVersionData
+                        )
+                    ) {
                         $message = __('custom.resource_updated');
 
                         $this->sendSupportMail(true, $post, $message);

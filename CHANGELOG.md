@@ -15,6 +15,9 @@ Security - in case of vulnerabilities.
 ### Fixed
 - Xml resource visualisations
 - Xsd resource visualisations
+- Wrong tool constant
+- Tool ssl connection to api
+- Detect same text in previous version when updating resource data
 
 ## [1.1.2] - 2019-03-22
 ### Fixed

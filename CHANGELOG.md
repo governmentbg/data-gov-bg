@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Dockerfile graylog port and database host
 
 ## [1.1.3] - 2019-03-29
 ### Fixed

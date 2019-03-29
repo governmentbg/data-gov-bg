@@ -20,14 +20,16 @@ class LoginByApiKey
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() && $request->offsetGet('api_key')) {
-            $user = User::select('id')->where([
-                'api_key'   => $request->offsetGet('api_key'),
-                'active'    => 1,
-            ])->first();
+        if (!config('app.IS_TOOL')) {
+            if (!Auth::check() && $request->offsetGet('api_key')) {
+                $user = User::select('id')->where([
+                    'api_key'   => $request->offsetGet('api_key'),
+                    'active'    => 1,
+                ])->first();
 
-            if (!empty($user)) {
-                Auth::loginUsingId($user->id);
+                if (!empty($user)) {
+                    Auth::loginUsingId($user->id);
+                }
             }
         }
 

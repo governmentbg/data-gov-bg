@@ -13,7 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
-## [1.1.3] - 2019-04-01
+## [1.1.4] - 2019-04-01
 ### Fixed
 - Dockerfile graylog port and database host
 

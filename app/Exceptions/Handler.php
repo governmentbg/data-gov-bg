@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -60,7 +61,16 @@ class Handler extends ExceptionHandler
             return redirect()->back()->with('alert-success', trans('chatter::alert.success.reason.submitted_to_post'));
         }
 
-        Log::error($exception->getMessage());
+        $context = ['type' => get_class($exception)];
+
+        if ($exception instanceof NotFoundHttpException) {
+            Log::info('Path not found', $context);
+        } else {
+            Log::error(
+                $exception->getMessage(),
+                array_merge($context, ['stack_trace' => $exception->getTraceAsString()])
+            );
+        }
 
         return parent::render($request, $exception);
     }

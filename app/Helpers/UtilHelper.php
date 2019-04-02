@@ -11,6 +11,37 @@ use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
+function get_dataset_resources_with_no_data($uri)
+{
+    $set = DataSet::where('uri', $uri)->first();
+    $resources = Resource::where('data_set_id', $set->id)->get();
+    $noIndex = false;
+
+    try {
+        $mappings = \Elasticsearch::indices()->getMapping(['index' => $set->id]);
+    } catch (\Elasticsearch\Common\Exceptions\Missing404Exception $ex) {
+        $noIndex = true;
+    }
+
+    $resourcesWithNoData = [];
+
+    foreach ($resources as $resource) {
+        if (
+            $resource->resource_type == Resource::TYPE_FILE
+            && (
+                $noIndex
+                || !isset(
+                    $mappings[$set->id]['mappings']['default']['properties'][$resource->id .'_'. $resource->version]
+                )
+            )
+        ) {
+            $resourcesWithNoData[] = $resource->uri;
+        }
+    }
+
+    return $resourcesWithNoData;
+}
+
 function is_xml_excel_exported($xml)
 {
     return strpos($xml, '<?mso-application progid="Excel.Sheet"?>') !== false;

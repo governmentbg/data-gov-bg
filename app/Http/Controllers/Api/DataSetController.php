@@ -293,6 +293,26 @@ class DataSetController extends ApiController
 
             if ($validator->fails()) {
                 $errors = $validator->errors()->messages();
+            } else {
+                $validator->after(function ($validator) use ($post) {
+                    if (
+                        !empty($post['data']['status'])
+                        && $post['data']['status'] == DataSet::STATUS_PUBLISHED
+                    ) {
+                        $resourcesWithNoData = get_dataset_resources_with_no_data($post['dataset_uri']);
+
+                        if (!empty($resourcesWithNoData)) {
+                            $validator->errors()->add('status',
+                                __('custom.publish_dataset_with_no_resource_data')
+                                .' ('. implode(', ', $resourcesWithNoData) .')'
+                            );
+                        }
+                    }
+                });
+
+                if ($validator->fails()) {
+                    $errors = $validator->errors()->messages();
+                }
             }
         }
 
@@ -328,16 +348,25 @@ class DataSetController extends ApiController
 
             if (!empty($post['data']['custom_fields'])) {
                 foreach ($post['data']['custom_fields'] as $i => $fieldSet) {
-                    if (!empty(array_filter($fieldSet['value']) && isset($post['data']['sett_id'][$i]))) {
+                    if (
+                        !empty(array_filter($fieldSet['value'])
+                        && isset($post['data']['sett_id'][$i]))
+                    ) {
                         $customFields[] = [
                             'value'     => $fieldSet['value'],
                             'sett_id'   => $post['data']['sett_id'][$i],
                             'label'     => isset($fieldSet['label']) ? $fieldSet['label'] : null,
                         ];
-                    } elseif (!empty(array_filter($fieldSet['value']) && isset($fieldSet['label']) && !empty(array_filter($fieldSet['label'])))) {
+                    } elseif (
+                        !empty(
+                            array_filter($fieldSet['value'])
+                            && isset($fieldSet['label'])
+                            && !empty(array_filter($fieldSet['label']))
+                        )
+                    ) {
                         $customFields[] = [
-                            'value'     => $fieldSet['value'],
-                            'label'     => $fieldSet['label'],
+                            'value' => $fieldSet['value'],
+                            'label' => $fieldSet['label'],
                         ];
                     }
                 }

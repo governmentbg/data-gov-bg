@@ -902,4 +902,5 @@ return [
     'add_news' => 'add news',
     'rec_per_page' => 'records per page',
     'organisation' => 'organisation',
+    'publish_dataset_with_no_resource_data' => 'The following resources do not contain data',
 ];

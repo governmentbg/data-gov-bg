@@ -1,9 +1,22 @@
 <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} sidenav m-t-lg">
     <span class="my-profile m-l-sm">{{uctrans('custom.dataset_edit')}}</span>
 </div>
-@php $root = empty($admin) ? 'user' : 'admin'; @endphp
+@php
+    $root = empty($admin) ? 'user' : 'admin';
+    $statusError = $errors->first('status');
+@endphp
 <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-sm-12' }} m-t-lg p-l-r-none">
     <p class='req-fields'>{{ __('custom.all_fields_required') }}</p>
+    @if (!empty($statusError))
+        <div class="m-t-md">
+            <div class="flash-message">
+                <p class="alert alert-danger">
+                    {{ $statusError }}
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                </p>
+            </div>
+        </div>
+    @endif
     <form method="POST">
         {{ csrf_field() }}
         <div class="form-group row">

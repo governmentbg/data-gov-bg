@@ -902,4 +902,5 @@ return [
     'add_news' => 'добави новина',
     'rec_per_page' => 'записа на страница',
     'organisation' => 'организация',
+    'publish_dataset_with_no_resource_data' => 'Следните ресурси не съдържат данни',
 ];

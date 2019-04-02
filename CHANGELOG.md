@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Changed
+- Throw error when publishing a dataset which has resources with no data
 
 ## [1.1.4] - 2019-04-01
 ### Fixed

@@ -273,6 +273,33 @@ class ResourceTest extends TestCase
      *
      * @return void
      */
+    public function testXmlUpload()
+    {
+        $dataSet = $this->getNewDataSet();
+        $resource = $this->getNewResource($dataSet->id);
+
+        $result = $this->post(url('api/xml2json'), [
+            'api_key'   => $this->getApiKey(),
+            'data'      => file_get_contents(storage_path('tests/sample.xml')),
+        ])->assertStatus(200)->assertJson(['success' => true]);
+
+        $data = $result->original['data'];
+
+        $this->post(
+            url('api/addResourceData'),
+            [
+                'api_key'       => $this->getApiKey(),
+                'resource_uri'  => $resource->uri,
+                'data'          => $data,
+            ]
+        )->assertStatus(200)->assertJson(['success' => true]);
+    }
+
+    /**
+     * Test resource upload
+     *
+     * @return void
+     */
     public function testPdfAndCsvUpload()
     {
         $dataSet = $this->getNewDataSet();

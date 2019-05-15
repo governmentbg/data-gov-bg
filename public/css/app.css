@@ -16696,6 +16696,51 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   padding: 10px;
 }
 
+.theme-data .history .version-heading,
+.theme-data-attention .history .version-heading,
+.theme-user .history .version-heading,
+.theme-organisation .history .version-heading {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.theme-data .history .version,
+.theme-data-attention .history .version,
+.theme-user .history .version,
+.theme-organisation .history .version {
+  font-size: 17px;
+}
+
+.theme-data .history span > svg,
+.theme-data-attention .history span > svg,
+.theme-user .history span > svg,
+.theme-organisation .history span > svg {
+  height: 20px;
+  width: 20px;
+}
+
+.theme-data .history .signaled span,
+.theme-data-attention .history .signaled span,
+.theme-user .history .signaled span,
+.theme-organisation .history .signaled span {
+  color: #d32a31;
+}
+
+.theme-data .history .signaled a:hover svg,
+.theme-data-attention .history .signaled a:hover svg,
+.theme-user .history .signaled a:hover svg,
+.theme-organisation .history .signaled a:hover svg,
+.theme-data .history .signaled a:focus svg,
+.theme-data-attention .history .signaled a:focus svg,
+.theme-user .history .signaled a:focus svg,
+.theme-organisation .history .signaled a:focus svg,
+.theme-data .history .signaled a:active svg,
+.theme-data-attention .history .signaled a:active svg,
+.theme-user .history .signaled a:active svg,
+.theme-organisation .history .signaled a:active svg {
+  fill: #d32a31;
+}
+
 .container .filter-content .filter-type,
 .container .filter-content .sort-by {
   display: inline-block;
@@ -17405,37 +17450,6 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   width: 230px;
 }
 
-.theme-data .history .version-heading,
-.theme-data-attention .history .version-heading {
-  font-size: 22px;
-  font-weight: 500;
-}
-
-.theme-data .history .version,
-.theme-data-attention .history .version {
-  font-size: 17px;
-}
-
-.theme-data .history span > svg,
-.theme-data-attention .history span > svg {
-  height: 20px;
-  width: 20px;
-}
-
-.theme-data .history .signaled span,
-.theme-data-attention .history .signaled span {
-  color: #d32a31;
-}
-
-.theme-data .history .signaled a:hover svg,
-.theme-data .history .signaled a:focus svg,
-.theme-data .history .signaled a:active svg,
-.theme-data-attention .history .signaled a:hover svg,
-.theme-data-attention .history .signaled a:focus svg,
-.theme-data-attention .history .signaled a:active svg {
-  fill: #d32a31;
-}
-
 .theme-data .chronology > .row .info-icon,
 .theme-data-attention .chronology > .row .info-icon {
   border: none !important;
@@ -17664,30 +17678,6 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .theme-user .info-bar-sm li {
   list-style: none;
   padding: 5px 0;
-}
-
-.theme-user .history .version-heading {
-  font-size: 22px;
-  font-weight: 500;
-}
-
-.theme-user .history .version {
-  font-size: 17px;
-}
-
-.theme-user .history span > svg {
-  height: 20px;
-  width: 20px;
-}
-
-.theme-user .history .signaled span {
-  color: #d32a31;
-}
-
-.theme-user .history .signaled a:hover svg,
-.theme-user .history .signaled a:focus svg,
-.theme-user .history .signaled a:active svg {
-  fill: #d32a31;
 }
 
 .theme-user .chronology > .row .info-icon {
@@ -18276,6 +18266,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   max-width: 310px;
 }
 
+.mng-btns {
+  display: inline-block;
+}
+
 .mng-btns .btn {
   margin-bottom: 5px;
   margin-top: 5px;
@@ -18628,30 +18622,6 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   .theme-organisation .list-orgs .col-md-4.col-sm-6.col-xs-10.col-sm-offset-0.col-xs-offset-1 {
     margin-left: 0;
   }
-}
-
-.theme-organisation .history .version-heading {
-  font-size: 22px;
-  font-weight: 500;
-}
-
-.theme-organisation .history .version {
-  font-size: 17px;
-}
-
-.theme-organisation .history span > svg {
-  height: 20px;
-  width: 20px;
-}
-
-.theme-organisation .history .signaled span {
-  color: #d32a31;
-}
-
-.theme-organisation .history .signaled a:hover svg,
-.theme-organisation .history .signaled a:focus svg,
-.theme-organisation .history .signaled a:active svg {
-  fill: #d32a31;
 }
 
 .theme-organisation .chronology > .row .info-icon {

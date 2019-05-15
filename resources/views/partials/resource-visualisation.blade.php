@@ -168,60 +168,6 @@
         @else
             <div class="data-preview">{{ json_encode($data, JSON_PRETTY_PRINT) }}</div>
         @endif
-        @if (!config('app.IS_TOOL'))
-            <form method="POST" action="{{ url('/resource/download') }}">
-                {{ csrf_field() }}
-                <input
-                    hidden
-                    name="resource"
-                    type="text"
-                    value="{{ $resource->id }}"
-                >
-                <input
-                    hidden
-                    name="version"
-                    type="text"
-                    value="{{ $versionView }}"
-                >
-                <input
-                    hidden
-                    name="name"
-                    type="text"
-                    value="{{ $resource->name }}"
-                >
-                <div class="form-group row">
-                    <label
-                        for="format"
-                        class="col-sm-3 col-xs-12 col-form-label"
-                    >{{ uctrans('custom.format') }}:</label>
-                    <div class="col-sm-9">
-                        <select
-                            id="format"
-                            name="format"
-                            class="js-select form-control"
-                        >
-                            @foreach ($formats as $id => $format)
-                                <option
-                                    value="{{ $format }}"
-                                    {{ $format == $resource->file_format ? 'selected' : '' }}
-                                >{{ $format }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row text-right download-btns">
-                    <button
-                        name="download"
-                        type="submit"
-                        class="btn btn-primary js-ga-event"
-                        data-ga-action="download"
-                        data-ga-label="resource download"
-                        data-ga-category="data"
-                    >{{ uctrans('custom.download') }}</button>
-                </div>
-            </form>
-        @endif
     @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
         <textarea
             class="js-xml-prev col-xs-12 m-b-md"
@@ -230,5 +176,59 @@
         ></textarea>
     @else
         <div class="data-preview">{!! nl2br($data) !!}</div>
+    @endif
+    @if (!config('app.IS_TOOL'))
+        <form method="POST" action="{{ url('/resource/download') }}">
+            {{ csrf_field() }}
+            <input
+                hidden
+                name="resource"
+                type="text"
+                value="{{ $resource->id }}"
+            >
+            <input
+                hidden
+                name="version"
+                type="text"
+                value="{{ $versionView }}"
+            >
+            <input
+                hidden
+                name="name"
+                type="text"
+                value="{{ $resource->name }}"
+            >
+            <div class="form-group row">
+                <label
+                    for="format"
+                    class="col-sm-3 col-xs-12 col-form-label"
+                >{{ uctrans('custom.format') }}:</label>
+                <div class="col-sm-9">
+                    <select
+                        id="format"
+                        name="format"
+                        class="js-select form-control"
+                    >
+                        @foreach ($formats as $id => $format)
+                            <option
+                                value="{{ $format }}"
+                                {{ $format == $resource->file_format ? 'selected' : '' }}
+                            >{{ $format }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="row text-right download-btns">
+                <button
+                    name="download"
+                    type="submit"
+                    class="btn btn-primary js-ga-event"
+                    data-ga-action="download"
+                    data-ga-label="resource download"
+                    data-ga-category="data"
+                >{{ uctrans('custom.download') }}</button>
+            </div>
+        </form>
     @endif
 @endif

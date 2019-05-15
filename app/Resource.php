@@ -97,15 +97,14 @@ class Resource extends Model implements TranslatableInterface
         ];
 
         if (!$forDownload) {
-            $formats = $formats +
-                [
-                    self::FORMAT_TSV    => 'TSV',
-                    self::FORMAT_XSD    => 'XSD',
-                    self::FORMAT_ODS    => 'ODS',
-                    self::FORMAT_SLK    => 'SLK',
-                    self::FORMAT_RTF    => 'RTF',
-                    self::FORMAT_ODT    => 'ODT',
-                ];
+            $formats = $formats + [
+                self::FORMAT_TSV    => 'TSV',
+                self::FORMAT_XSD    => 'XSD',
+                self::FORMAT_ODS    => 'ODS',
+                self::FORMAT_SLK    => 'SLK',
+                self::FORMAT_RTF    => 'RTF',
+                self::FORMAT_ODT    => 'ODT',
+            ];
         }
 
         return $formats;

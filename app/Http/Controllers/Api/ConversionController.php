@@ -719,9 +719,30 @@ class ConversionController extends ApiController
     {
         $xmlData = new SimpleXMLElement('<root/>');
 
-        parent::arrayToXml($data, $xmlData);
+        foreach ($data as $key => $value) {
+            if (
+                isset($value[0])
+                && (
+                    is_object($value[0]) && property_exists($value[0], '_')
+                    || is_array($value[0]) && array_key_exists('_', $value[0])
+                )
+            ) {
+                parent::arrayToXmlNew($data, $xmlData);
+            } else {
+                parent::arrayToXml($data, $xmlData);
+            }
 
-        return $xmlData->asXML();
+            break;
+        }
+
+        $xml = html_entity_decode($xmlData->asXML());
+
+        if (count($xml)) {
+            $xml = preg_replace('/<root>/', '', $xml, 1);
+            $xml = preg_replace('/<\/root>$/', '', $xml, -1);
+        }
+
+        return $xml;
     }
 
     /**
@@ -973,10 +994,58 @@ class ConversionController extends ApiController
         }
 
         $xml = simplexml_load_string($data);
-        $json = json_encode($xml);
-        $array = json_decode($json, true);
+
+        $array = $this->xmlToArray($xml);
 
         return $array;
+    }
+
+    private function xmlToArray($xmlnode) {
+        $root = (func_num_args() > 1 ? false : true);
+        $jsnode = [];
+
+        if (!$root) {
+            if (count($xmlnode->attributes()) > 0){
+                $jsnode['$'] = [];
+
+                foreach($xmlnode->attributes() as $key => $value) {
+                    $jsnode['$'][$key] = (string) $value;
+                }
+            }
+
+            $textcontent = trim((string) $xmlnode);
+
+            if (count($textcontent) > 0) {
+                $jsnode['_'] = $textcontent;
+            }
+
+            foreach ($xmlnode->children() as $childxmlnode) {
+                $childname = $childxmlnode->getName();
+
+                if (!array_key_exists($childname, $jsnode)) {
+                    $jsnode[$childname] = [];
+                }
+
+                array_push($jsnode[$childname], $this->xmlToArray($childxmlnode, true));
+            }
+
+            return $jsnode;
+        } else {
+            $nodename = $xmlnode->getName();
+            $jsnode[$nodename] = [];
+
+            array_push($jsnode[$nodename], $this->xmlToArray($xmlnode, true));
+
+            $result = json_decode(json_encode($jsnode), true);
+
+            if (isset($result['data'][0])) {
+                $result['data'] = $result['data'][0];
+                unset($result['data']['_']);
+                $result = $result['data'];
+            }
+
+            return $result;
+        }
     }
 
     /**

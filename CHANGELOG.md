@@ -12,8 +12,16 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Dataset view resources download button
+
+### Fixed
+- Attributes after xml conversion
+- Use html_entities_decode after json2xml conversion
+
 ### Changed
 - Throw error when publishing a dataset which has resources with no data
+- Remove additional root element on json2xml conversion
 
 ## [1.1.4] - 2019-04-01
 ### Fixed

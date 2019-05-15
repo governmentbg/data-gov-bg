@@ -70,7 +70,7 @@ class ApiController extends Controller
      */
     public static function errorResponse($message = null, $errors = [], $code = 500, $type = self::ERROR_GENERAL)
     {
-        $resposeData = [
+        $responseData = [
             'success'   => false,
             'status'    => $code,
             'errors'    => $errors,
@@ -86,12 +86,12 @@ class ApiController extends Controller
                 $xmlData = new \SimpleXMLElement('<?xml version="1.0"?><data></data>');
 
                 // function call to convert array to xml
-                self::arrayToXml($resposeData, $xmlData);
+                self::arrayToXml($responseData, $xmlData);
 
                 return response($xmlData->asXML(), 500)->header('Content-Type', 'text/xml');
             case 'json':
             default :
-                return new JsonResponse($resposeData, $code);
+                return new JsonResponse($responseData, $code);
         }
     }
 
@@ -137,16 +137,69 @@ class ApiController extends Controller
     {
         foreach ($data as $key => $value) {
             if (is_numeric($key)) {
-                $key = $parentKey; //dealing with <0/>..<n/> issues
+                $key = $parentKey; // Dealing with <0/>..<n/> issues
             }
 
             if (is_array($value) || is_object($value)) {
                 $subNode = $xmlData->addChild($key);
 
+                if (is_object($value)) {
+                    $value = (array) $value;
+                }
+
+                if (isset($value['@attributes'])) {
+                    foreach ($value['@attributes'] as $attrKey => $attrValue) {
+                        $subNode->addAttribute($attrKey, $attrValue);
+                    }
+
+                    unset($value['@attributes']);
+                }
+
                 self::arrayToXml($value, $subNode, $key);
             } else {
                 $xmlData->addChild($key, htmlspecialchars($value));
             }
+        }
+    }
+
+    /**
+     * Convert array to xml
+     *
+     * @param array $data
+     * @param string $xmlData
+     */
+    public static function arrayToXmlNew($data, &$xmlData, $parentKey = '')
+    {
+        foreach ($data as $key => $value) {
+            if (is_object($value)) {
+                $value = (array) $value;
+            }
+
+            if (is_array($value)) {
+                if (isset($value[0])) {
+                    self::arrayToXmlNew($value, $xmlData, $key);
+                } else {
+                    if (is_numeric($key)) {
+                        $key = $parentKey; // Dealing with <0/>..<n/> issues
+                    }
+
+                    $subNode = $xmlData->addChild(
+                        $key,
+                        isset($value['_']) ? htmlspecialchars($value['_']) : null
+                    );
+
+                    if (isset($value['$'])) {
+                        foreach ($value['$'] as $attrKey => $attrValue) {
+                            $subNode->addAttribute($attrKey, $attrValue);
+                        }
+
+                        unset($value['$']);
+                    }
+
+                    self::arrayToXmlNew($value, $subNode, $key);
+                }
+            }
+
         }
     }
 

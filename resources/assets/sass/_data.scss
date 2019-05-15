@@ -54,34 +54,7 @@
         width: 230px;
     }
 
-    .history {
-        .version-heading {
-            font-size: 22px;
-            font-weight: 500;
-        }
-
-        .version {
-            font-size: 17px;
-        }
-
-        span > svg {
-            height: 20px;
-            width: 20px;
-        }
-
-        .signaled {
-            span {
-                color: #d32a31;
-            }
-            a {
-                &:hover, &:focus, &:active {
-                    svg {
-                        fill: #d32a31;
-                    }
-                }
-            }
-        }
-    }
+    @extend %history-styles;
 
     .chronology > .row {
         .info-icon {

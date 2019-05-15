@@ -310,6 +310,21 @@ class ResourceController extends ApiController
 
                     $elasticKey = $id .'_1';
 
+                    $params = [
+                        'index'     => $index,
+                        'body'      => [
+                            'settings'  => [
+                                'index.mapping.total_fields.limit' => 1000000,
+                            ],
+                        ],
+                    ];
+
+                    if (\Elasticsearch::indices()->exists(['index' => $index])) {
+                        \Elasticsearch::indices()->putSettings($params);
+                    } else {
+                        \Elasticsearch::indices()->create($params);
+                    }
+
                     \Elasticsearch::index([
                         'body'  => $this->setElasticKey($filteredData, $elasticKey),
                         'index' => $index,

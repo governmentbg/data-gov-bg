@@ -4,21 +4,21 @@
             <title>{{ 'data.egov.bg '. uctrans('organisation') .' - '. $organisation->uri }}</title>
             <description>data.egov.bg</description>
             <link>{{ url('organisation/'. $organisation->uri .'/datasets') }}</link>
-            @foreach ($history as $item)
-                <item>
+            <items>
+                @foreach ($history as $item)
                     @if ($item->module_name == App\Module::getModuleName(App\Module::DATA_SETS))
-                    <dataset id="{{ $item->dataset_id }}">
-                        <title>{{ $item->action_msg .' - '. $translation[(int)$item->dataset_name] }}</title>
-                        <itemName>{{ $translation[(int)$item->dataset_name] }}</itemName>
-                        @if (is_null($item->dataset_deleted))
-                            <link>{{ url('data/view/'. $item->dataset_uri) }}</link>
-                        @else
-                            <link>{{ url('organisation/'. $organisation->uri .'/datasets') }}</link>
-                        @endif
-                        <description>{{ $item->action_msg .' - '. $translation[(int)$item->dataset_name] .' - '. $translation[(int)$item->dataset_descript] }}</description>
-                        <moment>{{ $item->occurrence }}</moment>
-                        <guid>{{ $item->ahId }}</guid>
-                    </dataset>
+                        <dataset id="{{ $item->dataset_id }}">
+                            <title>{{ $item->action_msg .' - '. $translation[(int)$item->dataset_name] }}</title>
+                            <itemName>{{ $translation[(int)$item->dataset_name] }}</itemName>
+                            @if (is_null($item->dataset_deleted))
+                                <link>{{ url('data/view/'. $item->dataset_uri) }}</link>
+                            @else
+                                <link>{{ url('organisation/'. $organisation->uri .'/datasets') }}</link>
+                            @endif
+                            <description>{{ $item->action_msg .' - '. $translation[(int)$item->dataset_name] .' - '. $translation[(int)$item->dataset_descript] }}</description>
+                            <moment>{{ $item->occurrence }}</moment>
+                            <guid>{{ $item->ahId }}</guid>
+                        </dataset>
                     @elseif ($item->module_name == App\Module::getModuleName(App\Module::RESOURCES) && !empty($item->resource_name))
                         <resource id="{{ $item->resource_id }}">
                             <title>{{ $item->action_msg .' - '. $translation[$item->resource_name] }}</title>
@@ -33,8 +33,8 @@
                             <guid>{{ $item->ahId }}</guid>
                         </resource>
                     @endif
-                </item>
-            @endforeach
+                @endforeach
+            </items>
         </channel>
     @endif
 </rss>

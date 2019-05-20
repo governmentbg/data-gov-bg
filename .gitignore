@@ -22,3 +22,4 @@ yarn-error.log
 .buildpath
 /.settings
 .vscode/
+.history/

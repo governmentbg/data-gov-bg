@@ -49,7 +49,9 @@ class ConversionController extends ApiController
             try {
                 $data = $this->fromXml($post['data'], true);
 
-                return $this->successResponse($data);
+                if (!empty($data)) {
+                    return $this->successResponse($data);
+                }
             } catch (\Exception $ex) {
                Log::error($ex->getMessage());
                $validator->errors()->add('data', __('custom.invalid_xml'));
@@ -990,6 +992,9 @@ class ConversionController extends ApiController
         }
 
         if ($parentTag) {
+            $data = preg_replace('/<\?xml.*\?>/i', '', $data);
+            $data = preg_replace('/<\?mso-application.*\?>/i', '', $data);
+
             $data = '<data>'. str_replace('&', '&amp;', $data) .'</data>';
         }
 
@@ -1005,10 +1010,10 @@ class ConversionController extends ApiController
         $jsnode = [];
 
         if (!$root) {
-            if (count($xmlnode->attributes()) > 0){
+            if (count($xmlnode->attributes()) > 0) {
                 $jsnode['$'] = [];
 
-                foreach($xmlnode->attributes() as $key => $value) {
+                foreach ($xmlnode->attributes() as $key => $value) {
                     $jsnode['$'][$key] = (string) $value;
                 }
             }

@@ -3734,6 +3734,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$org->id] = $this->getActObjectData(
                                 $org->id,
                                 $org->name,
+                                $org->logo,
                                 ultrans('custom.organisations'),
                                 'org',
                                 '/organisation/profile/'. $org->uri
@@ -3782,6 +3783,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$group->id] = $this->getActObjectData(
                                 $group->id,
                                 $group->name,
+                                $group->logo,
                                 ultrans('custom.groups'),
                                 'group',
                                 '/groups/view/'. $group->uri
@@ -3831,6 +3833,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$category->id] = $this->getActObjectData(
                                 $category->id,
                                 $category->name,
+                                $category->logo,
                                 ultrans('custom.main_topic'),
                                 'category'
                             );
@@ -3878,6 +3881,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$tag->id] = $this->getActObjectData(
                                 $tag->id,
                                 $tag->name,
+                                null,
                                 ultrans('custom.tags'),
                                 'tag'
                             );
@@ -3925,6 +3929,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$followUser->id] = $this->getActObjectData(
                                 $followUser->id,
                                 $followUser->firstname .' '. $followUser->lastname,
+                                null,
                                 ultrans('custom.users'),
                                 'user',
                                 '/user/profile/'. $followUser->id
@@ -3961,6 +3966,7 @@ class UserController extends Controller {
                 $actObjData[$objType][$user->id] = $this->getActObjectData(
                     $user->id,
                     $user->firstname .' '. $user->lastname,
+                    null,
                     ultrans('custom.users'),
                     'user',
                     '/user/profile/'. $user->id
@@ -4058,15 +4064,28 @@ class UserController extends Controller {
                             'org_id' => $dataset->org_id,
                         ];
 
-                        $rq = Request::create('/api/getOrganisationDetails', 'GET', $params);
-                        $api = new ApiOrganisation($rq);
-                        $res = $api->getOrganisationDetails($rq)->getData();
+                        if (!isset($actObjData['Organisation']) || !isset($actObjData['Organisation'][$dataset->org_id])) {
+                            $rq = Request::create('/api/getOrganisationDetails', 'GET', $params);
+                            $api = new ApiOrganisation($rq);
+                            $res = $api->getOrganisationDetails($rq)->getData();
+
+                            if (isset($res->data)) {
+                                $actObjData['Organisation'][$res->data->id] = $this->getActObjectData(
+                                    $res->data->id,
+                                    $res->data->name,
+                                    $res->data->logo,
+                                    ultrans('custom.organisations'),
+                                    'org',
+                                    '/organisation/profile/'. $res->data->uri
+                                );
+                            }
+                        }
 
                         $objOwner = [
-                            'id' => (isset($res->data) && isset($res->data->id)) ? $res->data->id : '',
-                            'name' => (isset($res->data) && isset($res->data->name)) ? $res->data->name : '',
-                            'logo' => (isset($res->data) && isset($res->data->logo)) ? $res->data->logo : '',
-                            'view' => '/organisation/profile/'. (isset($res->data) && isset($res->data->uri) ? $res->data->uri : '')
+                            'id' => (isset($actObjData['Organisation']) && isset($actObjData['Organisation'][$dataset->org_id])) ? $actObjData['Organisation'][$dataset->org_id]['obj_id'] : '',
+                            'name' => (isset($actObjData['Organisation']) && isset($actObjData['Organisation'][$dataset->org_id])) ? $actObjData['Organisation'][$dataset->org_id]['obj_name'] : '',
+                            'logo' => (isset($actObjData['Organisation']) && isset($actObjData['Organisation'][$dataset->org_id])) ? $actObjData['Organisation'][$dataset->org_id]['obj_logo'] : '',
+                            'view' => (isset($actObjData['Organisation']) && isset($actObjData['Organisation'][$dataset->org_id])) ? $actObjData['Organisation'][$dataset->org_id]['obj_view'] : '',
                         ];
                     } else {
                         $params = [
@@ -4076,20 +4095,32 @@ class UserController extends Controller {
                             ],
                         ];
 
-                        $rq = Request::create('/api/listUsers', 'POST', $params);
-                        $api = new ApiUser($rq);
-                        $res = $api->listUsers($rq)->getData();
-                        $user = isset($res->users) ? array_first($res->users) : null;
+                        if (!isset($actObjData['User']) || !isset($actObjData['User'][$dataset->created_by])) {
+                            $rq = Request::create('/api/listUsers', 'POST', $params);
+                            $api = new ApiUser($rq);
+                            $res = $api->listUsers($rq)->getData();
+                            $user = isset($res->users) ? array_first($res->users) : null;
+
+                            if (isset($user)) {
+                                $actObjData['User'][$user->id] = $this->getActObjectData(
+                                    $user->id,
+                                    ($user->firstname || $user->lastname ? trim($user->firstname .' '. $user->lastname) : $user->username),
+                                    null,
+                                    ultrans('custom.users'),
+                                    'user',
+                                    '/user/profile/'. $user->id
+                                );
+                            }
+                        }
 
                         $objOwner = [
-                            'id' => isset($user) ? $user->id : '',
-                            'name' => isset($user)
-                                        ? ($user->firstname || $user->lastname ? trim($user->firstname .' '. $user->lastname) : $user->username)
-                                        : '',
-                            'logo' => null,
-                            'view' => '/user/profile/'. (isset($user) ? $user->id : '')
+                            'id' => (isset($actObjData['User']) && isset($actObjData['User'][$dataset->created_by])) ? $actObjData['User'][$dataset->created_by]['obj_id'] : '',
+                            'name' => (isset($actObjData['User']) && isset($actObjData['User'][$dataset->created_by])) ? $actObjData['User'][$dataset->created_by]['obj_name'] : '',
+                            'logo' => (isset($actObjData['User']) && isset($actObjData['User'][$dataset->created_by])) ? $actObjData['User'][$dataset->created_by]['obj_logo'] : '',
+                            'view' => (isset($actObjData['User']) && isset($actObjData['User'][$dataset->created_by])) ? $actObjData['User'][$dataset->created_by]['obj_view'] : '',
                         ];
                     }
+
                     if ($filter == 'datasets') {
                         $filters[$filter]['data'][$dataset->uri] = $dataset->name;
 
@@ -4193,10 +4224,11 @@ class UserController extends Controller {
      *
      * @return array
      */
-    private function getActObjectData($id, $name, $module, $type, $view = null, $parentObjId = null) {
+    private function getActObjectData($id, $name, $logo, $module, $type, $view = null, $parentObjId = null) {
         return [
             'obj_id'        => $id,
             'obj_name'      => $name,
+            'obj_logo'      => $logo,
             'obj_module'    => $module,
             'obj_type'      => $type,
             'obj_view'      => $view,

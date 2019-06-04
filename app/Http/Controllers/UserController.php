@@ -3833,7 +3833,7 @@ class UserController extends Controller {
                             $actObjData[$objType][$category->id] = $this->getActObjectData(
                                 $category->id,
                                 $category->name,
-                                $category->logo,
+                                $category->icon_data,
                                 ultrans('custom.main_topic'),
                                 'category'
                             );

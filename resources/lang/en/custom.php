@@ -903,4 +903,5 @@ return [
     'rec_per_page' => 'records per page',
     'organisation' => 'organisation',
     'publish_dataset_with_no_resource_data' => 'The following resources do not contain data',
+    'footer_text' => "The Open Data Portal of the Republic of Bulgaria is created under the public procurement order: „Creation, testing and implementation of a Portal for open data, creation of an instrument for automated upload of data to the portal and conduct of a training“ in the implementation of: G05SFOP001-2.001-0001 „Improving the processes related to the provision, access and reuse of public sector information“ financed by the „Good governance“ operational program",
 ];

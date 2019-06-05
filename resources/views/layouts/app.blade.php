@@ -68,13 +68,6 @@
                             <a
                                 href="{{ url('/') }}"
                             ><img alt="Лого на портала" src="{{ asset('img/opendata-logo-color.svg') }}"></a>
-                            <a href="https://europa.eu/european-union/index_bg" target="_blank">
-                                <img
-                                    alt="Официална страница на Европейския съюз"
-                                    src="{{ asset('img/euro-union.svg') }}"
-                                >
-                            </a>
-                            <a><img alt="Добро управление" src="{{ asset('img/upravlenie-logo.svg') }}"></a>
                         </div>
                         @if (!config('app.IS_TOOL'))
                             <div class="access-terms-icons">
@@ -321,34 +314,41 @@
                 </div>
             </nav>
 
-            <div class="js-content">
+            <div class="js-content m-b-xl">
                 @yield('content')
             </div>
 
-            <footer class="footer js-footer hidden">
-                <div class="image-links text-right col-xs-12 m-b-n-sm">
-                    <a href="{{ url('/help') }}">
-                        <span class="svg-icons">
-                            <svg class="help-section" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26">
-                                <rect class="cls-1" width="26" height="26" rx="1.62" ry="1.62"/>
-                                <rect class="cls-2" width="26" height="26" rx="12" ry="12"/>
-                                <g>
-                                  <path class="cls-3" d="M6.94,15.8V12.94a.08.08,0,0,0,0,0,4.74,4.74,0,0,1-1,.11,4.9,4.9,0,0,1-1-.11v2.9a1,1,0,1,0,2.05,0Z" transform="translate(0 0)"/>
-                                  <path class="cls-3" d="M10.64,7.88A4.72,4.72,0,1,0,5.92,12.6,4.73,4.73,0,0,0,10.64,7.88Zm-8.21,0a3.49,3.49,0,1,1,3.49,3.49A3.49,3.49,0,0,1,2.43,7.88Z" transform="translate(0 0)"/>
-                                  <path class="cls-3" d="M4.59,7.09c.22-.36.33-1.06,0-1.17s-.7.41-.87.77a2.83,2.83,0,0,0,.72,3.38C4.71,10.07,3.72,8.52,4.59,7.09Z" transform="translate(0 0)"/>
-                                </g>
-                                <rect class="cls-3" x="12.57" y="5.94" width="11.99" height="1.27" rx="0.59" ry="0.59"/>
-                                <rect class="cls-3" x="12.57" y="9.41" width="11.99" height="1.27" rx="0.59" ry="0.59"/>
-                                <rect class="cls-3" x="12.62" y="13.01" width="11.93" height="1.27" rx="0.59" ry="0.59"/>
-                                <rect class="cls-3" x="1.49" y="19.14" width="23.07" height="1.27" rx="0.59" ry="0.59"/>
-                                <rect class="cls-3" x="1.49" y="22.58" width="23.07" height="1.27" rx="0.59" ry="0.59"/>
-                            </svg>
-                        </span>
-                    </a>
-                </div>
-                <div class="copiright text-center col-xs-12">
+            <footer>
+                <div class="text-center col-xs-12 m-t-xl">
                     <div class="row">
-                        {{ __('custom.copyright') }}
+                        <div class="container">
+                            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 text-left align-top m-t-md m-l-none">
+                                <a href="https://europa.eu/european-union/index_bg" target="_blank">
+                                    <img
+                                        alt="Официална страница на Европейския съюз"
+                                        src="{{ asset('img/euro-union.svg') }}"
+                                        width="150"
+                                        height="100"
+                                    >
+                                </a>
+                                <a class="m-l-r-md">
+                                    <img
+                                        alt="Добро управление"
+                                        src="{{ asset('img/upravlenie-logo.svg') }}"
+                                        width="150"
+                                        height="100"
+                                    >
+                                </a>
+                            </div>
+                            <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                                <h6 class="text-justify m-t-xl">
+                                    Платформата за отворени данни на Република България е разработена в рамките на обществена поръчка с предмет: „Изработване, тестване
+                                    и внедряване на Портал за отворени данни, разработване на инструмент за автоматизирано въвеждане на данни на портала и провеждане на свързано
+                                    обучение“ в изпълнение на Проект: BG05SFOP001-2.001-0001 „Подобряване на процесите, свързани с предоставянето, достъпа и повторното използване
+                                    на информацията от обществения сектор“, финансиран по Оперативна програма „Добро управление“
+                                </h6>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </footer>

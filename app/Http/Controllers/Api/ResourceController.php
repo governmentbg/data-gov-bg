@@ -242,7 +242,7 @@ class ResourceController extends ApiController
         } else {
             $errors = $validator->errors()->messages();
         }
-        Log::error($errors);
+
         return $this->errorResponse(__('custom.add_resource_meta_fail'), $errors);
     }
 

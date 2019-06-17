@@ -3672,6 +3672,39 @@ class UserController extends Controller {
             $api = new ApiUser($rq);
             $result = $api->getUserSettings($rq)->getData();
 
+            if (empty($filter)) {
+                if (!empty($result->user->follows)) {
+                    $firstInterest = array_first($result->user->follows);
+
+                    foreach ($firstInterest as $type => $object) {
+                        if (!is_null($object) && $object != 0) {
+                            switch ($type) {
+                                case 'org_id':
+                                    $filter = 'organisations';
+                                    break;
+                                case 'group_id':
+                                    $filter = 'groups';
+                                    break;
+                                case 'dataset_id':
+                                    $filter = 'datasets';
+                                    break;
+                                case 'category_id':
+                                    $filter = 'categories';
+                                    break;
+                                case 'tag_id':
+                                    $filter = 'tags';
+                                    break;
+                                case 'follow_user_id':
+                                    $filter = 'users';
+                                    break;
+                                default:
+                                $filter = 'datasets';
+                            }
+                        }
+                    }
+                }
+            }
+
             if (!empty($result->user) && !empty($result->user->follows)) {
                 $userFollows = [
                     'org_id'         => [],

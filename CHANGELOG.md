@@ -12,6 +12,9 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Fix display of empty tags in dataset feed
+- Fix xml conversions with declarations or empty xml
 
 ## [1.1.6] - 2019-06-13
 ### Added

@@ -180,14 +180,18 @@ function migrate_datasets($dataSetUri, $convert)
                         $alternativeFileFormat = explode('/', $resource['url']);
                         $alternativeFileFormat = substr(strrchr(array_pop($alternativeFileFormat), '.'), 1);
 
-                        $fileFormat = !empty($resource['format'])
-                            ? $resource['format']
-                            : $alternativeFileFormat;
+                        $fileFormat = $alternativeFileFormat != ''
+                            ? $alternativeFileFormat
+                            : $resource['format'];
 
                         $fileFormat = strtoupper(str_replace('.', '', $fileFormat));
 
                         if ($fileFormat == 'WORD') {
                             $fileFormat = 'DOC';
+                        }
+
+                        if ($fileFormat == 'XLSX' || $fileFormat == 'XLS') {
+                            $fileFormat = 'CSV';
                         }
 
                         $resource['format'] = $fileFormat;

@@ -5,7 +5,31 @@
     @include('partials.alerts-bar')
     @include('partials.admin-nav-bar', ['view' => 'dataset'])
     <div class="col-xs-12 m-t-lg p-l-r-none">
-        <span class="my-profile m-l-sm">{{ uctrans('custom.datasets_list') }}</span>
+        <div class="col-xs-4 p-l-r-none">
+            <span class="my-profile m-l-sm">{{ uctrans('custom.datasets_list') }}</span>
+        </div>
+        <div class="col-xs-8">
+            <div class="filter-content org-nav-bar">
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="nav filter-type right-border">
+                            <li>
+                                <a
+                                    class="{{ $view == 'datasets' ? 'active' : null }}"
+                                    href="{{ url('/admin/datasets') }}"
+                                >{{ ultrans('custom.datasets') }}</a>
+                            </li>
+                            <li>
+                                <a
+                                    class="{{ $view == 'deletedDatasets' ? 'active' : null }}"
+                                    href="{{ url('/admin/datasetsDeleted') }}"
+                                >{{ ultrans('custom.deleted_datasets') }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-3 col-sm-4 col-xs-12 text-left">

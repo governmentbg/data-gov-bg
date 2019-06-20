@@ -51,6 +51,14 @@
                                     >{{ ultrans('custom.datasets') }}</a>
                                 @endif
                             </li>
+                            @if ($isAdmin)
+                                <li>
+                                    <a
+                                        class="{{ $view == 'deletedDatasets' ? 'active' : null }}"
+                                        href="{{ url('admin/organisations/deletedDatasets/'. $organisation->uri) }}"
+                                    >{{ ultrans('custom.deleted_datasets') }}</a>
+                                </li>
+                            @endif
                             <li>
                             @if ($isAdmin)
                                 <a

@@ -904,4 +904,7 @@ return [
     'organisation' => 'organisation',
     'publish_dataset_with_no_resource_data' => 'The following resources do not contain data',
     'footer_text' => "The Open Data Portal of the Republic of Bulgaria is developed under Project: BG05SFOP001-2.001-0001 „Improving the processes related to the provision, access and reuse of public sector information“ financed by the „Good governance“ operational program",
+    'deleted_datasets' => 'Изтрити набори данни',
+    'deleted_at' => 'Deleted at',
+    'delete_failure' => 'Delete failure',
 ];

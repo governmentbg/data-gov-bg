@@ -535,31 +535,16 @@ class DataSetController extends ApiController
         }
 
         try {
-
-            $index = $dataset->id;
-
             $logData = [
                 'module_name'      => Module::getModuleName(Module::DATA_SETS),
                 'action'           => ActionsHistory::TYPE_DEL,
-                'action_object'    =>  $index,
+                'action_object'    => $dataset->id,
                 'action_msg'       => 'Deleted dataset',
             ];
 
-            $result = DB::transaction(function () use ($index, $logData) {
-                $dataset->delete();
+            $dataset->delete();
 
-                try {
-                    if (\Elasticsearch::indices()->exists(['index' => $index])) {
-                        \Elasticsearch::indices()->delete(['index' => $index]);
-                    }
-                } catch (Exception $ex) {
-                    throw new Error;
-                }
-
-                Module::add($logData);
-            }, config('app.TRANSACTION_ATTEMPTS'));
-
-
+            Module::add($logData);
         } catch (Exception $ex) {
             Log::error($ex->getMessage());
 
@@ -578,7 +563,6 @@ class DataSetController extends ApiController
 
         return $this->successResponse();
     }
-
 
     /**
      * API function for listing Data Sets

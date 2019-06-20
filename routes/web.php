@@ -21,6 +21,11 @@ Route::middleware('auth')->group(function() {
 
     Route::middleware('check.resources')->group(function () {
         Route::middleware('admin')->group(function () {
+            Route::match(['get', 'post'], 'admin/organisations/deletedDatasets/{uri}', 'Admin\OrganisationController@listDeletedDatasets');
+            Route::match(['get', 'post'], 'admin/groups/deletedDatasets/{uri}', 'Admin\OrganisationController@listDeletedDatasets');
+            Route::match(['get', 'post'], 'admin/organisations/{orgUri}/viewDeletedDataset/{uri}', 'Admin\OrganisationController@viewDeletedDataset');
+            Route::match(['get', 'post'], 'admin/groups/{orgUri}/viewDeletedDataset/{uri}', 'Admin\OrganisationController@viewDeletedDataset');
+            Route::match(['get', 'post'], 'admin/organisations/hardDeleteDataset', 'Admin\OrganisationController@hardDeleteDataset');
             Route::match(['get', 'post'], 'admin/organisations/dataset/create/{uri}', 'UserController@orgDatasetCreate');
             Route::match(['get', 'post'], 'admin/groups/dataset/create/{uri}', 'UserController@groupDatasetCreate');
             Route::match(['get', 'post'], 'admin/groups/datasets/{uri}', 'UserController@groupDatasets');
@@ -176,6 +181,8 @@ Route::middleware('auth')->group(function() {
         Route::match(['get', 'post'], '/admin/dataset/view/{uri}', 'Admin\DataSetController@view')->name('adminDatasetView');
         Route::match(['get', 'post'], '/admin/dataset/edit/{uri}', 'Admin\DataSetController@edit');
         Route::match(['get', 'post'], '/admin/dataset/delete', 'Admin\DataSetController@delete');
+        Route::match(['get', 'post'], '/admin/datasetsDeleted', 'Admin\DataSetController@listDeletedDatasets');
+        Route::match(['get', 'post'], '/admin/viewDeletedDataset/{uri}', 'Admin\DataSetController@viewDeletedDataset');
 
         Route::match(
             ['get', 'post'],

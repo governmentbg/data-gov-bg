@@ -7,6 +7,7 @@ use App\Tags;
 use App\DataSet;
 use App\Resource;
 use App\Organisation;
+use App\DataSetGroup;
 use App\CustomSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -194,6 +195,7 @@ class DataSetController extends AdminController
                 'from' => isset($request->from) ? $request->from : null,
                 'to'   => isset($request->to) ? $request->to : null
             ],
+            'view' => 'datasets'
         ]);
     }
 
@@ -974,5 +976,96 @@ class DataSetController extends AdminController
             'parent'    => isset($parent) ? $parent : false,
             'dataseUri' => $resourceData->dataset_uri
         ]);
+    }
+
+    public function listDeletedDatasets(Request $request)
+    {
+        $perPage = 10;
+        $page = !empty($request->page) ? $request->page : 1;
+        $allowActionsForDataset = [];
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $query = Dataset::whereNotNull('deleted_at')
+            ->whereNull('org_id')->whereNotIn('data_sets.id', DataSetGroup::select('data_set_id'))
+            ->withTrashed();
+
+        $search = $request->has('q') ? $request->offsetGet('q') : '';
+
+        if (!empty($search)) {
+            $tntIds = DataSet::search($search)->withTrashed()->get()->pluck('id');
+
+            $fullMatchIds = DataSet::select('data_sets.id')
+                ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                ->where('translations.locale', $locale)
+                ->where('translations.text', 'like', '%'. $search .'%')
+                ->withTrashed()
+                ->pluck('id');
+
+            $ids = $fullMatchIds->merge($tntIds)->unique();
+
+            $query->whereIn('data_sets.id', $ids);
+
+            if (count($ids)) {
+                $strIds = $ids->implode(',');
+                $query->orderByRaw(\DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+            }
+        }
+
+        $totalDatasets = $query->count();
+        $datasets = $query->orderBy('deleted_at', 'desc')
+            ->forPage($page, $perPage)
+            ->get();
+
+        if (\Elasticsearch::ping()) {
+            foreach ($datasets as $singleDataset) {
+                if (\Elasticsearch::indices()->exists(['index' => $singleDataset->id])) {
+                    $allowActionsForDataset[] = $singleDataset->id;
+                }
+            }
+        }
+
+        $paginationData = $this->getPaginationData($datasets, $totalDatasets, array_except(app('request')->input(), ['page']), $perPage);
+
+        return view('admin/datasetsDeleted',
+            [
+                'view'                   => 'deletedDatasets',
+                'datasets'               => $paginationData['items'],
+                'pagination'             => $paginationData['paginate'],
+                'allowActionsForDataset' => $allowActionsForDataset,
+                'search'                 => $search,
+            ]
+        );
+    }
+
+    public function viewDeletedDataset(Request $request, $uri)
+    {
+        $perPage = 6;
+        $allowDelete = false;
+        $page = !empty($request->page) ? $request->page : 1;
+        $dataset = Dataset::where('uri', $uri)->withTrashed()->first();
+        $resourcesTotal = $dataset->resource()->withTrashed()->count();
+        $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();
+
+        if (\Elasticsearch::ping()) {
+            try {
+                if (\Elasticsearch::indices()->exists(['index' => $dataset->id])) {
+                    $allowDelete = true;
+                }
+            } catch (Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        $paginationData = $this->getPaginationData($resources, $resourcesTotal, [], $perPage);
+
+        return view('admin/datasetDeletedView',
+            [
+                'view'            => 'deletedDatasets',
+                'dataset'         => $dataset,
+                'resources'       => $paginationData['items'],
+                'pagination'      => $paginationData['paginate'],
+                'allowDelete'     => $allowDelete
+            ]
+        );
     }
 }

@@ -12,6 +12,19 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Fixed
+- Fix display of empty tags in dataset feed
+- Fix xml conversions with declarations or empty xml
+
+## [1.1.6] - 2019-06-13
+### Added
+- Footer text
+
+### Fixed
+- Hide download button if resource has no data
+- Various optimizations of queries
+- Foreign key for tags
+- Signals page issue
 
 ## [1.1.5] - 2019-05-20
 ### Added
@@ -477,6 +490,8 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.6]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.5...v1.1.6
+[1.1.5]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.1...v1.1.2

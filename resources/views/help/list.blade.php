@@ -50,12 +50,14 @@
                                                 @endif
                                             @endforeach
                                             @foreach ($pages as $page)
-                                                @if ($page->section_id == $section->id)
-                                                    <ul class="nav">
-                                                        <li>
-                                                            <a href="{{ url('help/view/'. $section->id .'/'. $page->id) }}">{{ $page->title }}</a>
-                                                        </li>
-                                                    </ul>
+                                                @if ($page->active)
+                                                    @if ($page->section_id == $section->id)
+                                                        <ul class="nav">
+                                                            <li>
+                                                                <a href="{{ url('help/view/'. $section->id .'/'. $page->id) }}">{{ $page->title }}</a>
+                                                            </li>
+                                                        </ul>
+                                                    @endif
                                                 @endif
                                             @endforeach
                                         </div>

@@ -236,6 +236,7 @@ class ResourceController extends ApiController
 
                 return $result;
             } catch (Throwable $e) {
+                Log::error($e->getMessage());
                 return $this->errorResponse(__('custom.add_resource_meta_fail'));
             }
         } else {
@@ -315,6 +316,7 @@ class ResourceController extends ApiController
                         'body'      => [
                             'settings'  => [
                                 'index.mapping.total_fields.limit' => 1000000,
+                                'index.refresh_interval' => '300s'
                             ],
                         ],
                     ];

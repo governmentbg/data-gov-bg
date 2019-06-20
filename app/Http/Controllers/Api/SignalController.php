@@ -354,6 +354,11 @@ class SignalController extends ApiController
         $result = [];
         $query = Signal::select();
 
+        $query->join('resources', 'resources.id', '=', 'signals.resource_id');
+        $query->join('data_sets', 'data_sets.id', '=', 'resources.data_set_id');
+        $query->where('resources.deleted_at', null);
+        $query->where('data_sets.deleted_at', null);
+
         if (isset($criteria['search'])) {
             $ids = Signal::search($criteria['search'])->get()->pluck('id');
             $query->whereIn('signals.id', $ids);
@@ -364,20 +369,20 @@ class SignalController extends ApiController
         }
 
         if (isset($criteria['status'])) {
-            $query->where('status', $criteria['status']);
+            $query->where('signals.status', $criteria['status']);
         }
 
         if (isset($criteria['date_from'])) {
-            $query->where('created_at', '>=', $criteria['date_from']);
+            $query->where('signals.created_at', '>=', $criteria['date_from']);
         }
 
         if (isset($criteria['date_to'])) {
-            $query->where('created_at', '<=', $criteria['date_to']);
+            $query->where('signals.created_at', '<=', $criteria['date_to']);
         }
 
         $total_records = $query->count();
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
-        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'signals.created_at';
 
         $orderColumns = [
             'id',

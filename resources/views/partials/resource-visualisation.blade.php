@@ -198,37 +198,39 @@
                 type="text"
                 value="{{ $resource->name }}"
             >
-            <div class="form-group row">
-                <label
-                    for="format"
-                    class="col-sm-3 col-xs-12 col-form-label"
-                >{{ uctrans('custom.format') }}:</label>
-                <div class="col-sm-9">
-                    <select
-                        id="format"
-                        name="format"
-                        class="js-select form-control"
-                    >
-                        @foreach ($formats as $id => $format)
-                            <option
-                                value="{{ $format }}"
-                                {{ $format == $resource->file_format ? 'selected' : '' }}
-                            >{{ $format }}</option>
-                        @endforeach
-                    </select>
+            @if (!empty($data))
+                <div class="form-group row">
+                    <label
+                        for="format"
+                        class="col-sm-3 col-xs-12 col-form-label"
+                    >{{ uctrans('custom.format') }}:</label>
+                    <div class="col-sm-9">
+                        <select
+                            id="format"
+                            name="format"
+                            class="js-select form-control"
+                        >
+                            @foreach ($formats as $id => $format)
+                                <option
+                                    value="{{ $format }}"
+                                    {{ $format == $resource->file_format ? 'selected' : '' }}
+                                >{{ $format }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <div class="row text-right download-btns">
-                <button
-                    name="download"
-                    type="submit"
-                    class="btn btn-primary js-ga-event"
-                    data-ga-action="download"
-                    data-ga-label="resource download"
-                    data-ga-category="data"
-                >{{ uctrans('custom.download') }}</button>
-            </div>
+                <div class="row text-right download-btns">
+                    <button
+                        name="download"
+                        type="submit"
+                        class="btn btn-primary js-ga-event"
+                        data-ga-action="download"
+                        data-ga-label="resource download"
+                        data-ga-category="data"
+                    >{{ uctrans('custom.download') }}</button>
+                </div>
+            @endif
         </form>
     @endif
 @endif

@@ -32,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
                 ))->withPath('');
             });
         }
+
+        \DB::listen(function ($query) {
+            if ($query->time/1000 > 2) {
+                \Log::error(' Time: '. $query->time/1000 .' Query: '. $query->sql);
+            }
+        });
     }
 
     /**

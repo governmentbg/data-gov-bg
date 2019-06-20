@@ -19,10 +19,12 @@
         "postcss-cli": "^4.1.1"
     },
     "dependencies": {
+        "ajv": "^6.10.0",
         "codemirror": "^5.40.0",
         "datatables.net-dt": "^1.10.19",
         "flag-icon-css": "^3.0.0",
         "icheck": "^1.0.2",
+        "imagemin": "^5.3.1",
         "prettify-xml": "^1.2.0",
         "summernote": "^0.8.10"
     }

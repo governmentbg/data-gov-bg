@@ -9,6 +9,7 @@ use App\DataSet;
 use App\Category;
 use App\Resource;
 use App\UserSetting;
+use App\DataSetGroup;
 use App\Organisation;
 use App\CustomSetting;
 use App\ActionsHistory;
@@ -701,5 +702,135 @@ class OrganisationController extends AdminController
                 'organisation'  => $org
             ]
         );
+    }
+
+    public function listDeletedDatasets(Request $request, $uri)
+    {
+        $perPage = 6;
+        $page = !empty($request->page) ? $request->page : 1;
+        $allowActionsForDataset = [];
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $org = Organisation::where('uri', $uri)->first();
+
+        if ($org->type == Organisation::TYPE_GROUP) {
+
+            $groupDatasets = DataSetGroup::select('data_set_id')->where('group_id', $org->id)->get();
+            $query = Dataset::whereIn('id', $groupDatasets)->whereNotNull('deleted_at')->withTrashed();
+        } else {
+
+            $query = Dataset::where('org_id', $org->id)->whereNotNull('deleted_at')->withTrashed();
+        }
+
+        $search = $request->has('q') ? $request->offsetGet('q') : '';
+
+        if (!empty($search)) {
+            $tntIds = DataSet::search($search)->withTrashed()->get()->pluck('id');
+
+            $fullMatchIds = DataSet::select('data_sets.id')
+                ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                ->where('translations.locale', $locale)
+                ->where('translations.text', 'like', '%'. $search .'%')
+                ->withTrashed()
+                ->pluck('id');
+
+            $ids = $fullMatchIds->merge($tntIds)->unique();
+
+            $query->whereIn('data_sets.id', $ids);
+
+            if (count($ids)) {
+                $strIds = $ids->implode(',');
+                $query->orderByRaw(\DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+            }
+        }
+
+        $totalDatasets = $query->count();
+        $datasets = $query->forPage($page, $perPage)->get();
+
+        if (\Elasticsearch::ping()) {
+            foreach ($datasets as $singleDataset) {
+                if (\Elasticsearch::indices()->exists(['index' => $singleDataset->id])) {
+                    $allowActionsForDataset[] = $singleDataset->id;
+                }
+            }
+        }
+
+        $paginationData = $this->getPaginationData(
+            $datasets,
+            $totalDatasets,
+            array_except(app('request')->input(), ['page']),
+            $perPage
+        );
+
+        return view('admin/deletedDatasets',
+            [
+                'view'                   => 'deletedDatasets',
+                'organisation'           => $org,
+                'datasets'               => $paginationData['items'],
+                'pagination'             => $paginationData['paginate'],
+                'allowActionsForDataset' => $allowActionsForDataset,
+                'search'                 => $search
+            ]
+        );
+    }
+
+    public function viewDeletedDataset(Request $request, $orgUri, $uri)
+    {
+        $perPage = 6;
+        $allowDelete = false;
+        $page = !empty($request->page) ? $request->page : 1;
+        $dataset = Dataset::where('uri', $uri)->withTrashed()->first();
+        $org = Organisation::where('uri', $orgUri)->first();
+        $resourcesTotal = $dataset->resource()->withTrashed()->count();
+        $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();
+
+        if (\Elasticsearch::ping()) {
+            try {
+                if (\Elasticsearch::indices()->exists(['index' => $dataset->id])) {
+                    $allowDelete = true;
+                }
+            } catch (Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        $paginationData = $this->getPaginationData($resources, $resourcesTotal, [], $perPage);
+
+        return view('admin/viewDeletedDataset',
+            [
+                'view'            => 'deletedDatasets',
+                'dataset'         => $dataset,
+                'organisation'    => $org,
+                'resources'       => $paginationData['items'],
+                'pagination'      => $paginationData['paginate'],
+                'allowDelete'     => $allowDelete
+            ]
+        );
+    }
+
+    public function hardDeleteDataset(Request $request)
+    {
+        if (\Elasticsearch::ping()) {
+            $result = \DB::transaction(function () use ($request) {
+                try {
+                    if (\Elasticsearch::indices()->exists(['index' => $request->dataset_id])) {
+                        if (\Elasticsearch::indices()->delete(['index' => $request->dataset_id])) {
+                            $request->session()->flash('alert-success', __('custom.delete_success'));
+                        }
+                    } else {
+                        $request->session()->flash('alert-danger', __('custom.delete_failure'));
+                    }
+
+                } catch (Exception $ex) {
+                    Log::error($ex->getMessage());
+
+                    $request->session()->flash('alert-danger', __('custom.delete_failure'));
+                }
+            });
+        } else {
+            $request->session()->flash('alert-danger', __('custom.delete_failure'));
+        }
+
+        return back();
     }
 }

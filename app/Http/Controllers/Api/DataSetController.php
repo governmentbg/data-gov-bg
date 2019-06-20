@@ -545,7 +545,6 @@ class DataSetController extends ApiController
             $dataset->delete();
 
             Module::add($logData);
-
         } catch (Exception $ex) {
             Log::error($ex->getMessage());
 
@@ -564,7 +563,6 @@ class DataSetController extends ApiController
 
         return $this->successResponse();
     }
-
 
     /**
      * API function for listing Data Sets

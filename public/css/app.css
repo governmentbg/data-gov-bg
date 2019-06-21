@@ -13769,12 +13769,6 @@ body #app .navbar .navbar-header > div.access-terms-icons {
   margin-top: 11px;
 }
 
-@media screen and (max-width: 767px) {
-  body #app .navbar .navbar-header > div.access-terms-icons {
-    display: none;
-  }
-}
-
 body #app .navbar .navbar-header > div.access-terms-icons > a {
   display: inline-block;
 }
@@ -14923,6 +14917,71 @@ button:focus {
 
 .p-l-lg {
   padding-left: 30px;
+}
+
+.mobile-img {
+  background: white;
+  width: 26px;
+  height: 26px;
+}
+
+.mobile-icon {
+  width: 32px;
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+.active-menu {
+  border: 3px solid #108f9e;
+  border-radius: 3px;
+}
+
+@media screen and (max-width: 767px) {
+  .img-wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .img-wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+}
+
+.img-wrapper .footer-img {
+  width: 40%;
+  height: auto;
+  max-height: 10vh;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+@media screen and (max-width: 991px) {
+  .img-wrapper .footer-img {
+    width: 30%;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .img-wrapper .footer-img {
+    width: 40%;
+  }
+}
+
+@media screen and (max-width: 1199px) {
+  .img-wrapper .footer-img {
+    margin-top: 20px;
+  }
 }
 
 .bootstrap-tagsinput {

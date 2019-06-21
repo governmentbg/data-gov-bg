@@ -63,10 +63,6 @@ body {
                         vertical-align: top;
                         margin-top: 11px;
 
-                        @include smMobile() {
-                            display: none;
-                        }
-
                         > a {
                             display: inline-block;
                         }

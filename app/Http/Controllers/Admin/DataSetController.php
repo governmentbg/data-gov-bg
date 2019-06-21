@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Role;
+use App\User;
 use App\Tags;
 use App\DataSet;
 use App\Resource;
@@ -1045,6 +1046,9 @@ class DataSetController extends AdminController
         $dataset = Dataset::where('uri', $uri)->withTrashed()->first();
         $resourcesTotal = $dataset->resource()->withTrashed()->count();
         $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();
+        $dataset->created_by = User::where('id', $dataset->created_by)->value('username');
+        $dataset->updated_by = User::where('id', $dataset->updated_by)->value('username');
+        $dataset->deleted_by = User::where('id', $dataset->deleted_by)->value('username');
 
         if (\Elasticsearch::ping()) {
             try {

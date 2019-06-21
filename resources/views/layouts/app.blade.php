@@ -76,6 +76,25 @@
                                 </a>
                             </div>
                             <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
+                                @if (\Auth::check())
+                                    <div class="mobile-icon {{ in_array(Request::segment(1), ['user', 'admin']) ? 'active-menu' : '' }}">
+                                        <span>
+                                            <a
+                                                href="{{ url('/user') }}"
+                                            >
+                                                @if (\Auth::user()->is_admin)
+                                                    <img class="mobile-img " src="{{ asset('img/admin.svg') }}">
+                                                @else
+                                                    <img class="mobile-img" src="{{ asset('img/user.svg') }}">
+                                                @endif
+                                            </a>
+                                        </span>
+                                    </div>
+                                @else
+                                    <span class="login-link">>
+                                        <a href="{{ url('/login') }}">{{ __('custom.login') }}</a>
+                                    </span>
+                                @endif
                                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#my-navbar">
                                     <span class="icon-bar"></span>
                                     <span class="icon-bar"></span>
@@ -322,23 +341,23 @@
                 <div class="text-center col-xs-12 m-t-xl">
                     <div class="row">
                         <div class="container">
-                            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 text-left align-top m-t-md m-l-none">
-                                <a href="https://europa.eu/european-union/index_bg" target="_blank">
-                                    <img
-                                        alt="Официална страница на Европейския съюз"
-                                        src="{{ asset('img/euro-union.svg') }}"
-                                        width="150"
-                                        height="100"
-                                    >
-                                </a>
-                                <a class="m-l-r-md">
-                                    <img
-                                        alt="Добро управление"
-                                        src="{{ asset('img/upravlenie-logo.svg') }}"
-                                        width="150"
-                                        height="100"
-                                    >
-                                </a>
+                            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 text-left align-top m-t-md m-l-none img-wrapper">
+                                <div class="footer-img">
+                                    <a href="https://europa.eu/european-union/index_bg" target="_blank">
+                                        <img
+                                            alt="Официална страница на Европейския съюз"
+                                            src="{{ asset('img/euro-union.svg') }}"
+                                        >
+                                    </a>
+                                </div>
+                                <div class="footer-img">
+                                    <a class="m-l-r-md">
+                                        <img
+                                            alt="Добро управление"
+                                            src="{{ asset('img/upravlenie-logo.svg') }}"
+                                        >
+                                    </a>
+                                </div>
                             </div>
                             <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
                                 <h6 class="text-justify m-t-xl">

@@ -714,11 +714,9 @@ class OrganisationController extends AdminController
         $org = Organisation::where('uri', $uri)->first();
 
         if ($org->type == Organisation::TYPE_GROUP) {
-
             $groupDatasets = DataSetGroup::select('data_set_id')->where('group_id', $org->id)->get();
             $query = Dataset::whereIn('id', $groupDatasets)->whereNotNull('deleted_at')->withTrashed();
         } else {
-
             $query = Dataset::where('org_id', $org->id)->whereNotNull('deleted_at')->withTrashed();
         }
 
@@ -783,6 +781,10 @@ class OrganisationController extends AdminController
         $org = Organisation::where('uri', $orgUri)->first();
         $resourcesTotal = $dataset->resource()->withTrashed()->count();
         $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();
+
+        $dataset->created_by = User::where('id', $dataset->created_by)->value('username');
+        $dataset->updated_by = User::where('id', $dataset->updated_by)->value('username');
+        $dataset->deleted_by = User::where('id', $dataset->deleted_by)->value('username');
 
         if (\Elasticsearch::ping()) {
             try {

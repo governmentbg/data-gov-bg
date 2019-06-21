@@ -199,6 +199,7 @@
                     @endif
                     @if (!empty($dataset->deleted_by))
                         <li>{{ __('custom.deleted_at') }}: {{ $dataset->deleted_at }}</li>
+                        <li>{{ __('custom.deleted_by') }}: {{ $dataset->deleted_by }}</li>
                     @endif
                 </ul>
             </div>

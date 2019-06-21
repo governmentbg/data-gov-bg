@@ -907,4 +907,5 @@ return [
     'deleted_datasets' => 'Изтрити набори данни',
     'deleted_at' => 'Изтрит на',
     'delete_failure' => 'Грешка при изтриване',
+    'deleted_by' => 'Изтрит от',
 ];

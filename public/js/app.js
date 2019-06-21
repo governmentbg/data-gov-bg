@@ -60512,6 +60512,10 @@ $(function () {
     });
 });
 
+$(function () {
+    $('.link-wrap').css('height', $('.section-cont').height() - $('.section-cont').find('h3').height() - 77); // 77 - sum of margins of elements in section-cont
+});
+
 /***/ }),
 /* 44 */
 /***/ (function(module, exports) {

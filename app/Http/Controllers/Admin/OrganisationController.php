@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Error;
 use App\Role;
 use App\User;
 use App\Module;
@@ -13,6 +14,7 @@ use App\DataSetGroup;
 use App\Organisation;
 use App\CustomSetting;
 use App\ActionsHistory;
+use App\ElasticDataSet;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -743,13 +745,12 @@ class OrganisationController extends AdminController
         }
 
         $totalDatasets = $query->count();
-        $datasets = $query->forPage($page, $perPage)->get();
+        $datasets = $query->orderBy('deleted_at', 'desc')->forPage($page, $perPage)->get();
 
+        // Check if elasticsearch cluster is available
         if (\Elasticsearch::ping()) {
             foreach ($datasets as $singleDataset) {
-                if (\Elasticsearch::indices()->exists(['index' => $singleDataset->id])) {
-                    $allowActionsForDataset[] = $singleDataset->id;
-                }
+                $allowActionsForDataset[] = $singleDataset->id;
             }
         }
 
@@ -776,24 +777,26 @@ class OrganisationController extends AdminController
     {
         $perPage = 6;
         $allowDelete = false;
+        $groupsIdArray= [];
         $page = !empty($request->page) ? $request->page : 1;
         $dataset = Dataset::where('uri', $uri)->withTrashed()->first();
         $org = Organisation::where('uri', $orgUri)->first();
         $resourcesTotal = $dataset->resource()->withTrashed()->count();
         $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();
+        $groups = DataSetGroup::where('data_set_id', $dataset->id)->get();
 
+        foreach ($groups as $singleGroup) {
+            $groupsIdArray[] = $singleGroup->group_id;
+        }
+
+        $dataset->groups = Organisation::whereIn('id', $groupsIdArray)->get();
         $dataset->created_by = User::where('id', $dataset->created_by)->value('username');
         $dataset->updated_by = User::where('id', $dataset->updated_by)->value('username');
         $dataset->deleted_by = User::where('id', $dataset->deleted_by)->value('username');
 
+        // Check if elasticsearch cluster is available
         if (\Elasticsearch::ping()) {
-            try {
-                if (\Elasticsearch::indices()->exists(['index' => $dataset->id])) {
-                    $allowDelete = true;
-                }
-            } catch (Exception $ex) {
-                Log::error($ex->getMessage());
-            }
+            $allowDelete = true;
         }
 
         $paginationData = $this->getPaginationData($resources, $resourcesTotal, [], $perPage);
@@ -812,27 +815,60 @@ class OrganisationController extends AdminController
 
     public function hardDeleteDataset(Request $request)
     {
-        if (\Elasticsearch::ping()) {
-            $result = \DB::transaction(function () use ($request) {
-                try {
-                    if (\Elasticsearch::indices()->exists(['index' => $request->dataset_id])) {
-                        if (\Elasticsearch::indices()->delete(['index' => $request->dataset_id])) {
-                            $request->session()->flash('alert-success', __('custom.delete_success'));
-                        }
-                    } else {
-                        $request->session()->flash('alert-danger', __('custom.delete_failure'));
-                    }
+        $complete = false;
+        $organisation = [];
+        $message = '';
+        $alert = '';
 
-                } catch (Exception $ex) {
-                    Log::error($ex->getMessage());
+        $dataset = DataSet::where('id', $request->dataset_id)->withTrashed()->first();
 
-                    $request->session()->flash('alert-danger', __('custom.delete_failure'));
-                }
-            });
-        } else {
-            $request->session()->flash('alert-danger', __('custom.delete_failure'));
+        if ($dataset->org_id && $request->source == 'organisations') {
+            $organisation = Organisation::where('id', $request->belogsToOrg)->first();
         }
 
-        return back();
+        if ($request->source == 'groups') {
+            $dsetGroup = DataSetGroup::where('group_id', $request->belogsToOrg)->first();
+            $organisation = Organisation::where('id', $dsetGroup->group_id)->first();
+        }
+
+        // Check if elasticsearch cluster is available
+        if (\Elasticsearch::ping()) {
+            try {
+                $result = \DB::transaction(function () use ($request, $dataset, &$alert, &$message) {
+                    $historyDelete = ActionsHistory::where('action_object', $request->dataset_id)
+                        ->where('module_name', Module::getModuleName(Module::DATA_SETS))
+                        ->delete();
+
+                    $dataset->dataSetGroup()->delete();
+                    $dataset->dataSetTags()->delete();
+                    $dataset->userFollow()->delete();
+                    $deleteSetRel = ElasticDataSet::where('index', $dataset->id)->delete();
+                    $deleteRes = Resource::where('data_set_id', $dataset->id)->forceDelete();
+                    $deletedDataset = $dataset->forceDelete();
+
+                    if (\Elasticsearch::indices()->exists(['index' => $request->dataset_id])) {
+                        \Elasticsearch::indices()->delete(['index' => $request->dataset_id]);
+                    }
+
+                    $alert = 'alert-success';
+                    $message = __('custom.delete_success');
+                });
+            } catch (Exception $ex) {
+                Log::error($ex->getMessage());
+                $alert = 'alert-danger';
+                $message = __('custom.delete_failure');
+            }
+        } else {
+            $alert = 'alert-danger';
+            $message = __('custom.delete_failure');
+        }
+
+        if ($request->source == 'user') {
+            return redirect('/admin/datasetsDeleted')->with($alert, $message);
+        }
+
+        if ($request->source == 'organisations' || $request->source == 'groups') {
+            return redirect('/admin/'. $request->source .'/deletedDatasets/'. $organisation->uri)->with($alert, $message);
+        }
     }
 }

@@ -98,6 +98,9 @@
             </div>
         @endif
         @if (!empty($dataset->organisation))
+            @php
+                $ownerPath = strpos(\Request::path(), $dataset->organisation->uri) ? $dataset->organisation->id : null;
+            @endphp
             <p><strong>{{ utrans('custom.organisations') }}:</strong></p>
             <div class="m-b-sm">
                 <p><a href="{{ url('admin/organisations/view/'. $dataset->organisation->uri) }}">{{ $dataset->organisation->name }}</a></p>
@@ -107,6 +110,11 @@
             <p><strong>{{ utrans('custom.groups', 2) }}:</strong></p>
             <div class="m-b-sm">
                 @foreach ($dataset->groups as $groupName)
+                @php
+                    if (!isset($ownerPath)) {
+                        $ownerPath = strpos(\Request::path(), $groupName->uri) ? $groupName->id : null;
+                    }
+                @endphp
                 <p>
                     <a href="{{ url('admin/groups/view/'. $groupName->uri) }}">{{ $groupName->name }}</a>
                 </p>
@@ -196,9 +204,11 @@
                        class="btn del-btn btn-primary"
                         type="submit"
                         name="delete"
-                        data-confirm="{{ __('custom.remove_data') }}"
-                    >{{ uctrans('custom.remove') }}</button>
+                        data-confirm="{{ __('custom.hard_remove') }}"
+                    >{{ uctrans('custom.hard_remove') }}</button>
                     <input type="hidden" name="dataset_id" value="{{ $dataset->id }}">
+                    <input type="hidden" name="belogsToOrg" value="{{ $ownerPath }}">
+                    <input type="hidden" name="source" value="{{ $viewPath }}">
                 </form>
             @endif
         </div>

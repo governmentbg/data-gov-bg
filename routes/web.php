@@ -21,8 +21,8 @@ Route::middleware('auth')->group(function() {
 
     Route::middleware('check.resources')->group(function () {
         Route::middleware('admin')->group(function () {
-            Route::match(['get', 'post'], 'admin/organisations/deletedDatasets/{uri}', 'Admin\OrganisationController@listDeletedDatasets');
-            Route::match(['get', 'post'], 'admin/groups/deletedDatasets/{uri}', 'Admin\OrganisationController@listDeletedDatasets');
+            Route::match(['get', 'post'], 'admin/organisations/deletedDatasets/{uri}', 'Admin\OrganisationController@listDeletedDatasets')->name('adminOrgDatasetsDeleted');
+            Route::match(['get', 'post'], 'admin/groups/deletedDatasets/{uri}', 'Admin\OrganisationController@listDeletedDatasets')->name('adminGroupDatasetsDeleted');
             Route::match(['get', 'post'], 'admin/organisations/{orgUri}/viewDeletedDataset/{uri}', 'Admin\OrganisationController@viewDeletedDataset');
             Route::match(['get', 'post'], 'admin/groups/{orgUri}/viewDeletedDataset/{uri}', 'Admin\OrganisationController@viewDeletedDataset');
             Route::match(['get', 'post'], 'admin/organisations/hardDeleteDataset', 'Admin\OrganisationController@hardDeleteDataset');

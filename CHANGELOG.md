@@ -12,9 +12,13 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+### Added
+- Admin functionality for final resource removal
+
 ### Fixed
-- Fix display of empty tags in dataset feed
-- Fix xml conversions with declarations or empty xml
+- Visual fixes
+- Fix display of xls, xlsx as csv for readability
+- Improved loading of notifications page
 
 ## [1.1.6] - 2019-06-13
 ### Added

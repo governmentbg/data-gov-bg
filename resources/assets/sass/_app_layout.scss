@@ -253,7 +253,9 @@ body {
                                         img {
                                             border-radius: 13px;
                                             &.admin {
-                                                border-radius: 3px;
+                                                border-radius: 4px;
+                                                margin: 2px;
+                                                padding: 1px;
                                             }
                                         }
                                     }
@@ -266,7 +268,7 @@ body {
                                     img {
                                         background: white;
                                         width: 26px;
-                                        height: 26px;
+                                        height: 23px;
                                         margin: 3px;
                                     }
                                 }

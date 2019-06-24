@@ -1044,6 +1044,10 @@ class DataSetController extends AdminController
 
         $groups = DataSetGroup::where('data_set_id', $dataset->id)->get();
 
+        foreach ($groups as $singleGroup) {
+            $groupsIdArray[] = $singleGroup->group_id;
+        }
+
         $dataset->groups = Organisation::whereIn('id', $groupsIdArray)->get();
         $resourcesTotal = $dataset->resource()->withTrashed()->count();
         $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();

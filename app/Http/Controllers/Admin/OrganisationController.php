@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Error;
 use App\Role;
 use App\User;
 use App\Module;

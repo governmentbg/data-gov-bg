@@ -525,19 +525,18 @@ button:focus {
 .mobile-img {
     background: white;
     width: 26px;
-    height: 26px;
+    height: 23px;
 }
 
 .mobile-icon {
     width: 32px;
     display: inline-block;
     vertical-align: text-bottom;
-
 }
 
 .active-menu {
-    border: 3px solid $themeUser;
-    border-radius: 3px;
+    border: 2px solid $themeUser;
+    border-radius: 4px;
 }
 
 .img-wrapper {

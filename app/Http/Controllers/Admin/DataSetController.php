@@ -986,9 +986,7 @@ class DataSetController extends AdminController
         $allowActionsForDataset = [];
         $locale = \LaravelLocalization::getCurrentLocale();
 
-        $query = Dataset::whereNotNull('deleted_at')
-            ->whereNull('org_id')->whereNotIn('data_sets.id', DataSetGroup::select('data_set_id'))
-            ->withTrashed();
+        $query = Dataset::whereNotNull('deleted_at')->withTrashed();
 
         $search = $request->has('q') ? $request->offsetGet('q') : '';
 
@@ -1019,9 +1017,7 @@ class DataSetController extends AdminController
 
         if (\Elasticsearch::ping()) {
             foreach ($datasets as $singleDataset) {
-                if (\Elasticsearch::indices()->exists(['index' => $singleDataset->id])) {
-                    $allowActionsForDataset[] = $singleDataset->id;
-                }
+                $allowActionsForDataset[] = $singleDataset->id;
             }
         }
 
@@ -1042,8 +1038,17 @@ class DataSetController extends AdminController
     {
         $perPage = 6;
         $allowDelete = false;
+        $groupsIdArray = [];
         $page = !empty($request->page) ? $request->page : 1;
         $dataset = Dataset::where('uri', $uri)->withTrashed()->first();
+
+        $groups = DataSetGroup::where('data_set_id', $dataset->id)->get();
+
+        foreach ($groups as $singleGroup) {
+            $groupsIdArray[] = $singleGroup->group_id;
+        }
+
+        $dataset->groups = Organisation::whereIn('id', $groupsIdArray)->get();
         $resourcesTotal = $dataset->resource()->withTrashed()->count();
         $resources = $dataset->resource()->withTrashed()->forPage($page, $perPage)->get();
         $dataset->created_by = User::where('id', $dataset->created_by)->value('username');
@@ -1051,13 +1056,7 @@ class DataSetController extends AdminController
         $dataset->deleted_by = User::where('id', $dataset->deleted_by)->value('username');
 
         if (\Elasticsearch::ping()) {
-            try {
-                if (\Elasticsearch::indices()->exists(['index' => $dataset->id])) {
-                    $allowDelete = true;
-                }
-            } catch (Exception $ex) {
-                Log::error($ex->getMessage());
-            }
+            $allowDelete = true;
         }
 
         $paginationData = $this->getPaginationData($resources, $resourcesTotal, [], $perPage);

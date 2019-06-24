@@ -13971,7 +13971,9 @@ body #app .navbar .navbar-header > div.nav-controls > span.user-icon.active a im
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon.active a img.admin {
-  border-radius: 3px;
+  border-radius: 4px;
+  margin: 2px;
+  padding: 1px;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon a {
@@ -13982,7 +13984,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.user-icon a {
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon a img {
   background: white;
   width: 26px;
-  height: 26px;
+  height: 23px;
   margin: 3px;
 }
 
@@ -14922,7 +14924,7 @@ button:focus {
 .mobile-img {
   background: white;
   width: 26px;
-  height: 26px;
+  height: 23px;
 }
 
 .mobile-icon {
@@ -14932,8 +14934,8 @@ button:focus {
 }
 
 .active-menu {
-  border: 3px solid #108f9e;
-  border-radius: 3px;
+  border: 2px solid #108f9e;
+  border-radius: 4px;
 }
 
 @media screen and (max-width: 767px) {

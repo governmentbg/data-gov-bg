@@ -48,10 +48,12 @@
                                                             class="badge badge-pill m-b-sm del-btn"
                                                             type="submit"
                                                             name="delete"
-                                                            data-confirm="{{ __('custom.remove_data') }}"
-                                                        >{{ uctrans('custom.remove') }}</button>
+                                                            data-confirm="{{ __('custom.hard_remove') }}"
+                                                        >{{ uctrans('custom.hard_remove') }}</button>
                                                     </div>
                                                     <input type="hidden" name="dataset_id" value="{{ $set->id }}">
+                                                    <input type="hidden" name="belogsToOrg" value="{{ $organisation->id }}">
+                                                    <input type="hidden" name="source" value="{{ $viewPath }}">
                                                 </form>
                                             @endif
                                         </div>

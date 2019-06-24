@@ -908,4 +908,5 @@ return [
     'deleted_at' => 'Deleted at',
     'delete_failure' => 'Delete failure',
     'deleted_by' => 'Deleted by',
+    'hard_remove' => 'Final delete',
 ];

@@ -220,9 +220,10 @@
                         class="btn del-btn btn-primary"
                             type="submit"
                             name="delete"
-                            data-confirm="{{ __('custom.remove_data') }}"
-                        >{{ uctrans('custom.remove') }}</button>
+                            data-confirm="{{ __('custom.hard_remove') }}"
+                        >{{ uctrans('custom.hard_remove') }}</button>
                         <input type="hidden" name="dataset_id" value="{{ $dataset->id }}">
+                        <input type="hidden" name="source" value="user">
                     </form>
                 @endif
             </div>

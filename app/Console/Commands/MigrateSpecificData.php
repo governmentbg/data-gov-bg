@@ -245,7 +245,14 @@ class MigrateSpecificData extends Command
         if ($this->confirm('Are you sure you want to delete saved data?')) {
             try {
                 ElasticDataSet::whereIn('index', $dataSets)->forceDelete();
-                Resource::whereIn('data_set_id', $dataSets)->forceDelete();
+                $resources = Resource::whereIn('data_set_id', $dataSets)->get();
+
+                foreach ($resources as $singleResource) {
+                        $singleResource->signal()->delete();
+                        $singleResource->customFields()->delete();
+                        $singleResource->forceDelete();
+                }
+
                 DataSetTags::whereIn('data_set_id', $dataSets)->delete();
                 UserFollow::whereIn('data_set_id', $dataSets)->delete();
                 DataSet::whereIn('id', $dataSets)->forceDelete();

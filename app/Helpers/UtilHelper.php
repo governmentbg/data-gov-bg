@@ -445,11 +445,17 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
 
                 break;
             case 'xml':
+                $current_encoding = strpos($content, 'windows-1251');
+
                 if (($pos = strpos($content, '?>')) !== false) {
                     $trimContent = substr($content, $pos + 2);
                     $convertData['data'] = trim($trimContent);
                 } else {
                     Log::error(print_r($resultConvert, true));
+                }
+
+                if ($current_encoding) {
+                   $convertData['data'] = iconv('windows-1251', 'utf-8', $convertData['data']);
                 }
 
                 $reqConvert = Request::create('/xml2json', 'POST', $convertData);
@@ -458,7 +464,7 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
                 $elasticData = $resultConvert['data'];
                 $data['xmlData'] = $content;
 
-                if ($resultConvert['success']) {;
+                if ($resultConvert['success']) {
                     $elasticData = $resultConvert['data'];
                     $data['xmlData'] = $content;
                 } else {

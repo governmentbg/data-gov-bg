@@ -817,6 +817,7 @@ class OrganisationController extends AdminController
         $organisation = [];
         $message = '';
         $alert = '';
+        ini_set('max_execution_time', 600);
 
         $dataset = DataSet::where('id', $request->dataset_id)->withTrashed()->first();
 

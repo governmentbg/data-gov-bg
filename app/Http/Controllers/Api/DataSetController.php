@@ -634,6 +634,8 @@ class DataSetController extends ApiController
                 'user_ids.*'            => 'int|digits_between:1,10',
                 'user_datasets_only'    => 'nullable|bool',
                 'public'                => 'nullable|bool',
+                'date_from'             => 'nullable|date',
+                'date_to'               => 'nullable|date',
                 'order'                 => 'nullable|array',
             ]);
         }
@@ -728,7 +730,7 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['tag_ids'])) {
-                    $query->whereHas('dataSetTags', function($q) use($criteria) {
+                    $query->whereHas('dataSetTags', function($q) use ($criteria) {
                         $q->whereIn('tag_id', $criteria['tag_ids']);
                     });
                 }
@@ -743,7 +745,7 @@ class DataSetController extends ApiController
                         }
                     }
 
-                    $query->whereHas('resource', function($q) use($formats) {
+                    $query->whereHas('resource', function($q) use ($formats) {
                         $q->whereIn('file_format', $formats);
                     });
                 }
@@ -752,8 +754,16 @@ class DataSetController extends ApiController
                     $query->whereIn('terms_of_use_id', $criteria['terms_of_use_ids']);
                 }
 
+                if (!empty($criteria['date_from'])) {
+                    $query->where('created_at', '>=', $criteria['date_from']);
+                }
+
+                if (!empty($criteria['date_to'])) {
+                    $query->where('created_at', '<=', $criteria['date_to']);
+                }
+
                 if (!empty($criteria['reported'])) {
-                    $query->whereHas('resource', function($q) use($criteria) {
+                    $query->whereHas('resource', function($q) use ($criteria) {
                         $q->where('is_reported', $criteria['reported']);
                     });
                 }

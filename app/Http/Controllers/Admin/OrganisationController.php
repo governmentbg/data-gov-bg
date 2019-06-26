@@ -814,7 +814,6 @@ class OrganisationController extends AdminController
 
     public function hardDeleteDataset(Request $request)
     {
-        $complete = false;
         $organisation = [];
         $message = '';
         $alert = '';
@@ -842,7 +841,14 @@ class OrganisationController extends AdminController
                     $dataset->dataSetTags()->delete();
                     $dataset->userFollow()->delete();
                     $deleteSetRel = ElasticDataSet::where('index', $dataset->id)->delete();
-                    $deleteRes = Resource::where('data_set_id', $dataset->id)->forceDelete();
+                    $deleteRes = Resource::where('data_set_id', $dataset->id)->withTrashed()->get();
+
+                    foreach ($deleteRes as $singleResource) {
+                        $singleResource->signal()->delete();
+                        $singleResource->customFields()->delete();
+                        $singleResource->forceDelete();
+                    }
+
                     $deletedDataset = $dataset->forceDelete();
 
                     if (\Elasticsearch::indices()->exists(['index' => $request->dataset_id])) {

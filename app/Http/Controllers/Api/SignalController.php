@@ -405,7 +405,7 @@ class SignalController extends ApiController
         }
 
         if (!empty($order)) {
-            $query->orderBy($order['field'], $order['type']);
+            $query->orderBy('signals.'. $order['field'], $order['type']);
         }
 
         if ($request->has('records_per_page') || $request->has('page_number')) {

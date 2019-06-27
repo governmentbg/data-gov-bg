@@ -12,6 +12,8 @@ Fixed - for any bug fixes.
 Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
+
+## [1.1.7] - 2019-06-27
 ### Added
 - Admin functionality for final resource removal
 

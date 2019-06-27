@@ -375,12 +375,14 @@ class DataSetController extends AdminController
             $uri = $request->offsetGet('dataset_uri');
 
             if ($this->datasetDelete($uri)) {
-                $request->session()->flash('alert-success', __('custom.success_dataset_delete'));
+                $alert = 'alert-success';
+                $message = __('custom.success_dataset_delete');
             } else {
-                $request->session()->flash('alert-danger', __('custom.fail_dataset_delete'));
+                $alert = 'alert-danger';
+                $message = __('custom.fail_dataset_delete');
             }
 
-            return back();
+            return redirect('/admin/datasets')->with($alert, $message);
         }
 
         $paginationData = $this->getPaginationData(

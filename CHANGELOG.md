@@ -19,6 +19,9 @@ Security - in case of vulnerabilities.
 - Visual fixes
 - Fix display of xls, xlsx as csv for readability
 - Improved loading of notifications page
+- Visualisation of xsd format
+- Redirect after dataset delete
+- Migration of windows-1251 encoded files
 
 ## [1.1.6] - 2019-06-13
 ### Added
@@ -494,6 +497,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.7]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.3...v1.1.4

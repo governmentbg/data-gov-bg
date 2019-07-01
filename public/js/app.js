@@ -60513,7 +60513,9 @@ $(function () {
 });
 
 $(function () {
-    $('.link-wrap').css('height', $('.section-cont').height() - $('.section-cont').find('h3').height() - 77); // 77 - sum of margins of elements in section-cont
+    $('.link-wrap').each(function () {
+        $(this).css('height', $(this).closest('.section-cont').height() - $(this).closest('.section-cont').find('h3').height() - 77); // 77 - sum of margins of elements in section-cont
+    });
 });
 
 /***/ }),

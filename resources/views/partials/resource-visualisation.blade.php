@@ -212,10 +212,12 @@
                             class="js-select form-control"
                         >
                             @foreach ($formats as $id => $format)
-                                <option
-                                    value="{{ $format }}"
-                                    {{ $format == $resource->file_format ? 'selected' : '' }}
-                                >{{ $format }}</option>
+                                @if (!in_array($format,\App\Resource::FORMAT_LIMITS[$resource->file_format]))
+                                    <option
+                                        value="{{ $format }}"
+                                        {{ $format == $resource->file_format ? 'selected' : '' }}
+                                    >{{ $format }}</option>
+                                @endif
                             @endforeach
                         </select>
                     </div>

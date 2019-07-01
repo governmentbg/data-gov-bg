@@ -33,6 +33,42 @@
             @if (isset(app('request')->input()['dtype']))
                 <input type="hidden" name="status" value="{{ app('request')->input()['dtype'] }}">
             @endif
+            @if (isset(app('request')->input()['org']) && is_array(app('request')->input()['org']))
+                @foreach (app('request')->input()['org'] as $singleOrg)
+                    <input type="hidden" name="org[]" value="{{ $singleOrg }}">
+                @endforeach
+            @endif
+            @if (isset(app('request')->input()['group']) && is_array(app('request')->input()['group']))
+                @foreach (app('request')->input()['group'] as $singleGroup)
+                    <input type="hidden" name="group[]" value="{{ $singleGroup }}">
+                @endforeach
+            @endif
+            @if (isset(app('request')->input()['user']))
+                <input type="hidden" name="user" value="{{ app('request')->input()['user'] }}">
+            @endif
+            @if (isset(app('request')->input()['category']) && is_array(app('request')->input()['category']))
+                @foreach (app('request')->input()['category'] as $singleCat)
+                    <input type="hidden" name="category[]" value="{{ $singleCat }}">
+                @endforeach
+            @endif
+            @if (isset(app('request')->input()['tag']) && is_array(app('request')->input()['tag']))
+                @foreach (app('request')->input()['tag'] as $singleTag)
+                    <input type="hidden" name="tag[]" value="{{ $singleTag }}">
+                @endforeach
+            @endif
+            @if (isset(app('request')->input()['format']) && is_array(app('request')->input()['format']))
+                @foreach (app('request')->input()['format'] as $singleFormat)
+                    <input type="hidden" name="format[]" value="{{ $singleFormat }}">
+                @endforeach
+            @endif
+            @if (isset(app('request')->input()['term']) && is_array(app('request')->input()['term']))
+                @foreach (app('request')->input()['term'] as $singleTerm)
+                    <input type="hidden" name="term[]" value="{{ $singleTerm }}">
+                @endforeach
+            @endif
+            @if (isset(app('request')->input()['signaled']))
+                <input type="hidden" name="signaled" value="{{ app('request')->input()['signaled'] }}">
+            @endif
         </form>
     @endif
 

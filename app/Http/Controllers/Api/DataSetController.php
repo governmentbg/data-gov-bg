@@ -755,11 +755,11 @@ class DataSetController extends ApiController
                 }
 
                 if (!empty($criteria['date_from'])) {
-                    $query->where('created_at', '>=', $criteria['date_from']);
+                    $query->where('data_sets.created_at', '>=', $criteria['date_from']);
                 }
 
                 if (!empty($criteria['date_to'])) {
-                    $query->where('created_at', '<=', $criteria['date_to']);
+                    $query->where('data_sets.created_at', '<=', $criteria['date_to']);
                 }
 
                 if (!empty($criteria['reported'])) {
@@ -877,6 +877,7 @@ class DataSetController extends ApiController
                     $result['tags'] = $tags;
 
                     $results[] = $result;
+                    unset($result);
                 }
 
                 return $this->successResponse([

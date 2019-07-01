@@ -41,6 +41,15 @@ class Resource extends Model implements TranslatableInterface
     const REPORTED_FALSE = 0;
     const REPORTED_TRUE = 1;
 
+    // Conversion not available: format => ['not available formats']
+    const FORMAT_LIMITS = [
+        'KML' => ['CSV', 'RDF'],
+        'CSV' => ['KML', 'RDF'],
+        'JSON' => ['KML', 'RDF'],
+        'XML' => ['KML', 'RDF', 'CSV'],
+        'RDF' => ['KML', 'CSV']
+    ];
+
     protected static $translatable = [
         'name'      => 'text',
         'descript'  => 'text',

@@ -1020,6 +1020,12 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $dataset = Dataset::where('id', Resource::where('uri', $post['resource_uri'])->first()->data_set_id)->withTrashed()->first();
+
+            if ($dataset->deleted_at) {
+                return $this->errorResponse(__('custom.get_resource_metadata_fail'));
+            }
+
             $resource = Resource::with('DataSet')->with('customFields')->where('uri', $post['resource_uri'])->first();
             $fileFormats = Resource::getFormats();
             $rqTypes = Resource::getRequestTypes();
@@ -1204,8 +1210,14 @@ class ResourceController extends ApiController
         ]);
 
         if (!$validator->fails()) {
+            $resource = Resource::where('uri', $post['resource_uri'])->first();
+            $dataset = Dataset::where('id', $resource->data_set_id)->withTrashed()->first();
+
+            if ($dataset->deleted_at) {
+                return $this->errorResponse(__('custom.get_resource_data_fail'));
+            }
+
             try {
-                $resource = Resource::where('uri', $post['resource_uri'])->first();
                 $version = !is_null($request->offsetGet('version')) ? $request->offsetGet('version') : $resource->version;
 
                 return $this->successResponse(

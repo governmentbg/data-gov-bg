@@ -19,6 +19,7 @@ use App\CustomSetting;
 use App\UserToOrgRole;
 use App\RoleRight;
 use App\ActionsHistory;
+use App\ElasticDataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -1766,6 +1767,7 @@ class UserController extends Controller {
             $data['description'] = $data['descript'];
             $maxResourceRows = 2000;
             $bPaging = true;
+            $extension = $file->getClientOriginalExtension();
 
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
@@ -1788,7 +1790,8 @@ class UserController extends Controller {
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
-                    'bPaging'       => $bPaging
+                    'bPaging'       => $bPaging,
+                    'extension'     => $extension
                 ], $response['data']));
             } else {
                 // delete resource record on fail
@@ -1940,6 +1943,8 @@ class UserController extends Controller {
         }
 
         $resourceData = $res->resource;
+        $file = $request->file('file');
+        $extension = isset($file) ? $file->getClientOriginalExtension() : '';
 
         $rightCheck = RoleRight::checkUserRight(
             Module::RESOURCES,
@@ -1968,13 +1973,14 @@ class UserController extends Controller {
             if ($request->has('ready_metadata')) {
 
                 $data = [
-                    'type'          => $resource->resource_type,
-                    'resource_url'  => $request->offsetGet('resource_url'),
-                    'http_rq_type'  => $request->offsetGet('http_rq_type'),
-                    'http_headers'  => $request->offsetGet('http_headers') ?: '',
-                    'post_data'     => $request->offsetGet('post_data') ?: '',
-                    'upl_freq_type' => $request->offsetGet('upl_freq_type'),
-                    'upl_freq'      => $request->offsetGet('upl_freq'),
+                    'type'             => $resource->resource_type,
+                    'resource_url'     => $request->offsetGet('resource_url'),
+                    'http_rq_type'     => $request->offsetGet('http_rq_type'),
+                    'http_headers'     => $request->offsetGet('http_headers') ?: '',
+                    'post_data'        => $request->offsetGet('post_data') ?: '',
+                    'upl_freq_type'    => $request->offsetGet('upl_freq_type'),
+                    'upl_freq'         => $request->offsetGet('upl_freq'),
+                    'extension_format' => $extension
                 ];
 
                 $file = $request->file('file');
@@ -2007,7 +2013,8 @@ class UserController extends Controller {
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
-                        'bPaging'       => $bPaging
+                        'bPaging'       => $bPaging,
+                        'extension'     => $extension
                     ], $response['data']));
                 } else {
                     $request->session()->flash(
@@ -2030,7 +2037,8 @@ class UserController extends Controller {
             'reqTypes'  => $reqTypes,
             'fields'    => $this->getResourceTransFields(),
             'parent'    => isset($parent) ? $parent : false,
-            'dataseUri' => $resourceData->dataset_uri
+            'dataseUri' => $resourceData->dataset_uri,
+            'extension' => $extension
         ]);
     }
 
@@ -2065,7 +2073,7 @@ class UserController extends Controller {
                 $data = $request->except('file');
                 $file = $request->file('file');
                 $data['description'] = $data['descript'];
-
+                $extension = isset($file) ? $file->getClientOriginalExtension() : '';
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
                 $maxResourceRows = 2000;
                 $bPaging = true;
@@ -2090,7 +2098,8 @@ class UserController extends Controller {
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'group'         => $group,
-                        'bPaging'       => $bPaging
+                        'bPaging'       => $bPaging,
+                        'extension'     => $extension
                     ], $response['data']));
                 } else {
                     // delete resource record on fail
@@ -2150,6 +2159,7 @@ class UserController extends Controller {
                 $data = $request->except('file');
                 $file = $request->file('file');
                 $data['description'] = $data['descript'];
+                $extension = isset($file) ? $file->getClientOriginalExtension() : '';
 
                 $response = ResourceController::addMetadata($datasetUri, $data, $file);
                 $maxResourceRows = 2000;
@@ -2175,7 +2185,8 @@ class UserController extends Controller {
                         'resourceUri'   => $response['uri'],
                         'action'        => 'create',
                         'fromOrg'       => $fromOrg,
-                        'bPaging'       => $bPaging
+                        'bPaging'       => $bPaging,
+                        'extension'     => $extension
                     ], $response['data']));
                 } else {
                     // Delete resource record on fail
@@ -2226,6 +2237,25 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resourceVersionFormat = null;
+
+        if ($resource->resource->file_format) {
+            $versionQuery = ElasticDataSet::where('resource_id', $resource->resource->id);
+
+            if (is_null($version)) {
+                $versionQuery->orderBy('version', 'desc');
+            } else {
+                $versionQuery->where('version', $version);
+            }
+
+            $versionResult = $versionQuery->first();
+
+            if ($versionResult) {
+                $resourceVersionFormat = $versionResult->format;
+            }
+        }
+
+        $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->resource->file_format) : $resourceVersionFormat;
 
         if (empty($resource->resource)) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
@@ -2295,14 +2325,15 @@ class UserController extends Controller {
         $data = !empty($response->data) ? $response->data : [];
 
         if (
-            $resource->format_code == Resource::FORMAT_XML
-            || $resource->format_code == Resource::FORMAT_RDF
+            $resourceVersionFormat == Resource::FORMAT_XML
+            || $resourceVersionFormat == Resource::FORMAT_RDF
         ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $method = 'json2'. strtolower($resource->file_format);
+
+            $method = 'json2'. strtolower(Resource::getFormats()[$resourceVersionFormat]);
             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
             $resultConvert = $apiConvert->$method($reqConvert)->getData();
@@ -2411,6 +2442,7 @@ class UserController extends Controller {
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
             'resPagination' => $resourcePaginationData['resPagination'],
+            'versionFormat' => $resourceVersionFormat
         ]);
     }
 
@@ -2435,10 +2467,29 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resourceVersionFormat = null;
 
         if (empty($resource->resource)) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
         }
+
+        if ($resource->resource->file_format) {
+            $versionQuery = ElasticDataSet::where('resource_id', $resource->resource->id);
+
+            if (is_null($version)) {
+                $versionQuery->orderBy('version', 'desc');
+            } else {
+                $versionQuery->where('version', $version);
+            }
+
+            $versionResult = $versionQuery->first();
+
+            if ($versionResult) {
+                $resourceVersionFormat = $versionResult->format;
+            }
+        }
+
+        $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->resource->file_format) : $resourceVersionFormat;
 
         $versionsPerPage = 10;
         $resource = $this->getModelUsernames($resource->resource);
@@ -2507,14 +2558,15 @@ class UserController extends Controller {
         $data = !empty($response->data) ? $response->data : [];
 
         if (
-            $resource->format_code == Resource::FORMAT_XML
-            || $resource->format_code == Resource::FORMAT_RDF
+            $resourceVersionFormat == Resource::FORMAT_XML
+            || $resourceVersionFormat == Resource::FORMAT_RDF
         ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $method = 'json2'. strtolower($resource->file_format);
+
+            $method = 'json2'. strtolower(Resource::getFormats()[$resourceVersionFormat]);
             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
             $resultConvert = $apiConvert->$method($reqConvert)->getData();
@@ -2631,6 +2683,7 @@ class UserController extends Controller {
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
             'resPagination' => $resourcePaginationData['resPagination'],
+            'versionFormat' => $resourceVersionFormat
         ]);
     }
 
@@ -5657,10 +5710,29 @@ class UserController extends Controller {
         $resourcesReq = Request::create('/api/getResourceMetadata', 'POST', ['resource_uri' => $uri]);
         $apiResources = new ApiResource($resourcesReq);
         $resource = $apiResources->getResourceMetadata($resourcesReq)->getData();
+        $resourceVersionFormat = null;
 
         if (empty($resource->resource)) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
         }
+
+        if ($resource->resource->file_format) {
+            $versionQuery = ElasticDataSet::where('resource_id', $resource->resource->id);
+
+            if (is_null($version)) {
+                $versionQuery->orderBy('version', 'desc');
+            } else {
+                $versionQuery->where('version', $version);
+            }
+
+            $versionResult = $versionQuery->first();
+
+            if ($versionResult) {
+                $resourceVersionFormat = $versionResult->format;
+            }
+        }
+
+        $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->resource->file_format) : $resourceVersionFormat;
 
         $resource = $this->getModelUsernames($resource->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
@@ -5731,14 +5803,14 @@ class UserController extends Controller {
         $data = !empty($response->data) ? $response->data : [];
 
         if (
-            $resource->format_code == Resource::FORMAT_XML
-            || $resource->format_code == Resource::FORMAT_RDF
+            $resourceVersionFormat == Resource::FORMAT_XML
+            || $resourceVersionFormat == Resource::FORMAT_RDF
         ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $method = 'json2'. strtolower($resource->file_format);
+            $method = 'json2'. strtolower(Resource::getFormats()[$resourceVersionFormat]);
             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
             $resultConvert = $apiConvert->$method($reqConvert)->getData();
@@ -5843,6 +5915,7 @@ class UserController extends Controller {
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
             'resPagination' => $resourcePaginationData['resPagination'],
+            'versionFormat' => $resourceVersionFormat
         ]);
     }
 

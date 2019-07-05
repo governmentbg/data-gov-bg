@@ -252,6 +252,7 @@ class ResourceController extends ApiController
      * @param string api_key - required
      * @param int resource_uri - required
      * @param array data - required
+     * @param string format - required
      *
      * @return json with success or error
      */
@@ -260,8 +261,9 @@ class ResourceController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
-            'data'          => 'required|array',
+            'resource_uri'     => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
+            'data'             => 'required|array',
+            'extension_format' => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -303,7 +305,8 @@ class ResourceController extends ApiController
                         'index_type'    => ElasticDataSet::ELASTIC_TYPE,
                         'doc'           => $id .'_1',
                         'version'       => 1,
-                        'resource_id'   => $id
+                        'resource_id'   => $id,
+                        'format'        => Resource::getFormatsCode($post['extension_format'])
                     ]);
 
                     // Filter data for containing personal info
@@ -436,6 +439,14 @@ class ResourceController extends ApiController
             $resource = Resource::where('uri', $post['resource_uri'])->first();
             $dataset = DataSet::where('id', $resource->data_set_id)->first();
             $locale = isset($post['data']['locale']) ? $post['data']['locale'] : null;
+
+            if ($resource->file_format) {
+                $prevVersionElasticData = ElasticDataSet::where(['resource_id' => $resource->id, 'version' => $resource->version])->orderBy('version', 'desc')->first();
+
+                if ($prevVersionElasticData->format == null) {
+                    $prevVersionElasticData->update(['format' => $resource->file_format]);
+                }
+            }
 
             if (isset($dataset->org_id)) {
                 $rightCheck = RoleRight::checkUserRight(
@@ -588,6 +599,7 @@ class ResourceController extends ApiController
      * @param string api_key - required
      * @param int resource_uri - required
      * @param array data - required
+     * @param string format - required
      *
      * @return json with success or error
      */
@@ -602,6 +614,7 @@ class ResourceController extends ApiController
             'support_email'     => 'sometimes|email',
             'connection_name'   => 'sometimes|string|max:191',
             'connection_query'  => 'sometimes|string',
+            'extension_format'  => 'required|string',
         ]);
 
         if (!$validator->fails()) {
@@ -668,7 +681,7 @@ class ResourceController extends ApiController
                         $resource->updated_by = Auth::id();
                         $resource->save();
 
-                        // Increase dataset version without goint to new full version
+                        // Increase dataset version without going to new full version
                         $versionParts = explode('.', $dataset->version);
 
                         if (isset($versionParts[1])) {
@@ -686,6 +699,7 @@ class ResourceController extends ApiController
                             'doc'           => $id .'_'. $newVersion,
                             'version'       => $newVersion,
                             'resource_id'   => $id,
+                            'format'        => Resource::getFormatsCode($post['extension_format'])
                         ]);
 
                         // Filter data for containing personal info

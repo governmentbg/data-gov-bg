@@ -47,7 +47,8 @@ class Resource extends Model implements TranslatableInterface
         'CSV' => ['KML', 'RDF'],
         'JSON' => ['KML', 'RDF'],
         'XML' => ['KML', 'RDF', 'CSV'],
-        'RDF' => ['KML', 'CSV']
+        'RDF' => ['KML', 'CSV'],
+        'XSD' => ['KML', 'RDF']
     ];
 
     protected static $translatable = [

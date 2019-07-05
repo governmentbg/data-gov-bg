@@ -34,7 +34,7 @@
                 <p><strong>{{ uctrans('custom.type') }}:</strong>&nbsp;{{ $resource->type }}</p>
             @endif
             @if (!empty($resource->file_format))
-                <p><strong>{{ uctrans('custom.format') }}:</strong>&nbsp;{{ $resource->file_format }}</p>
+                <p><strong>{{ uctrans('custom.format') }}:</strong>&nbsp;{{ App\Resource::getFormats()[$versionFormat] }}</p>
             @endif
             @if (!empty($resource->resource_url))
                 <p><strong>{{ uctrans('custom.url') }}:</strong></p>

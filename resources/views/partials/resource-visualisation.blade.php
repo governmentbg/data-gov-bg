@@ -1,5 +1,6 @@
 @php
-    $format = empty($resource) ? false : $resource->format_code;
+    $format = empty($resource) ? false : $versionFormat ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
+    $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
     $type = empty($resource) ? App\Resource::TYPE_FILE : $resource->type;
     $perPageArr = [10, 25, 50, 100];
 @endphp
@@ -212,7 +213,7 @@
                             class="js-select form-control"
                         >
                             @foreach ($formats as $id => $format)
-                                @if (!in_array($format,\App\Resource::FORMAT_LIMITS[$resource->file_format]))
+                                @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
                                     <option
                                         value="{{ $format }}"
                                         {{ $format == $resource->file_format ? 'selected' : '' }}

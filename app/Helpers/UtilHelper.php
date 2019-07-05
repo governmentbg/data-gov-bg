@@ -593,8 +593,9 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
 
         if (!empty($elasticData)) {
             $saveData = [
-                'resource_uri'  => $resourceURI,
-                'data'          => $elasticData,
+                'resource_uri'     => $resourceURI,
+                'data'             => $elasticData,
+                'extension_format' => $extension
             ];
 
             if ($alreadyExists) {

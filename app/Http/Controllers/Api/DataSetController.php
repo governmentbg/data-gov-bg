@@ -582,6 +582,8 @@ class DataSetController extends ApiController
      * @param boolean criteria[user_datasets_only] - optional
      * @param boolean criteria[keywords] - optional
      * @param array criteria[public] - optional
+     * @param string criteria[date_from] - optional
+     * @param string criteria[date_to] - optional
      * @param array criteria[order] - optional
      * @param string criteria[order][type] - optional
      * @param string criteria[order][field] - optional

@@ -9,6 +9,7 @@ use App\DataSet;
 use App\Resource;
 use App\UserFollow;
 use App\DataSetTags;
+use App\DataSetGroup;
 use App\ElasticDataSet;
 
 class MigrateSpecificData extends Command
@@ -255,6 +256,7 @@ class MigrateSpecificData extends Command
 
                 DataSetTags::whereIn('data_set_id', $dataSets)->delete();
                 UserFollow::whereIn('data_set_id', $dataSets)->delete();
+                DataSetGroup::whereIn('data_set_id', $dataSets)->delete();
                 DataSet::whereIn('id', $dataSets)->forceDelete();
 
                 foreach ($dataSets as $id) {

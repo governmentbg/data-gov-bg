@@ -56,6 +56,7 @@
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ uctrans('custom.cancel') }}
                     </a>
+                    <input type="hidden" value="{{ isset($extension) ? $extension : '' }}" name="extensionFormat">
                     <button
                         name="ready_data"
                         type="submit"
@@ -91,6 +92,7 @@
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ uctrans('custom.cancel') }}
                     </a>
+                    <input type="hidden" value="{{ isset($extension) ? $extension : '' }}" name="extensionFormat">
                     <button
                         name="ready_data"
                         type="submit"
@@ -132,6 +134,7 @@
                         href="{{ url('resource/import/cancel/'. $resourceUri .'/'. $action) }}"
                         class="btn del-btn btn-primary">{{ uctrans('custom.cancel') }}
                     </a>
+                    <input type="hidden" value="{{ isset($extension) ? $extension : '' }}" name="extensionFormat">
                     <button
                         name="ready_data"
                         type="submit"

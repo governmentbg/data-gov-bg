@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 
-class ResourceController extends Controller {
+class ResourceController extends Controller
+{
     public static function addMetadata($recordUri, $resourceData, $file = null, $isUpdate = false, $changeMeta = true)
     {
         $data = [];
@@ -428,6 +429,7 @@ class ResourceController extends Controller {
             $elasticData = Session::get('elasticData.'. $uri);
             Session::forget('elasticData.'. $uri);
             $filtered = [];
+            $extensionFormat = $request->extensionFormat;
 
             if ($request->has('keepcol')) {
                 $keepColumns = $request->offsetGet('keepcol');
@@ -443,8 +445,9 @@ class ResourceController extends Controller {
 
             if (!empty($filtered)) {
                 $saveData = [
-                    'resource_uri'  => $uri,
-                    'data'          => $filtered,
+                    'resource_uri'     => $uri,
+                    'data'             => $filtered,
+                    'extension_format' => $extensionFormat
                 ];
 
                 $apiFunction = $action == 'create' ? 'addResourceData' : 'updateResourceData';
@@ -508,11 +511,13 @@ class ResourceController extends Controller {
             $action = $request->offsetGet('action');
             $elasticData = Session::get('elasticData.'. $uri);
             Session::forget('elasticData.'. $uri);
+            $extensionFormat = $request->extensionFormat;
 
             if (!empty($elasticData)) {
                 $saveData = [
-                    'resource_uri'  => $uri,
-                    'data'          => $elasticData,
+                    'resource_uri'     => $uri,
+                    'data'             => $elasticData,
+                    'extension_format' => $extensionFormat
                 ];
 
                 $apiFunction = $action == 'create' ? 'addResourceData' : 'updateResourceData';

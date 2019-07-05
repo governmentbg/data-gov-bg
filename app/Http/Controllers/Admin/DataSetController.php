@@ -10,6 +10,7 @@ use App\Resource;
 use App\Organisation;
 use App\DataSetGroup;
 use App\CustomSetting;
+use App\ElasticDataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
@@ -588,6 +589,8 @@ class DataSetController extends AdminController
             $file = $request->file('file');
             $data['description'] = $data['descript'];
 
+            $extension = isset($file) ? $file->getClientOriginalExtension() : '';
+
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
             if ($response['success']) {
@@ -609,7 +612,8 @@ class DataSetController extends AdminController
                     'types'         => $types,
                     'resourceUri'   => $response['uri'],
                     'action'        => 'create',
-                    'bPaging'       => $bPaging
+                    'bPaging'       => $bPaging,
+                    'extension'     => $extension
                 ], $response['data']));
             } else {
                 // Delete resource record on fail
@@ -646,10 +650,29 @@ class DataSetController extends AdminController
         $apiMetadata = new ApiResource($reqMetadata);
         $result = $apiMetadata->getResourceMetadata($reqMetadata)->getData();
         $versionsPerPage = 10;
+        $resourceVersionFormat = null;
 
         if (empty($result->resource)) {
             return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.no_resource_found')));
         }
+
+        if ($result->resource->file_format) {
+            $versionQuery = ElasticDataSet::where('resource_id', $result->resource->id);
+
+            if (is_null($version)) {
+                $versionQuery->orderBy('version', 'desc');
+            } else {
+                $versionQuery->where('version', $version);
+            }
+
+            $versionResult = $versionQuery->first();
+
+            if ($versionResult) {
+                $resourceVersionFormat = $versionResult->format;
+            }
+        }
+
+        $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($result->resource->file_format) : $resourceVersionFormat;
 
         $resource = $this->getModelUsernames($result->resource);
         $resource->format_code = Resource::getFormatsCode($resource->file_format);
@@ -681,14 +704,15 @@ class DataSetController extends AdminController
         $data = !empty($response->data) ? $response->data : [];
 
         if (
-            $resource->format_code == Resource::FORMAT_XML
-            || $resource->format_code == Resource::FORMAT_RDF
+            $resourceVersionFormat == Resource::FORMAT_XML
+            || $resourceVersionFormat == Resource::FORMAT_RDF
         ) {
             $convertData = [
                 'api_key'   => \Auth::user()->api_key,
                 'data'      => $data,
             ];
-            $method = 'json2'. strtolower($resource->file_format);
+
+            $method = 'json2'. strtolower(Resource::getFormats()[$resourceVersionFormat]);
             $reqConvert = Request::create('/'. $method, 'POST', $convertData);
             $apiConvert = new ApiConversion($reqConvert);
             $resultConvert = $apiConvert->$method($reqConvert)->getData();
@@ -785,6 +809,7 @@ class DataSetController extends AdminController
             'dataset'       => $datasetData,
             'supportName'   => !is_null($dataset) ? $dataset->support_name : null,
             'formats'       => $formats,
+            'versionFormat' => $resourceVersionFormat
         ]);
     }
 
@@ -901,7 +926,8 @@ class DataSetController extends AdminController
         }
 
         $resourceData = $res->resource;
-
+        $file = $request->file('file');
+        $extension = isset($file) ? $file->getClientOriginalExtension() : '';
         $class = 'user';
         $types = Resource::getTypes();
         $reqTypes = Resource::getRequestTypes();
@@ -954,7 +980,8 @@ class DataSetController extends AdminController
                         'types'         => $types,
                         'resourceUri'   => $response['uri'],
                         'action'        => 'update',
-                        'bPaging'       => $bPaging
+                        'bPaging'       => $bPaging,
+                        'extension'     => $extension
                     ], $response['data']));
                 } else {
                     $request->session()->flash(

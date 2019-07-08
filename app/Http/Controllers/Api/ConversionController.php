@@ -723,6 +723,7 @@ class ConversionController extends ApiController
 
         foreach ($data as $key => $value) {
             if (
+                is_array($value) &&
                 isset($value[0])
                 && (
                     is_object($value[0]) && property_exists($value[0], '_')

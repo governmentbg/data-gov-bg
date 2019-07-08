@@ -60900,7 +60900,7 @@ $(function () {
         var format = __webpack_require__(50);
         var xmlData = $(".js-xml-prev").data('xml-data');
         var formattedXml = format(xmlData.trim());
-        $('.js-xml-prev').html(formattedXml);
+        $('.js-xml-prev').text(formattedXml);
     }
 });
 

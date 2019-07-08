@@ -9,6 +9,7 @@ use App\Role;
 use App\RoleRight;
 use App\Module;
 use App\ActionsHistory;
+use App\ElasticDataSet;
 use App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
@@ -926,14 +927,34 @@ class DataController extends Controller {
                 $res = $api->getResourceData($rq)->getData();
                 $data = !empty($res->data) ? $res->data : [];
 
+                $resourceVersionFormat = null;
+
+                if ($resource->file_format) {
+                    $versionQuery = ElasticDataSet::where('resource_id', $resource->id);
+
+                    if (is_null($version)) {
+                        $versionQuery->orderBy('version', 'desc');
+                    } else {
+                        $versionQuery->where('version', $version);
+                    }
+
+                    $versionResult = $versionQuery->first();
+
+                    if ($versionResult) {
+                        $resourceVersionFormat = $versionResult->format;
+                    }
+                }
+
+                $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->file_format) : $resourceVersionFormat;
+
                 if (
-                    $resource->format_code == Resource::FORMAT_XML
-                    || $resource->format_code == Resource::FORMAT_RDF
+                    $resourceVersionFormat == Resource::FORMAT_XML
+                    || $resourceVersionFormat == Resource::FORMAT_RDF
                 ) {
                     $convertData = [
                         'data'      => $data,
                     ];
-                    $method = 'json2'. strtolower($resource->file_format);
+                    $method = 'json2'. strtolower(Resource::getFormats()[$resourceVersionFormat]);
                     $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                     $apiConvert = new ApiConversion($reqConvert);
                     $resultConvert = $apiConvert->$method($reqConvert)->getData();
@@ -1051,6 +1072,7 @@ class DataController extends Controller {
                         'buttons'       => $buttons,
                         'formats'       => $formats,
                         'resPagination' => $resourcePaginationData['resPagination'],
+                        'versionFormat' => $resourceVersionFormat
                     ]
                 );
             }
@@ -1935,7 +1957,30 @@ class DataController extends Controller {
                 $res = $api->getResourceData($rq)->getData();
                 $data = !empty($res->data) ? $res->data : [];
 
-                if ($resource->format_code == Resource::FORMAT_XML) {
+                $resourceVersionFormat = null;
+
+                if ($resource->file_format) {
+                    $versionQuery = ElasticDataSet::where('resource_id', $resource->id);
+
+                    if (is_null($version)) {
+                        $versionQuery->orderBy('version', 'desc');
+                    } else {
+                        $versionQuery->where('version', $version);
+                    }
+
+                    $versionResult = $versionQuery->first();
+
+                    if ($versionResult) {
+                        $resourceVersionFormat = $versionResult->format;
+                    }
+                }
+
+                $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->file_format) : $resourceVersionFormat;
+
+                if (
+                    $resourceVersionFormat == Resource::FORMAT_XML
+                    || $resourceVersionFormat == Resource::FORMAT_RDF
+                ) {
                     $reqConvert = Request::create('/json2xml', 'POST', ['data' => $data]);
                     $apiConvert = new ApiConversion($reqConvert);
                     $resultConvert = $apiConvert->json2xml($reqConvert)->getData();
@@ -1985,7 +2030,8 @@ class DataController extends Controller {
                         'versionView'    => $version,
                         'userData'       => $userData,
                         'buttons'        => $buttons,
-                        'formats'        => $formats
+                        'formats'        => $formats,
+                        'versionFormat'  => $resourceVersionFormat
                     ]
                 );
             }

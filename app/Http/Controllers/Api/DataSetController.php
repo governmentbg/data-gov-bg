@@ -544,6 +544,18 @@ class DataSetController extends ApiController
 
             $dataset->delete();
 
+            if ($dataset->deleted_by) {
+                $resources = Resource::where('data_set_id', $dataset->id)->withTrashed()->get();
+
+                foreach ($resources as $singleResource) {
+                    $removeSignals[] = $singleResource->id;
+                }
+
+                if (!empty($removeSignals)) {
+                    Signal::whereIn('resource_id', $removeSignals)->delete();
+                }
+            }
+
             Module::add($logData);
         } catch (Exception $ex) {
             Log::error($ex->getMessage());

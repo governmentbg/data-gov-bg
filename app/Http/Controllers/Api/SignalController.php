@@ -352,7 +352,7 @@ class SignalController extends ApiController
         }
 
         $result = [];
-        $query = Signal::select();
+        $query = Signal::select('signals.*');
 
         $query->join('resources', 'resources.id', '=', 'signals.resource_id');
         $query->join('data_sets', 'data_sets.id', '=', 'resources.data_set_id');

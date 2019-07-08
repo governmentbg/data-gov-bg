@@ -838,6 +838,10 @@ class ResourceController extends ApiController
                 $resource->save();
                 $resource->delete();
 
+                if ($resource->deleted_by) {
+                    Signal::where('resource_id', $resource->id)->delete();
+                }
+
                 $logData = [
                     'module_name'      => Module::getModuleName(Module::RESOURCES),
                     'action'           => ActionsHistory::TYPE_DEL,

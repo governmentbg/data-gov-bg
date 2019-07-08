@@ -327,6 +327,6 @@ $(function() {
         var format = require('prettify-xml');
         var xmlData = $(".js-xml-prev").data('xml-data');
         var formattedXml = format(xmlData.trim());
-        $('.js-xml-prev').html(formattedXml);
+        $('.js-xml-prev').text(formattedXml);
     }
 });

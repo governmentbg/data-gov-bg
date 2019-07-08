@@ -9,6 +9,7 @@ use App\Module;
 use App\Organisation;
 use App\DataSet;
 use App\Resource;
+use App\ElasticDataSet;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\UserController as ApiUser;
 use App\Http\Controllers\Api\UserFollowController as ApiFollow;
@@ -1052,14 +1053,32 @@ class OrganisationController extends Controller
                     $res = $api->getResourceData($rq)->getData();
                     $data = !empty($res->data) ? $res->data : [];
 
+                    if ($resource->file_format) {
+                        $versionQuery = ElasticDataSet::where('resource_id', $resource->id);
+
+                        if (is_null($version)) {
+                            $versionQuery->orderBy('version', 'desc');
+                        } else {
+                            $versionQuery->where('version', $version);
+                        }
+
+                        $versionResult = $versionQuery->first();
+
+                        if ($versionResult) {
+                            $resourceVersionFormat = $versionResult->format;
+                        }
+                    }
+
+                    $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->file_format) : $resourceVersionFormat;
+
                     if (
-                        $resource->format_code == Resource::FORMAT_XML
-                        || $resource->format_code == Resource::FORMAT_RDF
+                        $resourceVersionFormat == Resource::FORMAT_XML
+                        || $resourceVersionFormat == Resource::FORMAT_RDF
                     ) {
                         $convertData = [
                             'data'      => $data,
                         ];
-                        $method = 'json2'. strtolower($resource->file_format);
+                        $method = 'json2'. strtolower(Resource::getFormats()[$resourceVersionFormat]);
                         $reqConvert = Request::create('/'. $method, 'POST', $convertData);
                         $apiConvert = new ApiConversion($reqConvert);
                         $resultConvert = $apiConvert->$method($reqConvert)->getData();
@@ -1178,6 +1197,7 @@ class OrganisationController extends Controller
                             'buttons'       => $buttons,
                             'formats'       => $formats,
                             'resPagination' => $resourcePaginationData['resPagination'],
+                            'versionFormat' => $resourceVersionFormat
                         ]
                     );
                 }

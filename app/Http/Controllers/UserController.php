@@ -1767,7 +1767,7 @@ class UserController extends Controller {
             $data['description'] = $data['descript'];
             $maxResourceRows = 2000;
             $bPaging = true;
-            $extension = $file->getClientOriginalExtension();
+            $extension = isset($file) ? $file->getClientOriginalExtension() : '';
 
             $response = ResourceController::addMetadata($datasetUri, $data, $file);
 
@@ -1795,7 +1795,10 @@ class UserController extends Controller {
                 ], $response['data']));
             } else {
                 // delete resource record on fail
-                $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                if (isset($response['uri'])) {
+                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                }
+
                 $request->session()->flash(
                     'alert-danger',
                     empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
@@ -2103,7 +2106,10 @@ class UserController extends Controller {
                     ], $response['data']));
                 } else {
                     // delete resource record on fail
-                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    if (isset($response['uri'])) {
+                        $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    }
+
                     $request->session()->flash(
                         'alert-danger',
                         empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']
@@ -2190,7 +2196,10 @@ class UserController extends Controller {
                     ], $response['data']));
                 } else {
                     // Delete resource record on fail
-                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    if (isset($response['uri'])) {
+                        $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                    }
+
                     $request->session()->flash(
                         'alert-danger',
                         empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']

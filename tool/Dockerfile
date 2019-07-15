@@ -53,7 +53,7 @@ RUN mkdir -p /run/apache2 && chown -R apache:apache /run/apache2 \
     && sed -i 's#AllowOverride None#AllowOverride All#' /etc/apache2/httpd.conf
 
 # install composer
-COPY composer /usr/local/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # configure project
 RUN cd /var/www/localhost \

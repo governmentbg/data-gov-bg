@@ -31,6 +31,8 @@ if [ -d /var/lib/mysql/mysql ]; then
 else
     echo '[i] MySQL data directory not found, creating initial DBs'
 
+    rm -R /var/lib/mysql/*
+
     # Set new user and password
     dbpass=`pwgen -s -1 -v`
     echo $dbpass > /var/lib/mysql/dbpass
@@ -39,7 +41,7 @@ else
 
     # init database
     echo '[i] MySQL initializing database...'
-    mysql_install_db --user=mysql > /dev/null
+    mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql --auth-root-authentication-method=normal > /dev/null
     echo '[i] MySQL database initialized'
 
     echo "[i] MySql root password: $MYSQL_PASSWORD"

@@ -617,7 +617,10 @@ class DataSetController extends AdminController
                 ], $response['data']));
             } else {
                 // Delete resource record on fail
-                $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                if (isset($response['uri'])) {
+                    $failMetadata = Resource::where('uri', $response['uri'])->forceDelete();
+                }
+
                 $request->session()->flash(
                     'alert-danger',
                     empty($response['data']['error']) ? __('custom.changes_success_fail') : $response['data']['error']

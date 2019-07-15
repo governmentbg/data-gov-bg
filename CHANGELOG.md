@@ -13,6 +13,14 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.8] - 2019-07-15
+### Fixed
+- Issue with tool installation
+- Visual fixes for resource visualisation
+- Further improved loading of notifications page
+- Signals query
+- Minor visual fixes
+
 ## [1.1.7] - 2019-06-27
 ### Added
 - Admin functionality for final resource removal
@@ -499,6 +507,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.8]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.4...v1.1.5

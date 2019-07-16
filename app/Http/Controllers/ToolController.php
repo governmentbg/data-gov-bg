@@ -424,6 +424,9 @@ class ToolController extends Controller
         $sourceTypes = ConnectionSetting::getSourceTypes();
         $freqTypes = DataQuery::getFreqTypes();
         $file = $request->file('file');
+        $versionFormat = '';
+        $visNotAvailable = [];
+        $originalFormat = '';
 
         if ($request->has('new')) {
             $this->clearFile($request, $post);
@@ -468,6 +471,13 @@ class ToolController extends Controller
                     if (file_exists(self::DOCKER_FILE_VOLUME . $post['file'])) {
                         $content = file_get_contents(self::DOCKER_FILE_VOLUME . $post['file']);
                         $data = empty($content) ? ' ' : $content;
+                        $originalFormat = pathinfo($post['file'], PATHINFO_EXTENSION);
+                        $versionFormat = Resource::getFormatsCode($originalFormat);
+                        $visNotAvailable = ['odt', 'xsd', 'rtf', 'ods', 'doc', 'docx', 'pdf', 'xls', 'xlsx'];
+
+                        if (in_array(strtolower($originalFormat), $visNotAvailable)) {
+                            $data = [];
+                        }
 
                         session()->flash('alert-success', __('custom.conn_success'));
                     } else {
@@ -547,7 +557,8 @@ class ToolController extends Controller
             'sourceTypes',
             'freqTypes',
             'errors',
-            'files'
+            'files',
+            'versionFormat'
         ));
     }
 
@@ -798,6 +809,7 @@ class ToolController extends Controller
     public static function updateResourceData($apiKey, $resourceUri, $data, $file = false, $email = null, $name = null, $query = null)
     {
         $elasticData = null;
+        $extension = '';
 
         if ($file) {
             $file = $data;
@@ -840,6 +852,8 @@ class ToolController extends Controller
             }
         }
 
+        $extension = $extension == '' ? 'csv' : $extension;
+
         $requestUrl = config('app.TOOL_API_URL') .'updateResourceData';
 
         $ch = curl_init($requestUrl);
@@ -851,6 +865,7 @@ class ToolController extends Controller
             'support_email'     => $email,
             'connection_name'   => $name,
             'connection_query'  => $query,
+            'extension_format'  => $extension
         ];
 
         if (!empty($format)) {

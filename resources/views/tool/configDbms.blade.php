@@ -16,9 +16,7 @@
 
         @foreach ($dbs as $db)
             <div class="data-query">
-                <span
-                    class="{{ isset($post['edit_dbms']) && $db->id == $post['edit_dbms'] ? 'success' : null }}"
-                >{{ $db->connection_name }}</span>
+                <span>{{ $db->connection_name }}</span>
                 <input
                     type="submit"
                     class="btn btn-primary pull-right"
@@ -28,7 +26,7 @@
                 >
                 <input
                     type="submit"
-                    class="btn btn-primary pull-right"
+                    class="btn btn-primary pull-right save-btn"
                     name="edit_dbms[{{ $db->id }}]"
                     value="{{ uctrans('custom.edit') }}"
                 >
@@ -118,7 +116,7 @@
             <div class="form-group col-md-9 col-md-offset-3">
                 <input
                     type="submit"
-                    class="btn btn-primary test-btn"
+                    class="btn btn-primary test-btn save-btn"
                     name="test_conn"
                     value="{{ __('custom.test_connection') }}"
                 >
@@ -168,7 +166,7 @@
                 <div class="align-right">
                     <input
                         type="button"
-                        class="btn btn-primary pull-right js-hide-button"
+                        class="btn btn-primary pull-right js-hide-button save-btn"
                         data-target=".js-data-table"
                         value="{{ uctrans('custom.close') }}"
                     >
@@ -272,9 +270,7 @@
 
             @foreach ($dataQueries as $dataQuery)
                 <div class="data-query">
-                    <span
-                        class="{{ isset($post['query_id']) && $dataQuery->id == $post['query_id'] ? 'success' : null }}"
-                    >{{ $dataQuery->name }}</span>
+                    <span>{{ $dataQuery->name }}</span>
                     <input
                         type="submit"
                         class="btn btn-primary pull-right"
@@ -284,7 +280,7 @@
                     >
                     <input
                         type="submit"
-                        class="btn btn-primary pull-right"
+                        class="btn btn-primary pull-right save-btn"
                         name="edit_query[{{ $dataQuery->id }}]"
                         value="{{ uctrans('custom.edit') }}"
                     >

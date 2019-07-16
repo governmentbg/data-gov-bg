@@ -1,6 +1,12 @@
 @php
-    $format = empty($resource) ? false : $versionFormat ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
-    $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
+    if (!config('app.IS_TOOL')) {
+        $format = empty($resource) ? false : $versionFormat ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
+        $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
+    } else {
+        $format = $versionFormat;
+        $versionFormat = $versionFormat;
+    }
+
     $type = empty($resource) ? App\Resource::TYPE_FILE : $resource->type;
     $perPageArr = [10, 25, 50, 100];
 @endphp

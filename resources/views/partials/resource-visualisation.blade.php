@@ -4,7 +4,6 @@
         $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resource->file_format);
     } else {
         $format = $versionFormat;
-        $versionFormat = $versionFormat;
     }
 
     $type = empty($resource) ? App\Resource::TYPE_FILE : $resource->type;

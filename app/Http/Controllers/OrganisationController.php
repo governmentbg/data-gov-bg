@@ -1057,7 +1057,7 @@ class OrganisationController extends Controller
                         $versionQuery = ElasticDataSet::where('resource_id', $resource->id);
 
                         if (is_null($version)) {
-                            $versionQuery->orderBy('version', 'desc');
+                            $versionQuery->orderBy('id', 'desc');
                         } else {
                             $versionQuery->where('version', $version);
                         }

@@ -16,8 +16,7 @@
             @foreach ($files as $file)
                 @foreach ($file->dataQueries as $query)
                     <div class="data-query">
-                        <span 
-                            class="{{ isset($post['conn_id']) && $file->id == $post['conn_id'] ? 'success' : null }}"
+                        <span
                         >{{ $file->connection_name .'('. $query->name .')' }}</span>
                         <input
                             type="submit"
@@ -28,7 +27,7 @@
                         >
                         <input
                             type="submit"
-                            class="btn btn-primary pull-right"
+                            class="btn btn-primary pull-right save-btn"
                             name="file_conn_id[{{ $file->id }}]"
                             value="{{ uctrans('custom.edit') }}"
                         >
@@ -83,7 +82,7 @@
             <div class="form-group col-md-9 col-md-offset-3">
                 <input
                     type="submit"
-                    class="btn btn-primary test-btn pull-right"
+                    class="btn btn-primary test-btn pull-right save-btn"
                     name="test_file"
                     value="{{ __('custom.check') }}"
                 >
@@ -144,7 +143,7 @@
                 @if (!empty($post['conn_id']))
                     <input
                         type="submit"
-                        class="btn btn-primary test-btn"
+                        class="btn btn-primary test-btn save-btn"
                         name="send_file"
                         value="{{ uctrans('custom.send') }}"
                     >

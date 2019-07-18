@@ -1052,6 +1052,7 @@ class OrganisationController extends Controller
                     $api = new ApiResource($rq);
                     $res = $api->getResourceData($rq)->getData();
                     $data = !empty($res->data) ? $res->data : [];
+                    $resourceVersionFormat = null;
 
                     if ($resource->file_format) {
                         $versionQuery = ElasticDataSet::where('resource_id', $resource->id);

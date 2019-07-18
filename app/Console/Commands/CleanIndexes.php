@@ -53,7 +53,9 @@ class CleanIndexes extends Command
         // Get index ids stored in elasticsearch
         if (!empty($stats['indices'])) {
             foreach ($stats['indices'] as $index => $stat) {
-                $indices[] = $index;
+                if (is_numeric($index)) {
+                    $indices[] = $index;
+                }
             }
         }
 

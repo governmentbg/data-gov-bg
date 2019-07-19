@@ -645,12 +645,15 @@ class UserController extends Controller {
                     session()->flash('alert-danger', __('custom.edit_error'));
 
                     return redirect()->back()->withInput()->withErrors($remove->errors);
+                }else {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
                 }
 
                 $dataset->groups = $setGroups = [];
             }
 
             if (!is_null($groupId)) {
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
                 $post['group_id'] = $groupId;
                 $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
                 $api = new ApiDataSet($addGroup);

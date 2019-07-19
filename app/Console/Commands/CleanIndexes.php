@@ -70,7 +70,7 @@ class CleanIndexes extends Command
             foreach ($indices as $singleIndex) {
                 // Check if each elasticsearch index belongs to a corresponding one in resource metadata
                 if (!in_array($singleIndex, $datasetIds)) {
-                    $this->info('Index '. $singleIndex.' has NO corresponding resource');
+                    $this->info('Index '. $singleIndex .' has NO corresponding resource');
                     // If an index does not belong to a dataset add it for deletion
                     $toBeDeleted[] = $singleIndex;
                 }
@@ -78,14 +78,14 @@ class CleanIndexes extends Command
         }
 
         if (!empty($toBeDeleted)) {
-            $this->info(count($toBeDeleted). ' indices do not belong to a dataset.');
+            $this->info(count($toBeDeleted) .' indices do not belong to a dataset.');
 
             if ($this->confirm('Delete indices?')) {
                 foreach ($toBeDeleted as $singleIndex) {
                     if (\Elasticsearch::indices()->delete(['index' => $singleIndex])) {
-                        $this->info('Index ' .$singleIndex. ' was removed from elasticsearch');
+                        $this->info('Index '. $singleIndex .' was removed from elasticsearch');
                     } else {
-                        $this->info('Index ' .$singleIndex. ' was NOT removed from elasticsearch');
+                        $this->info('Index '. $singleIndex .' was NOT removed from elasticsearch');
                     }
                 }
             } else {

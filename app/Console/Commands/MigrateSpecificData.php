@@ -249,9 +249,9 @@ class MigrateSpecificData extends Command
                 $resources = Resource::whereIn('data_set_id', $dataSets)->get();
 
                 foreach ($resources as $singleResource) {
-                        $singleResource->signal()->delete();
-                        $singleResource->customFields()->delete();
-                        $singleResource->forceDelete();
+                    $singleResource->signal()->delete();
+                    $singleResource->customFields()->delete();
+                    $singleResource->forceDelete();
                 }
 
                 DataSetTags::whereIn('data_set_id', $dataSets)->delete();

@@ -296,18 +296,52 @@ class DataSetController extends AdminController
         }
 
         if ($request->has('save')) {
-            $groupParams = [
-                'api_key'       => Auth::user()->api_key,
-                'data_set_uri'  => $uri,
-                'group_id'      => $request->input('group_id', []),
-            ];
+            if ($request->input('group_id', false) == false) {
 
-            $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
-            $api = new ApiDataset($addGroup);
-            $added = $api->addDataSetToGroup($addGroup)->getData();
+                $getGroupsParams = [
+                    'api_key'       => Auth::user()->api_key,
+                    'dataset_uri'   => $uri,
+                ];
 
-            if (!$added->success) {
-                session()->flash('alert-danger', __('custom.edit_error'));
+                $allAddedGroupsRequest = Request::create('/api/getDatasetDetails', 'POST', $getGroupsParams);
+                $api = new ApiDataset($allAddedGroupsRequest);
+                $apiResultObj = $api->getDatasetDetails($allAddedGroupsRequest)->getData();
+                $allAddedGroups = $apiResultObj->data->groups;
+                $allGroupsForDelete = [];
+
+                foreach ($allAddedGroups as $group) {
+                    $allGroupsForDelete[] = $group->id;
+                }
+
+                $groupParamsForRemove = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $allGroupsForDelete,
+                ];
+
+                $addGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $groupParamsForRemove);
+                $api = new ApiDataset($addGroup);
+                $removedResult = $api->removeDatasetFromGroup($addGroup)->getData();
+                $request->session()->flash('alert-success', __('custom.add_success'));
+
+            } else {
+                $groupParams = [
+                    'api_key'       => Auth::user()->api_key,
+                    'data_set_uri'  => $uri,
+                    'group_id'      => $request->input('group_id', []),
+                ];
+
+                $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $groupParams);
+                $api = new ApiDataset($addGroup);
+
+                $added = $api->addDataSetToGroup($addGroup)->getData();
+                if (!$added->success) {
+                    session()->flash('alert-danger', __('custom.edit_error'));
+                }
+
+                if ($added->success) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
+                }
             }
         }
 
@@ -595,6 +629,7 @@ class DataSetController extends AdminController
 
             if ($response['success']) {
                 if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
+                    $request->session()->flash('alert-success', __('custom.add_success'));
                     return redirect('/admin/resource/view/'. $response['uri']);
                 }
 

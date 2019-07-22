@@ -53,9 +53,14 @@ class CleanMigratedAndDeleted extends Command
             die();
         }
 
+        $countDeletedIndexes = 0;
+
         if ($this->confirm('Delete them permanently?')) {
+            $this->info('Started: '. date('Y-m-d H:i:s'));
+            $this->line('');
+
             try {
-                $result = \DB::transaction(function () use ($dataSets) {
+                $result = \DB::transaction(function () use ($dataSets, $countDeletedIndexes) {
                     ElasticDataSet::whereIn('index', $dataSets)->forceDelete();
                     $resources = Resource::whereIn('data_set_id', $dataSets)->get();
 
@@ -74,11 +79,17 @@ class CleanMigratedAndDeleted extends Command
                         if (\Elasticsearch::indices()->exists(['index' => $id])) {
                             if (\Elasticsearch::indices()->delete(['index' => $id])) {
                                 $this->info('Index '. $id .' was deleted.');
+                                $countDeletedIndexes += 1;
                             } else {
                                 $this->error('Index '. $id .' was not deleted.');
                             }
                         }
                     }
+
+                    $this->info($countDeletedIndexes .' elastic indices were deleted.');
+                    $this->info('Metadata for '. count($dataSets) .' datasets was deleted.');
+                    $this->line('');
+                    $this->info('Ended: '. date('Y-m-d H:i:s'));
                 }, config('app.TRANSACTION_ATTEMPTS'));
 
                 return $result;

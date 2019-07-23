@@ -43,7 +43,7 @@ class ActionsHistoryController extends ApiController
         $publicTypes = array_keys(ActionsHistory::getPublicTypes());
         $allActTypes = array_keys(ActionsHistory::getTypes());
         $defaultOrderType = 'desc';
-        $defaultOrderField = 'occurrence';
+        $defaultOrderField = 'id';
 
         $order['type'] = !empty($post['criteria']['order']['type']) ? $post['criteria']['order']['type'] : $defaultOrderType;
         $order['field'] = !empty($post['criteria']['order']['field']) ? $post['criteria']['order']['field'] : $defaultOrderField;

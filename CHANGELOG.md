@@ -13,6 +13,14 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.10] - 2019-07-23
+### Added
+- Command for removal of elastic indices without metadata
+- Command for removal of elastic indices deleted during migration
+
+### Fixed
+- Load speed of notifications page
+
 ## [1.1.9] - 2019-07-17
 ### Fixed
 - Version visualisations
@@ -513,6 +521,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.10]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.6...v1.1.7

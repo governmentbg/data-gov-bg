@@ -39,15 +39,8 @@ return [
              * @see https://www.elastic.co/guide/en/elasticsearch/client/php-api/2.0/_configuration.html#_inline_host_configuration
              */
 
-            'hosts' => [
-                [
-                    'host'   => env('ELASTICSEARCH_HOST', 'localhost'),
-                    'port'   => env('ELASTICSEARCH_PORT', 9200),
-                    'scheme' => env('ELASTICSEARCH_SCHEME', null),
-                    'user'   => env('ELASTICSEARCH_USER', null),
-                    'pass'   => env('ELASTICSEARCH_PASS', null),
-                ],
-            ],
+            'hosts' => \App\ElasticDataSet::setElasticHosts()
+            ,
 
             /**
              * SSL
@@ -137,7 +130,7 @@ return [
              * @see https://www.elastic.co/guide/en/elasticsearch/client/php-api/2.0/_connection_pool.html
              */
 
-            'connectionPool' => null,
+            'connectionPool' => '\Elasticsearch\ConnectionPool\StaticConnectionPool',
 
             /**
              * Connection Selector

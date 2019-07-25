@@ -43,4 +43,27 @@ class ElasticDataSet extends Model
 
         return $result;
     }
+
+    public static function setElasticHosts()
+    {
+        if (getenv('ELASTICSEARCH_HOSTS')) {
+            $hostsList = explode(',', trim(env('ELASTICSEARCH_HOSTS')));
+            $port = env('ELASTICSEARCH_PORT');
+            $scheme = env('ELASTICSEARCH_SCHEME');
+            $user = env('ELASTICSEARCH_USER');
+            $pass = env('ELASTICSEARCH_PASS');
+
+            foreach ($hostsList as $host) {
+                $hosts[] = [
+                    'host'   => $host,
+                    'port'   => $port,
+                    'scheme' => $scheme,
+                    'user'   => $user,
+                    'pass'   => $pass
+                ];
+            }
+
+            return $hosts;
+        }
+    }
 }

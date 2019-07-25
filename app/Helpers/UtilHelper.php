@@ -27,7 +27,7 @@ function get_dataset_resources_with_no_data($uri)
 
     foreach ($resources as $resource) {
         if (
-            $resource->resource_type == Resource::TYPE_FILE
+            ($resource->resource_type == Resource::TYPE_FILE || $resource->resource_type == Resource::TYPE_AUTO)
             && (
                 $noIndex
                 || !isset(

@@ -302,28 +302,30 @@ class DataSetController extends AdminController
                     'api_key'       => Auth::user()->api_key,
                     'dataset_uri'   => $uri,
                 ];
-
-                $allAddedGroupsRequest = Request::create('/api/getDatasetDetails', 'POST', $getGroupsParams);
-                $api = new ApiDataset($allAddedGroupsRequest);
-                $apiResultObj = $api->getDatasetDetails($allAddedGroupsRequest)->getData();
-                $allAddedGroups = $apiResultObj->data->groups;
-                $allGroupsForDelete = [];
-
-                foreach ($allAddedGroups as $group) {
-                    $allGroupsForDelete[] = $group->id;
+                $ownedGroupsReq = Request::create('/api/getDatasetDetails', 'POST', $getGroupsParams);
+                $api = new ApiDataset($ownedGroupsReq);
+                $result = $api->getDatasetDetails($ownedGroupsReq)->getData();
+                $ownedGroups = $result->data->groups;
+                $ownedGroupsIds = [];
+                foreach ($ownedGroups as $group) {
+                    $ownedGroupsIds[] = $group->id;
                 }
-
-                $groupParamsForRemove = [
+                $removeGroupsReq = [
                     'api_key'       => Auth::user()->api_key,
                     'data_set_uri'  => $uri,
-                    'group_id'      => $allGroupsForDelete,
+                    'group_id'      => $ownedGroupsIds,
                 ];
+                $result = Request::create('/api/removeDatasetFromGroup', 'POST', $removeGroupsReq);
+                $api = new ApiDataset($result);
+                $result = $api->removeDatasetFromGroup($result)->getData();
 
-                $addGroup = Request::create('/api/removeDatasetFromGroup', 'POST', $groupParamsForRemove);
-                $api = new ApiDataset($addGroup);
-                $removedResult = $api->removeDatasetFromGroup($addGroup)->getData();
-                $request->session()->flash('alert-success', __('custom.add_success'));
+                if (!$result->success) {
+                    $request->session()->flash('alert-danger', __('custom.add_datasetgroup_fail'));
+                }
 
+                if ($result->success) {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
+                }
             } else {
                 $groupParams = [
                     'api_key'       => Auth::user()->api_key,

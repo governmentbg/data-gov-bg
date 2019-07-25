@@ -47,7 +47,7 @@ class ElasticDataSet extends Model
     public static function setElasticHosts()
     {
         if (getenv('ELASTICSEARCH_HOSTS')) {
-            $hostsList = explode(',', trim(env('ELASTICSEARCH_HOSTS')));
+            $hostsList = explode(',', env('ELASTICSEARCH_HOSTS'));
             $port = env('ELASTICSEARCH_PORT');
             $scheme = env('ELASTICSEARCH_SCHEME');
             $user = env('ELASTICSEARCH_USER');
@@ -55,7 +55,7 @@ class ElasticDataSet extends Model
 
             foreach ($hostsList as $host) {
                 $hosts[] = [
-                    'host'   => $host,
+                    'host'   => trim($host),
                     'port'   => $port,
                     'scheme' => $scheme,
                     'user'   => $user,

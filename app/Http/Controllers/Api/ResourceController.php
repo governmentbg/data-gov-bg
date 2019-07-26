@@ -296,7 +296,13 @@ class ResourceController extends ApiController
                 $result = DB::transaction(function () use ($resource, $dataset, $post) {
                     $id = $resource->id;
                     $index = $resource->data_set_id;
-                    $dataset->version = intval($dataset->version) + 1;
+
+                    if ($resource->resource_type == Resource::TYPE_AUTO && $resource->version == 0 ) {
+                        $resource->version += 1;
+                        $resource->save();
+                    }
+
+                    $dataset->version = intval($dataset->version);
                     $dataset->updated_by = Auth::id();
                     $dataset->save();
 
@@ -304,7 +310,7 @@ class ResourceController extends ApiController
                         'index'         => $index,
                         'index_type'    => ElasticDataSet::ELASTIC_TYPE,
                         'doc'           => $id .'_1',
-                        'version'       => 1,
+                        'version'       => $resource->version,
                         'resource_id'   => $id,
                         'format'        => Resource::getFormatsCode($post['extension_format'])
                     ]);

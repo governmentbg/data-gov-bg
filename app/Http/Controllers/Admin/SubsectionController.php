@@ -232,7 +232,19 @@ class SubsectionController extends AdminController
      */
     public function delete(Request $request, $id)
     {
+        $params = [
+            'api_key' => \Auth::user()->api_key,
+            'criteria' => [
+                'id' => $id
+            ]
+        ];
+
+        $request = Request::create('/api/listSubsections', 'POST', $params);
+        $api = new ApiSection($request);
+        $result = $api->listSubsections($request)->getData();
+        $deletedSectionInfo = $result->subsections[0];
         $pages = Page::where('section_id', $id)->first();
+        $section = is_array($result->subsections) && !empty($result->subsections[0]) ? $result->subsections[0] : null;
 
         if (is_null($pages)) {
 
@@ -246,12 +258,17 @@ class SubsectionController extends AdminController
             $result = $api->deleteSection($rq)->getData();
 
             if ($result->success) {
-                $request->session()->flash('alert-success', __('custom.delete_success'));
+                if (!is_null($section)) {
+                    session()->flash('alert-success', __('custom.delete_success'));
+                    return redirect(url('/') ."/admin/subsections/list/". $deletedSectionInfo->parent_id);
+                }else {
+                    session()->flash('alert-danger', __('custom.delete_error'));
+                }
+
             } else {
-                $request->session()->flash('alert-danger', __('custom.delete_error'));
+                session()->flash('alert-danger', __('custom.delete_error'));
             }
 
-            return redirect()->back();
         } else {
             $request->session()->flash('alert-danger', __('custom.section_pages_delete_error'));
 

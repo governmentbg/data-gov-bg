@@ -1776,6 +1776,10 @@ class UserController extends Controller {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
 
+                if ($data['type'] == Resource::TYPE_API) {
+                    $extension = $response['extension'];
+                }
+
                 if (
                     is_array($data)
                     && isset($response['data']['csvData'])
@@ -1997,6 +2001,10 @@ class UserController extends Controller {
                         return redirect('/user/resource/view/'. $response['uri']);
                     }
 
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
+                    }
+
                     if (!empty($parent)) {
                         $key = $parent->type == Organisation::TYPE_GROUP ? 'group' : 'fromOrg';
                         $response['data'][$key] = $parent;
@@ -2084,6 +2092,10 @@ class UserController extends Controller {
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
+                    }
+
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
                     }
 
                     if (
@@ -2174,6 +2186,10 @@ class UserController extends Controller {
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
+                    }
+
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
                     }
 
                     if (

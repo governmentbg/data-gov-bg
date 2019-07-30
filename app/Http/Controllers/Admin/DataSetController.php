@@ -968,6 +968,10 @@ class DataSetController extends AdminController
                         return redirect('/admin/resource/view/'. $response['uri']);
                     }
 
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
+                    }
+
                     if (!empty($parent)) {
                         $key = $parent->type == Organisation::TYPE_GROUP ? 'group' : 'fromOrg';
                         $response['data'][$key] = $parent;

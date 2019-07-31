@@ -127,7 +127,7 @@
                         <a
                             class="btn btn-primary add pull-right"
                             href="{{ url('/admin/documents/add') }}"
-                        >{{ __('custom.add') }}</a> 
+                        >{{ __('custom.add') }}</a>
                     </div>
                 </div>
                 <div class="row m-b-lg">

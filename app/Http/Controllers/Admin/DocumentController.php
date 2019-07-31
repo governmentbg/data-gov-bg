@@ -179,6 +179,7 @@ class DocumentController extends AdminController
             $result = $api->addDocument($rq)->getData();
 
             if (!empty($result->success)) {
+                $request->session()->flash('alert-success', __('custom.add_success'));
                 return redirect('/admin/documents/view/'. $result->data->doc_id);
             } else {
                 $request->session()->flash('alert-danger', __('custom.add_error'));

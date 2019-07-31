@@ -443,8 +443,10 @@ class ResourceController extends ApiController
             if ($resource->file_format) {
                 $prevVersionElasticData = ElasticDataSet::where(['resource_id' => $resource->id, 'version' => $resource->version])->orderBy('version', 'desc')->first();
 
-                if ($prevVersionElasticData->format == null) {
-                    $prevVersionElasticData->update(['format' => $resource->file_format]);
+                if ($prevVersionElasticData) {
+                    if ($prevVersionElasticData->format == null) {
+                        $prevVersionElasticData->update(['format' => $resource->file_format]);
+                    }
                 }
             }
 

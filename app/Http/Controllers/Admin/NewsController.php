@@ -90,15 +90,15 @@ class NewsController extends AdminController
             $params['criteria']['active'] = $request->active;
         }
 
-        if (!empty($request->offsetGet('date_from'))) {
-            $params['criteria']['date_from'] = date_format(date_create($request->offsetGet('date_from')), 'Y-m-d H:i:s');
+        if (!empty($request->offsetGet('from'))) {
+            $params['criteria']['date_from'] = date_format(date_create($request->offsetGet('from')), 'Y-m-d H:i:s');
         }
 
-        if (!empty($request->offsetGet('date_to'))) {
-            $params['criteria']['date_to'] = date_format(date_create($request->offsetGet('date_to') .' 23:59'), 'Y-m-d H:i:s');
+        if (!empty($request->offsetGet('to'))) {
+            $params['criteria']['date_to'] = date_format(date_create($request->offsetGet('to') .' 23:59'), 'Y-m-d H:i:s');
         }
 
-        if (!empty($request->offsetGet('date_to')) || !empty($request->offsetGet('date_from'))) {
+        if (!empty($request->offsetGet('to')) || !empty($request->offsetGet('from'))) {
             $params['criteria']['date_type'] = Page::DATE_TYPE_VALID;
         }
 

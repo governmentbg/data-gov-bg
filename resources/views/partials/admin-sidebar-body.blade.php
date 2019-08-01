@@ -1,5 +1,10 @@
 @if (isset($options))
     @if (in_array('range', $options))
+        @php
+            $range = [];
+            $range['from'] = app('request')->input('from') ? app('request')->input('from') : '';
+            $range['to'] = app('request')->input('to') ? app('request')->input('to') : '';
+        @endphp
         <form
             method="GET"
         >
@@ -15,6 +20,9 @@
                     <input class="js-to-filter datepicker input-border-r-12 form-control" name="to" value="{{ $range['to'] }}">
                 </div>
             </div>
+            @if (isset(app('request')->input()['active']))
+                <input type="hidden" name="active" value = "{{ app('request')->input()['active'] }}">
+            @endif
             @if (isset(app('request')->input()['order_field']))
                 <input type="hidden" name="order_field" value="{{ app('request')->input()['order_field'] }}">
             @endif
@@ -936,6 +944,11 @@
 @endif
 
 @if (isset($history))
+    @php
+        $range = [];
+        $range['from'] = app('request')->input('period_from') ? app('request')->input('period_from') : '';
+        $range['to'] = app('request')->input('period_to') ? app('request')->input('period_to') : '';
+    @endphp
     <form
         method="GET"
         action="{{ url('/admin/history/'. $view) }}"

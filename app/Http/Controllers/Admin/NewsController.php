@@ -107,12 +107,17 @@ class NewsController extends AdminController
         $result = $api->listNews($req)->getData();
         $getParams = array_except(app('request')->input(), ['news']);
 
-        $paginationData = $this->getPaginationData(
-            $result->news,
-            $result->total_records,
-            $getParams,
-            $perPage
-        );
+        if (isset($result->news)) {
+            $paginationData = $this->getPaginationData(
+                $result->news,
+                $result->total_records,
+                $getParams,
+                $perPage
+            );
+        } else {
+            $paginationData['items'] = [];
+            $paginationData['paginate'] = 0;
+        }
 
         return view('/admin/news', [
             'class'         => 'user',

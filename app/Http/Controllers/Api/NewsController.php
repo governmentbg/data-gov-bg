@@ -533,7 +533,7 @@ class NewsController extends ApiController
                 $dateTo = date_format($datePeriodTo, 'Y-m-d');
 
                 if (isset($criteria['active'])) {
-                $newsList->where(function($query) use ($dateFrom) {
+                $newsList->where(function($query) use ($dateFrom, $dateTo) {
                     $query->orWhere(function($a) use ($dateFrom, $dateTo) {
                         $a->where('valid_from', null)
                             ->where('valid_to', null)

@@ -302,7 +302,7 @@ class ResourceController extends ApiController
                         $resource->save();
                     }
 
-                    $dataset->version = intval($dataset->version);
+                    $dataset->version = intval($dataset->version) + 1;
                     $dataset->updated_by = Auth::id();
                     $dataset->save();
 

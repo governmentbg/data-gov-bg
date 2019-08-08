@@ -406,7 +406,7 @@ class NewsController extends ApiController
 
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     if (isset($criteria['active'])) {
-                        $newsList->where(function($query) use ($dateCreate, $date, $criteria){
+                        $newsList->where(function($query) use ($date) {
                             $query->where(function($c) use ($date) {
                                 $c->where('valid_from', null)
                                     ->where('valid_to', '>=', $date)
@@ -467,7 +467,7 @@ class NewsController extends ApiController
 
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_VALID) {
                     if (isset($criteria['active'])) {
-                        $newsList->where(function($query) use ($dateCreate, $dated, $criteria){
+                        $newsList->where(function($query) use ($dated) {
                             $query->where(function($c) use ($dated) {
                                 $c->where('valid_from', null)
                                     ->where('valid_to', '<=', $dated)
@@ -494,7 +494,7 @@ class NewsController extends ApiController
                                     ->where('type', Page::TYPE_NEWS);
                             });
                         });
-                    }else {
+                    } else {
                         $newsList->where(function($c) use ($dated) {
                             $c->where('valid_from', null)
                                 ->where('valid_to', '<=', $dated)
@@ -533,7 +533,7 @@ class NewsController extends ApiController
                 $dateTo = date_format($datePeriodTo, 'Y-m-d');
 
                 if (isset($criteria['active'])) {
-                $newsList->where(function($query) use ($dateFrom, $dateTo, $criteria){
+                $newsList->where(function($query) use ($dateFrom) {
                     $query->orWhere(function($a) use ($dateFrom, $dateTo) {
                         $a->where('valid_from', null)
                             ->where('valid_to', null)

@@ -45,7 +45,6 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($news as $signleNews)
-
                                                         <tr>
                                                             <td class="name">{{ $signleNews->title }}</td>
                                                             <td>
@@ -101,7 +100,7 @@
                     @if (isset($pagination))
                         <div class="row">
                             <div class="col-xs-12 text-center">
-                                @if($pagination)
+                                @if ($pagination)
                                     {{ $pagination->render() }}
                                 @endif
                             </div>

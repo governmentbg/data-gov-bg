@@ -490,9 +490,11 @@ class OrganisationController extends Controller
                 $params = [
                     'criteria' => [
                         'dataset_criteria' => $criteria,
-                        'locale' => $locale
+                        'locale'           => $locale,
+                        'keywords'         => trim($request->q)
                     ],
                 ];
+
                 if ($hasLimit) {
                     $params['criteria']['records_limit'] = $recordsLimit;
                 }
@@ -512,9 +514,12 @@ class OrganisationController extends Controller
                 // list data tags
                 $params = [
                     'criteria' => [
-                        'dataset_criteria' => $criteria
+                        'dataset_criteria' => $criteria,
+                        'locale'           => $locale,
+                        'keywords'         => trim($request->q)
                     ],
                 ];
+
                 if ($hasLimit) {
                     $params['criteria']['records_limit'] = $recordsLimit;
                 }
@@ -535,8 +540,11 @@ class OrganisationController extends Controller
                 $params = [
                     'criteria' => [
                         'dataset_criteria' => $criteria,
+                        'locale'           => $locale,
+                        'keywords'         => trim($request->q)
                     ],
                 ];
+
                 if ($hasLimit) {
                     $params['criteria']['records_limit'] = $recordsLimit;
                 }
@@ -557,9 +565,11 @@ class OrganisationController extends Controller
                 $params = [
                     'criteria' => [
                         'dataset_criteria' => $criteria,
-                        'locale' => $locale
+                        'locale'           => $locale,
+                        'keywords'         => trim($request->q)
                     ],
                 ];
+
                 if ($hasLimit) {
                     $params['criteria']['records_limit'] = $recordsLimit;
                 }

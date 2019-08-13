@@ -163,8 +163,8 @@ class DataController extends Controller {
             // List organisations
             $params = [
                 'criteria'  => [
-                    'org_ids'   => array_unique($orgIds),
-                    'locale'    => $locale,
+                    'org_ids' => array_unique($orgIds),
+                    'locale'  => $locale,
                 ],
             ];
             $rq = Request::create('/api/listOrganisations', 'POST', $params);
@@ -180,8 +180,9 @@ class DataController extends Controller {
                 // List data organisations
                 $params = [
                     'criteria' => [
-                        'dataset_criteria'  => $criteria,
-                        'locale'            => $locale,
+                        'dataset_criteria' => $criteria,
+                        'locale'           => $locale,
+                        'keywords'         => trim($request->q)
                     ],
                 ];
 
@@ -206,7 +207,9 @@ class DataController extends Controller {
                 // List data users
                 $params = [
                     'criteria'          => [
-                        'dataset_criteria'  => $criteria,
+                        'dataset_criteria' => $criteria,
+                        'locale'           => $locale,
+                        'keywords'         => trim($request->q)
                     ],
                 ];
 
@@ -230,8 +233,9 @@ class DataController extends Controller {
             // List data groups
             $params = [
                 'criteria'          => [
-                    'dataset_criteria'  => $criteria,
-                    'locale'            => $locale,
+                    'dataset_criteria' => $criteria,
+                    'locale'           => $locale,
+                    'keywords'         => trim($request->q)
                 ],
             ];
 
@@ -254,8 +258,9 @@ class DataController extends Controller {
             // List data categories
             $params = [
                 'criteria' => [
-                    'dataset_criteria'  => $criteria,
-                    'locale'            => $locale,
+                    'dataset_criteria' => $criteria,
+                    'locale'           => $locale,
+                    'keywords'         => trim($request->q)
                 ],
             ];
 
@@ -279,6 +284,8 @@ class DataController extends Controller {
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
+                    'locale'           => $locale,
+                    'keywords'         => trim($request->q)
                 ],
             ];
             if ($hasLimit) {
@@ -301,6 +308,8 @@ class DataController extends Controller {
             $params = [
                 'criteria' => [
                     'dataset_criteria' => $criteria,
+                    'locale'           => $locale,
+                    'keywords'         => trim($request->q)
                 ],
             ];
 
@@ -325,6 +334,7 @@ class DataController extends Controller {
                 'criteria' => [
                     'dataset_criteria'  => $criteria,
                     'locale'            => $locale,
+                    'keywords'          => trim($request->q)
                 ],
             ];
 

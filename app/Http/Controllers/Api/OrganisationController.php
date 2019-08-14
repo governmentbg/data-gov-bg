@@ -2368,6 +2368,7 @@ class OrganisationController extends ApiController
                 $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
+                    $data->whereNull('data_sets.org_id');
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
                 }
                 if (!empty($dsCriteria['org_ids'])) {

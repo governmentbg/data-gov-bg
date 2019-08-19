@@ -13,6 +13,18 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.11] - 2019-08-19
+### Added
+- Setup of multiple elastic hosts
+- Additional validation for dataset publish
+
+### Fixed
+- Subcategory deletion redirect
+- Public filter interactions and ordering
+- Load times of history of actions, logins by setting default dates
+- Query for most active organisation
+- Limit of organisation list for data requests
+
 ## [1.1.10] - 2019-07-23
 ### Added
 - Command for removal of elastic indices without metadata
@@ -521,6 +533,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.11]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.7...v1.1.8

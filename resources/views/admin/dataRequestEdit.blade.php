@@ -86,28 +86,27 @@
                                     <label for="org_id" class="col-sm-3 col-xs-12 col-form-label">{{ uctrans('custom.organisations') }}:</label>
                                     <div class="col-sm-9">
                                         <select
-                                            class="js-autocomplete form-control"
+                                            class="js-ajax-autocomplete js-ajax-autocomplete-org form-control"
+                                            data-url="{{ url('/api/listOrganisations') }}"
                                             name="org_id"
                                             id="org"
-                                            data-live-search="true"
+                                            data-id="true"
+                                            data-do-not-apply-clear="true"
+                                            data-order-field="name"
+                                            data-order-type="asc"
                                             required
                                         >
                                             @if (isset($organisations))
                                                 @foreach ($organisations as $organisation)
-
-                                                    <option
-                                                        value="{{ $organisation->id }}"
-                                                        {{ $organisation->id == $dataRequest->org_id
-                                                            ? 'selected'
-                                                            : ''
-                                                        }}
-                                                    >{{ $organisation->name }}</option>
+                                                    @if ($organisation->id == $dataRequest->org_id)
+                                                        <option
+                                                            value="{{ $organisation->id }}"
+                                                                {{ 'selected' }}
+                                                        >{{ $organisation->name }}</option>
+                                                    @endif
                                                 @endforeach
                                             @endif
                                         </select>
-                                        @if (isset($errors) && $errors->has('organisation'))
-                                            <span class="error">{{ $errors->first('organisation') }}</span>
-                                        @endif
                                     </div>
                                 </div>
                                 <div class="form-group row m-b-lg m-t-md">

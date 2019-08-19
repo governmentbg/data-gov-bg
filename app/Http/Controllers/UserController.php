@@ -645,12 +645,15 @@ class UserController extends Controller {
                     session()->flash('alert-danger', __('custom.edit_error'));
 
                     return redirect()->back()->withInput()->withErrors($remove->errors);
+                }else {
+                    $request->session()->flash('alert-success', __('custom.changes_success_save'));
                 }
 
                 $dataset->groups = $setGroups = [];
             }
 
             if (!is_null($groupId)) {
+                $request->session()->flash('alert-success', __('custom.changes_success_save'));
                 $post['group_id'] = $groupId;
                 $addGroup = Request::create('/api/addDataSetToGroup', 'POST', $post);
                 $api = new ApiDataSet($addGroup);
@@ -1776,6 +1779,10 @@ class UserController extends Controller {
                     return redirect('/user/resource/view/'. $response['uri']);
                 }
 
+                if ($data['type'] == Resource::TYPE_API) {
+                    $extension = $response['extension'];
+                }
+
                 if (
                     is_array($data)
                     && isset($response['data']['csvData'])
@@ -1997,6 +2004,10 @@ class UserController extends Controller {
                         return redirect('/user/resource/view/'. $response['uri']);
                     }
 
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
+                    }
+
                     if (!empty($parent)) {
                         $key = $parent->type == Organisation::TYPE_GROUP ? 'group' : 'fromOrg';
                         $response['data'][$key] = $parent;
@@ -2084,6 +2095,10 @@ class UserController extends Controller {
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
+                    }
+
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
                     }
 
                     if (
@@ -2174,6 +2189,10 @@ class UserController extends Controller {
                 if ($response['success']) {
                     if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
                         return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
+                    }
+
+                    if ($data['type'] == Resource::TYPE_API) {
+                        $extension = $response['extension'];
                     }
 
                     if (
@@ -3288,13 +3307,7 @@ class UserController extends Controller {
                 $api = new ApiOrganisation($rq);
                 $result = $api->addMember($rq)->getData();
 
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.add_success'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-                }
-
-                return back();
+                return json_encode($result);
             }
 
             if ($request->has('invite')) {
@@ -3329,13 +3342,7 @@ class UserController extends Controller {
                 $api = new ApiUser($rq);
                 $result = $api->inviteUser($rq)->getData();
 
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-                }
-
-                return back();
+                return json_encode($result);
             }
 
             $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);
@@ -6129,13 +6136,7 @@ class UserController extends Controller {
                 $api = new ApiOrganisation($rq);
                 $result = $api->addMember($rq)->getData();
 
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.add_success'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-                }
-
-                return back();
+                return json_encode($result);
             }
 
             if ($request->has('invite')) {
@@ -6169,13 +6170,7 @@ class UserController extends Controller {
                 $api = new ApiUser($rq);
                 $result = $api->inviteUser($rq)->getData();
 
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-                }
-
-                return back();
+                return json_encode($result);
             }
 
             $group->logo = $this->getImageData($group->logo_data, $group->logo_mime_type, 'group');

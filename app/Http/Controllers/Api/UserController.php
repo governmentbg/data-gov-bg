@@ -1529,8 +1529,10 @@ class UserController extends ApiController
             $criteria = isset($post['criteria']) ? $post['criteria'] : [];
             $validator = \Validator::make($criteria, [
                 'dataset_criteria'  => 'nullable|array',
+                'keywords'          => 'nullable|string|max:191',
                 'dataset_ids'       => 'nullable|array',
                 'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
+                'locale'            => 'nullable|string|max:5|exists:locale,locale,active,1',
                 'records_limit'     => 'nullable|int|digits_between:1,10|min:1',
             ]);
         }
@@ -1556,6 +1558,8 @@ class UserController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                $locale = isset($criteria['locale']) ? $criteria['locale'] : \LaravelLocalization::getCurrentLocale();
+
                 $data = User::join('data_sets', 'users.id', '=', 'data_sets.created_by');
                 $data->select('users.id', 'username', 'firstname', 'lastname', DB::raw('count(distinct data_sets.id, data_sets.created_by) as total'));
 
@@ -1568,6 +1572,19 @@ class UserController extends ApiController
                 if (!empty($dsCriteria['user_ids'])) {
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
                 }
+
+                $data->where(function($q) {
+                    $q->whereIn(
+                        'data_sets.org_id',
+                        Organisation::select('id')
+                            ->where('organisations.active', 1)
+                            ->where('organisations.approved', 1)
+                            ->get()
+                            ->pluck('id')
+                    )
+                        ->orWhereNull('data_sets.org_id');
+                });
+
                 if (!empty($dsCriteria['group_ids'])) {
                     $data->whereIn(
                         'data_sets.id',
@@ -1593,14 +1610,33 @@ class UserController extends ApiController
                     }
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)->whereNull('resources.deleted_by')
                     );
                 }
                 if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)->whereNull('resources.deleted_by')
                     );
+                }
+
+                if (!empty($criteria['keywords'])) {
+                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
+                    $data->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $data->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
                 }
 
                 if (!empty($criteria['dataset_ids'])) {

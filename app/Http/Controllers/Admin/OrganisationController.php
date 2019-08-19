@@ -393,13 +393,7 @@ class OrganisationController extends AdminController
                 $api = new ApiOrganisation($rq);
                 $result = $api->addMember($rq)->getData();
 
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.add_success'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-                }
-
-                return back();
+                return json_encode($result);
             }
 
             if ($request->has('invite')) {
@@ -418,13 +412,7 @@ class OrganisationController extends AdminController
                 $api = new ApiUser($rq);
                 $result = $api->inviteUser($rq)->getData();
 
-                if (!empty($result->success)) {
-                    $request->session()->flash('alert-success', __('custom.confirm_mail_sent'));
-                } else {
-                    $request->session()->flash('alert-danger', __('custom.add_error'));
-                }
-
-                return back();
+                return json_encode($result);
             }
 
             $org->logo = $this->getImageData($org->logo_data, $org->logo_mime_type);

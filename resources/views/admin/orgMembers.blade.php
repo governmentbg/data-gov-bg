@@ -227,8 +227,27 @@
                     <h2>{{ __('custom.add_user') }}</h2>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" class="form-horisontal">
+                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.add_success') }}</p>
+                    </div>
+                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.add_error') }}</p>
+                    </div>
+                    <form
+                        class="js-add-member m-t-lg"
+                        method="post"
+                        action="{{ url('/admin/organisations/members/'. $organisation->uri) }}"
+                        data-url="{{ url('/admin/organisations/members/'. $organisation->uri) }}"
+                    >
                         {{ csrf_field() }}
+                        <input type="hidden" name="invite_existing">
+                        <input type="hidden" name="uri" value="{{ $organisation->uri }}">
                         <div class="form-group row m-b-lg m-t-md">
                             <label for="role" class="col-lg-2 col-form-label">{{ uctrans('custom.name') }}: </label>
                             <div class="col-lg-10">
@@ -286,8 +305,27 @@
                     <h2>{{ __('custom.add_user') }}</h2>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" class="form-horisontal">
+                    <div id="js-alert-success" class="alert alert-success" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.add_success') }}</p>
+                    </div>
+                    <div id="js-alert-danger" class="alert alert-danger" role="alert" hidden>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <p>{{ __('custom.add_error') }}</p>
+                    </div>
+                    <form
+                        class="js-invite-member m-t-lg"
+                        method="post"
+                        action="{{ url('/admin/organisations/members/'. $organisation->uri) }}"
+                        data-url="{{ url('/admin/organisations/members/'. $organisation->uri) }}"
+                    >
                         {{ csrf_field() }}
+                        <input type="hidden" name="uri" value="{{ $organisation->uri }}">
+                        <input type="hidden" name="invite">
                         <div class="form-group row m-b-lg m-t-md">
                             <label for="email" class="col-lg-2 col-form-label">{{ __('custom.email') }}: </label>
                             <div class="col-lg-10">

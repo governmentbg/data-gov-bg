@@ -723,7 +723,7 @@ class DataSetController extends ApiController
 
                     if (count($ids)) {
                         $strIds = $ids->implode(',');
-                        $query->orderByRaw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                        $query->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
                     }
                 }
 

@@ -47,12 +47,11 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         <div>
                         @if ($resultsCount > 0)
                             <div class="m-r-md p-h-xs">
                                 <p>{{ __('custom.order_by') }}:</p>
-                                <ul class="nav sort-by p-l-r-none">
+                                <ul class="nav sort-by p-l-r-none m-l-n">
                                     <li>
                                         <a
                                             href="{{
@@ -143,7 +142,7 @@
                 @endif
                 <div class="articles">
                 @if ($resultsCount > 0)
-                    <div class="col-xs-12 p-h-xxs ">
+                    <div class="col-xs-12 p-h-xxs m-l-n">
                         <h4>{{ $resultsCount }} {{ ultrans('custom.results_found', $resultsCount) }}</h4>
                     </div>
                     <div class="col-xs-12">

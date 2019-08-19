@@ -389,6 +389,7 @@ class TermsOfUseController extends ApiController
                 'dataset_ids'       => 'nullable|array',
                 'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
                 'locale'            => 'nullable|string|max:5|exists:locale,locale,active,1',
+                'keywords'          => 'nullable|string|max:191',
                 'records_limit'     => 'nullable|int|digits_between:1,10|min:1',
             ]);
         }
@@ -419,6 +420,11 @@ class TermsOfUseController extends ApiController
                 $locale = isset($criteria['locale']) ? $criteria['locale'] : \LaravelLocalization::getCurrentLocale();
 
                 $data = TermsOfUse::join('data_sets', 'terms_of_use.id', '=', 'terms_of_use_id');
+
+                if (!empty($dsCriteria['user_ids'])) {
+                    $data->join('users', 'data_sets.created_by', '=', 'users.id');
+                }
+
                 $data->select('terms_of_use.id', 'terms_of_use.name', DB::raw('count(distinct data_sets.id, data_sets.terms_of_use_id) as total'));
 
                 $data->where('terms_of_use.active', 1);
@@ -427,6 +433,9 @@ class TermsOfUseController extends ApiController
                 $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
+                    $data->where('users.active', 1);
+                    $data->where('users.approved', 1);
+                    $data->whereNull('data_sets.org_id');
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
                 }
                 if (!empty($dsCriteria['org_ids'])) {
@@ -457,14 +466,45 @@ class TermsOfUseController extends ApiController
                     }
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)->whereNull('resources.deleted_by')
                     );
                 }
                 if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)->whereNull('resources.deleted_by')
                     );
+                }
+
+                $data->where(function($q) {
+                    $q->whereIn(
+                        'data_sets.org_id',
+                        Organisation::select('id')
+                            ->where('organisations.active', 1)
+                            ->where('organisations.approved', 1)
+                            ->get()
+                            ->pluck('id')
+                    )
+                        ->orWhereNull('data_sets.org_id');
+                });
+
+                if (!empty($criteria['keywords'])) {
+                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
+                    $data->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $data->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
                 }
 
                 if (!empty($criteria['dataset_ids'])) {

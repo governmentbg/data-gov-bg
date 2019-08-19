@@ -434,6 +434,8 @@ class TagController extends ApiController
                 'dataset_criteria'  => 'nullable|array',
                 'dataset_ids'       => 'nullable|array',
                 'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
+                'locale'            => 'nullable|string|max:5|exists:locale,locale,active,1',
+                'keywords'          => 'nullable|string|max:191',
                 'records_limit'     => 'nullable|int|digits_between:1,10|min:1',
             ]);
         }
@@ -461,11 +463,16 @@ class TagController extends ApiController
 
         if (!$validator->fails()) {
             try {
+                $locale = isset($criteria['locale']) ? $criteria['locale'] : \LaravelLocalization::getCurrentLocale();
                 $data = DataSetTags::join('tags', 'tag_id', '=', 'tags.id');
+
+                $data->join('data_sets', 'data_sets.id', '=', 'data_set_tags.data_set_id');
+
                 $data->select('tags.id', 'tags.name', DB::raw('count(distinct data_set_id, tag_id) as total'));
 
                 $data->whereHas('DataSet', function($q) use ($dsCriteria) {
                     if (!empty($dsCriteria['user_ids'])) {
+                        $q->whereNull('org_id');
                         $q->whereIn('created_by', $dsCriteria['user_ids']);
                     }
                     if (!empty($dsCriteria['org_ids'])) {
@@ -494,18 +501,49 @@ class TagController extends ApiController
                         }
                         $q->whereIn(
                             'data_sets.id',
-                            DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                            DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)->whereNull('resources.deleted_by')
                         );
                     }
                     if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
                         $q->whereIn(
                             'data_sets.id',
-                            DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                            DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)->whereNull('resources.deleted_by')
                         );
                     }
                     $q->where('status', DataSet::STATUS_PUBLISHED);
                     $q->where('visibility', DataSet::VISIBILITY_PUBLIC);
                 });
+
+                $data->where(function($q) {
+                    $q->whereIn(
+                        'data_sets.org_id',
+                        Organisation::select('id')
+                            ->where('organisations.active', 1)
+                            ->where('organisations.approved', 1)
+                            ->get()
+                            ->pluck('id')
+                    )
+                        ->orWhereNull('data_sets.org_id');
+                });
+
+                if (!empty($criteria['keywords'])) {
+                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
+                    $data->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $data->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
+                }
 
                 if (!empty($criteria['dataset_ids'])) {
                     $data->whereIn('data_set_id', $criteria['dataset_ids']);

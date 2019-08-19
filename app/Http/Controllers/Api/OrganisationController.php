@@ -2140,6 +2140,7 @@ class OrganisationController extends ApiController
             $criteria = isset($post['criteria']) ? $post['criteria'] : [];
             $validator = \Validator::make($criteria, [
                 'dataset_criteria'  => 'nullable|array',
+                'keywords'          => 'nullable|string|max:191',
                 'dataset_ids'       => 'nullable|array',
                 'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
                 'type'              => 'nullable|int|in:'. implode(',', array_keys(Organisation::getPublicTypes())),
@@ -2223,14 +2224,33 @@ class OrganisationController extends ApiController
                     }
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)->whereNull('resources.deleted_by')
                     );
                 }
                 if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)->whereNull('resources.deleted_by')
                     );
+                }
+
+                if (!empty($criteria['keywords'])) {
+                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
+                    $data->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $data->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
                 }
 
                 if (!empty($criteria['dataset_ids'])) {
@@ -2242,6 +2262,7 @@ class OrganisationController extends ApiController
                 if (!empty($criteria['records_limit'])) {
                     $data->take($criteria['records_limit']);
                 }
+
                 $data = $data->get();
 
                 $results = [];
@@ -2298,6 +2319,7 @@ class OrganisationController extends ApiController
             $criteria = isset($post['criteria']) ? $post['criteria'] : [];
             $validator = \Validator::make($criteria, [
                 'dataset_criteria'  => 'nullable|array',
+                'keywords'          => 'nullable|string|max:191',
                 'dataset_ids'       => 'nullable|array',
                 'dataset_ids.*'     => 'int|exists:data_sets,id|digits_between:1,10',
                 'locale'            => 'nullable|string|max:5|exists:locale,locale,active,1',
@@ -2346,6 +2368,7 @@ class OrganisationController extends ApiController
                 $data->whereNull('data_sets.deleted_at');
 
                 if (!empty($dsCriteria['user_ids'])) {
+                    $data->whereNull('data_sets.org_id');
                     $data->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
                 }
                 if (!empty($dsCriteria['org_ids'])) {
@@ -2376,14 +2399,33 @@ class OrganisationController extends ApiController
                     }
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)
+                        DB::table('resources')->select('data_set_id')->distinct()->whereIn('file_format', $fileFormats)->whereNull('resources.deleted_by')
                     );
                 }
                 if (isset($dsCriteria['reported']) && $dsCriteria['reported']) {
                     $data->whereIn(
                         'data_sets.id',
-                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)
+                        DB::table('resources')->select('data_set_id')->distinct()->where('is_reported', Resource::REPORTED_TRUE)->whereNull('resources.deleted_by')
                     );
+                }
+
+                if (!empty($criteria['keywords'])) {
+                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
+                    $data->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $data->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
                 }
 
                 if (!empty($criteria['dataset_ids'])) {
@@ -2436,8 +2478,19 @@ class OrganisationController extends ApiController
                 $result = DB::table('actions_history')
                     ->select('user_to_org_role.org_id', DB::raw('count(user_to_org_role.org_id) as count'))
                     ->leftJoin('user_to_org_role', 'user_to_org_role.user_id', '=', 'actions_history.user_id')
-                    ->whereNotIn('user_to_org_role.org_id', Organisation::where('type', '=', Organisation::TYPE_GROUP)->get()->pluck('id'))
+                    ->whereNotIn('user_to_org_role.org_id',
+                        DB::table('organisations')
+                            ->orWhere('active', 0)
+                            ->orWhere('approved', 0)
+                            ->orWhere('type', '=', Organisation::TYPE_GROUP)
+                            ->orWhereNotNull('deleted_by')
+                            ->get()
+                            ->pluck('id')
+                    )
+                    ->whereYear('actions_history.occurrence', '=', Carbon::now()->subMonth()->year)
                     ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
+                    ->whereIn('module_name', ['Resource', 'Dataset'])
+                    ->whereIn('action', array_keys(ActionsHistory::getPublicTypes()))
                     ->groupBy('user_to_org_role.org_id')
                     ->orderBy('count', 'desc')
                     ->limit(1)

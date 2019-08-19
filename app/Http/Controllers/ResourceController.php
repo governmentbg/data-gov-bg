@@ -147,7 +147,7 @@ class ResourceController extends Controller
             }
         }
 
-        return compact('errors', 'data', 'success', 'uri');
+        return compact('errors', 'data', 'success', 'uri', 'extension');
     }
 
     public static function callConversions($apiKey, $extension, $content, $resourceUri)

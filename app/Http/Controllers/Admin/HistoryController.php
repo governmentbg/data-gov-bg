@@ -51,6 +51,9 @@ class HistoryController extends AdminController
                 date_create($request->offsetGet('period_from')),
                 'Y-m-d H:i:s'
             );
+        } else {
+            $params['criteria']['period_from'] = date('Y-m-d', strtotime('-1 months'));
+            $request->merge(['period_from' => date('d-m-Y', strtotime('-1 months'))]);
         }
 
         if (!empty($request->offsetGet('period_to'))) {
@@ -58,6 +61,9 @@ class HistoryController extends AdminController
                 date_create($request->offsetGet('period_to') .' 23:59'),
                 'Y-m-d H:i:s'
             );
+        } else {
+            $params['criteria']['period_to'] = date('Y-m-d'). ' 23:59';
+            $request->merge(['period_to' => date('d-m-Y')]);
         }
 
         if (!is_null($selectedOrg)) {

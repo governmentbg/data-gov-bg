@@ -174,7 +174,11 @@ function initSelect2() {
                     data: function (params) {
                         var queryParams = {
                             criteria: {
-                                keywords: params.term
+                                keywords: params.term,
+                                order: {
+                                    type: typeof $this.data('order-type') != 'undefined' ? $this.data('order-type') : '',
+                                    field: typeof $this.data('order-field') != 'undefined' ? $this.data('order-field') : '',
+                                }
                             }
                         };
                         var finalParams = $.extend({}, queryParams, $this.data('post'));
@@ -214,11 +218,15 @@ function initSelect2() {
 
     $('.js-ajax-autocomplete-org, .js-ajax-user').on('select2:open', function (e) {
         var $this = $(this);
-        var selectedVal = $this.find(':selected').val();
+        if (!$($this).data('do-not-apply-clear')) {
+            var selectedVal = $this.find(':selected').val();
 
-        if (typeof selectedVal != 'undefined') {
-            var newOption = new Option($('.js-translations').data('clear-org-filter'), 0, true, true);
-            $this.append(newOption).trigger('change');
+            if (typeof selectedVal != 'undefined') {
+                if ($(".js-ajax-autocomplete-org option[value='0']").length == 0) {
+                    var newOption = new Option($('.js-translations').data('clear-org-filter'), 0, true, true);
+                    $this.append(newOption).trigger('change');
+                }
+            }
         }
     });
 };

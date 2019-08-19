@@ -19,7 +19,6 @@ class RequestController extends Controller {
     public function sendDataRequest(Request $request)
     {
         if ($request->has('save')) {
-
             $requestData['description'] = $request['description'];
             $requestData['published_url'] = isset($request['published_url']) ? $request['published_url'] : null;
             $requestData['contact_name'] = isset($request['contact_name']) ? $request['contact_name'] : null;
@@ -40,21 +39,10 @@ class RequestController extends Controller {
             }
         }
 
-        $params = [
-            'active' => true,
-            'approved' => true
-        ];
-
-        $orgRequest = Request::create('/api/listOrganisations', 'POST', ['criteria' => $params]);
-        $apiOrganisations = new ApiOrganisation($orgRequest);
-        $orgList = $apiOrganisations->listOrganisations($orgRequest)->getData();
-        $organisations = !empty($orgList->organisations) ? $orgList->organisations : null;
-
         return view(
             'request/dataRequest',
             [
-                'class'          => 'request',
-                'orgList'        => $organisations,
+                'class'          => 'request'
             ]
         );
     }

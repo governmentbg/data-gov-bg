@@ -44,26 +44,18 @@
                 <textarea class="form-control" name="notes"></textarea>
             </div>
             <div class="form-group">
-            <h4>{{ utrans('custom.organisations', 1) }} <span class="required">*</span></h4>
+                <h4>{{ utrans('custom.organisations', 1) }} <span class="required">*</span></h4>
                 <select
-                    class="js-autocomplete form-control"
+                    class="js-ajax-autocomplete js-ajax-autocomplete-org form-control"
+                    data-url="{{ url('/api/listOrganisations') }}"
                     name="org_id"
                     id="org"
-                    data-live-search="true"
+                    data-id="true"
+                    data-do-not-apply-clear="true"
+                    data-order-field="name"
+                    data-order-type="asc"
                     required
                 >
-                    @if (isset($orgList))
-                        <option value="">&nbsp;</option>
-                        @foreach ($orgList as $organisation)
-                            <option
-                                value="{{ $organisation->id }}"
-                                {{ $organisation->id == old('organisation->id')
-                                    ? 'selected'
-                                    : ''
-                                }}
-                            >{{ $organisation->name }}</option>
-                        @endforeach
-                    @endif
                 </select>
             </div>
             <div class="m-t-lg text-right">

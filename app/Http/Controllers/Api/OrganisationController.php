@@ -2491,6 +2491,7 @@ class OrganisationController extends ApiController
                     ->whereMonth('actions_history.occurrence', '=', Carbon::now()->subMonth()->month)
                     ->whereIn('module_name', ['Resource', 'Dataset'])
                     ->whereIn('action', array_keys(ActionsHistory::getPublicTypes()))
+                    ->where('user_to_org_role.user_id', '!=', 2)
                     ->groupBy('user_to_org_role.org_id')
                     ->orderBy('count', 'desc')
                     ->limit(1)

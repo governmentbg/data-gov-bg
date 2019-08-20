@@ -327,6 +327,11 @@ class ResourceController extends ApiController
                                 'index.mapping.total_fields.limit' => 1000000,
                                 'index.refresh_interval' => '300s'
                             ],
+                            'mappings' => [
+                                'default' => [
+                                    'dynamic'    => false,
+                                ]
+                            ]
                         ],
                     ];
 

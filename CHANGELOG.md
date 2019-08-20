@@ -13,7 +13,7 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
-## [1.1.11] - 2019-08-19
+## [1.1.11] - 2019-08-20
 ### Added
 - Setup of multiple elastic hosts
 - Additional validation for dataset publish

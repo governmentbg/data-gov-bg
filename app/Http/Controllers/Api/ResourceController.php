@@ -253,6 +253,7 @@ class ResourceController extends ApiController
      * @param int resource_uri - required
      * @param array data - required
      * @param string format - required
+     * @param bool map_data - optional - enable/disable mapping
      *
      * @return json with success or error
      */
@@ -264,6 +265,7 @@ class ResourceController extends ApiController
             'resource_uri'     => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'data'             => 'required|array',
             'extension_format' => 'required|string',
+            'map_data'         => 'nullable|boolean'
         ]);
 
         if (!$validator->fails()) {
@@ -329,7 +331,7 @@ class ResourceController extends ApiController
                             ],
                             'mappings' => [
                                 'default' => [
-                                    'dynamic'    => false,
+                                    'dynamic'    => isset($post['map_data']) ? $post['map_data'] : true,
                                 ]
                             ]
                         ],

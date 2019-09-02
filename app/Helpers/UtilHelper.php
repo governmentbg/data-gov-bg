@@ -35,7 +35,24 @@ function get_dataset_resources_with_no_data($uri)
                 )
             )
         ) {
-            $resourcesWithNoData[] = $resource->uri;
+            try {
+                $resourceData = \Elasticsearch::get([
+                    'index' => $set->id,
+                    'type'  => 'default',
+                    'id'    => $resource->id .'_'. $resource->version,
+                ]);
+
+            } catch (\Elasticsearch\Common\Exceptions\Missing404Exception $ex) {
+                $resourcesWithNoData[] = $resource->uri;
+            }
+
+            if (isset($resourceData) && empty($resourceData['_source'])) {
+                $resourcesWithNoData[] = $resource->uri;
+            }
+
+            if (isset($resourceData)) {
+                unset($resourceData);
+            }
         }
     }
 

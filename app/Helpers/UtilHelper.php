@@ -475,6 +475,8 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
                    $convertData['data'] = iconv('windows-1251', 'utf-8', $convertData['data']);
                 }
 
+                $convertData['parse_large'] = true;
+
                 $reqConvert = Request::create('/xml2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->xml2json($reqConvert)->getData(true);

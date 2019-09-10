@@ -280,6 +280,8 @@ class ResourceController extends Controller
                     $convertData['data'] = trim($trimContent);
                 }
 
+                $convertData['parse_large'] = true;
+
                 $reqConvert = Request::create('/xml2json', 'POST', $convertData);
                 $api = new ApiConversion($reqConvert);
                 $resultConvert = $api->xml2json($reqConvert)->getData(true);

@@ -36,6 +36,7 @@ class ConversionController extends ApiController
      *
      * @param string api_key - required
      * @param string data - required
+     * @param bool parse_large - optional
      *
      * @return json with data or error
      */
@@ -43,11 +44,15 @@ class ConversionController extends ApiController
     {
         $post = $request->all();
 
-        $validator = \Validator::make($post, ['data' => 'required|string']);
+        $validator = \Validator::make($post, [
+            'data'        => 'required|string',
+            'parse_large' => 'nullable|bool'
+        ]);
 
         if (!$validator->fails()) {
             try {
-                $data = $this->fromXml($post['data'], true);
+                $parseLarge = isset($post['parse_large']) ? $post['parse_large'] : false;
+                $data = $this->fromXml($post['data'], true, $parseLarge);
 
                 if (!empty($data)) {
                     return $this->successResponse($data);
@@ -986,7 +991,7 @@ class ConversionController extends ApiController
      *
      * @return json data
      */
-    private function fromXML($data, $parentTag = false)
+    private function fromXML($data, $parentTag = false, $parseLarge)
     {
         if (is_xml_excel_exported($data)) {
             return $this->fromCells($data, false);
@@ -999,7 +1004,7 @@ class ConversionController extends ApiController
             $data = '<data>'. str_replace('&', '&amp;', $data) .'</data>';
         }
 
-        $xml = simplexml_load_string($data);
+        $xml = $parseLarge ? simplexml_load_string($data, 'SimpleXMLElement', LIBXML_PARSEHUGE) : simplexml_load_string($data);
 
         $array = $this->xmlToArray($xml);
 

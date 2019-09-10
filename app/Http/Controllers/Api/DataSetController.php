@@ -253,6 +253,7 @@ class DataSetController extends ApiController
      */
     public function editDataset(Request $request)
     {
+        ini_set('max_execution_time', 600);
         $post = $request->all();
         $tags = [];
         $customFields = [];

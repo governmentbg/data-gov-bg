@@ -66,6 +66,30 @@ class ConversionController extends ApiController
         return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
     }
 
+    public function html2json(Request $request)
+    {
+        $post = $request->all();
+
+        $validator = \Validator::make($post, [
+            'data' => 'required|string'
+        ]);
+
+        if (!$validator->fails()) {
+            try {
+                $data = $this->fromHTML($post['data']);
+
+                if (!empty($data)) {
+                    return $this->successResponse($data);
+                }
+            } catch (\Exception $ex) {
+               Log::error($ex->getMessage());
+               $validator->errors()->add('data', __('custom.invalid_html'));
+            }
+        }
+
+        return $this->errorResponse(__('custom.converse_fail'), $validator->errors()->messages());
+    }
+
     /**
      * Convert from json data and return xml
      *

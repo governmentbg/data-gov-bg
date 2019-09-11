@@ -591,6 +591,20 @@ function manage_migrated_file($fileData, $resourceURI, $convertClosedFormats)
                 $data['text'] = $convertData['data'];
 
                 break;
+            case 'html':
+                $method = 'html2json';
+                $reqConvert = Request::create('/'. $method, 'POST', $convertData);
+                $api = new ApiConversion($reqConvert);
+                $resultConvert = $api->$method($reqConvert)->getData(true);
+
+                if ($resultConvert['success']) {
+                    Session::put('elasticData.'. $resourceUri, ['text' => $resultConvert['data']]);
+                    $data['text'] = $resultConvert['data'];
+                } else {
+                    $data['error'] = $resultConvert['error']['message'];
+                }
+
+                break;
             default:
                 $method = 'img2json';
                 $convertData['data'] = base64_encode($convertData['data']);

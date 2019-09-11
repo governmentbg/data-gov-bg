@@ -909,4 +909,5 @@ return [
     'delete_failure' => 'Delete failure',
     'deleted_by' => 'Deleted by',
     'hard_remove' => 'Final delete',
+    'invalid_html' => 'Invalid html',
 ];

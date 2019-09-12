@@ -219,6 +219,7 @@ class DataSetController extends ApiController
 
                 return $result;
             } catch (Throwable $e) {
+                Log::error($ex->getMessage());
                 return $this->errorResponse(__('custom.add_dataset_fail'));
             }
         }
@@ -408,7 +409,9 @@ class DataSetController extends ApiController
                     }
 
                     // If NULL passed - dataset not connected to organisation
-                    $dataset->org_id = $post['data']['org_id'];
+                    if (!empty($post['data']['org_id'])) {
+                        $dataset->org_id = $post['data']['org_id'];
+                    }
 
                     if (!empty($post['data']['uri'])) {
                         $dataset->uri = $post['data']['uri'];
@@ -479,6 +482,7 @@ class DataSetController extends ApiController
 
                 return $result;
             } catch (Throwable $e) {
+                Log::error($e->getMessage());
                 return $this->errorResponse(__('custom.edit_dataset_fail'));
             }
         }

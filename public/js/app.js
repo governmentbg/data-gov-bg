@@ -60601,6 +60601,8 @@ $(function () {
 $(function () {
     if ($('.js-invite-member').length) {
         $('.js-invite-member').on('submit', function (e) {
+            var invButton = $(document.activeElement);
+            invButton.hide();
             e.preventDefault();
 
             $.ajax({
@@ -60619,7 +60621,9 @@ $(function () {
                     } else {
                         $('#js-alert-danger').show();
                         $('.alert-danger').fadeTo(3000, 500).slideUp(500, function () {
-                            $('.alert-danger').slideUp(500);
+                            $('.alert-danger').slideUp(500, function () {
+                                invButton.show();
+                            });
                         });
                     }
                 },

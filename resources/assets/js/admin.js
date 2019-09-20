@@ -78,7 +78,7 @@ $(function() {
     if ($('.js-invite-member').length) {
         $('.js-invite-member').on('submit', function(e) {
             var invButton = $(document.activeElement);
-            invButton.hide();
+            invButton.prop('disabled', true);
             e.preventDefault();
 
             $.ajax({
@@ -98,7 +98,7 @@ $(function() {
                         $('#js-alert-danger').show();
                         $('.alert-danger').fadeTo(3000, 500).slideUp(500, function(){
                             $('.alert-danger').slideUp(500, function() {
-                                invButton.show();
+                                invButton.prop('disabled', false);
                             });
                         });
                     }

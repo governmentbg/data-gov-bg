@@ -13,6 +13,14 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.15] - 2019-10-01
+### Added
+- Commands for elasticsearch data backup
+
+### Fixed
+- Relation retrieval for action history
+- User e-mail invite button
+
 ## [1.1.14] - 2019-09-12
 ### Added
 - Conversion for html files
@@ -552,6 +560,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.15]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.14...v1.1.15
 [1.1.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.13...v1.1.14
 [1.1.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.12...v1.1.13
 [1.1.12]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.11...v1.1.12

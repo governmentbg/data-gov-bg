@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.16] - 2019-11-14
+### Removed
+- Temporarily disable signal creation
+
 ## [1.1.15] - 2019-10-01
 ### Added
 - Commands for elasticsearch data backup
@@ -560,6 +564,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.15...v1.1.16
 [1.1.15]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.14...v1.1.15
 [1.1.14]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.13...v1.1.14
 [1.1.13]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.12...v1.1.13

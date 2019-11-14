@@ -34,93 +34,93 @@ class SignalController extends ApiController
      */
     public function sendSignal(Request $request)
     {
-        $signalData = $request->all();
+        // $signalData = $request->all();
 
-        $validator = Validator::make($signalData, [
-            'data'  => 'required|array',
-        ]);
+        // $validator = Validator::make($signalData, [
+        //     'data'  => 'required|array',
+        // ]);
 
-        if (!$validator->fails()) {
-            $validator = Validator::make($signalData['data'], [
-                'resource_id'  => 'required|integer|digits_between:1,10|exists:resources,id,deleted_at,NULL',
-                'description'  => 'required|string|max:8000',
-                'firstname'    => 'required|string|max:100',
-                'lastname'     => 'required|string|max:100',
-                'email'        => 'required|email|max:191',
-                'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses()))
-            ]);
-        }
+        // if (!$validator->fails()) {
+        //     $validator = Validator::make($signalData['data'], [
+        //         'resource_id'  => 'required|integer|digits_between:1,10|exists:resources,id,deleted_at,NULL',
+        //         'description'  => 'required|string|max:8000',
+        //         'firstname'    => 'required|string|max:100',
+        //         'lastname'     => 'required|string|max:100',
+        //         'email'        => 'required|email|max:191',
+        //         'status'       => 'nullable|integer|in:'. implode(',', array_keys(Signal::getStatuses()))
+        //     ]);
+        // }
 
-        if (!$validator->fails()) {
-            try {
-                DB::beginTransaction();
+        // if (!$validator->fails()) {
+        //     try {
+        //         DB::beginTransaction();
 
-                $newSignal = new Signal;
+        //         $newSignal = new Signal;
 
-                $newSignal->resource_id = $signalData['data']['resource_id'];
-                $newSignal->descript = $signalData['data']['description'];
-                $newSignal->firstname = $signalData['data']['firstname'];
-                $newSignal->lastname = $signalData['data']['lastname'];
-                $newSignal->email = $signalData['data']['email'];
+        //         $newSignal->resource_id = $signalData['data']['resource_id'];
+        //         $newSignal->descript = $signalData['data']['description'];
+        //         $newSignal->firstname = $signalData['data']['firstname'];
+        //         $newSignal->lastname = $signalData['data']['lastname'];
+        //         $newSignal->email = $signalData['data']['email'];
 
-                if (isset($signalData['data']['status'])) {
-                    $newSignal->status = $signalData['data']['status'];
-                } else {
-                    $newSignal->status = Signal::STATUS_NEW;
-                }
+        //         if (isset($signalData['data']['status'])) {
+        //             $newSignal->status = $signalData['data']['status'];
+        //         } else {
+        //             $newSignal->status = Signal::STATUS_NEW;
+        //         }
 
-                $saved = $newSignal->save();
+        //         $saved = $newSignal->save();
 
-                // mark related resource as reported
-                if ($saved && ($newSignal->status == Signal::STATUS_NEW)) {
-                    $resource = Resource::where('id', $newSignal->resource_id)->first();
-                    $resource->is_reported = Resource::REPORTED_TRUE;
-                    $saved = $resource->save();
-                }
+        //         // mark related resource as reported
+        //         if ($saved && ($newSignal->status == Signal::STATUS_NEW)) {
+        //             $resource = Resource::where('id', $newSignal->resource_id)->first();
+        //             $resource->is_reported = Resource::REPORTED_TRUE;
+        //             $saved = $resource->save();
+        //         }
 
-                $logData = [
-                    'module_name'      => Module::getModuleName(Module::SIGNALS),
-                    'action'           => ActionsHistory::TYPE_ADD,
-                    'action_object'    => $newSignal->id,
-                    'action_msg'       => 'Sent signal',
-                ];
+        //         $logData = [
+        //             'module_name'      => Module::getModuleName(Module::SIGNALS),
+        //             'action'           => ActionsHistory::TYPE_ADD,
+        //             'action_object'    => $newSignal->id,
+        //             'action_msg'       => 'Sent signal',
+        //         ];
 
-                Module::add($logData);
+        //         Module::add($logData);
 
-                DB::commit();
-            } catch (QueryException $e) {
-                $saved = false;
+        //         DB::commit();
+        //     } catch (QueryException $e) {
+        //         $saved = false;
 
-                DB::rollback();
+        //         DB::rollback();
 
-                Log::error($e->getMessage());
-            }
+        //         Log::error($e->getMessage());
+        //     }
 
-            if ($saved) {
-                try {
-                    if (($user = User::find($resource->created_by)) && !empty($user->email)) {
-                        $mailData = [
-                            'user'          => $user->firstname ?: $user->username,
-                            'resource_name' => $resource->name,
-                            'dataset_uri'   => $resource->dataSet->uri,
-                            'dataset_name'  => $resource->dataSet->name,
-                        ];
+        //     if ($saved) {
+        //         try {
+        //             if (($user = User::find($resource->created_by)) && !empty($user->email)) {
+        //                 $mailData = [
+        //                     'user'          => $user->firstname ?: $user->username,
+        //                     'resource_name' => $resource->name,
+        //                     'dataset_uri'   => $resource->dataSet->uri,
+        //                     'dataset_name'  => $resource->dataSet->name,
+        //                 ];
 
-                        Mail::send('mail/signalMail', $mailData, function ($m) use ($user) {
-                            $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
-                            $m->to($user->email, $user->firstname);
-                            $m->subject(__('custom.signal_subject'));
-                        });
-                    }
-                } catch (\Exception $ex) {
-                    Log::error($ex->getMessage());
-                }
+        //                 Mail::send('mail/signalMail', $mailData, function ($m) use ($user) {
+        //                     $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
+        //                     $m->to($user->email, $user->firstname);
+        //                     $m->subject(__('custom.signal_subject'));
+        //                 });
+        //             }
+        //         } catch (\Exception $ex) {
+        //             Log::error($ex->getMessage());
+        //         }
 
-                return $this->successResponse(['signal_id' => $newSignal->id]);
-            }
-        }
+        //         return $this->successResponse(['signal_id' => $newSignal->id]);
+        //     }
+        // }
 
-        return $this->errorResponse(__('custom.send_signal_fail'), $validator->errors()->messages());
+        // return $this->errorResponse(__('custom.send_signal_fail'), $validator->errors()->messages());
     }
 
     /**

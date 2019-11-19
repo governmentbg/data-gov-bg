@@ -172,9 +172,9 @@
                             @endif
                         </form>
                     </div>
-                    <div class="col-sm-3 col-xs-12 text-right p-l-none">
+                    <!-- <div class="col-sm-3 col-xs-12 text-right p-l-none">
                         <button type="button" class="badge badge-pill m-b-sm" data-toggle="modal" data-target="#addSignal">{{ uctrans('custom.signal') }}</button>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- IF there are old versions of this article -->

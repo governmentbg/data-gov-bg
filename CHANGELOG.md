@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.18] - 2019-12-19
+### Fixed
+- Filename error during download of resource
+
 ## [1.1.17] - 2019-11-19
 ### Removed
 - Temporarily remove signal button
@@ -568,6 +572,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.17...v1.1.18
 [1.1.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.16...v1.1.17
 [1.1.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.15...v1.1.16
 [1.1.15]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.14...v1.1.15

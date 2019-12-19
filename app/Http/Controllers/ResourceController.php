@@ -592,6 +592,8 @@ class ResourceController extends Controller
     public function resourceDownload(Request $request)
     {
         $fileName = $request->offsetGet('name');
+        $fileName = str_replace(['\\', '/'], '_', $fileName);
+
         $resourceId = (int) $request->offsetGet('resource');
         $version = (int) $request->offsetGet('version');
         $format = $request->offsetGet('format');

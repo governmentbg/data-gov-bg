@@ -305,7 +305,6 @@ class ResourceController extends ApiController
                     }
 
                     $dataset->version = intval($dataset->version) + 1;
-                    $dataset->updated_by = Auth::id();
                     $dataset->save();
 
                     $elasticDataSet = ElasticDataSet::create([
@@ -558,7 +557,6 @@ class ResourceController extends ApiController
                         $resource->descript = $this->trans($post['data']['locale'], $post['data']['description']);
                     }
 
-                    $resource->updated_by = Auth::id();
                     $resource->save();
 
                     if (!empty($post['data']['custom_fields'])) {
@@ -693,7 +691,6 @@ class ResourceController extends ApiController
                             $resource->file_format = Resource::getFormatsCode($post['format']);
                         }
 
-                        $resource->updated_by = Auth::id();
                         $resource->save();
 
                         // Increase dataset version without going to new full version
@@ -705,7 +702,6 @@ class ResourceController extends ApiController
                             $dataset->version = $versionParts[0] .'.1';
                         }
 
-                        $dataset->updated_by = Auth::id();
                         $dataset->save();
 
                         $elasticDataSet = ElasticDataSet::create([

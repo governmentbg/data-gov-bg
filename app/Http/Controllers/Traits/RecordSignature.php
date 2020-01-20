@@ -9,6 +9,26 @@ trait RecordSignature
 {
     protected static function bootRecordSignature()
     {
+        static::updating(function ($model) {
+            $userId = self::getUserId();
+
+            if (array_key_exists('updated_by', $model->attributes)) {
+                $model->updated_by = $userId;
+            }
+        });
+
+        static::creating(function ($model) {
+            $userId = self::getUserId();
+
+            if (empty($model->created_by)) {
+                $model->created_by = $userId;
+            }
+        });
+
+    }
+
+    private static function getUserId()
+    {
         $userId = null;
 
         if (Auth::check()) {
@@ -17,16 +37,7 @@ trait RecordSignature
             $userId = $system->id;
         }
 
-        static::updating(function ($model) use ($userId) {
-            if (empty($model->updated_by)) {
-                $model->updated_by = $userId;
-            }
-        });
+        return $userId;
 
-        static::creating(function ($model) use ($userId) {
-            if (empty($model->created_by)) {
-                $model->created_by = $userId;
-            }
-        });
     }
 }

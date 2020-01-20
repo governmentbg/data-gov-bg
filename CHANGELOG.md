@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.19] - 2019-12-19
+### Changed
+- Updated_by property controlled through trait
+
 ## [1.1.18] - 2019-12-19
 ### Fixed
 - Filename error during download of resource
@@ -572,6 +576,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.18...v1.1.19
 [1.1.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.17...v1.1.18
 [1.1.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.16...v1.1.17
 [1.1.16]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.15...v1.1.16

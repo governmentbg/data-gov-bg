@@ -200,8 +200,6 @@ class SectionController extends ApiController
                     $section->forum_link = null;
                 }
 
-                $section->updated_by = \Auth::id();
-
                 try {
                     $section->save();
 

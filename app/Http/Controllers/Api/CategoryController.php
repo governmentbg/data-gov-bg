@@ -219,8 +219,6 @@ class CategoryController extends ApiController
                     $category->ordering = $data['ordering'];
                 }
 
-                $category->updated_by = \Auth::id();
-
                 try {
                     $category->save();
 

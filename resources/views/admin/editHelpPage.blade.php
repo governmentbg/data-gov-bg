@@ -142,7 +142,7 @@
                             type="submit"
                             name="save"
                             class="m-l-md btn btn-custom"
-                        >{{ __('custom.save') }}</button>
+                        >{{ uctrans('custom.save') }}</button>
                     </div>
                 </div>
             </div>

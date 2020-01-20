@@ -156,7 +156,6 @@ class TagController extends ApiController
             try {
 
                 $tag->name = $post['data']['name'];
-                $tag->updated_by = \Auth::id();
 
                 $tag->save();
 

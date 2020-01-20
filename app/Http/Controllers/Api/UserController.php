@@ -724,8 +724,6 @@ class UserController extends ApiController
         }
 
         if (!empty($newUserData)) {
-            $newUserData['updated_by'] = Auth::id();
-
             try {
                 User::where('id', $request->id)->update($newUserData);
             } catch (QueryException $e) {
@@ -898,7 +896,6 @@ class UserController extends ApiController
 
         try {
             $user->api_key = Uuid::generate(4)->string;
-            $user->updated_by = Auth::id();
             $user->save();
         } catch (QueryException $e) {
             Log::error($e->getMessage());
@@ -1424,7 +1421,6 @@ class UserController extends ApiController
                 });
 
                 $newUserData['hash_id'] = $mailData['hash'];
-                $newUserData['updated_by'] = $user['id'];
 
                 if (count(Mail::failures()) <= 0) {
                     try {
@@ -1469,7 +1465,6 @@ class UserController extends ApiController
                 $newUserData['password'] = bcrypt($data['password']);
 
                 if (!empty($newUserData)) {
-                    $newUserData['updated_by'] = $user->id;
                     try {
                         User::where('id', $user->id)->update($newUserData);
                     } catch (QueryException $e) {

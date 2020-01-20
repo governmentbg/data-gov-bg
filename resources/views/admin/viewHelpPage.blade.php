@@ -86,7 +86,7 @@
                                 <a
                                     href="{{ url('/admin/help/page/edit/'. $page->id) }}"
                                     class="m-l-md btn btn-custom"
-                                >{{ __('custom.edit') }}</a>
+                                >{{ uctrans('custom.edit') }}</a>
                                 <a
                                     href="{{ url('/admin/help/page/delete/'. $page->id) }}"
                                     class="m-l-md btn btn-custom del-btn"

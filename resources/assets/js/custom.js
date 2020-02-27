@@ -687,3 +687,8 @@ $(function() {
         $(this).css('height', $(this).closest('.section-cont').height() - $(this).closest('.section-cont').find('h3').height() - 77); // 77 - sum of margins of elements in section-cont
     });
 });
+
+$('.reg-usr-form').on('submit', () => {
+    $('.usr-save').prop('disabled', true);
+    $('.add-org').prop('disabled', true);
+});

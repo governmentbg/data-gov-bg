@@ -60518,6 +60518,11 @@ $(function () {
     });
 });
 
+$('.reg-usr-form').on('submit', function () {
+    $('.usr-save').prop('disabled', true);
+    $('.add-org').prop('disabled', true);
+});
+
 /***/ }),
 /* 44 */
 /***/ (function(module, exports) {

@@ -10,7 +10,7 @@
                         <h2>{{ __('custom.user_registration') }}</h2>
                         <p class='req-fields m-t-lg m-b-lg'>{{ __('custom.all_fields_required') }}</p>
                     </div>
-                    <form method="POST" class="m-t-lg p-sm">
+                    <form method="POST" class="m-t-lg p-sm reg-usr-form">
                         {{ csrf_field() }}
 
                         <div class="form-group row required">
@@ -122,7 +122,7 @@
                                 >{{ uctrans('custom.add_organisation') }}</button>
                                 <button
                                     type="submit"
-                                    class="m-l-md btn btn-primary m-b-sm"
+                                    class="m-l-md btn btn-primary m-b-sm usr-save"
                                 >{{ uctrans('custom.save') }}</button>
                             </div>
                         </div>

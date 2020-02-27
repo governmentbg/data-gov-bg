@@ -582,7 +582,7 @@ class UserController extends ApiController
         $post = $request->all();
 
         $validator = \Validator::make($post, [
-            'id'                    => 'required|int|digits_between:1,10',
+            'id'                    => 'required|int|digits_between:1,10|exists:users,id',
             'data'                  => 'required|array',
         ]);
 
@@ -590,6 +590,7 @@ class UserController extends ApiController
             $validator = \Validator::make($post['data'], [
                 'firstname'         => 'nullable|string|max:100',
                 'lastname'          => 'nullable|string|max:100',
+                'username'          => 'required|string|unique:users,username,'. $post['id'] .',id,deleted_at,NULL|max:100',
                 'email'             => 'nullable|email|max:191',
                 'add_info'          => 'nullable|string|max:8000',
                 'password'          => 'nullable|string|min:6',

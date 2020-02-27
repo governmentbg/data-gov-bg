@@ -64,7 +64,13 @@ class DocumentController extends Controller {
 
         $params = [
             'records_per_page' => $perPage,
-            'page_number'      => $pageNumber
+            'page_number'      => $pageNumber,
+            'criteria'         => [
+                'order'        => [
+                    'field'    => 'updated_at',
+                    'type'     => 'desc'
+                ]
+            ]
         ];
 
         $docRequest = Request::create('/api/listDocuments', 'POST', $params);

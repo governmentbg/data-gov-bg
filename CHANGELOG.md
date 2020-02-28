@@ -13,6 +13,14 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.20] - 2020-02-28
+### Fixed
+- A few typos
+- Multi-user registrations
+
+### Changed
+- Ordering of public documents
+
 ## [1.1.19] - 2019-12-19
 ### Changed
 - Updated_by property controlled through trait
@@ -576,6 +584,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.20]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.19...v1.1.20
 [1.1.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.18...v1.1.19
 [1.1.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.17...v1.1.18
 [1.1.17]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.16...v1.1.17

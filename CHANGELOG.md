@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.1.21] - 2020-03-04
+### Fixed
+- Incorrect validation to edit user
+
 ## [1.1.20] - 2020-02-28
 ### Fixed
 - A few typos
@@ -584,6 +588,7 @@ Security - in case of vulnerabilities.
 - Search engine fixes
 
 [Unreleased]: https://github.com/governmentbg/data-gov-bg/compare/vUnreleased...HEAD
+[1.1.21]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.20...v1.1.21
 [1.1.20]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.19...v1.1.20
 [1.1.19]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.18...v1.1.19
 [1.1.18]: https://github.com/governmentbg/data-gov-bg/compare/v1.1.17...v1.1.18

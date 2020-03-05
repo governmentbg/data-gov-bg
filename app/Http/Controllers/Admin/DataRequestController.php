@@ -100,7 +100,8 @@ class DataRequestController extends AdminController
         if ($dataRequest) {
             $params = [
                 'active' => true,
-                'approved' => true
+                'approved' => true,
+                'org_ids' => [$dataRequest->org_id]
             ];
 
             $statuses = DataRequest::getDataRequestStatuses();

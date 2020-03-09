@@ -131,7 +131,7 @@ class PageController extends AdminController
             return redirect()->route('adminPages');
         }
 
-        $req = Request::create('/api/listPages', 'POST', ['criteria' => ['page_id' => $id]]);
+        $req = Request::create('/api/listPages', 'POST', ['api_key' => \Auth::user()->api_key, 'criteria' => ['page_id' => $id]]);
         $api = new ApiPage($req);
         $result = $api->listPages($req)->getData();
         $page = isset($result->pages[0]) ? $result->pages[0] : null;

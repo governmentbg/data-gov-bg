@@ -444,6 +444,7 @@ class PageController extends ApiController
         $post = $request->all();
 
         $validator = Validator::make($post, [
+            'api_key'           => 'nullable|string|exists:users,api_key',
             'locale'            => 'nullable|string|max:5',
             'criteria'          => 'nullable|array',
             'records_per_page'  => 'nullable|integer|digits_between:1,10',

@@ -694,5 +694,5 @@ $('.reg-usr-form').on('submit', () => {
 });
 
 $("[name='remove_role']").on('click', function() {
-    $(this).siblings(':hidden').attr('name', 'org_id');
+    $("[name='org_id']").val($(this).data('org-id'));
 });

@@ -692,3 +692,7 @@ $('.reg-usr-form').on('submit', () => {
     $('.usr-save').prop('disabled', true);
     $('.add-org').prop('disabled', true);
 });
+
+$("[name='remove_role']").on('click', function() {
+    $(this).siblings(':hidden').attr('name', 'org_id');
+});

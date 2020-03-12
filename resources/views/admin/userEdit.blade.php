@@ -147,7 +147,7 @@
                                     name="remove_role"
                                     class="btn btn-primary pull-right del-btn"
                                 >{{ utrans('custom.remove') }}</button>
-                                <input type="hidden" name="org_id" value="{{ $org }}">
+                                <input type="hidden" name="" value="{{ $org }}">
                             </div>
                         </div>
                     @elseif ($org != 0 && isset($groups[$org]))
@@ -181,7 +181,7 @@
                                     name="remove_role"
                                     class="btn btn-primary pull-right del-btn"
                                 >{{ utrans('custom.remove') }}</button>
-                                <input type="hidden" name="org_id" value="{{ $org }}">
+                                <input type="hidden" name="" value="{{ $org }}">
                             </div>
                         </div>
                     @endif

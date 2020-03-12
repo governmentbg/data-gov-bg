@@ -146,8 +146,8 @@
                                     type="submit"
                                     name="remove_role"
                                     class="btn btn-primary pull-right del-btn"
+                                    data-org-id="{{ $org }}"
                                 >{{ utrans('custom.remove') }}</button>
-                                <input type="hidden" name="" value="{{ $org }}">
                             </div>
                         </div>
                     @elseif ($org != 0 && isset($groups[$org]))
@@ -180,12 +180,13 @@
                                     type="submit"
                                     name="remove_role"
                                     class="btn btn-primary pull-right del-btn"
+                                    data-org-id="{{ $org }}"
                                 >{{ utrans('custom.remove') }}</button>
-                                <input type="hidden" name="" value="{{ $org }}">
                             </div>
                         </div>
                     @endif
                 @endforeach
+                <input type="hidden" name="org_id" value="">
             @endif
             <div class="form-group row">
                 <label for="apiKey" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.api_key') }}:</label>

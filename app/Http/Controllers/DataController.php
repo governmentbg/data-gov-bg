@@ -1100,9 +1100,20 @@ class DataController extends Controller {
      */
     public function sendSignal(Request $request)
     {
-        $params = [
-            'data' => $request->only(['resource_id', 'firstname', 'lastname', 'email', 'description'])
-        ];
+        $recaptchaResp = $request->get('g-recaptcha-response');
+
+        if (empty($recaptchaResp)) {
+            return json_encode(['success' => false, 'err_msg' => __('custom.recaptcha_confirm_err')]);
+        } else {
+            $recaptcha = new \ReCaptcha\ReCaptcha(config('app.CAPTCHA_SECRET'));
+            $resp = $recaptcha->verify($recaptchaResp);
+
+            if (!$resp->isSuccess()) {
+                return json_encode(['success' => false, 'err_msg' => __('custom.recaptcha_wrong_resp')]);
+            }
+        }
+
+        $params = ['data' => $request->only(['resource_id', 'firstname', 'lastname', 'email', 'description'])];
         $sendRequest = Request::create('api/sendSignal', 'POST', $params);
         $api = new ApiSignal($sendRequest);
         $result = $api->sendSignal($sendRequest)->getData();

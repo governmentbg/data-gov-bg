@@ -72,9 +72,19 @@
                             </div>
                         </div>
                         <div class="form-group row">
+                            <label class="col-sm-3 col-xs-12 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div
+                                    class="g-recaptcha pull-right"
+                                    name="g-recaptcha-response"
+                                    data-sitekey="{{ config('app.CAPTCHA_PUB') }}"
+                                ></div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
                             <div class="col-sm-12 text-right">
                                 <button type="button" class="m-l-md btn btn-danger" data-dismiss="modal">{{ uctrans('custom.close') }}</button>
-                                <button type="button" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
+                                <button type="submit" class="m-l-md btn btn-custom">{{ uctrans('custom.send') }}</button>
                             </div>
                         </div>
                     </form>

@@ -57,6 +57,8 @@
             gtag('config', '{{ config('app.GA_TRACKING_ID') }}');
         </script>
     @endif
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js?hl={{ $lang }}" async defer></script>
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">

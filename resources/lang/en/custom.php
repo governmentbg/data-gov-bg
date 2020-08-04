@@ -910,4 +910,6 @@ return [
     'deleted_by' => 'Deleted by',
     'hard_remove' => 'Final delete',
     'invalid_html' => 'Invalid html',
+    'recaptcha_confirm_err' => 'Please confirm that you are not a robot!',
+    'recaptcha_wrong_resp' => 'Wrong CAPTCHA response!',
 ];

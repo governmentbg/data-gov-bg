@@ -910,4 +910,6 @@ return [
     'deleted_by' => 'Изтрит от',
     'hard_remove' => 'Окончателно изтриване',
     'invalid_html' => 'Невалиден html',
+    'recaptcha_confirm_err' => 'Моля, потвърдете, че не сте робот!',
+    'recaptcha_wrong_resp' => 'Грешен отговор от CAPTCHA!',
 ];

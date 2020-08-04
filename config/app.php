@@ -137,6 +137,8 @@ return [
     'APP_URL' => env('APP_URL'),
     'SYSTEM_PASSWORD' => env('SYSTEM_PASSWORD'),
     'GA_TRACKING_ID' => env('GA_TRACKING_ID'),
+    'CAPTCHA_PUB' => env('gCAPTCHASiteKey'),
+    'CAPTCHA_SECRET' => env('gCAPTCHASecret'),
     'TNT_DATABASE' => env('TNT_DATABASE'),
     'NEWSLETTER_SEND_TIME' => '10:00',
     'OLD_OD_API_SOURCE' => env('OLD_OD_API_SOURCE', 'http://old.opendata.government.bg/api/3/action/'),

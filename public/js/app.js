@@ -60293,6 +60293,11 @@ $(function () {
                     $('button:submit').attr('disabled', 'disabled');
                 } else {
                     $('#js-alert-danger').show();
+
+                    if (response.err_msg) {
+                        $('#js-alert-danger').html(response.err_msg);
+                    }
+
                     $('.alert-danger').fadeTo(3000, 500).slideUp(500, function () {
                         $('.alert-danger').slideUp(500);
                     });

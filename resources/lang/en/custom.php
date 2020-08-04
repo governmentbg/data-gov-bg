@@ -144,7 +144,7 @@ return [
     'groups' => 'group|groups',
     'settings' => 'settings',
     'invite' => 'invite',
-    'data_req_info' => 'Please, share what kind of data would you like to see published at the state portal for open data - https://opendata.government.bg/ You could either give a concrete example for specific information which exists but maybe not in a structured, machine-readable and convenient for automatic processing format or share the need to see data which is found nowhere but you think it should be public.<br>You can fill the form more than once if you wish to request more than one dataset. Please note, that this is a survey of informative nature in order to prioritize the publishing of certain datasets and does not guarantee that the requested dataset will be published.',
+    'data_req_info' => 'Please, share what kind of data would you like to see published at the state portal for open data - https://data.egov.bg. You could either give a concrete example for specific information which exists but maybe not in a structured, machine-readable and convenient for automatic processing format or share the need to see data which is found nowhere but you think it should be public.<br>You can fill the form more than once if you wish to request more than one dataset. Please note, that this is a survey of informative nature in order to prioritize the publishing of certain datasets and does not guarantee that the requested dataset will be published.',
     'required' => 'Required',
     'short_data_descr' => 'Short description of the data',
     'user_data_descr' => 'Please describe using a few words the data you would like to see published in the portal.',

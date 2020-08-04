@@ -169,11 +169,6 @@
                                     ><span class="fa fa-twitter"></span></a>
                                     <a
                                         target="_blank"
-                                        href="https://plus.google.com/share?url={{ url('/') }}"
-                                        class="gp"
-                                    ><span class="fa fa-google-plus"></span></a>
-                                    <a
-                                        target="_blank"
                                         href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"
                                     ><span class="fa fa-linkedin"></span></a>
                                     @if (isset($newsLink))
@@ -293,7 +288,6 @@
                                     >{{ strtoupper($altLang) }}</a>
                                     <a href="#" class="fb"><i class="fa fa-facebook"></i></a>
                                     <a href="#" class="tw"><i class="fa fa-twitter"></i></a>
-                                    <a href="#" class="gp"><i class="fa fa-google-plus"></i></a>
                                 </li>
                             @endif
                         </ul>

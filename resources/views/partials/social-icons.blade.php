@@ -5,9 +5,6 @@
     <div class="social tw">
         <a target ="_blank" href="http://twitter.com/home?status={{ $shareUrl }}"><i class="fa fa-twitter"></i></a>
     </div>
-    <div class="social gp">
-        <a target ="_blank" href="https://plus.google.com/share?url={{ $shareUrl }}"><i class="fa fa-google-plus"></i></a>
-    </div>
     <div class="social in">
         <a target ="_blank" href="https://www.linkedin.com/shareArticle?mini=true&url={{ $shareUrl }}"><i class="fa fa-linkedin"></i></a>
     </div>

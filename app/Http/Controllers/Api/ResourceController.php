@@ -1043,6 +1043,10 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
+        if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+            Log::info('API resource request', array_merge(['method' => 'getResourceMetadata'], $post));
+        }
+
         $validator = \Validator::make($post, [
             'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'locale'        => 'nullable|string|max:5',
@@ -1233,6 +1237,10 @@ class ResourceController extends ApiController
     {
         $post = $request->all();
 
+        if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+            Log::info('API resource request', array_merge(['method' => 'getResourceData'], $post));
+        }
+
         $validator = \Validator::make($post, [
             'resource_uri'  => 'required|string|exists:resources,uri,deleted_at,NULL|max:191',
             'version'       => 'sometimes|nullable|int',
@@ -1278,6 +1286,10 @@ class ResourceController extends ApiController
     public function searchResourceData(Request $request)
     {
         $post = $request->all();
+
+        if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+            Log::info('API resource request', array_merge(['method' => 'searchResourceData'], $post));
+        }
 
         $validator = \Validator::make($post, [
             'criteria'              => 'required|array',

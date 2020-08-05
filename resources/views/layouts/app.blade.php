@@ -164,7 +164,7 @@
                                     ><span class="fa fa-facebook"></span></a>
                                     <a
                                         target="_blank"
-                                        href="http://twitter.com/home?status={{ url('/') }}"
+                                        href="http://twitter.com/intent/tweet?text={{ url('/') }}"
                                         class="tw"
                                     ><span class="fa fa-twitter"></span></a>
                                     <a

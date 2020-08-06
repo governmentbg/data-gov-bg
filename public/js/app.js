@@ -60294,13 +60294,19 @@ $(function () {
                 } else {
                     $('#js-alert-danger').show();
 
-                    if (response.err_msg) {
+                    if (typeof response.err_msg != 'undefined') {
                         $('#js-alert-danger').html(response.err_msg);
+                    } else {
+                        $('#js-alert-danger').html($('#sendSignal').data('input-err'));
                     }
 
                     $('.alert-danger').fadeTo(3000, 500).slideUp(500, function () {
                         $('.alert-danger').slideUp(500);
                     });
+
+                    if (window.grecaptcha) {
+                        grecaptcha.reset();
+                    }
                 }
             },
             error: function error(jqXHR) {

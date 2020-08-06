@@ -22,7 +22,7 @@
                         </button>
                         <p>{{ __('custom.send_signal_error') }}</p>
                     </div>
-                    <form id="sendSignal" method="POST" action="{{ url($postUrl) }}" class="m-t-lg">
+                    <form id="sendSignal" data-input-err="{{ __('custom.send_signal_error') }}" method="POST" action="{{ url($postUrl) }}" class="m-t-lg">
                         {{ csrf_field() }}
                         <input type="hidden" name="resource_id" value="{{ $resource->id }}">
                         <div class="form-group row required">

@@ -486,6 +486,7 @@ class UserController extends Controller {
             'buttons'       => $buttons,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 
@@ -1100,6 +1101,7 @@ class UserController extends Controller {
             'groups'        => $groups,
             'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 
@@ -1197,6 +1199,7 @@ class UserController extends Controller {
             'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
             'fromOrg'       => $fromOrg,
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 
@@ -1283,6 +1286,7 @@ class UserController extends Controller {
             'buttons'       => $buttons,
             'fields'        => $this->getDatasetTransFields(),
             'group'         => $group,
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 
@@ -1432,6 +1436,7 @@ class UserController extends Controller {
             'buttons'       => $buttons,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 
@@ -5709,6 +5714,7 @@ class UserController extends Controller {
             'setGroups'     => $setGroups,
             'group'         => $group,
             'fields'        => $this->getDatasetTransFields(),
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 

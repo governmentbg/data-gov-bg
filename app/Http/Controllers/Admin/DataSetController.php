@@ -10,6 +10,7 @@ use App\Resource;
 use App\Organisation;
 use App\DataSetGroup;
 use App\CustomSetting;
+use App\UserToOrgRole;
 use App\ElasticDataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -276,6 +277,7 @@ class DataSetController extends AdminController
             'organisations' => $organisations,
             'groups'        => $groups,
             'fields'        => $this->getDatasetTransFields(),
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 
@@ -568,6 +570,7 @@ class DataSetController extends AdminController
             'hasResources'  => $hasResources,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
         ]);
     }
 

@@ -65,6 +65,7 @@ class DataSetController extends ApiController
         if ($validator->fails()) {
             $errors = $validator->errors()->messages();
         } else {
+            $orgRule = UserToOrgRole::where('user_id', Auth::user()->id)->count() ? 'required' : 'nullable';
             $validator = \Validator::make($post['data'], [
                 'locale'                => 'nullable|string|max:5',
                 'name'                  => 'required_with:locale|max:8000',
@@ -73,6 +74,7 @@ class DataSetController extends ApiController
                 'description'           => 'nullable|max:8000',
                 'tags.*.name'           => 'nullable|string|max:191',
                 'category_id'           => 'required|int|digits_between:1,10|exists:categories,id',
+                'org_id'                => $orgRule .'|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10|exists:terms_of_use,id',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
                 'source'                => 'nullable|string|max:191',
@@ -270,13 +272,14 @@ class DataSetController extends ApiController
         if ($validator->fails()) {
             $errors = $validator->errors()->messages();
         } else {
+            $orgRule = UserToOrgRole::where('user_id', Auth::user()->id)->count() ? 'required' : 'nullable';
             $validator = \Validator::make($post['data'], [
                 'locale'                => 'nullable|string|max:5',
                 'name'                  => 'required_with:locale|max:8000',
                 'name.bg'               => 'required_without:locale|string|max:8000',
                 'description'           => 'nullable|max:8000',
                 'category_id'           => 'required|int|digits_between:1,10',
-                'org_id'                => 'nullable|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
+                'org_id'                => $orgRule .'|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
                 'uri'                   => 'nullable|string|unique:data_sets,uri',
                 'tags.*.name'           => 'nullable|string|max:191',
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10',

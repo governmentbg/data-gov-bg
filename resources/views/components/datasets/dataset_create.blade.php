@@ -113,7 +113,7 @@
             @endif
         </div>
 
-        <div class="form-group row">
+        <div class="form-group row {{ isset($orgRequired) && $orgRequired ? 'required' : '' }}">
             <label
                 for="organisation"
                 class="col-sm-3 col-xs-12 col-form-label"

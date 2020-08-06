@@ -277,7 +277,7 @@ class DataSetController extends AdminController
             'organisations' => $organisations,
             'groups'        => $groups,
             'fields'        => $this->getDatasetTransFields(),
-            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->whereNotNull('org_id')->count()
         ]);
     }
 
@@ -570,7 +570,7 @@ class DataSetController extends AdminController
             'hasResources'  => $hasResources,
             'setGroups'     => $setGroups,
             'fields'        => $this->getDatasetTransFields(),
-            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->count()
+            'orgRequired'   => (bool) UserToOrgRole::where('user_id', Auth::user()->id)->whereNotNull('org_id')->count()
         ]);
     }
 

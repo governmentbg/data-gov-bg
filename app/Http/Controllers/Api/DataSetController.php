@@ -65,7 +65,7 @@ class DataSetController extends ApiController
         if ($validator->fails()) {
             $errors = $validator->errors()->messages();
         } else {
-            $orgRule = UserToOrgRole::where('user_id', Auth::user()->id)->count() ? 'required' : 'nullable';
+            $orgRule = UserToOrgRole::where('user_id', Auth::user()->id)->whereNotNull('org_id')->count() ? 'required' : 'nullable';
             $validator = \Validator::make($post['data'], [
                 'locale'                => 'nullable|string|max:5',
                 'name'                  => 'required_with:locale|max:8000',
@@ -272,7 +272,7 @@ class DataSetController extends ApiController
         if ($validator->fails()) {
             $errors = $validator->errors()->messages();
         } else {
-            $orgRule = UserToOrgRole::where('user_id', Auth::user()->id)->count() ? 'required' : 'nullable';
+            $orgRule = UserToOrgRole::where('user_id', Auth::user()->id)->whereNotNull('org_id')->count() ? 'required' : 'nullable';
             $validator = \Validator::make($post['data'], [
                 'locale'                => 'nullable|string|max:5',
                 'name'                  => 'required_with:locale|max:8000',

@@ -60278,19 +60278,21 @@ function stickyFooter() {
 $(function () {
     $('#sendSignal').on('submit', function (e) {
         e.preventDefault();
+        $('button:submit').prop('disabled', true);
 
         $.ajax({
             url: $(this).attr('action'),
             type: 'POST',
             data: $('#sendSignal').serialize(),
             success: function success(data) {
+                $('button:submit').removeAttr('disabled');
                 var response = JSON.parse(data);
                 if (response.success) {
                     $('#js-alert-success').show();
                     $('.alert-success').fadeTo(3000, 500).slideUp(500, function () {
                         $('.alert-success').slideUp(500);
                     });
-                    $('button:submit').attr('disabled', 'disabled');
+                    $('button:submit').prop('disabled', true);
                 } else {
                     $('#js-alert-danger').show();
 
@@ -60310,6 +60312,7 @@ $(function () {
                 }
             },
             error: function error(jqXHR) {
+                $('button:submit').removeAttr('disabled');
                 $('#js-alert-danger').show();
                 $('.alert-danger').fadeTo(2000, 500).slideUp(500, function () {
                     $('.alert-danger').alert('close');

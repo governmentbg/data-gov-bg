@@ -57,6 +57,10 @@ class DataSetController extends ApiController
         $post = $request->all();
         $visibilityTypes = DataSet::getVisibility();
 
+        if (isset($post['data']['org_id'])) {
+            $post['org_id'] = $post['data']['org_id'];
+        }
+
         $validator = \Validator::make($post, [
             'org_id'    => 'nullable|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
             'data'      => 'required|array',

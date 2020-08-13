@@ -21,6 +21,13 @@ class Section extends Model implements TranslatableInterface
 
     const ACTIVE_FALSE = 0;
     const READ_ONLY_FALSE = 0;
+    const LOCATION_MAIN_MENU = 1;
+    const LOCATION_FOOTER = 2;
+
+    public static function getSectionLocations()
+    {
+        return [self::LOCATION_MAIN_MENU => __('custom.main_menu_section'), self::LOCATION_FOOTER => __('custom.footer_section')];
+    }
 
     public function page()
     {

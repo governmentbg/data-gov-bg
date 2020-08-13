@@ -83,6 +83,7 @@ class SectionController extends AdminController
         }
 
         $themes = $this->getColorThemes(true);
+        $locations = Section::getSectionLocations();
 
         if ($request->has('create')) {
             $rq = Request::create('/api/addSection', 'POST', [
@@ -93,6 +94,7 @@ class SectionController extends AdminController
                     'ordering'      => $request->offsetGet('ordering'),
                     'forum_link'    => $request->offsetGet('forum_link'),
                     'theme'         => $request->offsetGet('theme'),
+                    'location'      => $request->offsetGet('location'),
                 ]
             ]);
             $api = new ApiSection($rq);
@@ -115,6 +117,7 @@ class SectionController extends AdminController
                 'class'         => 'user',
                 'fields'        => self::getSectionTransFields(),
                 'themes'        => $themes,
+                'locations'     => $locations
             ]
         );
     }
@@ -153,9 +156,10 @@ class SectionController extends AdminController
                 return view(
                     'admin/sectionView',
                     [
-                        'class'    => 'user',
-                        'section'  => $this->getModelUsernames($section),
-                        'themes'   => $this->getColorThemes(true)
+                        'class'     => 'user',
+                        'section'   => $this->getModelUsernames($section),
+                        'themes'    => $this->getColorThemes(true),
+                        'locations' => Section::getSectionLocations()
                     ]
                 );
             }
@@ -180,6 +184,7 @@ class SectionController extends AdminController
             $fields = self::getSectionTransFields();
             $model = Section::find($id);
             $themes = $this->getColorThemes(true);
+            $locations = Section::getSectionLocations();
 
             if (!is_null($model)) {
                 $model = $this->getModelUsernames($model->loadTranslations());
@@ -195,6 +200,7 @@ class SectionController extends AdminController
                         'ordering'      => $request->offsetGet('ordering'),
                         'forum_link'    => $request->offsetGet('forum_link'),
                         'theme'         => $request->offsetGet('theme'),
+                        'location'      => $request->offsetGet('location'),
                     ]
                 ]);
 
@@ -212,7 +218,7 @@ class SectionController extends AdminController
                 }
             }
 
-            return view('admin/sectionEdit', compact('class', 'fields', 'model', 'themes'));
+            return view('admin/sectionEdit', compact('class', 'fields', 'model', 'themes', 'locations'));
         }
 
         return redirect()->back()->with('alert-danger', __('custom.access_denied_page'));

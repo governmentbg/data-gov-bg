@@ -710,3 +710,26 @@ $('.reg-usr-form').on('submit', () => {
 $("[name='remove_role']").on('click', function() {
     $("[name='org_id']").val($(this).data('org-id'));
 });
+
+$(document).ready(function() {
+    if ($('.js-footer-section').length) {
+        var maxWidth;
+        var maxHeight;
+
+        $('.js-footer-section').each(function(i, el) {
+            var width = $(el).outerWidth(true);
+            var height = $(el).outerHeight(true);
+
+            if (typeof maxWidth == 'undefined' || maxWidth < parseInt(width)) {
+                maxWidth = $(el).outerWidth(true);
+            }
+
+            if (typeof maxHeight == 'undefined' || maxHeight < parseInt(height)) {
+                maxHeight = $(el).outerHeight(true);
+            }
+        });
+
+        $('.js-footer-section').css('width', maxWidth);
+        $('.js-footer-section').css('height', maxHeight);
+    }
+});

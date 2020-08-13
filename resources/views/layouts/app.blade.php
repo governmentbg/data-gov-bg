@@ -230,25 +230,27 @@
                                 </li>
                                 @if (isset($activeSections))
                                     @foreach ($activeSections as $section)
-                                        <li
-                                            class="
-                                                {{
-                                                    isset(app('request')->input()['section'])
-                                                    && app('request')->input()['section'] == $section->id
-                                                        ? 'active'
-                                                        : ''
-                                                }}
-                                                {{ isset($section->class) ? $section->class : '' }}
-                                            "
-                                        >
-                                            <a
-                                                href="{{
-                                                    url(str_slug($section->name)) .
-                                                    '?'.
-                                                    http_build_query(['section' => $section->id])
-                                                }}"
-                                            >{{ $section->name }}</a>
-                                        </li>
+                                        @if ($section->location == App\Section::LOCATION_MAIN_MENU)
+                                            <li
+                                                class="
+                                                    {{
+                                                        isset(app('request')->input()['section'])
+                                                        && app('request')->input()['section'] == $section->id
+                                                            ? 'active'
+                                                            : ''
+                                                    }}
+                                                    {{ isset($section->class) ? $section->class : '' }}
+                                                "
+                                            >
+                                                <a
+                                                    href="{{
+                                                        url(str_slug($section->name)) .
+                                                        '?'.
+                                                        http_build_query(['section' => $section->id])
+                                                    }}"
+                                                >{{ $section->name }}</a>
+                                            </li>
+                                        @endif
                                     @endforeach
                                 @endif
                                 <li
@@ -334,7 +336,62 @@
             </div>
 
             <footer>
-                <div class="text-center col-xs-12 m-t-xl">
+                @if (!config('app.IS_TOOL'))
+                    <div class="col-xs-12 m-t-xl p-t-sm text-center footer-sections">
+                        <div class="row">
+                            <div class="container">
+                                @if (isset($activeSections))
+                                    @foreach ($activeSections as $section)
+                                        @if ($section->location == App\Section::LOCATION_FOOTER)
+                                            <div
+                                                class="
+                                                    {{
+                                                        isset(app('request')->input()['section'])
+                                                        && app('request')->input()['section'] == $section->id
+                                                            ? 's-active'
+                                                            : ''
+                                                    }}
+                                                    {{ isset($section->class) ? $section->class : '' }}
+                                                    js-footer-section
+                                                    footer-section
+                                                "
+                                            >
+                                                <a
+                                                    class="section-link"
+                                                    href="{{
+                                                        url(str_slug($section->name)) .
+                                                        '?'.
+                                                        http_build_query(['section' => $section->id])
+                                                    }}"
+                                                >{{ $section->name }}</a><br><br>
+                                                @if (isset($section->pages))
+                                                    @foreach ($section->pages as $page)
+                                                        <a
+                                                            class="
+                                                                {{
+                                                                    isset(app('request')->input()['item'])
+                                                                    && app('request')->input()['item'] == $page->id
+                                                                        ? 'p-active'
+                                                                        : ''
+                                                                }}
+                                                            "
+                                                            href="{{
+                                                                url(str_slug($section->name)) .
+                                                                '?'.
+                                                                http_build_query(['section' => $section->id, 'item' => $page->id])
+                                                            }}"
+                                                        >{{$page->title}}</a><br>
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                <div class="text-center col-xs-12 m-t-sm m-b-sm">
                     <div class="row">
                         <div class="container">
                             <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 text-left align-top m-t-md m-l-none img-wrapper">

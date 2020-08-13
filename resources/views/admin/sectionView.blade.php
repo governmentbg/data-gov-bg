@@ -49,6 +49,18 @@
                             </div>
                         </div>
                         <div class="form-group row m-b-lg m-t-md">
+                            <label for="location" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.location') }}:</label>
+                            <div class="col-sm-6 col-xs-12">
+                                <div>
+                                    {{
+                                        isset($locations[$section->location])
+                                            ? $locations[$section->location]
+                                            : $section->location
+                                    }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row m-b-lg m-t-md">
                             <label class="col-sm-6 col-xs-12 col-form-label">{{__('custom.ordering')}}:</label>
                             <div class="col-sm-6 col-xs-12">
                                 <div>{{ $section->ordering }}</div>

@@ -40,6 +40,42 @@
             border: 1px solid $primary;
         }
 
+        .footer-sections {
+            background-color: $primary;
+            color: white;
+            padding-top: 20px;
+            padding-bottom: 20px;
+
+            .footer-section {
+                width: auto;
+                float: left;
+                padding: 20px;
+            }
+
+            .section-link {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .s-active {
+                .section-link {
+                    text-decoration: underline;
+                }
+            }
+
+            .p-active {
+                text-decoration: underline;
+            }
+
+            a {
+                cursor: pointer;
+            }
+
+            a:hover {
+                color: white !important;
+            }
+        }
+
         .pagination {
             li {
                 &.active {

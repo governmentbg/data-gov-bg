@@ -45,6 +45,7 @@ class SectionController extends ApiController
             'ordering'      => 'nullable|integer|digits_between:1,3',
             'read_only'     => 'nullable|boolean',
             'theme'         => 'nullable|integer|digits_between:1,3',
+            'location'      => 'nullable|integer|digits_between:1,2',
             'forum_link'    => 'nullable|string|max:191',
         ]);
 
@@ -66,6 +67,10 @@ class SectionController extends ApiController
             $newSection->active = !empty($data['active']);
             $newSection->parent_id = isset($data['parent_id']) ? $data['parent_id'] : null;
             $newSection->forum_link = isset($data['forum_link']) ? $data['forum_link'] : null;
+
+            if (isset($data['location'])) {
+                $newSection->location = $data['location'];
+            }
 
             if (isset($data['ordering'])) {
                 $newSection->ordering = $data['ordering'];
@@ -144,6 +149,7 @@ class SectionController extends ApiController
                 'ordering'      => 'nullable|integer|digits_between:1,3',
                 'read_only'     => 'nullable|boolean',
                 'theme'         => 'nullable|integer|digits_between:1,3',
+                'location'      => 'nullable|integer|digits_between:1,2',
                 'forum_link'    => 'nullable|string|max:191',
             ]);
         }
@@ -192,6 +198,10 @@ class SectionController extends ApiController
 
                 if (!empty($data['theme'])) {
                     $section->theme = $data['theme'];
+                }
+
+                if (!empty($data['location'])) {
+                    $section->location = $data['location'];
                 }
 
                 if (!empty($data['forum_link'])) {
@@ -356,6 +366,7 @@ class SectionController extends ApiController
             'read_only',
             'theme',
             'forum_link',
+            'location',
             'created_at',
             'updated_at',
             'created_by',
@@ -396,6 +407,7 @@ class SectionController extends ApiController
                 'read_only'     => $section->read_only,
                 'forum_link'    => $section->forum_link,
                 'theme'         => $section->theme,
+                'location'      => $section->location,
                 'pages'         => $pages,
                 'created_at'    => isset($section->created_at) ? $section->created_at->toDateTimeString() : null,
                 'updated_at'    => isset($section->updated_at) ? $section->updated_at->toDateTimeString() : null,

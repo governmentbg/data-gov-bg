@@ -85,6 +85,26 @@
                                         <span class="error">{{ $errors->first('theme') }}</span>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label for="location" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.location') }}:</label>
+                                    <div class="col-sm-9">
+                                        <select
+                                            id="location"
+                                            name="location"
+                                            class="js-select form-control"
+                                            data-placeholder="{{ __('custom.select_location') }}"
+                                        >
+                                            <option></option>
+                                            @foreach ($locations as $id => $location)
+                                                <option
+                                                    value="{{ $id }}"
+                                                    {{ $id == $model->location ? 'selected' : '' }}
+                                                >{{ $location }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="error">{{ $errors->first('location') }}</span>
+                                    </div>
+                                </div>
                                 <div class="form-group row m-b-lg m-t-md">
                                     <label for="order" class="col-lg-3 col-form-label">{{ uctrans('custom.ordering') }}:</label>
                                     <div class="col-lg-2">

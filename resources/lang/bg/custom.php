@@ -912,4 +912,8 @@ return [
     'invalid_html' => 'Невалиден html',
     'recaptcha_confirm_err' => 'Моля, потвърдете, че не сте робот!',
     'recaptcha_wrong_resp' => 'Грешен отговор от CAPTCHA!',
+    'main_menu_section' => 'Главно меню',
+    'footer_section' => 'Футър',
+    'select_section_location' => 'Избери локация',
+    'location' => 'Локация',
 ];

@@ -192,7 +192,7 @@ class SectionController extends ApiController
 
                 if (!empty($data['parent_id'])) {
                     $section->parent_id = $data['parent_id'];
-                } elseif (is_null($data['parent_id'])) {
+                } elseif (isset($data['parent_id']) && is_null($data['parent_id'])) {
                     $section->parent_id = null;
                 }
 

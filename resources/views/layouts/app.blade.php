@@ -405,7 +405,7 @@
                     <div class="row">
                         <div class="container">
                             <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 text-left align-top m-t-md m-l-none img-wrapper">
-                                <div class="footer-img">
+                                <div class="col-xs-6 m-t-sm footer-img">
                                     <a href="https://europa.eu/european-union/index_bg" target="_blank">
                                         <img
                                             alt="Официална страница на Европейския съюз"
@@ -413,7 +413,7 @@
                                         >
                                     </a>
                                 </div>
-                                <div class="footer-img">
+                                <div class="col-xs-6 m-t-sm footer-img">
                                     <a class="m-l-r-md">
                                         <img
                                             alt="Добро управление"

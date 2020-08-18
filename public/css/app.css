@@ -14159,7 +14159,7 @@ body #app .navbar .navbar-header > div.nav-name p {
 body #app .navbar .navbar-header > div.nav-logos {
   display: inline-block;
   vertical-align: top;
-  margin-top: 7px;
+  margin-top: 15px;
   margin-bottom: 7px;
   text-align: center;
   padding-right: 10px;
@@ -14175,7 +14175,7 @@ body #app .navbar .navbar-header > div.nav-logos > a:last-child {
 }
 
 body #app .navbar .navbar-header > div.nav-logos > a:first-of-type img {
-  width: 100%;
+  width: 85px;
   max-height: 65px;
 }
 
@@ -14348,8 +14348,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.search-input input {
   height: 26px;
   padding-top: 2px;
   padding-bottom: 2px;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-left: 10px;
   font-size: 13px;
   border: 1px solid #333333;
   border-radius: 30px;
@@ -15378,29 +15377,9 @@ button:focus {
   }
 }
 
-.img-wrapper .footer-img {
-  width: 40%;
-  height: auto;
-  max-height: 10vh;
-  display: inline-block;
-  margin-top: 10px;
-}
-
-@media screen and (max-width: 991px) {
+@media screen and (max-width: 1199px) and (min-width: 991px) {
   .img-wrapper .footer-img {
-    width: 30%;
-  }
-}
-
-@media screen and (max-width: 767px) {
-  .img-wrapper .footer-img {
-    width: 40%;
-  }
-}
-
-@media screen and (max-width: 1199px) {
-  .img-wrapper .footer-img {
-    margin-top: 20px;
+    margin-top: 24px;
   }
 }
 

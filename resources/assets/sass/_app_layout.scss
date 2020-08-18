@@ -46,7 +46,7 @@ body {
                     &.nav-logos {
                         display: inline-block;
                         vertical-align: top;
-                        margin-top: 7px;
+                        margin-top: 15px;
                         margin-bottom: 7px;
                         text-align: center;
                         padding-right: 10px;
@@ -60,7 +60,7 @@ body {
                             }
 
                             &:first-of-type img {
-                                width: 100%;
+                                width: 85px;
                                 max-height: 65px;
                             }
 
@@ -227,8 +227,7 @@ body {
                                     height: 26px;
                                     padding-top: 2px;
                                     padding-bottom: 2px;
-                                    padding-left: 15px;
-                                    padding-right: 15px;
+                                    padding-left: 10px;
                                     font-size: 13px;
                                     border: 1px solid $black;
                                     border-radius: 30px;

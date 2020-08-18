@@ -916,4 +916,6 @@ return [
     'footer_section' => 'Footer',
     'select_section_location' => 'Избери локация',
     'location' => 'Локация',
+    'od_portal_name' => 'Open Data Portal',
+    'od_portal_desc' => 'Access to Bulgarian public data in open and machine-readable format',
 ];

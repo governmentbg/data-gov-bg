@@ -422,8 +422,8 @@
                                     </a>
                                 </div>
                             </div>
-                            <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
-                                <h6 class="text-justify m-t-xl">
+                            <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 footer-text">
+                                <h6 class="text-justify">
                                      {{__('custom.footer_text')}}
                                 </h6>
                             </div>

@@ -552,22 +552,8 @@ button:focus {
     }
 
     .footer-img {
-        @include mdMobile() {
-            width: 30%;
+        @media screen and (max-width: 1199px) and (min-width: 991px) {
+            margin-top: 24px;
         }
-
-        @include smMobile() {
-            width: 40%;
-        }
-
-        @include mobile() {
-            margin-top: 20px;
-        }
-
-        width: 40%;
-        height: auto;
-        max-height: 10vh;
-        display: inline-block;
-        margin-top: 10px;
     }
 }

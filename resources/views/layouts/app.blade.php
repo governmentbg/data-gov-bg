@@ -66,18 +66,13 @@
             <nav class="navbar navbar-default navbar-static-top js-head">
                 <div class="container">
                     <div class="navbar-header">
-                        <div class="nav-logos">
+                        <div class="nav-logos col-xs-3 col-sm-2 col-md-1 col-lg-1 pull-left">
                             <a
                                 href="{{ url('/') }}"
                             ><img alt="Лого на портала" src="{{ asset('img/opendata-logo-color.svg') }}"></a>
                         </div>
                         @if (!config('app.IS_TOOL'))
-                            <div class="access-terms-icons m-l-sm">
-                                <a href="{{ url('/help') }}">
-                                    <img class="help-section" title="{{ __('custom.help') }}" src="{{ asset('/img/help_section.svg') }}">
-                                </a>
-                            </div>
-                            <div class="hamburger-trigger hidden-lg hidden-md hidden-sm pull-right">
+                            <div class="hamburger-trigger hidden-lg hidden-md hidden-sm col-xs-5 pull-right text-right">
                                 @if (\Auth::check())
                                     <div class="mobile-icon {{ in_array(Request::segment(1), ['user', 'admin']) ? 'active-menu' : '' }}">
                                         <span>
@@ -104,7 +99,18 @@
                                 </button>
                             </div>
                         @endif
-                        <div class="nav-controls text-right {{ config('app.IS_TOOL') ? null : 'hidden-xs' }} js-show-on-load">
+                        <div class="nav-name col-xs-12 hidden-sm {{ \Auth::check() ? 'col-md-4 col-lg-5' : 'col-md-5 col-lg-7' }}">
+                            <b>{{ __('custom.od_portal_name') }}</b>
+                            <br>
+                            <p>{{ __('custom.od_portal_desc') }}</p>
+                        </div>
+                        <div class="
+                            nav-controls
+                            text-right
+                            {{ config('app.IS_TOOL') ? null : 'hidden-xs' }}
+                            js-show-on-load
+                            {{ \Auth::check() ? 'col-sm-7 col-md-7 col-lg-6' : 'col-sm-6 col-md-5 col-lg-4'}}
+                        ">
                             @if (!config('app.IS_TOOL'))
                                 @if (\Auth::check())
                                     <span class="login-link username">
@@ -191,7 +197,11 @@
                                     @endif
                                 </span>
                             @endif
-
+                        </div>
+                        <div class="col-sm-12 hidden-xs hidden-md hidden-lg nav-name">
+                            <b>{{ __('custom.od_portal_name') }}</b>
+                            <br>
+                            <p>{{ __('custom.od_portal_desc') }}</p>
                         </div>
                     </div>
                     <div class="collapse navbar-collapse" id="my-navbar">

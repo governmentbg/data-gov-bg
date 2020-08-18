@@ -14144,12 +14144,25 @@ body #app .navbar .navbar-header > div {
   padding-right: 0;
 }
 
+body #app .navbar .navbar-header > div.nav-name {
+  font-size: 18px;
+  display: table;
+  padding-top: 21px;
+  padding-left: 10px;
+}
+
+body #app .navbar .navbar-header > div.nav-name p {
+  font-size: 14px;
+  padding-top: 10px;
+}
+
 body #app .navbar .navbar-header > div.nav-logos {
   display: inline-block;
   vertical-align: top;
   margin-top: 7px;
   margin-bottom: 7px;
   text-align: center;
+  padding-right: 10px;
 }
 
 body #app .navbar .navbar-header > div.nav-logos > a {
@@ -14162,8 +14175,8 @@ body #app .navbar .navbar-header > div.nav-logos > a:last-child {
 }
 
 body #app .navbar .navbar-header > div.nav-logos > a:first-of-type img {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  max-height: 65px;
 }
 
 body #app .navbar .navbar-header > div.nav-logos > a:not(:first-of-type) img {
@@ -14213,7 +14226,7 @@ body #app .navbar .navbar-header > div.nav-controls > span {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons {
-  width: auto;
+  width: 100px !important;
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons a {
@@ -14257,11 +14270,6 @@ body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.tw spa
   padding-right: 5.5px;
 }
 
-body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.gp span {
-  padding-left: 3px;
-  padding-right: 3px;
-}
-
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.in span {
   padding-left: 6px;
   padding-right: 6px;
@@ -14269,7 +14277,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.social-icons a.in spa
 
 body #app .navbar .navbar-header > div.nav-controls > span.trans-link {
   width: 1px;
-  padding-right: 18px;
+  padding-right: 10px;
 }
 
 @media screen and (max-width: 991px) {
@@ -14288,8 +14296,8 @@ body #app .navbar .navbar-header > div.nav-controls > span.trans-link a:hover {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.login-link {
-  width: auto;
-  padding-right: 18px;
+  width: 65px;
+  padding-right: 10px;
 }
 
 @media screen and (max-width: 991px) {
@@ -14299,7 +14307,8 @@ body #app .navbar .navbar-header > div.nav-controls > span.login-link {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.login-link.username {
-  padding-right: 13px;
+  width: auto !important;
+  padding-right: 10px;
 }
 
 @media screen and (max-width: 991px) {
@@ -14318,7 +14327,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.login-link a:hover {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.search-input {
-  padding-right: 20px;
+  padding-right: 10px;
   width: 1px;
 }
 
@@ -14361,7 +14370,7 @@ body #app .navbar .navbar-header > div.nav-controls > span.search-input input:ho
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.user-icon {
-  padding-right: 13px;
+  width: 32px;
 }
 
 @media screen and (max-width: 991px) {
@@ -15339,6 +15348,7 @@ button:focus {
   width: 32px;
   display: inline-block;
   vertical-align: text-bottom;
+  margin-right: 20px;
 }
 
 .active-menu {

@@ -14348,7 +14348,8 @@ body #app .navbar .navbar-header > div.nav-controls > span.search-input {
 }
 
 body #app .navbar .navbar-header > div.nav-controls > span.search-input input {
-  min-width: 150px;
+  min-width: 140px;
+  max-width: 150px;
   height: 26px;
   padding-top: 2px;
   padding-bottom: 2px;

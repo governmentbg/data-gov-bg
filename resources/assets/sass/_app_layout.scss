@@ -113,6 +113,10 @@ body {
                             &.social-icons {
                                 width: 100px !important;
 
+                                &.rss-i {
+                                    width: 135px !important;
+                                }
+
                                 a {
                                     font-size: 14px;
                                     text-decoration: none;

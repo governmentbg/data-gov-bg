@@ -162,20 +162,20 @@
                             </span>
 
                             @if (!config('app.IS_TOOL'))
-                                <span class="social-icons">
+                                <span class="social-icons {{ isset($newsLink) || isset($datasetLink) || isset($link) ? 'rss-i' : '' }}">
                                     <a
                                         target="_blank"
-                                        href="http://www.facebook.com/sharer.php?u={{ url('/') }}"
+                                        href="http://www.facebook.com/sharer.php?u={{ url()->current() }}"
                                         class="fb"
                                     ><span class="fa fa-facebook"></span></a>
                                     <a
                                         target="_blank"
-                                        href="http://twitter.com/intent/tweet?text={{ url('/') }}"
+                                        href="http://twitter.com/intent/tweet?text={{ url()->current() }}"
                                         class="tw"
                                     ><span class="fa fa-twitter"></span></a>
                                     <a
                                         target="_blank"
-                                        href="https://www.linkedin.com/shareArticle?mini=true&url={{ url('/') }}" class="in"
+                                        href="https://www.linkedin.com/shareArticle?mini=true&url={{ url()->current() }}" class="in"
                                     ><span class="fa fa-linkedin"></span></a>
                                     @if (isset($newsLink))
                                         <a

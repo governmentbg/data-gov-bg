@@ -14229,6 +14229,10 @@ body #app .navbar .navbar-header > div.nav-controls > span.social-icons {
   width: 100px !important;
 }
 
+body #app .navbar .navbar-header > div.nav-controls > span.social-icons.rss-i {
+  width: 135px !important;
+}
+
 body #app .navbar .navbar-header > div.nav-controls > span.social-icons a {
   font-size: 14px;
   text-decoration: none;

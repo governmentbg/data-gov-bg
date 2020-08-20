@@ -13,6 +13,22 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.2] - 2020-08-20
+### Fixed
+- User rights issue
+
+### Added
+- COVID-19 resource visualizations
+- Dynamic addition of sections in the footer area
+- Name and information about the Portal in the header area
+- Send information to Graylog for resource data requests through the API
+- Merged pull request #28
+- reCAPTCHA v2 checkbox
+
+### Changed
+- Social media buttons functionality
+- Make "Organisation" mandatory field when publishing data
+
 ## [1.1.22] - 2020-03-12
 ### Fixed
 - Removal of user rights

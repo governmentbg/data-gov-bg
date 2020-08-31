@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.2.1] - 2020-08-31
+### Added
+- Report Elasticsearch red indices command
+
 ## [1.2] - 2020-08-20
 ### Fixed
 - User rights issue

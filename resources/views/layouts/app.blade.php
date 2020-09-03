@@ -298,8 +298,9 @@
                                     <a
                                         href="{{ route('lang.switch', $altLang) }}"
                                     >{{ strtoupper($altLang) }}</a>
-                                    <a href="#" class="fb"><i class="fa fa-facebook"></i></a>
-                                    <a href="#" class="tw"><i class="fa fa-twitter"></i></a>
+                                    <a href="http://www.facebook.com/sharer.php?u={{ url()->current() }}" class="fb"><i class="fa fa-facebook"></i></a>
+                                    <a href="http://twitter.com/intent/tweet?text={{ url()->current() }}" class="tw"><i class="fa fa-twitter"></i></a>
+                                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ url()->current() }}" class="in"><i class="fa fa-linkedin"></i></a>
                                 </li>
                             @endif
                         </ul>

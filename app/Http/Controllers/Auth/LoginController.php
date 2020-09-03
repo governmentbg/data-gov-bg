@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\RightController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
@@ -71,6 +72,21 @@ class LoginController extends Controller
             });
 
             if (!$validator->fails()) {
+                $recaptchaResp = $request->get('g-recaptcha-response');
+
+                if (empty($recaptchaResp)) {
+                    Input::flashOnly('username');
+                    return back()->with('alert-danger', __('custom.recaptcha_confirm_err'));
+                } else {
+                    $recaptcha = new \ReCaptcha\ReCaptcha(config('app.CAPTCHA_SECRET'));
+                    $resp = $recaptcha->verify($recaptchaResp);
+
+                    if (!$resp->isSuccess()) {
+                        Input::flashOnly('username');
+                        return back()->with('alert-danger', __('custom.recaptcha_wrong_resp'));
+                    }
+                }
+
                 $request->merge(['username' => $loginData['username']]);
                 $credentials = $request->only('username', 'password');
                 $rememberMe = isset($loginData['remember_me']) ? $loginData['remember_me'] : false;

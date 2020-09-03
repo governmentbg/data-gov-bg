@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use App\Http\Controllers\Api\DataRequestController as ApiDataRequest;
+use Illuminate\Support\Facades\Input;
 
 class RequestController extends Controller {
     /**
@@ -19,6 +20,21 @@ class RequestController extends Controller {
     public function sendDataRequest(Request $request)
     {
         if ($request->has('save')) {
+            $recaptchaResp = $request->get('g-recaptcha-response');
+
+            if (empty($recaptchaResp)) {
+                Input::flash();
+                return back()->with('alert-danger', __('custom.recaptcha_confirm_err'));
+            } else {
+                $recaptcha = new \ReCaptcha\ReCaptcha(config('app.CAPTCHA_SECRET'));
+                $resp = $recaptcha->verify($recaptchaResp);
+
+                if (!$resp->isSuccess()) {
+                    Input::flash();
+                    return back()->with('alert-danger', __('custom.recaptcha_wrong_resp'));
+                }
+            }
+
             $requestData['description'] = $request['description'];
             $requestData['published_url'] = isset($request['published_url']) ? $request['published_url'] : null;
             $requestData['contact_name'] = isset($request['contact_name']) ? $request['contact_name'] : null;

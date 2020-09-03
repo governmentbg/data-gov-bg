@@ -1644,6 +1644,8 @@ class UserController extends Controller {
      */
     public function registration(Request $request)
     {
+        return redirect('/');
+
         $class = 'user';
         $invMail = $request->offsetGet('mail');
 

@@ -20,7 +20,7 @@
             <div class="form-group row">
                 <label for="username" class="col-xs-12 col-form-label">{{ __('custom.user_name') }}:</label>
                 <div class="col-xs-12">
-                    <input type="text" class="input-border-r-12 form-control" name="username">
+                    <input type="text" class="input-border-r-12 form-control" name="username" value="{{ old('username') }}">
                     @if (!empty($error['username']))
                         <span class="error">{{ $error['username'][0] }}</span>
                     @endif
@@ -44,6 +44,16 @@
                 </div>
             </div>
             <div class="form-group row">
+                <label class="col-sm-3 col-xs-12 col-form-label"></label>
+                <div class="col-sm-9">
+                    <div
+                        class="g-recaptcha pull-right"
+                        name="g-recaptcha-response"
+                        data-sitekey="{{ config('app.CAPTCHA_PUB') }}"
+                    ></div>
+                </div>
+            </div>
+            <div class="form-group row">
                 <div class="col-xs-12">
                     <button
                         type="submit"
@@ -61,11 +71,6 @@
                     href="{{ url('/password/forgotten') }}"
                     class="col-xs-12 btn btn-primary"
                 >{{ uctrans('custom.forgotten_password') }}</a>
-            </div>
-        </div>
-        <div class="form-group row text-center">
-            <div class="col-xs-12">
-                <a href="{{ url('/registration') }}"><h3>{{ uctrans('custom.new_profile') }}</h3></a>
             </div>
         </div>
     </div>

@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
             if ($query->time/1000 > 2) {
                 \Log::error(' Time: '. $query->time/1000 .' Query: '. $query->sql);
             }
+        });
+
+        Validator::extend('phone_number', function($attribute, $value, $parameters) {
+            return strlen($value) >= 3 && strlen($value) <= 15 && ctype_digit($value);
         });
     }
 

@@ -368,6 +368,7 @@ class UserController extends ApiController
             'approved'          => 'nullable|bool',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
+            'phone'             => 'nullable|phone_number',
             'role_id'           => 'nullable',
             'org_id'            => 'nullable',
         ]);
@@ -453,6 +454,9 @@ class UserController extends ApiController
                 $user->email = $request->data['email'];
                 $user->firstname = $request->data['firstname'];
                 $user->lastname = $request->data['lastname'];
+                $user->phone = !empty($request->data['phone'])
+                    ? $request->data['phone']
+                    : null;
                 $user->add_info = !empty($request->data['add_info'])
                     ? $request->data['add_info']
                     : null;
@@ -588,6 +592,7 @@ class UserController extends ApiController
 
         if (!$validator->fails()) {
             $validator = \Validator::make($post['data'], [
+                'phone'             => 'nullable|phone_number',
                 'firstname'         => 'nullable|string|max:100',
                 'lastname'          => 'nullable|string|max:100',
                 'username'          => 'nullable|string|unique:users,username,'. $post['id'] .',id,deleted_at,NULL|max:100',
@@ -657,6 +662,12 @@ class UserController extends ApiController
 
         if (!empty($data['add_info'])) {
             $newUserData['add_info'] = $data['add_info'];
+        }
+
+        if (!empty($data['phone'])) {
+            $newUserData['phone'] = $data['phone'];
+        } else {
+            $newUserData['phone'] = null;
         }
 
         if (!empty($data['username'])) {
@@ -1138,6 +1149,7 @@ class UserController extends ApiController
             'email'             => 'required|email|max:191',
             'password'          => 'required|string|min:6',
             'password_confirm'  => 'required|string|same:password',
+            'phone'             => 'nullable|phone_number',
             'role_id'           => 'nullable',
             'org_id'            => 'nullable',
         ]);
@@ -1158,6 +1170,9 @@ class UserController extends ApiController
                 $user->lastname = $request->data['lastname'];
                 $user->add_info = !empty($request->data['add_info'])
                     ? $request->data['add_info']
+                    : null;
+                $user->phone = !empty($request->data['phone'])
+                    ? $request->data['phone']
                     : null;
                 $user->is_admin = 0;
                 $user->active = 0;

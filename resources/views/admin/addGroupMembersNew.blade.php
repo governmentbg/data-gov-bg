@@ -92,6 +92,18 @@
                             </div>
                         </div>
                         <div class="form-group row">
+                            <label class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.phone') }}:</label>
+                            <div class="col-sm-9">
+                                <input
+                                    type="number"
+                                    class="input-border-r-12 form-control"
+                                    name="phone"
+                                    value="{{ old('phone') }}"
+                                >
+                                <span class="error">{{ $errors->first('phone') }}</span>
+                            </div>
+                        </div>
+                        <div class="form-group row">
                             <label for="description" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.additional_info') }}:</label>
                             <div class="col-sm-9">
                                 <textarea

@@ -422,6 +422,7 @@ class GroupController extends AdminController
                         'email'             => $request->offsetGet('email'),
                         'password'          => $request->offsetGet('password'),
                         'password_confirm'  => $request->offsetGet('password_confirm'),
+                        'phone'             => $request->offsetGet('phone'),
                         'role_id'           => $request->offsetGet('role_id'),
                         'org_id'            => $group->id,
                         'invite'            => true,

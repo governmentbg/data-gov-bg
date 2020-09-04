@@ -255,6 +255,7 @@ class UserController extends AdminController {
                         'is_admin'      => $request->offsetGet('is_admin') ? $request->offsetGet('is_admin') : false,
                         'approved'      => $request->offsetGet('invite') ? $request->offsetGet('invite') : false,
                         'active'        => $request->offsetGet('active') ? $request->offsetGet('active') : false,
+                        'phone'         => $request->offsetGet('phone') ? $request->offsetGet('phone') : null,
                         'add_info'      => $request->offsetGet('add_info'),
                         'role_id'       => $rolesPost,
                         'org_id'        => $request->offsetGet('org_id'),
@@ -320,8 +321,8 @@ class UserController extends AdminController {
                     return back();
                 } else {
                     $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
-
                     $error = $result->errors;
+                    return redirect()->back()->withInput()->withErrors($error);
                 }
             }
 

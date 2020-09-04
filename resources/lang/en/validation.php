@@ -14,6 +14,7 @@ return [
     */
 
     'accepted'             => 'The :attribute must be accepted.',
+    'phone_number'         => 'The :attribute may only contain digits, minimum 3 and maximum 15.',
     'active_url'           => 'The :attribute is not a valid URL.',
     'after'                => 'The :attribute must be a date after :date.',
     'after_or_equal'       => 'The :attribute must be a date after or equal to :date.',
@@ -250,7 +251,8 @@ return [
         'img_url' => 'url to file',
         'comment' => 'comment',
         'mime_type' => 'mime type',
-        'color' => 'color'
+        'color' => 'color',
+        'phone' => 'contact phone',
     ],
 
 ];

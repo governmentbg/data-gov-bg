@@ -1492,6 +1492,7 @@ class UserController extends Controller {
                         'lastname'      => $request->offsetGet('lastname'),
                         'username'      => $request->offsetGet('username'),
                         'email'         => $request->offsetGet('email'),
+                        'phone'         => $request->offsetGet('phone'),
                         'add_info'      => $request->offsetGet('add_info'),
                         'user_settings' => [
                             'newsletter_digest' => $request->offsetGet('newsletter'),
@@ -1597,8 +1598,8 @@ class UserController extends Controller {
                     return back();
                 } else {
                     $request->session()->flash('alert-danger', __('custom.changes_success_fail'));
-
                     $error = $result->errors;
+                    return redirect()->back()->withInput()->withErrors($error);
                 }
             }
 

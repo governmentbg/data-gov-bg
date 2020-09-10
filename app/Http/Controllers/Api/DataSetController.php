@@ -453,11 +453,14 @@ class DataSetController extends ApiController
                         ? $post['data']['forum_link']
                         : null;
 
-                    $isAdmin = Auth::user()->is_admin;
-                    $dataset->trusted = $isAdmin && !empty($post['data']['trusted']) ? 1 : 0;
-
                     if (!empty($post['data']['status'])) {
                         $dataset->status = $post['data']['status'];
+                    }
+
+                    $isAdmin = Auth::user()->is_admin;
+
+                    if ($isAdmin && array_key_exists('trusted', $post['data'])) {
+                        $dataset->trusted = $post['data']['trusted'];
                     }
 
                     if (!$isAdmin && !$dataset->trusted) {

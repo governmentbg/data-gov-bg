@@ -32,6 +32,7 @@
                     class="input-border-r-12 form-control"
                     value="{{ empty(old('uri')) ? $dataSet->uri : old('uri') }}"
                     placeholder="{{ __('custom.unique_identificator') }}"
+                    readonly
                 >
                 <span class="error">{{ $errors->first('uri') }}</span>
             </div>
@@ -318,6 +319,24 @@
             </div>
         @endif
 
+        <div class="form-group row">
+            <label for="trusted" class="col-lg-3 col-md-5 col-xs-8 col-form-label">{{ uctrans('custom.trusted') }}:</label>
+            <div class="col-lg-9 col-md-7 col-xs-4">
+                @if (Auth::user()->is_admin)
+                    <div class="js-check">
+                        <input
+                            type="checkbox"
+                            name="trusted"
+                            value="1"
+                            {{ !empty($dataSet->trusted) ? 'checked' : '' }}
+                        >
+                    </div>
+                @else
+                    {{ !empty($dataSet->trusted) ? uctrans('custom.yes') : uctrans('custom.no') }}
+                @endif
+            </div>
+        </div>
+
         @foreach ($fields as $field)
             @if ($field['view'] == 'translation_custom')
                 @include(
@@ -339,7 +358,7 @@
                             href="{{ url('/'. $root .'/dataset/resource/create/'. $dataSet->uri) }}"
                         @endif
                 >{{ uctrans('custom.add_resource') }}</a>
-                @if ($hasResources)
+                @if ($hasResources && Auth::user()->is_admin)
                     <button
                         type="submit"
                         name="publish"

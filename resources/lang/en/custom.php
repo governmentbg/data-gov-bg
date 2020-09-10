@@ -919,4 +919,5 @@ return [
     'od_portal_name' => 'Open Data Portal',
     'od_portal_desc' => 'Access to Bulgarian public data in open and machine-readable format',
     'phone' => 'Contact phone',
+    'trusted' => 'post without approval',
 ];

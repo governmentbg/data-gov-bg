@@ -172,6 +172,11 @@ class ResourceController extends ApiController
                             : null,
                     ];
 
+                    if (!Auth::user()->is_admin && !$dataset->trusted && $dataset->status != DataSet::STATUS_DRAFT) {
+                        $dataset->status = DataSet::STATUS_DRAFT;
+                        $dataset->save();
+                    }
+
                     if (
                         isset($post['data']['migrated_data'])
                         && Auth::user()->username == 'migrate_data'
@@ -305,6 +310,11 @@ class ResourceController extends ApiController
                     }
 
                     $dataset->version = intval($dataset->version) + 1;
+
+                    if (!Auth::user()->is_admin && !$dataset->trusted && $dataset->status != DataSet::STATUS_DRAFT) {
+                        $dataset->status = DataSet::STATUS_DRAFT;
+                    }
+
                     $dataset->save();
 
                     $elasticDataSet = ElasticDataSet::create([
@@ -490,7 +500,7 @@ class ResourceController extends ApiController
             }
 
             try {
-                $result = DB::transaction(function () use ($resource, $requestTypes, $post) {
+                $result = DB::transaction(function () use ($resource, $requestTypes, $post, $dataset) {
                     if (isset($post['data']['type'])) {
                         $resource->resource_type = $post['data']['type'];
                     }
@@ -558,6 +568,11 @@ class ResourceController extends ApiController
                     }
 
                     $resource->save();
+
+                    if (!Auth::user()->is_admin && !$dataset->trusted && $dataset->status != DataSet::STATUS_DRAFT) {
+                        $dataset->status = DataSet::STATUS_DRAFT;
+                        $dataset->save();
+                    }
 
                     if (!empty($post['data']['custom_fields'])) {
                         foreach ($post['data']['custom_fields'] as $fieldSet) {
@@ -700,6 +715,10 @@ class ResourceController extends ApiController
                             $dataset->version = $versionParts[0] .'.'. strval(intval($versionParts[1]) + 1);
                         } else {
                             $dataset->version = $versionParts[0] .'.1';
+                        }
+
+                        if (!Auth::user()->is_admin && !$dataset->trusted && $dataset->status != DataSet::STATUS_DRAFT) {
+                            $dataset->status = DataSet::STATUS_DRAFT;
                         }
 
                         $dataset->save();

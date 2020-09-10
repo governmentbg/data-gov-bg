@@ -253,6 +253,7 @@ return [
         'mime_type' => 'mime type',
         'color' => 'color',
         'phone' => 'contact phone',
+        'trusted' => 'post without approval',
     ],
 
 ];

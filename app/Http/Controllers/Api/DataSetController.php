@@ -74,7 +74,6 @@ class DataSetController extends ApiController
                 'locale'                => 'nullable|string|max:5',
                 'name'                  => 'required_with:locale|max:8000',
                 'name.bg'               => 'required_without:locale|string|max:8000',
-                'uri'                   => 'nullable|string|max:191|unique:data_sets,uri',
                 'description'           => 'nullable|max:8000',
                 'tags.*.name'           => 'nullable|string|max:191',
                 'category_id'           => 'required|int|digits_between:1,10|exists:categories,id',
@@ -88,6 +87,7 @@ class DataSetController extends ApiController
                 'support_email'         => 'nullable|email|max:191',
                 'sla'                   => 'nullable|max:8000',
                 'forum_link'            => 'nullable|string|max:191',
+                'trusted'               => 'nullable|digits_between:0,1',
                 'custom_fields.*.label' => 'nullable|max:191',
                 'custom_fields.*.value' => 'nullable|max:8000',
             ]);
@@ -125,7 +125,7 @@ class DataSetController extends ApiController
             $locale = isset($data['locale']) ? $data['locale'] : null;
 
             $dbData = [
-                'uri'               => empty($data['uri']) ? Uuid::generate(4)->string : $data['uri'],
+                'uri'               => Uuid::generate(4)->string,
                 'name'              => $this->trans($locale, $data['name']),
                 'descript'          => empty($data['description']) ? null : $this->trans($locale, $data['description']),
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
@@ -141,6 +141,7 @@ class DataSetController extends ApiController
                 'support_name'      => empty($data['support_name']) ? null : $data['support_name'],
                 'support_email'     => empty($data['support_email']) ? null : $data['support_email'],
                 'forum_link'        => empty($data['forum_link']) ? null : $data['forum_link'],
+                'trusted'           => Auth::user()->is_admin && !empty($data['trusted']) ? 1 : 0,
             ];
 
             if (
@@ -284,7 +285,6 @@ class DataSetController extends ApiController
                 'description'           => 'nullable|max:8000',
                 'category_id'           => 'required|int|digits_between:1,10',
                 'org_id'                => $orgRule .'|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
-                'uri'                   => 'nullable|string|unique:data_sets,uri',
                 'tags.*.name'           => 'nullable|string|max:191',
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
@@ -296,6 +296,7 @@ class DataSetController extends ApiController
                 'sla'                   => 'nullable|max:8000',
                 'forum_link'            => 'nullable|string|max:191',
                 'status'                => 'nullable|int|in:'. implode(',', array_flip($statusTypes)),
+                'trusted'               => 'nullable|digits_between:0,1',
                 'custom_fields.*.label' => 'nullable|max:191',
                 'custom_fields.*.value' => 'nullable|max:8000',
             ]);
@@ -420,10 +421,6 @@ class DataSetController extends ApiController
                         $dataset->org_id = $post['data']['org_id'];
                     }
 
-                    if (!empty($post['data']['uri'])) {
-                        $dataset->uri = $post['data']['uri'];
-                    }
-
                     if (!empty($post['data']['terms_of_use_id'])) {
                         $dataset->terms_of_use_id = $post['data']['terms_of_use_id'];
                     }
@@ -456,8 +453,15 @@ class DataSetController extends ApiController
                         ? $post['data']['forum_link']
                         : null;
 
+                    $isAdmin = Auth::user()->is_admin;
+                    $dataset->trusted = $isAdmin && !empty($post['data']['trusted']) ? 1 : 0;
+
                     if (!empty($post['data']['status'])) {
                         $dataset->status = $post['data']['status'];
+                    }
+
+                    if (!$isAdmin && !$dataset->trusted) {
+                        $dataset->status = DataSet::STATUS_DRAFT;
                     }
 
                     $dataset->save();

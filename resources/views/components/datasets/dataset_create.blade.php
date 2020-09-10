@@ -34,6 +34,7 @@
                     class="input-border-r-12 form-control"
                     value="{{ old('uri') }}"
                     placeholder="{{ __('custom.unique_identificator') }}"
+                    readonly
                 >
                 <span class="error">{{ $errors->first('uri') }}</span>
             </div>
@@ -314,6 +315,24 @@
                 </div>
             </div>
         @endif
+
+        <div class="form-group row">
+            <label for="trusted" class="col-lg-3 col-md-5 col-xs-8 col-form-label">{{ uctrans('custom.trusted') }}:</label>
+            <div class="col-lg-9 col-md-7 col-xs-4">
+                @if (Auth::user()->is_admin)
+                    <div class="js-check">
+                        <input
+                            type="checkbox"
+                            name="trusted"
+                            value="1"
+                            {{ !empty(old('trusted')) ? 'checked' : '' }}
+                        >
+                    </div>
+                @else
+                    {{ uctrans('custom.no') }}
+                @endif
+            </div>
+        </div>
 
         @foreach ($fields as $field)
             @if ($field['view'] == 'translation_custom')

@@ -920,4 +920,5 @@ return [
     'od_portal_desc' => 'Access to Bulgarian public data in open and machine-readable format',
     'phone' => 'Contact phone',
     'trusted' => 'post without approval',
+    'resource_pagination_info' => 'Showing %s to %s of %s entries'
 ];

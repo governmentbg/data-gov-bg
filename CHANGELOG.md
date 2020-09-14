@@ -13,6 +13,20 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.2.2] - 2020-09-14
+### Added
+- Contact phone to users
+- reCaptcha to data requests and log in forms
+- Data set setting for publishing data without admin approval
+
+### Fixed
+- Social media buttons on mobile screen
+- Resource pagination info
+
+### Changed
+- Маке data set uri readonly field with auto generated value
+- Disable user registration functionality
+
 ## [1.2.1] - 2020-08-31
 ### Added
 - Report Elasticsearch red indices command

@@ -56,7 +56,6 @@ else
     # save sql
     printf "USE mysql;\n" >> $tmpfile
     printf "FLUSH PRIVILEGES;\n" >> $tmpfile
-    printf "DELETE FROM mysql.user;\n" >> $tmpfile
     printf "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD' WITH GRANT OPTION;\n" >> $tmpfile
 
     # Create new database
@@ -65,6 +64,7 @@ else
 
     if [ "$MYSQL_USER" != "" ]; then
         echo "[i] Creating user: $MYSQL_USER with password $dbpass"
+        echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'localhost' IDENTIFIED BY '$dbpass';" >> $tmpfile
         echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$dbpass';" >> $tmpfile
     fi
 

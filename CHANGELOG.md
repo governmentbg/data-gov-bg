@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.2.3] - 2020-09-16
+### Fixed
+- Tool installation files
+
 ## [1.2.2] - 2020-09-14
 ### Added
 - Contact phone to users

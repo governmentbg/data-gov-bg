@@ -20,10 +20,10 @@ if [ -z $port ]; then
     goto portloop
 fi
 
-if ! [[ $port =~ $re ]]; then
+if ! echo "$port" | grep -Eq ^[0-9]+$; then
     echo "Port \`$port\` must be numeric";
     goto portloop
-fi
+fi;
 
 if [ $port -gt $portmax ] || [ $port -eq 0 ]; then
     echo "Port \`$port\` must be in range from 1 to $portmax";

@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\DataSet;
+use App\Resource;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ReportRedIndexes extends Command
 {
@@ -11,13 +14,16 @@ class ReportRedIndexes extends Command
      *
      * @var string
      */
-    protected $signature = 'elastic:redIndexReport';
+    protected $signature = 'elastic:redIndexReport {--delete}';
+
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Report Elasticsearch red indices';
+    protected $failed = false;
+
     /**
      * Create a new command instance.
      *
@@ -39,6 +45,7 @@ class ReportRedIndexes extends Command
             die();
         }
 
+        $deleteOpt = $this->option('delete');
         $path = $this->ask('Enter full path to your csv file');
 
         if (strpos($path, '.csv') === false) {
@@ -64,9 +71,13 @@ class ReportRedIndexes extends Command
         $progressBar->start();
 
         $csvFile = fopen($path, 'w') or die('Unable to create new file :'. $path);
-        $failed = false;
+        $csvHead = $deleteOpt
+            ? ['id', 'uri', 'org_id', 'org_name', 'firstname', 'lastname', 'username', 'email', 'deleted_db', 'deleted_es']
+            : ['id', 'uri', 'org_id', 'org_name', 'firstname', 'lastname', 'username', 'email'] ;
 
-        collect($dSets)->map(function($set) use($progressBar, $csvFile) {
+        fputcsv($csvFile, $csvHead, ',', "'", "\\");
+
+        collect($dSets)->map(function($set) use($progressBar, $csvFile, $deleteOpt) {
             $this->output->write('<info> index: '. $set->id .'...</info>');
 
             $exists = \Elasticsearch::indices()->exists(['index' => $set->id]);
@@ -78,8 +89,32 @@ class ReportRedIndexes extends Command
                     if (isset($indexStat['_all']['primaries'])) {
                         if (isset($indexStat['_all']['primaries']['indexing'])) {
                             if ($indexStat['_all']['primaries']['indexing']['index_failed']) {
-                                $failed = true;
-                                fputcsv($csvFile, (array) $set, ',', '"', "\\");
+                                $this->failed = true;
+                                $deletedResources = false;
+                                $deletedDataSet = false;
+                                $csvRow = (array) $set;
+
+                                $deletedIndex = \Elasticsearch::indices()->delete(['index' => $set->id]);
+
+                                if (!empty($deletedIndex['acknowledged'])) {
+                                    DB::beginTransaction();
+
+                                    $deletedResources = Resource::where('data_set_id', $set->id)->delete();
+                                    $deletedDataSet = DataSet::where('id', $set->id)->delete();
+
+                                    if ($deletedResources && $deletedDataSet) {
+                                        DB::commit();
+                                    } else {
+                                        DB::rollBack();
+                                    }
+                                }
+
+                                if ($deleteOpt) {
+                                    $csvRow['deleted_db'] = $deletedResources && $deletedDataSet ? 'yes' : 'no';
+                                    $csvRow['deleted_es'] = !empty($deletedIndex['acknowledged']) ? 'yes' : 'no';
+                                }
+
+                                fputcsv($csvFile, $csvRow, ',', "'", "\\");
                             }
                         }
                     }
@@ -92,7 +127,7 @@ class ReportRedIndexes extends Command
         fclose($csvFile);
         $progressBar->finish();
 
-        if (!$failed) {
+        if (!$this->failed) {
             $this->info("\n");
             $this->info('Failed indices not found..');
         }

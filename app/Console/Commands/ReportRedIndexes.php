@@ -22,7 +22,7 @@ class ReportRedIndexes extends Command
      * @var string
      */
     protected $description = 'Report Elasticsearch red indices';
-    protected $failed = false;
+    protected $failed = 0;
 
     /**
      * Create a new command instance.
@@ -66,70 +66,78 @@ class ReportRedIndexes extends Command
             where ds.deleted_at is null and ur.role_id = (select id from roles where default_org_admin = 1 and for_org = 1) and t.locale = 'bg'
             order by ds.id asc";
 
-        $dSets = \DB::select(\DB::raw($query));
-        $progressBar = $this->output->createProgressBar(count($dSets));
-        $progressBar->start();
+        $dSets = [];
+        $dSetsResult = \DB::select(\DB::raw($query));
+
+        foreach ($dSetsResult as $dSet) {
+            if (!isset($dSets[$dSet->id])) {
+                $dSets[$dSet->id] = [];
+            }
+
+            $dSets[$dSet->id][] = $dSet;
+        }
 
         $csvFile = fopen($path, 'w') or die('Unable to create new file :'. $path);
         $csvHead = $deleteOpt
-            ? ['id', 'uri', 'org_id', 'org_name', 'firstname', 'lastname', 'username', 'email', 'deleted_db', 'deleted_es']
+            ? ['id', 'uri', 'org_id', 'org_name', 'firstname', 'lastname', 'username', 'email', 'deleted_dset_db', 'deleted_res_db', 'deleted_es']
             : ['id', 'uri', 'org_id', 'org_name', 'firstname', 'lastname', 'username', 'email'] ;
 
         fputcsv($csvFile, $csvHead, ',', "'", "\\");
 
-        collect($dSets)->map(function($set) use($progressBar, $csvFile, $deleteOpt) {
-            $this->output->write('<info> index: '. $set->id .'...</info>');
+        $indicesHealth = \Elasticsearch::cluster()->health(['level' => 'indices']);
+        $indicesHealth = !empty($indicesHealth['indices']) ? $indicesHealth['indices'] : [];
 
-            $exists = \Elasticsearch::indices()->exists(['index' => $set->id]);
+        $progressBar = $this->output->createProgressBar(count($indicesHealth));
+        $progressBar->start();
 
-            if ($exists) {
-                $indexStat = \Elasticsearch::indices()->stats(['index' => $set->id]);
+        if (!empty($indicesHealth)) {
+            collect($indicesHealth)->map(function($indexData, $index) use($progressBar, $csvFile, $deleteOpt, $dSets) {
+                $this->output->write('<info> index: '. $index .'...</info>');
 
-                if (isset($indexStat['_all'])) {
-                    if (isset($indexStat['_all']['primaries'])) {
-                        if (isset($indexStat['_all']['primaries']['indexing'])) {
-                            if ($indexStat['_all']['primaries']['indexing']['index_failed']) {
-                                $this->failed = true;
-                                $deletedResources = false;
-                                $deletedDataSet = false;
-                                $csvRow = (array) $set;
+                if ($indexData['status'] == 'red') {
+                    $this->failed = $this->failed + 1;
+                    $deletedResources = [];
+                    $deletedDataSet = [];
 
-                                $deletedIndex = \Elasticsearch::indices()->delete(['index' => $set->id]);
+                    if ($deleteOpt) {
+                        $deletedIndex = \Elasticsearch::indices()->delete(['index' => $index]);
 
-                                if (!empty($deletedIndex['acknowledged'])) {
-                                    DB::beginTransaction();
-
-                                    $deletedResources = Resource::where('data_set_id', $set->id)->delete();
-                                    $deletedDataSet = DataSet::where('id', $set->id)->delete();
-
-                                    if ($deletedResources && $deletedDataSet) {
-                                        DB::commit();
-                                    } else {
-                                        DB::rollBack();
-                                    }
-                                }
-
-                                if ($deleteOpt) {
-                                    $csvRow['deleted_db'] = $deletedResources && $deletedDataSet ? 'yes' : 'no';
-                                    $csvRow['deleted_es'] = !empty($deletedIndex['acknowledged']) ? 'yes' : 'no';
-                                }
-
-                                fputcsv($csvFile, $csvRow, ',', "'", "\\");
-                            }
+                        if (!empty($dSets[$index]) && !empty($deletedIndex['acknowledged'])) {
+                            $deletedResources[$index] = Resource::where('data_set_id', $index)->delete();
+                            $deletedDataSet[$index] = DataSet::where('id', $index)->delete();
                         }
                     }
-                }
-            }
 
-            $progressBar->advance();
-        });
+                    if (!empty($dSets[$index])) {
+                        foreach ($dSets[$index] as $row) {
+                            $csvRow = (array) $row;
+
+                            if ($deleteOpt) {
+                                $csvRow['deleted_dset_db'] = !empty($deletedDataSet[$index]) ? 'yes' : 'no';
+                                $csvRow['deleted_res_db'] = !empty($deletedResources[$index]) ? $deletedResources[$index] : 0;
+                                $csvRow['deleted_es'] = !empty($deletedIndex['acknowledged']) ? 'yes' : 'no';
+                            }
+
+                            fputcsv($csvFile, $csvRow, ',', "'", "\\");
+                        }
+                    } else {
+                        $csvRow = [$index, 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a'];
+                        fputcsv($csvFile, $csvRow, ',', "'", "\\");
+                    }
+                }
+
+                $progressBar->advance();
+            });
+        }
 
         fclose($csvFile);
         $progressBar->finish();
+        $this->info("\n");
 
         if (!$this->failed) {
-            $this->info("\n");
-            $this->info('Failed indices not found..');
+            $this->info('Red indices not found..');
+        } else {
+            $this->info($this->failed .' red indices found..');
         }
     }
 }

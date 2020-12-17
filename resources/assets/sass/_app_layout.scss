@@ -1,0 +1,677 @@
+$footerHeight: 50px;
+$footerMobileHeight: 130px;
+$headerUnderlineHeight: 30px;
+
+body {
+    cursor: default;
+    font-family: 'Roboto', sans-serif;
+    min-width: 318px;
+
+    #app {
+        min-height: 100%;
+
+        @include mdMobile() {
+            .container {
+                width: 100%;
+            }
+        }
+
+        .navbar {
+            margin-bottom: 10px;
+            z-index: 99;
+
+            .navbar-header {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+                font-size: 0;
+
+                > div {
+                    font-size: 0;
+                    padding-left: 0;
+                    padding-right: 0;
+
+                    &.nav-name {
+                        font-size: 18px;
+                        display: table;
+                        padding-top: 21px;
+                        padding-left: 10px;
+
+                        p {
+                            font-size: 14px;
+                            padding-top: 10px;
+                        }
+                    }
+
+                    &.nav-logos {
+                        display: inline-block;
+                        vertical-align: top;
+                        margin-top: 15px;
+                        margin-bottom: 7px;
+                        text-align: center;
+                        padding-right: 10px;
+
+                        > a {
+                            display: inline-block;
+                            margin-right: 10px;
+
+                            &:last-child {
+                                margin-right: 0;
+                            }
+
+                            &:first-of-type img {
+                                width: 85px;
+                                max-height: 65px;
+                            }
+
+                            &:not(:first-of-type) img {
+                                height: 25px;
+                                width: 73px;
+                            }
+                        }
+                    }
+
+                    &.access-terms-icons {
+                        display: inline-block;
+                        vertical-align: top;
+                        margin-top: 11px;
+
+                        > a {
+                            display: inline-block;
+                        }
+                    }
+
+                    .svg-icons {
+                        > svg {
+                            width: 45px;
+                            height: 23px;
+                            margin-top: 10px;
+                            margin-left: 10px;
+                            transition: 0.1s ease-in;
+
+                            &.puzzle {
+                                max-width: 23px;
+                            }
+
+                            &:hover {
+                                transition: 0.3s ease-out;
+                            }
+                        }
+                    }
+
+                    &.nav-controls {
+                        height: 65px;
+                        display: table;
+                        float: right;
+
+                        > span {
+                            padding-right: 3px;
+                            padding-left: 3px;
+                            display: table-cell;
+                            vertical-align: middle;
+
+                            &.social-icons {
+                                width: 100px !important;
+
+                                &.rss-i {
+                                    width: 135px !important;
+                                }
+
+                                a {
+                                    font-size: 14px;
+                                    text-decoration: none;
+                                    display: inline-flex;
+                                    padding: 2px;
+                                    color: $black;
+
+                                    &:not(:last-child) {
+                                        padding-right: 3px;
+                                    }
+
+                                    span {
+                                        display: inline-block;
+                                        border: 1px solid $black;
+                                        border-radius: 13px;
+                                        padding-top: 5px;
+                                        padding-bottom: 5px;
+                                        transition: 0.1s ease-in;
+
+                                        &:hover {
+                                            transition: 0.3s ease-out;
+                                            // background-color: grey;
+                                            color: white;
+                                            border-color: transparent;
+                                        }
+                                    }
+
+                                    &.fb {
+                                        span {
+                                            padding-left: 8px;
+                                            padding-right: 8px;
+                                        }
+
+                                    }
+
+                                    &.tw {
+                                        span {
+                                            padding-left: 5.5px;
+                                            padding-right: 5.5px;
+                                        }
+
+                                    }
+
+                                    &.in {
+                                        span {
+                                            padding-left: 6px;
+                                            padding-right: 6px;
+                                        }
+                                    }
+                                }
+                            }
+
+                            &.trans-link {
+                                width: 1px;
+                                padding-right: 10px;
+
+                                @include mdMobile() {
+                                    padding-right: 8px;
+                                }
+
+                                a {
+                                    font-size: 14px;
+                                    color: $black;
+
+                                    &:hover {
+                                        font-weight: 800;
+                                    }
+                                }
+                            }
+
+                            &.login-link {
+                                width: 56px;
+                                padding-right: 10px;
+
+                                @include mdMobile() {
+                                    padding-right: 8px;
+                                }
+
+                                &.username {
+                                    width: auto !important;
+                                    padding-right: 10px;
+
+                                    @include mdMobile() {
+                                        display: none;
+                                    }
+                                }
+
+                                a {
+                                    font-size: 14px;
+                                    color: $black;
+
+                                    &:hover {
+                                        font-weight: 800;
+                                    }
+                                }
+                            }
+
+                            &.search-input {
+                                padding-right: 10px;
+                                width: 1px;
+
+                                @include smMobile() {
+                                    width: auto;
+                                }
+
+                                @include mdMobile() {
+                                    padding-right: 10px;
+                                }
+
+                                input {
+                                    min-width: 140px;
+                                    max-width: 150px;
+                                    height: 26px;
+                                    padding-top: 2px;
+                                    padding-bottom: 2px;
+                                    padding-left: 10px;
+                                    font-size: 13px;
+                                    border: 1px solid $black;
+                                    border-radius: 30px;
+                                    display: inline-block;
+                                    vertical-align: top;
+
+                                    &:focus, &:hover {
+                                        border: 1px solid $black;
+                                    }
+
+                                    @include smMobile() {
+                                        width: 100%;
+                                        min-width: 75px;
+                                    }
+                                }
+                            }
+
+                            &.user-icon {
+                                width: 32px;
+
+                                @include mdMobile() {
+                                    padding-right: 8px;
+                                }
+
+                                &.active {
+                                    a {
+                                        background: $themeUser;
+
+                                        img {
+                                            border-radius: 13px;
+                                            &.admin {
+                                                border-radius: 4px;
+                                                margin: 2px;
+                                                padding: 1px;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                a {
+                                    border-radius: 5px;
+                                    display: inline-block;
+
+                                    img {
+                                        background: white;
+                                        width: 26px;
+                                        height: 23px;
+                                        margin: 3px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            .navbar-nav {
+                &.sections {
+                    justify-content: left !important;
+                }
+
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin: 0;
+                font-size: 0;
+                margin-top: 20px;
+
+                li {
+                    a {
+                        color: #000;
+                        background-color: transparent !important;
+                        font-size: 14px;
+                        padding-top: 5px;
+                        padding-left: 5px;
+                        padding-bottom: 5px;
+                        margin-top: 4px;
+                        margin-bottom: 8px;
+                    }
+
+                    &:before, &:after {
+                        content: '';
+                        display: block;
+                        width: 40px;
+                        margin: 0 auto;
+                        transition: 0.1s ease-in;
+                    }
+
+                    &:hover, &.active {
+                        a {
+                            margin-top: 0;
+                            margin-bottom: 0;
+                        }
+
+                        &:before, &:after {
+                            transition: 0.3s ease-out;
+                        }
+
+                        &:before {
+                            height: 4px;
+                        }
+
+                        &:after {
+                            height: 8px;
+                        }
+                    }
+
+                    &.index {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeIndex !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeIndex;
+                            }
+                        }
+                    }
+
+                    &.data {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeData !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeData;
+                            }
+                        }
+                    }
+
+                    &.data-attention {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeDataAttention !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeDataAttention;
+                            }
+                        }
+                    }
+
+                    &.organisation {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeOrganisation !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeOrganisation;
+                            }
+                        }
+                    }
+
+                    &.request {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeRequest !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeRequest;
+                            }
+                        }
+                    }
+
+                    &.visualisation {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeVisualisations !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeVisualisations;
+                            }
+                        }
+                    }
+
+                    &.news {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeNews !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeNews;
+                            }
+                        }
+                    }
+
+                    &.document {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeDocuments !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeDocuments;
+                            }
+                        }
+                    }
+
+                    &.help {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeHelp !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeHelp;
+                            }
+                        }
+                    }
+
+                    &.contact {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeContact !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeContact;
+                            }
+                        }
+                    }
+
+                    &.user {
+                        &:hover, &.active {
+                            @include smMobile() {
+                                a {
+                                    color: $themeUser !important;
+                                }
+                            }
+
+                            &:before, &:after {
+                                background: $themeUser;
+                            }
+                        }
+                    }
+
+                    @include smMobile() {
+                        display: inline !important;
+                        width: 100%;
+                        text-align: center;
+                    }
+                }
+            }
+
+            .underline {
+                height: $headerUnderlineHeight;
+            }
+        }
+
+        @include smMobile() {
+            .hamburger-trigger .navbar-toggle {
+                float: none;
+                border-color: transparent;
+                margin-right: -10px;
+                padding: 9px 10px;
+
+                > .icon-bar {
+                    background-color: #707070;
+                    width: 55px;
+                    padding: 4px;
+                    height: 8px;
+                    border-radius: 10px;
+                }
+            }
+
+            #my-navbar {
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.91);
+                position: absolute;
+
+                .nav.navbar-nav {
+                    width: 50%;
+                    margin: 0 auto;
+                    padding: 10px 0px 50px;
+
+                    >li {
+                        border-bottom: 1px solid white;
+                        text-align: left;
+
+                        > a {
+                            color: white;
+                            padding: 0;
+                            margin-bottom: 5px;
+                        }
+
+                        &:hover, &.active {
+                            a {
+                                font-weight: 800;
+                                margin-top: 4px;
+                                margin-bottom: 5px;
+                            }
+
+                            &:before, &:after {
+                                display: none;
+                            }
+                        }
+
+                        &.icons {
+                            margin-top: 10px;
+                            > a {
+                                width: 25%;
+                                display: inline-block;
+                                padding: 10px;
+                                text-align: center;
+                            }
+                        }
+
+                        &:last-of-type, &:nth-last-of-type(2), &:nth-last-of-type(3) {
+                            border-color: transparent;
+                        }
+                    }
+
+                    .rounded-input.input-long {
+                        margin-top: 15px;
+                        border: none;
+                        color: white;
+                        background-color: #555555;
+                    }
+
+                    @include xsMobile() {
+                        width: 90%;
+                    }
+                }
+
+                .close-btn {
+                    width: 70%;
+                    margin: 0 auto;
+                    padding-top: 10px;
+
+                    .js-close-navbar {
+                        cursor: pointer;
+                        width: 15px;
+                    }
+                }
+            }
+        }
+
+        .footer-text {
+            h6 {
+                margin-top: 35px;
+            }
+        }
+    }
+
+    .footer {
+        padding: 0 15px;
+        height: $footerHeight;
+        text-align: center;
+        width: 100%;
+
+        .image-links {
+            display: none;
+        }
+
+        .copiright {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        @include smMobile {
+            height: $footerMobileHeight;
+
+            .image-links {
+                display: block;
+                padding-right: 2px;
+
+                .svg-icons > svg {
+                    border: 1px solid white;
+                    width: 60px;
+                    height: 30px;
+                    margin: 20px 12px 0px;
+
+                    &.help-section {
+                        max-width: 30px;
+                        fill: none;
+
+                        .cls-2 {
+                          fill: none;
+                        }
+
+                        .cls-3 {
+                          fill: #fff;
+                        }
+                    }
+
+                    &:hover {
+                        .cls-3 {
+                            fill: black;
+                        }
+                    }
+
+                    &:hover {
+                        border: 1px solid #000;
+                    }
+                }
+            }
+
+            @include smMobile() {
+                .copiright {
+                    color: white;
+                    height: 80px;
+
+                    a {
+                        color: white;
+
+                        &:hover {
+                            color: black;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

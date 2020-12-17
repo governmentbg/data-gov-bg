@@ -1,0 +1,61 @@
+
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Raleway:300,400,600');
+
+// Variables
+@import 'variables';
+
+// Mixins
+@import 'mixins';
+
+// Bootstrap
+@import '~bootstrap-sass/assets/stylesheets/bootstrap';
+
+// Layout
+@import 'app_layout';
+
+// Base
+@import 'base';
+
+// Tags styles
+@import 'tags-input/bootstrap-tagsinput';
+
+// Common
+@import 'main';
+
+// Articles for data and organisations
+@import 'articles';
+
+// Home page
+@import 'home';
+
+// Data pages
+@import 'data';
+
+// User pages
+@import 'user';
+
+// Admin pages
+@import 'admin';
+
+// Organisation pages
+@import 'organisation';
+
+// Request page
+@import 'request';
+
+// Flag icons
+@import 'node_modules/flag-icon-css/sass/flag-icon.scss';
+
+// Data tables
+@import 'datatables';
+
+// Tool
+@import 'tool';
+
+// Help
+@import 'help';
+
+// Visualizations
+@import 'visualizations/main.scss';
+

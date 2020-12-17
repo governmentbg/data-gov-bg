@@ -1,0 +1,259 @@
+.help-section {
+    height: 28px;
+    margin-top: 8px;
+}
+
+.help {
+    .icon {
+        height: 50px;
+    }
+
+    .content {
+        margin: 0 90px;
+
+        @include mobile {
+            margin: 0px -10px;
+        }
+
+        @include smMobile {
+            margin: 0 auto;
+        }
+    }
+
+    .section-cont {
+        background-color: #5E66B1;
+        height: 410px;
+        width: 310px;
+        border-radius: 5px;
+        margin: 10px;
+        color: white;
+
+        .link-wrap {
+            height: 300px;
+        }
+
+        .nav {
+            a {
+                color: white;
+                &:hover {
+                    color:white;
+                    background: none;
+                }
+
+                &:focus {
+                    background: none;
+                }
+            }
+
+            .subsection-cont {
+                font-size: 13pt;
+            }
+        }
+    }
+
+    .result-cont {
+        width: 92%;
+        height: 600px;
+        background-color: #5E66B1;
+        border-radius: 5px;
+        color: white;
+        margin: 0 auto;
+        padding: 10px 30px;
+
+        a {
+            color: white;
+
+            &:hover {
+                color: white;
+                background: none;
+            }
+
+            &:focus {
+                background: none;
+            }
+
+            &:focus {
+                color: white;
+            }
+        }
+
+        .result-wrap {
+            height: 480px;
+        }
+
+        iframe {
+            max-width: 385px;
+            height: 220px;
+
+            @include smMobile {
+                width: 100%
+            }
+        }
+
+        .subsection {
+            font-size: 15pt;
+        }
+
+        .subsection {
+            font-size: 13pt;
+        }
+    }
+}
+
+.help-btn {
+    position: absolute;
+    padding-top: 4px;
+    right: 320px;
+
+    @include mobile {
+        right: 100px;
+    }
+
+    @include smMobile {
+        right: 10px;
+    }
+ }
+
+.help-icon-open {
+    height: 21px;
+    position: relative;
+    top: 3px;
+    padding-left: 5px;
+}
+
+.help-icon {
+    position: absolute;
+    padding-left: 5px;
+    height: 21px;
+    width: 26px;
+    cursor: pointer;
+
+    @include mobile {
+        right: 35px;
+    }
+
+    @include smMobile {
+        right: 10px;
+    }
+ }
+
+ .close-help {
+     position: relative;
+     float: right;
+     top: 4px;
+     padding-right: 5px;
+     height: 19px;
+ }
+
+.help-container {
+    background: black;
+    position: absolute;
+    color: white;
+    width: 275px;
+    top: 0px;
+    left: auto;
+    height: 765px;
+    overflow: hidden;
+
+    @include mobile {
+        right: -75px;
+    }
+
+    @include mdMobile {
+        right: -90px;
+    }
+
+    @include smMobile {
+        right: 0px;
+        width: 180px;
+    }
+
+    .nav {
+        a {
+            color: white;
+            &:hover {
+                color:white;
+                background: none;
+            }
+
+            &:focus {
+                background: none;
+            }
+        }
+
+        .subsection-cont {
+            font-size: 13pt;
+        }
+    }
+
+    .help-page {
+        height: 350px;
+    }
+
+    .help-content {
+        padding: 0 15px;
+        height: 90%;
+        width: 100%;
+        word-wrap: break-word;
+        font-size: 12pt;
+
+        > h3 {
+            margin-top: 10px;
+            font-size: 17pt;
+        }
+
+        > span {
+            top: -3px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 150px;
+        }
+
+        .help-edit {
+            margin-bottom: 20px;
+            padding-right: 15px;
+
+            a {
+                color: white !important;
+            }
+        }
+
+        .nano-content {
+            ul {
+                padding: 0px !important
+            }
+        }
+    }
+
+    .close {
+        color: white;
+        opacity: 1;
+        bottom: 6px;
+        position: relative;
+
+        span {
+            user-select: none;
+        }
+    }
+}
+
+.stick {
+    position: fixed;
+    top: 0px;
+    height: 100%;
+
+    @include mobile{
+        right: 25px;
+    }
+
+    @include mdMobile{
+        right: 10px;
+    }
+
+    @include smMobile{
+        right: 10px;
+    }
+}
+

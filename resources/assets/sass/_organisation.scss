@@ -1,0 +1,284 @@
+.theme-organisation {
+    .sidebar-submenu .order {
+        display: inline-block;
+        margin-left: -45px;
+        min-width: 270px;
+
+        > a {
+            display: inline-block;
+            font-size: 14px;
+            width: max-content;
+        }
+    }
+
+    a.active {
+      color: #76ad3f;
+    }
+
+    .view-profile {
+        color: #5e5e5e;
+        font-weight: 600;
+    }
+
+    .inline-block {
+        display: inline-block;
+    }
+
+    .new-data {
+        padding: 8px 28px;
+        margin-top: 25px;
+        width: 230px;
+    }
+
+    .logo-box {
+        height: 120px;
+    }
+
+    .list-orgs {
+        img {
+            max-height: 120px;
+            height: auto !important;
+        }
+
+        padding: 50px;
+
+        .ch-del-btns {
+            margin-top: 10px;
+            margin-bottom: 35px;
+            min-height: 36px;
+            div {
+                div {
+                    button {
+                        border-radius: 10px;
+                        padding: 7px;
+                        background-color: #76ad3f;
+                        color: white;
+                        border: none;
+                        min-width: 80px;
+                    }
+                }
+            }
+        }
+
+        .org-desc {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+             -webkit-box-orient: vertical;
+             -webkit-line-clamp: 6;
+            height: 130px;
+        }
+
+        .org-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+            max-height: 3rem;
+        }
+
+        .logo {
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .show-more {
+            margin-top: 10px;
+            padding-right: 7px;
+        }
+
+        .org-col {
+            margin: 10px;
+            height: 490px;
+            width: 330px;
+            border: 1px #888888;
+            box-shadow: 0px 0px 6px 0px #888888;
+
+            &:hover {
+                box-shadow: 0px 0px 18px 0px #108f9e;
+            }
+
+            @include mobile() {
+                width: 280px;
+            }
+
+            @include mdMobile() {
+              /*margin: 5px;*/
+              /*width: 300px;*/
+            }
+        }
+
+        @include mdMobile() {
+            padding: 50px;
+        }
+
+        @include xsMobile() {
+            padding: 50px 25px;
+        }
+
+        @include xssMobile() {
+            .col-md-4.col-sm-6.col-xs-10.col-sm-offset-0.col-xs-offset-1 {
+                margin-left: 0;
+            }
+        }
+    }
+
+    @extend %history-styles;
+
+    .chronology > .row {
+        .info-icon {
+            border: none !important;
+            position: relative;
+            min-height: 1px;
+            padding-left: 15px;
+            padding-right: 15px;
+            bottom: 10px;
+
+            img {
+                max-height: 70px !important;
+            }
+
+            &:after {
+                content: '';
+                display: block;
+                border: 5px solid #76AE41;
+                border-radius: 40px;
+                bottom: -15px;
+                position: absolute;
+                left: 45px;
+            }
+
+            @include smMobile() {
+                img {
+                    margin-top: 20px;
+                    max-width: 30px;
+                }
+                &:after {
+                    left: 30px;
+                }
+            }
+
+            @include xsMobile() {
+                padding: 10px 0;
+
+                img {
+                    margin-top: 0;
+                }
+
+                &:after {
+                    left: 59%;
+                }
+            }
+        }
+
+        &:last-of-type {
+            .info-icon:after {
+                display: none;
+            }
+        }
+
+        @include smMobile() {
+            .logo-img > img {
+                margin: 15px 10px;
+            }
+        }
+
+        @include xsMobile() {
+            .logo-img > img {
+                display: none;
+            }
+        }
+    }
+
+    .org-logo {
+        text-align: center !important;
+    }
+
+    .info-box {
+        a {
+            display: inline-block;
+            width: 100%;
+            margin-top: 15px;
+            position: relative;
+            height: 85px;
+            border-radius: 10px;
+
+            img {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                height: 100%;
+            }
+
+            &.reg-users {
+                background: #13ca9a;
+            }
+
+            &.reg-orgs {
+                background: #e8e129;
+            }
+
+            &.updates {
+                background: #76ad3f;
+            }
+
+            &.followers {
+                background: #77ad3e;
+            }
+
+            &.data-sets {
+                background: #c02e54;
+            }
+
+            p {
+                color: #fff;
+                margin: 0;
+
+                &:first-child {
+                    padding: 5px 17px 3px 17px;
+                    font-size: 22px;
+                    font-weight: bold;
+                }
+
+                &:nth-child(3) {
+                    padding: 6px 17px 0 17px;
+                    font-size: 16px;
+                    position: absolute;
+                    z-index: 1;
+                    width: 100%;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+
+            hr {
+                margin: 0 0 0 17px;
+                width: 100px;
+                text-align: left;
+            }
+        }
+    }
+
+    @include smMobile {
+        img.img-responsive {
+            width: 100%;
+        }
+    }
+
+    .org-nav-bar .filter-type {
+        border-radius: 5px;
+        border: 1px solid $themeOrganisation;
+    }
+}
+
+@include xsMobile {
+    .exclamation-sign img {
+        min-width: 30px;
+        height: 30px;
+    }
+    .col-lg-8.col-md-7.col-sm-12.col-xs-12.col-xs-offset-3.p-w-xl {
+        margin-left: 0px;
+    }
+}

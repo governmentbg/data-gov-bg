@@ -1,0 +1,176 @@
+@extends(
+    'layouts.app',
+    [
+        'script' => !empty($script) ? $script : null,
+        'jsPaths' => [
+            'js/visualizations/d3.v3.min.js',
+            'js/visualizations/crossfilter.min.js',
+            'js/visualizations/dc.min.js',
+            'js/visualizations/leaflet.js',
+            'js/visualizations/topojson.min.js',
+            'js/visualizations/queue.min.js',
+            'js/visualizations/charts.js',
+            'js/visualizations/d3.min.js',
+            'js/visualizations/d3.slider.js',
+            'js/visualizations/open-charts.js',
+            'js/visualizations/charts.js',
+        ],
+        'cssPaths' => [
+            'css/visualizations/leaflet.css',
+            'css/visualizations/d3.slider.css',
+            'css/visualizations/jquery.smartmenus.bootstrap.css',
+            'css/visualizations/dc.css',
+        ]
+    ]
+)
+
+@section('content')
+    <div class="container">
+        @include('partials.alerts-bar')
+        @include('partials.admin-nav-bar', ['view' => 'pages'])
+        <div class="row m-t-lg">
+            @if (!is_null($page))
+                <div class="col-md-2 col-sm-1"></div>
+                <div class="col-md-8 col-sm-10">
+                    <div class="frame add-terms">
+                        <div class="p-w-md text-center m-b-lg m-t-lg">
+                            <h2>{{ __('custom.page_preview') }}</h2>
+                        </div>
+                        <div class="body">
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.title') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->title }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.section') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ !is_null($section) ? $section : $page->section_id }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label for="active" class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.active') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ !empty($page->active) ? utrans('custom.yes') : utrans('custom.no') }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_head') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->head_title }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_keywords') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->meta_keywords }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.browser_desc') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->meta_description }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ utrans('custom.valid') }}:</label>
+                                <div class="col-sm-3 col-xs-12">
+                                    <div>{{ __('custom.from') .': '. $page->valid_from }}</div>
+                                </div>
+                                <div class="col-sm-3 col-xs-12">
+                                    <div>{{ __('custom.to') .': '. $page->valid_to }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-xs-12 col-form-label">{{ utrans('custom.content') }}:</label>
+                                <div class="col-xs-12">
+                                    <div class="page-cont">{!! $page->body !!}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->forum_link }}</div>
+                                </div>
+                            </div>
+
+                            <div class="text-center m-b-lg terms-hr">
+                                <hr>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_by') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->created_by }}</div>
+                                </div>
+                            </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.created_at') }}:</label>
+                                <div class="col-sm-6 col-xs-12">
+                                    <div>{{ $page->created_at }}</div>
+                                </div>
+                            </div>
+                            @if ($page->created_at != $page->updated_at)
+                                <div class="form-group row m-b-lg m-t-md">
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_by') }}:</label>
+                                    <div class="col-sm-6 col-xs-12">
+                                        <div>{{ $page->updated_by }}</div>
+                                    </div>
+                                </div>
+                                <div class="form-group row m-b-lg m-t-md">
+                                    <label class="col-sm-6 col-xs-12 col-form-label">{{ __('custom.updated_at') }}:</label>
+                                    <div class="col-sm-6 col-xs-12">
+                                        <div>{{ $page->updated_at }}</div>
+                                    </div>
+                                </div>
+                            @endif
+                            @if (\App\Role::isAdmin())
+                                <div class="text-right">
+                                    <div class="row">
+                                        <form
+                                            method="POST"
+                                            class="inline-block"
+                                            action="{{ url('admin/pages/edit/'. $page->id) }}"
+                                        >
+                                            {{ csrf_field() }}
+                                            <button class="btn btn-primary m-b-sm" type="submit">{{ uctrans('custom.edit') }}</button>
+                                            <input type="hidden" name="view" value="1">
+                                        </form>
+                                        <form
+                                            method="POST"
+                                            class="inline-block"
+                                        >
+                                            {{ csrf_field() }}
+                                        <button
+                                            name="back"
+                                            class="btn btn-primary m-b-sm"
+                                        >{{ uctrans('custom.close') }}</button>
+                                        </form>
+                                        <form
+                                            method="POST"
+                                            class="inline-block"
+                                            action="{{ url('admin/pages/delete/'. $page->id) }}"
+                                        >
+                                            {{ csrf_field() }}
+                                                <button
+                                                    class="btn btn-primary del-btn m-b-sm"
+                                                    type="submit"
+                                                    name="delete"
+                                                    data-confirm="{{ __('custom.remove_data') }}"
+                                                >{{ uctrans('custom.remove') }}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-1"></div>
+            @else
+                <div class="col-sm-12 m-t-md text-center no-info">
+                    {{ __('custom.no_info') }}
+                </div>
+            @endif
+        </div>
+    </div>
+@endsection

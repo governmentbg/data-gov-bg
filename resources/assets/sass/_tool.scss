@@ -1,0 +1,148 @@
+nav {
+    .tool-version {
+        color: white;
+        font-size: 18px;
+        float: right;
+        margin-right: 8px;
+        line-height: $headerUnderlineHeight;
+
+        &:hover {
+            color: black !important;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    }
+}
+
+.config-form {
+    .config-control-form {
+        max-width: 500px;
+        margin: 20px auto 0 auto;
+    }
+
+    .dbms-form, .file-form {
+        overflow: hidden;
+        max-width: 700px;
+        margin: 40px auto 0 auto;
+
+        h2 {
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+    }
+
+    .query-form {
+        overflow: hidden;
+        max-width: 700px;
+        margin: 0 auto 20px auto;
+
+        h2 {
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+    }
+
+    .freq-number {
+        width: 50px;
+        display: inline-block;
+    }
+
+    .select2 {
+        margin-left: 20px;
+        width: 200px !important;
+    }
+
+    .data-query {
+        overflow: hidden;
+        max-width: 700px;
+        margin: 10px auto;
+
+        input[type="submit"] {
+            margin-left: 10px;
+
+            &:nth-child(2) {
+                margin-right: 15px;
+            }
+        }
+
+        span {
+            margin-left: 15px;
+            font-size: 20px;
+        }
+    }
+
+    .form-group {
+        overflow: hidden;
+    }
+}
+
+.save-btn {
+    background-color: $brand-success !important;
+    border-color: $brand-success !important;
+}
+
+.tool-history {
+    padding-top: 20px;
+
+    .history-filters {
+        margin-bottom: 20px;
+
+        form {
+            color: black !important;
+            padding: 25px 20px 5px 15px;
+            border: 1px #c02e54 solid;
+            border-radius: 10px;
+
+            table {
+                width: 100%;
+
+                tr {
+                    td {
+                        padding-bottom: 10px;
+
+                        > div {
+                            padding-right: 0 !important;
+
+                            label {
+                                width: 100%;
+                                margin-bottom: 0px;
+                            }
+                        }
+
+                        &:first-child {
+                            width: 1px;
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+
+            .date {
+                padding-right: 0px;
+            }
+        }
+    }
+
+    .history-row {
+        border-left: 2px #c02e54 solid;
+        padding-left: 20px;
+        padding-bottom: 50px;
+
+        &:last-child {
+            padding-bottom: 0px;
+        }
+
+        span {
+            word-break: break-word;
+        }
+    }
+}
+
+.dropdown-menu {
+    z-index: 999 !important;
+}
+
+.new-file {
+    min-width: 80px !important;
+    margin-right: 15px;
+}

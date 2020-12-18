@@ -21,7 +21,7 @@ class HomeController extends Controller {
         $organisations = Cache::get('home_organisations', 'N/A');
         $datasets = Cache::get('home_datasets', 'N/A');
         $mostActiveOrg = Cache::get('home_active', 'N/A');
-
+        $newsCount     = Cache::get('home_news', 'N/A');
         $lastMonth = __('custom.'. strtolower(date('F', strtotime('last month'))));
         $lastMonth .= ' '. date('Y', strtotime('last month'));
 
@@ -42,6 +42,7 @@ class HomeController extends Controller {
             'users',
             'organisations',
             'datasets',
+            'newsCount',
             'lastMonth',
             'mostActiveOrg',
             'categories'

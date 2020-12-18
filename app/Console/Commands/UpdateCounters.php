@@ -12,6 +12,7 @@ use \App\Http\Controllers\Api\UserController as ApiUser;
 use \App\Http\Controllers\Api\DataSetController as ApiDataSet;
 use \App\Http\Controllers\Api\OrganisationController as ApiOrganisation;
 use \App\Http\Controllers\Api\ActionsHistoryController as ApiActionsHistory;
+use App\Http\Controllers\Api\NewsController as ApiNews;
 
 class UpdateCounters extends Command
 {
@@ -102,6 +103,21 @@ class UpdateCounters extends Command
         if ($result->success) {
             Cache::forever('home_active', $result->data);
         }
+
+
+        # Get news count
+        $newsRequest = Request::create('/api/listNews', 'POST', [
+            'records_per_page'  => 1,
+            'criteria'          => [
+                'active'            => true,
+            ],
+        ]);
+        $apiNews = new ApiNews($newsRequest);
+        $result = $apiNews->listNews($newsRequest)->getData();
+        $news = $result->total_records;
+        Cache::forever('home_news', $news);
+
+
 
         $elaspsedTime = microtime(true) - $start;
         $hours = floor($elaspsedTime / 3600);

@@ -24,9 +24,9 @@
             </div>
             <div class="col-md-6">
                 <a href="{{ url('organisation') }}" class="reg-orgs">
-                    <p>{{ $organisations }}</p>
+                    <p>{{ $newsCount }}</p>
                     <hr>
-                    <p>{{ utrans('custom.organisations', 2) }}</p>
+                    <p>{{ utrans('custom.news_events', 2) }}</p>
                     <img src="{{ asset('/img/reg-orgs.svg') }}">
                 </a>
             </div>

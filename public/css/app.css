@@ -22810,3 +22810,21 @@ nav .tool-version:hover {
   line-height: 20px;
 }
 
+hr.news-count {
+    width: auto;
+    margin-left: 17px !important;
+    width: 150px !important;
+    border:0px !important;
+    color: #fff;background:#fff; height:1px;
+}
+
+.text-black { color: #000!important; }
+.border-0   { border: 0px !important; }
+.p-0    { padding: 0px; }
+.pr-0   { padding-right: 0px; }
+.pl-0   { padding-left: 0px; }
+.m0     { margin: 0px !important; }
+.ml-0   { margin-left: 0px !important; }
+.mr-0   { margin-right: 0px !important; }
+.mt-0   { margin-top: 0px !important; }
+.mt-10  { margin-top: 10px !important; }

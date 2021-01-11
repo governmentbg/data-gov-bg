@@ -15,39 +15,37 @@
     <div class="col-md-8 basic-stats">
         <div class="row">
             <div class="col-md-6">
-                <a href="{{ url('/users/list') }}" class="reg-users">
+                <div class="col-md-12 pr-0 pl-0">
+
+                    <a href="{{ url('/users/list') }}" class="reg-users">
                     <p>{{ $users }}</p>
                     <hr>
                     <p>{{ __('custom.registered_users') }}</p>
                     <img src="{{ asset('/img/reg-users.svg') }}">
                 </a>
+                </div>
+                <div class="col-md-12 pr-0 pl-0">
+
+                    <a href="{{ url('data') }}" class="data-sets">
+                        <p>{{ $datasets }}</p>
+                        <hr>
+                        <p>{{ __('custom.data_sets') }}</p>
+                        <img src="{{ asset('/img/data-sets.svg') }}">
+                    </a>
+                </div>
             </div>
+
             <div class="col-md-6">
-                <a href="{{ url('organisation') }}" class="reg-orgs">
-                    <p>{{ $newsCount }}</p>
-                    <hr>
-                    <p>{{ utrans('custom.news_events', 2) }}</p>
-                    <img src="{{ asset('/img/reg-orgs.svg') }}">
-                </a>
+                <div class="col-md-12 pr-0 pl-0 most-active">
+                    <a href="{{ url('news') }}" class="reg-orgs border-0">
+                        <p class="ml-0 mr-0">{{ $newsCount }} </p>
+                        <hr class="news-count">
+                        <p class="ml-0 mr-0">{{ __('custom.news_events') }}</p>
+                        <img src="{{ asset('/img/newspaper-yellow.svg') }}" width="100px" style="bottom: 15px;right: 15px;opacity: 0.6;" >
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <a href="{{ url('data') }}" class="data-sets">
-                    <p>{{ $datasets }}</p>
-                    <hr>
-                    <p>{{ __('custom.data_sets') }}</p>
-                    <img src="{{ asset('/img/data-sets.svg') }}">
-                </a>
-            </div>
-            <div class="col-md-6">
-                <a href="{{ url('data') }}" class="updates">
-                    <p>{{ $updates }}</p>
-                    <hr>
-                    <p>{{ __('custom.updates') }} </p>
-                    <img src="{{ asset('/img/updates.svg') }}">
-                </a>
-            </div>
+
         </div>
     </div>
     <div class="col-md-4 most-active">

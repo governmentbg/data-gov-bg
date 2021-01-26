@@ -17,7 +17,7 @@
             <div class="col-md-6">
                 <div class="col-md-12 pr-0 pl-0">
 
-                    <a href="{{ url('/users/list') }}" class="reg-orgs">
+                    <a href="{{ url('/organisation') }}" class="reg-orgs">
                     <p>{{ $organisations }}</p>
                     <hr>
                     <p>{{ ucfirst(trans_choice('custom.organisations', 2)) }}</p>

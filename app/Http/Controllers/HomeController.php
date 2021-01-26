@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\NewsController as ApiNews;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use \App\Http\Controllers\Api\CategoryController as ApiCategories;
@@ -21,7 +22,8 @@ class HomeController extends Controller {
         $organisations = Cache::get('home_organisations', 'N/A');
         $datasets = Cache::get('home_datasets', 'N/A');
         $mostActiveOrg = Cache::get('home_active', 'N/A');
-        $newsCount     = Cache::get('home_news', 'N/A');
+        $latestNewsCache     = Cache::get('latest_news', 'N/A');
+        $latestNews  = ($latestNewsCache != "N/A") ? $latestNewsCache[0] : $latestNewsCache;
         $lastMonth = __('custom.'. strtolower(date('F', strtotime('last month'))));
         $lastMonth .= ' '. date('Y', strtotime('last month'));
 
@@ -42,7 +44,7 @@ class HomeController extends Controller {
             'users',
             'organisations',
             'datasets',
-            'newsCount',
+            'latestNews',
             'lastMonth',
             'mostActiveOrg',
             'categories'

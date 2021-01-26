@@ -17537,12 +17537,36 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   height: 100%;
 }
 
-.home-stats .basic-stats a.reg-users {
+.home-stats .basic-stats a.reg-orgs {
   background: #13ca9a;
 }
 
-.home-stats .basic-stats a.reg-orgs {
-  background: #e8e129;
+.home-stats .basic-stats a.lat-news {
+  background: none;
+}
+
+.home-stats .basic-stats a.lat-news p {
+  color: #333 !important;
+  font-size: 15px !important;
+  font-weight: normal !important;
+  position: relative !important;
+  padding: 6px 17px 0 17px;
+}
+
+.home-stats .basic-stats a.lat-news p.p-left {
+  text-indent: 95px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.home-stats .basic-stats a.lat-news img {
+  height: 62px !important;
+}
+
+.home-stats .basic-stats a.lat-news p.see_more {
+  color: #c02e54 !important;
+  text-align: right;
+  margin-top: -10px !important;
 }
 
 .home-stats .basic-stats a.updates {
@@ -22827,4 +22851,5 @@ hr.news-count {
 .ml-0   { margin-left: 0px !important; }
 .mr-0   { margin-right: 0px !important; }
 .mt-0   { margin-top: 0px !important; }
+.mt-5  { margin-top: 5px !important; }
 .mt-10  { margin-top: 10px !important; }

@@ -107,15 +107,20 @@ class UpdateCounters extends Command
 
         # Get news count
         $newsRequest = Request::create('/api/listNews', 'POST', [
-            'records_per_page'  => 1,
-            'criteria'          => [
-                'active'            => true,
-            ],
+          'records_per_page'  => 1,
+          'criteria'         => [
+            'active'   => true,
+            'order'    => [
+              'type'     => 'desc',
+              'field'    => 'created_at'
+            ]
+          ]
         ]);
         $apiNews = new ApiNews($newsRequest);
         $result = $apiNews->listNews($newsRequest)->getData();
-        $news = $result->total_records;
-        Cache::forever('home_news', $news);
+        $news = $result->news;
+        //$total_news = $result->total_records;
+        Cache::forever('latest_news', $news);
 
 
 

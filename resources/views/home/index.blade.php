@@ -20,7 +20,7 @@
                     <a href="{{ url('/organisation') }}" class="reg-orgs">
                     <p>{{ $organisations }}</p>
                     <hr>
-                    <p>{{ ucfirst(trans_choice('custom.organisations', 2)) }}</p>
+                    <p>{{ mb_convert_case(trans_choice('custom.organisations', 2), MB_CASE_TITLE, "UTF-8") }}</p>
                     <img src="{{ asset('/img/reg-users.svg') }}">
                 </a>
                 </div>
@@ -39,16 +39,15 @@
                 <div class="col-md-12 pr-0 pl-0 most-active">
                     @if(!empty($latestNews))
                     <a href="{{ url('/news/view/' . $latestNews->id ) }}" class="lat-news">
-                        <img src="{{ asset('/img/latest-news-'.Config::get('app.locale').'.png') }}" width="100">
-                        <p class="ml-0 mr-0 p-left">{{$latestNews->title}} </p>
+                        <p class="box_title">{{ __('custom.latest_news') }}</p>
+                        <p class="ml-0 mr-0 news_title">{{$latestNews->title}} </p>
                         <hr class="news-count">
                         <p class="ml-0 mr-0 mt-5">{{ mb_strimwidth(strip_tags($latestNews->body), 0, 50,'...', 'utf-8') }}</p>
                         <p class="ml-0 mr-0 mt-0 see_more">{{ __('custom.see_more') }} <i class="fa fa-angle-double-right"></i></p>
                     </a>
                     @else
                     <a href="" class="lat-news">
-                        <img src="{{ asset('/img/latest-news-'.Config::get('app.locale').'.png') }}" width="100">
-                        <p class="ml-0 mr-0 p-left"></p>
+                        <p class="box_title">{{ __('custom.latest_news') }}</p>
                     </a>
                     @endif
                 </div>

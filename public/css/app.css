@@ -17553,9 +17553,27 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
   padding: 6px 17px 0 17px;
 }
 
-.home-stats .basic-stats a.lat-news p.p-left {
-  text-indent: 95px;
-  height: 60px;
+.home-stats .basic-stats a.lat-news p.box_title {
+  min-height: 43px;
+  padding: 12px 0 0;
+  margin: 0;
+  text-align: center;
+  color: #c02e54 !important;
+  font-weight: bold !important;
+  font-size: 24px !important;
+  font-family: "Raleway", sans-serif;
+}
+
+hr.news-count {
+  margin: 0 0 0 17px !important;
+  width: 90% !important;
+  border: none !important;
+}
+
+.home-stats .basic-stats a.lat-news p.news_title {
+  padding: 0 17px;
+  margin: 0;
+  font-weight: bold !important;
   overflow: hidden;
 }
 
@@ -22832,14 +22850,6 @@ nav .tool-version:hover {
   font-family: sans-serif;
   font-size: 16px;
   line-height: 20px;
-}
-
-hr.news-count {
-    width: auto;
-    margin-left: 17px !important;
-    width: 150px !important;
-    border:0px !important;
-    color: #fff;background:#fff; height:1px;
 }
 
 .text-black { color: #000!important; }

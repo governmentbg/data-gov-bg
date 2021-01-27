@@ -524,6 +524,7 @@ return [
     'orange' => 'Orange',
     'purple' => 'Purple',
     'active_side' => 'Active',
+    'latest_news' => 'Latest news',
     'show_approved' => 'Show approved',
     'hide_approved' => 'Hide approved',
     'show_all' => 'Show all',

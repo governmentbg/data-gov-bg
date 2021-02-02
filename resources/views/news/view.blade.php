@@ -21,6 +21,7 @@
                                 @endif
 
                                 <div class="col-xs-12 m-t-sm p-l-none text-right">
+                                    <span class="badge badge-pill"><a href="{{ url('/news') }}">{{ __('custom.all_news') }}</a></span>
                                 @if (\App\Role::isAdmin())
                                     <span class="badge badge-pill"><a href="{{ url('/admin/news/edit/' . $newsList->id) }}">{{ uctrans('custom.edit') }}</a></span>
                                 @endif

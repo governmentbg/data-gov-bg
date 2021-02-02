@@ -87,6 +87,22 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label for="home_page" class="col-lg-3 col-sm-3 col-xs-3 col-form-label">{{ utrans('custom.admin_latest_news') }}:</label>
+                                <div class="col-lg-2 col-sm-9 col-xs-9">
+                                    <div class="js-check">
+                                        <input
+                                            type="checkbox"
+                                            name="home_page"
+                                            value="1"
+                                            {{ !empty($model->home_page) ? 'checked' : '' }}
+                                        >
+                                        @if (isset($errors) && $errors->has('home_page'))
+                                            <span class="error">{{ $errors->first('home_page') }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
                                     <a

@@ -31,6 +31,7 @@ class NewsController extends ApiController
      * @param string data[meta_description] - optional
      * @param string data[forum_link] - optional
      * @param integer data[active] - required
+     * @param integer data[home_page] - optional
      * @param date data[valid_from] - optional
      * @param date data[valid_to] - optional
      *
@@ -43,7 +44,7 @@ class NewsController extends ApiController
         $validator = Validator::make($newsData, [
             'data'                  => 'required|array',
         ]);
-
+      
         if (!$validator->fails()) {
             $validator = Validator::make($newsData['data'], [
                 'locale'              => 'nullable|string|max:5',
@@ -68,8 +69,13 @@ class NewsController extends ApiController
                 'valid_to'            => 'nullable|date',
             ]);
         }
-
+  
+        if($newsData['data']['home_page']) {
+          DB::table('pages')->where('home_page', '=', 1)->update(array('home_page' => 0));
+        }
+        
         if (!$validator->fails()) {
+          
             $rightCheck = RoleRight::checkUserRight(
                 Module::NEWS,
                 RoleRight::RIGHT_EDIT
@@ -112,9 +118,10 @@ class NewsController extends ApiController
                 if (isset($newsData['data']['valid_to'])) {
                     $newNews->valid_to = $newsData['data']['valid_to'];
                 }
-
+  
+                $newNews->home_page = $newsData['data']['home_page'];
                 $newNews->active = $newsData['data']['active'];
-
+              
                 $newNews->save();
 
                 $logData = [
@@ -154,6 +161,7 @@ class NewsController extends ApiController
      * @param string data[meta_description] - optional
      * @param string data[forum_link] - optional
      * @param integer data[active] - optional
+     * @param integer data[home_page] - optional
      * @param date data[valid_from] - optional
      * @param date data[valid_to] - optional
      *
@@ -191,6 +199,10 @@ class NewsController extends ApiController
                 'valid_from'            => 'nullable|date',
                 'valid_to'              => 'nullable|date',
             ]);
+        }
+
+        if(isset($editData['data']['home_page']) && $editData['data']['home_page'] == 1) {
+          DB::table('pages')->where('home_page', '=', 1)->update(array('home_page' => 0));
         }
 
         if (!$validator->fails()) {
@@ -242,6 +254,10 @@ class NewsController extends ApiController
 
                 if (isset($editData['data']['active'])) {
                     $newsToEdit->active = $editData['data']['active'];
+                }
+                
+                if (isset($editData['data']['home_page'])) {
+                    $newsToEdit->home_page = $editData['data']['home_page'];
                 }
 
                 if (isset($editData['data']['valid_from'])) {
@@ -580,6 +596,9 @@ class NewsController extends ApiController
                     });
                 }
             } else {
+                if (isset($criteria['home_page'])) {
+                  $newsList->where('home_page', 1);
+                }
                 $newsList->where('type', Page::TYPE_NEWS);
             }
 
@@ -653,6 +672,7 @@ class NewsController extends ApiController
                 'title',
                 'body',
                 'active',
+                'home_page',
                 'head_title',
                 'meta_description',
                 'meta_keywords',

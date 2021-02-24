@@ -1,6 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
+/storage/logs
 /storage/docs
 /storage/*.key
 /storage/*.index

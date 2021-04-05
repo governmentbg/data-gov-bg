@@ -316,7 +316,7 @@
                                 $.get( "/msg", function( data ) {
                                     //console.log(data);
                                     if(data[0] == 1) {
-                                        $(".underline .container").html(data[1].title);
+                                        $(".underline .container").html(data.msg);
                                     }
                                 });
                             });

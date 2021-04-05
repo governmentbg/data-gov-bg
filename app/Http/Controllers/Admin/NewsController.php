@@ -217,7 +217,7 @@ class NewsController extends AdminController
                     'abstract'         => $request->offsetGet('abstract'),
                     'forum_link'       => $request->offsetGet('forum_link'),
                     'active'           => !empty($request->offsetGet('active')),
-                    'home_page'        => !empty($request->offsetGet('home_page')),
+                    'home_page'        => $request->offsetGet('home_page'),
                     'valid_from'       => $from,
                     'valid_to'         => $to,
                 ]
@@ -280,7 +280,7 @@ class NewsController extends AdminController
                     'abstract'         => $request->offsetGet('abstract'),
                     'forum_link'       => $request->offsetGet('forum_link'),
                     'active'           => !empty($request->offsetGet('active')),
-                    'home_page'        => !empty($request->offsetGet('home_page')),
+                    'home_page'        => $request->offsetGet('home_page'),
                     'valid_from'       => $from,
                     'valid_to'         => $to,
                 ]

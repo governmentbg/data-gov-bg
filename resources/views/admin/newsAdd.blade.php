@@ -88,19 +88,16 @@
                                 </div>
                             </div>
                             <div class="form-group row m-b-lg m-t-md">
-                                <label for="home_page" class="col-lg-3 col-sm-3 col-xs-3 col-form-label">{{ utrans('custom.admin_latest_news') }}:</label>
-                                <div class="col-lg-2 col-sm-9 col-xs-9">
-                                    <div class="js-check">
-                                        <input
-                                            type="checkbox"
-                                            name="home_page"
-                                            value="1"
-                                            {{ !empty(old('home_page')) ? 'checked' : '' }}
-                                        >
-                                        @if (isset($errors) && $errors->has('home_page'))
-                                            <span class="error">{{ $errors->first('home_page') }}</span>
-                                        @endif
-                                    </div>
+                                <label for="home_page" class="col-lg-3 col-sm-3 col-xs-3 col-form-label">{{ __('custom.admin_news_is_for') }}:</label>
+                                <div class="col-sm-9">
+                                    <select name="home_page" class="input-border-r-12 form-control">
+                                        <option value="0" @if(old('home_page') == 0) selected="selected" @endif>{{ __('custom.admin_regular_news') }}</option>
+                                        <option value="1" @if(old('home_page') == 1) selected="selected" @endif>{{ __('custom.admin_latest_news') }}</option>
+                                        <option value="2" @if(old('home_page') == 2) selected="selected" @endif>{{ __('custom.admin_alert_news') }}</option>
+                                    </select>
+                                    @if (isset($errors) && $errors->has('home_page'))
+                                        <span class="error">{{ $errors->first('home_page') }}</span>
+                                    @endif
                                 </div>
                             </div>
                             <div class="form-group row">

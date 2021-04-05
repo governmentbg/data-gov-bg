@@ -402,6 +402,8 @@ Route::match(['get', 'post'], 'groups/view/{uri}', 'GroupController@view')->name
 Route::post('groups/delete', 'GroupController@delete')->name('groupDelete');
 Route::match(['get', 'post'], 'groups/chronology/{uri}', 'GroupController@chronology');
 
+Route::get('/msg', 'MsgController@display');
+
 Route::get('user', 'UserController@index');
 Route::post('user', 'UserController@index');
 

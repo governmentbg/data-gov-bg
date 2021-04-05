@@ -59,6 +59,9 @@
     @endif
     <!-- Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js?hl={{ $lang }}" async defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous"></script>
 </head>
 <body class="{{ isset($class) ? 'theme-'. $class : 'theme-user' }}">
     <div id="app" class="nano" data-lang="{{ $lang }}">
@@ -307,6 +310,18 @@
                     </div>
                 </div>
                 <div class="underline">
+                    <div class="container" style="color: #ffffff">
+                        <script type="text/javascript">
+                            $(function() {
+                                $.get( "/msg", function( data ) {
+                                    //console.log(data);
+                                    if(data[0] == 1) {
+                                        $(".underline .container").html(data[1].title);
+                                    }
+                                });
+                            });
+                        </script>
+                    </div>
                     @if (config('app.IS_TOOL'))
                        <div class="container">
                            <a

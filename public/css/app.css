@@ -14641,6 +14641,14 @@ body #app .navbar .underline {
   height: 30px;
 }
 
+body #app .navbar .underline .container {
+  text-align: center;
+  padding: 5px 21px;
+  color: #ffffff;
+  overflow: hidden;
+  height: 30px;
+}
+
 @media screen and (max-width: 767px) {
   body #app .hamburger-trigger .navbar-toggle {
     float: none;

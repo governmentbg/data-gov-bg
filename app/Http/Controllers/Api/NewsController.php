@@ -71,7 +71,9 @@ class NewsController extends ApiController
         }
   
         if($newsData['data']['home_page']) {
-          DB::table('pages')->where('home_page', '=', 1)->update(array('home_page' => 0));
+          $home_page = $newsData['data']['home_page'];
+          //dd($home_page);
+          DB::table('pages')->where('home_page', '=', $home_page)->update(array('home_page' => 0));
         }
         
         if (!$validator->fails()) {
@@ -201,8 +203,9 @@ class NewsController extends ApiController
             ]);
         }
 
-        if(isset($editData['data']['home_page']) && $editData['data']['home_page'] == 1) {
-          DB::table('pages')->where('home_page', '=', 1)->update(array('home_page' => 0));
+        if(isset($editData['data']['home_page']) && $editData['data']['home_page'] != 0) {
+          $home_page = $editData['data']['home_page'];
+          DB::table('pages')->where('home_page', '=', $home_page)->update(array('home_page' => 0));
         }
 
         if (!$validator->fails()) {
@@ -597,7 +600,7 @@ class NewsController extends ApiController
                 }
             } else {
                 if (isset($criteria['home_page'])) {
-                  $newsList->where('home_page', 1);
+                  $newsList->where('home_page', $criteria['home_page']);
                 }
                 $newsList->where('type', Page::TYPE_NEWS);
             }

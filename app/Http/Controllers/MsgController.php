@@ -14,7 +14,7 @@ class MsgController extends Controller
     $response[0] = 0;
     if(!empty($alertNewsCache)) {
       $response[0] = 1;
-      $response['msg'] = utf8_encode(substr(strip_tags($alertNewsCache[0]->msg), 0, 255));
+      $response['msg'] = substr(strip_tags($alertNewsCache[0]->msg), 0, 255);
     }
     //dd($response);
     return $response;

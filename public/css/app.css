@@ -14646,7 +14646,7 @@ body #app .navbar .underline .container {
   padding: 5px 21px;
   color: #ffffff;
   overflow: hidden;
-  height: 30px;
+  height: 29px;
 }
 
 @media screen and (max-width: 767px) {

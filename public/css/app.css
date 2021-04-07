@@ -14638,15 +14638,16 @@ body #app .navbar .navbar-nav li.user.active:after {
 }
 
 body #app .navbar .underline {
-  height: 30px;
+  min-height: 30px;
+  position: relative;
 }
 
 body #app .navbar .underline .container {
   text-align: center;
   padding: 5px 21px;
   color: #ffffff;
-  overflow: hidden;
-  height: 29px;
+  min-height: 28px;
+  position: relative;
 }
 
 @media screen and (max-width: 767px) {
@@ -22215,7 +22216,7 @@ nav .tool-version:hover {
 
 .help-btn {
   position: absolute;
-  padding-top: 4px;
+  top: 4px;
   right: 320px;
 }
 

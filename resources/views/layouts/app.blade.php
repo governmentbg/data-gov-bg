@@ -310,18 +310,40 @@
                     </div>
                 </div>
                 <div class="underline">
-                    <div class="container" style="color: #ffffff">
-                        <script type="text/javascript">
-                            $(function() {
-                                $.get( "/msg", function( data ) {
-                                    //console.log(data);
-                                    if(data[0] == 1) {
-                                        $(".underline .container").html(data.msg);
-                                    }
-                                });
-                            });
-                        </script>
+                    <div class="container">
+                        <div id="slideText" style="position: relative;">
+
+                        </div>
                     </div>
+                    <script type="text/javascript">
+                        let keyValue = document.cookie.match('(^|;) ?slideText=([^;]*)(;|$)');
+                        let value = keyValue ? keyValue[2] : null;
+                        console.log(value);
+                        function SlideText() {
+                            $('#slideText').animate({right: -200}, 2000);
+                            $('#slideText').animate({left: -100}, 2000);
+                            $('#slideText').animate({left: 0}, 2000);
+                        }
+                        function DeleteCoockie() {
+                            document.cookie = "slideText=0;expires=Wed Apr 07 2020 18:11:49 GMT+0300";
+                        }
+                        $(function() {
+                            $.get( "/msg", function( data ) {
+                                //console.log(data);
+                                if(data[0] == 1) {
+                                    $("#slideText").html(data.msg);
+                                }
+                            });
+                            if(value == null) {
+                                SlideText();
+                                let date = new Date();
+                                date.setTime(date.getTime() + (30 * 1000));
+                                console.log(date);
+                                document.cookie = "slideText=1;expires="+date;
+                            }
+                            setInterval(function(){ SlideText() }, 10000);
+                        });
+                    </script>
                     @if (config('app.IS_TOOL'))
                        <div class="container">
                            <a

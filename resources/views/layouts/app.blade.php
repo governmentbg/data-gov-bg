@@ -341,7 +341,7 @@
                                 console.log(date);
                                 document.cookie = "slideText=1;expires="+date;
                             }
-                            setInterval(function(){ SlideText() }, 10000);
+                            setInterval(function(){ SlideText() }, 12000);
                         });
                     </script>
                     @if (config('app.IS_TOOL'))

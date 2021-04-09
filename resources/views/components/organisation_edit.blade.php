@@ -29,6 +29,7 @@
                     class="input-border-r-12 form-control js-autocomplete"
                     name="parent_org_id"
                     id="filter"
+                    @if(!\Auth::user()->is_admin) disabled="disabled" @endif
                     data-live-search="true"
                 >
                     @if (isset($parentOrgs[0]))
@@ -60,6 +61,7 @@
                     type="text"
                     class="input-border-r-12 form-control"
                     name="uri"
+                    @if(!\Auth::user()->is_admin) readonly="readonly" @endif
                     value="{{ !empty($model['uri']) ? $model['uri'] : '' }}"
                 >
                 @if (isset($errors) && $errors->has('uri'))

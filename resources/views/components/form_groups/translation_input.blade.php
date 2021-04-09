@@ -15,6 +15,7 @@
                         value="{{ $model->translate($active['locale'], $active['locale'])->{ $field['name']} }}"
                         name="{{ $field['name'] }}[{{ $active['locale'] }}]"
                         class="input-border-r-12 form-control"
+                        @if($model instanceof \App\Organisation && !\Auth::user()->is_admin) disabled="disabled" @endif
                     >
                 @elseif (is_array(old($field['name'])) && !empty(old($field['name'])[$active['locale']]))
                     <input

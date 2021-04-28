@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function() {
             Route::match(['get', 'post'], 'admin/groups/{grpUri}/dataset/{uri}', 'UserController@groupDatasetView')->name('adminGroupDatasetView');
             Route::match(['get', 'post'], 'admin/organisations/{orguri}/resource/{uri}/{version?}', 'UserController@orgResourceView')->name('adminOrgResourceView');
             Route::match(['get', 'post'], 'admin/organisations/dataset/view/{uri}', 'UserController@orgDatasetView')->name('adminOrgDatasetView');
+            Route::match(['post'], 'admin/organisations/dataset/move/', 'UserController@adminOrgDatasetMove')->name('adminOrgDatasetMove');
             Route::match(['get', 'post'], 'admin/organisations/{orgUri}/dataset/edit/{uri}', 'UserController@orgDatasetEdit');
             Route::match(
                 ['get', 'post'],

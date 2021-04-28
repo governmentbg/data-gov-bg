@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Role;
 use App\Tags;
+use App\Translator\Translations;
 use App\User;
 use App\Locale;
 use App\Module;
@@ -974,6 +975,35 @@ class UserController extends Controller {
                 'sorting'       => \Auth::user()->is_admin ? 'adminOrgDatasetView' : 'userOrgDatasetView',
             ]
         );
+    }
+
+    public function adminOrgDatasetMove()
+    {
+
+      //dd(request()->all());
+      $new_data_set_id = request()->get('new_data_set_id');
+      $current_data_set_id = request()->get('current_data_set_id');
+      if(!$current_data_set_id) {
+        return redirect()->back()->withErrors(session()->flash('alert-danger', "Не е намерен стария набор от данни"));
+      }
+      if(!$new_data_set_id) {
+        return redirect()->back()->withErrors(session()->flash('alert-danger', "Моля напишете ИД на набор от данни в който искате да преместите ресурсите"));
+      }
+
+      $dataSet = DataSet::find($new_data_set_id);
+      if(!$dataSet) {
+        return redirect()->back()->withErrors(session()->flash('alert-danger', "Не съществува набор от данни с ИД: $new_data_set_id"));
+      }
+
+
+      try {
+        Resource::where('data_set_id', $current_data_set_id)->update(['data_set_id' => $new_data_set_id]);
+
+      } catch (\Exception $ex) {
+        Log::error($ex->getMessage());
+      }
+
+      return redirect()->back()->withErrors(session()->flash('alert-success', "Ресурсите бяха преместени успешно в Набор от данни: ".$dataSet->name));
     }
 
     /**

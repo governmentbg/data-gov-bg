@@ -157,6 +157,28 @@
         @endif
 
         @if (
+            (!empty($admin))
+        )
+            <p><strong>Премести ресурсите в набор от данни с ИД:</strong></p>
+            <div class="col-xs-12 p-l-r-none">
+                <form method="POST" class="col-lg-4" action="{{ route('adminOrgDatasetMove') }}">
+                    {{ csrf_field() }}
+                    <div class="form-group row">
+                        <input type="hidden" name="current_data_set_id" value="{{$dataset->id}}">
+                        <input type="text" name="new_data_set_id" class="form-control">
+                    </div>
+                    <div class="form-group row">
+                        <button
+                                type="submit"
+                                name="save"
+                                class="btn btn-primary"
+                        >{{ uctrans('custom.save') }}</button>
+                    </div>
+                </form>
+            </div>
+        @endif
+
+        @if (
             isset($dataset->custom_settings[0])
             && !empty($dataset->custom_settings[0]->key)
         )

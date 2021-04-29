@@ -157,7 +157,7 @@
         @endif
 
         @if (
-            (!empty($admin))
+            !empty($admin) && \Auth::user()->is_admin
         )
             <p><strong>Премести ресурсите в набор от данни с ИД:</strong></p>
             <div class="col-xs-12 p-l-r-none">

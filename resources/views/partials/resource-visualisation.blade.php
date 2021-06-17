@@ -245,7 +245,8 @@
                         <div class="form-group row">
                             <div class="col-sm-12" style="position: relative;padding-right:100px;">
                                 Линк за сваляне в <b>{{ strtolower($format) }}</b> формат:
-                                <input type="text" id="link_{{ strtolower($format) }}" class="form-control" value="{{ url('/resource/download') }}?resource={{ $resource->id }}&version={{ $versionView }}&name={{ urlencode($resource->name) }}&format={{ $format }}" readonly>
+                                <input type="text" id="link_{{ strtolower($format) }}" class="form-control"
+                                       value="{{ url("/resource/download/$resource->uri/$format") }}" readonly>
                                 <span class="btn btn-primary" style="position: absolute;width: 85px;top: 19px;right: 5px;" onclick="copyToClipboard('link_{{ strtolower($format) }}')">Копирай</span>
                             </div>
                         </div>

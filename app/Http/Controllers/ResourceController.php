@@ -631,6 +631,67 @@ class ResourceController extends Controller
         return back();
     }
 
+    /**
+     * Transforms resource data to downloadable file
+     *
+     * @param Request $request - file format, uri of the resource
+     *
+     * @return downlodable file
+     */
+    public function resourceDirectDownload(Request $request)
+    {
+        $format = $request->offsetGet('format');
+        $uri = $request->offsetGet('uri');
+        $locale = \LaravelLocalization::getCurrentLocale();
+
+        $params = [
+          'resource_uri' => $uri,
+          'locale'  => $locale
+        ];
+        $rq = Request::create('/api/getResourceMetadata', 'POST', $params);
+        $api = new ApiResource($rq);
+        $res = $api->getResourceMetadata($rq)->getData();
+        $resource = !empty($res->resource) ? $res->resource : [];
+
+        $resourceId = $resource->id;
+        $fileName = $resource->name;
+        $fileName = str_replace(['\\', '/'], '_', $fileName);
+        $version = $resource->version;
+
+        $data = ElasticDataSet::getElasticData($resourceId, $version);
+
+        if (strtolower($format) != 'json') {
+            $method = 'json2'. strtolower($format);
+            $convertReq = Request::create('/api/'. $method, 'POST', ['data' => $data]);
+            $apiResources = new ApiConversion($convertReq);
+            $resource = $apiResources->$method($convertReq)->getData();
+
+            if (!$resource->success) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.converse_unavailable')));
+            }
+
+            $fileData = $resource->data;
+        } else {
+            $fileData = json_encode($data, JSON_UNESCAPED_UNICODE);
+        }
+
+        if (!empty($fileData)) {
+            $tmpFileName = str_random(32);
+            $handle = fopen('../storage/app/'. $tmpFileName, 'w+');
+            $path = stream_get_meta_data($handle)['uri'];
+
+            fwrite($handle, $fileData);
+
+            fclose($handle);
+
+            $headers = ['Content-Type' => 'text/'. strtolower($format)];
+
+            return response()->download($path, $fileName .'.'. strtolower($format), $headers)->deleteFileAfterSend(true);
+        }
+
+        return back();
+    }
+
     public function resourceCancelImport(Request $request, $uri, $action)
     {
         if ($action == 'create') {

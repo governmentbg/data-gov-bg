@@ -333,6 +333,7 @@ Route::middleware('auth')->group(function() {
 });
 
 Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
+Route::match(['get', 'post'], '/resource/download/{uri}/{format}', 'ResourceController@resourceDirectDownload');
 Route::match(['get', 'post'], 'help', 'HelpController@list');
 Route::match(['get', 'post'], 'help/search', 'HelpController@search');
 Route::match(['get', 'post'], 'help/view/{id}/{activePage?}', 'HelpController@view');

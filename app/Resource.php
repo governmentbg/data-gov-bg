@@ -168,4 +168,30 @@ class Resource extends Model implements TranslatableInterface
             'CSV', 'JSON', 'KML', 'RDF', 'XML', 'XLSX', 'XLS', 'TXT', 'TSV', 'XSD', 'ODS', 'SLK', 'RTF', 'ODT', 'PDF', 'DOC', 'DOCX'
         ];
     }
+
+    public static function getResourceVersionFormat ($resource) {
+
+      $resourceVersionFormat = null;
+
+      if ($resource->file_format) {
+        $versionQuery = ElasticDataSet::where('resource_id', $resource->id);
+
+        if (is_null($resource->version)) {
+          $versionQuery->orderBy('id', 'desc');
+        } else {
+          $versionQuery->where('version', $resource->version);
+        }
+
+        $versionResult = $versionQuery->first();
+
+        if ($versionResult) {
+          $resourceVersionFormat = $versionResult->format;
+        }
+      }
+
+      $resourceVersionFormat = is_null($resourceVersionFormat) ? Resource::getFormatsCode($resource->file_format) : $resourceVersionFormat;
+
+      return $resourceVersionFormat;
+    }
+
 }

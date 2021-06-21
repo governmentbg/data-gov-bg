@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Page;
 use App\Role;
 use App\Resource;
-use App\Organisation;
 use App\ElasticDataSet;
+use Chumper\Zipper\Facades\Zipper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
+use Illuminate\Support\Facades\Storage;
 
 class ResourceController extends Controller
 {
@@ -654,8 +655,7 @@ class ResourceController extends Controller
         $resource = !empty($res->resource) ? $res->resource : [];
 
         $resourceId = $resource->id;
-        $fileName = $resource->name;
-        $fileName = str_replace(['\\', '/'], '_', $fileName);
+        $fileName = str_replace(['\\', '/'], '_', $resource->name);
         $version = $resource->version;
 
         $data = ElasticDataSet::getElasticData($resourceId, $version);
@@ -690,6 +690,131 @@ class ResourceController extends Controller
         }
 
         return back();
+    }
+
+    /**
+     * Make zip file from dataset resources data
+     *
+     * @param Request $request - files format, uri of the dataset
+     *
+     * @return downlodable zip file
+     */
+    public function resourcesDownloadZip(Request $request)
+    {
+        $uri = $request->offsetGet('uri');
+        $format = $request->offsetGet('format');
+
+        $zipName = "$uri.zip";
+        $zipDir = "../storage/app/$uri";
+        if(file_exists($zipDir) && is_dir($zipDir)) {
+          $this->deleteZipFolder($uri);
+        }
+
+        $params['records_per_page'] = 100;
+        $params = [
+          'criteria' => [
+            'dataset_uri' => $uri
+          ]
+        ];
+
+        $rq = Request::create('/api/listResources', 'POST', $params);
+        $apiResources = new ApiResource($rq);
+        $res = $apiResources->listResources($rq)->getData();
+        $resources = !empty($res->resources) ? $res->resources : [];
+
+        //return back();
+        //dd(count($resources));
+        if(!empty($resources)) {
+          //dd($resources);
+
+          \Log::info("Create folder $zipDir");
+          mkdir($zipDir, 0777);
+
+          foreach ($resources as $key => $resource) {
+
+            //if($key > 3) continue;
+
+            $resourceId = $resource->id;
+            $fileName = str_replace(['\\', '/'], '_', $resource->name);
+            if(file_exists($zipDir.DIRECTORY_SEPARATOR.$fileName)) {
+              continue;
+            }
+            $version = $resource->version;
+
+            $data = ElasticDataSet::getElasticData($resourceId, $version);
+
+            if (strtolower($format) != 'json') {
+              $method = 'json2'. strtolower($format);
+              $convertReq = Request::create('/api/'. $method, 'POST', ['data' => $data]);
+              $apiResources = new ApiConversion($convertReq);
+              $resource = $apiResources->$method($convertReq)->getData();
+
+              if (!$resource->success) {
+                return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.converse_unavailable')));
+              }
+
+              $fileData = $resource->data;
+            } else {
+              $fileData = json_encode($data, JSON_UNESCAPED_UNICODE);
+            }
+
+            if (!empty($fileData)) {
+              //$tmpFileName = str_random(32);
+              $handle = fopen($zipDir.DIRECTORY_SEPARATOR.$fileName, 'w+');
+
+              fwrite($handle, $fileData);
+
+              fclose($handle);
+            }
+          }
+
+          $files = glob($zipDir.DIRECTORY_SEPARATOR."*");
+          //$files = Storage::disk('public')->files('zip');
+
+          $zip = new \ZipArchive;
+          if ($zip->open($zipDir.DIRECTORY_SEPARATOR.$zipName, \ZipArchive::CREATE) === TRUE) {
+            foreach ($files as $file) {
+              $exploded = explode("/", $file);
+              $fileName = end($exploded);
+              $zip->addFile($file, $fileName);
+            }
+            $zip->close();
+          }
+
+          //$headers = ['Content-Type' => 'application/zip'];
+          header('Content-Type: application/zip');
+          header('Content-disposition: attachment; filename='.$zipName);
+          header('Content-Length: ' . filesize($zipDir.DIRECTORY_SEPARATOR.$zipName));
+          readfile($zipDir.DIRECTORY_SEPARATOR.$zipName);
+
+        }
+
+        sleep(3);
+
+        $this->deleteZipFolder($uri);
+
+        //return back();
+    }
+
+    public function deleteZipFolder($uri)
+    {
+      $zipDir = "../storage/app/$uri";
+      \Log::info("Delete $zipDir");
+
+      if(file_exists($zipDir) && is_dir($zipDir)) {
+        if (is_dir($zipDir)) {
+          $objects = scandir($zipDir);
+          foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+              if (is_dir($zipDir. DIRECTORY_SEPARATOR .$object) && !is_link($zipDir."/".$object))
+                rrmdir($zipDir. DIRECTORY_SEPARATOR .$object);
+              else
+                unlink($zipDir. DIRECTORY_SEPARATOR .$object);
+            }
+          }
+          rmdir($zipDir);
+        }
+      }
     }
 
     public function resourceCancelImport(Request $request, $uri, $action)

@@ -727,6 +727,7 @@ class OrganisationController extends Controller
         $api = new ApiDataSet($rq);
         $res = $api->getDataSetDetails($rq)->getData();
         $dataset = !empty($res->data) ? $res->data : [];
+        $formats = Resource::getFormats(true);
 
         if (
             !empty($dataset) && isset($dataset->org_id) &&
@@ -966,6 +967,7 @@ class OrganisationController extends Controller
                         'setGroups'     => isset($setGroups) ? $setGroups : [],
                         'pagination'    => $paginationData['paginate'],
                         'uri'           => $uri,
+                        'formats'       => $formats,
                         'sorting'       => 'orgViewDataset'
                     ]
                 );

@@ -220,6 +220,27 @@
             </div>
         </div>
     </div>
+    @if (count($resources) > 0)
+        @php
+            $versionFormat = App\Resource::getResourceVersionFormat($resources[0]);
+            if (!config('app.IS_TOOL')) {
+                $format = empty($resource) ? false : $versionFormat ? $versionFormat : App\Resource::getFormatsCode($resources[0]->file_format);
+                $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resources[0]->file_format);
+            } else {
+                $format = $versionFormat;
+            }
+        @endphp
+        <div class="row">
+            <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns" style="margin-top:-50px;">
+                @foreach ($formats as $id => $format)
+                    @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
+                        <br>
+                        <a href="{{ url("/dataset/$dataset->uri/resources/download/".strtolower($format)) }}"><i class="fa fa-download"></i> .zip с всички ресурси в {{ $format }} формат</a>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    @endif
     <div class="row">
         <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns">
             @if (isset($buttons['addResource']) && $buttons['addResource'])
@@ -255,3 +276,4 @@
         </div>
     </div>
 @endif
+

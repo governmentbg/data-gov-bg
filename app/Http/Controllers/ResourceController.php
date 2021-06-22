@@ -743,6 +743,9 @@ class ResourceController extends Controller
             $version = $resource->version;
 
             $data = ElasticDataSet::getElasticData($resourceId, $version);
+            if(empty($data)) {
+              continue;
+            }
 
             if (strtolower($format) != 'json') {
               $method = 'json2'. strtolower($format);
@@ -777,7 +780,7 @@ class ResourceController extends Controller
             foreach ($files as $file) {
               $exploded = explode("/", $file);
               $fileName = end($exploded);
-              $zip->addFile($file, $fileName);
+              $zip->addFile($file, $fileName.".".strtolower($format));
             }
             $zip->close();
           }

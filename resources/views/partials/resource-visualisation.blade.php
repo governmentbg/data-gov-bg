@@ -178,11 +178,11 @@
     @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
         <textarea
             class="js-xml-prev col-xs-12 m-b-md"
-            data-xml-data="{{ $data }}"
+            data-xml-data="{{ substr($data, 0, 400) }}"
             rows="20"
         ></textarea>
     @else
-        <div class="data-preview">{!! nl2br($data) !!}</div>
+        <div class="data-preview">{!! nl2br(substr($data, 0, 400)) !!}</div>
     @endif
     @if (!config('app.IS_TOOL'))
         <form method="POST" action="{{ url('/resource/download') }}">

@@ -220,7 +220,7 @@
             </div>
         </div>
     </div>
-    @if (count($resources) > 0)
+    @if (count($resources) > 0 && $filesResCount > 0)
         @php
             $versionFormat = App\Resource::getResourceVersionFormat($resources[0]);
             if (!config('app.IS_TOOL')) {

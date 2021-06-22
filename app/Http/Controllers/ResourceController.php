@@ -710,12 +710,13 @@ class ResourceController extends Controller
           $this->deleteZipFolder($uri);
         }
 
-        $params['records_per_page'] = 100;
         $params = [
           'criteria' => [
             'dataset_uri' => $uri
           ]
         ];
+        $params['records_per_page'] = 100;
+        $params['resource_type'] = 1; // files
 
         $rq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($rq);

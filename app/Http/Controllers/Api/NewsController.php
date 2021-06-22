@@ -54,9 +54,9 @@ class NewsController extends ApiController
                 'abstract'            => 'required_with:locale|max:8000',
                 'abstract.bg'         => 'required_without:locale|string|max:8000',
                 'abstract.*'          => 'max:8000',
-                'body'                => 'required_with:locale|max:8000',
-                'body.bg'             => 'required_without:locale|string|max:8000',
-                'body.*'              => 'max:8000',
+                'body'                => 'required_with:locale', //|max:8000
+                'body.bg'             => 'required_without:locale|string', //|max:8000
+                //'body.*'              => 'max:8000',
                 'head_title'          => 'nullable|max:191',
                 'head_title.*'        => 'max:191',
                 'meta_description'    => 'nullable|max:191',
@@ -187,9 +187,9 @@ class NewsController extends ApiController
                 'abstract'              => 'required_with:locale|max:8000',
                 'abstract.bg'           => 'required_without:locale|string|max:8000',
                 'abstract.*'            => 'max:8000',
-                'body'                  => 'required_with:locale|max:8000',
-                'body.bg'               => 'required_without:locale|string|max:8000',
-                'body.*'                => 'max:8000',
+                'body'                => 'required_with:locale', //|max:8000
+                'body.bg'             => 'required_without:locale|string', //|max:8000
+                //'body.*'              => 'max:8000',
                 'head_title'            => 'nullable|max:191',
                 'head_title.*'          => 'max:191',
                 'meta_description'      => 'nullable|max:191',

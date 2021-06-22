@@ -925,6 +925,7 @@ class ResourceController extends ApiController
             'criteria'              => 'required|array',
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|digits_between:1,10',
+            'resource_type'         => 'nullable|int|digits_between:1,10',
         ]);
 
         if (!$validator->fails()) {
@@ -954,6 +955,10 @@ class ResourceController extends ApiController
                 $query->whereHas('DataSet', function($q) use ($post) {
                     $q->where('uri', $post['criteria']['dataset_uri']);
                 });
+            }
+
+            if (!empty($post['resource_type'])) {
+                $query->where('resource_type', $post['resource_type']);
             }
 
             if (!empty($post['criteria']['resource_uri'])) {

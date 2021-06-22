@@ -235,7 +235,9 @@
                 @foreach ($formats as $id => $format)
                     @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
                         <br>
-                        <a href="{{ url("/dataset/$dataset->uri/resources/download/".strtolower($format)) }}"><i class="fa fa-download"></i> .zip с всички ресурси в {{ $format }} формат</a>
+                        <a onclick="downloadZipFile('{{ url("/dataset/$dataset->uri/resources/download/".strtolower($format)) }}')" href="javascript:;">
+                            <i class="fa fa-download"></i> .zip с всички ресурси в {{ $format }} формат
+                        </a>
                     @endif
                 @endforeach
             </div>
@@ -276,4 +278,40 @@
         </div>
     </div>
 @endif
+
+@section('js')
+    <script type="text/javascript">
+
+        function ShowLoadingSpinner() {
+            $("#ajax_loader_backgr").show();
+            $("#ajax_loader").show();
+        }
+
+        function HideLoadingSpinner() {
+            $("#ajax_loader_backgr").hide();
+            $("#ajax_loader").hide();
+        }
+
+        function downloadZipFile(url) {
+
+            $("#ajax_loader_backgr").show();
+            $("#ajax_loader").show();
+
+            $.ajax({
+                type: 'GET',
+                url: url,
+                success: function (uri) {
+
+                    $("#ajax_loader_backgr").hide();
+                    $("#ajax_loader").hide();
+
+                    document.location = "/dataset/resources/download/delete/"+uri;
+                },
+                error: function () {
+                    // $periodUl.find('li').remove();
+                }
+            });
+        }
+    </script>
+@endsection
 

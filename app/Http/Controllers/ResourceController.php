@@ -697,9 +697,9 @@ class ResourceController extends Controller
      *
      * @param Request $request - files format, uri of the dataset
      *
-     * @return downlodable zip file
+     * @return string $uri to download zip file
      */
-    public function resourcesDownloadZip(Request $request)
+    public function resourcesPrepareZipForDownload(Request $request)
     {
         $uri = $request->offsetGet('uri');
         $format = $request->offsetGet('format');
@@ -722,8 +722,8 @@ class ResourceController extends Controller
         $apiResources = new ApiResource($rq);
         $res = $apiResources->listResources($rq)->getData();
         $resources = !empty($res->resources) ? $res->resources : [];
+        //$resources = [];
 
-        //return back();
         //dd(count($resources));
         if(!empty($resources)) {
           //dd($resources);
@@ -733,7 +733,7 @@ class ResourceController extends Controller
 
           foreach ($resources as $key => $resource) {
 
-            //if($key > 3) continue;
+            if($key > 5) continue;
 
             $resourceId = $resource->id;
             $fileName = str_replace(['\\', '/'], '_', $resource->name);
@@ -785,19 +785,39 @@ class ResourceController extends Controller
             $zip->close();
           }
 
-          //$headers = ['Content-Type' => 'application/zip'];
-          header('Content-Type: application/zip');
-          header('Content-disposition: attachment; filename='.$zipName);
-          header('Content-Length: ' . filesize($zipDir.DIRECTORY_SEPARATOR.$zipName));
-          readfile($zipDir.DIRECTORY_SEPARATOR.$zipName);
-
         }
 
-        sleep(3);
+        return $uri;
+    }
+
+    /**
+     * Download zip file
+     *
+     * @param Request $request - uri of the dataset
+     *
+     * @return downlodable zip file
+     */
+    public function downloadAndDeleteZip(Request $request)
+    {
+      $uri = $request->offsetGet('uri');
+      $zipName = "$uri.zip";
+      $zipDir = "../storage/app/$uri";
+
+      if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
+        //dd($zipDir.DIRECTORY_SEPARATOR.$zipName);
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename='.basename($zipName));
+        @$filesize = filesize($zipDir.DIRECTORY_SEPARATOR.$zipName);
+        if($filesize) header('Content-Length: ' . $filesize);
+        readfile($zipDir.DIRECTORY_SEPARATOR.$zipName);
+
+        sleep(5);
 
         $this->deleteZipFolder($uri);
+      }
 
-        //return back();
+      //return redirect()->route('orgViewDataset', [$uri]);
     }
 
     public function deleteZipFolder($uri)

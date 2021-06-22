@@ -318,7 +318,7 @@
                     <script type="text/javascript">
                         let keyValue = document.cookie.match('(^|;) ?slideText=([^;]*)(;|$)');
                         let value = keyValue ? keyValue[2] : null;
-                        console.log(value);
+                        //console.log(value);
                         function SlideText() {
                             $('#slideText').animate({right: -200}, 2000);
                             $('#slideText').animate({left: -100}, 2000);
@@ -469,6 +469,21 @@
                     </div>
                 </div>
             </footer>
+        </div>
+    </div>
+    <div id="ajax_loader_backgr">&nbsp;</div>
+    <div id="ajax_loader">
+        <h2>Моля изчакайте</h2>
+        <div class="sk-cube-grid">
+            <div class="sk-cube sk-cube1"></div>
+            <div class="sk-cube sk-cube2"></div>
+            <div class="sk-cube sk-cube3"></div>
+            <div class="sk-cube sk-cube4"></div>
+            <div class="sk-cube sk-cube5"></div>
+            <div class="sk-cube sk-cube6"></div>
+            <div class="sk-cube sk-cube7"></div>
+            <div class="sk-cube sk-cube8"></div>
+            <div class="sk-cube sk-cube9"></div>
         </div>
     </div>
 

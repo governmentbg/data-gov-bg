@@ -282,16 +282,6 @@
 @section('js')
     <script type="text/javascript">
 
-        function ShowLoadingSpinner() {
-            $("#ajax_loader_backgr").show();
-            $("#ajax_loader").show();
-        }
-
-        function HideLoadingSpinner() {
-            $("#ajax_loader_backgr").hide();
-            $("#ajax_loader").hide();
-        }
-
         function downloadZipFile(url) {
 
             $("#ajax_loader_backgr").show();
@@ -299,21 +289,29 @@
             $("#ajax_loader .text").html('В зависимост от големината и броя на ресурсите <br> ' +
                 'създаването на .zip файла може да отнеме известно време.');
 
+            // if the response was not return in 11 minutes
+            // call the function again, because the .zip file should be
+            // ready and download will start immediately
+            //let timeOutDownload = setTimeout(function() { downloadZipFile(url); }, 660000);
+
             $.ajax({
                 type: 'GET',
                 url: url,
-                timeout: 600000 //600 seconds timeout
+                timeout: 660000 // 11 minutes
             }).done(function(uri){
 
                 $("#ajax_loader_backgr").hide();
                 $("#ajax_loader").hide();
 
+                //clearTimeout(timeOutDownload);
+
                 document.location = "/dataset/resources/download/delete/"+uri;
+
             }).fail(function(jqXHR, textStatus){
+                //alert(textStatus);
                 if(textStatus === 'timeout')
                 {
                     alert('Времето за отговор от сървъра изтече. Може би ресурсите са прекалено големи. Моля свалете ги поотделно');
-                    //do something. Try again perhaps?
                 }
             });
         }

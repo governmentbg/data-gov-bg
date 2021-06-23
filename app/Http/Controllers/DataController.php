@@ -668,7 +668,7 @@ class DataController extends Controller {
 
             // check for resources of type files and if any
             // give the user a download link for zip version of the file's resources
-            $params['resource_type'] = 1; // files
+            $params['resource_type'] = [1,3]; // TYPE_FILE, TYPE_API
             $rqFiles = Request::create('/api/listResources', 'POST', $params);
             $apiFilesResources = new ApiResource($rqFiles);
             $resFiles = $apiFilesResources->listResources($rqFiles)->getData();

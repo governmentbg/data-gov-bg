@@ -173,16 +173,28 @@
                 @endforeach
             </textarea>
         @else
-            <div class="data-preview">{{ json_encode($data, JSON_PRETTY_PRINT) }}</div>
+            @php $newData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); @endphp
+            @if(mb_strlen($newData) > 3000)
+                <p>Моля имайте предвид, че това е извадка от първите 2500 символа на ресурса</p>
+                <div class="data-preview">
+                    {{ mb_substr($data, 0, 2500, "utf-8") }}
+                </div>
+            @else
+                <div class="data-preview">
+                    {{ $newData }}
+                </div>
+            @endif
         @endif
     @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
+        <p>Моля имайте предвид, че това е извадка от първите 3000 символа на ресурса</p>
         <textarea
             class="js-xml-prev col-xs-12 m-b-md"
-            data-xml-data="{{ substr($data, 0, 400) }}"
+            data-xml-data="{{ mb_substr($data, 0, 3000, "utf-8") }}"
             rows="20"
         ></textarea>
     @else
-        <div class="data-preview">{!! nl2br(substr($data, 0, 400)) !!}</div>
+        <p>Моля имайте предвид, че това е извадка от първите 3000 символа на ресурса</p>
+        <div class="data-preview">{!! nl2br(mb_substr($data, 0, 3000, "utf-8")) !!}</div>
     @endif
     @if (!config('app.IS_TOOL'))
         <form method="POST" action="{{ url('/resource/download') }}">

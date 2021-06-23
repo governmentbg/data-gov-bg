@@ -706,8 +706,9 @@ class ResourceController extends Controller
 
         $zipName = "$uri.zip";
         $zipDir = "../storage/app/$uri";
-        if(file_exists($zipDir) && is_dir($zipDir)) {
-          $this->deleteZipFolder($uri);
+        if(!file_exists($zipDir) && !is_dir($zipDir)) {
+          \Log::info("Create folder $zipDir");
+          mkdir($zipDir, 0777);
         }
 
         $params = [
@@ -716,7 +717,7 @@ class ResourceController extends Controller
           ]
         ];
         $params['records_per_page'] = 100;
-        $params['resource_type'] = 1; // files
+        $params['resource_type'] = [1,3]; // TYPE_FILE, TYPE_API
 
         $rq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($rq);
@@ -724,19 +725,16 @@ class ResourceController extends Controller
         $resources = !empty($res->resources) ? $res->resources : [];
         //$resources = [];
 
-        //dd(count($resources));
         if(!empty($resources)) {
           //dd($resources);
-
-          \Log::info("Create folder $zipDir");
-          mkdir($zipDir, 0777);
 
           foreach ($resources as $key => $resource) {
 
             //if($key > 5) continue;
 
             $resourceId = $resource->id;
-            $fileName = str_replace(['\\', '/'], '_', $resource->name);
+            $checkName = (mb_strlen($resource->name) > 130) ? mb_substr($resource->name, 0, 130, "utf-8") : $resource->name;
+            $fileName = str_replace(['\\', '/'], '_', $checkName);
             if(file_exists($zipDir.DIRECTORY_SEPARATOR.$fileName)) {
               continue;
             }
@@ -763,7 +761,7 @@ class ResourceController extends Controller
             }
 
             if (!empty($fileData)) {
-              //$tmpFileName = str_random(32);
+
               $handle = fopen($zipDir.DIRECTORY_SEPARATOR.$fileName, 'w+');
 
               fwrite($handle, $fileData);
@@ -772,17 +770,18 @@ class ResourceController extends Controller
             }
           }
 
-          $files = glob($zipDir.DIRECTORY_SEPARATOR."*");
-          //$files = Storage::disk('public')->files('zip');
+          if(!file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
 
-          $zip = new \ZipArchive;
-          if ($zip->open($zipDir.DIRECTORY_SEPARATOR.$zipName, \ZipArchive::CREATE) === TRUE) {
-            foreach ($files as $file) {
-              $exploded = explode("/", $file);
-              $fileName = end($exploded);
-              $zip->addFile($file, $fileName.".".strtolower($format));
+            $files = glob($zipDir.DIRECTORY_SEPARATOR."*");
+            $zip = new \ZipArchive;
+            if ($zip->open($zipDir.DIRECTORY_SEPARATOR.$zipName, \ZipArchive::CREATE) === TRUE) {
+              foreach ($files as $file) {
+                $exploded = explode("/", $file);
+                $fileName = end($exploded);
+                $zip->addFile($file, $fileName.".".strtolower($format));
+              }
+              $zip->close();
             }
-            $zip->close();
           }
 
         }
@@ -804,15 +803,21 @@ class ResourceController extends Controller
       $zipDir = "../storage/app/$uri";
 
       if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
-        //dd($zipDir.DIRECTORY_SEPARATOR.$zipName);
+        //dd($zipDir.DIRECTORY_SEPARATOR.$zipName ."<br>".basename($zipName)."<br>".filesize($zipDir.DIRECTORY_SEPARATOR.$zipName));
         header('Content-Description: File Transfer');
         header('Content-Type: application/zip');
         header('Content-disposition: attachment; filename='.basename($zipName));
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
         @$filesize = filesize($zipDir.DIRECTORY_SEPARATOR.$zipName);
         if($filesize) header('Content-Length: ' . $filesize);
-        readfile($zipDir.DIRECTORY_SEPARATOR.$zipName);
 
-        sleep(5);
+        if(ob_get_level()){
+          ob_end_clean();
+        }
+
+        readfile($zipDir.DIRECTORY_SEPARATOR.$zipName);
 
         $this->deleteZipFolder($uri);
       }

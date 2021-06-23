@@ -925,7 +925,7 @@ class ResourceController extends ApiController
             'criteria'              => 'required|array',
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|digits_between:1,10',
-            'resource_type'         => 'nullable|int|digits_between:1,10',
+            'resource_type'         => 'nullable|array',
         ]);
 
         if (!$validator->fails()) {
@@ -958,7 +958,7 @@ class ResourceController extends ApiController
             }
 
             if (!empty($post['resource_type'])) {
-                $query->where('resource_type', $post['resource_type']);
+                $query->whereIn('resource_type', $post['resource_type']);
             }
 
             if (!empty($post['criteria']['resource_uri'])) {

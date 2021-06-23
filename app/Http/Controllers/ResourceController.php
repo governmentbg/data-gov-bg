@@ -733,7 +733,7 @@ class ResourceController extends Controller
 
           foreach ($resources as $key => $resource) {
 
-            if($key > 5) continue;
+            //if($key > 5) continue;
 
             $resourceId = $resource->id;
             $fileName = str_replace(['\\', '/'], '_', $resource->name);
@@ -817,7 +817,7 @@ class ResourceController extends Controller
         $this->deleteZipFolder($uri);
       }
 
-      //return redirect()->route('orgViewDataset', [$uri]);
+      return redirect()->route('orgViewDataset', [$uri]);
     }
 
     public function deleteZipFolder($uri)

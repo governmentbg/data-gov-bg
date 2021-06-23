@@ -22884,13 +22884,27 @@ nav .tool-version:hover {
   z-index: 9000;
   top: 0;
   left: 0;
-  background: #fff;
+  background: #000;
   opacity: .7
+}
+#ajax_loader {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  width: 55%;
+  top: 28%;
+  left: 22.5%;
+  text-align: center;
 }
 #ajax_loader h2 {
   position: relative;
-  left: -42%;
   margin-bottom: 30px;
+  color: #fff;
+}
+#ajax_loader .text {
+  margin-bottom: 30px;
+  color: #fff;
+  font-size: 16px;
 }
 #ajax_loader a {
   display: block;
@@ -22902,21 +22916,15 @@ nav .tool-version:hover {
   text-align: center;
   color: red;
 }
-#ajax_loader {
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  top: 32%;
-  left: 49%;
-}
 .sk-cube-grid {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto;
 }
 .sk-cube-grid .sk-cube {
   width: 33%;
   height: 33%;
-  background-color: #c02e54;
+  background-color: #76ad3f;
   float: left;
   -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
   animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;

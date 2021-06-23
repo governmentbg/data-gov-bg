@@ -474,6 +474,7 @@
     <div id="ajax_loader_backgr">&nbsp;</div>
     <div id="ajax_loader">
         <h2>Моля изчакайте</h2>
+        <p class="text"></p>
         <div class="sk-cube-grid">
             <div class="sk-cube sk-cube1"></div>
             <div class="sk-cube sk-cube2"></div>

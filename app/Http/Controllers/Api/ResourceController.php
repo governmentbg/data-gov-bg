@@ -1055,6 +1055,27 @@ class ResourceController extends ApiController
     }
 
     /**
+     * Check for resources of type file or api
+     *
+     * @param $uri
+     * @return int
+     */
+    public function checkForFilesResources(Request $request)
+    {
+
+      $uri = $request->get('uri');
+
+      $filesCount = Resource::with('DataSet')
+                            ->whereHas('DataSet', function($q) use ($uri) {
+                                $q->where('uri', $uri);
+                            })
+                            ->whereIn('resource_type', [1,3]) // TYPE_FILE, TYPE_API
+                            ->count();
+
+      return $this->successResponse(['filesCount' => $filesCount], true);
+    }
+
+    /**
      * Get resource metadata
      *
      * @param string api_key - optional

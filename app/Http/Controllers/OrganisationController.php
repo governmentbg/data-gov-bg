@@ -812,13 +812,10 @@ class OrganisationController extends Controller
                 $resources = !empty($res->resources) ? $res->resources : [];
                 $resCount = isset($res->total_records) ? $res->total_records : 0;
 
-                // check for resources of type files and if any
-                // give the user a download link for zip version of the file's resources
-                $params['resource_type'] = [1,3]; // TYPE_FILE, TYPE_API
-                $rqFiles = Request::create('/api/listResources', 'POST', $params);
+                $rqFiles = Request::create('/api/checkForFilesResources', 'POST', ['uri' => $uri]);
                 $apiFilesResources = new ApiResource($rqFiles);
-                $resFiles = $apiFilesResources->listResources($rqFiles)->getData();
-                $filesResCount = isset($resFiles->total_records) ? $resFiles->total_records : 0;
+                $filesCount = $apiFilesResources->checkForFilesResources($rqFiles)->getData();
+                $filesResCount = isset($filesCount->filesCount) ? $filesCount->filesCount : 0;
 
                 // get category details
                 if (!empty($dataset->category_id)) {

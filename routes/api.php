@@ -193,6 +193,7 @@ Route::post('listActionTypes', 'Api\ActionsHistoryController@listActionTypes');
 Route::post('userCount', 'Api\UserController@userCount');
 
 Route::post('listResources', 'Api\ResourceController@listResources');
+Route::post('checkForFilesResources', 'Api\ResourceController@checkForFilesResources');
 Route::post('getResourceMetadata', 'Api\ResourceController@getResourceMetadata');
 Route::post('getResourceSchema', 'Api\ResourceController@getResourceSchema');
 Route::post('getResourceData', 'Api\ResourceController@getResourceData');

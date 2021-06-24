@@ -718,6 +718,7 @@ class ResourceController extends Controller
         ];
         $params['records_per_page'] = 100;
         $params['resource_type'] = [1,3]; // TYPE_FILE, TYPE_API
+        $params['query_for_zip'] = true;
 
         $rq = Request::create('/api/listResources', 'POST', $params);
         $apiResources = new ApiResource($rq);

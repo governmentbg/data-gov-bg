@@ -926,6 +926,7 @@ class ResourceController extends ApiController
             'records_per_page'      => 'nullable|int|digits_between:1,10',
             'page_number'           => 'nullable|int|digits_between:1,10',
             'resource_type'         => 'nullable|array',
+            'query_for_zip'         => 'nullable|boolean',
         ]);
 
         if (!$validator->fails()) {
@@ -948,6 +949,7 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
+            \DB::enableQueryLog();
             $locale = \LaravelLocalization::getCurrentLocale();
             $query = Resource::with('DataSet');
 
@@ -1014,10 +1016,14 @@ class ResourceController extends ApiController
                 }
             }
 
-            $query->forPage(
+            $queryForZip = (!empty($post['query_for_zip'])) ? $post['query_for_zip'] : false;
+            if(!$queryForZip) {
+              $query->forPage(
                 $request->offsetGet('page_number'),
                 $this->getRecordsPerPage($request->offsetGet('records_per_page'))
-            );
+              );
+            }
+            //if($queryForZip) dd(\DB::getQueryLog());
 
             $fileFormats = Resource::getFormats();
             $rqTypes = Resource::getRequestTypes();

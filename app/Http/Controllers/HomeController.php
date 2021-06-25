@@ -22,34 +22,34 @@ class HomeController extends Controller {
         $organisations = Cache::get('home_organisations', 'N/A');
         $datasets = Cache::get('home_datasets', 'N/A');
         $mostActiveOrg = Cache::get('home_active', 'N/A');
-        //$latestNewsCache     = Cache::get('latest_news', '');
-        # Get latest news
-        $newsRequest = Request::create('/api/listNews', 'POST', [
-          'records_per_page'  => 1,
-          'criteria'         => [
-            'active'   => true,
-            'home_page'   => 1,
-          ]
-        ]);
-        $apiNews = new ApiNews($newsRequest);
-        $result = $apiNews->listNews($newsRequest)->getData();
-        if(!$result->news) {
+        $latestNewsCache = Cache::remember('latest_news', 10, function () {
+          # Get latest news
           $newsRequest = Request::create('/api/listNews', 'POST', [
             'records_per_page'  => 1,
             'criteria'         => [
               'active'   => true,
-              'home_page'   => 0,
-              'order'    => [
-                'field'    => 'created_at',
-                'type'     => 'desc'
-              ]
+              'home_page'   => true,
             ]
           ]);
           $apiNews = new ApiNews($newsRequest);
           $result = $apiNews->listNews($newsRequest)->getData();
-        }
-        $latestNewsCache = $result->news;
-        //\Log::error(gettype($latestNewsCache));
+          if(!$result->news) {
+            $newsRequest = Request::create('/api/listNews', 'POST', [
+              'records_per_page'  => 1,
+              'criteria'         => [
+                'active'   => true,
+                'order'    => [
+                  'field'    => 'created_at',
+                  'type'     => 'desc'
+                ]
+              ]
+            ]);
+            $apiNews = new ApiNews($newsRequest);
+            $result = $apiNews->listNews($newsRequest)->getData();
+          }
+          return $result->news;
+        });
+        //dd($latestNewsCache);
 
         $latestNews  = (!empty($latestNewsCache)) ? $latestNewsCache[0] : $latestNewsCache;
         $lastMonth = __('custom.'. strtolower(date('F', strtotime('last month'))));

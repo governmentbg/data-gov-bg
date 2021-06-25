@@ -354,6 +354,7 @@ class NewsController extends ApiController
      * @param string locale - optional
      * @param array criteria - optional
      * @param integer criteria[active] - optional
+     * @param integer criteria[home_page] - optional
      * @param integer criteria[valid] - optional
      * @param date criteria[date_from] - optional
      * @param date criteria[date_to] - optional
@@ -384,6 +385,7 @@ class NewsController extends ApiController
         if (!$validator->fails()) {
             $validator = Validator::make($criteria, [
                 'active'       => 'nullable|boolean',
+                'home_page'    => 'nullable|boolean',
                 'valid'        => 'nullable|integer|digits_between:1,10',
                 'date_from'    => 'nullable|date',
                 'date_to'      => 'nullable|date',
@@ -417,6 +419,10 @@ class NewsController extends ApiController
                 if (isset($criteria['date_type']) && strtolower($criteria['date_type']) == Page::DATE_TYPE_CREATED) {
                     $newsList->whereBetween('created_at', [$criteria['date_from'],$criteria['date_to']]);
                 }
+            }
+
+            if (isset($criteria['home_page'])) {
+              $newsList->where('home_page', $criteria['home_page']);
             }
 
             if (!empty($criteria['date_from']) && empty($criteria['date_to'])) {
@@ -599,9 +605,6 @@ class NewsController extends ApiController
                     });
                 }
             } else {
-                if (isset($criteria['home_page'])) {
-                  $newsList->where('home_page', $criteria['home_page']);
-                }
                 $newsList->where('type', Page::TYPE_NEWS);
             }
 

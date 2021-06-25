@@ -256,10 +256,10 @@
                     @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
                         <div class="form-group row">
                             <div class="col-sm-12" style="position: relative;padding-right:100px;">
-                                Линк за сваляне в <b>{{ strtolower($format) }}</b> формат:
+                                {!! sprintf(__('custom.resources_link_in_format'), $format) !!}
                                 <input type="text" id="link_{{ strtolower($format) }}" class="form-control"
                                        value="{{ url("/resource/download/$resource->uri/".strtolower($format)) }}" readonly>
-                                <span class="btn btn-primary" style="position: absolute;width: 85px;top: 19px;right: 5px;" onclick="copyToClipboard('link_{{ strtolower($format) }}')">Копирай</span>
+                                <span class="btn btn-primary" style="position: absolute;width: 85px;top: 19px;right: 5px;" onclick="copyToClipboard('link_{{ strtolower($format) }}')">{{ uctrans('custom.copy') }}</span>
                             </div>
                         </div>
                     @endif

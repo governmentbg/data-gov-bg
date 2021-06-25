@@ -4,8 +4,8 @@
     <div class="container">
         <div class="col-xs-12 m-l-sm mt-10">
             <div class="alert alert-warning">
-                Страницата която търсите не може да бъде намерена! Можете да отидете на началния екран на портала
-                <a href="{{ url('/') }}" class="btn btn-primary">тук</a>
+                {{ __('custom.page_404_text') }}
+                <a href="{{ url('/') }}" class="btn btn-primary">{{ __('custom.here') }}</a>
             </div>
         </div>
     </div>

@@ -318,7 +318,6 @@
                     <script type="text/javascript">
                         let keyValue = document.cookie.match('(^|;) ?slideText=([^;]*)(;|$)');
                         let value = keyValue ? keyValue[2] : null;
-                        //console.log(value);
                         function SlideText() {
                             $('#slideText').animate({right: -200}, 2000);
                             $('#slideText').animate({left: -100}, 2000);
@@ -329,16 +328,12 @@
                         }
                         $(function() {
                             $.get( "/msg", function( data ) {
-                                //console.log(data);
-                                if(data[0] == 1) {
-                                    $("#slideText").html(data.msg);
-                                }
+                                $("#slideText").html(data.msg);
                             });
                             if(value == null) {
                                 SlideText();
                                 let date = new Date();
                                 date.setTime(date.getTime() + (30 * 1000));
-                                console.log(date);
                                 document.cookie = "slideText=1;expires="+date;
                             }
                             setInterval(function(){ SlideText() }, 12000);

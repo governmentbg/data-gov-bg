@@ -977,24 +977,26 @@ class UserController extends Controller {
         );
     }
 
+    /**
+     * Move all resources from one data set to another
+     *
+     * @return RedirectResponse
+     */
     public function adminOrgDatasetMove()
     {
-
-      //dd(request()->all());
       $new_data_set_id = request()->get('new_data_set_id');
       $current_data_set_id = request()->get('current_data_set_id');
       if(!$current_data_set_id) {
-        return redirect()->back()->withErrors(session()->flash('alert-danger', "Не е намерен стария набор от данни"));
+        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.old_dataset_not_found')));
       }
       if(!$new_data_set_id) {
-        return redirect()->back()->withErrors(session()->flash('alert-danger', "Моля напишете ИД на набор от данни в който искате да преместите ресурсите"));
+        return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.write_dataset_id')));
       }
 
       $dataSet = DataSet::find($new_data_set_id);
       if(!$dataSet) {
-        return redirect()->back()->withErrors(session()->flash('alert-danger', "Не съществува набор от данни с ИД: $new_data_set_id"));
+        return redirect()->back()->withErrors(session()->flash('alert-danger', sprintf(__('custom.no_dataset_with_this_id'), $new_data_set_id)));
       }
-
 
       try {
         Resource::where('data_set_id', $current_data_set_id)->update(['data_set_id' => $new_data_set_id]);
@@ -1003,7 +1005,7 @@ class UserController extends Controller {
         Log::error($ex->getMessage());
       }
 
-      return redirect()->back()->withErrors(session()->flash('alert-success', "Ресурсите бяха преместени успешно в Набор от данни: ".$dataSet->name));
+      return redirect()->back()->withErrors(session()->flash('alert-success', sprintf(__('custom.resources_moved_successfully_to_new_dataset'), $dataSet->name)));
     }
 
     /**

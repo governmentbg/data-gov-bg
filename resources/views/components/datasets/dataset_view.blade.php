@@ -159,7 +159,7 @@
         @if (
             !empty($admin) && \Auth::user()->is_admin && false
         )
-            <p><strong>Премести ресурсите в набор от данни с ИД:</strong></p>
+            <p><strong>{{ __('custom.move_resources_to_new_dataset') }}</strong></p>
             <div class="col-xs-12 p-l-r-none">
                 <form method="POST" class="col-lg-4" action="{{ route('adminOrgDatasetMove') }}">
                     {{ csrf_field() }}

@@ -335,7 +335,7 @@ Route::middleware('auth')->group(function() {
 Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
 Route::match(['get', 'post'], '/resource/download/{uri}/{format}', 'ResourceController@resourceDirectDownload');
 Route::match(['get', 'post'], '/dataset/{uri}/resources/download/{format}', 'ResourceController@resourcesPrepareZipForDownload');
-Route::match(['get', 'post'], '/dataset/resources/download/delete/{uri}', 'ResourceController@downloadAndDeleteZip');
+Route::match(['get', 'post'], '/dataset/resources/download/zip/{uri}', 'ResourceController@downloadResourcesZip');
 Route::match(['get', 'post'], 'help', 'HelpController@list');
 Route::match(['get', 'post'], 'help/search', 'HelpController@search');
 Route::match(['get', 'post'], 'help/view/{id}/{activePage?}', 'HelpController@view');

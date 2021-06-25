@@ -917,7 +917,6 @@ class ResourceController extends ApiController
      */
     public function listResources(Request $request)
     {
-        $count = 0;
         $results = [];
         $post = $request->all();
 
@@ -949,7 +948,6 @@ class ResourceController extends ApiController
         }
 
         if (!$validator->fails()) {
-            \DB::enableQueryLog();
             $locale = \LaravelLocalization::getCurrentLocale();
             $query = Resource::with('DataSet');
 
@@ -1023,7 +1021,6 @@ class ResourceController extends ApiController
                 $this->getRecordsPerPage($request->offsetGet('records_per_page'))
               );
             }
-            //if($queryForZip) dd(\DB::getQueryLog());
 
             $fileFormats = Resource::getFormats();
             $rqTypes = Resource::getRequestTypes();
@@ -1075,7 +1072,7 @@ class ResourceController extends ApiController
                             ->whereHas('DataSet', function($q) use ($uri) {
                                 $q->where('uri', $uri);
                             })
-                            ->whereIn('resource_type', [1,3]) // TYPE_FILE, TYPE_API
+                            ->whereIn('resource_type', [Resource::TYPE_FILE,Resource::TYPE_API])
                             ->count();
 
       return $this->successResponse(['filesCount' => $filesCount], true);

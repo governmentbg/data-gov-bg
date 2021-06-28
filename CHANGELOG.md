@@ -13,6 +13,28 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.3.0] - 2021-06-28
+### Added
+- News type to news that can be regular, latest news for home page and alert
+- Latest news box to the home page
+- Alert news displayed just below the horizontal menu in the colored lane
+- Resources direct download links for the different formats to the resource's details page
+- Error pages 404, 500, 505
+- Download links for zip files in different format with all the resources in a data set
+
+### Changed
+- Replace registered user's count in the green box on home page with organizations count
+- Disable the first three fields in organization's edit form for all users except admins
+- Temporarily remove the restriction of maximum 800 characters for news body
+- Make an excerpt from the first 3000 characters of the resource priview when it is in json
+or xml format on the resource's details page
+
+### Fixed
+- Typo in data sets text on home page
+
+### Removed
+- Home page boxes for organizations count and updates count
+
 ## [1.2.5] - 2020-09-18
 ### Changed
 - Report Elasticsearch red indices command

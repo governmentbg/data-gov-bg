@@ -3,14 +3,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Page;
+
 class MsgController extends Controller
 {
 
   public function display()
   {
     $locale = \LaravelLocalization::getCurrentLocale();
-    $alertNewsCache = \DB::select("SELECT p.active, t.label as msg FROM `pages` p,`translations` t 
-                                    Where p.title = t.group_id and p.home_page = 2 and p.active = 1 and p.type = 1 and t.locale = '$locale' limit 1");
+    $alertNewsCache = \DB::select("SELECT p.active, t.label as msg 
+                                    FROM `pages` p,`translations` t 
+                                    WHERE p.title = t.group_id AND p.news_type = ".Page::NEWS_TYPE_ALERT." AND p.active = 1 
+                                            AND p.type = ".Page::TYPE_NEWS." AND t.locale = '$locale' 
+                                    LIMIT 1");
 
     $response['msg'] = (!empty($alertNewsCache)) ? mb_substr($alertNewsCache[0]->msg, 0, 2500, "utf-8") : "";
 

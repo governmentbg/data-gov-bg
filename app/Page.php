@@ -24,6 +24,10 @@ class Page extends Model implements TranslatableInterface
     const TYPE_NEWS = 1;
     const TYPE_PAGE = 2;
 
+    const NEWS_TYPE_REGULAR = 0;
+    const NEWS_TYPE_LATEST_NEWS = 1;
+    const NEWS_TYPE_ALERT = 2;
+
     const RESOURCE_RESPONSE_JSON = 1;
     const RESOURCE_RESPONSE_CSV = 2;
 

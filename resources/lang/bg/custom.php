@@ -940,4 +940,5 @@ return [
     'no_dataset_with_this_id' => 'Не съществува набор от данни с ИД: %s',
     'resources_moved_successfully_to_new_dataset' => 'Ресурсите бяха преместени успешно в Набор от данни: %s',
     'resources_link_in_format' => 'Линк за сваляне в <b>%s</b> формат:',
+    'resource_short_preview' => 'Моля имайте предвид, че това е извадка от първите %s символа на ресурса',
 ];

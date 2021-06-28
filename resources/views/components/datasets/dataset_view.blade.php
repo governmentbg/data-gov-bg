@@ -80,12 +80,12 @@
                 &nbsp;{{ $dataset->support_email }}
             </p>
         @endif
-            <p><strong>{{ __('custom.description') }}:</strong></p>
-            <div class="m-b-sm">
-                @if (!empty($dataset->description))
-                    {!! nl2br(e($dataset->description)) !!}
-                @endif
-            </div>
+        <p><strong>{{ __('custom.description') }}:</strong></p>
+        <div class="m-b-sm">
+            @if (!empty($dataset->description))
+                {!! nl2br(e($dataset->description)) !!}
+            @endif
+        </div>
         @if (!empty($dataset->sla))
             <p><strong>{{ __('custom.sla_agreement') }}:</strong></p>
             <div class="m-b-sm">
@@ -102,9 +102,9 @@
             <p><strong>{{ utrans('custom.groups', 2) }}:</strong></p>
             <div class="m-b-sm">
                 @foreach ($dataset->groups as $groupName)
-                <p>
-                    <a href="{{ url('/'. $root .'/groups/view/'. $groupName->uri) }}">{{ $groupName->name }}</a>
-                </p>
+                    <p>
+                        <a href="{{ url('/'. $root .'/groups/view/'. $groupName->uri) }}">{{ $groupName->name }}</a>
+                    </p>
                 @endforeach
             </div>
         @endif
@@ -124,32 +124,32 @@
                     {{ csrf_field() }}
                     <div class="form-group row">
                         <select
-                            id="group"
-                            name="group_id[]"
-                            class="js-autocomplete form-control"
-                            data-placeholder="{{ utrans('custom.groups', 1) }}"
-                            multiple="multiple"
+                                id="group"
+                                name="group_id[]"
+                                class="js-autocomplete form-control"
+                                data-placeholder="{{ utrans('custom.groups', 1) }}"
+                                multiple="multiple"
                         >
                             <option></option>
                             @foreach ($groups as $id => $groupName)
                                 <option
-                                    value="{{ $id }}"
-                                    {{
-                                        !empty(old('group_id'))
-                                        && in_array($id, old('group_id'))
-                                        || !empty($setGroups)
-                                        && in_array($id, $setGroups)
-                                        ? 'selected' : ''
-                                    }}
+                                        value="{{ $id }}"
+                                        {{
+                                            !empty(old('group_id'))
+                                            && in_array($id, old('group_id'))
+                                            || !empty($setGroups)
+                                            && in_array($id, $setGroups)
+                                            ? 'selected' : ''
+                                        }}
                                 >{{ $groupName }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group row">
                         <button
-                            type="submit"
-                            name="save"
-                            class="btn btn-primary"
+                                type="submit"
+                                name="save"
+                                class="btn btn-primary"
                         >{{ uctrans('custom.save') }}</button>
                     </div>
                 </form>
@@ -201,20 +201,20 @@
                     @if (!empty($admin) || !empty($buttons[$resource->uri]['view']))
                         <div class="m-b-xs {{ $resource->reported ? 'signaled' : '' }}">
                             <a
-                                @if (!empty($fromOrg))
+                                    @if (!empty($fromOrg))
                                     href="{{ url('/'. $root. '/organisations/'. $fromOrg->uri .'/resource/'. $resource->uri) }}"
-                                @elseif (!empty($group))
+                                    @elseif (!empty($group))
                                     href="{{ url('/'. $root. '/groups/'. $group->uri .'/resource/'. $resource->uri) }}"
-                                @else
+                                    @else
                                     href="{{ url('/'. $root .'/resource/view/'. $resource->uri) }}"
-                                @endif
+                                    @endif
                             >
                                 <span>
                                     <svg
-                                        id="Layer_1"
-                                        data-name="Layer 1"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 30 30"
+                                            id="Layer_1"
+                                            data-name="Layer 1"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 30 30"
                                     >
                                         <path d="M26.72,29.9H3.33V0H26.72ZM4.62,28.61H25.43V1.29H4.62Z"/>
                                         <path d="M11.09,6.18V9.12H8.14V6.18h2.95m1.29-1.3H6.85v5.53h5.53V4.88Z"/>
@@ -232,36 +232,36 @@
                                 <form method="POST" class="pull-right" action="{{ url('/resource/download') }}">
                                     {{ csrf_field() }}
                                     <input
-                                        hidden
-                                        name="resource"
-                                        type="text"
-                                        value="{{ $resource->id }}"
+                                            hidden
+                                            name="resource"
+                                            type="text"
+                                            value="{{ $resource->id }}"
                                     >
                                     <input
-                                        hidden
-                                        name="version"
-                                        type="text"
-                                        value="{{ $resource->version }}"
+                                            hidden
+                                            name="version"
+                                            type="text"
+                                            value="{{ $resource->version }}"
                                     >
                                     <input
-                                        hidden
-                                        name="name"
-                                        type="text"
-                                        value="{{ $resource->name }}"
+                                            hidden
+                                            name="name"
+                                            type="text"
+                                            value="{{ $resource->name }}"
                                     >
                                     <input
-                                        hidden
-                                        name="format"
-                                        type="text"
-                                        value="{{ $resource->file_format }}"
+                                            hidden
+                                            name="format"
+                                            type="text"
+                                            value="{{ $resource->file_format }}"
                                     >
                                     <button
-                                        name="download"
-                                        type="submit"
-                                        class="btn btn-primary js-ga-event"
-                                        data-ga-action="download"
-                                        data-ga-label="resource download"
-                                        data-ga-category="data"
+                                            name="download"
+                                            type="submit"
+                                            class="btn btn-primary js-ga-event"
+                                            data-ga-action="download"
+                                            data-ga-label="resource download"
+                                            data-ga-category="data"
                                     >{{ uctrans('custom.download') }}</button>
                                 </form>
                             @endif
@@ -285,40 +285,40 @@
         <div class="{{ isset($fromOrg) || isset($group) ? 'col-sm-9' : 'col-xs-12' }} mng-btns p-l-r-none">
             @if (!empty($admin) || !empty($buttons['addResource']))
                 <a
-                    class="btn btn-primary"
-                    @if (isset($group))
+                        class="btn btn-primary"
+                        @if (isset($group))
                         href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/resource/create/'. $dataset->uri) }}"
-                    @elseif (isset($fromOrg))
+                        @elseif (isset($fromOrg))
                         href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/resource/create/'. $dataset->uri) }}"
-                    @else
+                        @else
                         href="{{ url('/'. $root .'/dataset/resource/create/'. $dataset->uri) }}"
-                    @endif
+                        @endif
                 >{{ uctrans('custom.add_resource') }}</a>
             @endif
             @if (!empty($admin) || !empty($buttons[$dataset->uri]['edit']))
                 <a
-                    class="btn btn-primary"
-                    @if (isset($group))
+                        class="btn btn-primary"
+                        @if (isset($group))
                         href="{{ url('/'. $root .'/groups/'. $group->uri .'/dataset/edit/'. $dataset->uri) }}"
-                    @elseif (isset($fromOrg))
+                        @elseif (isset($fromOrg))
                         href="{{ url('/'. $root .'/organisations/'. $fromOrg->uri .'/dataset/edit/'. $dataset->uri) }}"
-                    @else
+                        @else
                         href="{{ url('/'. $root .'/dataset/edit/'. $dataset->uri) }}"
-                    @endif
+                        @endif
                 >{{ uctrans('custom.edit') }}</a>
             @endif
             <form method="POST" class="inline-block">
-            {{ csrf_field() }}
+                {{ csrf_field() }}
                 <a
-                    name="back"
-                    @if (isset($group))
+                        name="back"
+                        @if (isset($group))
                         href="{{ url('/'. $root .'/groups/datasets/'. $group->uri) }}"
-                    @elseif (isset($fromOrg))
+                        @elseif (isset($fromOrg))
                         href="{{ url('/'. $root .'/organisations/datasets/'. $fromOrg->uri) }}"
-                    @else
+                        @else
                         href="{{ url('/'. $root .'/datasets/') }}"
-                    @endif
-                    class="btn btn-primary"
+                        @endif
+                        class="btn btn-primary"
                 >{{ uctrans('custom.close') }}</a>
             </form>
             @if (!empty($admin) || !empty($buttons[$dataset->uri]['delete']))
@@ -326,10 +326,10 @@
                     {{ csrf_field() }}
                     <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                     <button
-                        class="btn del-btn btn-primary"
-                        type="submit"
-                        name="delete"
-                        data-confirm="{{ __('custom.remove_data') }}"
+                            class="btn del-btn btn-primary"
+                            type="submit"
+                            name="delete"
+                            data-confirm="{{ __('custom.remove_data') }}"
                     >{{ uctrans('custom.remove') }}</button>
                 </form>
             @endif

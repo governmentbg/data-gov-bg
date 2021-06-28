@@ -30,20 +30,20 @@
                                 <select class="js-records-per-page" name="per_page">
                                     @foreach ($perPageArr as $opt)
                                         <option
-                                            value="{{ $opt }}"
-                                            {{
-                                                !isset(app('request')['per_page'])
-                                                && isset($dataPerPage)
-                                                && $opt == $dataPerPage
-                                                    ? 'selected'
-                                                    : ''
-                                            }}
-                                            {{
-                                                isset(app('request')['per_page'])
-                                                && app('request')['per_page'] == $opt
-                                                    ? 'selected'
-                                                    : ''
-                                            }}
+                                                value="{{ $opt }}"
+                                                {{
+                                                    !isset(app('request')['per_page'])
+                                                    && isset($dataPerPage)
+                                                    && $opt == $dataPerPage
+                                                        ? 'selected'
+                                                        : ''
+                                                }}
+                                                {{
+                                                    isset(app('request')['per_page'])
+                                                    && app('request')['per_page'] == $opt
+                                                        ? 'selected'
+                                                        : ''
+                                                }}
                                         >{{ $opt }}</option>
                                     @endforeach
                                 </select>
@@ -59,11 +59,11 @@
                         <form method="GET">
                             <div class="col-xs-6">
                                 <input
-                                    type="text"
-                                    class="input-border-r-12 form-control"
-                                    placeholder="{{ __('custom.search') }}.."
-                                    value="{{ isset($search) ? $search : '' }}"
-                                    name="q"
+                                        type="text"
+                                        class="input-border-r-12 form-control"
+                                        placeholder="{{ __('custom.search') }}.."
+                                        value="{{ isset($search) ? $search : '' }}"
+                                        name="q"
                                 >
                             </div>
                             @if (isset(app('request')['rpage']))
@@ -90,8 +90,8 @@
                                 )
                             @endphp
                             <a
-                                href="{{ url()->current() .'?'. http_build_query($params) }}"
-                                class="{{
+                                    href="{{ url()->current() .'?'. http_build_query($params) }}"
+                                    class="{{
                                     isset(app('request')->input()['order_type'])
                                     && app('request')->input()['order_type'] == 'asc'
                                         ? 'active'
@@ -105,8 +105,8 @@
                                 )
                             @endphp
                             <a
-                                href="{{ url()->current() .'?'. http_build_query($params) }}"
-                                class="{{
+                                    href="{{ url()->current() .'?'. http_build_query($params) }}"
+                                    class="{{
                                     isset(app('request')->input()['order_type'])
                                     && app('request')->input()['order_type'] == 'desc'
                                         ? 'active'
@@ -118,19 +118,19 @@
                 @endif
                 <table class="data-table <?= isset($resPagination) ? 'paging-off' : '' ?>">
                     <thead>
-                        @foreach ($data as $index => $row)
-                            @if ($index == 0)
-                                @foreach ($row as $key => $value)
-                                    @php
-                                        $params = array_merge(
-                                            ['order' => $key],
-                                            array_except(app('request')->input(), ['order'])
-                                        )
-                                    @endphp
-                                    <th>
-                                        <p>{{ $value }}</p>
-                                        @if (isset($resPagination))
-                                            <a
+                    @foreach ($data as $index => $row)
+                        @if ($index == 0)
+                            @foreach ($row as $key => $value)
+                                @php
+                                    $params = array_merge(
+                                        ['order' => $key],
+                                        array_except(app('request')->input(), ['order'])
+                                    )
+                                @endphp
+                                <th>
+                                    <p>{{ $value }}</p>
+                                    @if (isset($resPagination))
+                                        <a
                                                 href="{{ url()->current() .'?'. http_build_query($params) }}"
                                                 class="{{
                                                     isset(app('request')->input()['order'])
@@ -138,25 +138,25 @@
                                                         ? 'active'
                                                         : ''
                                                 }}"
-                                            ><i class="fa fa-sort"></i></a>
-                                        @endif
-                                    </th>
-                                @endforeach
-                                </thead>
-                                <tbody>
-                            @else
-                                <tr>
-                                    @foreach ($row as $key => $value)
-                                        <td>{{ $value }}</td>
-                                    @endforeach
-                                    @if (count($data[0]) > count($row))
-                                        @for ($x = count($data[0]) - count($row); $x >= 0; $x--)
-                                            <td></td>
-                                        @endfor
+                                        ><i class="fa fa-sort"></i></a>
                                     @endif
-                                </tr>
+                                </th>
+                            @endforeach
+                    </thead>
+                    <tbody>
+                    @else
+                        <tr>
+                            @foreach ($row as $key => $value)
+                                <td>{{ $value }}</td>
+                            @endforeach
+                            @if (count($data[0]) > count($row))
+                                @for ($x = count($data[0]) - count($row); $x >= 0; $x--)
+                                    <td></td>
+                                @endfor
                             @endif
-                        @endforeach
+                        </tr>
+                    @endif
+                    @endforeach
                     </tbody>
                 </table>
                 @include('partials.resource-pagination')
@@ -165,8 +165,8 @@
             <p>@php echo nl2br(e($data->text)) @endphp</p>
         @elseif ($format == App\Resource::FORMAT_XSD)
             <textarea
-                class="col-xs-12 m-b-md"
-                rows="20"
+                    class="col-xs-12 m-b-md"
+                    rows="20"
             >
                 @foreach ($data as $el)
                     {{ $el }}
@@ -175,9 +175,9 @@
         @else
             @php $newData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); @endphp
             @if(mb_strlen($newData) > 3000)
-                <p>Моля имайте предвид, че това е извадка от първите 2500 символа на ресурса</p>
+                <p>{{ sprintf(__('custom.resource_short_preview'), 3000) }}</p>
                 <div class="data-preview">
-                    {{ mb_substr($data, 0, 2500, "utf-8") }}
+                    {{ mb_substr($newData, 0, 3000, "utf-8") }}
                 </div>
             @else
                 <div class="data-preview">
@@ -186,54 +186,54 @@
             @endif
         @endif
     @elseif ($format == App\Resource::FORMAT_XML || $format == App\Resource::FORMAT_RDF)
-        <p>Моля имайте предвид, че това е извадка от първите 3000 символа на ресурса</p>
+        <p>{{ sprintf(__('custom.resource_short_preview'), 3000) }}</p>
         <textarea
-            class="js-xml-prev col-xs-12 m-b-md"
-            data-xml-data="{{ mb_substr($data, 0, 3000, "utf-8") }}"
-            rows="20"
+                class="js-xml-prev col-xs-12 m-b-md"
+                data-xml-data="{{ mb_substr($data, 0, 3000, "utf-8") }}"
+                rows="20"
         ></textarea>
     @else
-        <p>Моля имайте предвид, че това е извадка от първите 3000 символа на ресурса</p>
+        <p>{{ sprintf(__('custom.resource_short_preview'), 3000) }}</p>
         <div class="data-preview">{!! nl2br(mb_substr($data, 0, 3000, "utf-8")) !!}</div>
     @endif
     @if (!config('app.IS_TOOL'))
         <form method="POST" action="{{ url('/resource/download') }}">
             {{ csrf_field() }}
             <input
-                hidden
-                name="resource"
-                type="text"
-                value="{{ $resource->id }}"
+                    hidden
+                    name="resource"
+                    type="text"
+                    value="{{ $resource->id }}"
             >
             <input
-                hidden
-                name="version"
-                type="text"
-                value="{{ $versionView }}"
+                    hidden
+                    name="version"
+                    type="text"
+                    value="{{ $versionView }}"
             >
             <input
-                hidden
-                name="name"
-                type="text"
-                value="{{ $resource->name }}"
+                    hidden
+                    name="name"
+                    type="text"
+                    value="{{ $resource->name }}"
             >
             @if (!empty($data))
                 <div class="form-group row">
                     <label
-                        for="format"
-                        class="col-sm-3 col-xs-12 col-form-label"
+                            for="format"
+                            class="col-sm-3 col-xs-12 col-form-label"
                     >{{ uctrans('custom.format') }}:</label>
                     <div class="col-sm-9">
                         <select
-                            id="format"
-                            name="format"
-                            class="js-select form-control"
+                                id="format"
+                                name="format"
+                                class="js-select form-control"
                         >
                             @foreach ($formats as $id => $format)
                                 @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
                                     <option
-                                        value="{{ $format }}"
-                                        {{ $format == $resource->file_format ? 'selected' : '' }}
+                                            value="{{ $format }}"
+                                            {{ $format == $resource->file_format ? 'selected' : '' }}
                                     >{{ $format }}</option>
                                 @endif
                             @endforeach
@@ -243,12 +243,12 @@
 
                 <div class="row text-right download-btns">
                     <button
-                        name="download"
-                        type="submit"
-                        class="btn btn-primary js-ga-event"
-                        data-ga-action="download"
-                        data-ga-label="resource download"
-                        data-ga-category="data"
+                            name="download"
+                            type="submit"
+                            class="btn btn-primary js-ga-event"
+                            data-ga-action="download"
+                            data-ga-label="resource download"
+                            data-ga-category="data"
                     >{{ uctrans('custom.download') }}</button>
                 </div>
 
@@ -280,4 +280,3 @@
         }
     </script>
 @endsection
-

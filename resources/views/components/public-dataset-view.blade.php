@@ -4,36 +4,36 @@
             <div class="articles">
                 <div class="article col-xs-12">
                     <div>
-                    @if (!empty($organisation))
-                        <div class="col-sm-7 col-xs-12 p-l-r-none m-t-lg m-b-md">
-                            <div class="col-md-8 col-sm-10 col-xs-12 logo-img p-l-r-none">
-                                <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" title="{{ $organisation->name }}">
-                                    <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
-                                </a>
+                        @if (!empty($organisation))
+                            <div class="col-sm-7 col-xs-12 p-l-r-none m-t-lg m-b-md">
+                                <div class="col-md-8 col-sm-10 col-xs-12 logo-img p-l-r-none">
+                                    <a href="{{ url('/organisation/profile/'. $organisation->uri) }}" title="{{ $organisation->name }}">
+                                        <img class="img-responsive" src="{{ $organisation->logo }}" alt="{{ $organisation->name }}">
+                                    </a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-sm-12 col-xs-12 p-l-r-none">
-                            <h3>
-                                <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ $organisation->name }}</a>
-                            </h3>
-                        </div>
-                    @else
-                        <div class="col-sm-12 col-xs-12 p-l-r-none">
-                            <div class="pull-left">
-                                <h2>
-                                    @if (!empty($user))
-                                        {{ utrans('custom.author') }}:
-                                        <a href="{{ url('/user/profile/'. $user->id) }}">
-                                            {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
-                                        </a>
-                                    @elseif (!empty($dataset->created_by))
-                                        {{ utrans('custom.author') }}:
-                                        <span>{{ $dataset->created_by }}</span>
-                                    @endif
-                                </h2>
+                            <div class="col-sm-12 col-xs-12 p-l-r-none">
+                                <h3>
+                                    <a href="{{ url('/organisation/profile/'. $organisation->uri) }}">{{ $organisation->name }}</a>
+                                </h3>
                             </div>
-                        </div>
-                    @endif
+                        @else
+                            <div class="col-sm-12 col-xs-12 p-l-r-none">
+                                <div class="pull-left">
+                                    <h2>
+                                        @if (!empty($user))
+                                            {{ utrans('custom.author') }}:
+                                            <a href="{{ url('/user/profile/'. $user->id) }}">
+                                                {{ ($user->firstname || $user->lastname) ? trim($user->firstname .' '. $user->lastname) : $user->username }}
+                                            </a>
+                                        @elseif (!empty($dataset->created_by))
+                                            {{ utrans('custom.author') }}:
+                                            <span>{{ $dataset->created_by }}</span>
+                                        @endif
+                                    </h2>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     <div class="col-xs-12 p-l-r-none m-t-md m-b-md">
                         <div class="art-heading-bar row">
@@ -97,38 +97,38 @@
                             </div>
                         </div>
 
-                         @if (!empty($buttons['addGroup']) && !empty($groups))
+                        @if (!empty($buttons['addGroup']) && !empty($groups))
                             <div class="col-xs-12 p-l-r-none">
                                 <form method="POST" class="col-lg-4">
                                     {{ csrf_field() }}
                                     <div class="form-group row">
                                         <select
-                                            id="group"
-                                            name="group_id[]"
-                                            class="js-autocomplete form-control"
-                                            data-placeholder="{{ utrans('custom.groups', 1) }}"
-                                            multiple="multiple"
+                                                id="group"
+                                                name="group_id[]"
+                                                class="js-autocomplete form-control"
+                                                data-placeholder="{{ utrans('custom.groups', 1) }}"
+                                                multiple="multiple"
                                         >
                                             <option></option>
                                             @foreach ($groups as $id => $groupName)
                                                 <option
-                                                    value="{{ $id }}"
-                                                    {{
-                                                        !empty(old('group_id'))
-                                                        && in_array($id, old('group_id'))
-                                                        || !empty($setGroups)
-                                                        && in_array($id, $setGroups)
-                                                        ? 'selected' : ''
-                                                    }}
+                                                        value="{{ $id }}"
+                                                        {{
+                                                            !empty(old('group_id'))
+                                                            && in_array($id, old('group_id'))
+                                                            || !empty($setGroups)
+                                                            && in_array($id, $setGroups)
+                                                            ? 'selected' : ''
+                                                        }}
                                                 >{{ $groupName }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="form-group row">
                                         <button
-                                            type="submit"
-                                            name="save"
-                                            class="btn btn-primary"
+                                                type="submit"
+                                                name="save"
+                                                class="btn btn-primary"
                                         >{{ uctrans('custom.save') }}</button>
                                     </div>
                                 </form>
@@ -136,27 +136,27 @@
                         @endif
 
                         @if (count($resources) > 0)
-                        <div class="col-sm-12 pull-left p-h-sm p-l-none">
-                            <div class="pull-left history">
-                                @if (count($resources) > 1)
-                                    @include('partials.sorting.data-sets')
-                                @endif
+                            <div class="col-sm-12 pull-left p-h-sm p-l-none">
+                                <div class="pull-left history">
+                                    @if (count($resources) > 1)
+                                        @include('partials.sorting.data-sets')
+                                    @endif
 
-                                @include('partials.pagination')
-                                @foreach ($resources as $resource)
-                                    <div class="{{ $resource->reported ? 'signaled' : '' }}">
-                                        <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => ''])) }}">
+                                    @include('partials.pagination')
+                                    @foreach ($resources as $resource)
+                                        <div class="{{ $resource->reported ? 'signaled' : '' }}">
+                                            <a href="{{ route($routeName, array_merge(app('request')->input(), ['uri' => $resource->uri, 'version' => ''])) }}">
                                             <span>
                                                 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><path d="M26.72,29.9H3.33V0H26.72ZM4.62,28.61H25.43V1.29H4.62Z"/><path d="M11.09,6.18V9.12H8.14V6.18h2.95m1.29-1.3H6.85v5.53h5.53V4.88Z"/><path d="M11.09,13.48v2.94H8.14V13.48h2.95m1.29-1.29H6.85v5.52h5.53V12.19Z"/><path d="M11.09,20.78v2.94H8.14V20.78h2.95m1.29-1.29H6.85V25h5.53V19.49Z"/><rect x="14.34" y="21.38" width="7.57" height="1.74"/><rect x="14.34" y="14.08" width="7.57" height="1.74"/><rect x="14.34" y="6.78" width="7.57" height="1.74"/></svg>
                                             </span>
-                                            <span class="version-heading">{{ utrans('custom.resource') }}</span>
-                                            <span class="version">&nbsp;&#8211;&nbsp;{{ $resource->name }}</span>
-                                        </a>
-                                    </div>
-                                @endforeach
-                                @include('partials.pagination')
+                                                <span class="version-heading">{{ utrans('custom.resource') }}</span>
+                                                <span class="version">&nbsp;&#8211;&nbsp;{{ $resource->name }}</span>
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                    @include('partials.pagination')
+                                </div>
                             </div>
-                        </div>
                         @endif
                         <p>
                             <strong>{{ utrans('custom.version') }}:</strong>&nbsp;{{ $dataset->version }}
@@ -220,12 +220,36 @@
             </div>
         </div>
     </div>
+    @if (count($resources) > 0 && $filesResCount > 0)
+        @php
+            $versionFormat = App\Resource::getResourceVersionFormat($resources[0]);
+            if (!config('app.IS_TOOL')) {
+                $format = empty($resource) ? false : $versionFormat ? $versionFormat : App\Resource::getFormatsCode($resources[0]->file_format);
+                $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resources[0]->file_format);
+            } else {
+                $format = $versionFormat;
+            }
+        @endphp
+        <div class="row">
+            <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns" style="margin-top:-50px;">
+                @foreach ($formats as $id => $format)
+                    @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
+                        <br>
+                        <a href="javascript:;" onclick="downloadZipFile('{{ url("/dataset/$dataset->uri/resources/download/".strtolower($format)) }}')">
+                            <i class="fa fa-download"></i>
+                            {{ sprintf(__('custom.resources_zip_link'), $format) }}
+                        </a>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    @endif
     <div class="row">
         <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns">
             @if (isset($buttons['addResource']) && $buttons['addResource'])
                 <a
-                    class="btn btn-primary badge badge-pill"
-                    href="{{ url(
+                        class="btn btn-primary badge badge-pill"
+                        href="{{ url(
                         '/'. (isset($buttons['addResourceRootUrl']) ? $buttons['addResourceRootUrl'] : $buttons['rootUrl'] .'/dataset') .
                         '/resource/create/'. $dataset->uri
                     ) }}"
@@ -233,8 +257,8 @@
             @endif
             @if (isset($buttons['edit']) && $buttons['edit'])
                 <a
-                    class="btn btn-primary badge badge-pill"
-                    href="{{ url(
+                        class="btn btn-primary badge badge-pill"
+                        href="{{ url(
                         '/'. (isset($buttons['editRootUrl']) ? $buttons['editRootUrl'] : $buttons['rootUrl'] .'/dataset') .
                         '/edit/'. $dataset->uri
                     ) }}"
@@ -244,10 +268,10 @@
                 <form method="POST" class="inline-block">
                     {{ csrf_field() }}
                     <button
-                        class="btn del-btn btn-primary badge badge-pill"
-                        type="submit"
-                        name="delete"
-                        data-confirm="{{ __('custom.remove_data') }}"
+                            class="btn del-btn btn-primary badge badge-pill"
+                            type="submit"
+                            name="delete"
+                            data-confirm="{{ __('custom.remove_data') }}"
                     >{{ uctrans('custom.remove') }}</button>
                     <input type="hidden" name="dataset_uri" value="{{ $dataset->uri }}">
                 </form>
@@ -255,3 +279,37 @@
         </div>
     </div>
 @endif
+
+@section('js')
+    <script type="text/javascript">
+
+        /**
+         * Prepare the zip file, prompt the user to download it when ready
+         * and delete it after that
+         *
+         * @param url
+         */
+        function downloadZipFile(url) {
+
+            $("#ajax_loader_backgr").show();
+            $("#ajax_loader").show();
+            $("#ajax_loader .text").html("{!!  __('custom.zip_download_info')  !!}");
+
+            $.ajax({
+                type: 'GET',
+                url: url,
+            }).done(function(uri){
+
+                $("#ajax_loader_backgr").hide();
+                $("#ajax_loader").hide();
+
+                document.location = "/dataset/resources/download/zip/"+uri;
+
+            }).fail(function(jqXHR, textStatus){
+                if(textStatus == "error") {
+                    alert("{{ __('custom.zip_download_fail') }}");
+                }
+            });
+        }
+    </script>
+@endsection

@@ -10,9 +10,9 @@
             <div class="col-sm-9">
                 <div class="fileinput-new thumbnai form-control input-border-r-12 m-r-md">
                     <img
-                        class="preview js-preview {{ empty($model['logo']) ? 'hidden' : '' }}"
-                        src="{{ !empty($model['logo']) ? $model['logo'] : '' }}"
-                        alt="organisation logo"
+                            class="preview js-preview {{ empty($model['logo']) ? 'hidden' : '' }}"
+                            src="{{ !empty($model['logo']) ? $model['logo'] : '' }}"
+                            alt="organisation logo"
                     />
                 </div>
                 <div class="inline-block choose-img">
@@ -26,21 +26,22 @@
             <label for="baseOrg" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.main_organisation') }}:</label>
             <div class="col-sm-9">
                 <select
-                    class="input-border-r-12 form-control js-autocomplete"
-                    name="parent_org_id"
-                    id="filter"
-                    data-live-search="true"
+                        class="input-border-r-12 form-control js-autocomplete"
+                        name="parent_org_id"
+                        id="filter"
+                        @if(!\Auth::user()->is_admin) disabled="disabled" @endif
+                        data-live-search="true"
                 >
                     @if (isset($parentOrgs[0]))
                         <option value="">&nbsp;</option>
                         @foreach ($parentOrgs as $parent)
                             @if (!isset($model['name']) || $model['id'] != $parent->id)
                                 <option
-                                    value="{{ $parent->id }}"
-                                    {{ !empty($model['parent_org_id']) && $parent->id == $model['parent_org_id']
-                                        ? 'selected'
-                                        : ''
-                                    }}
+                                        value="{{ $parent->id }}"
+                                        {{ !empty($model['parent_org_id']) && $parent->id == $model['parent_org_id']
+                                            ? 'selected'
+                                            : ''
+                                        }}
                                 >{{ $parent->name }}</option>
                             @endif
                         @endforeach
@@ -57,10 +58,11 @@
             <label for="uri" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.unique_identificator') }}:</label>
             <div class="col-sm-9">
                 <input
-                    type="text"
-                    class="input-border-r-12 form-control"
-                    name="uri"
-                    value="{{ !empty($model['uri']) ? $model['uri'] : '' }}"
+                        type="text"
+                        class="input-border-r-12 form-control"
+                        name="uri"
+                        @if(!\Auth::user()->is_admin) readonly="readonly" @endif
+                        value="{{ !empty($model['uri']) ? $model['uri'] : '' }}"
                 >
                 @if (isset($errors) && $errors->has('uri'))
                     <span class="error">{{ $errors->first('uri') }}</span>
@@ -84,10 +86,10 @@
                         {{ utrans($name) }}
                         <div class="js-check">
                             <input
-                                type="radio"
-                                name="type"
-                                value="{{ $id }}"
-                                {{ isset($model['type']) && $model['type'] == $id ? 'checked' : '' }}
+                                    type="radio"
+                                    name="type"
+                                    value="{{ $id }}"
+                                    {{ isset($model['type']) && $model['type'] == $id ? 'checked' : '' }}
                             >
                         </div>
                     </label>
@@ -107,10 +109,10 @@
                 <div class="col-lg-4 col-sm-4 col-xs-8">
                     <div class="js-check">
                         <input
-                            type="checkbox"
-                            name="active"
-                            value="1"
-                            {{ !empty($model['active']) ? 'checked' : '' }}
+                                type="checkbox"
+                                name="active"
+                                value="1"
+                                {{ !empty($model['active']) ? 'checked' : '' }}
                         >
                     </div>
                 </div>
@@ -123,10 +125,10 @@
                     <div class="col-lg-4 col-sm-4 col-xs-8">
                         <div class="js-check">
                             <input
-                                type="checkbox"
-                                name="approved"
-                                value="1"
-                                {{ !empty($model['approved']) ? 'checked' : '' }}
+                                    type="checkbox"
+                                    name="approved"
+                                    value="1"
+                                    {{ !empty($model['approved']) ? 'checked' : '' }}
                             >
                         </div>
                     </div>
@@ -136,8 +138,8 @@
         <div class="form-group row">
             <div class="col-sm-12 text-right">
                 <a
-                    href="{{ url('/'. $root .'/organisations') }}"
-                    class="btn btn-primary"
+                        href="{{ url('/'. $root .'/organisations') }}"
+                        class="btn btn-primary"
                 >
                     {{ uctrans('custom.close') }}
                 </a>

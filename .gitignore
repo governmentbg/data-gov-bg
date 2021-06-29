@@ -1,10 +1,15 @@
 /node_modules
 /public/hot
 /public/storage
+/storage/logs/*
 /storage/docs
 /storage/*.key
 /storage/*.index
 /storage/*.index-journal
+/storage/framework/cache/*
+/storage/framework/views/*
+/storage/framework/sessions/*
+/storage/app/*
 /vendor
 /.idea
 /.vagrant

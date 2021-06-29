@@ -33,9 +33,9 @@
                                 <label for="forum_link" class="col-sm-3 col-xs-12 col-form-label">{{ __('custom.forum_link') }}:</label>
                                 <div class="col-sm-9">
                                     <input
-                                        name="forum_link"
-                                        class="input-border-r-12 form-control"
-                                        value="{{ !empty($model->forum_link) ? $model->forum_link : '' }}"
+                                            name="forum_link"
+                                            class="input-border-r-12 form-control"
+                                            value="{{ !empty($model->forum_link) ? $model->forum_link : '' }}"
                                     >
                                     @if (isset($errors) && $errors->has('forum_link'))
                                         <span class="error">{{ $errors->first('forum_link') }}</span>
@@ -76,10 +76,10 @@
                                 <div class="col-lg-2 col-sm-9 col-xs-9">
                                     <div class="js-check">
                                         <input
-                                            type="checkbox"
-                                            name="active"
-                                            value="1"
-                                            {{ !empty($model->active) ? 'checked' : '' }}
+                                                type="checkbox"
+                                                name="active"
+                                                value="1"
+                                                {{ !empty($model->active) ? 'checked' : '' }}
                                         >
                                         @if (isset($errors) && $errors->has('active'))
                                             <span class="error">{{ $errors->first('active') }}</span>
@@ -87,11 +87,24 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="form-group row m-b-lg m-t-md">
+                                <label for="news_type" class="col-lg-3 col-sm-3 col-xs-3 col-form-label">{{ __('custom.admin_news_is_for') }}:</label>
+                                <div class="col-sm-9">
+                                    <select name="news_type" class="input-border-r-12 form-control">
+                                        <option value="0" @if($model->news_type == 0) selected="selected" @endif>{{ __('custom.admin_regular_news') }}</option>
+                                        <option value="1" @if($model->news_type == 1) selected="selected" @endif>{{ __('custom.admin_latest_news') }}</option>
+                                        <option value="2" @if($model->news_type == 2) selected="selected" @endif>{{ __('custom.admin_alert_news') }}</option>
+                                    </select>
+                                    @if (isset($errors) && $errors->has('news_type'))
+                                        <span class="error">{{ $errors->first('news_type') }}</span>
+                                    @endif
+                                </div>
+                            </div>
                             <div class="form-group row">
                                 <div class="col-sm-12 text-right">
                                     <a
-                                        href="{{ url('admin/news/list') }}"
-                                        class="btn btn-primary"
+                                            href="{{ url('admin/news/list') }}"
+                                            class="btn btn-primary"
                                     >
                                         {{ uctrans('custom.close') }}
                                     </a>

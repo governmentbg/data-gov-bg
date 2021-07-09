@@ -47,7 +47,7 @@ class CheckElasticNodes extends Command
 
         $nodes = ElasticDataSet::getElasticClusterParam('number_of_nodes');
 
-        if($nodes < 7) {
+        if($nodes < 6) {
 
           $this->info('Starting a check of Elasticsearch down nodes..');
 

@@ -690,6 +690,9 @@ class ResourceController extends ApiController
             )
           ) {
             $message = __('custom.resource_updated');
+            
+            $resource->updated_at = \Carbon\Carbon::now();
+            $resource->save();
 
             $this->sendSupportMail(true, $post, $message);
 

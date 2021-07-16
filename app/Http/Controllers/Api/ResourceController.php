@@ -331,22 +331,36 @@ class ResourceController extends ApiController
 
           $elasticKey = $id .'_1';
 
+          $indexExists = false;
+          if (\Elasticsearch::indices()->exists(['index' => $index])) {
+            $indexExists = true;
+          }
+
+          $mapping = ["enabled" => false, 'dynamic' => false];
+          if($indexExists) {
+            $mapping = [
+              'properties' => [
+                $elasticKey => [
+                  'dynamic' => false
+                ]
+              ]
+            ];
+          }
+
           $params = [
             'index'     => $index,
             'body'      => [
               'settings'  => [
-                'index.mapping.total_fields.limit' => 1000000,
+                'index.mapping.total_fields.limit' => 10000,
                 'index.refresh_interval' => '300s'
               ],
               'mappings' => [
-                'default' => [
-                  'dynamic'    => isset($post['map_data']) ? $post['map_data'] : true,
-                ]
+                'default' => $mapping
               ]
             ],
           ];
 
-          if (\Elasticsearch::indices()->exists(['index' => $index])) {
+          if ($indexExists) {
             \Elasticsearch::indices()->putSettings($params);
           } else {
             \Elasticsearch::indices()->create($params);

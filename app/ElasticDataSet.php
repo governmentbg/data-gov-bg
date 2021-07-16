@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Elasticsearch as ES;
+use Symfony\Component\VarDumper\Cloner\Data;
 
 class ElasticDataSet extends Model
 {
@@ -89,10 +90,9 @@ class ElasticDataSet extends Model
     public static function getElasticIndexDocsCount($index) {
 
       if(ES::ping()) {
-        $data = shell_exec('curl -X GET "'.env('ELASTICSEARCH_HOST').':'.env('ELASTICSEARCH_PORT').'/'.$index.'/_count"');
+        $data = ES::count(['index' => $index]);
 
-        $dataArr = json_decode($data, true);
-        if(isset($dataArr['count'])) return $dataArr['count'];
+        if(isset($data['count'])) return $data['count'];
         else return 'N/A';
       }
 
@@ -119,29 +119,34 @@ class ElasticDataSet extends Model
       return "No ping to ES";
     }
 
+    /**
+     * Get Elasticsearch nodes tasks
+     * @return mixed|array
+     */
+    public static function getElasticNodesTasks() {
+
+      if(ES::ping()) {
+        $tasksList = "";
+        $esTasks = ES::tasks()->get()['nodes'];
+        foreach ($esTasks as $node) {
+          if(isset($node['tasks'])) {
+            foreach ($node['tasks'] as $task) {
+              $tasksList .= "{$node['host']} - {$task['action']} <br>\n";
+            }
+          }
+        }
+
+        return $tasksList;
+      }
+
+      return "No ping to ES";
+    }
+
     public static function getElasticData($id, $version)
     {
         $elasticData = ElasticDataSet::where('resource_id', $id)
             ->where('version', $version)
             ->first();
-
-        //dd(self::getElasticClusterStats());
-        //dd(self::getElasticIndexInfo('15036'));
-        //dd(self::getElasticClusterParam('number_of_nodes'));
-        //$nodesStats = ES::nodes()->stats();dd($nodesStats);
-        //$nodesInfo = ES::nodes()->info();dd($nodesInfo);
-        //$cluster = ES::cluster()->remoteInfo();dd($cluster);
-        //$snapshots = ES::snapshot()->getRepository();dd($snapshots);
-        //$cluster = ES::cluster()->health(['level' => 'indices']);dd($cluster);
-        //$indexSettings = ES::indices()->getSettings(['index' => '14425']);dd($indexSettings);
-        //$indexRecovery = ES::indices()->recovery(['index' => '15008', 'human' => true, 'detailed' => true]);dd($indexRecovery);
-        //$indexMapping = ES::indices()->putSettings(['index' => '14425', 'body' => ['number_of_replicas' => 0]]);dd($indexMapping);
-        //$indexMapping = ES::indices()->getMapping(['index' => '14425', 'type' => ElasticDataSet::ELASTIC_TYPE])['14425'];dd($indexMapping);
-        //$indexStats = ES::indices()->stats(['index' => '15008']);dd($indexStats);
-        //$esInfo = ES::info();dd($esInfo);
-        //$data = shell_exec('curl -X GET "172.23.116.75:9200/14425/_count"');dd(json_decode($data, true)['count']);
-        //$data = shell_exec('curl -X GET "172.23.116.75:9200/15036?pretty"');dd($data);
-        //$data = shell_exec('curl -X GET "172.23.116.75:9200/15036?pretty"');dd($data);
 
         if (!empty($elasticData)) {
             $data = ES::get([
@@ -149,7 +154,6 @@ class ElasticDataSet extends Model
                 'type'  => $elasticData->index_type,
                 'id'    => $elasticData->doc,
             ]);
-            //dd($data);
         }
 
         $result = [];

@@ -157,7 +157,7 @@
         @endif
 
         @if (
-            !empty($admin) && \Auth::user()->is_admin && false
+            !empty($admin) && \Auth::user()->is_admin
         )
             <p><strong>{{ __('custom.move_resources_to_new_dataset') }}</strong></p>
             <div class="col-xs-12 p-l-r-none">

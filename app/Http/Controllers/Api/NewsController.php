@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Page;
+use Illuminate\Support\Facades\Cache;
 use \Validator;
 use App\Module;
 use App\RoleRight;
@@ -31,7 +32,7 @@ class NewsController extends ApiController
    * @param string data[meta_description] - optional
    * @param string data[forum_link] - optional
    * @param integer data[active] - required
-   * @param integer data[news_type] - optional
+   * @param integer data[news_type] - required
    * @param date data[valid_from] - optional
    * @param date data[valid_to] - optional
    *
@@ -65,14 +66,10 @@ class NewsController extends ApiController
         'meta_keywords.*'     => 'max:191',
         'forum_link'          => 'nullable|string|max:191',
         'active'              => 'required|boolean',
+        'news_type'           => 'required|integer',
         'valid_from'          => 'nullable|date',
         'valid_to'            => 'nullable|date',
       ]);
-    }
-
-    if($newsData['data']['news_type']) {
-      $news_type = $newsData['data']['news_type'];
-      DB::table('pages')->where('news_type', '=', $news_type)->update(array('news_type' => 0));
     }
 
     if (!$validator->fails()) {
@@ -120,7 +117,15 @@ class NewsController extends ApiController
           $newNews->valid_to = $newsData['data']['valid_to'];
         }
 
-        $newNews->news_type = $newsData['data']['news_type'];
+        $news_type = $newsData['data']['news_type'];
+        if($news_type != Page::NEWS_TYPE_REGULAR) {
+          DB::table('pages')->where('news_type', '=', $news_type)->update(array('news_type' => Page::NEWS_TYPE_REGULAR));
+        }
+        if($news_type == Page::NEWS_TYPE_LATEST_NEWS) {
+          Cache::forget('latest_news');
+        }
+
+        $newNews->news_type = $news_type;
         $newNews->active = $newsData['data']['active'];
 
         $newNews->save();
@@ -162,7 +167,7 @@ class NewsController extends ApiController
    * @param string data[meta_description] - optional
    * @param string data[forum_link] - optional
    * @param integer data[active] - optional
-   * @param integer data[news_type] - optional
+   * @param integer data[news_type] - required
    * @param date data[valid_from] - optional
    * @param date data[valid_to] - optional
    *
@@ -197,14 +202,10 @@ class NewsController extends ApiController
         'meta_keywords.*'       => 'max:191',
         'forum_link'            => 'nullable|string|max:191',
         'active'                => 'nullable|boolean',
+        'news_type'             => 'required|integer',
         'valid_from'            => 'nullable|date',
         'valid_to'              => 'nullable|date',
       ]);
-    }
-
-    if(isset($editData['data']['news_type']) && $editData['data']['news_type'] != 0) {
-      $news_type = $editData['data']['news_type'];
-      DB::table('pages')->where('news_type', '=', $news_type)->update(array('news_type' => 0));
     }
 
     if (!$validator->fails()) {
@@ -258,9 +259,15 @@ class NewsController extends ApiController
           $newsToEdit->active = $editData['data']['active'];
         }
 
-        if (isset($editData['data']['news_type'])) {
-          $newsToEdit->news_type = $editData['data']['news_type'];
+        $news_type = $editData['data']['news_type'];
+        if($news_type != Page::NEWS_TYPE_REGULAR) {
+          DB::table('pages')->where('news_type', '=', $news_type)->update(array('news_type' => Page::NEWS_TYPE_REGULAR));
         }
+        if($news_type == Page::NEWS_TYPE_LATEST_NEWS) {
+          Cache::forget('latest_news');
+        }
+
+        $newsToEdit->news_type = $news_type;
 
         if (isset($editData['data']['valid_from'])) {
           $newsToEdit->valid_from = $editData['data']['valid_from'];
@@ -325,6 +332,10 @@ class NewsController extends ApiController
 
         if (!$rightCheck) {
           return $this->errorResponse(__('custom.access_denied'));
+        }
+
+        if($deleteNews->news_type == Page::NEWS_TYPE_LATEST_NEWS) {
+          Cache::forget('latest_news');
         }
 
         $deleteNews->delete();

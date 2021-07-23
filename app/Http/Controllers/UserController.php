@@ -979,6 +979,7 @@ class UserController extends Controller {
 
   /**
    * Move all resources from one data set to another
+   * and reindex the resources in Elasticsearch
    *
    * @return RedirectResponse
    */
@@ -993,19 +994,58 @@ class UserController extends Controller {
       return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.write_dataset_id')));
     }
 
-    $dataSet = DataSet::find($new_data_set_id);
-    if(!$dataSet) {
+    $newDataset = DataSet::find($new_data_set_id);
+    if(!$newDataset) {
       return redirect()->back()->withErrors(session()->flash('alert-danger', sprintf(__('custom.no_dataset_with_this_id'), $new_data_set_id)));
     }
 
+    $oldDataset = DataSet::find($current_data_set_id);
+
     try {
+
+      $oldIndex = $current_data_set_id;
+      $newIndex = $new_data_set_id;
+
+      $newDataset->version = intval($newDataset->version) + 1;
+
+      if (!Auth::user()->is_admin && !$newDataset->trusted && $newDataset->status != DataSet::STATUS_DRAFT) {
+        $newDataset->status = DataSet::STATUS_DRAFT;
+      }
+
+      $newDataset->save();
+
       Resource::where('data_set_id', $current_data_set_id)->update(['data_set_id' => $new_data_set_id]);
+      ElasticDataSet::where('index', $oldIndex)->update(['index' => $newIndex]);
+
+      \Artisan::call("elastic:reindex", ['--oldIndex' => $oldIndex, '--newIndex' => $newIndex]);
+
+      $logData = [
+        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+        'action'           => ActionsHistory::TYPE_MOD,
+        'action_object'    => $oldDataset->id,
+        'action_msg'       => 'Move all resources to new dataset '.$newDataset->name,
+      ];
+
+      Module::add($logData);
+
+      $logData = [
+        'module_name'      => Module::getModuleName(Module::DATA_SETS),
+        'action'           => ActionsHistory::TYPE_MOD,
+        'action_object'    => $newDataset->id,
+        'action_msg'       => 'Has resources from old dataset '.$oldDataset->name,
+      ];
+
+      Module::add($logData);
+
+      session()->flash('alert-success', sprintf(__('custom.resources_moved_successfully_to_new_dataset'), $newDataset->name));
+      
+      return redirect()->back();
 
     } catch (\Exception $ex) {
       Log::error($ex->getMessage());
-    }
 
-    return redirect()->back()->withErrors(session()->flash('alert-success', sprintf(__('custom.resources_moved_successfully_to_new_dataset'), $dataSet->name)));
+      return redirect()->back()->withErrors(session()->flash('alert-danger', __('custom.move_resources_to_new_dataset_fail')));
+    }
   }
 
   /**

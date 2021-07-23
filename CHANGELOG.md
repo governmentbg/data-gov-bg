@@ -26,6 +26,7 @@ used in Kernel Schedule every fifteen minutes and if a node is down send warning
 ### Fixed
 - News type in add and edit news. On delete check if news type is for latest news 
 and if so clear the cache for the latest news on the home page
+- Last updated date on the dateset page, it doesn't get updated when updating resource via API
 
 ## [1.3.0] - 2021-06-28
 ### Added

@@ -13,6 +13,16 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.0] - 2021-07-23
+### Added
+- Artisan command to check if all the cluster's nodes are in good health 
+used in Kernel Schedule every fifteen minutes and if a node is down send warning email
+- Artisan command for reindexing resources in Elasticsearch
+- Move all resources from one data set to another and reindex the resources in Elasticsearch
+
+### Changed
+- Elasticsearch mapping from dynamic true to false when creating new resource and when reindexing (prevent issue of mapping explosion) 
+
 ## [1.3.0] - 2021-06-28
 ### Added
 - News type to news that can be regular, latest news for home page and alert
@@ -20,13 +30,13 @@ Security - in case of vulnerabilities.
 - Alert news displayed just below the horizontal menu in the colored lane
 - Resources direct download links for the different formats to the resource's details page
 - Error pages 404, 500, 505
-- Download links for zip files in different format with all the resources in a data set
+- Download links for zip files in a different format with all the resources in a data set
 
 ### Changed
-- Replace registered user's count in the green box on home page with organizations count
+- Replace registered user's count in the green box on the home page with organizations count
 - Disable the first three fields in organization's edit form for all users except admins
 - Temporarily remove the restriction of maximum 800 characters for news body
-- Make an excerpt from the first 3000 characters of the resource priview when it is in json
+- Make an excerpt from the first 3000 characters of the resource preview when it is in json
 or xml format on the resource's details page
 
 ### Fixed

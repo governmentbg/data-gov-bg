@@ -74,8 +74,7 @@ class ReindexDatasetInElasticsearch extends Command
             ],
             'mappings' => [
               'default' => [
-                "enabled" => false,
-                //'dynamic' => false
+                'enabled' => false
               ]
             ]
           ],

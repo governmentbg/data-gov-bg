@@ -67,7 +67,7 @@ class ReindexDatasetInElasticsearch extends Command
           'index'     => $newIndex,
           'body'      => [
             'settings'  => [
-              'index.mapping.total_fields.limit' => 10000,
+              'index.mapping.total_fields.limit' => 1000000,
               'index.number_of_shards' => $oldIndexSettings['number_of_shards'],
               'index.number_of_replicas' => 0,
               'index.refresh_interval' => '-1'

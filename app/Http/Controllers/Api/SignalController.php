@@ -111,7 +111,7 @@ class SignalController extends ApiController
 
                         Mail::send('mail/signalMail', $mailData, function ($m) {
                           $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
-                          $m->to(['skirov@e-gov.bg','bikozhuharov@e-gov.bg','opendata@e-gov.bg']);
+                          $m->to(['skirov@e-gov.bg','bikozhuharov@e-gov.bg','rborisova@e-gov.bg','opendata@e-gov.bg']);
                           $m->subject(__('custom.signal_subject'));
                         });
 

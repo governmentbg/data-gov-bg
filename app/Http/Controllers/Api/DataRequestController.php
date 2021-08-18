@@ -101,7 +101,7 @@ class DataRequestController extends ApiController
 
                 Mail::send('mail/newDataRequest', $mailData, function ($m) {
                   $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
-                  $m->to(['skirov@e-gov.bg','bikozhuharov@e-gov.bg','opendata@e-gov.bg']);
+                  $m->to(['skirov@e-gov.bg','bikozhuharov@e-gov.bg','rborisova@e-gov.bg','opendata@e-gov.bg']);
                   $m->subject(__('custom.new_data_request'));
                 });
 

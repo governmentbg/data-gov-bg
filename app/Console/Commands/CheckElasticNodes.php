@@ -73,7 +73,7 @@ class CheckElasticNodes extends Command
 
             Mail::send('mail/nodesDownAlert', $mailData, function ($m) {
               $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
-              $m->to('dev@asap.bg;skirov@e-gov.bg;bikozhuharov@e-gov.bg');
+              $m->to(['dev@asap.bg','skirov@e-gov.bg','bikozhuharov@e-gov.bg','opendata@e-gov.bg']);
               $m->subject(__('custom.cluster_nodes_down_alert'));
             });
           }

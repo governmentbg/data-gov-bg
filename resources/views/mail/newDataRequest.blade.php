@@ -7,8 +7,12 @@
 @endsection
 
 @section('content')
-{{ __('custom.greetings') }},<br/>
+{{ __('custom.greetings') }},<br/><br/>
+@if(!isset($sendToAdmin))
 {{ __('custom.your_org')}}: <br/>
+@else
+{{ sprintf(__('custom.your_org_admin'), $orgName) }}: <br/>
+@endif
 <b>{{ __('custom.description')}}</b>: {{$description}} <br/>
 <b>{{ __('custom.published_url')}}</b>: {{isset($published_url) ? $published_url : __('custom.no_info_provided')}} <br/>
 <b>{{ uctrans('custom.from')}}</b>: {{isset($contact_name) ? $contact_name : __('custom.no_contact_provided')}} <br/>

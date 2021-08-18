@@ -98,13 +98,24 @@ class SignalController extends ApiController
 
             if ($saved) {
                 try {
+                    $resource = Resource::where('id', $signalData['data']['resource_id'])->first();
                     if (($user = User::find($resource->created_by)) && !empty($user->email)) {
+
                         $mailData = [
-                            'user'          => $user->firstname ?: $user->username,
-                            'resource_name' => $resource->name,
-                            'dataset_uri'   => $resource->dataSet->uri,
-                            'dataset_name'  => $resource->dataSet->name,
+                          'user'          => $user->firstname ?: $user->username,
+                          'resource_name' => $resource->name,
+                          'dataset_uri'   => $resource->dataSet->uri,
+                          'dataset_name'  => $resource->dataSet->name,
+                          'sendToAdmin'   => true,
                         ];
+
+                        Mail::send('mail/signalMail', $mailData, function ($m) {
+                          $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
+                          $m->to(['skirov@e-gov.bg','bikozhuharov@e-gov.bg','rborisova@e-gov.bg','opendata@e-gov.bg']);
+                          $m->subject(__('custom.signal_subject'));
+                        });
+
+                        unset($mailData['sendToAdmin']);
 
                         Mail::send('mail/signalMail', $mailData, function ($m) use ($user) {
                             $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));

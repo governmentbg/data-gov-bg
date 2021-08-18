@@ -707,7 +707,7 @@ class ResourceController extends Controller
     $zipName = "$uri.zip";
     $zipDir = "../storage/app/$uri";
     if(!file_exists($zipDir) && !is_dir($zipDir)) {
-      \Log::info("Create folder $zipDir");
+      //\Log::info("Create folder $zipDir at {$_SERVER['SERVER_NAME']}");
       mkdir($zipDir, 0777);
     }
 
@@ -806,6 +806,8 @@ class ResourceController extends Controller
     $zipName = "$uri.zip";
     $zipDir = "../storage/app/$uri";
 
+    //\Log::info("Reading $zipDir from {$_SERVER['SERVER_NAME']}");
+
     try {
 
       if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
@@ -844,7 +846,7 @@ class ResourceController extends Controller
   public function deleteZipFolder($uri)
   {
     $zipDir = "../storage/app/$uri";
-    \Log::info("Delete $zipDir");
+    //\Log::info("Delete folder $zipDir {$_SERVER['SERVER_NAME']}");
 
     if(file_exists($zipDir) && is_dir($zipDir)) {
       if (is_dir($zipDir)) {

@@ -83,19 +83,29 @@ class DataRequestController extends ApiController
 
             if (!empty($requestData['data']['org_id'])) {
                 $organisation = Organisation::where('id', $requestData['data']['org_id'])->first();
-                $orgCreatedBy = $organisation->created_by;
+
                 $orgAdmins = UserToOrgRole::where('org_id', $requestData['data']['org_id'])
                     ->where('role_id', Role::getOrgAdminRole()->id)
                     ->pluck('user_id')->toArray();
 
                 $mailData = [
-                    'description'   => $dataRequest->descript,
-                    'email'         => $dataRequest->email,
-                    'status'        => $dataRequest->status,
-                    'published_url' => isset($dataRequest->published_url) ? $dataRequest->published_url : null,
-                    'contact_name'  => isset($dataRequest->contact_name) ? $dataRequest->contact_name : null,
-                    'notes'         => isset($dataRequest->notes) ? $dataRequest->notes : null,
+                  'description'   => $dataRequest->descript,
+                  'email'         => $dataRequest->email,
+                  'status'        => $dataRequest->status,
+                  'orgName'       => $organisation->name,
+                  'sendToAdmin'   => true,
+                  'published_url' => isset($dataRequest->published_url) ? $dataRequest->published_url : null,
+                  'contact_name'  => isset($dataRequest->contact_name) ? $dataRequest->contact_name : null,
+                  'notes'         => isset($dataRequest->notes) ? $dataRequest->notes : null,
                 ];
+
+                Mail::send('mail/newDataRequest', $mailData, function ($m) {
+                  $m->from(config('app.MAIL_FROM'), config('app.APP_NAME'));
+                  $m->to(['skirov@e-gov.bg','bikozhuharov@e-gov.bg','rborisova@e-gov.bg','opendata@e-gov.bg']);
+                  $m->subject(__('custom.new_data_request'));
+                });
+
+                unset($mailData['sendToAdmin']);
 
                 if (!empty($orgAdmins)) {
                     foreach ($orgAdmins as $orgAdmin) {
@@ -112,6 +122,7 @@ class DataRequestController extends ApiController
             }
 
             try {
+
                 $dataRequest->save();
 
                 $logData = [

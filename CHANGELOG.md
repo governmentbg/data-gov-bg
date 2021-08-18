@@ -13,19 +13,28 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.1] - 2021-08-18
+### Added
+- Send a notification emails to admins when a resource report signal is send
+- Send a notification emails to admins when a data request is send
+
+### Fixed
+- Emails list in warning email when Elasticsearch cluster's node is down
+
 ## [1.4.0] - 2021-07-23
 ### Added
-- Artisan command to check if all the cluster's nodes are in good health 
-used in Kernel Schedule every fifteen minutes and if a node is down send warning email
+- Artisan command to check if all the Elasticsearch cluster's nodes are in good health 
+  and if a node is down send warning emails to admins
 - Artisan command for reindexing resources in Elasticsearch
 - Move all resources from one data set to another and reindex the resources in Elasticsearch
 
 ### Changed
-- Elasticsearch mapping from dynamic true to false when creating new resource and when reindexing (prevent issue of mapping explosion) 
+- Elasticsearch mapping from dynamic true to false when creating new resource and when 
+  reindexing (prevent issue of mapping explosion) 
 
 ### Fixed
 - News type in add and edit news. On delete check if news type is for latest news 
-and if so clear the cache for the latest news on the home page
+  and if so clear the cache for the latest news on the home page
 - Last updated date on the dateset page, it doesn't get updated when updating resource via API
 
 ## [1.3.0] - 2021-06-28
@@ -42,7 +51,7 @@ and if so clear the cache for the latest news on the home page
 - Disable the first three fields in organization's edit form for all users except admins
 - Temporarily remove the restriction of maximum 800 characters for news body
 - Make an excerpt from the first 3000 characters of the resource preview when it is in json
-or xml format on the resource's details page
+  or xml format on the resource's details page
 
 ### Fixed
 - Typo in data sets text on home page

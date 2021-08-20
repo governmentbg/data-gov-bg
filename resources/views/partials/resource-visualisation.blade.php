@@ -13,7 +13,20 @@
     <a href="{{ $resource->resource_url }}">{{ $resource->resource_url }}</a>
 @else
     @if (empty($data))
-        <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
+        @if($resource->file_format == App\Resource::getFormats()[App\Resource::FORMAT_ZIP])
+            @php
+                $zipName = App\Resource::getResourceZipFile($resource->uri);
+            @endphp
+            @if(!empty($zipName))
+                <div class="col-sm-12 m-t-lg m-b-md row">
+                    Свалете файлът: <a href="{{ route('downloadZip', $resource->uri) }}">{{ $zipName }}</a>
+                </div>
+            @else
+                <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
+            @endif
+        @else
+            <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
+        @endif
     @elseif (is_array($data) || is_object($data))
         @if ($format == App\Resource::FORMAT_CSV)
             <div class="m-b-lg overflow-x-auto js-show-on-load">

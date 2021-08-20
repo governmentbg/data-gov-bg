@@ -638,6 +638,14 @@ class DataSetController extends AdminController
                     return redirect('/admin/resource/view/'. $response['uri']);
                 }
 
+                if(
+                  is_array($data)
+                  && isset($response['data']['zip'])
+                ) {
+                  $request->session()->flash('alert-success', __('custom.add_success'));
+                  return redirect('/admin/resource/view/'. $response['uri']);
+                }
+
                 if ($data['type'] == Resource::TYPE_API) {
                     $extension = $response['extension'];
                 }

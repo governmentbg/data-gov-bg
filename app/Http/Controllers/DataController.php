@@ -671,6 +671,22 @@ class DataController extends Controller {
       $filesCount = $apiFilesResources->checkForFilesResources($rqFiles)->getData();
       $filesResCount = isset($filesCount->filesCount) ? $filesCount->filesCount : 0;
 
+      $formatsLimits = [];
+      if($resCount > 0) {
+        $onlyZipFiles = true;
+        foreach ($resources as $resource) {
+          if($resource->file_format != Resource::getFormats()[Resource::FORMAT_ZIP]) {
+            $onlyZipFiles = false;
+          }
+          foreach (Resource::FORMAT_LIMITS[$resource->file_format] as $limit) {
+            if(!in_array($limit, $formatsLimits)){
+              $formatsLimits[] = $limit;
+            }
+          }
+        }
+      }
+      $formatsLimits['onlyZipFiles'] = $onlyZipFiles;
+
       // Get category details
       if (!empty($dataset->category_id)) {
         $params = [
@@ -830,6 +846,7 @@ class DataController extends Controller {
         'dataset'       => $dataset,
         'resources'     => $paginationData['items'],
         'filesResCount' => $filesResCount,
+        'formatsLimits' => $formatsLimits,
         'buttons'       => $buttons,
         'groups'        => $groups,
         'setGroups'     => isset($setGroups) ? $setGroups : [],

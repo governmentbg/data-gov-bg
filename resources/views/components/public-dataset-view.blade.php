@@ -221,26 +221,25 @@
         </div>
     </div>
     @if (count($resources) > 0 && $filesResCount > 0)
-        @php
-            $versionFormat = App\Resource::getResourceVersionFormat($resources[0]);
-            if (!config('app.IS_TOOL')) {
-                $format = empty($resource) ? false : $versionFormat ? $versionFormat : App\Resource::getFormatsCode($resources[0]->file_format);
-                $versionFormat = !empty($versionFormat) ? $versionFormat : App\Resource::getFormatsCode($resources[0]->file_format);
-            } else {
-                $format = $versionFormat;
-            }
-        @endphp
         <div class="row">
             <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns" style="margin-top:-50px;">
-                @foreach ($formats as $id => $format)
-                    @if (!in_array($format,\App\Resource::FORMAT_LIMITS[App\Resource::getFormats()[$versionFormat]]))
-                        <br>
-                        <a href="javascript:;" onclick="downloadZipFile('{{ url("/dataset/$dataset->uri/resources/download/".strtolower($format)) }}')">
-                            <i class="fa fa-download"></i>
-                            {{ sprintf(__('custom.resources_zip_link'), $format) }}
-                        </a>
-                    @endif
-                @endforeach
+                @if($formatsLimits['onlyZipFiles'])
+                    <br>
+                    <a href="javascript:;" onclick="downloadZipFile('{{ url("/dataset/$dataset->uri/resources/download/zip") }}')">
+                        <i class="fa fa-download"></i>
+                        {{ __('custom.resources_only_zip') }}
+                    </a>
+                @else
+                    @foreach ($formats as $id => $format)
+                        @if (!in_array($format,$formatsLimits))
+                            <br>
+                            <a href="javascript:;" onclick="downloadZipFile('{{ url("/dataset/$dataset->uri/resources/download/".strtolower($format)) }}')">
+                                <i class="fa fa-download"></i>
+                                {{ sprintf(__('custom.resources_zip_link'), $format) }}
+                            </a>
+                        @endif
+                    @endforeach
+                @endif
             </div>
         </div>
     @endif

@@ -13,6 +13,13 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.2] - 2021-08-20
+### Added
+- Upload resource in zip format to data sets
+
+### Fixed
+- Zip download formats in dataset view
+
 ## [1.4.1] - 2021-08-18
 ### Added
 - Send a notification emails to admins when a resource report signal is send

@@ -34,6 +34,7 @@ class Resource extends Model implements TranslatableInterface
   const FORMAT_SLK = 9;
   const FORMAT_RTF = 10;
   const FORMAT_ODT = 11;
+  const FORMAT_ZIP = 12;
 
   const HTTP_POST = 1;
   const HTTP_GET = 2;
@@ -43,12 +44,13 @@ class Resource extends Model implements TranslatableInterface
 
   // Conversion not available: format => ['not available formats']
   const FORMAT_LIMITS = [
-    'KML' => ['CSV', 'RDF'],
-    'CSV' => ['KML', 'RDF'],
-    'JSON' => ['KML', 'RDF'],
-    'XML' => ['KML', 'RDF', 'CSV'],
-    'RDF' => ['KML', 'CSV'],
-    'XSD' => ['KML', 'RDF']
+    'KML' => ['CSV', 'RDF', 'ZIP'],
+    'CSV' => ['KML', 'RDF', 'ZIP'],
+    'JSON' => ['KML', 'RDF', 'ZIP'],
+    'XML' => ['KML', 'RDF', 'CSV', 'ZIP'],
+    'RDF' => ['KML', 'CSV', 'ZIP'],
+    'XSD' => ['KML', 'RDF', 'ZIP'],
+    'ZIP' => []
   ];
 
   protected static $translatable = [
@@ -91,6 +93,8 @@ class Resource extends Model implements TranslatableInterface
       case 'RTF':
       case 'ODT':
         return self::FORMAT_XSD;
+      case 'ZIP':
+        return self::FORMAT_ZIP;
       default:
         return self::FORMAT_JSON;
     }
@@ -104,6 +108,7 @@ class Resource extends Model implements TranslatableInterface
       self::FORMAT_KML    => 'KML',
       self::FORMAT_RDF    => 'RDF',
       self::FORMAT_XML    => 'XML',
+      self::FORMAT_ZIP    => 'ZIP',
     ];
 
     if (!$forDownload) {
@@ -194,4 +199,31 @@ class Resource extends Model implements TranslatableInterface
     return $resourceVersionFormat;
   }
 
+  public static function getResourceZipFile($uri) {
+
+    $zipDir = "../storage/app/files/$uri";
+    $zipDirFull = "{$_SERVER['DOCUMENT_ROOT']}/storage/app/files/$uri";
+    $zipName = "";
+
+    if(file_exists($zipDir) && is_dir($zipDir)) {
+
+      $files = scandir($zipDir);
+
+      foreach ($files as $fileName) {
+        if(strstr($fileName, 'zip')) {
+          $zipFile = $zipDir.DIRECTORY_SEPARATOR.$fileName;
+          $zipFileFull = $zipDirFull.DIRECTORY_SEPARATOR.$fileName;
+          if(
+            file_exists($zipFile)
+            &&
+            strtoupper(pathinfo($zipFileFull, PATHINFO_EXTENSION)) == self::getFormats()[self::FORMAT_ZIP]
+          ) {
+            $zipName = $fileName;
+          }
+        }
+      }
+    }
+
+    return $zipName;
+  }
 }

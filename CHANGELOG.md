@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.4] - 2021-10-05
+### Changed
+- Dataset create form visibility defaults to public
+
 ## [1.4.3] - 2021-10-05
 ### Added
 - Dataset list access filter - free and paid

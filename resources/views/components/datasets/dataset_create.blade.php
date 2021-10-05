@@ -212,9 +212,7 @@
                     id="visibility"
                     name="visibility"
                     class="js-select form-control"
-                    data-placeholder="{{ utrans('custom.select_visibility') }}"
                 >
-                    <option></option>
                     @foreach ($visibilityOpt as $id => $visOpt)
                         <option
                             value="{{ $id }}"

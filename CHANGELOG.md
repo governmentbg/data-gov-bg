@@ -13,6 +13,13 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.3] - 2021-10-05
+### Added
+- Dataset list access filter - free and paid
+
+### Removed
+- Dataset list filters by user and groups
+
 ## [1.4.2] - 2021-08-20
 ### Added
 - Upload resource in zip format to data sets

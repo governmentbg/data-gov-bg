@@ -378,6 +378,7 @@ class UserController extends Controller {
 
     //prepare data for form
     $visibilityOptions = $datasetModel->getVisibility();
+    $accessTypes = Dataset::getAccessTypes();
     $categories = $this->prepareMainCategories();
     $termsOfUse = $this->prepareTermsOfUse();
     $organisations = $this->prepareOrganisations();
@@ -478,6 +479,7 @@ class UserController extends Controller {
       'tagModel'      => $tagModel,
       'withModel'     => $withModel,
       'visibilityOpt' => $visibilityOptions,
+      'accessTypes'   => $accessTypes,
       'categories'    => $categories,
       'termsOfUse'    => $termsOfUse,
       'organisations' => $organisations,

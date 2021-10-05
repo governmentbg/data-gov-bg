@@ -24,6 +24,9 @@ class DataSet extends Model implements TranslatableInterface
     const VISIBILITY_PUBLIC = 1;
     const VISIBILITY_PRIVATE = 2;
 
+    const ACCESS_FREE = 1;
+    const ACCESS_PAID = 2;
+
     protected static $translatable = [
         'name'      => 'text',
         'descript'  => 'text',
@@ -53,6 +56,14 @@ class DataSet extends Model implements TranslatableInterface
         return [
             self::VISIBILITY_PUBLIC     => __('custom.public'),
             self::VISIBILITY_PRIVATE    => __('custom.private'),
+        ];
+    }
+
+    public static function getAccessTypes()
+    {
+        return [
+            self::ACCESS_FREE     => __('custom.free'),
+            self::ACCESS_PAID    => __('custom.paid'),
         ];
     }
 

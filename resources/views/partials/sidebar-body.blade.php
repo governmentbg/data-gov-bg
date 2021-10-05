@@ -69,7 +69,7 @@
                 </div>
             </ul>
         </li>
-        <li class="js-show-submenu">
+        <li class="js-show-submenu hidden">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ untrans('custom.users', 2) }}</a>
             <ul class="sidebar-submenu nano">
                 <div class="nano-content">
@@ -134,7 +134,7 @@
                 </div>
             </ul>
         </li>
-        <li class="js-show-submenu">
+        <li class="js-show-submenu hidden">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ untrans('custom.groups', 2) }}</a>
             <ul class="sidebar-submenu nano">
                 <div class="nano-content">
@@ -386,6 +386,36 @@
                                 }}"
                             >{{ $showAll ? __('custom.show_all') : __('custom.only_popular') }}</a>
                         </li>
+                    @endif
+                </div>
+            </ul>
+        </li>
+        <li class="js-show-submenu">
+            <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ mb_strtolower(__('custom.dataset_access')) }}</a>
+            <ul class="sidebar-submenu nano">
+                <div class="nano-content">
+                    @if (is_array($access) && count($access) > 0)
+                        @foreach ($access as $acc)
+                            <li>
+                                <a
+                                    href="{{
+                                            action(
+                                                'DataController@'. $action, array_merge(
+                                                    array_except(app('request')->input(), ['access', 'page']),
+                                                    ['access' => $acc->access]
+                                                )
+                                            )
+                                    }}"
+                                        class="{{
+                                            isset($getParams['access']) && ($acc->access == $getParams['access'])
+                                                ? 'active'
+                                                : ''
+                                    }}"
+                                >{{ mb_strtolower(\App\DataSet::getAccessTypes()[$acc->access]) }} ({{ $acc->total }})</a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><a><span>{{ __('custom.no_matches') }}</span></a></li>
                     @endif
                 </div>
             </ul>

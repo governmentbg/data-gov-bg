@@ -1509,6 +1509,7 @@ class ResourceController extends ApiController
    * @param array criteria[dataset_criteria][category_ids] - optional
    * @param array criteria[dataset_criteria][tag_ids] - optional
    * @param array criteria[dataset_criteria][formats] - optional
+   * @param array criteria[dataset_criteria][access] - optional
    * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
    * @param boolean criteria[dataset_criteria][reported] - optional
    * @param array criteria[dataset_ids] - optional
@@ -1555,6 +1556,7 @@ class ResourceController extends ApiController
         'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
         'formats'             => 'nullable|array|min:1',
         'formats.*'           => 'string|in:'. implode(',', $formats),
+        'access'              => 'nullable|int|in:'. implode(',', array_keys(DataSet::getAccessTypes())),
         'reported'            => 'nullable|boolean',
       ]);
     }
@@ -1591,6 +1593,10 @@ class ResourceController extends ApiController
             $q->whereHas('DataSetTags', function($qr) use ($dsCriteria) {
               $qr->whereIn('tag_id', $dsCriteria['tag_ids']);
             });
+          }
+
+          if (!empty($dsCriteria['access'])) {
+            $q->where('access', $dsCriteria['access']);
           }
 
           if (!empty($dsCriteria['terms_of_use_ids'])) {

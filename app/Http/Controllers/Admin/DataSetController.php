@@ -212,6 +212,7 @@ class DataSetController extends AdminController
     public function add(Request $request)
     {
         $visibilityOptions = DataSet::getVisibility();
+        $accessTypes = Dataset::getAccessTypes();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->getAllOrganisations();
@@ -272,6 +273,7 @@ class DataSetController extends AdminController
         return view('admin/datasetCreate', [
             'class'         => 'user',
             'visibilityOpt' => $visibilityOptions,
+            'accessTypes'   => $accessTypes,
             'categories'    => $categories,
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,
@@ -454,6 +456,7 @@ class DataSetController extends AdminController
     public function edit(Request $request, $uri)
     {
         $visibilityOptions = Dataset::getVisibility();
+        $accessTypes = Dataset::getAccessTypes();
         $categories = $this->prepareMainCategories();
         $termsOfUse = $this->prepareTermsOfUse();
         $organisations = $this->getAllOrganisations();
@@ -563,6 +566,7 @@ class DataSetController extends AdminController
             'tagModel'      => $tagModel,
             'withModel'     => $withModel,
             'visibilityOpt' => $visibilityOptions,
+            'accessTypes'   => $accessTypes,
             'categories'    => $categories,
             'termsOfUse'    => $termsOfUse,
             'organisations' => $organisations,

@@ -1120,6 +1120,7 @@ class UserController extends Controller {
     $buttons['addResource'] = $rightCheck;
 
     $visibilityOptions = DataSet::getVisibility();
+    $accessTypes = Dataset::getAccessTypes();
     $categories = $this->prepareMainCategories();
     $termsOfUse = $this->prepareTermsOfUse();
     $organisations = $this->prepareOrganisations();
@@ -1169,6 +1170,7 @@ class UserController extends Controller {
     return view('user/datasetCreate', [
       'class'         => 'user',
       'visibilityOpt' => $visibilityOptions,
+      'accessTypes'   => $accessTypes,
       'categories'    => $categories,
       'termsOfUse'    => $termsOfUse,
       'organisations' => $organisations,
@@ -1199,6 +1201,7 @@ class UserController extends Controller {
 
     //prepare data for form
     $visibilityOptions = DataSet::getVisibility();
+    $accessTypes = Dataset::getAccessTypes();
     $categories = $this->prepareMainCategories();
     $termsOfUse = $this->prepareTermsOfUse();
     $organisations = $this->prepareOrganisations();
@@ -1266,6 +1269,7 @@ class UserController extends Controller {
     return view('user/orgDatasetCreate', [
       'class'         => 'user',
       'visibilityOpt' => $visibilityOptions,
+      'accessTypes'   => $accessTypes,
       'categories'    => $categories,
       'termsOfUse'    => $termsOfUse,
       'organisations' => $organisations,
@@ -1303,6 +1307,7 @@ class UserController extends Controller {
 
     //prepare data for form
     $visibilityOptions = DataSet::getVisibility();
+    $accessTypes = Dataset::getAccessTypes();
     $categories = $this->prepareMainCategories();
     $termsOfUse = $this->prepareTermsOfUse();
     $organisations = $this->prepareOrganisations();
@@ -1353,6 +1358,7 @@ class UserController extends Controller {
     return view('user/groupDatasetCreate', [
       'class'         => 'user',
       'visibilityOpt' => $visibilityOptions,
+      'accessTypes'   => $accessTypes,
       'categories'    => $categories,
       'termsOfUse'    => $termsOfUse,
       'organisations' => $organisations,
@@ -1406,6 +1412,7 @@ class UserController extends Controller {
     $buttons['addResource'] = $rightCheck;
 
     $visibilityOptions = Dataset::getVisibility();
+    $accessTypes = Dataset::getAccessTypes();
     $categories = $this->prepareMainCategories();
     $termsOfUse = $this->prepareTermsOfUse();
     $organisations = $this->prepareOrganisations();
@@ -1502,6 +1509,7 @@ class UserController extends Controller {
       'tagModel'      => $tagModel,
       'withModel'     => $withModel,
       'visibilityOpt' => $visibilityOptions,
+      'accessTypes'   => $accessTypes,
       'categories'    => $categories,
       'termsOfUse'    => $termsOfUse,
       'organisations' => $organisations,
@@ -5682,6 +5690,7 @@ class UserController extends Controller {
 
     //prepare data for form
     $visibilityOptions = $datasetModel->getVisibility();
+    $accessTypes = Dataset::getAccessTypes();
     $categories = $this->prepareMainCategories();
     $termsOfUse = $this->prepareTermsOfUse();
     $organisations = $this->prepareOrganisations();
@@ -5782,6 +5791,7 @@ class UserController extends Controller {
       'tagModel'      => $tagModel,
       'withModel'     => $withModel,
       'visibilityOpt' => $visibilityOptions,
+      'accessTypes'   => $accessTypes,
       'categories'    => $categories,
       'termsOfUse'    => $termsOfUse,
       'organisations' => $organisations,

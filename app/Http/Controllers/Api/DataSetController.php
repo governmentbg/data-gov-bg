@@ -700,6 +700,7 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
+
                 $query = DataSet::select()->with('resource');
 
                 if (isset($post['api_key'])) {
@@ -1030,7 +1031,7 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
-              \DB::enableQueryLog();
+
                 $query = DataSet::select(DB::raw('count(distinct id) as total'));
 
                 if (isset($post['api_key'])) {
@@ -1047,19 +1048,19 @@ class DataSetController extends ApiController
                         return $this->errorResponse(__('custom.access_denied'));
                     }
 
-                    if (!empty($criteria['status'])) {
-                        $query->where('status', $criteria['status']);
+                    if (!empty($dsCriteria['status'])) {
+                        $query->where('status', $dsCriteria['status']);
                     }
 
-                    if (!empty($criteria['visibility'])) {
-                        $query->where('visibility', $criteria['visibility']);
+                    if (!empty($dsCriteria['visibility'])) {
+                        $query->where('visibility', $dsCriteria['visibility']);
                     }
                 } else {
                     $query->where('status', DataSet::STATUS_PUBLISHED);
                     $query->where('visibility', DataSet::VISIBILITY_PUBLIC);
                 }
 
-                if (!empty($criteria['public'])) {
+                if (!empty($dsCriteria['public'])) {
                     $query->where(function($q) {
                         $q->whereIn(
                             'data_sets.org_id',
@@ -1072,17 +1073,17 @@ class DataSetController extends ApiController
                             ->orWhereNull('data_sets.org_id');
                     });
                 }
-                if (!empty($criteria['dataset_ids'])) {
-                    $query->whereIn('data_sets.id', $criteria['dataset_ids']);
+                if (!empty($dsCriteria['dataset_ids'])) {
+                    $query->whereIn('data_sets.id', $dsCriteria['dataset_ids']);
                 }
 
-                if (!empty($criteria['keywords'])) {
-                    $tntIds = DataSet::search($criteria['keywords'])->get()->pluck('id');
+                if (!empty($dsCriteria['keywords'])) {
+                    $tntIds = DataSet::search($dsCriteria['keywords'])->get()->pluck('id');
 
                     $fullMatchIds = DataSet::select('data_sets.id')
                         ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
                         ->where('translations.locale', $locale)
-                        ->where('translations.text', 'like', '%'. $criteria['keywords'] .'%')
+                        ->where('translations.text', 'like', '%'. $dsCriteria['keywords'] .'%')
                         ->pluck('id');
 
                     $ids = $fullMatchIds->merge($tntIds)->unique();
@@ -1095,33 +1096,33 @@ class DataSetController extends ApiController
                     }
                 }
 
-                if (isset($criteria['user_datasets_only']) && $criteria['user_datasets_only']) {
+                if (isset($dsCriteria['user_datasets_only']) && $dsCriteria['user_datasets_only']) {
                     $query->whereNull('org_id');
-                } elseif (!empty($criteria['org_ids'])) {
-                    $query->whereIn('org_id', $criteria['org_ids']);
+                } elseif (!empty($dsCriteria['org_ids'])) {
+                    $query->whereIn('org_id', $dsCriteria['org_ids']);
                 }
 
-                if (!empty($criteria['group_ids'])) {
-                    $query->whereHas('dataSetGroup', function($q) use($criteria) {
-                        $q->whereIn('group_id', $criteria['group_ids']);
+                if (!empty($dsCriteria['group_ids'])) {
+                    $query->whereHas('dataSetGroup', function($q) use($dsCriteria) {
+                        $q->whereIn('group_id', $dsCriteria['group_ids']);
                     });
                 }
 
-                if (!empty($criteria['category_ids'])) {
-                    $query->whereIn('category_id', $criteria['category_ids']);
+                if (!empty($dsCriteria['category_ids'])) {
+                    $query->whereIn('category_id', $dsCriteria['category_ids']);
                 }
 
-                if (!empty($criteria['tag_ids'])) {
-                    $query->whereHas('dataSetTags', function($q) use ($criteria) {
-                        $q->whereIn('tag_id', $criteria['tag_ids']);
+                if (!empty($dsCriteria['tag_ids'])) {
+                    $query->whereHas('dataSetTags', function($q) use ($dsCriteria) {
+                        $q->whereIn('tag_id', $dsCriteria['tag_ids']);
                     });
                 }
 
-                if (!empty($criteria['formats'])) {
+                if (!empty($dsCriteria['formats'])) {
                     $formatCodes = array_flip(Resource::getFormats());
                     $formats = [];
 
-                    foreach ($criteria['formats'] as $format) {
+                    foreach ($dsCriteria['formats'] as $format) {
                         if (isset($formatCodes[$format])) {
                             array_push($formats, $formatCodes[$format]);
                         }
@@ -1132,34 +1133,35 @@ class DataSetController extends ApiController
                     });
                 }
 
-                if (!empty($criteria['terms_of_use_ids'])) {
-                    $query->whereIn('terms_of_use_id', $criteria['terms_of_use_ids']);
+                if (!empty($dsCriteria['terms_of_use_ids'])) {
+                    $query->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
                 }
 
-                if (!empty($criteria['date_from'])) {
-                    $query->where('data_sets.created_at', '>=', $criteria['date_from']);
+                if (!empty($dsCriteria['date_from'])) {
+                    $query->where('data_sets.created_at', '>=', $dsCriteria['date_from']);
                 }
 
-                if (!empty($criteria['date_to'])) {
-                    $query->where('data_sets.created_at', '<=', $criteria['date_to']);
+                if (!empty($dsCriteria['date_to'])) {
+                    $query->where('data_sets.created_at', '<=', $dsCriteria['date_to']);
                 }
 
-                if (!empty($criteria['reported'])) {
-                    $query->whereHas('resource', function($q) use ($criteria) {
-                        $q->where('is_reported', $criteria['reported']);
+                if (!empty($dsCriteria['reported'])) {
+                    $query->whereHas('resource', function($q) use ($dsCriteria) {
+                        $q->where('is_reported', $dsCriteria['reported']);
                     });
                 }
 
-                if (!empty($criteria['user_ids'])) {
-                    $query->whereIn('data_sets.created_by', $criteria['user_ids']);
-                } elseif (!empty($criteria['created_by'])) {
-                    $query->where('data_sets.created_by', $criteria['created_by']);
+                if (!empty($dsCriteria['user_ids'])) {
+                    $query->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
+                } elseif (!empty($dsCriteria['created_by'])) {
+                    $query->where('data_sets.created_by', $dsCriteria['created_by']);
                 }
 
                 $results = new TranslatableCollection();
                 foreach (DataSet::getAccessTypes() as $access => $name) {
                   $newQuery = clone $query;
                   $result = $newQuery->where('access', $access)->first();
+                  //dd(\DB::getQueryLog());
                   $result->access = $access;
                   $results->push($result);
                 }

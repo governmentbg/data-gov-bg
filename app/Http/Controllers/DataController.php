@@ -341,6 +341,7 @@ class DataController extends Controller {
       $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
 
       // List data access
+      $criteria['public'] = true;
       $params = [
         'criteria' => [
           'dataset_criteria' => $criteria,

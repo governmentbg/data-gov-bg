@@ -390,6 +390,7 @@
                 </div>
             </ul>
         </li>
+        @if (isset($access))
         <li class="js-show-submenu">
             <a href="#" class="clicable"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;{{ mb_strtolower(__('custom.dataset_access')) }}</a>
             <ul class="sidebar-submenu nano">
@@ -420,6 +421,7 @@
                 </div>
             </ul>
         </li>
+        @endif
         <li class="js-show-submenu">
             @php
                 $params = array_except($getParams, ['license']);

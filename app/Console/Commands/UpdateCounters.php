@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\DataSet;
 use App\Module;
 use App\ActionsHistory;
 use Illuminate\Http\Request;
@@ -85,7 +86,16 @@ class UpdateCounters extends Command
 
     Cache::forever('home_organisations', $organisations);
 
-    $rq = Request::create('/api/listDatasets', 'POST', ['records_per_page' => 1]);
+    $locale = \LaravelLocalization::getCurrentLocale();
+
+    $params['records_per_page'] = 1;
+    $params['criteria']['public'] = true;
+    $params['criteria']['locale'] = $locale;
+    $params['criteria']['status'] = DataSet::STATUS_PUBLISHED;
+    $params['criteria']['visibility'] = DataSet::VISIBILITY_PUBLIC;
+    $params['criteria']['user_datasets_only'] = false;
+
+    $rq = Request::create('/api/listDatasets', 'POST', $params);
     $api = new ApiDataSet($rq);
     $sets = $api->listDatasets($rq)->getData();
     $datasets = $sets->total_records;

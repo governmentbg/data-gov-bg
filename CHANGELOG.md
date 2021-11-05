@@ -13,6 +13,14 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.5] - 2021-11-05
+### Added
+- Matomo tracking code
+
+### Changed
+- api listDatasets default filters to match site Data section
+- Info logs to use different file info.log instead of laravel.log
+
 ## [1.4.4] - 2021-10-05
 ### Changed
 - Dataset create form visibility defaults to public

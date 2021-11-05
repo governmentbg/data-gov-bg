@@ -18,9 +18,7 @@
                 $zipName = App\Resource::getResourceZipFile($resource->uri);
             @endphp
             @if(!empty($zipName))
-                <div class="col-sm-12 m-t-lg m-b-md row">
-                    Свалете файлът: <a href="{{ route('downloadZip', $resource->uri) }}">{{ $zipName }}</a>
-                </div>
+                <a href="{{ route('downloadZip', $resource->uri) }}">{{ $zipName }}</a>
             @else
                 <div class="col-sm-12 m-t-lg text-center">{{ __('custom.no_info') }}</div>
             @endif

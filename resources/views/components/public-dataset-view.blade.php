@@ -223,7 +223,7 @@
     @if (count($resources) > 0 && $filesResCount > 0)
         <div class="row">
             <div class="col-sm-9 col-xs-12 page-content p-sm col-sm-offset-3 mng-btns" style="margin-top:-50px;">
-                @if($formatsLimits['onlyZipFiles'])
+                @if(isset($formatsLimits['onlyZipFiles']) && $formatsLimits['onlyZipFiles'])
                     <br>
                     <a href="javascript:;" onclick="downloadZipFile('{{ url("/dataset/$dataset->uri/resources/download/zip") }}')">
                         <i class="fa fa-download"></i>

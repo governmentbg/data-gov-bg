@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Uuid;
 use Error;
 use Exception;
@@ -430,6 +432,12 @@ class ResourceController extends ApiController
   {
     $post = $request->all();
     $requestTypes = Resource::getRequestTypes();
+
+    if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: editResourceMetadata; Data: '.json_encode($post));
+    }
 
     if (isset($post['data']['http_rq_type'])) {
       $post['data']['http_rq_type'] = strtoupper($post['data']['http_rq_type']);
@@ -1109,7 +1117,9 @@ class ResourceController extends ApiController
     $post = $request->all();
 
     if (strstr($_SERVER['REQUEST_URI'], '/api')) {
-      Log::info('API resource request', array_merge(['method' => 'getResourceMetadata'], $post));
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: getResourceMetadata; Data: '.json_encode($post));
     }
 
     $validator = \Validator::make($post, [
@@ -1303,7 +1313,9 @@ class ResourceController extends ApiController
     $post = $request->all();
 
     if (strstr($_SERVER['REQUEST_URI'], '/api')) {
-      Log::info('API resource request', array_merge(['method' => 'getResourceData'], $post));
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: getResourceData; Data: '.json_encode($post));
     }
 
     $validator = \Validator::make($post, [
@@ -1353,7 +1365,9 @@ class ResourceController extends ApiController
     $post = $request->all();
 
     if (strstr($_SERVER['REQUEST_URI'], '/api')) {
-      Log::info('API resource request', array_merge(['method' => 'searchResourceData'], $post));
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: searchResourceData; Data: '.json_encode($post));
     }
 
     $validator = \Validator::make($post, [

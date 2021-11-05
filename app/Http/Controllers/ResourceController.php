@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use PhpParser\Node\Scalar\MagicConst\Dir;
 
 class ResourceController extends Controller
@@ -150,7 +152,6 @@ class ResourceController extends Controller
 
             $zipDir = "../storage/app/files/$uri";
             if(!file_exists($zipDir) && !is_dir($zipDir)) {
-              \Log::info("Create folder $zipDir at {$_SERVER['SERVER_NAME']}");
               mkdir($zipDir, 0777);
             }
 
@@ -675,7 +676,9 @@ class ResourceController extends Controller
     $zipName = end($zipNameExpl);
 
     if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
-      \Log::info("Reding file $zipName from folder $zipDir from server {$_SERVER['SERVER_NAME']}");
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info("Download file $zipName from folder $zipDir from server {$_SERVER['SERVER_NAME']}; User ip:".request()->ip().'; Url: '.request()->getPathInfo());
 
       header('Content-Description: File Transfer');
       header('Content-Type: application/zip');
@@ -768,7 +771,6 @@ class ResourceController extends Controller
     $zipName = "$uri.zip";
     $zipDir = "../storage/app/$uri";
     if(!file_exists($zipDir) && !is_dir($zipDir)) {
-      //\Log::info("Create folder $zipDir at {$_SERVER['SERVER_NAME']}");
       mkdir($zipDir, 0777);
     }
 
@@ -884,11 +886,13 @@ class ResourceController extends Controller
     $zipName = "$uri.zip";
     $zipDir = "../storage/app/$uri";
 
-    //\Log::info("Reading $zipDir from {$_SERVER['SERVER_NAME']}");
-
     try {
 
       if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
+        $monolog = Log::getMonolog();
+        $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+        $monolog->info("Download file $zipName from folder $zipDir from server {$_SERVER['SERVER_NAME']}; User ip:".request()->ip().'; Url: '.request()->getPathInfo());
+
         header('Content-Description: File Transfer');
         header('Content-Type: application/zip');
         header('Content-disposition: attachment; filename='.@basename($zipName));
@@ -924,7 +928,6 @@ class ResourceController extends Controller
   public function deleteZipFolder($uri)
   {
     $zipDir = "../storage/app/$uri";
-    //\Log::info("Delete folder $zipDir {$_SERVER['SERVER_NAME']}");
 
     if(file_exists($zipDir) && is_dir($zipDir)) {
       if (is_dir($zipDir)) {
@@ -966,7 +969,7 @@ class ResourceController extends Controller
 
   public function execResourceQueryScript(Request $request)
   {
-    $format = $request->format;
+    $format = $request->offsetGet('format');
     $resourceParams = ['resource_uri' => $request->uri, 'version' => $request->version];
 
     $rq = Request::create('/api/getResourceData', 'POST', $resourceParams);

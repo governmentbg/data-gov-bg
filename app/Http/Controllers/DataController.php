@@ -1786,6 +1786,12 @@ class DataController extends Controller {
       $apiResources = new ApiResource($rq);
       $res = $apiResources->listResources($rq)->getData();
       $resources = !empty($res->resources) ? $res->resources : [];
+      $resCount = isset($res->total_records) ? $res->total_records : 0;
+
+      $rqFiles = Request::create('/api/checkForFilesResources', 'POST', ['uri' => $uri]);
+      $apiFilesResources = new ApiResource($rqFiles);
+      $filesCount = $apiFilesResources->checkForFilesResources($rqFiles)->getData();
+      $filesResCount = isset($filesCount->filesCount) ? $filesCount->filesCount : 0;
 
       // Get category details
       if (!empty($dataset->category_id)) {
@@ -1917,6 +1923,7 @@ class DataController extends Controller {
       }
 
       $dataset = $this->getModelUsernames($dataset);
+      $formats = Resource::getFormats(true);
 
       return view(
         'data/reportedView',
@@ -1927,6 +1934,8 @@ class DataController extends Controller {
           'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
           'dataset'       => $dataset,
           'resources'     => $resources,
+          'filesResCount' => $filesResCount,
+          'formats'       => $formats,
           'buttons'       => $buttons,
           'groups'        => $groups,
           'setGroups'     => isset($setGroups) ? $setGroups : [],

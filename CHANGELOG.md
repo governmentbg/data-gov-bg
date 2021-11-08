@@ -13,6 +13,10 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.6] - 2021-11-05
+### Added
+- Docker tool to work with testdata.egov.bg
+
 ## [1.4.5] - 2021-11-05
 ### Added
 - Matomo tracking code

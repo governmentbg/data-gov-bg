@@ -44,6 +44,7 @@ class DataController extends Controller {
     $categories = [];
     $tags = [];
     $formats = [];
+    $access = "";
     $termsOfUse = [];
     $getParams = [];
     $display = [];
@@ -92,11 +93,19 @@ class DataController extends Controller {
     }
 
     // Data formats filter
-    if ($request->filled('format') && is_array($request->format)) {
-      $criteria['formats'] = array_map('strtoupper', $request->format);
-      $getParams['format'] = $request->format;
+    if ($request->filled('format') && is_array($request->offsetGet('format'))) {
+      $criteria['formats'] = array_map('strtoupper', $request->offsetGet('format'));
+      $getParams['format'] = $request->offsetGet('format');
     } else {
       $getParams['format'] = [];
+    }
+
+    // Data accessType filter
+    if ($request->filled('access') && is_numeric($request->offsetGet('access'))) {
+      $criteria['access'] = $request->offsetGet('access');
+      $getParams['access'] = $request->offsetGet('access');
+    } else {
+      $getParams['access'] = "";
     }
 
     // Terms of use filter
@@ -200,7 +209,9 @@ class DataController extends Controller {
         $this->prepareDisplayParams(count($organisations), $hasLimit, $recordsLimit, 'org', $display);
       }
 
-      if (empty($getParams['org'])) {
+      // stop the use of user's filter for now
+      //if (empty($getParams['org'])) {
+      if (false) {
         // Check for user records limit
         $hasLimit = !($request->filled('user_limit') && $request->user_limit == 0);
 
@@ -227,30 +238,33 @@ class DataController extends Controller {
         $this->prepareDisplayParams(count($users), $hasLimit, $recordsLimit, 'user', $display);
       }
 
-      // Check for group records limit
-      $hasLimit = !($request->filled('group_limit') && $request->group_limit == 0);
+      // stop the use of groups' filter for now
+      if (false) {
+        // Check for group records limit
+        $hasLimit = !($request->filled('group_limit') && $request->group_limit == 0);
 
-      // List data groups
-      $params = [
-        'criteria'          => [
-          'dataset_criteria' => $criteria,
-          'locale'           => $locale,
-          'keywords'         => trim($request->q)
-        ],
-      ];
+        // List data groups
+        $params = [
+          'criteria' => [
+            'dataset_criteria' => $criteria,
+            'locale' => $locale,
+            'keywords' => trim($request->q)
+          ],
+        ];
 
-      if ($hasLimit) {
-        $params['criteria']['records_limit'] = $recordsLimit;
+        if ($hasLimit) {
+          $params['criteria']['records_limit'] = $recordsLimit;
+        }
+
+        $rq = Request::create('/api/listDataGroups', 'POST', $params);
+        $api = new ApiOrganisation($rq);
+        $res = $api->listDataGroups($rq)->getData();
+
+        $groups = !empty($res->groups) ? $res->groups : [];
+        $getParams['group'] = array_intersect($getParams['group'], array_pluck($groups, 'id'));
+
+        $this->prepareDisplayParams(count($groups), $hasLimit, $recordsLimit, 'group', $display);
       }
-
-      $rq = Request::create('/api/listDataGroups', 'POST', $params);
-      $api = new ApiOrganisation($rq);
-      $res = $api->listDataGroups($rq)->getData();
-
-      $groups = !empty($res->groups) ? $res->groups : [];
-      $getParams['group'] = array_intersect($getParams['group'], array_pluck($groups, 'id'));
-
-      $this->prepareDisplayParams(count($groups), $hasLimit, $recordsLimit, 'group', $display);
 
       // Check for category records limit
       $hasLimit = !($request->filled('category_limit') && $request->category_limit == 0);
@@ -325,6 +339,22 @@ class DataController extends Controller {
       $getParams['format'] = array_intersect($getParams['format'], array_map('strtolower', array_pluck($formats, 'format')));
 
       $this->prepareDisplayParams(count($formats), $hasLimit, $recordsLimit, 'format', $display);
+
+      // List data access
+      $criteria['public'] = true;
+      $params = [
+        'criteria' => [
+          'dataset_criteria' => $criteria,
+          'locale'           => $locale,
+          'keywords'         => trim($request->q)
+        ],
+      ];
+
+      $rq = Request::create('/api/listDataAccess', 'POST', $params);
+      $api = new ApiDataSet($rq);
+      $res = $api->listDataAccess($rq)->getData();
+
+      $access = !empty($res->data_access) ? $res->data_access : [];
 
       // Check for terms of use records limit
       $hasLimit = !($request->filled('license_limit') && $request->license_limit == 0);
@@ -481,6 +511,7 @@ class DataController extends Controller {
         'categories'         => $categories,
         'tags'               => $tags,
         'formats'            => $formats,
+        'access'             => $access,
         'termsOfUse'         => $termsOfUse,
         'getParams'          => $getParams,
         'display'            => $display,
@@ -671,6 +702,24 @@ class DataController extends Controller {
       $filesCount = $apiFilesResources->checkForFilesResources($rqFiles)->getData();
       $filesResCount = isset($filesCount->filesCount) ? $filesCount->filesCount : 0;
 
+      $formatsLimits = [];
+      if($resCount > 0) {
+        $onlyZipFiles = true;
+        foreach ($resources as $resource) {
+          if($resource->file_format != Resource::getFormats()[Resource::FORMAT_ZIP]) {
+            $onlyZipFiles = false;
+          }
+          if($resource->file_format) {
+            foreach (Resource::FORMAT_LIMITS[$resource->file_format] as $limit) {
+              if(!in_array($limit, $formatsLimits)){
+                $formatsLimits[] = $limit;
+              }
+            }
+          }
+        }
+        $formatsLimits['onlyZipFiles'] = $onlyZipFiles;
+      }
+
       // Get category details
       if (!empty($dataset->category_id)) {
         $params = [
@@ -830,6 +879,7 @@ class DataController extends Controller {
         'dataset'       => $dataset,
         'resources'     => $paginationData['items'],
         'filesResCount' => $filesResCount,
+        'formatsLimits' => $formatsLimits,
         'buttons'       => $buttons,
         'groups'        => $groups,
         'setGroups'     => isset($setGroups) ? $setGroups : [],
@@ -1286,9 +1336,9 @@ class DataController extends Controller {
     }
 
     // Data formats filter
-    if ($request->filled('format') && is_array($request->format)) {
-      $criteria['formats'] = array_map('strtoupper', $request->format);
-      $getParams['format'] = $request->format;
+    if ($request->filled('format') && is_array($request->offsetGet('format'))) {
+      $criteria['formats'] = array_map('strtoupper', $request->offsetGet('format'));
+      $getParams['format'] = $request->offsetGet('format');
     } else {
       $getParams['format'] = [];
     }
@@ -1736,6 +1786,12 @@ class DataController extends Controller {
       $apiResources = new ApiResource($rq);
       $res = $apiResources->listResources($rq)->getData();
       $resources = !empty($res->resources) ? $res->resources : [];
+      $resCount = isset($res->total_records) ? $res->total_records : 0;
+
+      $rqFiles = Request::create('/api/checkForFilesResources', 'POST', ['uri' => $uri]);
+      $apiFilesResources = new ApiResource($rqFiles);
+      $filesCount = $apiFilesResources->checkForFilesResources($rqFiles)->getData();
+      $filesResCount = isset($filesCount->filesCount) ? $filesCount->filesCount : 0;
 
       // Get category details
       if (!empty($dataset->category_id)) {
@@ -1867,6 +1923,7 @@ class DataController extends Controller {
       }
 
       $dataset = $this->getModelUsernames($dataset);
+      $formats = Resource::getFormats(true);
 
       return view(
         'data/reportedView',
@@ -1877,6 +1934,8 @@ class DataController extends Controller {
           'approved'      => (!empty($organisation) && $organisation->type == Organisation::TYPE_COUNTRY),
           'dataset'       => $dataset,
           'resources'     => $resources,
+          'filesResCount' => $filesResCount,
+          'formats'       => $formats,
           'buttons'       => $buttons,
           'groups'        => $groups,
           'setGroups'     => isset($setGroups) ? $setGroups : [],

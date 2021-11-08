@@ -183,6 +183,26 @@
         </div>
 
         <div class="form-group row">
+            <label for="access" class="col-lg-3 col-md-5 col-xs-8 col-form-label">{{ uctrans('custom.dataset_access') }}:</label>
+            <div class="col-sm-9">
+                <select
+                        id="access"
+                        name="access"
+                        class="js-select form-control"
+                        data-placeholder="{{ utrans('custom.select_access') }}"
+                >
+                    @foreach ($accessTypes as $id => $accType)
+                        <option
+                                value="{{ $id }}"
+                                {{ $id == old('access') ? 'selected' : '' }}
+                        >{{ utrans($accType) }}</option>
+                    @endforeach
+                </select>
+                <span class="error">{{ $errors->first('access') }}</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
             <label
                 for="visibility"
                 class="col-sm-3 col-xs-12 col-form-label"
@@ -192,9 +212,7 @@
                     id="visibility"
                     name="visibility"
                     class="js-select form-control"
-                    data-placeholder="{{ utrans('custom.select_visibility') }}"
                 >
-                    <option></option>
                     @foreach ($visibilityOpt as $id => $visOpt)
                         <option
                             value="{{ $id }}"

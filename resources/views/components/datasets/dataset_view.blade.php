@@ -229,7 +229,11 @@
                                 <span class="version">&nbsp;&#8211;&nbsp;{{ $resource->name }}</span>
                             </a>
                             @if ($resource->type == $resourceTypes[App\Resource::TYPE_FILE])
-                                <form method="POST" class="pull-right" action="{{ url('/resource/download') }}">
+                                @if($resource->file_format == App\Resource::getFormats()[App\Resource::FORMAT_ZIP])
+                                    <form method="POST" class="pull-right" action="{{ route('downloadZip', $resource->uri) }}">
+                                @else
+                                    <form method="POST" class="pull-right" action="{{ url('/resource/download') }}">
+                                @endif
                                     {{ csrf_field() }}
                                     <input
                                             hidden

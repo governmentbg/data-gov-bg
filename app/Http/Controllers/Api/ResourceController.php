@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Uuid;
 use Error;
 use Exception;
@@ -430,6 +432,12 @@ class ResourceController extends ApiController
   {
     $post = $request->all();
     $requestTypes = Resource::getRequestTypes();
+
+    if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: editResourceMetadata; Data: '.json_encode($post));
+    }
 
     if (isset($post['data']['http_rq_type'])) {
       $post['data']['http_rq_type'] = strtoupper($post['data']['http_rq_type']);
@@ -1109,7 +1117,9 @@ class ResourceController extends ApiController
     $post = $request->all();
 
     if (strstr($_SERVER['REQUEST_URI'], '/api')) {
-      Log::info('API resource request', array_merge(['method' => 'getResourceMetadata'], $post));
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: getResourceMetadata; Data: '.json_encode($post));
     }
 
     $validator = \Validator::make($post, [
@@ -1303,7 +1313,9 @@ class ResourceController extends ApiController
     $post = $request->all();
 
     if (strstr($_SERVER['REQUEST_URI'], '/api')) {
-      Log::info('API resource request', array_merge(['method' => 'getResourceData'], $post));
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: getResourceData; Data: '.json_encode($post));
     }
 
     $validator = \Validator::make($post, [
@@ -1353,7 +1365,9 @@ class ResourceController extends ApiController
     $post = $request->all();
 
     if (strstr($_SERVER['REQUEST_URI'], '/api')) {
-      Log::info('API resource request', array_merge(['method' => 'searchResourceData'], $post));
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info('API resource request; User ip: '.request()->ip().'; Method: searchResourceData; Data: '.json_encode($post));
     }
 
     $validator = \Validator::make($post, [
@@ -1509,6 +1523,7 @@ class ResourceController extends ApiController
    * @param array criteria[dataset_criteria][category_ids] - optional
    * @param array criteria[dataset_criteria][tag_ids] - optional
    * @param array criteria[dataset_criteria][formats] - optional
+   * @param array criteria[dataset_criteria][access] - optional
    * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
    * @param boolean criteria[dataset_criteria][reported] - optional
    * @param array criteria[dataset_ids] - optional
@@ -1555,6 +1570,7 @@ class ResourceController extends ApiController
         'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
         'formats'             => 'nullable|array|min:1',
         'formats.*'           => 'string|in:'. implode(',', $formats),
+        'access'              => 'nullable|int|in:'. implode(',', array_keys(DataSet::getAccessTypes())),
         'reported'            => 'nullable|boolean',
       ]);
     }
@@ -1591,6 +1607,10 @@ class ResourceController extends ApiController
             $q->whereHas('DataSetTags', function($qr) use ($dsCriteria) {
               $qr->whereIn('tag_id', $dsCriteria['tag_ids']);
             });
+          }
+
+          if (!empty($dsCriteria['access'])) {
+            $q->where('access', $dsCriteria['access']);
           }
 
           if (!empty($dsCriteria['terms_of_use_ids'])) {

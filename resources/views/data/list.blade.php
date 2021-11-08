@@ -39,7 +39,9 @@
                                                             <input type="hidden" name="{{ $qp .'['. $pk .']' }}" value="{{ $pv }}"/>
                                                         @endforeach
                                                     @else
-                                                        <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
+                                                        @if (!empty($qpv))
+                                                            <input type="hidden" name="{{ $qp }}" value="{{ $qpv }}"/>
+                                                        @endif
                                                     @endif
                                                 @endforeach
                                             </form>

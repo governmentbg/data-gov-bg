@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
@@ -64,7 +66,9 @@ class Handler extends ExceptionHandler
         $context = ['type' => get_class($exception)];
 
         if ($exception instanceof NotFoundHttpException) {
-            Log::info('Path not found', $context);
+            $monolog = Log::getMonolog();
+            $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+            $monolog->info('Path not found; User ip: '.$request->ip().'; Url: '.$request->getPathInfo());
         } else {
             Log::error(
                 $exception->getMessage(),

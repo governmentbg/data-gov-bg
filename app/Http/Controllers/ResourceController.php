@@ -9,10 +9,15 @@ use App\ElasticDataSet;
 use Chumper\Zipper\Facades\Zipper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Api\ResourceController as ApiResource;
 use App\Http\Controllers\Api\ConversionController as ApiConversion;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use PhpParser\Node\Scalar\MagicConst\Dir;
 
 class ResourceController extends Controller
 {
@@ -137,7 +142,26 @@ class ResourceController extends Controller
         if (in_array($metadata['data']['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
           $success = true;
         } else if (!empty($extension)) {
-          $data = self::callConversions($apiKey, $extension, $content, $uri);
+          if(strtolower($extension) == "zip") {
+            $data['zip'] = "zip";
+
+            $zipDir = "../storage/app/files";
+            if(!file_exists($zipDir) && !is_dir($zipDir)) {
+              mkdir($zipDir, 0777);
+            }
+
+            $zipDir = "../storage/app/files/$uri";
+            if(!file_exists($zipDir) && !is_dir($zipDir)) {
+              mkdir($zipDir, 0777);
+            }
+
+            $file->move($zipDir, $file->getClientOriginalName());
+
+            $success = true;
+          }
+          else {
+            $data = self::callConversions($apiKey, $extension, $content, $uri);
+          }
         }
 
         if (Session::has('elasticData.'. $uri)) {
@@ -633,6 +657,46 @@ class ResourceController extends Controller
   }
 
   /**
+   * Download resource zip file
+   *
+   * @param Request $request - resource uri and file name
+   *
+   * @return downlodable file
+   */
+  public function resourceDirectDownloadZip(Request $request)
+  {
+    $uri = $request->offsetGet('uri');
+    $zipDir = "../storage/app/files/$uri";
+    $zipFile = glob($zipDir.DIRECTORY_SEPARATOR."*");
+    if(empty($zipFile)) {
+      $request->session()->flash('alert-danger', __('custom.zip_download_error'));
+      return redirect()->back()->withInput();
+    }
+    $zipNameExpl = explode("/", $zipFile[0]);
+    $zipName = end($zipNameExpl);
+
+    if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
+      $monolog = Log::getMonolog();
+      $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+      $monolog->info("Download file $zipName from folder $zipDir from server {$_SERVER['SERVER_NAME']}; User ip:".request()->ip().'; Url: '.request()->getPathInfo());
+
+      header('Content-Description: File Transfer');
+      header('Content-Type: application/zip');
+      header('Content-disposition: attachment; filename='.@basename($zipName));
+      header('Expires: 0');
+      header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+      header('Pragma: public');
+      header('Content-Length: ' .@filesize($zipDir.DIRECTORY_SEPARATOR.$zipName));
+
+      if(ob_get_level()){
+        ob_end_clean();
+      }
+
+      readfile($zipDir.DIRECTORY_SEPARATOR.$zipName);
+    }
+  }
+
+  /**
    * Transforms resource data to downloadable file
    *
    * @param Request $request - file format, uri of the resource
@@ -707,7 +771,6 @@ class ResourceController extends Controller
     $zipName = "$uri.zip";
     $zipDir = "../storage/app/$uri";
     if(!file_exists($zipDir) && !is_dir($zipDir)) {
-      //\Log::info("Create folder $zipDir at {$_SERVER['SERVER_NAME']}");
       mkdir($zipDir, 0777);
     }
 
@@ -728,7 +791,19 @@ class ResourceController extends Controller
 
       try {
 
-        foreach ($resources as $resource) {
+        $thereIsResourceZip = false;
+        $zipResources = [];
+
+        foreach ($resources as $key => $resource) {
+
+          if($resource->file_format == Resource::getFormats()[Resource::FORMAT_ZIP]) {
+            $zipDirResource = "../storage/app/files/$resource->uri";
+            $zipFileName = Resource::getResourceZipFile($resource->uri);
+            $zipResources[$key]['dir'] = $zipDirResource;
+            $zipResources[$key]['name'] = $zipFileName;
+            $thereIsResourceZip = true;
+            continue;
+          }
 
           $resourceId = $resource->id;
           $checkName = (mb_strlen($resource->name) > 130) ? mb_substr($resource->name, 0, 130, "utf-8") : $resource->name;
@@ -778,6 +853,11 @@ class ResourceController extends Controller
               $fileName = end($exploded);
               $zip->addFile($file, $fileName.".".strtolower($format));
             }
+            if($thereIsResourceZip) {
+              foreach ($zipResources as $zipResource) {
+                $zip->addFile($zipResource['dir'].DIRECTORY_SEPARATOR.$zipResource['name'], $zipResource['name']);
+              }
+            }
             $zip->close();
           }
         }
@@ -806,11 +886,13 @@ class ResourceController extends Controller
     $zipName = "$uri.zip";
     $zipDir = "../storage/app/$uri";
 
-    //\Log::info("Reading $zipDir from {$_SERVER['SERVER_NAME']}");
-
     try {
 
       if(file_exists($zipDir.DIRECTORY_SEPARATOR.$zipName)) {
+        $monolog = Log::getMonolog();
+        $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+        $monolog->info("Download file $zipName from folder $zipDir from server {$_SERVER['SERVER_NAME']}; User ip:".request()->ip().'; Url: '.request()->getPathInfo());
+
         header('Content-Description: File Transfer');
         header('Content-Type: application/zip');
         header('Content-disposition: attachment; filename='.@basename($zipName));
@@ -846,7 +928,6 @@ class ResourceController extends Controller
   public function deleteZipFolder($uri)
   {
     $zipDir = "../storage/app/$uri";
-    //\Log::info("Delete folder $zipDir {$_SERVER['SERVER_NAME']}");
 
     if(file_exists($zipDir) && is_dir($zipDir)) {
       if (is_dir($zipDir)) {
@@ -888,7 +969,7 @@ class ResourceController extends Controller
 
   public function execResourceQueryScript(Request $request)
   {
-    $format = $request->format;
+    $format = $request->offsetGet('format');
     $resourceParams = ['resource_uri' => $request->uri, 'version' => $request->version];
 
     $rq = Request::create('/api/getResourceData', 'POST', $resourceParams);

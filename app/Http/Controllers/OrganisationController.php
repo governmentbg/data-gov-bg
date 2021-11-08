@@ -424,9 +424,9 @@ class OrganisationController extends Controller
       }
 
       // data formats filter
-      if ($request->filled('format') && is_array($request->format)) {
-        $criteria['formats'] = array_map('strtoupper', $request->format);
-        $getParams['format'] = $request->format;
+      if ($request->filled('format') && is_array($request->offsetGet('format'))) {
+        $criteria['formats'] = array_map('strtoupper', $request->offsetGet('format'));
+        $getParams['format'] = $request->offsetGet('format');
       } else {
         $getParams['format'] = [];
       }
@@ -817,6 +817,25 @@ class OrganisationController extends Controller
         $filesCount = $apiFilesResources->checkForFilesResources($rqFiles)->getData();
         $filesResCount = isset($filesCount->filesCount) ? $filesCount->filesCount : 0;
 
+        $formatsLimits = [];
+        if($resCount > 0) {
+          $onlyZipFiles = true;
+          foreach ($resources as $resource) {
+            if(!$resource->file_format) continue;
+            if($resource->file_format != Resource::getFormats()[Resource::FORMAT_ZIP]) {
+              $onlyZipFiles = false;
+            }
+            if($resource->file_format) {
+              foreach (Resource::FORMAT_LIMITS[$resource->file_format] as $limit) {
+                if(!in_array($limit, $formatsLimits)){
+                  $formatsLimits[] = $limit;
+                }
+              }
+            }
+          }
+          $formatsLimits['onlyZipFiles'] = $onlyZipFiles;
+        }
+
         // get category details
         if (!empty($dataset->category_id)) {
           $params = [
@@ -968,6 +987,7 @@ class OrganisationController extends Controller
             'dataset'       => $dataset,
             'resources'     => $paginationData['items'],
             'filesResCount' => $filesResCount,
+            'formatsLimits' => $formatsLimits,
             'buttons'       => $buttons,
             'groups'        => $groups,
             'setGroups'     => isset($setGroups) ? $setGroups : [],

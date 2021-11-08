@@ -181,6 +181,7 @@ Route::post('searchNews', 'Api\NewsController@searchNews');
 Route::post('listNews', 'Api\NewsController@listNews');
 
 Route::post('listDatasets', 'Api\DataSetController@listDatasets');
+Route::post('listDataAccess', 'Api\DataSetController@listDataAccess');
 Route::post('getDatasetDetails', 'Api\DataSetController@getDatasetDetails');
 
 Route::post('listTags', 'Api\TagController@listTags');

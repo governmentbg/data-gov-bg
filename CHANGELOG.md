@@ -13,6 +13,36 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.6] - 2021-11-05
+### Added
+- Docker tool to work with testdata.egov.bg
+
+## [1.4.5] - 2021-11-05
+### Added
+- Matomo tracking code
+
+### Changed
+- api listDatasets default filters to match site Data section
+- Info logs to use different file info.log instead of laravel.log
+
+## [1.4.4] - 2021-10-05
+### Changed
+- Dataset create form visibility defaults to public
+
+## [1.4.3] - 2021-10-05
+### Added
+- Dataset list access filter - free and paid
+
+### Removed
+- Dataset list filters by user and groups
+
+## [1.4.2] - 2021-08-20
+### Added
+- Upload resource in zip format to data sets
+
+### Fixed
+- Zip download formats in dataset view
+
 ## [1.4.1] - 2021-08-18
 ### Added
 - Send a notification emails to admins when a resource report signal is send

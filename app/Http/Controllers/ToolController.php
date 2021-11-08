@@ -177,7 +177,7 @@ class ToolController extends Controller
                         .',id,deleted_at,NULL',
                     'api_key'       => 'required|string|max:191',
                     'resource_key'  => 'required|string|max:191',
-                    'query'         => 'required|string|max:191',
+                    'query'         => 'required|string|max:1191',
                     'upl_freq'      => 'required|int|digits_between:1,4',
                     'upl_freq_type' => 'required|int',
                 ]);

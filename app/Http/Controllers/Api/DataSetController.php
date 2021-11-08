@@ -1,6 +1,10 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use App\Collections\TranslatableCollection;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Symfony\Component\VarDumper\Cloner\Data;
 use Uuid;
 use Error;
 use App\Tags;
@@ -42,6 +46,7 @@ class DataSetController extends ApiController
      * @param integer data[category_id] - required
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
+     * @param integer data[access] - optional
      * @param string data[source] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
@@ -56,6 +61,7 @@ class DataSetController extends ApiController
         $errors = [];
         $post = $request->all();
         $visibilityTypes = DataSet::getVisibility();
+        $accessTypes = Dataset::getAccessTypes();
 
         if (isset($post['data']['org_id'])) {
             $post['org_id'] = $post['data']['org_id'];
@@ -80,6 +86,7 @@ class DataSetController extends ApiController
                 'org_id'                => $orgRule .'|int|digits_between:1,10|exists:organisations,id,deleted_at,NULL',
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10|exists:terms_of_use,id',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
+                'access'                => 'nullable|int|in:'. implode(',', array_flip($accessTypes)),
                 'source'                => 'nullable|string|max:191',
                 'author_name'           => 'nullable|string|max:191',
                 'author_email'          => 'nullable|email|max:191',
@@ -131,6 +138,7 @@ class DataSetController extends ApiController
                 'sla'               => empty($data['sla']) ? null : $this->trans($locale, $data['sla']),
                 'org_id'            => empty($data['org_id']) ? null : $data['org_id'],
                 'visibility'        => empty($data['visibility']) ? DataSet::VISIBILITY_PRIVATE : $data['visibility'],
+                'access'            => empty($data['access']) ? DataSet::ACCESS_FREE : $data['access'],
                 'version'           => 1,
                 'status'            => DataSet::STATUS_DRAFT,
                 'category_id'       => $data['category_id'],
@@ -226,7 +234,7 @@ class DataSetController extends ApiController
 
                 return $result;
             } catch (Throwable $e) {
-                Log::error($ex->getMessage());
+                Log::error($e->getMessage());
                 return $this->errorResponse(__('custom.add_dataset_fail'));
             }
         }
@@ -249,6 +257,7 @@ class DataSetController extends ApiController
      * @param integer data[org_id] - optional
      * @param integer data[terms_of_use_id] - optional
      * @param integer data[visibility] - optional
+     * @param integer data[access]  - optional
      * @param string data[source] - optional
      * @param string data[author_name] - optional
      * @param string data[author_email] - optional
@@ -267,6 +276,7 @@ class DataSetController extends ApiController
         $customFields = [];
         $errors = [];
         $visibilityTypes = DataSet::getVisibility();
+        $accessTypes = Dataset::getAccessTypes();
         $statusTypes = DataSet::getStatus();
 
         $validator = \Validator::make($post, [
@@ -288,6 +298,7 @@ class DataSetController extends ApiController
                 'tags.*.name'           => 'nullable|string|max:191',
                 'terms_of_use_id'       => 'nullable|int|digits_between:1,10',
                 'visibility'            => 'nullable|int|in:'. implode(',', array_flip($visibilityTypes)),
+                'access'                => 'nullable|int|in:'. implode(',', array_flip($accessTypes)),
                 'source'                => 'nullable|string|max:255',
                 'author_name'           => 'nullable|string|max:191',
                 'author_email'          => 'nullable|email|max:191',
@@ -427,6 +438,10 @@ class DataSetController extends ApiController
 
                     if (!empty($post['data']['visibility'])) {
                         $dataset->visibility = $post['data']['visibility'];
+                    }
+
+                    if (!empty($post['data']['access'])) {
+                        $dataset->access = $post['data']['access'];
                     }
 
                     if (!empty($post['data']['source'])) {
@@ -610,6 +625,7 @@ class DataSetController extends ApiController
      * @param array criteria[category_ids] - optional
      * @param array criteria[terms_of_use_ids] - optional
      * @param array criteria[formats] - optional
+     * @param array criteria[access] - optional
      * @param integer criteria[reported] - optional
      * @param integer criteria[created_by] - optional
      * @param array criteria[user_ids] - optional
@@ -629,6 +645,12 @@ class DataSetController extends ApiController
     public function listDatasets(Request $request)
     {
         $post = $request->all();
+
+        if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+          $monolog = Log::getMonolog();
+          $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
+          $monolog->info('API resource request; User ip: '.request()->ip().'; Method: listDatasets; Data: '.json_encode($post));
+        }
 
         $criteria = !empty($post['criteria']) ? $post['criteria'] : [];
         $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
@@ -664,6 +686,7 @@ class DataSetController extends ApiController
                 'keywords'              => 'nullable|string|max:191',
                 'status'                => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
                 'visibility'            => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
+                'access'                => 'nullable|int|in:'. implode(',', array_keys(DataSet::getAccessTypes())),
                 'reported'              => 'nullable|int|digits_between:1,10',
                 'created_by'            => 'nullable|int|digits_between:1,10',
                 'user_ids'              => 'nullable|array',
@@ -685,6 +708,7 @@ class DataSetController extends ApiController
 
         if (!$validator->fails()) {
             try {
+
                 $query = DataSet::select()->with('resource');
 
                 if (isset($post['api_key'])) {
@@ -701,12 +725,20 @@ class DataSetController extends ApiController
                         return $this->errorResponse(__('custom.access_denied'));
                     }
 
+                    if(empty($criteria['public'])) $criteria['public'] = true;
+
                     if (!empty($criteria['status'])) {
                         $query->where('status', $criteria['status']);
+                    }
+                    else {
+                        $query->where('status', DataSet::STATUS_PUBLISHED);
                     }
 
                     if (!empty($criteria['visibility'])) {
                         $query->where('visibility', $criteria['visibility']);
+                    }
+                    else {
+                        $query->where('visibility', DataSet::VISIBILITY_PUBLIC);
                     }
                 } else {
                     $query->where('status', DataSet::STATUS_PUBLISHED);
@@ -784,6 +816,10 @@ class DataSetController extends ApiController
                     $query->whereHas('resource', function($q) use ($formats) {
                         $q->whereIn('file_format', $formats);
                     });
+                }
+
+                if (!empty($criteria['access'])) {
+                    $query->where('access', $criteria['access']);
                 }
 
                 if (!empty($criteria['terms_of_use_ids'])) {
@@ -917,8 +953,237 @@ class DataSetController extends ApiController
                 }
 
                 return $this->successResponse([
-                    'datasets'      => $results,
-                    'total_records' => $count
+                    'total_records' => $count,
+                    'datasets'      => $results
+                ], true);
+            } catch (Exception $ex) {
+                Log::error($ex->getMessage());
+            }
+        }
+
+        return $this->errorResponse(__('custom.criteria_error'), $validator->errors()->messages());
+    }
+
+    /**
+     * Lists the count of the datasets per access type
+     *
+     * @param array criteria - optional
+     * @param array dataset_criteria[dataset_ids] - optional
+     * @param string dataset_criteria[locale] - optional
+     * @param array dataset_criteria[org_ids] - optional
+     * @param array dataset_criteria[group_ids] - optional
+     * @param array dataset_criteria[tag_ids] - optional
+     * @param array dataset_criteria[category_ids] - optional
+     * @param array dataset_criteria[terms_of_use_ids] - optional
+     * @param array dataset_criteria[formats] - optional
+     * @param array dataset_criteria[access] - optional
+     * @param integer dataset_criteria[reported] - optional
+     * @param integer dataset_criteria[created_by] - optional
+     * @param array dataset_criteria[user_ids] - optional
+     * @param boolean dataset_criteria[user_datasets_only] - optional
+     * @param boolean dataset_criteria[keywords] - optional
+     * @param array dataset_criteria[public] - optional
+     *
+     * @return json response
+     */
+    public function listDataAccess(Request $request)
+    {
+        $post = $request->all();
+
+        $criteria = !empty($post['criteria']) ? $post['criteria'] : [];
+        $order['type'] = !empty($criteria['order']['type']) ? $criteria['order']['type'] : 'desc';
+        $order['field'] = !empty($criteria['order']['field']) ? $criteria['order']['field'] : 'created_at';
+        $locale = !empty($post['criteria']['locale'])
+            ? $post['criteria']['locale']
+            : \LaravelLocalization::getCurrentLocale();
+
+        $validator = \Validator::make($post, [
+            'api_key'                    => 'nullable|string|exists:users,api_key',
+            'criteria'                   => 'nullable|array',
+            'records_per_page'           => 'nullable|int|digits_between:1,10',
+            'page_number'                => 'nullable|int|digits_between:1,10',
+        ]);
+
+        if (!$validator->fails()) {
+            $dsCriteria = isset($criteria['dataset_criteria']) ? $criteria['dataset_criteria'] : [];
+            $validator = \Validator::make($dsCriteria, [
+                'dataset_ids'           => 'nullable|array',
+                'dataset_ids.*'         => 'int|digits_between:1,10',
+                'locale'                => 'nullable|string|max:5',
+                'org_ids'               => 'nullable|array',
+                'org_ids.*'             => 'int|digits_between:1,10',
+                'group_ids'             => 'nullable|array',
+                'group_ids.*'           => 'int|digits_between:1,10',
+                'category_ids'          => 'nullable|array',
+                'category_ids.*'        => 'int|digits_between:1,10',
+                'tag_ids'               => 'nullable|array',
+                'tag_ids.*'             => 'int|digits_between:1,10',
+                'formats'               => 'nullable|array|min:1',
+                'formats.*'             => 'string|in:'. implode(',', Resource::getFormats()),
+                'terms_of_use_ids'      => 'nullable|array',
+                'terms_of_use_ids.*'    => 'int|digits_between:1,10',
+                'keywords'              => 'nullable|string|max:191',
+                'status'                => 'nullable|int|in:'. implode(',', array_keys(DataSet::getStatus())),
+                'visibility'            => 'nullable|int|in:'. implode(',', array_keys(DataSet::getVisibility())),
+                'access'                => 'nullable|int|in:'. implode(',', array_keys(DataSet::getAccessTypes())),
+                'reported'              => 'nullable|int|digits_between:1,10',
+                'created_by'            => 'nullable|int|digits_between:1,10',
+                'user_ids'              => 'nullable|array',
+                'user_ids.*'            => 'int|digits_between:1,10',
+                'user_datasets_only'    => 'nullable|bool',
+                'public'                => 'nullable|bool',
+                'date_from'             => 'nullable|date',
+                'date_to'               => 'nullable|date',
+                'order'                 => 'nullable|array',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            $validator = \Validator::make($order, [
+                'type'  => 'nullable|string|max:191',
+                'field' => 'nullable|string|max:191',
+            ]);
+        }
+
+        if (!$validator->fails()) {
+            try {
+
+                $query = DataSet::select(DB::raw('count(distinct id) as total'));
+
+                if (isset($post['api_key'])) {
+                    $user = \App\User::where('api_key', $post['api_key'])->first();
+                    $rightCheck = RoleRight::checkUserRight(
+                        Module::DATA_SETS,
+                        RoleRight::RIGHT_VIEW,
+                        [
+                            'user' => $user
+                        ]
+                    );
+
+                    if (!$rightCheck) {
+                        return $this->errorResponse(__('custom.access_denied'));
+                    }
+
+                    if (!empty($dsCriteria['status'])) {
+                        $query->where('status', $dsCriteria['status']);
+                    }
+
+                    if (!empty($dsCriteria['visibility'])) {
+                        $query->where('visibility', $dsCriteria['visibility']);
+                    }
+                } else {
+                    $query->where('status', DataSet::STATUS_PUBLISHED);
+                    $query->where('visibility', DataSet::VISIBILITY_PUBLIC);
+                }
+
+                if (!empty($dsCriteria['public'])) {
+                    $query->where(function($q) {
+                        $q->whereIn(
+                            'data_sets.org_id',
+                            Organisation::select('id')
+                                ->where('organisations.active', 1)
+                                ->where('organisations.approved', 1)
+                                ->get()
+                                ->pluck('id')
+                        )
+                            ->orWhereNull('data_sets.org_id');
+                    });
+                }
+                if (!empty($dsCriteria['dataset_ids'])) {
+                    $query->whereIn('data_sets.id', $dsCriteria['dataset_ids']);
+                }
+
+                if (!empty($dsCriteria['keywords'])) {
+                    $tntIds = DataSet::search($dsCriteria['keywords'])->get()->pluck('id');
+
+                    $fullMatchIds = DataSet::select('data_sets.id')
+                        ->leftJoin('translations', 'translations.group_id', '=', 'data_sets.name')
+                        ->where('translations.locale', $locale)
+                        ->where('translations.text', 'like', '%'. $dsCriteria['keywords'] .'%')
+                        ->pluck('id');
+
+                    $ids = $fullMatchIds->merge($tntIds)->unique();
+
+                    $query->whereIn('data_sets.id', $ids);
+
+                    if (count($ids)) {
+                        $strIds = $ids->implode(',');
+                        $query->raw(DB::raw('FIELD(data_sets.id, '. $strIds .')'));
+                    }
+                }
+
+                if (isset($dsCriteria['user_datasets_only']) && $dsCriteria['user_datasets_only']) {
+                    $query->whereNull('org_id');
+                } elseif (!empty($dsCriteria['org_ids'])) {
+                    $query->whereIn('org_id', $dsCriteria['org_ids']);
+                }
+
+                if (!empty($dsCriteria['group_ids'])) {
+                    $query->whereHas('dataSetGroup', function($q) use($dsCriteria) {
+                        $q->whereIn('group_id', $dsCriteria['group_ids']);
+                    });
+                }
+
+                if (!empty($dsCriteria['category_ids'])) {
+                    $query->whereIn('category_id', $dsCriteria['category_ids']);
+                }
+
+                if (!empty($dsCriteria['tag_ids'])) {
+                    $query->whereHas('dataSetTags', function($q) use ($dsCriteria) {
+                        $q->whereIn('tag_id', $dsCriteria['tag_ids']);
+                    });
+                }
+
+                if (!empty($dsCriteria['formats'])) {
+                    $formatCodes = array_flip(Resource::getFormats());
+                    $formats = [];
+
+                    foreach ($dsCriteria['formats'] as $format) {
+                        if (isset($formatCodes[$format])) {
+                            array_push($formats, $formatCodes[$format]);
+                        }
+                    }
+
+                    $query->whereHas('resource', function($q) use ($formats) {
+                        $q->whereIn('file_format', $formats);
+                    });
+                }
+
+                if (!empty($dsCriteria['terms_of_use_ids'])) {
+                    $query->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
+                }
+
+                if (!empty($dsCriteria['date_from'])) {
+                    $query->where('data_sets.created_at', '>=', $dsCriteria['date_from']);
+                }
+
+                if (!empty($dsCriteria['date_to'])) {
+                    $query->where('data_sets.created_at', '<=', $dsCriteria['date_to']);
+                }
+
+                if (!empty($dsCriteria['reported'])) {
+                    $query->whereHas('resource', function($q) use ($dsCriteria) {
+                        $q->where('is_reported', $dsCriteria['reported']);
+                    });
+                }
+
+                if (!empty($dsCriteria['user_ids'])) {
+                    $query->whereIn('data_sets.created_by', $dsCriteria['user_ids']);
+                } elseif (!empty($dsCriteria['created_by'])) {
+                    $query->where('data_sets.created_by', $dsCriteria['created_by']);
+                }
+
+                $results = new TranslatableCollection();
+                foreach (DataSet::getAccessTypes() as $access => $name) {
+                  $newQuery = clone $query;
+                  $result = $newQuery->where('access', $access)->first();
+                  //dd(\DB::getQueryLog());
+                  $result->access = $access;
+                  $results->push($result);
+                }
+
+                return $this->successResponse([
+                    'data_access'      => $results
                 ], true);
             } catch (Exception $ex) {
                 Log::error($ex->getMessage());

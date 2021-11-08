@@ -488,6 +488,7 @@ class CategoryController extends ApiController
      * @param array criteria[dataset_criteria][category_ids] - optional
      * @param array criteria[dataset_criteria][tag_ids] - optional
      * @param array criteria[dataset_criteria][formats] - optional
+     * @param array criteria[dataset_criteria][access] - optional
      * @param array criteria[dataset_criteria][terms_of_use_ids] - optional
      * @param boolean criteria[dataset_criteria][reported] - optional
      * @param array criteria[dataset_ids] - optional
@@ -532,6 +533,7 @@ class CategoryController extends ApiController
                 'terms_of_use_ids.*'  => 'int|digits_between:1,10|exists:terms_of_use,id',
                 'formats'             => 'nullable|array|min:1',
                 'formats.*'           => 'string|in:'. implode(',', Resource::getFormats()),
+                'access'              => 'nullable|int|in:'. implode(',', array_keys(DataSet::getAccessTypes())),
                 'reported'            => 'nullable|boolean',
             ]);
         }
@@ -586,6 +588,9 @@ class CategoryController extends ApiController
                     );
                 }
 
+                if (!empty($dsCriteria['access'])) {
+                  $data->where('data_sets.access', $dsCriteria['access']);
+                }
                 if (!empty($dsCriteria['terms_of_use_ids'])) {
                     $data->whereIn('terms_of_use_id', $dsCriteria['terms_of_use_ids']);
                 }

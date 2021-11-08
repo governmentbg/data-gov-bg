@@ -333,6 +333,7 @@ Route::middleware('auth')->group(function() {
 });
 
 Route::match(['get', 'post'], '/resource/download', 'ResourceController@resourceDownload');
+Route::match(['get', 'post'], '/resource/download/zip/{uri}', 'ResourceController@resourceDirectDownloadZip')->name('downloadZip');
 Route::match(['get', 'post'], '/resource/download/{uri}/{format}', 'ResourceController@resourceDirectDownload');
 Route::match(['get', 'post'], '/dataset/{uri}/resources/download/{format}', 'ResourceController@resourcesPrepareZipForDownload');
 Route::match(['get', 'post'], '/dataset/resources/download/zip/{uri}', 'ResourceController@downloadResourcesZip');

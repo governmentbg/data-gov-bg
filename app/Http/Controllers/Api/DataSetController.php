@@ -646,7 +646,7 @@ class DataSetController extends ApiController
     {
         $post = $request->all();
 
-        if (strstr($_SERVER['REQUEST_URI'], '/api')) {
+        if (isset($_SERVER['REQUEST_URI']) && strstr($_SERVER['REQUEST_URI'], '/api')) {
           $monolog = Log::getMonolog();
           $monolog->pushHandler(new StreamHandler(storage_path('logs/info.log'), Logger::INFO, false));
           $monolog->info('API resource request; User ip: '.request()->ip().'; Method: listDatasets; Data: '.json_encode($post));
@@ -725,21 +725,14 @@ class DataSetController extends ApiController
                         return $this->errorResponse(__('custom.access_denied'));
                     }
 
-                    if(empty($criteria['public'])) $criteria['public'] = true;
-
                     if (!empty($criteria['status'])) {
                         $query->where('status', $criteria['status']);
-                    }
-                    else {
-                        $query->where('status', DataSet::STATUS_PUBLISHED);
                     }
 
                     if (!empty($criteria['visibility'])) {
                         $query->where('visibility', $criteria['visibility']);
                     }
-                    else {
-                        $query->where('visibility', DataSet::VISIBILITY_PUBLIC);
-                    }
+
                 } else {
                     $query->where('status', DataSet::STATUS_PUBLISHED);
                     $query->where('visibility', DataSet::VISIBILITY_PUBLIC);

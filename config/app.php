@@ -126,6 +126,7 @@ return [
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
 
     'IS_TOOL' => env('IS_TOOL'),
+    'IS_TEST_TOOL' => env('IS_TEST_TOOL'),
     'IS_DOCKER' => env('IS_DOCKER'),
     'MIGRATE_USER_API_KEY' => env('MIGRATE_USER_API_KEY'),
     'APP_NAME' => env('APP_NAME', 'Open Data Portal'),

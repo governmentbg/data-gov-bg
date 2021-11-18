@@ -20,7 +20,7 @@ class LoginByApiKey
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!config('app.IS_TOOL')) {
+        if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL')) {
             if (!Auth::check() && $request->offsetGet('api_key')) {
                 $user = User::select('id')->where([
                     'api_key'   => $request->offsetGet('api_key'),

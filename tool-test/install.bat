@@ -38,7 +38,7 @@ if "%port%"=="0" (
     goto portloop
 )
 
-docker rm -f opendatatool >nul 2>&1
+docker rm -f opendatatool-test >nul 2>&1
 
 @echo off
 netstat -o -n -a | findstr 0.0:%port%
@@ -46,5 +46,5 @@ if %ERRORLEVEL% equ 0 (
     echo Port `%port%` already in use
     goto portloop
 ) else (
-    docker run -it -d --name opendatatool -v /var/run/docker.sock:/var/run/docker.sock -v %folder%:/var/files -v opendatatooldb:/var/lib/mysql -p %port%:80 --restart always asapbg/data-egov-bg-tool && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower >nul 2>&1 & echo Deployment finished
+    docker run -it -d --name opendatatool-test -v /var/run/docker.sock:/var/run/docker.sock -v %folder%:/var/files -v opendatatooldb-test:/var/lib/mysql -p %port%:80 --restart always asapbg/data-egov-bg-tool && docker run -d --name watchtower --restart always -v /var/run/docker.sock:/var/run/docker.sock v2tec/watchtower >nul 2>&1 & echo Deployment finished
 )

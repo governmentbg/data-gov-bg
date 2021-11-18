@@ -56,10 +56,11 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
 
             gtag('config', '{{ config('app.GA_TRACKING_ID') }}');
         </script>
-@endif
+    @endif
 <!-- Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js?hl={{ $lang }}" async defer></script>
 <!-- Matomo -->
+    @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
     <script>
         var _paq = window._paq = window._paq || [];
         /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -73,6 +74,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
             g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
         })();
     </script>
+    @endif
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
             crossorigin="anonymous"></script>
@@ -88,7 +90,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                                 href="{{ url('/') }}"
                         ><img alt="Лого на портала" src="{{ asset('img/opendata-logo-color.svg') }}"></a>
                     </div>
-                    @if (!config('app.IS_TOOL'))
+                    @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
                         <div class="hamburger-trigger hidden-lg hidden-md hidden-sm col-xs-5 pull-right text-right">
                             @if (\Auth::check())
                                 <div class="mobile-icon {{ in_array(Request::segment(1), ['user', 'admin']) ? 'active-menu' : '' }}">
@@ -128,7 +130,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                             js-show-on-load
                             {{ \Auth::check() ? 'col-sm-7 col-md-7 col-lg-6' : 'col-sm-6 col-md-5 col-lg-4'}}
                             ">
-                        @if (!config('app.IS_TOOL'))
+                        @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
                             @if (\Auth::check())
                                 <span class="login-link username">
                                         <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
@@ -178,7 +180,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                                 >{{ strtoupper($altLang) }}</a>
                             </span>
 
-                        @if (!config('app.IS_TOOL'))
+                        @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
                             <span class="social-icons {{ isset($newsLink) || isset($datasetLink) || isset($link) ? 'rss-i' : '' }}">
                                     <a
                                             target="_blank"
@@ -360,6 +362,14 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                                 href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
                         >{{ exec('git describe') }}</a>
                     </div>
+                @elseif (config('app.IS_TEST_TOOL'))
+                    <div class="container">
+                        <h3>Тест tool</h3>
+                        <a
+                                class="tool-version"
+                                href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
+                        >{{ exec('git describe') }}</a>
+                    </div>
                 @else
                     <div class="help-btn js-help">
                         @if (\Auth::check() && App\Role::isAdmin() && empty($help))
@@ -393,7 +403,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
         </div>
 
         <footer>
-            @if (!config('app.IS_TOOL'))
+            @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
                 <div class="col-xs-12 m-t-xl p-t-sm text-center footer-sections">
                     <div class="row">
                         <div class="container">

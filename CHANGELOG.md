@@ -13,6 +13,11 @@ Security - in case of vulnerabilities.
 
 ## [Unreleased] - XXXX-XX-XX
 
+## [1.4.7] - 2021-11-18
+### Fixed
+- Publish dataset with recourses of type zip
+- Docker tool to work with testdata.egov.bg
+
 ## [1.4.6] - 2021-11-05
 ### Added
 - Docker tool to work with testdata.egov.bg

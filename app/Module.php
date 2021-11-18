@@ -137,7 +137,7 @@ class Module extends Model
                         'occurrence'    => date('Y-m-d H:i:s'),
                     ];
 
-                    if (!config('app.IS_TOOL')) {
+                    if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL')) {
                         $dbData['user_id'] = Auth::user()->id;
                     }
 

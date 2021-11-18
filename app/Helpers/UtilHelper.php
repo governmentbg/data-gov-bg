@@ -26,6 +26,10 @@ function get_dataset_resources_with_no_data($uri)
     $resourcesWithNoData = [];
 
     foreach ($resources as $resource) {
+        if($resource->resource_type == Resource::TYPE_FILE && $resource->file_format == Resource::FORMAT_ZIP) {
+          // if resource is zip don't check for content in Elasticsearch
+          continue;
+        }
         if (
             ($resource->resource_type == Resource::TYPE_FILE || $resource->resource_type == Resource::TYPE_AUTO)
             && (

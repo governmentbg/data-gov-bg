@@ -173,13 +173,13 @@ class ActionsHistoryController extends ApiController
 
                 $history->whereIn('action', $criteria['actions']);
             } else {
-                if (!config('app.IS_TOOL')) {
+                if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL')) {
                     $history->whereIn('action', $publicTypes);
                 }
             }
         }
 
-        if (!config('app.IS_TOOL')) {
+        if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL')) {
             if (isset($criteria['period_from'])) {
                 $history->where('occurrence', '>=', $criteria['period_from']);
             }
@@ -311,7 +311,7 @@ class ActionsHistoryController extends ApiController
 
         if (!empty($history)) {
             foreach ($history as $key => $record) {
-                if (!config('app.IS_TOOL') && !empty($record->user)) {
+                if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL') && !empty($record->user)) {
                     $results[] = [
                         'id'             => $record->id,
                         'user_id'        => $record->user->id,

@@ -1869,6 +1869,14 @@ class UserController extends Controller {
           return redirect('/user/resource/view/'. $response['uri']);
         }
 
+        if(
+          is_array($data)
+          && isset($response['data']['zip'])
+        ) {
+          $request->session()->flash('alert-success', __('custom.add_success'));
+          return redirect('/admin/resource/view/'. $response['uri']);
+        }
+
         if ($data['type'] == Resource::TYPE_API) {
           $extension = $response['extension'];
         }
@@ -2094,6 +2102,14 @@ class UserController extends Controller {
             return redirect('/user/resource/view/'. $response['uri']);
           }
 
+          if(
+            is_array($data)
+            && isset($response['data']['zip'])
+          ) {
+            $request->session()->flash('alert-success', __('custom.add_success'));
+            return redirect('/admin/resource/view/'. $response['uri']);
+          }
+
           if ($data['type'] == Resource::TYPE_API) {
             $extension = $response['extension'];
           }
@@ -2185,6 +2201,14 @@ class UserController extends Controller {
         if ($response['success']) {
           if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
             return redirect('/'. $root .'/groups/'. $group->uri .'/resource/'. $response['uri']);
+          }
+
+          if(
+            is_array($data)
+            && isset($response['data']['zip'])
+          ) {
+            $request->session()->flash('alert-success', __('custom.add_success'));
+            return redirect('/admin/resource/view/'. $response['uri']);
           }
 
           if ($data['type'] == Resource::TYPE_API) {
@@ -2279,6 +2303,14 @@ class UserController extends Controller {
         if ($response['success']) {
           if (in_array($data['type'], [Resource::TYPE_HYPERLINK, Resource::TYPE_AUTO])) {
             return redirect('/'. $root .'/organisations/'. $fromOrg->uri .'/resource/'. $response['uri']);
+          }
+
+          if(
+            is_array($data)
+            && isset($response['data']['zip'])
+          ) {
+            $request->session()->flash('alert-success', __('custom.add_success'));
+            return redirect('/admin/resource/view/'. $response['uri']);
           }
 
           if ($data['type'] == Resource::TYPE_API) {

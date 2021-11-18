@@ -42,7 +42,7 @@ RUN apk add --update mysql mysql-client
 RUN addgroup mysql mysql
 RUN rm -f /var/cache/apk/*
 
-ENV MYSQL_DATABASE=opendata MYSQL_USER=opendata MYSQL_PASSWORD=opendata GIT_REPO=https://github.com/asapbg/data-gov-bg API_URL=https://testdata.egov.bg/api/ GRAYLOG_HOST=data.egov.bg GRAYLOG_PORT=12202 DB_HOST=localhost
+ENV MYSQL_DATABASE=opendata-test MYSQL_USER=opendata MYSQL_PASSWORD=opendata GIT_REPO=https://github.com/asapbg/data-gov-bg API_URL=https://testdata.egov.bg/api/ GRAYLOG_HOST=testdata.egov.bg GRAYLOG_PORT=12202 DB_HOST=localhost
 
 # configure apache
 RUN mkdir -p /run/apache2 && chown -R apache:apache /run/apache2 \
@@ -68,7 +68,7 @@ RUN cd /var/www/localhost \
     && sed -i "/DB_HOST=/c\\DB_HOST=$DB_HOST" ./.env \
     && sed -i "/GRAYLOG_HOST=/c\\GRAYLOG_HOST=$GRAYLOG_HOST" ./.env \
     && sed -i "/GRAYLOG_PORT=/c\\GRAYLOG_PORT=$GRAYLOG_PORT" ./.env \
-    && printf "IS_TOOL=true\n" >> .env \
+    && printf "IS_TEST_TOOL=true\n" >> .env \
     && printf "IS_DOCKER=true\n" >> .env \
     && printf "TOOL_API_URL=$API_URL\n" >> .env \
     && date +%s > /var/lastrestart \

@@ -56,10 +56,11 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
 
             gtag('config', '{{ config('app.GA_TRACKING_ID') }}');
         </script>
-@endif
+    @endif
 <!-- Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js?hl={{ $lang }}" async defer></script>
 <!-- Matomo -->
+    @if (!config('app.IS_TOOL'))
     <script>
         var _paq = window._paq = window._paq || [];
         /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -73,6 +74,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
             g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
         })();
     </script>
+    @endif
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
             crossorigin="anonymous"></script>
@@ -353,12 +355,21 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                         setInterval(function(){ SlideText() }, 12000);
                     });
                 </script>
-                @if (config('app.IS_TOOL'))
-                    <div class="container">
+                @if (config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+                    <div class="container tool">
                         <a
                                 class="tool-version"
                                 href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
                         >{{ exec('git describe') }}</a>
+                        <h3>Инструмент за продуктивна среда</h3>
+                    </div>
+                @elseif (config('app.IS_TEST_TOOL'))
+                    <div class="container tool">
+                        <a
+                                class="tool-version"
+                                href="https://github.com/asapbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
+                        >{{ exec('git describe') }}</a>
+                        <h3>Инструмент за тестова среда</h3>
                     </div>
                 @else
                     <div class="help-btn js-help">

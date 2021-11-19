@@ -20,7 +20,7 @@ class CheckHelp
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!config('app.IS_TOOL')) {
+        if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL')) {
             $pages = HelpPage::select()->get();
 
             $name = $request->getPathInfo();

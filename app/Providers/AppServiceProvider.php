@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (!config('app.IS_TOOL')) {
+        if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL')) {
             app('url')->forceRootUrl(config('app.APP_URL'));
         }
 

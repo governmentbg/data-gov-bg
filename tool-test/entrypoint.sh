@@ -6,7 +6,7 @@ if [ $(($(date +%s) - $(cat /var/lastrestart))) -gt 50 ]; then
     echo '[i] Docker container manually restarted'
     sleep 20
     date +%s > /var/lastrestart
-    docker restart opendatatool
+    docker restart opendatatool-test
 fi
 
 # start apache

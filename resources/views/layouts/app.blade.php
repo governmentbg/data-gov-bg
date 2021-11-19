@@ -60,7 +60,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
 <!-- Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js?hl={{ $lang }}" async defer></script>
 <!-- Matomo -->
-    @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+    @if (!config('app.IS_TOOL'))
     <script>
         var _paq = window._paq = window._paq || [];
         /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -90,7 +90,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                                 href="{{ url('/') }}"
                         ><img alt="Лого на портала" src="{{ asset('img/opendata-logo-color.svg') }}"></a>
                     </div>
-                    @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+                    @if (!config('app.IS_TOOL'))
                         <div class="hamburger-trigger hidden-lg hidden-md hidden-sm col-xs-5 pull-right text-right">
                             @if (\Auth::check())
                                 <div class="mobile-icon {{ in_array(Request::segment(1), ['user', 'admin']) ? 'active-menu' : '' }}">
@@ -130,7 +130,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                             js-show-on-load
                             {{ \Auth::check() ? 'col-sm-7 col-md-7 col-lg-6' : 'col-sm-6 col-md-5 col-lg-4'}}
                             ">
-                        @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+                        @if (!config('app.IS_TOOL'))
                             @if (\Auth::check())
                                 <span class="login-link username">
                                         <a href="{{ url('/user') }}">{{ \Auth::user()->username }}  </a>
@@ -180,7 +180,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                                 >{{ strtoupper($altLang) }}</a>
                             </span>
 
-                        @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+                        @if (!config('app.IS_TOOL'))
                             <span class="social-icons {{ isset($newsLink) || isset($datasetLink) || isset($link) ? 'rss-i' : '' }}">
                                     <a
                                             target="_blank"
@@ -355,20 +355,21 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
                         setInterval(function(){ SlideText() }, 12000);
                     });
                 </script>
-                @if (config('app.IS_TOOL'))
-                    <div class="container">
+                @if (config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+                    <div class="container tool">
                         <a
                                 class="tool-version"
                                 href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
                         >{{ exec('git describe') }}</a>
+                        <h3>Инструмент за продуктивна среда</h3>
                     </div>
                 @elseif (config('app.IS_TEST_TOOL'))
-                    <div class="container">
-                        <h3>Тест tool</h3>
+                    <div class="container tool">
                         <a
                                 class="tool-version"
-                                href="https://github.com/governmentbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
+                                href="https://github.com/asapbg/data-gov-bg/releases/tag/{{ exec('git describe') }}"
                         >{{ exec('git describe') }}</a>
+                        <h3>Инструмент за тестова среда</h3>
                     </div>
                 @else
                     <div class="help-btn js-help">
@@ -403,7 +404,7 @@ $altLang = $lang == 'bg' ? 'en' : 'bg';
         </div>
 
         <footer>
-            @if (!config('app.IS_TOOL') && !config('app.IS_TEST_TOOL'))
+            @if (!config('app.IS_TOOL'))
                 <div class="col-xs-12 m-t-xl p-t-sm text-center footer-sections">
                     <div class="row">
                         <div class="container">

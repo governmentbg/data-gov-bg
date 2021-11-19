@@ -66,8 +66,10 @@ RUN cd /var/www/localhost \
     && composer install \
     && cp .env.example .env \
     && sed -i "/DB_HOST=/c\\DB_HOST=$DB_HOST" ./.env \
+    && sed -i "/DB_DATABASE=/c\\DB_DATABASE=$MYSQL_DATABASE" ./.env \
     && sed -i "/GRAYLOG_HOST=/c\\GRAYLOG_HOST=$GRAYLOG_HOST" ./.env \
     && sed -i "/GRAYLOG_PORT=/c\\GRAYLOG_PORT=$GRAYLOG_PORT" ./.env \
+    && printf "IS_TOOL=true\n" >> .env \
     && printf "IS_TEST_TOOL=true\n" >> .env \
     && printf "IS_DOCKER=true\n" >> .env \
     && printf "TOOL_API_URL=$API_URL\n" >> .env \

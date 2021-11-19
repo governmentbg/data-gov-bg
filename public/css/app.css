@@ -14649,6 +14649,12 @@ body #app .navbar .underline .container {
   min-height: 28px;
   position: relative;
 }
+body #app .navbar .underline .container.tool {
+  text-align: left;
+}
+body #app .navbar .underline .container.tool h3 {
+  display: inline;
+}
 
 @media screen and (max-width: 767px) {
   body #app .hamburger-trigger .navbar-toggle {

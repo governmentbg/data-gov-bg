@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'SofiaSans';
+  src: url("../fonts/SofiaSans-Regular.eot");
+  src: url("../fonts/SofiaSans-Regular.eot?#iefix") format("embedded-opentype"), url("../fonts/SofiaSans-Regular.woff2") format("woff2"), url("../fonts/SofiaSans-Regular.woff") format("woff"), url("../fonts/SofiaSans-Regular.ttf") format("truetype"), url("../fonts/Roboto-Regular.svg#Roboto-Regular") format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SofiaSans';
+  src: url("../fonts/SofiaSans-Medium.eot");
+  src: url("../fonts/SofiaSans-Medium.eot?#iefix") format("embedded-opentype"), url("../fonts/SofiaSans-Medium.woff2") format("woff2"), url("../fonts/SofiaSans-Medium.woff") format("woff"), url("../fonts/SofiaSans-Medium.ttf") format("truetype"), url("../fonts/Roboto-Regular.svg#Roboto-Regular") format("svg");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SofiaSans';
+  src: url("../fonts/SofiaSans-Bold.otf");
+  src: url("../fonts/SofiaSans-Bold.eot?#iefix") format("embedded-opentype"), url("../fonts/SofiaSans-Bold.woff2") format("woff2"), url("../fonts/SofiaSans-Bold.woff") format("woff"), url("../fonts/SofiaSans-Bold.ttf") format("truetype"), url("../fonts/Roboto-Regular.svg#Roboto-Regular") format("svg");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SofiaSans';
+  src: url("../fonts/SofiaSans-ExtraBold.otf");
+  src: url("../fonts/SofiaSans-ExtraBold.eot?#iefix") format("embedded-opentype"), url("../fonts/SofiaSans-ExtraBold.woff2") format("woff2"), url("../fonts/SofiaSans-ExtraBold.woff") format("woff"), url("../fonts/SofiaSans-ExtraBold.ttf") format("truetype"), url("../fonts/Roboto-Regular.svg#Roboto-Regular") format("svg");
+  font-weight: 800;
+  font-style: normal;
+}
